@@ -67,10 +67,10 @@ vec3 l2_baseAmbient(){
 	return vec3(l2_max3(texture2D(frxs_lightmap, vec2(0.03125, 0.03125)).rgb) );
 }
 
-vec3 l2_sunLight(float skyLight, float time, float intensity, vec3 normal){
+vec3 l2_sunLight(float skyLight, float time, float intensity, vec3 normalForLightCalc){
 	float sl = l2_clampScale(0.03125, 1.0, skyLight) * intensity * 1.5;
     float aRad = time * M_2PI;
-	sl = min(1.15, sl * dot(normalize(vec3(cos(aRad), sin(aRad), 0.5)), normal));
+	sl = min(1.15, sl * dot(normalize(vec3(cos(aRad), sin(aRad), 0.5)), normalForLightCalc));
 	vec3 sunColor = vec3(1.0);
 	vec3 sunriseColor = vec3(1.0, 0.8, 0.4);
 	vec3 sunsetColor = vec3(1.0, 0.6, 0.4);
@@ -88,10 +88,10 @@ vec3 l2_sunLight(float skyLight, float time, float intensity, vec3 normal){
 	return sl * sunColor;
 }
 
-vec3 l2_moonLight(float skyLight, float time, float intensity, vec3 normal){
+vec3 l2_moonLight(float skyLight, float time, float intensity, vec3 normalForLightCalc){
 	float ml = l2_clampScale(0.03125, 1.0, skyLight) * intensity * frx_moonSize()*0.8;
     float aRad = (time - 0.5) * M_2PI;
-	ml *= dot(vec3(cos(aRad), sin(aRad), 0), normal);
+	ml *= dot(vec3(cos(aRad), sin(aRad), 0), normalForLightCalc);
 	if(time < 0.56){
 		ml *= l2_clampScale(0.5, 0.56, time);
 	} else if(time > 0.94){
@@ -122,10 +122,11 @@ void main() {
 
 	vec4 a = fragData.spriteColor * fragData.vertexColor;
 
-	vec3 normal = fragData.vertexNormal*frx_normalModelMatrix();
+	// If diffuse is disabled (e.g. grass) then the normal points up by default
+	vec3 normalForLightCalc = fragData.diffuse?fragData.vertexNormal*frx_normalModelMatrix():vec3(0,1,0);
 	vec3 block = l2_blockLight(fragData.light.x);
-	vec3 sun = l2_sunLight(fragData.light.y, frx_worldTime(), frx_ambientIntensity(), normal);
-	vec3 moon = l2_moonLight(fragData.light.y, frx_worldTime(), frx_ambientIntensity(), normal);
+	vec3 sun = l2_sunLight(fragData.light.y, frx_worldTime(), frx_ambientIntensity(), normalForLightCalc);
+	vec3 moon = l2_moonLight(fragData.light.y, frx_worldTime(), frx_ambientIntensity(), normalForLightCalc);
 	vec3 skyAmbient = l2_skyAmbient(fragData.light.y, frx_worldTime(), frx_ambientIntensity());
 
 	vec3 light = max(min(vec3(1,1,1), block+moon+l2_baseAmbient()+skyAmbient), sun);
