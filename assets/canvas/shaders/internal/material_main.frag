@@ -20,6 +20,7 @@
 ******************************************************/
 
 #define M_2PI 6.283185307179586476925286766559
+#define M_PI 3.1415926535897932384626433832795
 
 void _cv_startFragment(inout frx_FragmentData data) {
 	int cv_programId = _cv_fragmentProgramId();
@@ -88,13 +89,30 @@ vec3 l2_sunColor(float time){
 	return sunColor;
 }
 
+vec3 l2_vanillaSunDir(float time, float zWobble){
+
+	// wrap time to account  for sunrise
+	time -= time >= 0.75?1:0;
+
+	// supposed offset of sunset/sunrise from 0/12000 daytime. might get better result with datamining?
+	float sunHorizonDur = 0.04;
+
+	// angle of sun in radians
+	float angleRad = l2_clampScale(-sunHorizonDur, 0.5+sunHorizonDur, time) * M_PI;
+
+	return normalize(vec3(cos(angleRad), sin(angleRad), zWobble));
+}
+
 vec3 l2_sunLight(float skyLight, float time, float intensity, vec3 normalForLightCalc){
 	float sl = l2_clampScale(0.03125, 1.0, skyLight) * intensity * 1.5;
-    float aRad = time * M_2PI;
-	sl = min(1.15, sl * dot(normalize(vec3(cos(aRad), sin(aRad), 0.5)), normalForLightCalc));
+
+	// zWobble is added to make more interesting looking diffuse light
+	// TODO: might be fun to use frx_worldDay() with sine wave for the zWobble to simulate annual sun position change
+	sl = min(1.15, sl * dot(l2_vanillaSunDir(time, 0.5), normalForLightCalc));
+
 	if(time > 0.94){
 		sl *= l2_clampScale(0.94, 1.0, time);
-	} else if(time > 0.5){
+	} else if(time > 0.56){
 		sl *= l2_clampScale(0.56, 0.5, time);
 	}
 	return sl * l2_sunColor(time);
@@ -120,9 +138,8 @@ float l2_noise(vec3 aPos, float renderTime, float scale, float amplitude)
 
 float l2_specular(float time, vec3 aNormal, vec3 aPos, vec3 cameraPos, float luminance)
 {
-    // calculate sun position (different from l2_sunLight because l2_sunLight is more aesthetic while this one is more accurate)
-    float aRad = time * M_2PI;
-    vec3 sunDir = normalize(vec3(cos(aRad), sin(aRad), 0));
+    // calculate sun position (0 zWobble to make it look accurate with vanilla sun visuals)
+    vec3 sunDir = l2_vanillaSunDir(time, 0);
 
     // obtain the direction of the camera
     vec3 viewDir = normalize(cameraPos - aPos);
