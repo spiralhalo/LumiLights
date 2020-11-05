@@ -218,7 +218,7 @@ void ww_waterPipeline(inout vec4 a, in frx_FragmentData fragData) {
 	a.rgb += l2_sunColor(frx_worldTime()) * sunLight * specular;
 
 	// extra shiny
-	a.a += pow(specular,20) * 0.5;
+	a.a += pow(specular,20) * 0.5  * sunLight;
 
 	// apply brightness factor
 	a.rgb *= min(1,l2_baseAmbient().x+max(fragData.light.x,sunLight));
