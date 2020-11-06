@@ -65,7 +65,7 @@ vec3 l2_ambientColor(float time){
 }
 
 vec3 l2_skyAmbient(float skyLight, float time, float intensity){
-	float sa = l2_clampScale(0.03125, 1.0, skyLight) * intensity * 0.6;
+	float sa = l2_clampScale(0.03125, 1.0, skyLight) * intensity * 2;
 	return sa * l2_ambientColor(time);
 }
 
@@ -104,11 +104,11 @@ vec3 l2_vanillaSunDir(float time, float zWobble){
 }
 
 vec3 l2_sunLight(float skyLight, float time, float intensity, vec3 normalForLightCalc){
-	float sl = l2_clampScale(0.03125, 1.0, skyLight) * intensity * 1.5;
+	float sl = l2_clampScale(0.03125, 1.0, skyLight) * intensity * 2;
 
 	// zWobble is added to make more interesting looking diffuse light
 	// TODO: might be fun to use frx_worldDay() with sine wave for the zWobble to simulate annual sun position change
-	sl = min(1.15, sl * max(0.0, dot(l2_vanillaSunDir(time, 0.5), normalForLightCalc)));
+	sl *= max(0.0, dot(l2_vanillaSunDir(time, 0.5), normalForLightCalc));
 
 	if(time > 0.94){
 		sl *= l2_clampScale(0.94, 1.0, time);
@@ -224,6 +224,10 @@ void ww_waterPipeline(inout vec4 a, in frx_FragmentData fragData) {
 	a.rgb *= min(1,l2_baseAmbient().x+max(fragData.light.x,sunLight));
 }
 
+vec3 hdr_reinhardTonemap(in vec3 hdrColor){
+	return hdrColor / (hdrColor + vec3(1.0));
+}
+
 #if AO_SHADING_MODE != AO_MODE_NONE
 vec4 ao(float light){
 	float ao = min(1,_cvv_ao+light*0.25);
@@ -246,6 +250,9 @@ void main() {
 
 	vec4 a = fragData.spriteColor * fragData.vertexColor;
 
+    const float gamma = 2.2;
+	a.rgb = pow(a.rgb, vec3(gamma));
+
 	if(ww_waterTest(fragData)){
 		ww_waterPipeline(a, fragData);
 	} else {
@@ -256,10 +263,12 @@ void main() {
 		vec3 moon = l2_moonLight(fragData.light.y, frx_worldTime(), frx_ambientIntensity(), normalForLightCalc);
 		vec3 skyAmbient = l2_skyAmbient(fragData.light.y, frx_worldTime(), frx_ambientIntensity());
 
-		vec3 light = max(min(vec3(1,1,1), block+moon+l2_baseAmbient()+skyAmbient), sun);
+		vec3 light = block+moon+l2_baseAmbient()+skyAmbient+sun;
 
 		a *= vec4(light, 1.0);
 	}
+
+	a.rgb = pow(hdr_reinhardTonemap(a.rgb), vec3(1.0 / gamma));
 
 	// a.rgb = l2_what(a.rgb);
 	
