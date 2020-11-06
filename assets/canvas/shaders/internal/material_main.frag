@@ -22,6 +22,28 @@
 #define M_2PI 6.283185307179586476925286766559
 #define M_PI 3.1415926535897932384626433832795
 
+const float hdr_sunStr = 5;
+const float hdr_moonStr = 0.8;
+const float hdr_blockStr = 1;
+const float hdr_baseStr = 0.1;
+const float hdr_relAmbient = 0.1;
+const float hdr_relSunHorizon = 0.5;
+const float hdr_zWobbleDefault = 0.25;
+const float hdr_finalMult = 0.75;
+const float hdr_gamma = 2.2;
+
+float hdr_gammaAdjust(float x){
+	return pow(x, hdr_gamma);
+}
+
+vec3 hdr_gammaAdjust(vec3 x){
+	return pow(x, vec3(hdr_gamma));
+}
+
+vec3 hdr_reinhardTonemap(in vec3 hdrColor){
+	return hdrColor / (hdrColor + vec3(1.0));
+}
+
 void _cv_startFragment(inout frx_FragmentData data) {
 	int cv_programId = _cv_fragmentProgramId();
 #include canvas:startfragment
@@ -43,15 +65,21 @@ float l2_max3(vec3 vec){
 
 vec3 l2_blockLight(float blockLight){
 	float bl = l2_clampScale(0.03125, 1.0, blockLight);
-	bl *= bl * 0.85;
-	return vec3(bl, bl*0.875, bl*0.75);
+	bl *= bl * hdr_blockStr;
+	return hdr_gammaAdjust(vec3(bl, bl*0.875, bl*0.75));
+}
+
+float l2_skyLight(float skyLight, float intensity)
+{
+	float sl = l2_clampScale(0.03125, 1.0, skyLight);
+	return hdr_gammaAdjust(sl * intensity);
 }
 
 vec3 l2_ambientColor(float time){
-	vec3 ambientColor = vec3(0.6, 0.9, 1);
-	vec3 sunriseAmbient = vec3(1.0, 0.8, 0.4);
-	vec3 sunsetAmbient = vec3(1.0, 0.6, 0.2);
-	vec3 nightAmbient = vec3(0.2, 0.2, 0.6);
+	vec3 ambientColor = hdr_gammaAdjust(vec3(0.6, 0.9, 1.0)) * hdr_sunStr * hdr_relAmbient;
+	vec3 sunriseAmbient = hdr_gammaAdjust(vec3(1.0, 0.8, 0.4)) * hdr_sunStr * hdr_relAmbient * hdr_relSunHorizon;
+	vec3 sunsetAmbient = hdr_gammaAdjust(vec3(1.0, 0.6, 0.2)) * hdr_sunStr * hdr_relAmbient * hdr_relSunHorizon;
+	vec3 nightAmbient = hdr_gammaAdjust(vec3(0.3, 0.3, 1.0)) * hdr_moonStr * hdr_relAmbient;
 	if(time > 0.94){
 		ambientColor = mix(nightAmbient, sunriseAmbient, l2_clampScale(0.94, 0.98, time));
 	} else if(time > 0.52){
@@ -65,20 +93,24 @@ vec3 l2_ambientColor(float time){
 }
 
 vec3 l2_skyAmbient(float skyLight, float time, float intensity){
-	float sa = l2_clampScale(0.03125, 1.0, skyLight) * intensity * 2;
+	float sa = l2_skyLight(skyLight, intensity) * 2.5;
 	return sa * l2_ambientColor(time);
 }
 
 vec3 l2_baseAmbient(){
-	return vec3(l2_max3(texture2D(frxs_lightmap, vec2(0.03125, 0.03125)).rgb) );
+	return vec3(l2_max3(texture2D(frxs_lightmap, vec2(0.03125, 0.03125)).rgb))*hdr_baseStr;
 }
 
 vec3 l2_sunColor(float time){
-	vec3 sunColor = vec3(1.0);
-	vec3 sunriseColor = vec3(1.0, 0.8, 0.4);
-	vec3 sunsetColor = vec3(1.0, 0.6, 0.4);
+	vec3 sunColor = hdr_gammaAdjust(vec3(1.0, 1.0, 1.0)) * hdr_sunStr;
+	vec3 sunriseColor = hdr_gammaAdjust(vec3(1.0, 0.8, 0.4)) * hdr_sunStr * hdr_relSunHorizon;
+	vec3 sunsetColor = hdr_gammaAdjust(vec3(1.0, 0.6, 0.4)) * hdr_sunStr * hdr_relSunHorizon;
 	if(time > 0.94){
 		sunColor = sunriseColor;
+	} else if(time > 0.56){
+		sunColor = vec3(0); // pitch black at night
+	} else if(time > 0.54){
+		sunColor = mix(sunsetColor, vec3(0), l2_clampScale(0.54, 0.56, time));
 	} else if(time > 0.5){
 		sunColor = sunsetColor;
 	} else if(time > 0.48){
@@ -104,11 +136,11 @@ vec3 l2_vanillaSunDir(float time, float zWobble){
 }
 
 vec3 l2_sunLight(float skyLight, float time, float intensity, vec3 normalForLightCalc){
-	float sl = l2_clampScale(0.03125, 1.0, skyLight) * intensity * 2;
+	float sl = l2_skyLight(skyLight, intensity);
 
 	// zWobble is added to make more interesting looking diffuse light
 	// TODO: might be fun to use frx_worldDay() with sine wave for the zWobble to simulate annual sun position change
-	sl *= max(0.0, dot(l2_vanillaSunDir(time, 0.5), normalForLightCalc));
+	sl *= max(0.0, dot(l2_vanillaSunDir(time, hdr_zWobbleDefault), normalForLightCalc));
 
 	if(time > 0.94){
 		sl *= l2_clampScale(0.94, 1.0, time);
@@ -119,7 +151,7 @@ vec3 l2_sunLight(float skyLight, float time, float intensity, vec3 normalForLigh
 }
 
 vec3 l2_moonLight(float skyLight, float time, float intensity, vec3 normalForLightCalc){
-	float ml = l2_clampScale(0.03125, 1.0, skyLight) * intensity * frx_moonSize()*0.8;
+	float ml = l2_skyLight(skyLight, intensity) * frx_moonSize() * hdr_moonStr;
     float aRad = (time - 0.5) * M_2PI;
 	ml *= max(0.0, dot(vec3(cos(aRad), sin(aRad), 0), normalForLightCalc));
 	if(time < 0.56){
@@ -136,17 +168,13 @@ float l2_noise(vec3 aPos, float renderTime, float scale, float amplitude)
     return (snoise(vec3(aPos.x*invScale, aPos.z*invScale, renderTime)) * 0.5+0.5) * amplitude;
 }
 
-float l2_specular(float time, vec3 aNormal, vec3 aPos, vec3 cameraPos, float luminance)
+float l2_specular(float time, vec3 aNormal, vec3 aPos, vec3 cameraPos, float power)
 {
     // calculate sun position (0 zWobble to make it look accurate with vanilla sun visuals)
     vec3 sunDir = l2_vanillaSunDir(time, 0);
 
     // obtain the direction of the camera
     vec3 viewDir = normalize(cameraPos - aPos);
-
-    // this code is adapted from GlossyGoodness
-	// TODO: simplify?
-    float power = pow(luminance,1.5) * 20;
 
     // calculate the specular light
     return pow(max(0.0, dot(reflect(-sunDir, aNormal), viewDir)),power);
@@ -188,7 +216,7 @@ void ww_waterPipeline(inout vec4 a, in frx_FragmentData fragData) {
 	if(abs(surfaceNormal.y) > 0.9) {
 		// water wavyness parameter
 		float timeScale = 2; 		// speed
-		float noiseScale = 4; 		// wavelength
+		float noiseScale = 2; 		// wavelength
 		float noiseAmp = 0.03125 * noiseScale;// * timeScale; // amplitude
 
 		// inferred parameter
@@ -208,24 +236,21 @@ void ww_waterPipeline(inout vec4 a, in frx_FragmentData fragData) {
 		// a.rgb = surfaceNormal;
 	}
 
-	float sunLight = l2_clampScale(0.03125, 1.0, fragData.light.y) * frx_ambientIntensity();
+	float skyLight = l2_skyLight(fragData.light.y, frx_ambientIntensity());
+	vec3 blockLight = l2_blockLight(fragData.light.x);
+	vec3 sunColor = l2_sunColor(frx_worldTime());
 
 	// mix with ambient color before adding specular light
-	a.rgb = mix (a.rgb, a.rgb*l2_ambientColor(frx_worldTime()), sunLight);
+	a.rgb = mix (a.rgb, a.rgb*l2_ambientColor(frx_worldTime()), skyLight);
 
 	// add specular light
-	float specular = l2_specular(frx_worldTime(), surfaceNormal, wwv_aPos, wwv_cameraPos, 0.4); // magic number 0.4 (specular factor)
-	a.rgb += l2_sunColor(frx_worldTime()) * sunLight * specular;
-
-	// extra shiny
-	a.a += pow(specular,20) * 0.5  * sunLight;
+	float specular = l2_specular(frx_worldTime(), surfaceNormal, wwv_aPos, wwv_cameraPos, 25);
+	a.rgb += sunColor * skyLight * specular;
+	a.a += specular * 0.5 * skyLight;// * sunColor.r;
 
 	// apply brightness factor
-	a.rgb *= min(1,l2_baseAmbient().x+max(fragData.light.x,sunLight));
-}
-
-vec3 hdr_reinhardTonemap(in vec3 hdrColor){
-	return hdrColor / (hdrColor + vec3(1.0));
+	vec3 upMoonLight = l2_moonLight(fragData.light.y, frx_worldTime(), frx_ambientIntensity(), vec3(0,1,0));
+	a.rgb *= blockLight + sunColor * skyLight + upMoonLight + l2_baseAmbient();
 }
 
 #if AO_SHADING_MODE != AO_MODE_NONE
@@ -250,8 +275,7 @@ void main() {
 
 	vec4 a = fragData.spriteColor * fragData.vertexColor;
 
-    const float gamma = 2.2;
-	a.rgb = pow(a.rgb, vec3(gamma));
+	a.rgb = hdr_gammaAdjust(a.rgb);
 
 	if(ww_waterTest(fragData)){
 		ww_waterPipeline(a, fragData);
@@ -268,7 +292,8 @@ void main() {
 		a *= vec4(light, 1.0);
 	}
 
-	a.rgb = pow(hdr_reinhardTonemap(a.rgb), vec3(1.0 / gamma));
+	a.rgb *= hdr_finalMult;
+	a.rgb = pow(hdr_reinhardTonemap(a.rgb), vec3(1.0 / hdr_gamma));
 
 	// a.rgb = l2_what(a.rgb);
 	
