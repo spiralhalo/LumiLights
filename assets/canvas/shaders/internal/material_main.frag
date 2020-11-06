@@ -108,7 +108,7 @@ vec3 l2_sunLight(float skyLight, float time, float intensity, vec3 normalForLigh
 
 	// zWobble is added to make more interesting looking diffuse light
 	// TODO: might be fun to use frx_worldDay() with sine wave for the zWobble to simulate annual sun position change
-	sl = min(1.15, sl * dot(l2_vanillaSunDir(time, 0.5), normalForLightCalc));
+	sl = min(1.15, sl * max(0.0, dot(l2_vanillaSunDir(time, 0.5), normalForLightCalc)));
 
 	if(time > 0.94){
 		sl *= l2_clampScale(0.94, 1.0, time);
@@ -121,7 +121,7 @@ vec3 l2_sunLight(float skyLight, float time, float intensity, vec3 normalForLigh
 vec3 l2_moonLight(float skyLight, float time, float intensity, vec3 normalForLightCalc){
 	float ml = l2_clampScale(0.03125, 1.0, skyLight) * intensity * frx_moonSize()*0.8;
     float aRad = (time - 0.5) * M_2PI;
-	ml *= dot(vec3(cos(aRad), sin(aRad), 0), normalForLightCalc);
+	ml *= max(0.0, dot(vec3(cos(aRad), sin(aRad), 0), normalForLightCalc));
 	if(time < 0.56){
 		ml *= l2_clampScale(0.5, 0.56, time);
 	} else if(time > 0.94){
@@ -149,7 +149,7 @@ float l2_specular(float time, vec3 aNormal, vec3 aPos, vec3 cameraPos, float lum
     float power = pow(luminance,1.5) * 20;
 
     // calculate the specular light
-    return max(0.0, pow(dot(reflect(-sunDir, aNormal), viewDir),power));
+    return pow(max(0.0, dot(reflect(-sunDir, aNormal), viewDir)),power);
 }
 
 // prefix ww to separate water effects from the rest of the shader
