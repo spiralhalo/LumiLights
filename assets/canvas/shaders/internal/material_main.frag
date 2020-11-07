@@ -26,6 +26,7 @@ const float hdr_sunStr = 5;
 const float hdr_moonStr = 0.8;
 const float hdr_blockStr = 1;
 const float hdr_baseStr = 0.1;
+const float hdr_emissiveStr = 1;
 const float hdr_relAmbient = 0.1;
 const float hdr_relSunHorizon = 0.5;
 const float hdr_zWobbleDefault = 0.25;
@@ -67,6 +68,10 @@ vec3 l2_blockLight(float blockLight){
 	float bl = l2_clampScale(0.03125, 1.0, blockLight);
 	bl *= bl * hdr_blockStr;
 	return hdr_gammaAdjust(vec3(bl, bl*0.875, bl*0.75));
+}
+
+vec3 l2_emissiveLight(float emissivity){
+	return vec3(hdr_gammaAdjust(emissivity) * hdr_emissiveStr);
 }
 
 float l2_skyLight(float skyLight, float intensity)
@@ -286,8 +291,9 @@ void main() {
 		vec3 sun = l2_sunLight(fragData.light.y, frx_worldTime(), frx_ambientIntensity(), normalForLightCalc);
 		vec3 moon = l2_moonLight(fragData.light.y, frx_worldTime(), frx_ambientIntensity(), normalForLightCalc);
 		vec3 skyAmbient = l2_skyAmbient(fragData.light.y, frx_worldTime(), frx_ambientIntensity());
+		vec3 emissive = l2_emissiveLight(fragData.emissivity);
 
-		vec3 light = block+moon+l2_baseAmbient()+skyAmbient+sun;
+		vec3 light = block+emissive+moon+l2_baseAmbient()+skyAmbient+sun;
 
 		a *= vec4(light, 1.0);
 	}
