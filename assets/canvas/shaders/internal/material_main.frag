@@ -41,7 +41,7 @@ vec3 hdr_gammaAdjust(vec3 x){
 }
 
 vec3 hdr_reinhardTonemap(in vec3 hdrColor){
-	return hdrColor / (hdrColor + vec3(1.0));
+	return hdrColor / (frx_luminance(hdrColor) + vec3(1.0));
 }
 
 void _cv_startFragment(inout frx_FragmentData data) {
