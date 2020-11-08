@@ -22,12 +22,12 @@
 #define M_2PI 6.283185307179586476925286766559
 #define M_PI 3.1415926535897932384626433832795
 
-const float hdr_sunStr = 7;
+const float hdr_sunStr = 4;
 const float hdr_moonStr = 0.8;
 const float hdr_blockStr = 1.2;
 const float hdr_baseStr = 0.1;
 const float hdr_emissiveStr = 1;
-const float hdr_relAmbient = 0.05;
+const float hdr_relAmbient = 0.07;
 const float hdr_relSunHorizon = 0.5;
 const float hdr_zWobbleDefault = 0.25;
 const float hdr_finalMult = 1;
@@ -209,10 +209,6 @@ bool ww_waterTest(in frx_FragmentData fragData) {
 void ww_waterPipeline(inout vec4 a, in frx_FragmentData fragData) {
 	// make default water texture shinier. purely optional
 	a.rgb *= fragData.spriteColor.rgb;
-	a.rgb *= 0.3;
-
-	// adjust base alpha
-	// a.a = 0.4;
 
 	vec3 surfaceNormal = fragData.vertexNormal*frx_normalModelMatrix();
 
@@ -250,7 +246,7 @@ void ww_waterPipeline(inout vec4 a, in frx_FragmentData fragData) {
 	a.rgb = mix (a.rgb, a.rgb*l2_ambientColor(frx_worldTime()), skyLight);
 
 	// add specular light
-	float specular = l2_specular(frx_worldTime(), surfaceNormal, wwv_aPos, wwv_cameraPos, 5);
+	float specular = l2_specular(frx_worldTime(), surfaceNormal, wwv_aPos, wwv_cameraPos, 25);
 	a.rgb += sunColor * skyLight * specular;
 	a.a += specular * skyLight;// * sunColor.r;
 
