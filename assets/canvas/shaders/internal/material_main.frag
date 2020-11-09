@@ -247,7 +247,7 @@ void ww_waterPipeline(inout vec4 a, in frx_FragmentData fragData) {
 	a.rgb = mix (a.rgb, a.rgb*l2_ambientColor(frx_worldTime()), skyLight);
 
 	// add specular light
-	float specular = l2_specular(frx_worldTime(), surfaceNormal, wwv_aPos, wwv_cameraPos, 25);
+	float specular = l2_specular(frx_worldTime(), surfaceNormal, wwv_aPos, wwv_cameraPos, 50) * frx_smootherstep(-0.5, 1.0, surfaceNormal.y);
 	a.rgb += sunColor * skyLight * specular;
 	a.a += specular * skyLight;// * sunColor.r;
 
