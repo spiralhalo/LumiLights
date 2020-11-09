@@ -1,13 +1,25 @@
 # Lumi Lights
 Aesthetic shader for [Canvas](https://github.com/grondag/canvas) that adds directional sky light and ambient light. Lumi Lights aims to replace vanilla lighting as much as possible.
 
-Written for the latest Canvas build (new pipeline). 
+**Written for the latest Canvas build (new pipeline).**
 
 ## Now with wavy water
 Adds a reflection of the sun on water, complete with wavy wobbly effect.
 
 ## Now with higher dynamic range
 The sunlight is now much brighter than vanilla, giving a more realistic feel.
+
+## How to use
+
+### Branch
+
+There are two main branches:
+- [`hdr`](../../tree/hdr) the default branch
+- [`vibrant`](../../tree/vibrant) alternative version with more vibrant colors
+
+### Download and installation
+
+In the right branch, press the green dropdown button that says `Code` on the upper right corner. Select `Download ZIP`. You will get a ZIP file containing a folder. Put this folder inside your Resource Packs folder. Don't put the ZIP file directly as it wouldn't work.
 
 ## Notes
 
