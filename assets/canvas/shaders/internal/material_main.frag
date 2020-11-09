@@ -209,6 +209,7 @@ bool ww_waterTest(in frx_FragmentData fragData) {
 void ww_waterPipeline(inout vec4 a, in frx_FragmentData fragData) {
 	// make default water texture shinier. purely optional
 	a.rgb *= fragData.spriteColor.rgb;
+	a.rgb *= 0.8;
 
 	vec3 surfaceNormal = fragData.vertexNormal*frx_normalModelMatrix();
 
