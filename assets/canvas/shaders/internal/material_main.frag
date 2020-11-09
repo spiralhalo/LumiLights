@@ -25,7 +25,8 @@
 const float hdr_sunStr = 4;
 const float hdr_moonStr = 0.8;
 const float hdr_blockStr = 1.2;
-const float hdr_baseStr = 0.1;
+const float hdr_baseMinStr = 0.0;
+const float hdr_baseMaxStr = 0.25;
 const float hdr_emissiveStr = 1;
 const float hdr_relAmbient = 0.07;
 const float hdr_relSunHorizon = 0.5;
@@ -103,7 +104,12 @@ vec3 l2_skyAmbient(float skyLight, float time, float intensity){
 }
 
 vec3 l2_baseAmbient(){
-	return vec3(l2_max3(texture2D(frxs_lightmap, vec2(0.03125, 0.03125)).rgb))*hdr_baseStr;
+	float base = texture2D(frxs_lightmap, vec2(0.03125, 0.03125)).r;
+	return vec3(base) * mix(
+		hdr_baseMinStr,
+		hdr_baseMaxStr,
+		smoothstep(0.053, 0.135, base)
+		);
 }
 
 vec3 l2_sunColor(float time){
