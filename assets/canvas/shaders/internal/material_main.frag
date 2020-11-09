@@ -22,15 +22,15 @@
 #define M_2PI 6.283185307179586476925286766559
 #define M_PI 3.1415926535897932384626433832795
 
-const float hdr_sunStr = 5;
+const float hdr_sunStr = 4;
 const float hdr_moonStr = 0.8;
-const float hdr_blockStr = 1;
+const float hdr_blockStr = 1.2;
 const float hdr_baseStr = 0.1;
 const float hdr_emissiveStr = 1;
-const float hdr_relAmbient = 0.1;
+const float hdr_relAmbient = 0.07;
 const float hdr_relSunHorizon = 0.5;
 const float hdr_zWobbleDefault = 0.25;
-const float hdr_finalMult = 0.75;
+const float hdr_finalMult = 1;
 const float hdr_gamma = 2.2;
 
 float hdr_gammaAdjust(float x){
@@ -42,7 +42,7 @@ vec3 hdr_gammaAdjust(vec3 x){
 }
 
 vec3 hdr_reinhardTonemap(in vec3 hdrColor){
-	return hdrColor / (frx_luminance(hdrColor) + vec3(1.0));
+	return hdrColor / (hdrColor + vec3(1.0));
 }
 
 void _cv_startFragment(inout frx_FragmentData data) {
@@ -107,7 +107,7 @@ vec3 l2_baseAmbient(){
 }
 
 vec3 l2_sunColor(float time){
-	vec3 sunColor = hdr_gammaAdjust(vec3(1.0, 1.0, 1.0)) * hdr_sunStr;
+	vec3 sunColor = hdr_gammaAdjust(vec3(1.0, 1.0, 0.8)) * hdr_sunStr;
 	vec3 sunriseColor = hdr_gammaAdjust(vec3(1.0, 0.8, 0.4)) * hdr_sunStr * hdr_relSunHorizon;
 	vec3 sunsetColor = hdr_gammaAdjust(vec3(1.0, 0.6, 0.4)) * hdr_sunStr * hdr_relSunHorizon;
 	if(time > 0.94){
@@ -209,9 +209,7 @@ bool ww_waterTest(in frx_FragmentData fragData) {
 void ww_waterPipeline(inout vec4 a, in frx_FragmentData fragData) {
 	// make default water texture shinier. purely optional
 	a.rgb *= fragData.spriteColor.rgb;
-
-	// adjust base alpha
-	a.a = 0.6;
+	a.rgb *= 0.8;
 
 	vec3 surfaceNormal = fragData.vertexNormal*frx_normalModelMatrix();
 
@@ -249,9 +247,9 @@ void ww_waterPipeline(inout vec4 a, in frx_FragmentData fragData) {
 	a.rgb = mix (a.rgb, a.rgb*l2_ambientColor(frx_worldTime()), skyLight);
 
 	// add specular light
-	float specular = l2_specular(frx_worldTime(), surfaceNormal, wwv_aPos, wwv_cameraPos, 25);
+	float specular = l2_specular(frx_worldTime(), surfaceNormal, wwv_aPos, wwv_cameraPos, 50) * frx_smootherstep(-0.5, 1.0, surfaceNormal.y);
 	a.rgb += sunColor * skyLight * specular;
-	a.a += specular * 0.5 * skyLight;// * sunColor.r;
+	a.a += specular * skyLight;// * sunColor.r;
 
 	// apply brightness factor
 	vec3 upMoonLight = l2_moonLight(fragData.light.y, frx_worldTime(), frx_ambientIntensity(), vec3(0,1,0));
