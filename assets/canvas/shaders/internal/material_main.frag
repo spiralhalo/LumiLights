@@ -293,11 +293,6 @@ void main() {
 
 		vec3 light = block+emissive+moon+l2_baseAmbient()+skyAmbient+sun;
 
-		if(frx_rainGradient() > 0){
-			float specular = l2_specular(frx_worldTime(), normalForLightCalc, wwv_aPos, wwv_cameraPos, 25);
-			a.rgb += sun * specular * frx_smootherstep(0.0, 0.5, frx_rainGradient());
-		}
-
 		a *= vec4(light, 1.0);
 	}
 
