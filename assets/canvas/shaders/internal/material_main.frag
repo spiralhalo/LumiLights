@@ -293,10 +293,10 @@ void ww_waterPipeline(inout vec4 a, in frx_FragmentData fragData) {
 	a.rgb = mix (a.rgb, a.rgb*l2_ambientColor(frx_worldTime()), skyLight);
 
 	// add specular light
-	float skyAccess = smoothstep(0.78, 0.88, skyLight);
+	float skyAccess = smoothstep(0.89, 1.0, fragData.light.y);
 	float specular = l2_specular(frx_worldTime(), surfaceNormal, wwv_aPos, wwv_cameraPos, 50) * frx_smootherstep(-0.5, 1.0, surfaceNormal.y);
-	a.rgb += sunColor * skyAccess * specular;
-	a.a += specular * skyAccess;// * sunColor.r;
+	a.rgb += sunColor * skyAccess * skyLight * specular;
+	a.a += specular * skyAccess * skyLight;// * sunColor.r;
 
 	// apply brightness factor
 	vec3 upMoonLight = l2_moonLight(fragData.light.y, frx_worldTime(), frx_ambientIntensity(), vec3(0,1,0));
