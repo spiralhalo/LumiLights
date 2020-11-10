@@ -25,6 +25,7 @@
 const float hdr_sunStr = 4;
 const float hdr_moonStr = 0.8;
 const float hdr_blockStr = 1.2;
+const float hdr_netherStr = 0.2;
 const float hdr_baseMinStr = 0.0;
 const float hdr_baseMaxStr = 0.25;
 const float hdr_emissiveStr = 1;
@@ -103,13 +104,34 @@ vec3 l2_skyAmbient(float skyLight, float time, float intensity){
 	return sa * l2_ambientColor(time);
 }
 
-vec3 l2_baseAmbient(){
+float l2_userBrightness(){
 	float base = texture2D(frxs_lightmap, vec2(0.03125, 0.03125)).r;
-	return vec3(base) * mix(
-		hdr_baseMinStr,
-		hdr_baseMaxStr,
-		smoothstep(0.053, 0.135, base)
-		);
+	if(frx_isWorldTheNether()){
+		return smoothstep(0.15/*0.207 no true darkness in nether*/, 0.577, base);
+	} else {
+		return smoothstep(0.053, 0.135, base);
+	}
+}
+
+vec3 l2_netherColor(){
+	return hdr_gammaAdjust(vec3(1.0, 0.7, 0.5));
+}
+
+vec3 l2_netherLight(vec3 normal){
+	return frx_isWorldTheNether()?
+		abs(dot(normal,vec3(0,1,0)))
+		* hdr_netherStr
+		* l2_netherColor()
+		* l2_userBrightness()
+	:vec3(0);
+}
+
+vec3 l2_baseAmbient(){
+	if(frx_isWorldTheNether()){
+		return l2_netherColor() * mix(hdr_baseMinStr, hdr_baseMaxStr, l2_userBrightness());
+	} else {
+		return vec3(0.1) * mix(hdr_baseMinStr, hdr_baseMaxStr, l2_userBrightness());
+	}
 }
 
 vec3 l2_sunColor(float time){
@@ -260,7 +282,7 @@ void ww_waterPipeline(inout vec4 a, in frx_FragmentData fragData) {
 
 	// apply brightness factor
 	vec3 upMoonLight = l2_moonLight(fragData.light.y, frx_worldTime(), frx_ambientIntensity(), vec3(0,1,0));
-	a.rgb *= blockLight + sunColor * skyLight + upMoonLight + l2_baseAmbient();
+	a.rgb *= blockLight + sunColor * skyLight + upMoonLight + l2_baseAmbient() + l2_netherLight(surfaceNormal);
 }
 
 #if AO_SHADING_MODE != AO_MODE_NONE
@@ -297,8 +319,9 @@ void main() {
 		vec3 moon = l2_moonLight(fragData.light.y, frx_worldTime(), frx_ambientIntensity(), normalForLightCalc);
 		vec3 skyAmbient = l2_skyAmbient(fragData.light.y, frx_worldTime(), frx_ambientIntensity());
 		vec3 emissive = l2_emissiveLight(fragData.emissivity);
+		vec3 nether = l2_netherLight(normalForLightCalc);
 
-		vec3 light = block+emissive+moon+l2_baseAmbient()+skyAmbient+sun;
+		vec3 light = block+emissive+moon+l2_baseAmbient()+skyAmbient+sun+nether;
 
 		a *= vec4(light, 1.0);
 	}
