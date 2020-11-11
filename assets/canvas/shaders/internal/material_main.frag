@@ -31,7 +31,7 @@ const float hdr_baseMaxStr = 0.25;
 const float hdr_emissiveStr = 1;
 const float hdr_relAmbient = 0.07;
 const float hdr_relSunHorizon = 0.5;
-const float hdr_zWobbleDefault = 0.25;
+const float hdr_zWobbleDefault = 0.1;
 const float hdr_finalMult = 1;
 const float hdr_gamma = 2.2;
 
@@ -188,6 +188,9 @@ vec3 l2_vanillaSunDir(float time, float zWobble){
 
 vec3 l2_sunLight(float skyLight, float time, float intensity, vec3 normalForLightCalc){
 	float sl = l2_skyLight(skyLight, intensity);
+
+	// direct sun light doesn't reach into dark spot as much as sky ambient
+	sl = frx_smootherstep(0.5,1.0,sl);
 
 	// zWobble is added to make more interesting looking diffuse light
 	// TODO: might be fun to use frx_worldDay() with sine wave for the zWobble to simulate annual sun position change
