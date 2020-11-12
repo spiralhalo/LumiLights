@@ -90,7 +90,7 @@ void main() {
 	int cv_programId = _cv_vertexProgramId();
 	_cv_startVertex(data, cv_programId);
 
-	wwv_aPos = frx_modelOriginWorldPos() + data.vertex.xyz;
+	wwv_aPos = data.vertex.xyz;
     wwv_cameraPos = (ww_inv(mat4(gl_ModelViewMatrix)) * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
 
 	if (_cvu_material[_CV_SPRITE_INFO_TEXTURE_SIZE] != 0.0) {
