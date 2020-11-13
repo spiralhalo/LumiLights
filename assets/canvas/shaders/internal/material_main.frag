@@ -24,7 +24,7 @@
 
 const float hdr_sunStr = 4;
 const float hdr_moonStr = 0.8;
-const float hdr_blockStr = 1.2;
+const float hdr_blockStr = 1.5;
 const float hdr_skylessStr = 0.2;
 const float hdr_baseMinStr = 0.0;
 const float hdr_baseMaxStr = 0.25;
@@ -298,7 +298,7 @@ void ww_waterPipeline(inout vec4 a, in frx_FragmentData fragData) {
 
 	// add specular light
 	float skyAccess = smoothstep(0.89, 1.0, fragData.light.y);
-	float specular = l2_specular(frx_worldTime(), surfaceNormal, wwv_aPos, wwv_cameraPos, 50) * frx_smootherstep(-0.5, 1.0, surfaceNormal.y);
+	float specular = l2_specular(frx_worldTime(), surfaceNormal, wwv_aPos, wwv_cameraPos, 100);
 	a.rgb += sunColor * skyAccess * skyLight * specular;
 	a.a += specular * skyAccess * skyLight;// * sunColor.r;
 
