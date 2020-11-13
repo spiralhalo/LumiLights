@@ -128,7 +128,7 @@ vec3 l2_skylessLightColor(){
 
 vec3 l2_dimensionColor(){
 	return frx_isWorldTheNether()?
-	hdr_gammaAdjust(clamp(gl_Fog.color.rgb*vec3(10), 0.0, 1.0))
+	hdr_gammaAdjust(gl_Fog.color.rgb*(1/max(max(gl_Fog.color.rgb.x, gl_Fog.color.rgb.y), gl_Fog.color.rgb.z)))
 	:hdr_gammaAdjust(vec3(0.8, 0.7, 1.0));
 }
 
