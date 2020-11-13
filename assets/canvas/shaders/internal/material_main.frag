@@ -123,14 +123,12 @@ float l2_userBrightness(){
 }
 
 vec3 l2_skylessLightColor(){
-	return frx_isWorldTheNether()?
-	hdr_gammaAdjust(vec3(1.0, 0.7, 0.5))
-	:hdr_gammaAdjust(vec3(1.0));
+	return hdr_gammaAdjust(vec3(1.0));
 }
 
 vec3 l2_dimensionColor(){
 	return frx_isWorldTheNether()?
-	hdr_gammaAdjust(vec3(1.0, 0.7, 0.5))
+	hdr_gammaAdjust(clamp(gl_Fog.color.rgb*vec3(10), 0.0, 1.0))
 	:hdr_gammaAdjust(vec3(0.8, 0.7, 1.0));
 }
 
