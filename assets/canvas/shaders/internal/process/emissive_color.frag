@@ -15,8 +15,8 @@ varying vec2 _cvv_texcoord;
 void main() {
 	vec4 e = texture2D(_cvu_emissive, _cvv_texcoord);
 
-	bool sky = e.r == 0.0;
-	float bloom = sky ? 0.5 : smoothstep(0.01, 1.0, e.r);
+	bool sky = e.g == 0.0;
+	float bloom = sky ? 0.25 : e.r;
 
 	vec4 c = frx_fromGamma(texture2D(_cvu_base, _cvv_texcoord));
 	
