@@ -18,7 +18,7 @@ The sunlight is now much brighter than vanilla, giving a more realistic feel.
 "Bright" setting works similarly to vanilla. "Moody" setting makes it closer to true darkness in the overworld.
 
 ### Dimension colors
-The End in particular has a different ambient lighting that gives it a unique feel.
+The End and the Nether has ambient light colors that matches the surrounding fog or sky. 
 
 ## How to use
 
@@ -31,6 +31,12 @@ There are two main branches:
 ### Download and installation
 
 In the right branch, press the green dropdown button that says `Code` on the upper right corner. Select `Download ZIP`. You will get a ZIP file containing a folder. Put this folder inside your Resource Packs folder. Don't put the ZIP file directly as it wouldn't work.
+
+## License
+
+Lumi Lights is released under the terms of the GNU Lesser General Public License version 3.0. See the files `COPYING` and `COPYING.LESSER` for more information.
+
+Parts of its source code is derived from Canvas which is released under the Apache License version 2.0.
 
 ## Notes
 
