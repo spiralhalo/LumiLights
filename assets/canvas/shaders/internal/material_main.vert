@@ -1,3 +1,10 @@
+/*
+	Derived from Canvas source code (https://github.com/grondag/canvas/)
+
+	Changes are made to add varyings that transfers the world position
+	and camera position to the fragment shader.
+*/
+
 #include canvas:shaders/internal/header.glsl
 #include frex:shaders/api/context.glsl
 #include canvas:shaders/internal/varying.glsl
