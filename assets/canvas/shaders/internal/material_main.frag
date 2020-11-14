@@ -123,15 +123,23 @@ float l2_userBrightness(){
 }
 
 vec3 l2_skylessLightColor(){
-	return frx_isWorldTheNether()?
-	hdr_gammaAdjust(vec3(1.0, 0.7, 0.5))
-	:hdr_gammaAdjust(vec3(1.0));
+	return hdr_gammaAdjust(vec3(1.0));
 }
 
 vec3 l2_dimensionColor(){
-	return frx_isWorldTheNether()?
-	hdr_gammaAdjust(vec3(1.0, 0.7, 0.5))
-	:hdr_gammaAdjust(vec3(0.8, 0.7, 1.0));
+	if (frx_isWorldTheNether()) {
+		float min_col = min(min(gl_Fog.color.rgb.x, gl_Fog.color.rgb.y), gl_Fog.color.rgb.z);
+		float max_col = max(max(gl_Fog.color.rgb.x, gl_Fog.color.rgb.y), gl_Fog.color.rgb.z);
+		float sat = 0.0;
+		if (max_col != 0.0) {
+			sat = (max_col-min_col)/max_col;
+		}
+	
+		return hdr_gammaAdjust(clamp((gl_Fog.color.rgb*(1/max_col))+pow(sat,2)/2, 0.0, 1.0));
+	}
+	else {
+		return hdr_gammaAdjust(vec3(0.8, 0.7, 1.0));
+	}
 }
 
 vec3 l2_skylessLight(vec3 normal){
