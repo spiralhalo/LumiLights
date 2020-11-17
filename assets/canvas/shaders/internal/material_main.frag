@@ -85,7 +85,7 @@ vec3 l2_emissiveLight(float emissivity){
 float l2_skyLight(float skyLight, float intensity)
 {
 	float sl = l2_clampScale(0.03125, 1.0, skyLight);
-	return hdr_gammaAdjust(sl * intensity);
+	return hdr_gammaAdjust(sl) * intensity;
 }
 
 vec3 l2_ambientColor(float time){
@@ -186,10 +186,10 @@ vec3 l2_sunColor(float time){
 	return sunColor;
 }
 
-vec3 l2_vanillaSunDir(float time, float zWobble){
+vec3 l2_vanillaSunDir(in float time, float zWobble){
 
-	// wrap time to account  for sunrise
-	time -= time >= 0.75 ? 1 : 0;
+	// wrap time to account for sunrise
+	time -= (time >= 0.75) ? 1.0 : 0.0;
 
 	// supposed offset of sunset/sunrise from 0/12000 daytime. might get better result with datamining?
 	float sunHorizonDur = 0.04;
@@ -200,8 +200,20 @@ vec3 l2_vanillaSunDir(float time, float zWobble){
 	return normalize(vec3(cos(angleRad), sin(angleRad), zWobble));
 }
 
-vec3 l2_sunLight(float skyLight, float time, float intensity, vec3 normalForLightCalc){
-	float sl = l2_skyLight(skyLight, intensity);
+vec3 l2_sunLight(float skyLight, in float time, float intensity, float rainGradient, vec3 normalForLightCalc){
+
+	// wrap time to account for sunrise
+	float customTime = (time >= 0.75) ? (time - 1.0) : time;
+
+    float customIntensity = l2_clampScale(-0.08, 0.00, customTime);
+
+    if(customTime >= 0.25){
+		customIntensity = l2_clampScale(0.58, 0.5, customTime);
+    }
+
+	customIntensity *= mix(1.0, 0.0, rainGradient);
+
+	float sl = l2_skyLight(skyLight, max(customIntensity, intensity));
 
 	// direct sun light doesn't reach into dark spot as much as sky ambient
 	sl = frx_smootherstep(0.5,1.0,sl);
@@ -209,12 +221,6 @@ vec3 l2_sunLight(float skyLight, float time, float intensity, vec3 normalForLigh
 	// zWobble is added to make more interesting looking diffuse light
 	// TODO: might be fun to use frx_worldDay() with sine wave for the zWobble to simulate annual sun position change
 	sl *= max(0.0, dot(l2_vanillaSunDir(time, hdr_zWobbleDefault), normalForLightCalc));
-
-	if(time > 0.94){
-		sl *= l2_clampScale(0.94, 1.0, time);
-	} else if(time > 0.56){
-		sl *= l2_clampScale(0.56, 0.5, time);
-	}
 	return sl * l2_sunColor(time);
 }
 
@@ -351,7 +357,7 @@ void main() {
 		// If diffuse is disabled (e.g. grass) then the normal points up by default
 		vec3 normalForLightCalc = fragData.diffuse?fragData.vertexNormal*frx_normalModelMatrix():vec3(0,1,0);
 		vec3 block = l2_blockLight(fragData.light.x);
-		vec3 sun = l2_sunLight(fragData.light.y, frx_worldTime(), frx_ambientIntensity(), normalForLightCalc);
+		vec3 sun = l2_sunLight(fragData.light.y, frx_worldTime(), frx_ambientIntensity(), frx_rainGradient(), normalForLightCalc);
 		vec3 moon = l2_moonLight(fragData.light.y, frx_worldTime(), frx_ambientIntensity(), normalForLightCalc);
 		vec3 skyAmbient = l2_skyAmbient(fragData.light.y, frx_worldTime(), frx_ambientIntensity());
 		vec3 emissive = l2_emissiveLight(fragData.emissivity);
