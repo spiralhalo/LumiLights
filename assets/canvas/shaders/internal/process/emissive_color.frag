@@ -1,8 +1,8 @@
 /*
-	Derived from Canvas source code (https://github.com/grondag/canvas/)
-
-	Changes are made to add bloom to sky fragments.
-*/
+ *	Derived from Canvas source code (https://github.com/grondag/canvas/)
+ *
+ *	Changes are made to add bloom to sky fragments.
+ */
 
 #include canvas:shaders/internal/process/header.glsl
 #include frex:shaders/lib/color.glsl

@@ -1,8 +1,8 @@
 /*
-	Lumi Lights - A shader pack for Canvas
-	Copyright (c) 2020 spiralhalo and Contributors
-
-	See `README.md` for license notice.
+ *  Lumi Lights - A shader pack for Canvas
+ *  Copyright (c) 2020 spiralhalo and Contributors
+ *
+ *  See `README.md` for license notice.
  */
 
 #include canvas:shaders/internal/header.glsl
