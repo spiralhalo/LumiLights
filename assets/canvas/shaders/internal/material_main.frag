@@ -26,7 +26,6 @@
   canvas:shaders/internal/material_main.frag
 ******************************************************/
 
-#define M_2PI 6.283185307179586476925286766559
 #define M_PI 3.1415926535897932384626433832795
 
 const float hdr_sunStr = 4;
@@ -190,7 +189,7 @@ vec3 l2_sunColor(float time){
 vec3 l2_vanillaSunDir(float time, float zWobble){
 
 	// wrap time to account  for sunrise
-	time -= time >= 0.75?1:0;
+	time -= time >= 0.75 ? 1 : 0;
 
 	// supposed offset of sunset/sunrise from 0/12000 daytime. might get better result with datamining?
 	float sunHorizonDur = 0.04;
@@ -221,12 +220,12 @@ vec3 l2_sunLight(float skyLight, float time, float intensity, vec3 normalForLigh
 
 vec3 l2_moonLight(float skyLight, float time, float intensity, vec3 normalForLightCalc){
 	float ml = l2_skyLight(skyLight, intensity) * frx_moonSize() * hdr_moonStr;
-    float aRad = (time - 0.5) * M_2PI;
+    float aRad = l2_clampScale(0.56, 0.94, time) * M_PI;
 	ml *= max(0.0, dot(vec3(cos(aRad), sin(aRad), 0), normalForLightCalc));
-	if(time < 0.56){
-		ml *= l2_clampScale(0.5, 0.56, time);
-	} else if(time > 0.94){
-		ml *= l2_clampScale(1.0, 0.94, time);
+	if(time < 0.58){
+		ml *= l2_clampScale(0.54, 0.58, time);
+	} else if(time > 0.92){
+		ml *= l2_clampScale(0.96, 0.92, time);
 	}
 	return vec3(ml);
 }
