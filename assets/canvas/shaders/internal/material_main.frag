@@ -75,7 +75,19 @@ float l2_max3(vec3 vec){
 vec3 l2_blockLight(float blockLight){
 	float bl = l2_clampScale(0.03125, 1.0, blockLight);
 	bl *= bl * hdr_blockStr;
-	return hdr_gammaAdjust(vec3(bl, bl*0.875, bl*0.75));
+	vec3 block = hdr_gammaAdjust(vec3(bl, bl*0.875, bl*0.75));
+	
+#if HANDHELD_LIGHT_RADIUS != 0
+	vec4 held = frx_heldLight();
+	if (held.w > 0.0) {
+		float hl = l2_clampScale(held.w * HANDHELD_LIGHT_RADIUS, 0.0, gl_FogFragCoord);
+		hl *= hl * hdr_blockStr;
+
+		return block + hdr_gammaAdjust(held.rgb * hl);
+	}
+#endif
+
+	return block;
 }
 
 vec3 l2_emissiveLight(float emissivity){
