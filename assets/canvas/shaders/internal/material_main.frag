@@ -361,29 +361,39 @@ void main() {
 
 	vec4 a = fragData.spriteColor * fragData.vertexColor;
 
-	a.rgb = hdr_gammaAdjust(a.rgb);
-
-	if(ww_waterTest(fragData)){
-		ww_waterPipeline(a, fragData);
+	if(frx_isGui()){
+#if DIFFUSE_SHADING_MODE != DIFFUSE_MODE_NONE
+		if(fragData.diffuse){
+			float diffuse = mix(_cvv_diffuse, 1, fragData.emissivity);
+			vec3 shading = mix(vec3(0.5, 0.4, 0.8) * diffuse * diffuse, vec3(1.0), diffuse);
+			a.rgb *= shading;
+		}
+#endif
 	} else {
-		// If diffuse is disabled (e.g. grass) then the normal points up by default
-		vec3 normalForLightCalc = fragData.diffuse?fragData.vertexNormal*frx_normalModelMatrix():vec3(0,1,0);
-		vec3 block = l2_blockLight(fragData.light.x);
-		vec3 sun = l2_sunLight(fragData.light.y, frx_worldTime(), frx_ambientIntensity(), frx_rainGradient(), normalForLightCalc);
-		vec3 moon = l2_moonLight(fragData.light.y, frx_worldTime(), frx_ambientIntensity(), normalForLightCalc);
-		vec3 skyAmbient = l2_skyAmbient(fragData.light.y, frx_worldTime(), frx_ambientIntensity());
-		vec3 emissive = l2_emissiveLight(fragData.emissivity);
-		vec3 nether = l2_skylessLight(normalForLightCalc);
+		a.rgb = hdr_gammaAdjust(a.rgb);
 
-		vec3 light = block+emissive+moon+l2_baseAmbient()+skyAmbient+sun+nether;
+		if(ww_waterTest(fragData)){
+			ww_waterPipeline(a, fragData);
+		} else {
+			// If diffuse is disabled (e.g. grass) then the normal points up by default
+			vec3 normalForLightCalc = fragData.diffuse?fragData.vertexNormal*frx_normalModelMatrix():vec3(0,1,0);
+			vec3 block = l2_blockLight(fragData.light.x);
+			vec3 sun = l2_sunLight(fragData.light.y, frx_worldTime(), frx_ambientIntensity(), frx_rainGradient(), normalForLightCalc);
+			vec3 moon = l2_moonLight(fragData.light.y, frx_worldTime(), frx_ambientIntensity(), normalForLightCalc);
+			vec3 skyAmbient = l2_skyAmbient(fragData.light.y, frx_worldTime(), frx_ambientIntensity());
+			vec3 emissive = l2_emissiveLight(fragData.emissivity);
+			vec3 nether = l2_skylessLight(normalForLightCalc);
 
-		a *= vec4(light, 1.0);
+			vec3 light = block+emissive+moon+l2_baseAmbient()+skyAmbient+sun+nether;
+
+			a *= vec4(light, 1.0);
+		}
+
+		a.rgb *= hdr_finalMult;
+		a.rgb = pow(hdr_reinhardTonemap(a.rgb), vec3(1.0 / hdr_gamma));
+
+		// a.rgb = l2_what(a.rgb);
 	}
-
-	a.rgb *= hdr_finalMult;
-	a.rgb = pow(hdr_reinhardTonemap(a.rgb), vec3(1.0 / hdr_gamma));
-
-	// a.rgb = l2_what(a.rgb);
 	
 #if AO_SHADING_MODE != AO_MODE_NONE
 	a *= fragData.ao?vec4(_cvv_ao,_cvv_ao,_cvv_ao,1):vec4(1);
