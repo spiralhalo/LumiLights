@@ -86,7 +86,7 @@ void main() {
 
 	// Adding +0.5 prevents striping or other strangeness in flag-dependent rendering
 	// due to FP error on some cards/drivers.  Also made varying attribute invariant (rolls eyes at OpenGL)
-	_cvv_flags = in_normal_flags.w + 0.5;
+	_cvv_flags = uint(in_normal_flags.w + 0.5);
 	
 	_cv_setupProgram();
 
@@ -96,13 +96,13 @@ void main() {
 	wwv_aPos = data.vertex.xyz;
 	wwv_cameraPos = (ww_inv(mat4(gl_ModelViewMatrix)) * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
 
-	if (_cvu_material[_CV_SPRITE_INFO_TEXTURE_SIZE] != 0.0) {
+	if (_cvu_atlas[_CV_SPRITE_INFO_TEXTURE_SIZE] != 0.0) {
 		float spriteIndex = in_material.x;
 		// for sprite atlas textures, convert from normalized (0-1) to interpolated coordinates
-		vec4 spriteBounds = texture2DLod(frxs_spriteInfo, vec2(0, spriteIndex / _cvu_material[_CV_SPRITE_INFO_TEXTURE_SIZE]), 0);
+		vec4 spriteBounds = texture2DLod(frxs_spriteInfo, vec2(0, spriteIndex / _cvu_atlas[_CV_SPRITE_INFO_TEXTURE_SIZE]), 0);
 
-		float atlasHeight = _cvu_material[_CV_ATLAS_HEIGHT];
-		float atlasWidth = _cvu_material[_CV_ATLAS_WIDTH];
+		float atlasHeight = _cvu_atlas[_CV_ATLAS_HEIGHT];
+		float atlasWidth = _cvu_atlas[_CV_ATLAS_WIDTH];
 
 		// snap sprite bounds to integer coordinates to correct for floating point error
 		spriteBounds *= vec4(atlasWidth, atlasHeight, atlasWidth, atlasHeight);
