@@ -1,7 +1,9 @@
 # Lumi Lights
 Aesthetic shader for [Canvas](https://github.com/grondag/canvas) that adds directional sky light and ambient light. Lumi Lights aims to replace vanilla lighting as much as possible.
 
-**Written for the latest Canvas build (new pipeline).**
+**Made for the latest\* Canvas build (new pipeline).**
+
+\*) As Canvas is undergoing a major refactor, Lumi Lights code might not always catch up to it.
 
 ## Features
 
@@ -39,9 +41,6 @@ Lumi Lights is released under the terms of the GNU Lesser General Public License
 Parts of its source code is derived from Canvas which is released under the Apache License version 2.0.
 
 ## Notes
-
-### Known issues
-Due to a bug, water reflection effect might have "stitching" artifact on certain coordinates.
 
 ### Note on diffuse
 Vanilla objects has a property called "diffuse", which determines if they should have directional shading or not. In Lumi Lights, objects that had their diffuse set to false are treated as if they are facing up, so that they always have the same brightness as the top face of the block that they are on.
