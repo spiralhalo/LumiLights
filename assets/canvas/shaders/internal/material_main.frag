@@ -268,6 +268,15 @@ float l2_specular(float time, vec3 aNormal, vec3 aPos, vec3 cameraPos, float pow
     return pow(max(0.0, dot(reflect(-sunDir, aNormal), viewDir)),power);
 }
 
+float l2_ao(frx_FragmentData fragData) {
+#if AO_SHADING_MODE != AO_MODE_NONE
+	float ao = fragData.ao ? _cvv_ao : 1.0;
+	return hdr_gammaAdjust(min(1.0, ao + fragData.emissivity));
+#else
+	return 1.0;
+#endif 
+}
+
 // prefix ww to separate water effects from the rest of the shader
 
 varying vec3 wwv_aPos;
@@ -341,13 +350,6 @@ void ww_waterPipeline(inout vec4 a, in frx_FragmentData fragData) {
 	a.rgb *= blockLight + sunColor * skyLight + upMoonLight + l2_baseAmbient() + l2_skylessLight(surfaceNormal);
 }
 
-#if AO_SHADING_MODE != AO_MODE_NONE
-vec4 ao(float light){
-	float ao = min(1,_cvv_ao+light*0.25);
-	return vec4(ao, ao, ao, 1.0);
-}
-#endif
-
 void main() {
 	frx_FragmentData fragData = frx_FragmentData (
 	texture2D(frxs_spriteAltas, _cvv_texcoord, _cv_getFlag(_CV_FLAG_UNMIPPED) * -4.0),
@@ -378,6 +380,7 @@ void main() {
 			ww_waterPipeline(a, fragData);
 		} else {
 			// If diffuse is disabled (e.g. grass) then the normal points up by default
+			float ao = l2_ao(fragData);
 			vec3 normalForLightCalc = fragData.diffuse?fragData.vertexNormal*frx_normalModelMatrix():vec3(0,1,0);
 			vec3 block = l2_blockLight(fragData.light.x);
 			vec3 sun = l2_sunLight(fragData.light.y, frx_worldTime(), frx_ambientIntensity(), frx_rainGradient(), normalForLightCalc);
@@ -386,20 +389,16 @@ void main() {
 			vec3 emissive = l2_emissiveLight(fragData.emissivity);
 			vec3 nether = l2_skylessLight(normalForLightCalc);
 
-			vec3 light = block+emissive+moon+l2_baseAmbient()+skyAmbient+sun+nether;
-
+			vec3 light = block + moon + l2_baseAmbient() + skyAmbient + sun + nether;
+			light *= ao; // AO is supposed to be applied to ambient only, but things look better with AO on everything except for emissive light
+			light += emissive;
+			
 			a *= vec4(light, 1.0);
 		}
 
 		a.rgb *= hdr_finalMult;
 		a.rgb = pow(hdr_reinhardJodieTonemap(a.rgb), vec3(1.0 / hdr_gamma));
-
-		// a.rgb = l2_what(a.rgb);
 	}
-	
-#if AO_SHADING_MODE != AO_MODE_NONE
-	a *= fragData.ao?vec4(_cvv_ao,_cvv_ao,_cvv_ao,1):vec4(1);
-#endif
 
 	// PERF: varyings better here?
 	if (_cv_getFlag(_CV_FLAG_CUTOUT) == 1.0) {
