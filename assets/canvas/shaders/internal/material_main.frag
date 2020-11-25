@@ -333,7 +333,7 @@ void main() {
 		
 		vec3 viewDir = normalize(pbr_cameraPos - pbr_fragPos);
 
-		vec3 normal = fragData.vertexNormal;
+		vec3 normal = fragData.diffuse ? fragData.vertexNormal * frx_normalModelMatrix() : vec3(0, 1, 0);
 
 		if (frx_worldHasSkylight()) {
 
