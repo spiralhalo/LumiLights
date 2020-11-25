@@ -31,6 +31,7 @@
 const float hdr_sunStr = 3;
 const float hdr_moonStr = 0.4;
 const float hdr_blockStr = 1.5;
+const float hdr_handHeldStr = 0.9;
 const float hdr_skylessStr = 0.2;
 const float hdr_baseMinStr = 0.0;
 const float hdr_baseMaxStr = 0.25;
@@ -83,7 +84,7 @@ vec3 l2_blockLight(float blockLight){
 	vec4 held = frx_heldLight();
 	if (held.w > 0.0) {
 		float hl = l2_clampScale(held.w * HANDHELD_LIGHT_RADIUS, 0.0, gl_FogFragCoord);
-		hl *= hl * hdr_blockStr;
+		hl *= hl * hdr_handHeldStr;
 
 		return block + hdr_gammaAdjust(held.rgb * hl);
 	}
