@@ -1,10 +1,3 @@
-/*
- *	Derived from Canvas source code (https://github.com/grondag/canvas/)
- *
- *	Changes are made to add varyings that transfers the world position
- *	and camera position to the fragment shader.
- */
-
 #include canvas:shaders/internal/header.glsl
 #include frex:shaders/api/context.glsl
 #include canvas:shaders/internal/varying.glsl
@@ -12,10 +5,9 @@
 #include canvas:shaders/internal/flags.glsl
 #include frex:shaders/api/vertex.glsl
 #include frex:shaders/api/sampler.glsl
-#include frex:shaders/api/world.glsl
 #include canvas:shaders/internal/diffuse.glsl
 #include canvas:shaders/internal/program.glsl
-#include frex:shaders/lib/noise/noise3d.glsl
+#include lumi:shaders/api/varying.glsl
 
 #include canvas:apitarget
 
@@ -31,9 +23,6 @@ void _cv_endVertex(inout frx_VertexData data, in int cv_programId) {
 #include canvas:endvertex
 }
 
-varying vec3 wwv_aPos;
-varying vec3 wwv_cameraPos;
-
 void main() {
 	frx_VertexData data = frx_VertexData(
 	gl_Vertex,
@@ -46,14 +35,13 @@ void main() {
 	// Adding +0.5 prevents striping or other strangeness in flag-dependent rendering
 	// due to FP error on some cards/drivers.  Also made varying attribute invariant (rolls eyes at OpenGL)
 	_cvv_flags = uint(in_normal_flags.w + 0.5);
-	
+
+    wwv_specPower = 0.0;
+
 	_cv_setupProgram();
 
 	int cv_programId = _cv_vertexProgramId();
 	_cv_startVertex(data, cv_programId);
-
-	wwv_aPos = data.vertex.xyz;
-	wwv_cameraPos = (gl_ModelViewMatrixInverse * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
 
 	if (_cvu_atlas[_CV_SPRITE_INFO_TEXTURE_SIZE] != 0.0) {
 		float spriteIndex = in_material.x;
@@ -78,7 +66,7 @@ void main() {
 	gl_ClipVertex = viewCoord;
 	gl_FogFragCoord = length(viewCoord.xyz);
 
-	//data.oldNormal *= gl_NormalMatrix;
+	//data.normal *= gl_NormalMatrix;
 	data.vertex = gl_ModelViewProjectionMatrix * data.vertex;
 
 	gl_Position = data.vertex;

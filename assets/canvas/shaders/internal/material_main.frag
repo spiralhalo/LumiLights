@@ -17,8 +17,8 @@
 #include frex:shaders/api/sampler.glsl
 #include frex:shaders/lib/math.glsl
 #include frex:shaders/lib/color.glsl
-#include frex:shaders/lib/noise/noise3d.glsl
 #include canvas:shaders/internal/program.glsl
+#include lumi:shaders/api/varying.glsl
 
 #include canvas:apitarget
 
@@ -214,7 +214,7 @@ vec3 l2_vanillaSunDir(in float time, float zWobble){
 	return normalize(vec3(cos(angleRad), sin(angleRad), zWobble));
 }
 
-vec3 l2_sunLight(float skyLight, in float time, float intensity, float rainGradient, vec3 normalForLightCalc){
+vec3 l2_sunLight(float skyLight, in float time, float intensity, float rainGradient, vec3 diffuseNormal){
 
 	// wrap time to account for sunrise
 	float customTime = (time >= 0.75) ? (time - 1.0) : time;
@@ -234,26 +234,20 @@ vec3 l2_sunLight(float skyLight, in float time, float intensity, float rainGradi
 
 	// zWobble is added to make more interesting looking diffuse light
 	// TODO: might be fun to use frx_worldDay() with sine wave for the zWobble to simulate annual sun position change
-	sl *= max(0.0, dot(l2_vanillaSunDir(time, hdr_zWobbleDefault), normalForLightCalc));
+	sl *= max(0.0, dot(l2_vanillaSunDir(time, hdr_zWobbleDefault), diffuseNormal));
 	return sl * l2_sunColor(time);
 }
 
-vec3 l2_moonLight(float skyLight, float time, float intensity, vec3 normalForLightCalc){
+vec3 l2_moonLight(float skyLight, float time, float intensity, vec3 diffuseNormal){
 	float ml = l2_skyLight(skyLight, intensity) * frx_moonSize() * hdr_moonStr;
     float aRad = l2_clampScale(0.56, 0.94, time) * M_PI;
-	ml *= max(0.0, dot(vec3(cos(aRad), sin(aRad), 0), normalForLightCalc));
+	ml *= max(0.0, dot(vec3(cos(aRad), sin(aRad), 0), diffuseNormal));
 	if(time < 0.58){
 		ml *= l2_clampScale(0.54, 0.58, time);
 	} else if(time > 0.92){
 		ml *= l2_clampScale(0.96, 0.92, time);
 	}
 	return vec3(ml);
-}
-
-float l2_noise(vec3 aPos, float renderTime, float scale, float amplitude)
-{
-	float invScale = 1/scale;
-    return (snoise(vec3(aPos.x*invScale, aPos.z*invScale, renderTime)) * 0.5+0.5) * amplitude;
 }
 
 float l2_specular(float time, vec3 aNormal, vec3 aPos, vec3 cameraPos, float power)
@@ -275,79 +269,6 @@ float l2_ao(frx_FragmentData fragData) {
 #else
 	return 1.0;
 #endif 
-}
-
-// prefix ww to separate water effects from the rest of the shader
-
-varying vec3 wwv_aPos;
-varying vec3 wwv_cameraPos;
-
-bool ww_waterTest(in frx_FragmentData fragData) {
-
-	// check that vertex color is more blueish than other colors
-	// vertex color is otherwise used by grass and leaves, so false positive should be minimum
-	bool vertexBlue = fragData.vertexColor.b > fragData.vertexColor.g * 0.8 && fragData.vertexColor.b > fragData.vertexColor.r;
-
-	// check for transparency similar to water
-	// TODO: find out exact water texture transparency unless different resource pack can have different transparency
-	bool waterTransparent = fragData.spriteColor.a < 0.9;
-
-	// rule out particles and grass which may have non-white vertex color but usually have diffuse disabled
-	bool diffuse = fragData.diffuse;
-	
-	return vertexBlue && waterTransparent && diffuse;
-}
-
-void ww_waterPipeline(inout vec4 a, in frx_FragmentData fragData) {
-	// make default water texture shinier. purely optional
-	a.rgb *= fragData.spriteColor.rgb;
-	a.rgb *= 0.8;
-
-	vec3 surfaceNormal = fragData.vertexNormal*frx_normalModelMatrix();
-	vec3 worldPos = frx_modelOriginWorldPos() + wwv_aPos;
-
-	// apply simplex noise to the normal to create fake wavyness
-	// check for up-facing water only. this *might* cause artifacts
-	// TODO: make smoother check to remove artifacts. possibly by noiseAmp *= smoothstep(0.9, 0.95, surfaceNormal.y)
-	if(abs(surfaceNormal.y) > 0.9) {
-		// water wavyness parameter
-		float timeScale = 2; 		// speed
-		float noiseScale = 2; 		// wavelength
-		float noiseAmp = 0.03125 * noiseScale;// * timeScale; // amplitude
-
-		// inferred parameter
-		float renderTime = frx_renderSeconds() * 0.5 * timeScale;
-		float microSample = 0.01 * noiseScale;
-
-		// base noise
-		float noise = l2_noise(worldPos, renderTime, noiseScale, noiseAmp);
-
-		// normal recalculation
-		vec3 noiseOrigin = vec3(0, noise, 0);
-		vec3 noiseTangent = vec3(microSample, l2_noise(worldPos + vec3(microSample,0,0), renderTime, noiseScale, noiseAmp), 0) - noiseOrigin;
-		vec3 noiseBitangent = vec3(0, l2_noise(worldPos + vec3(0,0,microSample), renderTime, noiseScale, noiseAmp), microSample) - noiseOrigin;
-
-		// noisy normal
-		surfaceNormal = normalize(cross(noiseBitangent, noiseTangent));
-		// a.rgb = surfaceNormal;
-	}
-
-	float skyLight = l2_skyLight(fragData.light.y, frx_ambientIntensity());
-	vec3 blockLight = l2_blockLight(fragData.light.x);
-	vec3 sunColor = l2_sunColor(frx_worldTime());
-
-	// mix with ambient color before adding specular light
-	a.rgb = mix (a.rgb, a.rgb*l2_ambientColor(frx_worldTime()), skyLight);
-
-	// add specular light
-	float skyAccess = smoothstep(0.89, 1.0, fragData.light.y);
-	float specular = l2_specular(frx_worldTime(), surfaceNormal, wwv_aPos, wwv_cameraPos, 100);
-	a.rgb += sunColor * skyAccess * skyLight * specular;
-	a.a += specular * skyAccess * skyLight;// * sunColor.r;
-
-	// apply brightness factor
-	vec3 upMoonLight = l2_moonLight(fragData.light.y, frx_worldTime(), frx_ambientIntensity(), vec3(0,1,0));
-	a.rgb *= blockLight + sunColor * skyLight + upMoonLight + l2_baseAmbient() + l2_skylessLight(surfaceNormal);
 }
 
 void main() {
@@ -376,25 +297,40 @@ void main() {
 	} else {
 		a.rgb = hdr_gammaAdjust(a.rgb);
 
-		if(ww_waterTest(fragData)){
-			ww_waterPipeline(a, fragData);
-		} else {
-			// If diffuse is disabled (e.g. grass) then the normal points up by default
-			float ao = l2_ao(fragData);
-			vec3 normalForLightCalc = fragData.diffuse?fragData.vertexNormal*frx_normalModelMatrix():vec3(0,1,0);
-			vec3 block = l2_blockLight(fragData.light.x);
-			vec3 sun = l2_sunLight(fragData.light.y, frx_worldTime(), frx_ambientIntensity(), frx_rainGradient(), normalForLightCalc);
-			vec3 moon = l2_moonLight(fragData.light.y, frx_worldTime(), frx_ambientIntensity(), normalForLightCalc);
-			vec3 skyAmbient = l2_skyAmbient(fragData.light.y, frx_worldTime(), frx_ambientIntensity());
-			vec3 emissive = l2_emissiveLight(fragData.emissivity);
-			vec3 nether = l2_skylessLight(normalForLightCalc);
+		// If diffuse is disabled (e.g. grass) then the normal points up by default
+		float ao = l2_ao(fragData);
+		vec3 diffuseNormal = fragData.diffuse?fragData.vertexNormal * frx_normalModelMatrix():vec3(0,1,0);
+		vec3 block = l2_blockLight(fragData.light.x);
+		vec3 sun = l2_sunLight(fragData.light.y, frx_worldTime(), frx_ambientIntensity(), frx_rainGradient(), diffuseNormal);
+		vec3 moon = l2_moonLight(fragData.light.y, frx_worldTime(), frx_ambientIntensity(), diffuseNormal);
+		vec3 skyAmbient = l2_skyAmbient(fragData.light.y, frx_worldTime(), frx_ambientIntensity());
+		vec3 emissive = l2_emissiveLight(fragData.emissivity);
+		vec3 nether = l2_skylessLight(diffuseNormal);
 
-			vec3 light = block + moon + l2_baseAmbient() + skyAmbient + sun + nether;
-			light *= ao; // AO is supposed to be applied to ambient only, but things look better with AO on everything except for emissive light
-			light += emissive;
-			
-			a *= vec4(light, 1.0);
+		vec3 light = block + moon + l2_baseAmbient() + skyAmbient + sun + nether;
+		light *= ao; // AO is supposed to be applied to ambient only, but things look better with AO on everything except for emissive light
+		light += emissive;
+		
+		vec3 specular = vec3(0.0);
+		float specularAmount = 0;
+		if (wwv_specPower > 0.01) {
+			vec3 specularNormal = fragData.vertexNormal * frx_normalModelMatrix();
+
+			float skyLight = l2_skyLight(fragData.light.y, frx_ambientIntensity());
+			float skyAccess = smoothstep(0.89, 1.0, fragData.light.y);
+
+			vec3 fragPos = frx_var0.xyz;
+			vec3 cameraPos = frx_var1.xyz;
+
+			specularAmount = l2_specular(frx_worldTime(), specularNormal, fragPos, cameraPos, wwv_specPower);
+			specularAmount *= skyAccess * skyLight;
+
+			specular = l2_sunColor(frx_worldTime()) * specularAmount;
 		}
+
+		a.rgb *= light;
+		a.rgb += specular;
+		a.a += specularAmount;
 
 		a.rgb *= hdr_finalMult;
 		a.rgb = pow(hdr_reinhardJodieTonemap(a.rgb), vec3(1.0 / hdr_gamma));
