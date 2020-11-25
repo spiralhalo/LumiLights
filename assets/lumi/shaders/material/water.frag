@@ -1,13 +1,19 @@
-#include lumi:shaders/lib/noise.glsl
 #include lumi:shaders/api/varying.glsl
+#include lumi:shaders/lib/noise.glsl
 #include frex:shaders/api/fragment.glsl
+#include frex:shaders/api/world.glsl
 
 void frx_startFragment(inout frx_FragmentData fragData) {
 
     fragData.spriteColor.rgb *= fragData.spriteColor.rgb;
-	vec3 worldPos = frx_modelOriginWorldPos() + frx_var0.xyz;
 
     if(fragData.vertexNormal.y > 0.01) {
+		
+		// hack
+    	fragData.light.y += 0.077 * smoothstep(1.0, 0.99, fragData.vertexNormal.y);
+    	fragData.light.y = min(0.96875, fragData.light.y);
+		
+		vec3 worldPos = frx_modelOriginWorldPos() + frx_var0.xyz;
 		// water wavyness parameter
 		float timeScale = 2; 		// speed
 		float noiseScale = 2; 		// wavelength
@@ -27,6 +33,6 @@ void frx_startFragment(inout frx_FragmentData fragData) {
 
 		// noisy normal
 		vec3 noisyNormal = normalize(cross(noiseBitangent, noiseTangent));
-        fragData.vertexNormal = noisyNormal;
+		fragData.vertexNormal = noisyNormal;
 	}
 }
