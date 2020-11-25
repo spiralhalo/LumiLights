@@ -285,6 +285,7 @@ void main() {
 	_cv_startFragment(fragData);
 
 	vec4 a = fragData.spriteColor * fragData.vertexColor;
+	float bloom = fragData.emissivity; // separate bloom from emissivity
 
 	if(frx_isGui()){
 #if DIFFUSE_SHADING_MODE != DIFFUSE_MODE_NONE
@@ -331,6 +332,7 @@ void main() {
 		a.rgb *= light;
 		a.rgb += specular;
 		a.a += specularAmount;
+		bloom += specularAmount;
 
 		a.rgb *= hdr_finalMult;
 		a.rgb = pow(hdr_reinhardJodieTonemap(a.rgb), vec3(1.0 / hdr_gamma));
@@ -357,6 +359,6 @@ void main() {
 	gl_FragDepth = gl_FragCoord.z;
 
 #if TARGET_EMISSIVE > 0
-	gl_FragData[TARGET_EMISSIVE] = vec4(fragData.emissivity, 1.0, 0.0, 1.0);
+	gl_FragData[TARGET_EMISSIVE] = vec4(bloom * a.a, 1.0, 0.0, 1.0);
 #endif
 }
