@@ -19,6 +19,7 @@
 #include frex:shaders/lib/color.glsl
 #include canvas:shaders/internal/program.glsl
 #include lumi:shaders/api/varying.glsl
+#include lumi:shaders/lib/pbr.glsl
 
 #include canvas:apitarget
 
@@ -323,10 +324,14 @@ void main() {
 			vec3 cameraPos = frx_var1.xyz;
 			vec3 sunDir = l2_vanillaSunDir(frx_worldTime(), 0);
 			vec3 sun = l2_sunLight(fragData.light.y, frx_worldTime(), frx_ambientIntensity(), frx_rainGradient(), sunDir);
+			vec3 viewDir = normalize(cameraPos - fragPos);
+			vec3 halfway = normalize(viewDir + sunDir);
+			vec3 f0 = vec3(0.04);
+			vec3 fresnel = pbr_fresnelSchlick(max(0.0, dot(viewDir, halfway)), f0);
 
 			float specularAmount = l2_specular(frx_worldTime(), specularNormal, fragPos, cameraPos, wwv_specPower);
 
-			specular = sun * specularAmount * skyAccess;
+			specular = sun * specularAmount * skyAccess * fresnel;
 		}
 
 		a.rgb *= light;
