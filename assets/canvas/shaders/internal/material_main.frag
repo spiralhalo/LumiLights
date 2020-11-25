@@ -314,26 +314,27 @@ void main() {
 		light += emissive;
 		
 		vec3 specular = vec3(0.0);
-		float specularAmount = 0;
 		if (wwv_specPower > 0.01) {
 			vec3 specularNormal = fragData.vertexNormal * frx_normalModelMatrix();
 
-			float skyLight = l2_skyLight(fragData.light.y, frx_ambientIntensity());
 			float skyAccess = smoothstep(0.89, 1.0, fragData.light.y);
 
 			vec3 fragPos = frx_var0.xyz;
 			vec3 cameraPos = frx_var1.xyz;
+			vec3 sunDir = l2_vanillaSunDir(frx_worldTime(), 0);
+			vec3 sun = l2_sunLight(fragData.light.y, frx_worldTime(), frx_ambientIntensity(), frx_rainGradient(), sunDir);
 
-			specularAmount = l2_specular(frx_worldTime(), specularNormal, fragPos, cameraPos, wwv_specPower);
-			specularAmount *= skyAccess * skyLight;
+			float specularAmount = l2_specular(frx_worldTime(), specularNormal, fragPos, cameraPos, wwv_specPower);
 
-			specular = l2_sunColor(frx_worldTime()) * specularAmount;
+			specular = sun * specularAmount * skyAccess;
 		}
 
 		a.rgb *= light;
 		a.rgb += specular;
-		a.a += specularAmount;
-		bloom += specularAmount;
+
+		float specularLuminance = frx_luminance(specular);
+		a.a += specularLuminance;
+		bloom += specularLuminance;
 
 		a.rgb *= hdr_finalMult;
 		a.rgb = pow(hdr_reinhardJodieTonemap(a.rgb), vec3(1.0 / hdr_gamma));
