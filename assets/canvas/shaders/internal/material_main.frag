@@ -49,8 +49,10 @@ vec3 hdr_gammaAdjust(vec3 x){
 	return pow(x, vec3(hdr_gamma));
 }
 
-vec3 hdr_reinhardTonemap(in vec3 hdrColor){
-	return hdrColor / (hdrColor + vec3(1.0));
+vec3 hdr_reinhardJodieTonemap(in vec3 v) {
+    float l = frx_luminance(v);
+    vec3 tv = v / (1.0f + v);
+    return mix(v / (1.0f + l), tv, tv);
 }
 
 void _cv_startFragment(inout frx_FragmentData data) {
@@ -390,7 +392,7 @@ void main() {
 		}
 
 		a.rgb *= hdr_finalMult;
-		a.rgb = pow(hdr_reinhardTonemap(a.rgb), vec3(1.0 / hdr_gamma));
+		a.rgb = pow(hdr_reinhardJodieTonemap(a.rgb), vec3(1.0 / hdr_gamma));
 
 		// a.rgb = l2_what(a.rgb);
 	}
