@@ -2,6 +2,19 @@
 #include lumi:shaders/lib/noise.glsl
 #include frex:shaders/api/fragment.glsl
 #include frex:shaders/api/world.glsl
+#include frex:shaders/lib/noise/noise3d.glsl
+
+float ww_noise(vec3 aPos, float renderTime, float scale, float amplitude, float stretch)
+{
+	float invScale = 1/scale;
+    return (snoise(vec3(aPos.x * invScale * stretch, aPos.z*invScale, renderTime)) * 0.5+0.5) * amplitude;
+}
+
+// water wavyness parameter
+const float speed = 2;
+const float scale = 2;
+const float amplitude = 0.02;
+const float stretch = 2;
 
 void frx_startFragment(inout frx_FragmentData fragData) {
 
@@ -13,23 +26,19 @@ void frx_startFragment(inout frx_FragmentData fragData) {
     	fragData.light.y += 0.077 * smoothstep(1.0, 0.99, fragData.vertexNormal.y);
     	fragData.light.y = min(0.96875, fragData.light.y);
 		
-		vec3 worldPos = frx_modelOriginWorldPos() + frx_var0.xyz;
-		// water wavyness parameter
-		float timeScale = 2; 		// speed
-		float noiseScale = 2; 		// wavelength
-		float noiseAmp = 0.03125 * noiseScale;// * timeScale; // amplitude
+		vec3 worldPos = frx_modelOriginWorldPos() + pbr_fragPos;
 
 		// inferred parameter
-		float renderTime = frx_renderSeconds() * 0.5 * timeScale;
-		float microSample = 0.01 * noiseScale;
+		float renderTime = frx_renderSeconds() * 0.5 * speed;
+		float microSample = 0.01 * scale;
 
 		// base noise
-		float noise = l2_noise(worldPos, renderTime, noiseScale, noiseAmp);
+		float noise = ww_noise(worldPos, renderTime, scale, amplitude, stretch);
 
 		// normal recalculation
 		vec3 noiseOrigin = vec3(0, noise, 0);
-		vec3 noiseTangent = vec3(microSample, l2_noise(worldPos + vec3(microSample,0,0), renderTime, noiseScale, noiseAmp), 0) - noiseOrigin;
-		vec3 noiseBitangent = vec3(0, l2_noise(worldPos + vec3(0,0,microSample), renderTime, noiseScale, noiseAmp), microSample) - noiseOrigin;
+		vec3 noiseTangent = vec3(microSample, ww_noise(worldPos + vec3(microSample,0,0), renderTime, scale, amplitude, stretch), 0) - noiseOrigin;
+		vec3 noiseBitangent = vec3(0, ww_noise(worldPos + vec3(0,0,microSample), renderTime, scale, amplitude, stretch), microSample) - noiseOrigin;
 
 		// noisy normal
 		vec3 noisyNormal = normalize(cross(noiseBitangent, noiseTangent));

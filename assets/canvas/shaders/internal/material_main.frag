@@ -27,8 +27,6 @@
   canvas:shaders/internal/material_main.frag
 ******************************************************/
 
-#define M_PI 3.1415926535897932384626433832795
-
 const float hdr_sunStr = 3;
 const float hdr_moonStr = 0.4;
 const float hdr_blockStr = 1.5;
@@ -164,14 +162,42 @@ vec3 l2_dimensionColor(){
 	}
 }
 
-vec3 l2_skylessLight(vec3 normal){
-	if(frx_worldHasSkylight()){
+vec3 pbr_skylessDarkenedDir() {
+	return vec3(0, -0.977358, 0.211593);
+}
+
+vec3 pbr_skylessDir() {
+	return vec3(0, 0.977358, 0.211593);
+}
+
+vec3 pbr_skylessRadiance(){
+	if (frx_worldHasSkylight()) {
 		return vec3(0);
 	} else {
-		float yalign = dot(normal,vec3(0, 0.977358, 0.211593)); // a bit towards z for more interesting effect
-		yalign = frx_isSkyDarkened()?abs(yalign):max(0,yalign);
-		return yalign * hdr_skylessStr * l2_skylessLightColor() * l2_userBrightness();
+		return ( frx_isSkyDarkened() ? 0.5 : 1.0 )
+			* hdr_skylessStr
+			* l2_skylessLightColor()
+			* l2_userBrightness();
 	}
+}
+
+vec3 pbr_lightCalc(in vec3 albedo, in vec3 f0, in vec3 radiance, in vec3 lightDir, in vec3 viewDir, in vec3 normal) {
+	
+	vec3 halfway = normalize(viewDir + lightDir);
+	
+	// cook-torrance brdf
+	float distribution = pbr_distributionGGX(normal, halfway, pbr_roughness);
+	float geometry = pbr_geometrySmith(normal, viewDir, lightDir, pbr_roughness);
+	vec3 fresnel = pbr_fresnelSchlick(max(0.0, dot(viewDir, halfway)), f0);
+
+	float NdotL = max(dot(normal, lightDir), 0.0);  
+	vec3 num = distribution * geometry * fresnel;
+	float denom = 4.0 * max(dot(normal, viewDir), 0.0) * NdotL;
+	vec3 specular = num / max(denom, 0.001);
+
+	vec3 diffuse = 1.0 - fresnel;
+
+	return (albedo * diffuse / PI + specular) * radiance * NdotL;
 }
 
 vec3 l2_baseAmbient(){
@@ -202,7 +228,7 @@ vec3 l2_sunColor(float time){
 	return sunColor;
 }
 
-vec3 l2_vanillaSunDir(in float time, float zWobble){
+vec3 pbr_vanillaSunDir(in float time, float zWobble){
 
 	// wrap time to account for sunrise
 	time -= (time >= 0.75) ? 1.0 : 0.0;
@@ -211,12 +237,12 @@ vec3 l2_vanillaSunDir(in float time, float zWobble){
 	float sunHorizonDur = 0.04;
 
 	// angle of sun in radians
-	float angleRad = l2_clampScale(-sunHorizonDur, 0.5+sunHorizonDur, time) * M_PI;
+	float angleRad = l2_clampScale(-sunHorizonDur, 0.5+sunHorizonDur, time) * PI;
 
 	return normalize(vec3(cos(angleRad), sin(angleRad), zWobble));
 }
 
-vec3 l2_sunLight(float skyLight, in float time, float intensity, float rainGradient, vec3 diffuseNormal){
+vec3 pbr_sunRadiance(float skyLight, in float time, float intensity, float rainGradient){
 
 	// wrap time to account for sunrise
 	float customTime = (time >= 0.75) ? (time - 1.0) : time;
@@ -234,34 +260,22 @@ vec3 l2_sunLight(float skyLight, in float time, float intensity, float rainGradi
 	// direct sun light doesn't reach into dark spot as much as sky ambient
 	sl = frx_smootherstep(0.5,1.0,sl);
 
-	// zWobble is added to make more interesting looking diffuse light
-	// TODO: might be fun to use frx_worldDay() with sine wave for the zWobble to simulate annual sun position change
-	sl *= max(0.0, dot(l2_vanillaSunDir(time, hdr_zWobbleDefault), diffuseNormal));
 	return sl * l2_sunColor(time);
 }
 
-vec3 l2_moonLight(float skyLight, float time, float intensity, vec3 diffuseNormal){
+vec3 pbr_moonDir(float time){
+    float aRad = l2_clampScale(0.56, 0.94, time) * PI;
+	return normalize(vec3(cos(aRad), sin(aRad), 0));
+}
+
+vec3 pbr_moonRadiance(float skyLight, float time, float intensity){
 	float ml = l2_skyLight(skyLight, intensity) * frx_moonSize() * hdr_moonStr;
-    float aRad = l2_clampScale(0.56, 0.94, time) * M_PI;
-	ml *= max(0.0, dot(vec3(cos(aRad), sin(aRad), 0), diffuseNormal));
 	if(time < 0.58){
 		ml *= l2_clampScale(0.54, 0.58, time);
 	} else if(time > 0.92){
 		ml *= l2_clampScale(0.96, 0.92, time);
 	}
 	return vec3(ml);
-}
-
-float l2_specular(float time, vec3 aNormal, vec3 aPos, vec3 cameraPos, float power)
-{
-    // calculate sun position (0 zWobble to make it look accurate with vanilla sun visuals)
-    vec3 sunDir = l2_vanillaSunDir(time, 0);
-
-    // obtain the direction of the camera
-    vec3 viewDir = normalize(cameraPos - aPos);
-
-    // calculate the specular light
-    return pow(max(0.0, dot(reflect(-sunDir, aNormal), viewDir)),power);
 }
 
 float l2_ao(frx_FragmentData fragData) {
@@ -299,47 +313,58 @@ void main() {
 #endif
 	} else {
 		a.rgb = hdr_gammaAdjust(a.rgb);
+		vec3 albedo = a.rgb;
+		vec3 f0 = vec3(0.04);
+
+		// ambient light calculation
 
 		// If diffuse is disabled (e.g. grass) then the normal points up by default
 		float ao = l2_ao(fragData);
-		vec3 diffuseNormal = fragData.diffuse?fragData.vertexNormal * frx_normalModelMatrix():vec3(0,1,0);
 		vec3 block = l2_blockLight(fragData.light.x);
-		vec3 sun = l2_sunLight(fragData.light.y, frx_worldTime(), frx_ambientIntensity(), frx_rainGradient(), diffuseNormal);
-		vec3 moon = l2_moonLight(fragData.light.y, frx_worldTime(), frx_ambientIntensity(), diffuseNormal);
 		vec3 skyAmbient = l2_skyAmbient(fragData.light.y, frx_worldTime(), frx_ambientIntensity());
 		vec3 emissive = l2_emissiveLight(fragData.emissivity);
-		vec3 nether = l2_skylessLight(diffuseNormal);
 
-		vec3 light = block + moon + l2_baseAmbient() + skyAmbient + sun + nether;
-		light *= ao; // AO is supposed to be applied to ambient only, but things look better with AO on everything except for emissive light
+		vec3 light = block + l2_baseAmbient() + skyAmbient;
+		light *= ao;
 		light += emissive;
+		a.rgb *= light;
+
+		// directional light calculation
 		
-		vec3 specular = vec3(0.0);
-		if (wwv_specPower > 0.01) {
-			vec3 specularNormal = fragData.vertexNormal * frx_normalModelMatrix();
+		vec3 viewDir = normalize(pbr_cameraPos - pbr_fragPos);
 
-			float skyAccess = smoothstep(0.89, 1.0, fragData.light.y);
+		vec3 normal = fragData.vertexNormal;
 
-			vec3 fragPos = frx_var0.xyz;
-			vec3 cameraPos = frx_var1.xyz;
-			vec3 sunDir = l2_vanillaSunDir(frx_worldTime(), 0);
-			vec3 sun = l2_sunLight(fragData.light.y, frx_worldTime(), frx_ambientIntensity(), frx_rainGradient(), sunDir);
-			vec3 viewDir = normalize(cameraPos - fragPos);
-			vec3 halfway = normalize(viewDir + sunDir);
-			vec3 f0 = vec3(0.04);
-			vec3 fresnel = pbr_fresnelSchlick(max(0.0, dot(viewDir, halfway)), f0);
+		if (frx_worldHasSkylight()) {
 
-			float specularAmount = l2_specular(frx_worldTime(), specularNormal, fragPos, cameraPos, wwv_specPower);
+			vec3 moonRadiance = pbr_moonRadiance(fragData.light.y, frx_worldTime(), frx_ambientIntensity());
+			vec3 moonDir = pbr_moonDir(frx_worldTime());
+			vec3 sunRadiance = pbr_sunRadiance(fragData.light.y, frx_worldTime(), frx_ambientIntensity(), frx_rainGradient());
+			vec3 sunDir = pbr_vanillaSunDir(frx_worldTime(), 0.0);
 
-			specular = sun * specularAmount * skyAccess * fresnel;
+			a.rgb += pbr_lightCalc(albedo, f0, moonRadiance, moonDir, viewDir, normal);
+			a.rgb += pbr_lightCalc(albedo, f0, sunRadiance, sunDir, viewDir, normal);
+
+		} else {
+
+			vec3 skylessRadiance = pbr_skylessRadiance();
+			vec3 skylessDir = pbr_skylessDir();
+
+			a.rgb += pbr_lightCalc(albedo, f0, skylessRadiance, skylessDir, viewDir, normal);
+
+			if (frx_isSkyDarkened()) {
+
+				vec3 skylessDarkenedDir = pbr_skylessDarkenedDir();
+				a.rgb += pbr_lightCalc(albedo, f0, skylessRadiance, skylessDarkenedDir, viewDir, normal);
+			}
+
 		}
 
-		a.rgb *= light;
-		a.rgb += specular;
+		// float skyAccess = smoothstep(0.89, 1.0, fragData.light.y);
 
-		float specularLuminance = frx_luminance(specular);
-		a.a += specularLuminance;
-		bloom += specularLuminance;
+		// float specularLuminance = frx_luminance(specular);
+		// a.a += specularLuminance;
+		// bloom += specularLuminance;
 
 		a.rgb *= hdr_finalMult;
 		a.rgb = pow(hdr_reinhardJodieTonemap(a.rgb), vec3(1.0 / hdr_gamma));

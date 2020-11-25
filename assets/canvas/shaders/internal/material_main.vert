@@ -36,7 +36,9 @@ void main() {
 	// due to FP error on some cards/drivers.  Also made varying attribute invariant (rolls eyes at OpenGL)
 	_cvv_flags = uint(in_normal_flags.w + 0.5);
 
-    wwv_specPower = 0.0;
+    pbr_roughness = 1.0;
+	pbr_fragPos = data.vertex.xyz;
+	pbr_cameraPos = (gl_ModelViewMatrixInverse * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
 
 	_cv_setupProgram();
 
