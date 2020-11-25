@@ -26,9 +26,10 @@ The End and the Nether has ambient light colors that matches the surrounding fog
 
 ### Branch
 
-There are two main branches:
+There are several (subtly) different versions:
 - [`hdr`](../../tree/hdr) the default branch
 - [`vibrant`](../../tree/vibrant) alternative version with more vibrant colors
+- [`film`](../../tree/film) alternative version that uses ACES filmic tone mapping
 
 ### Download and installation
 
