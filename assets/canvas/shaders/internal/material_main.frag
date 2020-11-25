@@ -29,13 +29,13 @@
 #define M_PI 3.1415926535897932384626433832795
 
 const float hdr_sunStr = 3;
-const float hdr_moonStr = 0.8;
+const float hdr_moonStr = 0.4;
 const float hdr_blockStr = 1.5;
 const float hdr_skylessStr = 0.2;
 const float hdr_baseMinStr = 0.0;
 const float hdr_baseMaxStr = 0.25;
 const float hdr_emissiveStr = 1;
-const float hdr_relAmbient = 0.07;
+const float hdr_relAmbient = 0.09;
 const float hdr_relSunHorizon = 0.5;
 const float hdr_zWobbleDefault = 0.1;
 const float hdr_finalMult = 1;
