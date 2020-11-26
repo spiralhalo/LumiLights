@@ -197,7 +197,7 @@ vec3 pbr_lightCalc(in vec3 albedo, in vec3 f0, in vec3 radiance, in vec3 lightDi
 	float denom = 4.0 * max(dot(normal, viewDir), 0.0) * NdotL;
 	vec3 specular = num / max(denom, 0.001);
 
-	vec3 diffuse = 1.0 - fresnel;
+	vec3 diffuse = (1.0 - fresnel) * (1.0 - pbr_metallic);
 
 	specularAccu += specular * radiance * NdotL;
 
@@ -318,7 +318,7 @@ void main() {
 	} else {
 		a.rgb = hdr_gammaAdjust(a.rgb);
 		vec3 albedo = a.rgb;
-		vec3 f0 = vec3(0.04);
+		vec3 f0 = mix(vec3(0.04), albedo, pbr_metallic);
 
 		// ambient light calculation
 

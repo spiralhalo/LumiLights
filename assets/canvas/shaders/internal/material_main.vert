@@ -51,6 +51,7 @@ void main() {
 	_cvv_flags = uint(in_normal_flags.w + 0.5);
 
     pbr_roughness = 1.0;
+	pbr_metallic = 0.0;
 	pbr_cameraPos = (gl_ModelViewMatrixInverse * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
 
 	_cv_setupProgram();
