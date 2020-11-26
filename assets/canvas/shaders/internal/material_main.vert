@@ -9,17 +9,17 @@
 #include canvas:shaders/internal/program.glsl
 #include lumi:shaders/api/pbr_vars.glsl
 
-#include canvas:apitarget
-
-/******************************************************
-  canvas:shaders/internal/material_main.vert
-******************************************************/
-
 #define LUMI_BUMP
 float bump_resolution;
 vec2 uvN;
 vec2 uvT;
 vec2 uvB;
+
+#include canvas:apitarget
+
+/******************************************************
+  canvas:shaders/internal/material_main.vert
+******************************************************/
 
 void _cv_startVertex(inout frx_VertexData data, in int cv_programId) {
 #include canvas:startvertex

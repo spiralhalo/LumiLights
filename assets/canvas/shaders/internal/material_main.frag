@@ -21,6 +21,8 @@
 #include lumi:shaders/api/pbr_vars.glsl
 #include lumi:shaders/lib/pbr.glsl
 
+#define LUMI_BUMP
+
 #include canvas:apitarget
 
 /******************************************************
