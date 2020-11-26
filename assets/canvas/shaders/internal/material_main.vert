@@ -1,7 +1,8 @@
 /*
  * Derived from Canvas (https://github.com/grondag/canvas) material_main shader, Apache 2.0 license.
  * Modified to add PBR varyings and support for texture-based bump map generation.
-*/
+ * The modifications are released under the same license as Lumi Lights. See `README.MD` for license notice.
+ */
 
 #include canvas:shaders/internal/header.glsl
 #include frex:shaders/api/context.glsl
