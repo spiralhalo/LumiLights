@@ -37,13 +37,14 @@ void main() {
 	_cvv_flags = uint(in_normal_flags.w + 0.5);
 
     pbr_roughness = 1.0;
-	pbr_fragPos = data.vertex.xyz;
 	pbr_cameraPos = (gl_ModelViewMatrixInverse * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
 
 	_cv_setupProgram();
 
 	int cv_programId = _cv_vertexProgramId();
 	_cv_startVertex(data, cv_programId);
+	
+	pbr_fragPos = data.vertex.xyz;
 
 	if (_cvu_atlas[_CV_SPRITE_INFO_TEXTURE_SIZE] != 0.0) {
 		float spriteIndex = in_material.x;
