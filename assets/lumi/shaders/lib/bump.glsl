@@ -24,7 +24,7 @@ vec3 _bump_bitangentMove(vec3 normal, vec3 tangent)
 
 float _bump_height(float raw)
 {
-    return frx_smootherstep(0,1,raw*raw);
+    return frx_smootherstep(0, 1, pow(raw, 1 + raw * raw));
 }
 
 vec3 bump_normal(sampler2D tex, vec3 normal, vec2 uvn, vec2 uvt, vec2 uvb)
