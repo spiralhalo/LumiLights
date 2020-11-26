@@ -183,7 +183,7 @@ vec3 pbr_skylessRadiance(){
 	}
 }
 
-vec3 pbr_lightCalc(in vec3 albedo, in vec3 f0, in vec3 radiance, in vec3 lightDir, in vec3 viewDir, in vec3 normal, inout vec3 specularAccu) {
+vec3 pbr_lightCalc(vec3 albedo, vec3 f0, vec3 radiance, vec3 lightDir, vec3 viewDir, vec3 normal, bool diffuseOn, inout vec3 specularAccu) {
 	
 	vec3 halfway = normalize(viewDir + lightDir);
 	
@@ -199,9 +199,11 @@ vec3 pbr_lightCalc(in vec3 albedo, in vec3 f0, in vec3 radiance, in vec3 lightDi
 
 	vec3 diffuse = (1.0 - fresnel) * (1.0 - pbr_metallic);
 
-	specularAccu += specular * radiance * NdotL;
+	vec3 specularRadiance = specular * radiance * NdotL;
+	vec3 diffuseRadiance = albedo * diffuse / PI * radiance * (diffuseOn ? NdotL : max(0.0, dot(lightDir, vec3(.0, 1.0, .0))));
+	specularAccu += specularRadiance;
 
-	return (albedo * diffuse / PI + specular) * radiance * NdotL;
+	return specularRadiance + diffuseRadiance;
 }
 
 vec3 l2_baseAmbient(){
@@ -337,7 +339,7 @@ void main() {
 		
 		vec3 viewDir = normalize(pbr_cameraPos - pbr_fragPos);
 
-		vec3 normal = fragData.diffuse ? fragData.vertexNormal * frx_normalModelMatrix() : vec3(0, 1, 0);
+		vec3 normal = fragData.vertexNormal * frx_normalModelMatrix();
 
 		vec3 specularAccu = vec3(0.0);
 
@@ -348,20 +350,20 @@ void main() {
 			vec3 sunRadiance = pbr_sunRadiance(fragData.light.y, frx_worldTime(), frx_ambientIntensity(), frx_rainGradient());
 			vec3 sunDir = pbr_vanillaSunDir(frx_worldTime(), 0.0);
 
-			a.rgb += pbr_lightCalc(albedo, f0, moonRadiance, moonDir, viewDir, normal, specularAccu);
-			a.rgb += pbr_lightCalc(albedo, f0, sunRadiance, sunDir, viewDir, normal, specularAccu);
+			a.rgb += pbr_lightCalc(albedo, f0, moonRadiance, moonDir, viewDir, normal, fragData.diffuse, specularAccu);
+			a.rgb += pbr_lightCalc(albedo, f0, sunRadiance, sunDir, viewDir, normal, fragData.diffuse, specularAccu);
 
 		} else {
 
 			vec3 skylessRadiance = pbr_skylessRadiance();
 			vec3 skylessDir = pbr_skylessDir();
 
-			a.rgb += pbr_lightCalc(albedo, f0, skylessRadiance, skylessDir, viewDir, normal, specularAccu);
+			a.rgb += pbr_lightCalc(albedo, f0, skylessRadiance, skylessDir, viewDir, normal, fragData.diffuse, specularAccu);
 
 			if (frx_isSkyDarkened()) {
 
 				vec3 skylessDarkenedDir = pbr_skylessDarkenedDir();
-				a.rgb += pbr_lightCalc(albedo, f0, skylessRadiance, skylessDarkenedDir, viewDir, normal, specularAccu);
+				a.rgb += pbr_lightCalc(albedo, f0, skylessRadiance, skylessDarkenedDir, viewDir, normal, fragData.diffuse, specularAccu);
 			}
 
 		}
