@@ -1,3 +1,8 @@
+/*
+ * Derived from Canvas (https://github.com/grondag/canvas) material_main shader, Apache 2.0 license.
+ * Modified to add PBR varyings and support for texture-based bump map generation.
+*/
+
 #include canvas:shaders/internal/header.glsl
 #include frex:shaders/api/context.glsl
 #include canvas:shaders/internal/varying.glsl
@@ -8,12 +13,14 @@
 #include canvas:shaders/internal/diffuse.glsl
 #include canvas:shaders/internal/program.glsl
 #include lumi:shaders/api/pbr_vars.glsl
+#include lumi:shaders/api/context_bump.glsl
 
-#define LUMI_BUMP
+#ifdef LUMI_BUMP
 float bump_resolution;
 vec2 uvN;
 vec2 uvT;
 vec2 uvB;
+#endif
 
 #include canvas:apitarget
 
@@ -47,18 +54,22 @@ void main() {
 
 	_cv_setupProgram();
 
+#ifdef LUMI_BUMP
 	bump_resolution = 1.0;
+#endif
 
 	int cv_programId = _cv_vertexProgramId();
 	_cv_startVertex(data, cv_programId);
 	
 	pbr_fragPos = data.vertex.xyz; 
 
+#ifdef LUMI_BUMP
 	float bumpSample = 0.015625 * bump_resolution;
 
 	uvN = clamp(data.spriteUV + vec2(-bumpSample, bumpSample), 0.0, 1.0);
 	uvT = clamp(data.spriteUV + vec2(bumpSample, 0), 0.0, 1.0);
 	uvB = clamp(data.spriteUV - vec2(0, bumpSample), 0.0, 1.0);
+#endif
 
 	if (_cvu_atlas[_CV_SPRITE_INFO_TEXTURE_SIZE] != 0.0) {
 		float spriteIndex = in_material.x;
@@ -76,9 +87,11 @@ void main() {
 
 		data.spriteUV = spriteBounds.xy + data.spriteUV * spriteBounds.zw;
 
+#ifdef LUMI_BUMP
 		uvN = spriteBounds.xy + uvN * spriteBounds.zw;
 		uvT = spriteBounds.xy + uvT * spriteBounds.zw;
 		uvB = spriteBounds.xy + uvB * spriteBounds.zw;
+#endif
 	}
 
 	data.spriteUV = _cv_textureCoord(data.spriteUV, 0);
