@@ -11,6 +11,7 @@
 #include canvas:shaders/internal/flags.glsl
 #include canvas:shaders/internal/fog.glsl
 #include frex:shaders/api/world.glsl
+#include frex:shaders/api/camera.glsl
 #include frex:shaders/api/player.glsl
 #include frex:shaders/api/material.glsl
 #include frex:shaders/api/fragment.glsl
@@ -29,7 +30,7 @@
 ******************************************************/
 
 const float pbr_specularBloomStr = 0.01;
-const float hdr_sunStr = 4;
+const float hdr_sunStr = 5;
 const float hdr_moonStr = 0.4;
 const float hdr_blockStr = 1.5;
 const float hdr_handHeldStr = 1.5;
@@ -37,7 +38,7 @@ const float hdr_skylessStr = 0.2;
 const float hdr_baseMinStr = 0.0;
 const float hdr_baseMaxStr = 0.25;
 const float hdr_emissiveStr = 1;
-const float hdr_relAmbient = 0.09;
+const float hdr_relAmbient = 0.2;
 const float hdr_relSunHorizon = 0.5;
 const float hdr_zWobbleDefault = 0.1;
 const float hdr_finalMult = 1;
@@ -324,10 +325,9 @@ void main() {
 		// If diffuse is disabled (e.g. grass) then the normal points up by default
 		float ao = l2_ao(fragData);
 		vec3 block = l2_blockLight(fragData.light.x);
-		vec3 skyAmbient = l2_skyAmbient(fragData.light.y, frx_worldTime(), frx_ambientIntensity());
 		vec3 emissive = l2_emissiveLight(fragData.emissivity);
 
-		vec3 light = block + l2_baseAmbient() + skyAmbient;
+		vec3 light = block + l2_baseAmbient();
 		light *= ao;
 		light += emissive;
 		a.rgb *= light;
@@ -342,20 +342,27 @@ void main() {
 
 	#if HANDHELD_LIGHT_RADIUS != 0
 		vec3 handHeldRadiance = pbr_handHeldRadiance();
-		vec3 handHeldDir = normalize(pbr_cameraPos + vec3(0.5, -0.25, 0.0) - pbr_fragPos);
-
-		a.rgb += pbr_lightCalc(albedo, f0, handHeldRadiance, handHeldDir, viewDir, normal, fragData.diffuse, specularAccu);
+		if(handHeldRadiance.x + handHeldRadiance.y + handHeldRadiance.z > 0) {
+			vec3 handHeldDir = normalize(pbr_cameraPos + vec3(0.3, -0.3, 0.3) * frx_cameraView() - pbr_fragPos);
+			a.rgb += pbr_lightCalc(albedo, f0, handHeldRadiance, handHeldDir, viewDir, normal, fragData.diffuse, specularAccu);
+		}
 	#endif
 
 		if (frx_worldHasSkylight()) {
+			if (fragData.light.y > 0.03125) {
 
-			vec3 moonRadiance = pbr_moonRadiance(fragData.light.y, frx_worldTime(), frx_ambientIntensity());
-			vec3 moonDir = pbr_moonDir(frx_worldTime());
-			vec3 sunRadiance = pbr_sunRadiance(fragData.light.y, frx_worldTime(), frx_ambientIntensity(), frx_rainGradient());
-			vec3 sunDir = pbr_vanillaSunDir(frx_worldTime(), 0.0);
+				vec3 moonRadiance = pbr_moonRadiance(fragData.light.y, frx_worldTime(), frx_ambientIntensity());
+				vec3 moonDir = pbr_moonDir(frx_worldTime());
+				vec3 sunRadiance = pbr_sunRadiance(fragData.light.y, frx_worldTime(), frx_ambientIntensity(), frx_rainGradient());
+				vec3 sunDir = pbr_vanillaSunDir(frx_worldTime(), 0.0);
+				vec3 skyRadiance = l2_skyAmbient(fragData.light.y, frx_worldTime(), frx_ambientIntensity());
+				vec3 skyDir = normalize(vec3(0.1, 0.9, 0.1) + normal);
 
-			a.rgb += pbr_lightCalc(albedo, f0, moonRadiance, moonDir, viewDir, normal, fragData.diffuse, specularAccu);
-			a.rgb += pbr_lightCalc(albedo, f0, sunRadiance, sunDir, viewDir, normal, fragData.diffuse, specularAccu);
+				a.rgb += pbr_lightCalc(albedo, f0, moonRadiance, moonDir * ao, viewDir, normal, fragData.diffuse, specularAccu);
+				a.rgb += pbr_lightCalc(albedo, f0, sunRadiance, sunDir * ao, viewDir, normal, fragData.diffuse, specularAccu);
+				a.rgb += pbr_lightCalc(albedo, f0, skyRadiance, skyDir * ao, viewDir, normal, fragData.diffuse, specularAccu);
+
+			}
 
 		} else {
 
