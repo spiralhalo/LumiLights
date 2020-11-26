@@ -20,6 +20,7 @@
 #include canvas:shaders/internal/program.glsl
 #include lumi:shaders/api/pbr_vars.glsl
 #include lumi:shaders/lib/pbr.glsl
+#include lumi:shaders/api/context_bump.glsl
 
 #include canvas:apitarget
 
