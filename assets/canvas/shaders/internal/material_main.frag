@@ -18,7 +18,7 @@
 #include frex:shaders/lib/math.glsl
 #include frex:shaders/lib/color.glsl
 #include canvas:shaders/internal/program.glsl
-#include lumi:shaders/api/varying.glsl
+#include lumi:shaders/api/pbr_vars.glsl
 #include lumi:shaders/lib/pbr.glsl
 
 #include canvas:apitarget

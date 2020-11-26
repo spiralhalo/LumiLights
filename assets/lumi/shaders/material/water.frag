@@ -1,4 +1,4 @@
-#include lumi:shaders/api/varying.glsl
+#include lumi:shaders/api/pbr_vars.glsl
 #include lumi:shaders/lib/noise.glsl
 #include frex:shaders/api/fragment.glsl
 #include frex:shaders/api/world.glsl

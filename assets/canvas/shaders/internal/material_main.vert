@@ -7,7 +7,7 @@
 #include frex:shaders/api/sampler.glsl
 #include canvas:shaders/internal/diffuse.glsl
 #include canvas:shaders/internal/program.glsl
-#include lumi:shaders/api/varying.glsl
+#include lumi:shaders/api/pbr_vars.glsl
 
 #include canvas:apitarget
 
