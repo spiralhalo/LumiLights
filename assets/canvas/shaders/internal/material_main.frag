@@ -32,11 +32,11 @@
 const float pbr_specularBloomStr = 0.01;
 const float hdr_sunStr = 5;
 const float hdr_moonStr = 0.4;
-const float hdr_blockStr = 1.5;
+const float hdr_blockStr = 3;
 const float hdr_handHeldStr = 1.5;
 const float hdr_skylessStr = 0.2;
-const float hdr_baseMinStr = 0.0;
-const float hdr_baseMaxStr = 0.25;
+const float hdr_baseMinStr = 0.01;
+const float hdr_baseMaxStr = 0.8;
 const float hdr_emissiveStr = 1;
 const float hdr_relAmbient = 0.2;
 const float hdr_relSunHorizon = 0.5;
@@ -320,19 +320,9 @@ void main() {
 		vec3 albedo = a.rgb;
 		vec3 f0 = mix(vec3(0.04), albedo, pbr_metallic);
 
-		// ambient light calculation
-
-		// If diffuse is disabled (e.g. grass) then the normal points up by default
 		float ao = l2_ao(fragData);
-		vec3 block = l2_blockLight(fragData.light.x);
 		vec3 emissive = l2_emissiveLight(fragData.emissivity);
-
-		vec3 light = block + l2_baseAmbient();
-		light *= ao;
-		light += emissive;
-		a.rgb *= light;
-
-		// directional light calculation
+		a.rgb *= emissive;
 		
 		vec3 viewDir = normalize(pbr_cameraPos - pbr_fragPos);
 
@@ -348,6 +338,13 @@ void main() {
 		}
 	#endif
 
+		vec3 blockRadiance = l2_blockLight(fragData.light.x);
+		vec3 baseAmbientRadiance = l2_baseAmbient();
+		vec3 ambientDir = normalize(vec3(0.1, 0.9, 0.1) + normal);
+
+		a.rgb += pbr_lightCalc(albedo, f0, blockRadiance * ao, ambientDir, viewDir, normal, fragData.diffuse, specularAccu);
+		a.rgb += pbr_lightCalc(albedo, f0, baseAmbientRadiance * ao, ambientDir, viewDir, normal, fragData.diffuse, specularAccu);
+
 		if (frx_worldHasSkylight()) {
 			if (fragData.light.y > 0.03125) {
 
@@ -356,11 +353,10 @@ void main() {
 				vec3 sunRadiance = pbr_sunRadiance(fragData.light.y, frx_worldTime(), frx_ambientIntensity(), frx_rainGradient());
 				vec3 sunDir = pbr_vanillaSunDir(frx_worldTime(), 0.0);
 				vec3 skyRadiance = l2_skyAmbient(fragData.light.y, frx_worldTime(), frx_ambientIntensity());
-				vec3 skyDir = normalize(vec3(0.1, 0.9, 0.1) + normal);
 
-				a.rgb += pbr_lightCalc(albedo, f0, moonRadiance, moonDir * ao, viewDir, normal, fragData.diffuse, specularAccu);
-				a.rgb += pbr_lightCalc(albedo, f0, sunRadiance, sunDir * ao, viewDir, normal, fragData.diffuse, specularAccu);
-				a.rgb += pbr_lightCalc(albedo, f0, skyRadiance, skyDir * ao, viewDir, normal, fragData.diffuse, specularAccu);
+				a.rgb += pbr_lightCalc(albedo, f0, moonRadiance * ao, moonDir, viewDir, normal, fragData.diffuse, specularAccu);
+				a.rgb += pbr_lightCalc(albedo, f0, sunRadiance * ao, sunDir, viewDir, normal, fragData.diffuse, specularAccu);
+				a.rgb += pbr_lightCalc(albedo, f0, skyRadiance * ao, ambientDir, viewDir, normal, fragData.diffuse, specularAccu);
 
 			}
 
@@ -369,12 +365,12 @@ void main() {
 			vec3 skylessRadiance = pbr_skylessRadiance();
 			vec3 skylessDir = pbr_skylessDir();
 
-			a.rgb += pbr_lightCalc(albedo, f0, skylessRadiance, skylessDir, viewDir, normal, fragData.diffuse, specularAccu);
+			a.rgb += pbr_lightCalc(albedo, f0, skylessRadiance * ao, skylessDir, viewDir, normal, fragData.diffuse, specularAccu);
 
 			if (frx_isSkyDarkened()) {
 
 				vec3 skylessDarkenedDir = pbr_skylessDarkenedDir();
-				a.rgb += pbr_lightCalc(albedo, f0, skylessRadiance, skylessDarkenedDir, viewDir, normal, fragData.diffuse, specularAccu);
+				a.rgb += pbr_lightCalc(albedo, f0, skylessRadiance * ao, skylessDarkenedDir, viewDir, normal, fragData.diffuse, specularAccu);
 			}
 
 		}
