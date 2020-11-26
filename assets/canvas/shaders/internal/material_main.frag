@@ -27,7 +27,7 @@
   canvas:shaders/internal/material_main.frag
 ******************************************************/
 
-const float hdr_sunStr = 3;
+const float hdr_sunStr = 4;
 const float hdr_moonStr = 0.4;
 const float hdr_blockStr = 1.5;
 const float hdr_handHeldStr = 0.9;
