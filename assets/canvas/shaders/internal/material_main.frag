@@ -27,6 +27,7 @@
   canvas:shaders/internal/material_main.frag
 ******************************************************/
 
+const float pbr_specularBloomStr = 0.01;
 const float hdr_sunStr = 4;
 const float hdr_moonStr = 0.4;
 const float hdr_blockStr = 1.5;
@@ -181,7 +182,7 @@ vec3 pbr_skylessRadiance(){
 	}
 }
 
-vec3 pbr_lightCalc(in vec3 albedo, in vec3 f0, in vec3 radiance, in vec3 lightDir, in vec3 viewDir, in vec3 normal) {
+vec3 pbr_lightCalc(in vec3 albedo, in vec3 f0, in vec3 radiance, in vec3 lightDir, in vec3 viewDir, in vec3 normal, inout vec3 specularAccu) {
 	
 	vec3 halfway = normalize(viewDir + lightDir);
 	
@@ -196,6 +197,8 @@ vec3 pbr_lightCalc(in vec3 albedo, in vec3 f0, in vec3 radiance, in vec3 lightDi
 	vec3 specular = num / max(denom, 0.001);
 
 	vec3 diffuse = 1.0 - fresnel;
+
+	specularAccu += specular * radiance * NdotL;
 
 	return (albedo * diffuse / PI + specular) * radiance * NdotL;
 }
@@ -335,6 +338,8 @@ void main() {
 
 		vec3 normal = fragData.diffuse ? fragData.vertexNormal * frx_normalModelMatrix() : vec3(0, 1, 0);
 
+		vec3 specularAccu = vec3(0.0);
+
 		if (frx_worldHasSkylight()) {
 
 			vec3 moonRadiance = pbr_moonRadiance(fragData.light.y, frx_worldTime(), frx_ambientIntensity());
@@ -342,29 +347,30 @@ void main() {
 			vec3 sunRadiance = pbr_sunRadiance(fragData.light.y, frx_worldTime(), frx_ambientIntensity(), frx_rainGradient());
 			vec3 sunDir = pbr_vanillaSunDir(frx_worldTime(), 0.0);
 
-			a.rgb += pbr_lightCalc(albedo, f0, moonRadiance, moonDir, viewDir, normal);
-			a.rgb += pbr_lightCalc(albedo, f0, sunRadiance, sunDir, viewDir, normal);
+			a.rgb += pbr_lightCalc(albedo, f0, moonRadiance, moonDir, viewDir, normal, specularAccu);
+			a.rgb += pbr_lightCalc(albedo, f0, sunRadiance, sunDir, viewDir, normal, specularAccu);
 
 		} else {
 
 			vec3 skylessRadiance = pbr_skylessRadiance();
 			vec3 skylessDir = pbr_skylessDir();
 
-			a.rgb += pbr_lightCalc(albedo, f0, skylessRadiance, skylessDir, viewDir, normal);
+			a.rgb += pbr_lightCalc(albedo, f0, skylessRadiance, skylessDir, viewDir, normal, specularAccu);
 
 			if (frx_isSkyDarkened()) {
 
 				vec3 skylessDarkenedDir = pbr_skylessDarkenedDir();
-				a.rgb += pbr_lightCalc(albedo, f0, skylessRadiance, skylessDarkenedDir, viewDir, normal);
+				a.rgb += pbr_lightCalc(albedo, f0, skylessRadiance, skylessDarkenedDir, viewDir, normal, specularAccu);
 			}
 
 		}
 
 		// float skyAccess = smoothstep(0.89, 1.0, fragData.light.y);
 
-		// float specularLuminance = frx_luminance(specular);
+		float specularLuminance = frx_luminance(specularAccu);
+		float smoothness = (1-pbr_roughness);
 		// a.a += specularLuminance;
-		// bloom += specularLuminance;
+		bloom += specularLuminance * pbr_specularBloomStr * smoothness * smoothness;
 
 		a.rgb *= hdr_finalMult;
 		a.rgb = pow(hdr_reinhardJodieTonemap(a.rgb), vec3(1.0 / hdr_gamma));
