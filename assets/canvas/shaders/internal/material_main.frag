@@ -32,7 +32,7 @@ const float pbr_specularBloomStr = 0.01;
 const float hdr_sunStr = 4;
 const float hdr_moonStr = 0.4;
 const float hdr_blockStr = 1.5;
-const float hdr_handHeldStr = 0.9;
+const float hdr_handHeldStr = 1.5;
 const float hdr_skylessStr = 0.2;
 const float hdr_baseMinStr = 0.0;
 const float hdr_baseMaxStr = 0.25;
@@ -79,19 +79,16 @@ float l2_max3(vec3 vec){
 vec3 l2_blockLight(float blockLight){
 	float bl = l2_clampScale(0.03125, 1.0, blockLight);
 	bl *= bl * hdr_blockStr;
-	vec3 block = hdr_gammaAdjust(vec3(bl, bl*0.875, bl*0.75));
-	
+	return hdr_gammaAdjust(vec3(bl, bl*0.875, bl*0.75));
+}
+
+vec3 pbr_handHeldRadiance(){
 #if HANDHELD_LIGHT_RADIUS != 0
 	vec4 held = frx_heldLight();
-	if (held.w > 0.0) {
-		float hl = l2_clampScale(held.w * HANDHELD_LIGHT_RADIUS, 0.0, gl_FogFragCoord);
-		hl *= hl * hdr_handHeldStr;
-
-		return block + hdr_gammaAdjust(held.rgb * hl);
-	}
+	float hl = l2_clampScale(held.w * HANDHELD_LIGHT_RADIUS, 0.0, gl_FogFragCoord);
+	hl *= hl * hdr_handHeldStr;
+	return hdr_gammaAdjust(held.rgb * hl);
 #endif
-
-	return block;
 }
 
 vec3 l2_emissiveLight(float emissivity){
@@ -342,6 +339,13 @@ void main() {
 		vec3 normal = fragData.vertexNormal * frx_normalModelMatrix();
 
 		vec3 specularAccu = vec3(0.0);
+
+	#if HANDHELD_LIGHT_RADIUS != 0
+		vec3 handHeldRadiance = pbr_handHeldRadiance();
+		vec3 handHeldDir = normalize(pbr_cameraPos + vec3(0.5, -0.25, 0.0) - pbr_fragPos);
+
+		a.rgb += pbr_lightCalc(albedo, f0, handHeldRadiance, handHeldDir, viewDir, normal, fragData.diffuse, specularAccu);
+	#endif
 
 		if (frx_worldHasSkylight()) {
 
