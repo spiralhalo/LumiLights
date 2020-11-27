@@ -26,7 +26,7 @@ void frx_startFragment(inout frx_FragmentData fragData) {
     	fragData.light.y += 0.077 * smoothstep(1.0, 0.99, fragData.vertexNormal.y);
     	fragData.light.y = min(0.96875, fragData.light.y);
 		
-		vec3 worldPos = frx_modelOriginWorldPos() + pbr_fragPos;
+		vec3 worldPos = frx_modelOriginWorldPos() + frx_var0.xyz;
 
 		// inferred parameter
 		float renderTime = frx_renderSeconds() * 0.5 * speed;

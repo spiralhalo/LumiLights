@@ -329,7 +329,7 @@ void main() {
 		vec3 emissive = l2_emissiveLight(fragData.emissivity);
 		a.rgb *= emissive;
 		
-		vec3 viewDir = normalize(pbr_cameraPos - pbr_fragPos);
+		vec3 viewDir = pbr_viewDir;
 
 		vec3 normal = fragData.vertexNormal * frx_normalModelMatrix();
 
@@ -338,7 +338,7 @@ void main() {
 	#if HANDHELD_LIGHT_RADIUS != 0
 		vec3 handHeldRadiance = pbr_handHeldRadiance();
 		if(handHeldRadiance.x + handHeldRadiance.y + handHeldRadiance.z > 0) {
-			vec3 handHeldDir = normalize(pbr_cameraPos + vec3(0.3, -0.3, 0.3) * frx_cameraView() - pbr_fragPos);
+			vec3 handHeldDir = viewDir;
 			a.rgb += pbr_lightCalc(albedo, f0, handHeldRadiance, handHeldDir, viewDir, normal, fragData.diffuse, false, specularAccu);
 		}
 	#endif
@@ -389,6 +389,7 @@ void main() {
 
 		a.rgb *= hdr_finalMult;
 		a.rgb = pow(hdr_reinhardJodieTonemap(a.rgb), vec3(1.0 / hdr_gamma));
+		// a.rgb = viewDir * 0.5 + 0.5;
 	}
 
 	// PERF: varyings better here?

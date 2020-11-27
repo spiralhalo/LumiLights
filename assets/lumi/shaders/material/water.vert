@@ -3,4 +3,5 @@
 
 void frx_startVertex(inout frx_VertexData data) {
     pbr_roughness = 0.05;
+    frx_var0 = data.vertex;
 }
