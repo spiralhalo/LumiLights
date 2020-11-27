@@ -13,7 +13,6 @@
 #include frex:shaders/api/sampler.glsl
 #include canvas:shaders/internal/diffuse.glsl
 #include canvas:shaders/internal/program.glsl
-#include lumi:shaders/api/pbr_vars.glsl
 #include lumi:shaders/api/context_bump.glsl
 
 #ifdef LUMI_BUMP
@@ -23,11 +22,14 @@ vec2 uvT;
 vec2 uvB;
 #endif
 
+#define LUMI_PBR
 #include canvas:apitarget
 
 /******************************************************
   canvas:shaders/internal/material_main.vert
 ******************************************************/
+
+varying vec3 pbrv_viewDir;
 
 void _cv_startVertex(inout frx_VertexData data, in int cv_programId) {
 #include canvas:startvertex

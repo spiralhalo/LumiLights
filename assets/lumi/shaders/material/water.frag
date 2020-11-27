@@ -1,5 +1,3 @@
-#include lumi:shaders/api/pbr_vars.glsl
-#include lumi:shaders/lib/noise.glsl
 #include frex:shaders/api/fragment.glsl
 #include frex:shaders/api/world.glsl
 #include frex:shaders/lib/noise/noise3d.glsl
@@ -17,7 +15,7 @@ const float amplitude = 0.02;
 const float stretch = 2;
 
 void frx_startFragment(inout frx_FragmentData fragData) {
-
+#ifdef LUMI_PBR
     pbr_roughness = 0.05;
     fragData.spriteColor.rgb *= fragData.spriteColor.rgb * 0.8;
 
@@ -45,4 +43,5 @@ void frx_startFragment(inout frx_FragmentData fragData) {
 		vec3 noisyNormal = normalize(cross(noiseBitangent, noiseTangent));
 		fragData.vertexNormal = noisyNormal;
 	}
+#endif
 }

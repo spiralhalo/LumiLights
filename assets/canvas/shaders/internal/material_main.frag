@@ -19,16 +19,18 @@
 #include frex:shaders/lib/math.glsl
 #include frex:shaders/lib/color.glsl
 #include canvas:shaders/internal/program.glsl
-#include lumi:shaders/api/pbr_vars.glsl
 #include lumi:shaders/api/pbr_frag.glsl
 #include lumi:shaders/lib/pbr.glsl
 #include lumi:shaders/api/context_bump.glsl
 
+#define LUMI_PBR
 #include canvas:apitarget
 
 /******************************************************
   canvas:shaders/internal/material_main.frag
 ******************************************************/
+
+varying vec3 pbrv_viewDir;
 
 const float pbr_specularBloomStr = 0.01;
 const float hdr_sunStr = 5;
