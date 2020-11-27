@@ -183,6 +183,8 @@ vec3 pbr_skylessRadiance(){
 
 vec3 pbr_lightCalc(vec3 albedo, vec3 f0, vec3 radiance, vec3 lightDir, vec3 viewDir, vec3 normal, bool diffuseOn, bool isAmbiance, inout vec3 specularAccu) {
 	
+	mat3 normalMat = gl_NormalMatrix; // frx_normalModelMatrix();
+	lightDir = normalMat * lightDir;
 	vec3 halfway = normalize(viewDir + lightDir);
 	float roughness = pbr_roughness;
 
@@ -203,7 +205,7 @@ vec3 pbr_lightCalc(vec3 albedo, vec3 f0, vec3 radiance, vec3 lightDir, vec3 view
 	vec3 diffuse = (1.0 - fresnel) * (1.0 - pbr_metallic);
 
 	vec3 specularRadiance = specular * radiance * NdotL;
-	vec3 diffuseRadiance = albedo * diffuse / PI * radiance * (diffuseOn ? NdotL : max(0.0, dot(lightDir, vec3(.0, 1.0, .0))));
+	vec3 diffuseRadiance = albedo * diffuse / PI * radiance * (diffuseOn ? NdotL : max(0.0, dot(lightDir, normalMat * vec3(.0, 1.0, .0))));
 	specularAccu += specularRadiance;
 
 	return specularRadiance + diffuseRadiance;
@@ -329,16 +331,16 @@ void main() {
 		vec3 emissive = l2_emissiveLight(fragData.emissivity);
 		a.rgb *= emissive;
 		
-		vec3 viewDir = normalize(pbr_cameraPos - pbr_fragPos);
+		vec3 viewDir = pbr_viewDir;
 
-		vec3 normal = fragData.vertexNormal * frx_normalModelMatrix();
+		vec3 normal = gl_NormalMatrix * fragData.vertexNormal;
 
 		vec3 specularAccu = vec3(0.0);
 
 	#if HANDHELD_LIGHT_RADIUS != 0
 		vec3 handHeldRadiance = pbr_handHeldRadiance();
 		if(handHeldRadiance.x + handHeldRadiance.y + handHeldRadiance.z > 0) {
-			vec3 handHeldDir = normalize(pbr_cameraPos + vec3(0.3, -0.3, 0.3) * frx_cameraView() - pbr_fragPos);
+			vec3 handHeldDir = pbr_viewDir;
 			a.rgb += pbr_lightCalc(albedo, f0, handHeldRadiance, handHeldDir, viewDir, normal, fragData.diffuse, false, specularAccu);
 		}
 	#endif
@@ -389,6 +391,8 @@ void main() {
 
 		a.rgb *= hdr_finalMult;
 		a.rgb = pow(hdr_reinhardJodieTonemap(a.rgb), vec3(1.0 / hdr_gamma));
+		vec3 funny = gl_NormalMatrix * frx_normalModelMatrix() * -pbr_vanillaSunDir(frx_worldTime(), 0.0);
+		// a.rgb = funny * 0.5 + 0.5;
 	}
 
 	// PERF: varyings better here?

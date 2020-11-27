@@ -52,7 +52,6 @@ void main() {
 
     pbr_roughness = 1.0;
 	pbr_metallic = 0.0;
-	pbr_cameraPos = (gl_ModelViewMatrixInverse * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
 
 	_cv_setupProgram();
 
@@ -62,8 +61,6 @@ void main() {
 
 	int cv_programId = _cv_vertexProgramId();
 	_cv_startVertex(data, cv_programId);
-	
-	pbr_fragPos = data.vertex.xyz; 
 
 #ifdef LUMI_BUMP
 	float bumpSample = 0.015625 * bump_resolution;
@@ -104,6 +101,7 @@ void main() {
 
 	//data.normal *= gl_NormalMatrix;
 	data.vertex = gl_ModelViewProjectionMatrix * data.vertex;
+	pbr_viewDir = normalize(-vec3(data.vertex.x, data.vertex.y, -data.vertex.z));
 
 	gl_Position = data.vertex;
 
