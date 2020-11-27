@@ -62,6 +62,10 @@ void main() {
 	int cv_programId = _cv_vertexProgramId();
 	_cv_startVertex(data, cv_programId);
 
+	if(frx_modelOriginType() == MODEL_ORIGIN_REGION){
+		pbr_viewDir = normalize((gl_ModelViewMatrixInverse * vec4(0.0, 0.0, 0.0, 1.0)).xyz - data.vertex.xyz);
+	}
+
 #ifdef LUMI_BUMP
 	float bumpSample = 0.015625 * bump_resolution;
 
@@ -101,9 +105,12 @@ void main() {
 
 	//data.normal *= gl_NormalMatrix;
 	data.vertex = gl_ModelViewProjectionMatrix * data.vertex;
-	vec3 vertPos = data.vertex.xyz;
-	vertPos.z *= -1;
-	pbr_viewDir = normalize(-vertPos) * frx_normalModelMatrix() * gl_NormalMatrix;
+	
+	if(frx_modelOriginType() != MODEL_ORIGIN_REGION){
+		vec3 vertPos = data.vertex.xyz;
+		vertPos.z *= -1;
+		pbr_viewDir = normalize(-vertPos) * frx_normalModelMatrix() * gl_NormalMatrix;
+	}
 
 	gl_Position = data.vertex;
 
