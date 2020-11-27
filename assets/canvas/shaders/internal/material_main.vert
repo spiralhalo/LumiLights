@@ -101,7 +101,9 @@ void main() {
 
 	//data.normal *= gl_NormalMatrix;
 	data.vertex = gl_ModelViewProjectionMatrix * data.vertex;
-	pbr_viewDir = normalize(-vec3(data.vertex.x, data.vertex.y, -data.vertex.z));
+	vec3 vertPos = data.vertex.xyz;
+	vertPos.z *= -1;
+	pbr_viewDir = normalize(-vertPos) * frx_normalModelMatrix() * gl_NormalMatrix;
 
 	gl_Position = data.vertex;
 
