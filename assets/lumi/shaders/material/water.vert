@@ -2,6 +2,5 @@
 #include lumi:shaders/api/pbr_vars.glsl
 
 void frx_startVertex(inout frx_VertexData data) {
-    pbr_roughness = 0.05;
-    frx_var0 = data.vertex;
+    frx_var0.xyz = data.vertex.xyz + frx_modelOriginWorldPos();
 }

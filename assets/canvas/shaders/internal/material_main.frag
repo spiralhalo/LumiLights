@@ -20,6 +20,7 @@
 #include frex:shaders/lib/color.glsl
 #include canvas:shaders/internal/program.glsl
 #include lumi:shaders/api/pbr_vars.glsl
+#include lumi:shaders/api/pbr_frag.glsl
 #include lumi:shaders/lib/pbr.glsl
 #include lumi:shaders/api/context_bump.glsl
 
@@ -307,6 +308,9 @@ void main() {
 	_cvv_lightcoord
 	);
 
+	pbr_roughness = 1.0;
+	pbr_metallic = 0.0;
+
 	_cv_startFragment(fragData);
 
 	vec4 a = fragData.spriteColor * fragData.vertexColor;
@@ -329,7 +333,7 @@ void main() {
 		vec3 emissive = l2_emissiveLight(fragData.emissivity);
 		a.rgb *= emissive;
 		
-		vec3 viewDir = pbr_viewDir;
+		vec3 viewDir = pbrv_viewDir;
 
 		vec3 normal = fragData.vertexNormal * frx_normalModelMatrix();
 

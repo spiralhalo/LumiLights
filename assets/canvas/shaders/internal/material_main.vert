@@ -50,8 +50,8 @@ void main() {
 	// due to FP error on some cards/drivers.  Also made varying attribute invariant (rolls eyes at OpenGL)
 	_cvv_flags = uint(in_normal_flags.w + 0.5);
 
-    pbr_roughness = 1.0;
-	pbr_metallic = 0.0;
+    // pbrv_roughness = 1.0;
+	// pbrv_metallic = 0.0;
 
 	_cv_setupProgram();
 
@@ -63,7 +63,7 @@ void main() {
 	_cv_startVertex(data, cv_programId);
 
 	if(frx_modelOriginType() == MODEL_ORIGIN_REGION){
-		pbr_viewDir = normalize((gl_ModelViewMatrixInverse * vec4(0.0, 0.0, 0.0, 1.0)).xyz - data.vertex.xyz);
+		pbrv_viewDir = normalize((gl_ModelViewMatrixInverse * vec4(0.0, 0.0, 0.0, 1.0)).xyz - data.vertex.xyz);
 	}
 
 #ifdef LUMI_BUMP
@@ -109,7 +109,7 @@ void main() {
 	if(frx_modelOriginType() != MODEL_ORIGIN_REGION){
 		vec3 vertPos = data.vertex.xyz;
 		vertPos.z *= -1;
-		pbr_viewDir = normalize(-vertPos) * frx_normalModelMatrix() * gl_NormalMatrix;
+		pbrv_viewDir = normalize(-vertPos) * frx_normalModelMatrix() * gl_NormalMatrix;
 	}
 
 	gl_Position = data.vertex;
