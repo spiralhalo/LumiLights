@@ -1,0 +1,5 @@
+{
+    "transform": true,
+    "vertexSource":"canvas:shaders/material/default.vert",
+    "fragmentSource":"lumi:shaders/material/sign_text.frag"
+}

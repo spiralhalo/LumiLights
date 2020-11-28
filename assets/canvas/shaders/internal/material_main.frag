@@ -312,13 +312,14 @@ void main() {
 
 	pbr_roughness = 1.0;
 	pbr_metallic = 0.0;
+	pbr_disableShading = false;
 
 	_cv_startFragment(fragData);
 
 	vec4 a = fragData.spriteColor * fragData.vertexColor;
 	float bloom = fragData.emissivity; // separate bloom from emissivity
 
-	if(frx_isGui()){
+	if(frx_isGui() || pbr_disableShading){
 #if DIFFUSE_SHADING_MODE != DIFFUSE_MODE_NONE
 		if(fragData.diffuse){
 			float diffuse = mix(_cvv_diffuse, 1, fragData.emissivity);
