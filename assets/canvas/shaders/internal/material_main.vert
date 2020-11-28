@@ -29,7 +29,8 @@ vec2 uvB;
   canvas:shaders/internal/material_main.vert
 ******************************************************/
 
-varying vec3 pbrv_viewDir;
+varying vec3 pbrv_pos;
+varying vec3 pbrv_cameraWorldPos;
 
 void _cv_startVertex(inout frx_VertexData data, in int cv_programId) {
 #include canvas:startvertex
@@ -65,7 +66,8 @@ void main() {
 	_cv_startVertex(data, cv_programId);
 
 	if(frx_modelOriginType() == MODEL_ORIGIN_REGION){
-		pbrv_viewDir = normalize((gl_ModelViewMatrixInverse * vec4(0.0, 0.0, 0.0, 1.0)).xyz - data.vertex.xyz);
+		pbrv_cameraWorldPos = (gl_ModelViewMatrixInverse * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
+		pbrv_pos = data.vertex.xyz;
 	}
 
 #ifdef LUMI_BUMP
@@ -109,9 +111,7 @@ void main() {
 	data.vertex = gl_ModelViewProjectionMatrix * data.vertex;
 	
 	if(frx_modelOriginType() != MODEL_ORIGIN_REGION){
-		vec3 vertPos = data.vertex.xyz;
-		vertPos.z *= -1;
-		pbrv_viewDir = normalize(-vertPos) * frx_normalModelMatrix() * gl_NormalMatrix;
+		pbrv_pos = data.vertex.xyz;
 	}
 
 	gl_Position = data.vertex;

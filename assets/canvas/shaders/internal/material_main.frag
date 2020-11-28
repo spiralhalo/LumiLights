@@ -30,7 +30,8 @@
   canvas:shaders/internal/material_main.frag
 ******************************************************/
 
-varying vec3 pbrv_viewDir;
+varying vec3 pbrv_pos;
+varying vec3 pbrv_cameraWorldPos;
 
 const float pbr_specularBloomStr = 0.01;
 const float hdr_sunStr = 5;
@@ -336,7 +337,15 @@ void main() {
 		vec3 emissive = l2_emissiveLight(fragData.emissivity);
 		a.rgb *= emissive;
 		
-		vec3 viewDir = pbrv_viewDir;
+		vec3 viewDir;
+		
+		if(frx_modelOriginType() == MODEL_ORIGIN_REGION){
+			viewDir = normalize(pbrv_cameraWorldPos - pbrv_pos);
+		} else {
+			viewDir = pbrv_pos;
+			viewDir.z *= -1;
+			viewDir = normalize(-viewDir) * frx_normalModelMatrix() * gl_NormalMatrix;
+		}
 
 		vec3 normal = fragData.vertexNormal * frx_normalModelMatrix();
 
