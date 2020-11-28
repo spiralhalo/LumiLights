@@ -1,8 +1,13 @@
+float pbr_dot(vec3 a, vec3 b)
+{
+    return clamp(dot(a, b), 0.0, 1.0);
+}
+
 float pbr_distributionGGX(vec3 N, vec3 H, float roughness)
 {
     float a      = roughness*roughness;
     float a2     = a*a;
-    float NdotH  = max(dot(N, H), 0.0);
+    float NdotH  = pbr_dot(N, H);
     float NdotH2 = NdotH*NdotH;
 	
     float num   = a2;
@@ -25,8 +30,8 @@ float pbr_geometrySchlickGGX(float NdotV, float roughness)
 
 float pbr_geometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
 {
-    float NdotV = max(dot(N, V), 0.0);
-    float NdotL = max(dot(N, L), 0.0);
+    float NdotV = pbr_dot(N, V);
+    float NdotL = pbr_dot(N, L);
     float ggx2  = pbr_geometrySchlickGGX(NdotV, roughness);
     float ggx1  = pbr_geometrySchlickGGX(NdotL, roughness);
 	

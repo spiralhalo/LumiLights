@@ -30,7 +30,8 @@
   canvas:shaders/internal/material_main.frag
 ******************************************************/
 
-varying vec3 pbrv_viewDir;
+varying vec3 pbrv_pos;
+varying vec3 pbrv_cameraWorldPos;
 
 const float pbr_specularBloomStr = 0.01;
 const float hdr_sunStr = 5;
@@ -196,17 +197,17 @@ vec3 pbr_lightCalc(vec3 albedo, vec3 f0, vec3 radiance, vec3 lightDir, vec3 view
 	// cook-torrance brdf
 	float distribution = pbr_distributionGGX(normal, halfway, roughness);
 	float geometry = pbr_geometrySmith(normal, viewDir, lightDir, roughness);
-	vec3 fresnel = pbr_fresnelSchlick(max(0.0, dot(viewDir, halfway)), f0);
+	vec3 fresnel = pbr_fresnelSchlick(pbr_dot(viewDir, halfway), f0);
 
-	float NdotL = max(dot(normal, lightDir), 0.0);  
+	float NdotL = pbr_dot(normal, lightDir);  
 	vec3 num = distribution * geometry * fresnel;
-	float denom = 4.0 * max(dot(normal, viewDir), 0.0) * NdotL;
+	float denom = 4.0 * pbr_dot(normal, viewDir) * NdotL;
 	vec3 specular = num / max(denom, 0.001);
 
 	vec3 diffuse = (1.0 - fresnel) * (1.0 - pbr_metallic);
 
 	vec3 specularRadiance = specular * radiance * NdotL;
-	vec3 diffuseRadiance = albedo * diffuse / PI * radiance * (diffuseOn ? NdotL : max(0.0, dot(lightDir, vec3(.0, 1.0, .0))));
+	vec3 diffuseRadiance = albedo * diffuse / PI * radiance * (diffuseOn ? NdotL : pbr_dot(lightDir, vec3(.0, 1.0, .0)));
 	specularAccu += specularRadiance;
 
 	return specularRadiance + diffuseRadiance;
@@ -336,16 +337,24 @@ void main() {
 		vec3 emissive = l2_emissiveLight(fragData.emissivity);
 		a.rgb *= emissive;
 		
-		vec3 viewDir = pbrv_viewDir;
+		vec3 viewDir;
+		
+		if(frx_modelOriginType() == MODEL_ORIGIN_REGION){
+			viewDir = normalize(pbrv_cameraWorldPos - pbrv_pos);
+		} else {
+			viewDir = pbrv_pos;
+			viewDir.z *= -1;
+			viewDir = normalize(-viewDir) * frx_normalModelMatrix() * gl_NormalMatrix;
+		}
 
 		vec3 normal = fragData.vertexNormal * frx_normalModelMatrix();
 
 		vec3 specularAccu = vec3(0.0);
 
 	#if HANDHELD_LIGHT_RADIUS != 0
+		vec3 handHeldDir = viewDir;
 		vec3 handHeldRadiance = pbr_handHeldRadiance();
-		if(handHeldRadiance.x + handHeldRadiance.y + handHeldRadiance.z > 0) {
-			vec3 handHeldDir = viewDir;
+		if(handHeldRadiance.x * handHeldRadiance.y * handHeldRadiance.z > 0) {
 			a.rgb += pbr_lightCalc(albedo, f0, handHeldRadiance, handHeldDir, viewDir, normal, fragData.diffuse, false, specularAccu);
 		}
 	#endif
