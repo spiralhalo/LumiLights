@@ -29,8 +29,7 @@ vec2 uvB;
   canvas:shaders/internal/material_main.vert
 ******************************************************/
 
-varying vec3 pbrv_pos;
-varying vec3 pbrv_cameraWorldPos;
+varying vec3 pbrv_viewPos;
 
 void _cv_startVertex(inout frx_VertexData data, in int cv_programId) {
 #include canvas:startvertex
@@ -64,11 +63,6 @@ void main() {
 
 	int cv_programId = _cv_vertexProgramId();
 	_cv_startVertex(data, cv_programId);
-
-	if(frx_modelOriginType() == MODEL_ORIGIN_REGION){
-		pbrv_cameraWorldPos = (gl_ModelViewMatrixInverse * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
-		pbrv_pos = data.vertex.xyz;
-	}
 
 #ifdef LUMI_BUMP
 	float bumpSample = 0.015625 * bump_resolution;
@@ -107,12 +101,10 @@ void main() {
 	gl_ClipVertex = viewCoord;
 	gl_FogFragCoord = length(viewCoord.xyz);
 
+	pbrv_viewPos = viewCoord.xyz;
+
 	//data.normal *= gl_NormalMatrix;
 	data.vertex = gl_ModelViewProjectionMatrix * data.vertex;
-	
-	if(frx_modelOriginType() != MODEL_ORIGIN_REGION){
-		pbrv_pos = data.vertex.xyz;
-	}
 
 	gl_Position = data.vertex;
 
