@@ -1,15 +1,22 @@
+const mat4 _bump_tRotm = mat4(
+0,  0, -1,  0,
+0,  1,  0,  0,
+1,  0,  0,  0,
+0,  0,  0,  1 );
+
 vec3 _bump_tangentMove(vec3 normal)
 {
-    if(normal. y < 0.5 && normal.y > -0.5){
-       // Side
-       return (
-           mat4(0,  0,  -1, 0,
-                0,  1,  0,  0,
-                1,  0,  0,  0,
-                0,  0,  0,  1
-                ) * vec4(normal, 0.0)).xyz;
-    } else {
-        return (normal.y > 0.5)
+    if (normal. y < 0.99 && normal.y > -0.99)
+    {
+       // Side or Diagonal
+       float axis    = max(abs(normal.x), abs(normal.z));
+       vec3 aaNormal = vec3(normal.x / axis, 0, normal.z / axis);
+            aaNormal = normalize(aaNormal);
+       return (_bump_tRotm * vec4(aaNormal, 0.0)).xyz;
+    }
+    else
+    {
+        return (normal.y > 0)
         // Top
         ? vec3(1, 0, 0)
         // Bottom
