@@ -31,6 +31,7 @@ vec2 uvB;
 
 varying vec3 pbrv_pos;
 varying vec3 pbrv_cameraWorldPos;
+varying vec3 pbrv_cameraView;
 
 void _cv_startVertex(inout frx_VertexData data, in int cv_programId) {
 #include canvas:startvertex
@@ -68,6 +69,7 @@ void main() {
 	if(frx_modelOriginType() == MODEL_ORIGIN_REGION){
 		pbrv_cameraWorldPos = (gl_ModelViewMatrixInverse * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
 		pbrv_pos = data.vertex.xyz;
+		pbrv_cameraView = normalize((gl_ModelViewMatrixInverse * vec4(0.0, 0.0, -1.0, 1.0)).xyz - pbrv_cameraWorldPos);
 	}
 
 #ifdef LUMI_BUMP
@@ -112,6 +114,7 @@ void main() {
 	
 	if(frx_modelOriginType() != MODEL_ORIGIN_REGION){
 		pbrv_pos = data.vertex.xyz;
+		pbrv_cameraView = vec3(0.0, 0.0, -1.0) * frx_normalModelMatrix();
 	}
 
 	gl_Position = data.vertex;

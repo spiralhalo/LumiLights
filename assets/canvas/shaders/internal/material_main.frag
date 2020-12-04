@@ -32,6 +32,7 @@
 
 varying vec3 pbrv_pos;
 varying vec3 pbrv_cameraWorldPos;
+varying vec3 pbrv_cameraView;
 
 const float pbr_specularBloomStr = 0.01;
 const float hdr_sunStr = 5;
@@ -353,7 +354,7 @@ void main() {
 
 	#if HANDHELD_LIGHT_RADIUS != 0
 		vec3 handHeldDir = viewDir;
-		vec3 handHeldRadiance = pbr_handHeldRadiance() * 2 * frx_smootherstep(0.6, 0.8, dot(viewDir, -frx_cameraView()));
+		vec3 handHeldRadiance = pbr_handHeldRadiance() * 2 * frx_smootherstep(0.6, 0.8, dot(viewDir, -pbrv_cameraView));
 		if(handHeldRadiance.x * handHeldRadiance.y * handHeldRadiance.z > 0) {
 			a.rgb += pbr_lightCalc(albedo, f0, handHeldRadiance, handHeldDir, viewDir, normal, fragData.diffuse, false, specularAccu);
 		}
