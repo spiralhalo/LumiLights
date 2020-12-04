@@ -397,6 +397,7 @@ void main() {
 		a.rgb *= hdr_finalMult;
 		a.rgb = pow(hdr_reinhardJodieTonemap(a.rgb), vec3(1.0 / hdr_gamma));
 		// a.rgb = viewDir * 0.5 + 0.5;
+		// a.rgb = normal * 0.5 + 0.5;
 	}
 
 	// PERF: varyings better here?
