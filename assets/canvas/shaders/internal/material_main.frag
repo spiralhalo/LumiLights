@@ -343,10 +343,12 @@ void main() {
 		vec3 specularAccu = vec3(0.0);
 
 	#if HANDHELD_LIGHT_RADIUS != 0
-		vec3 handHeldDir = viewDir;
-		vec3 handHeldRadiance = pbr_handHeldRadiance();
-		if(handHeldRadiance.x * handHeldRadiance.y * handHeldRadiance.z > 0) {
-			a.rgb += pbr_lightCalc(albedo, f0, handHeldRadiance, handHeldDir, viewDir, normal, fragData.diffuse, false, specularAccu);
+		if (frx_heldLight().w > 0) {
+			vec3 handHeldDir = viewDir;
+			vec3 handHeldRadiance = pbr_handHeldRadiance();
+			if(handHeldRadiance.x * handHeldRadiance.y * handHeldRadiance.z > 0) {
+				a.rgb += pbr_lightCalc(albedo, f0, handHeldRadiance, handHeldDir, viewDir, normal, fragData.diffuse, false, specularAccu);
+			}
 		}
 	#endif
 
