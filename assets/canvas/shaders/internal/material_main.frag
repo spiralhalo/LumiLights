@@ -351,7 +351,8 @@ void main() {
 			vec3 handHeldDir = viewDir;
 			vec3 handHeldRadiance = pbr_handHeldRadiance();
 			if(handHeldRadiance.x * handHeldRadiance.y * handHeldRadiance.z > 0) {
-				a.rgb += pbr_lightCalc(albedo, f0, handHeldRadiance, handHeldDir, viewDir, normal, fragData.diffuse, false, specularAccu);
+				vec3 adjustedNormal = fragData.diffuse ? normal : viewDir;
+				a.rgb += pbr_lightCalc(albedo, f0, handHeldRadiance, handHeldDir, viewDir, adjustedNormal, true, false, specularAccu);
 			}
 		}
 	#endif
