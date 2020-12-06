@@ -193,6 +193,10 @@ vec3 pbr_lightCalc(vec3 albedo, vec3 f0, vec3 radiance, vec3 lightDir, vec3 view
 		roughness = min(1.0, roughness + 0.5 * (1 - pbr_metallic));
 	}
 	
+	if (!diffuseOn) {
+		return albedo / PI * radiance * pbr_dot(lightDir, vec3(.0, 1.0, .0));
+	}
+
 	// cook-torrance brdf
 	float distribution = pbr_distributionGGX(normal, halfway, roughness);
 	float geometry = pbr_geometrySmith(normal, viewDir, lightDir, roughness);
@@ -206,7 +210,7 @@ vec3 pbr_lightCalc(vec3 albedo, vec3 f0, vec3 radiance, vec3 lightDir, vec3 view
 	vec3 diffuse = (1.0 - fresnel) * (1.0 - pbr_metallic);
 
 	vec3 specularRadiance = specular * radiance * NdotL;
-	vec3 diffuseRadiance = albedo * diffuse / PI * radiance * (diffuseOn ? NdotL : pbr_dot(lightDir, vec3(.0, 1.0, .0)));
+	vec3 diffuseRadiance = albedo * diffuse / PI * radiance * NdotL;
 	specularAccu += specularRadiance;
 
 	return specularRadiance + diffuseRadiance;
