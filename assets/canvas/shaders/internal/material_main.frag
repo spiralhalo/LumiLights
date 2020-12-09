@@ -193,6 +193,10 @@ vec3 pbr_lightCalc(vec3 albedo, vec3 f0, vec3 radiance, vec3 lightDir, vec3 view
 		roughness = min(1.0, roughness + 0.5 * (1 - pbr_metallic));
 	}
 	
+	if (!diffuseOn) {
+		return albedo / PI * radiance * pbr_dot(lightDir, vec3(.0, 1.0, .0));
+	}
+
 	// cook-torrance brdf
 	float distribution = pbr_distributionGGX(normal, halfway, roughness);
 	float geometry = pbr_geometrySmith(normal, viewDir, lightDir, roughness);
@@ -206,7 +210,7 @@ vec3 pbr_lightCalc(vec3 albedo, vec3 f0, vec3 radiance, vec3 lightDir, vec3 view
 	vec3 diffuse = (1.0 - fresnel) * (1.0 - pbr_metallic);
 
 	vec3 specularRadiance = specular * radiance * NdotL;
-	vec3 diffuseRadiance = albedo * diffuse / PI * radiance * (diffuseOn ? NdotL : pbr_dot(lightDir, vec3(.0, 1.0, .0)));
+	vec3 diffuseRadiance = albedo * diffuse / PI * radiance * NdotL;
 	specularAccu += specularRadiance;
 
 	return specularRadiance + diffuseRadiance;
@@ -312,14 +316,13 @@ void main() {
 
 	pbr_roughness = 1.0;
 	pbr_metallic = 0.0;
-	pbr_disableShading = false;
 
 	_cv_startFragment(fragData);
 
 	vec4 a = fragData.spriteColor * fragData.vertexColor;
 	float bloom = fragData.emissivity; // separate bloom from emissivity
 
-	if(frx_isGui() || pbr_disableShading){
+	if(frx_isGui()){
 #if DIFFUSE_SHADING_MODE != DIFFUSE_MODE_NONE
 		if(fragData.diffuse){
 			float diffuse = mix(_cvv_diffuse, 1, fragData.emissivity);
@@ -328,7 +331,7 @@ void main() {
 		}
 #endif
 	} else {
-		a.rgb = hdr_gammaAdjust(a.rgb);
+		a.rgb = hdr_gammaAdjust(clamp(a.rgb, 0.0, 1.0));
 		vec3 albedo = a.rgb;
 		vec3 f0 = mix(vec3(0.04), albedo, pbr_metallic);
 
@@ -347,7 +350,8 @@ void main() {
 			vec3 handHeldDir = viewDir;
 			vec3 handHeldRadiance = pbr_handHeldRadiance();
 			if(handHeldRadiance.x * handHeldRadiance.y * handHeldRadiance.z > 0) {
-				a.rgb += pbr_lightCalc(albedo, f0, handHeldRadiance, handHeldDir, viewDir, normal, fragData.diffuse, false, specularAccu);
+				vec3 adjustedNormal = fragData.diffuse ? normal : viewDir;
+				a.rgb += pbr_lightCalc(albedo, f0, handHeldRadiance, handHeldDir, viewDir, adjustedNormal, true, false, specularAccu);
 			}
 		}
 	#endif
