@@ -33,6 +33,7 @@
 varying vec3 pbrv_viewPos;
 
 const float pbr_specularBloomStr = 0.01;
+const float pbr_specularAlphaStr = 0.1;
 const float hdr_sunStr = 5;
 const float hdr_moonStr = 0.4;
 const float hdr_blockStr = 2;
@@ -184,32 +185,46 @@ vec3 pbr_skylessRadiance(){
 	}
 }
 
-vec3 pbr_lightCalc(vec3 albedo, vec3 f0, vec3 radiance, vec3 lightDir, vec3 viewDir, vec3 normal, bool diffuseOn, bool isAmbiance, inout vec3 specularAccu) {
+vec3 pbr_specularBRDF(float roughness, vec3 f0, vec3 radiance, vec3 halfway, vec3 lightDir, vec3 viewDir, vec3 normal, vec3 fresnel, float NdotL) {
+	// cook-torrance brdf
+	float distribution = pbr_distributionGGX(normal, halfway, roughness);
+	float geometry     = pbr_geometrySmith(normal, viewDir, lightDir, roughness);
+
+	vec3  num   = distribution * geometry * fresnel;
+	float denom = 4.0 * pbr_dot(normal, viewDir) * NdotL;
+
+	vec3  specular = num / max(denom, 0.001);
+	return specular * radiance * NdotL;
+}
+
+vec3 pbr_lightCalc(vec3 albedo, vec3 f0, vec3 radiance, vec3 lightDir, vec3 viewDir, vec3 normal, bool diffuseOn, bool isAmbiance, float haloBlur, inout vec3 specularAccu) {
 	
 	vec3 halfway = normalize(viewDir + lightDir);
 	float roughness = pbr_roughness;
 
+	// ambiance hack
 	if (isAmbiance) {
 		roughness = min(1.0, roughness + 0.5 * (1 - pbr_metallic));
 	}
 	
+	// disableDiffuse hack
 	if (!diffuseOn) {
 		return albedo / PI * radiance * pbr_dot(lightDir, vec3(.0, 1.0, .0));
 	}
 
-	// cook-torrance brdf
-	float distribution = pbr_distributionGGX(normal, halfway, roughness);
-	float geometry = pbr_geometrySmith(normal, viewDir, lightDir, roughness);
+	vec3 specularRadiance;
 	vec3 fresnel = pbr_fresnelSchlick(pbr_dot(viewDir, halfway), f0);
+	float NdotL = pbr_dot(normal, lightDir);
 
-	float NdotL = pbr_dot(normal, lightDir);  
-	vec3 num = distribution * geometry * fresnel;
-	float denom = 4.0 * pbr_dot(normal, viewDir) * NdotL;
-	vec3 specular = num / max(denom, 0.001);
+	if (haloBlur > roughness) {
+		// sun halo hack
+		specularRadiance = pbr_specularBRDF(roughness, f0, radiance * 0.5, halfway, lightDir, viewDir, normal, fresnel, NdotL);
+		specularRadiance += pbr_specularBRDF(haloBlur, f0, radiance * 0.5, halfway, lightDir, viewDir, normal, fresnel, NdotL);
+	} else {
+		specularRadiance = pbr_specularBRDF(roughness, f0, radiance, halfway, lightDir, viewDir, normal, fresnel, NdotL);
+	}
 
 	vec3 diffuse = (1.0 - fresnel) * (1.0 - pbr_metallic);
-
-	vec3 specularRadiance = specular * radiance * NdotL;
 	vec3 diffuseRadiance = albedo * diffuse / PI * radiance * NdotL;
 	specularAccu += specularRadiance;
 
@@ -351,7 +366,7 @@ void main() {
 			vec3 handHeldRadiance = pbr_handHeldRadiance();
 			if(handHeldRadiance.x * handHeldRadiance.y * handHeldRadiance.z > 0) {
 				vec3 adjustedNormal = fragData.diffuse ? normal : viewDir;
-				a.rgb += pbr_lightCalc(albedo, f0, handHeldRadiance, handHeldDir, viewDir, adjustedNormal, true, false, specularAccu);
+				a.rgb += pbr_lightCalc(albedo, f0, handHeldRadiance, handHeldDir, viewDir, adjustedNormal, true, false, 0.0, specularAccu);
 			}
 		}
 	#endif
@@ -360,8 +375,8 @@ void main() {
 		vec3 baseAmbientRadiance = l2_baseAmbient();
 		vec3 ambientDir = normalize(vec3(0.1, 0.9, 0.1) + normal);
 
-		a.rgb += pbr_lightCalc(albedo, f0, blockRadiance * ao, ambientDir, viewDir, normal, fragData.diffuse, false, specularAccu);
-		a.rgb += pbr_lightCalc(albedo, f0, baseAmbientRadiance * ao, ambientDir, viewDir, normal, fragData.diffuse, true, specularAccu);
+		a.rgb += pbr_lightCalc(albedo, f0, blockRadiance * ao, ambientDir, viewDir, normal, fragData.diffuse, false, 0.0, specularAccu);
+		a.rgb += pbr_lightCalc(albedo, f0, baseAmbientRadiance * ao, ambientDir, viewDir, normal, fragData.diffuse, true, 0.0, specularAccu);
 
 		if (frx_worldHasSkylight()) {
 			if (fragData.light.y > 0.03125) {
@@ -372,9 +387,9 @@ void main() {
 				vec3 sunDir = pbr_vanillaSunDir(frx_worldTime(), 0.0);
 				vec3 skyRadiance = l2_skyAmbient(fragData.light.y, frx_worldTime(), frx_ambientIntensity());
 
-				a.rgb += pbr_lightCalc(albedo, f0, moonRadiance * ao, moonDir, viewDir, normal, fragData.diffuse, false, specularAccu);
-				a.rgb += pbr_lightCalc(albedo, f0, sunRadiance * ao, sunDir, viewDir, normal, fragData.diffuse, false, specularAccu);
-				a.rgb += pbr_lightCalc(albedo, f0, skyRadiance * ao, ambientDir, viewDir, normal, fragData.diffuse, true, specularAccu);
+				a.rgb += pbr_lightCalc(albedo, f0, moonRadiance * ao, moonDir, viewDir, normal, fragData.diffuse, false, 0.15, specularAccu);
+				a.rgb += pbr_lightCalc(albedo, f0, sunRadiance * ao, sunDir, viewDir, normal, fragData.diffuse, false, 0.15, specularAccu);
+				a.rgb += pbr_lightCalc(albedo, f0, skyRadiance * ao, ambientDir, viewDir, normal, fragData.diffuse, true, 0.0, specularAccu);
 
 			}
 
@@ -383,12 +398,12 @@ void main() {
 			vec3 skylessRadiance = pbr_skylessRadiance();
 			vec3 skylessDir = pbr_skylessDir();
 
-			a.rgb += pbr_lightCalc(albedo, f0, skylessRadiance * ao, skylessDir, viewDir, normal, fragData.diffuse, false, specularAccu);
+			a.rgb += pbr_lightCalc(albedo, f0, skylessRadiance * ao, skylessDir, viewDir, normal, fragData.diffuse, false, 0.0, specularAccu);
 
 			if (frx_isSkyDarkened()) {
 
 				vec3 skylessDarkenedDir = pbr_skylessDarkenedDir();
-				a.rgb += pbr_lightCalc(albedo, f0, skylessRadiance * ao, skylessDarkenedDir, viewDir, normal, fragData.diffuse, false, specularAccu);
+				a.rgb += pbr_lightCalc(albedo, f0, skylessRadiance * ao, skylessDarkenedDir, viewDir, normal, fragData.diffuse, false, 0.0, specularAccu);
 			}
 
 		}
