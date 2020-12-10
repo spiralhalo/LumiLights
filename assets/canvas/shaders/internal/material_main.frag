@@ -33,6 +33,7 @@
 varying vec3 pbrv_viewPos;
 
 const float pbr_specularBloomStr = 0.01;
+const float pbr_specularAlphaStr = 0.1;
 const float hdr_sunStr = 5;
 const float hdr_moonStr = 0.4;
 const float hdr_blockStr = 2;
@@ -386,8 +387,8 @@ void main() {
 				vec3 sunDir = pbr_vanillaSunDir(frx_worldTime(), 0.0);
 				vec3 skyRadiance = l2_skyAmbient(fragData.light.y, frx_worldTime(), frx_ambientIntensity());
 
-				a.rgb += pbr_lightCalc(albedo, f0, moonRadiance * ao, moonDir, viewDir, normal, fragData.diffuse, false, 0.2, specularAccu);
-				a.rgb += pbr_lightCalc(albedo, f0, sunRadiance * ao, sunDir, viewDir, normal, fragData.diffuse, false, 0.3, specularAccu);
+				a.rgb += pbr_lightCalc(albedo, f0, moonRadiance * ao, moonDir, viewDir, normal, fragData.diffuse, false, 0.15, specularAccu);
+				a.rgb += pbr_lightCalc(albedo, f0, sunRadiance * ao, sunDir, viewDir, normal, fragData.diffuse, false, 0.15, specularAccu);
 				a.rgb += pbr_lightCalc(albedo, f0, skyRadiance * ao, ambientDir, viewDir, normal, fragData.diffuse, true, 0.0, specularAccu);
 
 			}
