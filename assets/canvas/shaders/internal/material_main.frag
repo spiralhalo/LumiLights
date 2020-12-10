@@ -35,7 +35,7 @@ varying vec3 pbrv_viewPos;
 const float pbr_specularBloomStr = 0.01;
 const float hdr_sunStr = 5;
 const float hdr_moonStr = 0.4;
-const float hdr_blockStr = 1.8;
+const float hdr_blockStr = 2;
 const float hdr_handHeldStr = 1.5;
 const float hdr_skylessStr = 0.2;
 const float hdr_baseMinStr = 0.01;
