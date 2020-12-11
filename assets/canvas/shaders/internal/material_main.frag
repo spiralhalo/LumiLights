@@ -384,7 +384,7 @@ void main() {
 		vec3 baseAmbientRadiance = l2_baseAmbient();
 		vec3 ambientDir = normalize(vec3(0.1, 0.9, 0.1) + normal);
 
-		a.rgb += pbr_lightCalc(albedo, blockRadiance * ao, ambientDir, viewDir, normal, fragData.diffuse, false, 0.0, specularAccu);
+		a.rgb += pbr_lightCalc(albedo, blockRadiance * ao, ambientDir, viewDir, normal, fragData.diffuse, true, 0.0, specularAccu);
 		a.rgb += pbr_lightCalc(albedo, baseAmbientRadiance * ao, ambientDir, viewDir, normal, fragData.diffuse, true, 0.0, specularAccu);
 
 		if (frx_worldHasSkylight()) {
