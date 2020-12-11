@@ -16,6 +16,7 @@ const float stretch = 2;
 
 void frx_startFragment(inout frx_FragmentData fragData) {
 #ifdef LUMI_PBR
+	pbr_f0 = vec3(0.02);
     pbr_roughness = 0.05;
     fragData.spriteColor.rgb *= fragData.spriteColor.rgb * 0.8;
 
