@@ -329,16 +329,20 @@ void main() {
 	_cvv_lightcoord
 	);
 
-	vec3 preColor = (fragData.spriteColor * fragData.vertexColor).rgb;
+	vec3 preColor = hdr_gammaAdjust((fragData.spriteColor * fragData.vertexColor).rgb);
 	float maxC = l2_max3(preColor);
-	vec3 metallicF0 = preColor / maxC;
+	vec3 metallicF0 = preColor;// / maxC;
 	vec3 dielectricF0 = vec3(0.1) * frx_luminance(preColor);
 
 	pbr_roughness = 1.0;
 	pbr_metallic = 0.0;
-	pbr_f0 = mix(dielectricF0, metallicF0, pbr_metallic);
+	pbr_f0 = vec3(-1.0);
 
 	_cv_startFragment(fragData);
+
+	pbr_roughness = clamp(pbr_roughness, 0.0, 1.0);
+	pbr_metallic = clamp(pbr_metallic, 0.0, 1.0);
+	pbr_f0 = pbr_f0.r < 0 ? mix(dielectricF0, metallicF0, pbr_metallic) : clamp(pbr_f0, 0.0, 1.0);
 
 	vec4 a = fragData.spriteColor * fragData.vertexColor;
 	float bloom = fragData.emissivity; // separate bloom from emissivity
