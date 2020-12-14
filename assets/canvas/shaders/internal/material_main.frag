@@ -48,6 +48,8 @@ const float hdr_zWobbleDefault = 0.1;
 const float hdr_finalMult = 1;
 const float hdr_gamma = 2.2;
 
+const vec3 blockColor = vec3(1.0, 0.875, 0.75);
+
 float hdr_gammaAdjust(float x){
 	return pow(x, hdr_gamma);
 }
@@ -84,7 +86,7 @@ float l2_max3(vec3 vec){
 vec3 l2_blockLight(float blockLight){
 	float bl = l2_clampScale(0.03125, 1.0, blockLight);
 	bl *= bl * hdr_blockStr;
-	return hdr_gammaAdjust(vec3(bl, bl*0.875, bl*0.75));
+	return hdr_gammaAdjust(bl * blockColor);
 }
 
 vec3 pbr_handHeldRadiance(){
