@@ -44,8 +44,9 @@ void frx_startFragment(inout frx_FragmentData fragData) {
 	// normal recalculation
 	vec3 up = fragData.vertexNormal.xyz;// * (1.0 + texAmplitude);
 
-	vec3 tmove = _bump_tangentMove(up) * microSample;
-	vec3 bmove = _bump_bitangentMove(up, tmove) * microSample; 
+	vec3 tmove = _bump_tangentMove(up);
+	vec3 bmove = _bump_bitangentMove(up, tmove) * microSample;
+		 tmove *= microSample;
 	
 	vec3 origin = noise * up;
 	vec3 tangent = tmove + ww_noise(samplePos + tmove, time, invScale, amplitude, stretch) * up - origin;
