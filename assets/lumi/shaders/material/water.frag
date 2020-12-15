@@ -1,6 +1,7 @@
 #include frex:shaders/api/fragment.glsl
 #include frex:shaders/api/world.glsl
 #include frex:shaders/lib/noise/noise3d.glsl
+#include frex:shaders/lib/color.glsl
 
 float ww_noise(vec3 aPos, float renderTime, float scale, float amplitude, float stretch)
 {
@@ -18,7 +19,16 @@ void frx_startFragment(inout frx_FragmentData fragData) {
 #ifdef LUMI_PBR
 	pbr_f0 = vec3(0.02);
     pbr_roughness = 0.05;
-    fragData.spriteColor.rgb *= fragData.spriteColor.rgb * 0.8;
+	
+	vec3 desat = vec3(frx_luminance(fragData.vertexColor.rgb));
+	fragData.vertexColor.rgb = mix(fragData.vertexColor.rgb, desat, 0.7);
+
+	float maxc = max(fragData.spriteColor.r, max(fragData.spriteColor.g, fragData.spriteColor.b)); 
+	fragData.spriteColor.rgb *= fragData.spriteColor.rgb * fragData.spriteColor.rgb * 2.0;
+
+	float l = frx_luminance(fragData.spriteColor.rgb);
+	// pbr_f0 = mix(pbr_f0, vec3(0.2), l * l);
+    // fragData.spriteColor.rgb *= fragData.spriteColor.rgb * 0.8;
 
     if(fragData.vertexNormal.y > 0.01) {
 		
