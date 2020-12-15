@@ -44,7 +44,6 @@ const float hdr_baseMinStr = 0.01;
 const float hdr_baseMaxStr = 0.8;
 const float hdr_emissiveStr = 1;
 const float hdr_relAmbient = 0.2;
-const float hdr_relSunHorizon = 0.5;
 const float hdr_zWobbleDefault = 0.1;
 const float hdr_finalMult = 1;
 const float hdr_gamma = 2.2;
@@ -111,8 +110,8 @@ float l2_skyLight(float skyLight, float intensity)
 
 vec3 l2_ambientColor(float time){
 	vec3 ambientColor = hdr_gammaAdjust(vec3(0.6, 0.9, 1.0)) * hdr_sunStr * hdr_relAmbient;
-	vec3 sunriseAmbient = hdr_gammaAdjust(vec3(1.0, 0.8, 0.4)) * hdr_sunStr * hdr_relAmbient * hdr_relSunHorizon;
-	vec3 sunsetAmbient = hdr_gammaAdjust(vec3(1.0, 0.6, 0.2)) * hdr_sunStr * hdr_relAmbient * hdr_relSunHorizon;
+	vec3 sunriseAmbient = hdr_gammaAdjust(vec3(1.0, 0.8, 0.4)) * hdr_sunStr * hdr_relAmbient;
+	vec3 sunsetAmbient = hdr_gammaAdjust(vec3(1.0, 0.6, 0.2)) * hdr_sunStr * hdr_relAmbient;
 	vec3 nightAmbient = hdr_gammaAdjust(vec3(1.0, 1.0, 2.0)) * hdr_moonStr * hdr_relAmbient;
 	if(time > 0.94){
 		ambientColor = mix(nightAmbient, sunriseAmbient, l2_clampScale(0.94, 0.98, time));
@@ -226,8 +225,8 @@ vec3 l2_baseAmbient(float userBrightness){
 
 vec3 l2_sunColor(float time){
 	vec3 sunColor = hdr_gammaAdjust(vec3(1.0, 1.0, 0.8)) * hdr_sunStr;
-	vec3 sunriseColor = hdr_gammaAdjust(vec3(1.0, 0.8, 0.4)) * hdr_sunStr * hdr_relSunHorizon;
-	vec3 sunsetColor = hdr_gammaAdjust(vec3(1.0, 0.6, 0.4)) * hdr_sunStr * hdr_relSunHorizon;
+	vec3 sunriseColor = hdr_gammaAdjust(vec3(1.0, 0.8, 0.4)) * hdr_sunStr;
+	vec3 sunsetColor = hdr_gammaAdjust(vec3(1.0, 0.6, 0.4)) * hdr_sunStr;
 	if(time > 0.94){
 		sunColor = sunriseColor;
 	} else if(time > 0.56){
