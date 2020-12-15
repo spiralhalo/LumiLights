@@ -4,15 +4,16 @@
 #include frex:shaders/lib/color.glsl
 #include lumi:shaders/lib/bump.glsl
 
-float ww_noise(vec3 aPos, float renderTime, float invScale, float amplitude, float stretch)
+float ww_noise(vec3 pos, float time, float invScale, float amplitude, float stretch)
 {
-    return (snoise(vec3(aPos.x * invScale * stretch, aPos.z * invScale, aPos.y * invScale + renderTime)) * 0.5+0.5) * amplitude;
+    return (snoise(vec3(pos.x * invScale * stretch, pos.z * invScale, pos.y * invScale + time)) * 0.5 + 0.5) * amplitude;
 }
 
 // water wavyness parameter
 const float speed = 2;
 const float scale = 1.5;
 const float amplitude = 0.01;
+// const float texAmplitude = 0.005;
 const float stretch = 2;
 
 void frx_startFragment(inout frx_FragmentData fragData) {
@@ -28,32 +29,27 @@ void frx_startFragment(inout frx_FragmentData fragData) {
 
 	float l = frx_luminance(fragData.spriteColor.rgb);
 	pbr_f0 = mix(pbr_f0, vec3(0.2), l * l);
-    // fragData.spriteColor.rgb *= fragData.spriteColor.rgb * 0.8;
-		
-	// hack
-	// fragData.light.y += 0.077 * smoothstep(1.0, 0.99, fragData.vertexNormal.y);
-	fragData.light.y = min(0.96875, fragData.light.y);
 	
 	vec3 samplePos = frx_var0.xyz;
 	// samplePos = floor(samplePos) + floor(fract(samplePos) * 16) / 16;
 
 	// inferred parameter
-	float renderTime = frx_renderSeconds() * 0.5 * speed;
+	float time = frx_renderSeconds() * 0.5 * speed;
 	float microSample = 0.01 * scale;
 	float invScale = 1 / scale;
 
 	// base noise
-	float noise = ww_noise(samplePos, renderTime, invScale, amplitude, stretch);
+	float noise = ww_noise(samplePos, time, invScale, amplitude, stretch);
 
 	// normal recalculation
-	vec3 origNormal = fragData.vertexNormal.xyz;
+	vec3 up = fragData.vertexNormal.xyz;// * (1.0 + texAmplitude);
 
-	vec3 tangentMove = _bump_tangentMove(origNormal) * microSample;
-	vec3 bitangentMove = _bump_bitangentMove(origNormal, tangentMove) * microSample; 
+	vec3 tmove = _bump_tangentMove(up) * microSample;
+	vec3 bmove = _bump_bitangentMove(up, tmove) * microSample; 
 	
-	vec3 origin = noise * origNormal;
-	vec3 tangent = tangentMove + ww_noise(samplePos + tangentMove, renderTime, invScale, amplitude, stretch) * origNormal - origin;
-	vec3 bitangent = bitangentMove + ww_noise(samplePos + bitangentMove, renderTime, invScale, amplitude, stretch) * origNormal - origin;
+	vec3 origin = noise * up;
+	vec3 tangent = tmove + ww_noise(samplePos + tmove, time, invScale, amplitude, stretch) * up - origin;
+	vec3 bitangent = bmove + ww_noise(samplePos + bmove, time, invScale, amplitude, stretch) * up - origin;
 
 	// noisy normal
 	vec3 noisyNormal = normalize(cross(tangent, bitangent));
