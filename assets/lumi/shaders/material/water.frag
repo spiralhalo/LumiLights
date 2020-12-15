@@ -4,10 +4,9 @@
 #include frex:shaders/lib/color.glsl
 #include lumi:shaders/lib/bump.glsl
 
-float ww_noise(vec3 aPos, float renderTime, float scale, float amplitude, float stretch)
+float ww_noise(vec3 aPos, float renderTime, float invScale, float amplitude, float stretch)
 {
-	float invScale = 1/scale;
-    return (snoise(vec3(aPos.x * invScale * stretch, (aPos.z + aPos.y) * invScale, renderTime)) * 0.5+0.5) * amplitude;
+    return (snoise(vec3(aPos.x * invScale * stretch, aPos.z * invScale, aPos.y * invScale + renderTime)) * 0.5+0.5) * amplitude;
 }
 
 // water wavyness parameter
@@ -41,9 +40,10 @@ void frx_startFragment(inout frx_FragmentData fragData) {
 	// inferred parameter
 	float renderTime = frx_renderSeconds() * 0.5 * speed;
 	float microSample = 0.01 * scale;
+	float invScale = 1 / scale;
 
 	// base noise
-	float noise = ww_noise(samplePos, renderTime, scale, amplitude, stretch);
+	float noise = ww_noise(samplePos, renderTime, invScale, amplitude, stretch);
 
 	// normal recalculation
 	vec3 origNormal = fragData.vertexNormal.xyz;
@@ -52,8 +52,8 @@ void frx_startFragment(inout frx_FragmentData fragData) {
 	vec3 bitangentMove = _bump_bitangentMove(origNormal, tangentMove) * microSample; 
 	
 	vec3 origin = noise * origNormal;
-	vec3 tangent = tangentMove + ww_noise(samplePos + tangentMove, renderTime, scale, amplitude, stretch) * origNormal - origin;
-	vec3 bitangent = bitangentMove + ww_noise(samplePos + bitangentMove, renderTime, scale, amplitude, stretch) * origNormal - origin;
+	vec3 tangent = tangentMove + ww_noise(samplePos + tangentMove, renderTime, invScale, amplitude, stretch) * origNormal - origin;
+	vec3 bitangent = bitangentMove + ww_noise(samplePos + bitangentMove, renderTime, invScale, amplitude, stretch) * origNormal - origin;
 
 	// noisy normal
 	vec3 noisyNormal = normalize(cross(tangent, bitangent));
