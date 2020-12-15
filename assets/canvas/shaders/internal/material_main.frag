@@ -203,8 +203,8 @@ vec3 pbr_lightCalc(vec3 albedo, vec3 radiance, vec3 lightDir, vec3 viewDir, vec3
 
 	if (haloBlur > roughness) {
 		// sun halo hack
-		specularRadiance = pbr_specularBRDF(roughness, radiance * 0.5, halfway, lightDir, viewDir, normal, fresnel, NdotL);
-		specularRadiance += pbr_specularBRDF(haloBlur, radiance * 0.5, halfway, lightDir, viewDir, normal, fresnel, NdotL);
+		specularRadiance = pbr_specularBRDF(roughness, radiance * 0.75, halfway, lightDir, viewDir, normal, fresnel, NdotL);
+		specularRadiance += pbr_specularBRDF(haloBlur, radiance * 0.25, halfway, lightDir, viewDir, normal, fresnel, NdotL);
 	} else {
 		specularRadiance = pbr_specularBRDF(roughness, radiance, halfway, lightDir, viewDir, normal, fresnel, NdotL);
 	}
@@ -416,7 +416,9 @@ void main() {
 
 		float specularLuminance = frx_luminance(specularAccu);
 		float smoothness = (1-pbr_roughness);
-		// a.a += specularLuminance;
+		if (_cv_getFlag(_CV_FLAG_CUTOUT) == 0.0) {
+			a.a += specularLuminance * pbr_specularBloomStr;
+		}
 		bloom += specularLuminance * pbr_specularBloomStr * smoothness * smoothness;
 
 		a.rgb *= hdr_finalMult;
