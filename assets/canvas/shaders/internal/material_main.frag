@@ -416,7 +416,9 @@ void main() {
 
 		float specularLuminance = frx_luminance(specularAccu);
 		float smoothness = (1-pbr_roughness);
-		// a.a += specularLuminance;
+		if (_cv_getFlag(_CV_FLAG_CUTOUT) == 0.0) {
+			a.a += specularLuminance * pbr_specularBloomStr;
+		}
 		bloom += specularLuminance * pbr_specularBloomStr * smoothness * smoothness;
 
 		a.rgb *= hdr_finalMult;
