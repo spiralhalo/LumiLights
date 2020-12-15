@@ -6,22 +6,9 @@ const mat4 _bump_tRotm = mat4(
 
 vec3 _bump_tangentMove(vec3 normal)
 {
-    if (normal. y < 0.99 && normal.y > -0.99)
-    {
-       // Side or Diagonal
-       float axis    = max(abs(normal.x), abs(normal.z));
-       vec3 aaNormal = vec3(normal.x / axis, 0, normal.z / axis);
-            aaNormal = normalize(aaNormal);
-       return (_bump_tRotm * vec4(aaNormal, 0.0)).xyz;
-    }
-    else
-    {
-        return (normal.y > 0)
-        // Top
-        ? vec3(1, 0, 0)
-        // Bottom
-        : vec3(1, 0, 0);
-    }
+    vec3 aaNormal = vec3(normal.x + 0.01, 0, normal.z + 0.01);
+        aaNormal = normalize(aaNormal);
+    return (_bump_tRotm * vec4(aaNormal, 0.0)).xyz;
 }
 
 vec3 _bump_bitangentMove(vec3 normal, vec3 tangent)
