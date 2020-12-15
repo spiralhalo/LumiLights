@@ -27,7 +27,7 @@ void frx_startFragment(inout frx_FragmentData fragData) {
 	fragData.spriteColor.rgb *= fragData.spriteColor.rgb * fragData.spriteColor.rgb * 2.0;
 
 	float l = frx_luminance(fragData.spriteColor.rgb);
-	// pbr_f0 = mix(pbr_f0, vec3(0.2), l * l);
+	pbr_f0 = mix(pbr_f0, vec3(0.2), l * l);
     // fragData.spriteColor.rgb *= fragData.spriteColor.rgb * 0.8;
 
     if(fragData.vertexNormal.y > 0.01) {
