@@ -36,7 +36,8 @@ const float pbr_specularBloomStr = 0.01;
 const float pbr_specularAlphaStr = 0.1;
 const float hdr_sunStr = 5;
 const float hdr_moonStr = 0.4;
-const float hdr_blockStr = 2;
+const float hdr_minBlockStr = 2;
+const float hdr_maxBlockStr = 3;
 const float hdr_handHeldStr = 1.5;
 const float hdr_skylessStr = 0.2;
 const float hdr_baseMinStr = 0.01;
@@ -83,9 +84,9 @@ float l2_max3(vec3 vec){
 // 				0.0193308 * rgb.r + 0.1191950 * rgb.g + 0.9505320 * rgb.b);
 // }
 
-vec3 l2_blockLight(float blockLight){
+vec3 l2_blockLight(float blockLight, float userBrightness){
 	float bl = l2_clampScale(0.03125, 1.0, blockLight);
-	bl *= bl * hdr_blockStr;
+	bl *= bl * mix(hdr_minBlockStr, hdr_maxBlockStr, userBrightness);
 	return hdr_gammaAdjust(bl * blockColor);
 }
 
@@ -130,24 +131,6 @@ vec3 l2_skyAmbient(float skyLight, float time, float intensity){
 	return sa * l2_ambientColor(time);
 }
 
-float l2_userBrightness(){
-	float base = texture2D(frxs_lightmap, vec2(0.03125, 0.03125)).r;
-	// if(frx_isWorldTheNether()){
-	// 	return smoothstep(0.15/*0.207 no true darkness in nether*/, 0.577, base);
-	// } else if (frx_isWorldTheEnd(){
-	// 	return smoothstep(0.18/*0.271 no true darkness in the end*/, 0.685, base);
-	// } else {
-	// 	return smoothstep(0.053, 0.135, base);
-	// }
-
-	// Simplify nether/the end check
-	if(frx_worldHasSkylight()){
-		return smoothstep(0.053, 0.135, base);
-	} else {
-		return smoothstep(0.15, 0.63, base);
-	}
-}
-
 vec3 l2_skylessLightColor(){
 	return hdr_gammaAdjust(vec3(1.0));
 }
@@ -176,14 +159,14 @@ vec3 pbr_skylessDir() {
 	return vec3(0, 0.977358, 0.211593);
 }
 
-vec3 pbr_skylessRadiance(){
+vec3 pbr_skylessRadiance(float userBrightness){
 	if (frx_worldHasSkylight()) {
 		return vec3(0);
 	} else {
 		return ( frx_isSkyDarkened() ? 0.5 : 1.0 )
 			* hdr_skylessStr
 			* l2_skylessLightColor()
-			* l2_userBrightness();
+			* userBrightness;
 	}
 }
 
@@ -233,11 +216,11 @@ vec3 pbr_lightCalc(vec3 albedo, vec3 radiance, vec3 lightDir, vec3 viewDir, vec3
 	return specularRadiance + diffuseRadiance;
 }
 
-vec3 l2_baseAmbient(){
+vec3 l2_baseAmbient(float userBrightness){
 	if(frx_worldHasSkylight()){
-		return vec3(0.1) * mix(hdr_baseMinStr, hdr_baseMaxStr, l2_userBrightness());
+		return vec3(0.1) * mix(hdr_baseMinStr, hdr_baseMaxStr, userBrightness);
 	} else {
-		return l2_dimensionColor() * mix(hdr_baseMinStr, hdr_baseMaxStr, l2_userBrightness());
+		return l2_dimensionColor() * mix(hdr_baseMinStr, hdr_baseMaxStr, userBrightness);
 	}
 }
 
@@ -367,6 +350,20 @@ void main() {
 
 		vec3 specularAccu = vec3(0.0);
 
+		float userBrightness;
+		float brightnessBase = texture2D(frxs_lightmap, vec2(0.03125, 0.03125)).r;
+		if(frx_worldHasSkylight()){
+			userBrightness = smoothstep(0.053, 0.135, brightnessBase);
+		} else {
+			// simplified for both nether and the end
+			userBrightness = smoothstep(0.15, 0.63, brightnessBase);
+			// if(frx_isWorldTheNether()){
+			// 	userBrightness = smoothstep(0.15/*0.207 no true darkness in nether*/, 0.577, brightnessBase);
+			// } else if (frx_isWorldTheEnd(){
+			// 	userBrightness = smoothstep(0.18/*0.271 no true darkness in the end*/, 0.685, brightnessBase);
+			// }
+		}
+
 	#if HANDHELD_LIGHT_RADIUS != 0
 		if (frx_heldLight().w > 0) {
 			vec3 handHeldDir = viewDir;
@@ -378,8 +375,8 @@ void main() {
 		}
 	#endif
 
-		vec3 blockRadiance = l2_blockLight(fragData.light.x);
-		vec3 baseAmbientRadiance = l2_baseAmbient();
+		vec3 blockRadiance = l2_blockLight(fragData.light.x, userBrightness);
+		vec3 baseAmbientRadiance = l2_baseAmbient(userBrightness);
 		vec3 ambientDir = normalize(vec3(0.1, 0.9, 0.1) + normal);
 
 		a.rgb += pbr_lightCalc(albedo, blockRadiance * ao, ambientDir, viewDir, normal, fragData.diffuse, true, 0.0, specularAccu);
@@ -402,7 +399,7 @@ void main() {
 
 		} else {
 
-			vec3 skylessRadiance = pbr_skylessRadiance();
+			vec3 skylessRadiance = pbr_skylessRadiance(userBrightness);
 			vec3 skylessDir = pbr_skylessDir();
 
 			a.rgb += pbr_lightCalc(albedo, skylessRadiance * ao, skylessDir, viewDir, normal, fragData.diffuse, false, 0.0, specularAccu);
