@@ -447,6 +447,6 @@ void main() {
 	gl_FragDepth = gl_FragCoord.z;
 
 #if TARGET_EMISSIVE > 0
-	gl_FragData[TARGET_EMISSIVE] = vec4(bloom * a.a, 1.0, 0.0, 1.0);
+	gl_FragData[TARGET_EMISSIVE] = vec4(bloom * a.a, 1.0, 0.0, bloom);
 #endif
 }
