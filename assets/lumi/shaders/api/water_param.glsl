@@ -1,3 +1,5 @@
+// #define WATER_VERTEX_WAVY
+
 const float waveSpeed = 1;
 const float scale = 1.5;
 const float amplitude = 0.01;
