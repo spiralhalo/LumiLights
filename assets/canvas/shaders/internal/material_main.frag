@@ -89,14 +89,14 @@ vec3 l2_blockLight(float blockLight, float userBrightness){
 	return hdr_gammaAdjust(bl * blockColor);
 }
 
-vec3 pbr_handHeldRadiance(){
 #if HANDHELD_LIGHT_RADIUS != 0
+vec3 pbr_handHeldRadiance(){
 	vec4 held = frx_heldLight();
 	float hl = l2_clampScale(held.w * HANDHELD_LIGHT_RADIUS, 0.0, gl_FogFragCoord);
 	hl *= hl * hdr_handHeldStr;
 	return hdr_gammaAdjust(held.rgb * hl);
-#endif
 }
+#endif
 
 vec3 l2_emissiveLight(float emissivity){
 	return vec3(hdr_gammaAdjust(emissivity) * hdr_emissiveStr);
