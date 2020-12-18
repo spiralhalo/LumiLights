@@ -8,6 +8,7 @@
 #include frex:shaders/lib/color.glsl
 #include frex:shaders/lib/sample.glsl
 #include frex:shaders/lib/math.glsl
+#include lumi:shaders/internal/skybloom.glsl
 
 /******************************************************
   canvas:shaders/internal/process/emissive_color.frag
@@ -22,7 +23,7 @@ void main() {
 	vec4 e = texture2D(_cvu_emissive, _cvv_texcoord);
 
 	bool sky = e.g == 0.0;
-	float bloom = sky ? 0.25 : e.r;
+	float bloom = sky ? hdr_skyBloom : e.r;
 
 	vec4 c = frx_fromGamma(texture2D(_cvu_base, _cvv_texcoord));
 	

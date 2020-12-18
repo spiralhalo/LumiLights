@@ -22,6 +22,7 @@
 #include lumi:shaders/api/pbr_frag.glsl
 #include lumi:shaders/lib/pbr.glsl
 #include lumi:shaders/api/context_bump.glsl
+#include lumi:shaders/internal/skybloom.glsl
 
 #define LUMI_PBR
 #include canvas:apitarget
@@ -329,6 +330,7 @@ void main() {
 	vec3 albedo = hdr_gammaAdjust(a.rgb);
 	vec3 dielectricF0 = vec3(0.1) * frx_luminance(albedo);
 	float bloom = fragData.emissivity; // separate bloom from emissivity
+	bool translucent = _cv_getFlag(_CV_FLAG_CUTOUT) == 0.0 && a.a < 0.99;
 
 	pbr_roughness = clamp(pbr_roughness, 0.0, 1.0);
 	pbr_metallic = clamp(pbr_metallic, 0.0, 1.0);
@@ -421,10 +423,10 @@ void main() {
 
 		float specularLuminance = frx_luminance(specularAccu);
 		float smoothness = (1-pbr_roughness);
-		if (_cv_getFlag(_CV_FLAG_CUTOUT) == 0.0) {
+		bloom += specularLuminance * pbr_specularBloomStr * smoothness * smoothness;
+		if (translucent) {
 			a.a += specularLuminance * pbr_specularBloomStr;
 		}
-		bloom += specularLuminance * pbr_specularBloomStr * smoothness * smoothness;
 
 		a.rgb *= hdr_finalMult;
 		a.rgb = pow(hdr_reinhardJodieTonemap(a.rgb), vec3(1.0 / hdr_gamma));
@@ -453,6 +455,7 @@ void main() {
 	gl_FragDepth = gl_FragCoord.z;
 
 #if TARGET_EMISSIVE > 0
-	gl_FragData[TARGET_EMISSIVE] = vec4(bloom * a.a, 1.0, 0.0, a.a < 0.99 ? bloom : 1.0);
+	translucent = translucent && a.a < 0.99;
+	gl_FragData[TARGET_EMISSIVE] = vec4(bloom * a.a, 1.0, 0.0, translucent ? step(hdr_skyBloom, bloom) : 1.0);
 #endif
 }
