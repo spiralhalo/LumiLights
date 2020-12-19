@@ -9,4 +9,4 @@ Lumi Lights PBR is created with the latest version of Canvas in mind. Download t
 Once you have the latest version of Canvas installed, grab the latest release of [Lumi Lights PBR](https://github.com/spiralhalo/LumiLightsPBR/releases) and [Lumi Lights PBR Ext](https://github.com/spiralhalo/LumiPBRExt/releases) and put them in your resource packs folder. Enable them like regular resource pack and make sure to put Lumi Lights above Canvas default resource pack.
 
 ## License
-Lumi Lights is released under the GNU Lesser General Public License version 3.0 without any warranty. See the files `COPYING` and `COPYING.LESSER` for license terms. You may also obtain a copy of the license at https://www.gnu.org/licenses/lgpl-3.0.html
+Lumi Lights is released without any warranty under the GNU Lesser General Public License version 3.0. See the files `COPYING` and `COPYING.LESSER` for license terms. You may also obtain a copy of the license at https://www.gnu.org/licenses/lgpl-3.0.html
