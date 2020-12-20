@@ -31,6 +31,7 @@
 #include lumi:shaders/internal/tonemap.glsl
 #include lumi:shaders/internal/pbr_shading.glsl
 #include lumi:shaders/internal/phong_shading.glsl
+#include lumi:shaders/internal/debug_shading.glsl
 #include lumi:shaders/internal/skybloom.glsl
 
 #include canvas:apitarget
