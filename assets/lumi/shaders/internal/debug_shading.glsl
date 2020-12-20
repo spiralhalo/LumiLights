@@ -12,7 +12,7 @@
 #define DEBUG_VIEWDIR 2
 
 #if DEBUG_MODE != DEBUG_DISABLED
-void debug_shading(inout vec4 a) {
+void debug_shading(in frx_FragmentData fragData, inout vec4 a) {
 #if DEBUG_MODE == DEBUG_VIEWDIR
     vec3 viewDir = normalize(-l2_viewPos) * frx_normalModelMatrix() * gl_NormalMatrix;
     a.rgb = viewDir * 0.5 + 0.5;

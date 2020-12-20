@@ -86,7 +86,7 @@ void main() {
 #endif
 	} else {
 #if DEBUG_MODE != DEBUG_DISABLED
-		debug_shading(a);
+		debug_shading(fragData, a);
 #else
 		float userBrightness;
 		float brightnessBase = texture2D(frxs_lightmap, vec2(0.03125, 0.03125)).r;
