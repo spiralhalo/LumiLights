@@ -9,6 +9,14 @@ void frx_startFragment(inout frx_FragmentData fragData) {
 	/* PBR PARAMS */
 	pbr_f0 = vec3(0.02);
     pbr_roughness = 0.05;
+#else
+	/* HACK */
+	fragData.light.y += 0.077 * smoothstep(1.0, 0.99, fragData.vertexNormal.y);
+	fragData.light.y = min(0.96875, fragData.light.y);
+
+	/* LUMI PARAMS */
+	ww_specular = 500.0;
+#endif
 	
 	/* WATER RECOLOR */
 	vec3 desat = vec3(frx_luminance(fragData.vertexColor.rgb));
@@ -32,5 +40,4 @@ void frx_startFragment(inout frx_FragmentData fragData) {
 	vec3 samplePos = frx_var0.xyz;
 	// samplePos = floor(samplePos) + floor(fract(samplePos) * 16) / 16;
 	fragData.vertexNormal = ww_normals(up, samplePos, waveSpeed, scale, amplitude, stretch, moveSpeed);
-#endif
 }

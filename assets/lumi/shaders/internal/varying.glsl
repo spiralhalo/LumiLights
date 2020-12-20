@@ -2,4 +2,4 @@
  *  lumi:shaders/internal/varying.glsl                     *
  ***********************************************************/
 
-varying vec3 pbrv_viewPos;
+varying vec3 l2_viewPos;

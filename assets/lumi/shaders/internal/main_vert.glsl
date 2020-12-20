@@ -7,8 +7,6 @@
  *  published by the Free Software Foundation, Inc.    *
  *******************************************************/
 
-varying vec3 pbrv_viewPos;
-
 #ifdef LUMI_BUMP
 float bump_resolution;
 vec2 uvN;
@@ -34,8 +32,6 @@ void endBump(vec4 spriteBounds) {
 }
 #endif
 
-#ifdef LUMI_PBR
-void setPBRVaryings(vec4 viewCoord) {
-    pbrv_viewPos = viewCoord.xyz;
+void setVaryings(vec4 viewCoord) {
+    l2_viewPos = viewCoord.xyz;
 }
-#endif

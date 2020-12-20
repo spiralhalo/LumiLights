@@ -88,9 +88,7 @@ void main() {
 	gl_ClipVertex = viewCoord;
 	gl_FogFragCoord = length(viewCoord.xyz);
 
-#ifdef LUMI_PBR
-	setPBRVaryings(viewCoord);
-#endif
+	setVaryings(viewCoord);
 
 	//data.normal *= gl_NormalMatrix;
 	data.vertex = gl_ModelViewProjectionMatrix * data.vertex;

@@ -66,6 +66,8 @@ void main() {
 	pbr_roughness = 1.0;
 	pbr_metallic = 0.0;
 	pbr_f0 = vec3(-1.0);
+#else
+	ww_specular = 0.0;
 #endif
 
 	_cv_startFragment(fragData);

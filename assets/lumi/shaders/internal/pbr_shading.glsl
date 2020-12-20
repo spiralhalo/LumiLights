@@ -70,7 +70,7 @@ void pbr_shading(inout vec4 a, inout float bloom, float userBrightness) {
     vec3 emissive = l2_emissiveRadiance(fragData.emissivity);
     a.rgb *= emissive;
     
-    vec3 viewDir = normalize(-pbrv_viewPos) * frx_normalModelMatrix() * gl_NormalMatrix;
+    vec3 viewDir = normalize(-l2_viewPos) * frx_normalModelMatrix() * gl_NormalMatrix;
 
     vec3 normal = fragData.vertexNormal * frx_normalModelMatrix();
 
@@ -79,7 +79,7 @@ void pbr_shading(inout vec4 a, inout float bloom, float userBrightness) {
 #if HANDHELD_LIGHT_RADIUS != 0
     if (frx_heldLight().w > 0) {
         vec3 handHeldDir = viewDir;
-        vec3 handHeldRadiance = pbr_handHeldRadiance();
+        vec3 handHeldRadiance = l2_handHeldRadiance();
         if(handHeldRadiance.x * handHeldRadiance.y * handHeldRadiance.z > 0) {
             vec3 adjustedNormal = fragData.diffuse ? normal : viewDir;
             a.rgb += pbr_lightCalc(albedo, handHeldRadiance, handHeldDir, viewDir, adjustedNormal, true, false, 0.0, specularAccu);

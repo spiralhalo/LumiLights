@@ -17,3 +17,6 @@
  * 1 = Render normals
  * 2 = Render view direction */
 #define DEBUG_MODE 0
+
+/* Uncomment to enable wavy water model */
+// #define WATER_VERTEX_WAVY
