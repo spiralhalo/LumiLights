@@ -58,7 +58,7 @@ void main() {
 	_cv_startVertex(data, cv_programId);
 
 #ifdef LUMI_BUMP
-	setupBump();
+	setupBump(data);
 #endif
 
 	if (_cvu_atlas[_CV_SPRITE_INFO_TEXTURE_SIZE] != 0.0) {

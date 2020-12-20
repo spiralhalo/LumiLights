@@ -20,17 +20,6 @@ const float hdr_relAmbient = 0.2;
 const float hdr_zWobbleDefault = 0.1;
 const vec3 blockColor = vec3(1.0, 0.875, 0.75);
 
-/*  BASE AMBIENT LIGHT
- *******************************************************/
-
-vec3 l2_baseAmbient(float userBrightness){
-	if(frx_worldHasSkylight()){
-		return vec3(0.1) * mix(hdr_baseMinStr, hdr_baseMaxStr, userBrightness);
-	} else {
-		return l2_dimensionColor() * mix(hdr_baseMinStr, hdr_baseMaxStr, userBrightness);
-	}
-}
-
 /*  BLOCK LIGHT
  *******************************************************/
 
@@ -128,6 +117,17 @@ vec3 l2_skylessRadiance(float userBrightness) {
 			* hdr_skylessStr
 			* l2_skylessLightColor()
 			* userBrightness;
+	}
+}
+
+/*  BASE AMBIENT LIGHT
+ *******************************************************/
+
+vec3 l2_baseAmbient(float userBrightness){
+	if(frx_worldHasSkylight()){
+		return vec3(0.1) * mix(hdr_baseMinStr, hdr_baseMaxStr, userBrightness);
+	} else {
+		return l2_dimensionColor() * mix(hdr_baseMinStr, hdr_baseMaxStr, userBrightness);
 	}
 }
 

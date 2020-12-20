@@ -12,9 +12,11 @@ vec3 hdr_reinhardJodieTonemap(in vec3 v) {
     return mix(v / (1.0f + l), tv, tv);
 }
 
+#if TONEMAP_MODE == TONEMAP_VIBRANT
 vec3 hdr_vibrantTonemap(in vec3 hdrColor){
 	return hdrColor / (frx_luminance(hdrColor) + vec3(1.0));
 }
+#endif
 
 void tonemap(inout vec4 a) {
 #if TONEMAP_MODE == TONEMAP_FILM

@@ -28,9 +28,9 @@
 #include lumi:shaders/internal/varying.glsl
 #include lumi:shaders/internal/main_frag.glsl
 #include lumi:shaders/internal/lightsource.glsl
+#include lumi:shaders/internal/tonemap.glsl
 #include lumi:shaders/internal/pbr_shading.glsl
 #include lumi:shaders/internal/phong_shading.glsl
-#include lumi:shaders/internal/tonemap.glsl
 #include lumi:shaders/internal/skybloom.glsl
 
 #define LUMI_PBR
@@ -102,9 +102,9 @@ void main() {
 			// }
 		}
 	#ifdef LUMI_PBR
-		pbr_shading(a, bloom, userBrightness);
+		pbr_shading(fragData, a, bloom, userBrightness, translucent);
 	#else
-		phong_shading(a, bloom, userBrightness);
+		phong_shading(fragData, a, bloom, userBrightness, translucent);
 	#endif
 #endif
 	}
