@@ -7,16 +7,29 @@
  *  published by the Free Software Foundation, Inc.    *
  *******************************************************/
 
+#ifdef LUMI_PBR
 const float hdr_sunStr = 5;
 const float hdr_moonStr = 0.4;
-const float hdr_minBlockStr = 2;
-const float hdr_maxBlockStr = 3;
+const float hdr_blockMinStr = 2;
+const float hdr_blockMaxStr = 3;
 const float hdr_handHeldStr = 1.5;
 const float hdr_skylessStr = 0.2;
 const float hdr_baseMinStr = 0.01;
 const float hdr_baseMaxStr = 0.8;
 const float hdr_emissiveStr = 1;
 const float hdr_relAmbient = 0.2;
+#else
+const float hdr_sunStr = 2;
+const float hdr_moonStr = 0.4;
+const float hdr_blockMinStr = 1.0;
+const float hdr_blockMaxStr = 1.4;
+const float hdr_handHeldStr = 0.9;
+const float hdr_skylessStr = 0.2;
+const float hdr_baseMinStr = 0.0;
+const float hdr_baseMaxStr = 0.25;
+const float hdr_emissiveStr = 1;
+const float hdr_relAmbient = 0.09;
+#endif
 const float hdr_zWobbleDefault = 0.1;
 const vec3 blockColor = vec3(1.0, 0.875, 0.75);
 
@@ -25,7 +38,7 @@ const vec3 blockColor = vec3(1.0, 0.875, 0.75);
 
 vec3 l2_blockRadiance(float blockLight, float userBrightness) {
 	float bl = l2_clampScale(0.03125, 1.0, blockLight);
-	bl *= bl * mix(hdr_minBlockStr, hdr_maxBlockStr, userBrightness);
+	bl *= bl * mix(hdr_blockMinStr, hdr_blockMaxStr, userBrightness);
 	return hdr_gammaAdjust(bl * blockColor);
 }
 
