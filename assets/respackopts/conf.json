@@ -3,7 +3,8 @@
   "version": 1,
   "conf": {
     "PBR": true,
-    "WaterVertexWavy": false,
+    "WavyWaterModel": false,
+    "ApplySkyBloom": true,
     "Tonemap": [
       "Default",
       "Vibrant",
