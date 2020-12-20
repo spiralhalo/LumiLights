@@ -32,6 +32,11 @@ const float hdr_relAmbient = 0.09;
 #endif
 const float hdr_zWobbleDefault = 0.1;
 const vec3 blockColor = vec3(1.0, 0.875, 0.75);
+#if TONEMAP_MODE == TONEMAP_VIBRANT
+const vec3 sunColor = vec3(1.0, 1.0, 1.0);
+#else
+const vec3 sunColor = vec3(1.0, 1.0, 0.8);
+#endif
 
 /*  BLOCK LIGHT
  *******************************************************/
@@ -148,7 +153,7 @@ vec3 l2_baseAmbient(float userBrightness){
  *******************************************************/
 
 vec3 l2_sunColor(float time){
-	vec3 sunColor = hdr_gammaAdjust(vec3(1.0, 1.0, 0.8)) * hdr_sunStr;
+	vec3 sunColor = hdr_gammaAdjust(sunColor) * hdr_sunStr;
 	vec3 sunriseColor = hdr_gammaAdjust(vec3(1.0, 0.8, 0.4)) * hdr_sunStr;
 	vec3 sunsetColor = hdr_gammaAdjust(vec3(1.0, 0.6, 0.4)) * hdr_sunStr;
 	if(time > 0.94){
