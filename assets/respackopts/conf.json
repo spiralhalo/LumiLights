@@ -1,0 +1,18 @@
+{
+  "id": "LUMI",
+  "version": 1,
+  "conf": {
+    "PBR": true,
+    "WaterVertexWavy": false,
+    "Tonemap": [
+      "Default",
+      "Vibrant",
+      "Film"
+    ],
+    "DebugMode": [
+      "Disabled",
+      "Normal",
+      "ViewDir"
+    ]
+  }
+}

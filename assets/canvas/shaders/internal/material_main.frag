@@ -21,7 +21,7 @@
 #include frex:shaders/api/sampler.glsl
 #include frex:shaders/lib/math.glsl
 #include frex:shaders/lib/color.glsl
-#include lumi:config.glsl
+#include respackopts:config_supplier
 #include lumi:shaders/api/pbr_frag.glsl
 #include lumi:shaders/api/context_bump.glsl
 #include lumi:shaders/lib/pbr.glsl
@@ -85,7 +85,7 @@ void main() {
 		}
 #endif
 	} else {
-#if DEBUG_MODE != DEBUG_DISABLED
+#if LUMI_DebugMode != LUMI_DebugMode_Disabled
 		debug_shading(fragData, a);
 #else
 		float userBrightness;
