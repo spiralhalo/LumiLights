@@ -33,7 +33,6 @@
 #include lumi:shaders/internal/phong_shading.glsl
 #include lumi:shaders/internal/skybloom.glsl
 
-#define LUMI_PBR
 #include canvas:apitarget
 
 /******************************************************
