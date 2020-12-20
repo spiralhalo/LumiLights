@@ -10,3 +10,5 @@ Once you have the latest version of Canvas installed, grab the latest release of
 
 ## License
 Lumi Lights is released without any warranty under the GNU Lesser General Public License version 3.0. See the files `COPYING` and `COPYING.LESSER` for license terms. You may also obtain a copy of the license at https://www.gnu.org/licenses/lgpl-3.0.html
+
+Have some questions? [Join the Lumi Lights discord.](https://discord.gg/qcyBfhxkgk)
