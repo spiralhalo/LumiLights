@@ -1,5 +1,14 @@
 #include lumi:shaders/lib/bump.glsl
 
+/*******************************************************
+ *  lumi:shaders/lib/water.glsl                        *
+ *******************************************************
+ *  Copyright (c) 2020 spiralhalo and Contributors.    *
+ *  Released WITHOUT WARRANTY under the terms of the   *
+ *  GNU Lesser General Public License version 3 as     *
+ *  published by the Free Software Foundation, Inc.    *
+ *******************************************************/
+
 float ww_noise(vec3 pos, vec3 move, float invScale, float amplitude, float stretch)
 {
 	vec3 noisePos = vec3(pos.x * invScale * stretch, pos.y * invScale, pos.z * invScale) + move;

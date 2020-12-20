@@ -1,3 +1,12 @@
+/*******************************************************
+ *  lumi:shaders/lib/bump.glsl                         *
+ *******************************************************
+ *  Copyright (c) 2020 spiralhalo and Contributors.    *
+ *  Released WITHOUT WARRANTY under the terms of the   *
+ *  GNU Lesser General Public License version 3 as     *
+ *  published by the Free Software Foundation, Inc.    *
+ *******************************************************/
+
 const mat4 _bump_tRotm = mat4(
 0,  0, -1,  0,
 0,  1,  0,  0,

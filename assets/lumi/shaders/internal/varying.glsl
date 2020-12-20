@@ -1,5 +1,5 @@
 /***********************************************************
- *  lumi:shaders/internal/skybloom.glsl                    *
+ *  lumi:shaders/internal/varying.glsl                     *
  ***********************************************************/
 
-const float hdr_skyBloom = 0.25;
+varying vec3 pbrv_viewPos;

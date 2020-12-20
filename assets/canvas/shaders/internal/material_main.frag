@@ -1,15 +1,18 @@
-/*
- *  Lumi Lights - A shader pack for Canvas
- *  Copyright (c) 2020 spiralhalo and Contributors
- *
- *  See `README.md` for license notice.
- */
+/*******************************************************
+ *  Lumi Lights - Shader pack for Canvas               *
+ *******************************************************
+ *  Copyright (c) 2020 spiralhalo and Contributors.    *
+ *  Released WITHOUT WARRANTY under the terms of the   *
+ *  GNU Lesser General Public License version 3 as     *
+ *  published by the Free Software Foundation, Inc.    *
+ *******************************************************/
 
 #include canvas:shaders/internal/header.glsl
 #include canvas:shaders/internal/varying.glsl
 #include canvas:shaders/internal/diffuse.glsl
 #include canvas:shaders/internal/flags.glsl
 #include canvas:shaders/internal/fog.glsl
+#include canvas:shaders/internal/program.glsl
 #include frex:shaders/api/world.glsl
 #include frex:shaders/api/camera.glsl
 #include frex:shaders/api/player.glsl
@@ -18,10 +21,16 @@
 #include frex:shaders/api/sampler.glsl
 #include frex:shaders/lib/math.glsl
 #include frex:shaders/lib/color.glsl
-#include canvas:shaders/internal/program.glsl
+#include lumi:config.glsl
 #include lumi:shaders/api/pbr_frag.glsl
-#include lumi:shaders/lib/pbr.glsl
 #include lumi:shaders/api/context_bump.glsl
+#include lumi:shaders/lib/pbr.glsl
+#include lumi:shaders/internal/varying.glsl
+#include lumi:shaders/internal/main_frag.glsl
+#include lumi:shaders/internal/lightsource.glsl
+#include lumi:shaders/internal/pbr_shading.glsl
+#include lumi:shaders/internal/phong_shading.glsl
+#include lumi:shaders/internal/tonemap.glsl
 #include lumi:shaders/internal/skybloom.glsl
 
 #define LUMI_PBR
@@ -31,276 +40,9 @@
   canvas:shaders/internal/material_main.frag
 ******************************************************/
 
-varying vec3 pbrv_viewPos;
-
-const float pbr_specularBloomStr = 0.01;
-const float pbr_specularAlphaStr = 0.1;
-const float hdr_sunStr = 5;
-const float hdr_moonStr = 0.4;
-const float hdr_minBlockStr = 2;
-const float hdr_maxBlockStr = 3;
-const float hdr_handHeldStr = 1.5;
-const float hdr_skylessStr = 0.2;
-const float hdr_baseMinStr = 0.01;
-const float hdr_baseMaxStr = 0.8;
-const float hdr_emissiveStr = 1;
-const float hdr_relAmbient = 0.2;
-const float hdr_zWobbleDefault = 0.1;
-const float hdr_finalMult = 1;
-const float hdr_gamma = 2.2;
-
-const vec3 blockColor = vec3(1.0, 0.875, 0.75);
-
-float hdr_gammaAdjust(float x){
-	return pow(x, hdr_gamma);
-}
-
-vec3 hdr_gammaAdjust(vec3 x){
-	return pow(x, vec3(hdr_gamma));
-}
-
-vec3 hdr_reinhardJodieTonemap(in vec3 v) {
-    float l = frx_luminance(v);
-    vec3 tv = v / (1.0f + v);
-    return mix(v / (1.0f + l), tv, tv);
-}
-
 void _cv_startFragment(inout frx_FragmentData data) {
 	int cv_programId = _cv_fragmentProgramId();
 #include canvas:startfragment
-}
-
-float l2_clampScale(float e0, float e1, float v){
-    return clamp((v-e0)/(e1-e0), 0.0, 1.0);
-}
-
-float l2_max3(vec3 vec){
-	return max(vec.x, max(vec.y, vec.z));
-}
-
-// vec3 l2_what(vec3 rgb){
-// 	return vec3(0.4123910 * rgb.r + 0.3575840 * rgb.g + 0.1804810 * rgb.b,
-// 				0.2126390 * rgb.r + 0.7151690 * rgb.g + 0.0721923 * rgb.b,
-// 				0.0193308 * rgb.r + 0.1191950 * rgb.g + 0.9505320 * rgb.b);
-// }
-
-vec3 l2_blockLight(float blockLight, float userBrightness){
-	float bl = l2_clampScale(0.03125, 1.0, blockLight);
-	bl *= bl * mix(hdr_minBlockStr, hdr_maxBlockStr, userBrightness);
-	return hdr_gammaAdjust(bl * blockColor);
-}
-
-#if HANDHELD_LIGHT_RADIUS != 0
-vec3 pbr_handHeldRadiance(){
-	vec4 held = frx_heldLight();
-	float hl = l2_clampScale(held.w * HANDHELD_LIGHT_RADIUS, 0.0, gl_FogFragCoord);
-	hl *= hl * hdr_handHeldStr;
-	return hdr_gammaAdjust(held.rgb * hl);
-}
-#endif
-
-vec3 l2_emissiveLight(float emissivity){
-	return vec3(hdr_gammaAdjust(emissivity) * hdr_emissiveStr);
-}
-
-float l2_skyLight(float skyLight, float intensity)
-{
-	float sl = l2_clampScale(0.03125, 1.0, skyLight);
-	return hdr_gammaAdjust(sl) * intensity;
-}
-
-vec3 l2_ambientColor(float time){
-	vec3 ambientColor = hdr_gammaAdjust(vec3(0.6, 0.9, 1.0)) * hdr_sunStr * hdr_relAmbient;
-	vec3 sunriseAmbient = hdr_gammaAdjust(vec3(1.0, 0.8, 0.4)) * hdr_sunStr * hdr_relAmbient;
-	vec3 sunsetAmbient = hdr_gammaAdjust(vec3(1.0, 0.6, 0.2)) * hdr_sunStr * hdr_relAmbient;
-	vec3 nightAmbient = hdr_gammaAdjust(vec3(1.0, 1.0, 2.0)) * hdr_moonStr * hdr_relAmbient;
-	if(time > 0.94){
-		ambientColor = mix(nightAmbient, sunriseAmbient, l2_clampScale(0.94, 0.98, time));
-	} else if(time > 0.52){
-		ambientColor = mix(sunsetAmbient, nightAmbient, l2_clampScale(0.52, 0.56, time));
-	} else if(time > 0.48){
-		ambientColor = mix(ambientColor, sunsetAmbient, l2_clampScale(0.48, 0.5, time));
-	} else if(time < 0.02){
-		ambientColor = mix(ambientColor, sunriseAmbient, l2_clampScale(0.02, 0, time));
-	}
-	return ambientColor;
-}
-
-vec3 l2_skyAmbient(float skyLight, float time, float intensity){
-	float sa = l2_skyLight(skyLight, intensity) * 2.5;
-	return sa * l2_ambientColor(time);
-}
-
-vec3 l2_skylessLightColor(){
-	return hdr_gammaAdjust(vec3(1.0));
-}
-
-vec3 l2_dimensionColor(){
-	if (frx_isWorldTheNether()) {
-		float min_col = min(min(gl_Fog.color.rgb.x, gl_Fog.color.rgb.y), gl_Fog.color.rgb.z);
-		float max_col = max(max(gl_Fog.color.rgb.x, gl_Fog.color.rgb.y), gl_Fog.color.rgb.z);
-		float sat = 0.0;
-		if (max_col != 0.0) {
-			sat = (max_col-min_col)/max_col;
-		}
-	
-		return hdr_gammaAdjust(clamp((gl_Fog.color.rgb*(1/max_col))+pow(sat,2)/2, 0.0, 1.0));
-	}
-	else {
-		return hdr_gammaAdjust(vec3(0.8, 0.7, 1.0));
-	}
-}
-
-vec3 pbr_skylessDarkenedDir() {
-	return vec3(0, -0.977358, 0.211593);
-}
-
-vec3 pbr_skylessDir() {
-	return vec3(0, 0.977358, 0.211593);
-}
-
-vec3 pbr_skylessRadiance(float userBrightness){
-	if (frx_worldHasSkylight()) {
-		return vec3(0);
-	} else {
-		return ( frx_isSkyDarkened() ? 0.5 : 1.0 )
-			* hdr_skylessStr
-			* l2_skylessLightColor()
-			* userBrightness;
-	}
-}
-
-vec3 pbr_specularBRDF(float roughness, vec3 radiance, vec3 halfway, vec3 lightDir, vec3 viewDir, vec3 normal, vec3 fresnel, float NdotL) {
-	// cook-torrance brdf
-	float distribution = pbr_distributionGGX(normal, halfway, roughness);
-	float geometry     = pbr_geometrySmith(normal, viewDir, lightDir, roughness);
-
-	vec3  num   = distribution * geometry * fresnel;
-	float denom = 4.0 * pbr_dot(normal, viewDir) * NdotL;
-
-	vec3  specular = num / max(denom, 0.001);
-	return specular * radiance * NdotL;
-}
-
-vec3 pbr_lightCalc(vec3 albedo, vec3 radiance, vec3 lightDir, vec3 viewDir, vec3 normal, bool diffuseOn, bool isAmbiance, float haloBlur, inout vec3 specularAccu) {
-	
-	vec3 halfway = normalize(viewDir + lightDir);
-	float roughness = pbr_roughness;
-
-	// ambiance hack
-	if (isAmbiance) {
-		roughness = min(1.0, roughness + 0.5 * (1 - pbr_metallic));
-	}
-	
-	// disableDiffuse hack
-	if (!diffuseOn) {
-		return albedo / PI * radiance * pbr_dot(lightDir, vec3(.0, 1.0, .0));
-	}
-
-	vec3 specularRadiance;
-	vec3 fresnel = pbr_fresnelSchlick(pbr_dot(viewDir, halfway), pbr_f0);
-	float NdotL = pbr_dot(normal, lightDir);
-
-	if (haloBlur > roughness) {
-		// sun halo hack
-		specularRadiance = pbr_specularBRDF(roughness, radiance * 0.75, halfway, lightDir, viewDir, normal, fresnel, NdotL);
-		specularRadiance += pbr_specularBRDF(haloBlur, radiance * 0.25, halfway, lightDir, viewDir, normal, fresnel, NdotL);
-	} else {
-		specularRadiance = pbr_specularBRDF(roughness, radiance, halfway, lightDir, viewDir, normal, fresnel, NdotL);
-	}
-
-	vec3 diffuse = (1.0 - fresnel) * (1.0 - pbr_metallic);
-	vec3 diffuseRadiance = albedo * diffuse / PI * radiance * NdotL;
-	specularAccu += specularRadiance;
-
-	return specularRadiance + diffuseRadiance;
-}
-
-vec3 l2_baseAmbient(float userBrightness){
-	if(frx_worldHasSkylight()){
-		return vec3(0.1) * mix(hdr_baseMinStr, hdr_baseMaxStr, userBrightness);
-	} else {
-		return l2_dimensionColor() * mix(hdr_baseMinStr, hdr_baseMaxStr, userBrightness);
-	}
-}
-
-vec3 l2_sunColor(float time){
-	vec3 sunColor = hdr_gammaAdjust(vec3(1.0, 1.0, 0.8)) * hdr_sunStr;
-	vec3 sunriseColor = hdr_gammaAdjust(vec3(1.0, 0.8, 0.4)) * hdr_sunStr;
-	vec3 sunsetColor = hdr_gammaAdjust(vec3(1.0, 0.6, 0.4)) * hdr_sunStr;
-	if(time > 0.94){
-		sunColor = sunriseColor;
-	} else if(time > 0.56){
-		sunColor = vec3(0); // pitch black at night
-	} else if(time > 0.54){
-		sunColor = mix(sunsetColor, vec3(0), l2_clampScale(0.54, 0.56, time));
-	} else if(time > 0.5){
-		sunColor = sunsetColor;
-	} else if(time > 0.48){
-		sunColor = mix(sunColor, sunsetColor, l2_clampScale(0.48, 0.5, time));
-	} else if(time < 0.02){
-		sunColor = mix(sunColor, sunriseColor, l2_clampScale(0.02, 0, time));
-	}
-	return sunColor;
-}
-
-vec3 pbr_vanillaSunDir(in float time, float zWobble){
-
-	// wrap time to account for sunrise
-	time -= (time >= 0.75) ? 1.0 : 0.0;
-
-	// supposed offset of sunset/sunrise from 0/12000 daytime. might get better result with datamining?
-	float sunHorizonDur = 0.04;
-
-	// angle of sun in radians
-	float angleRad = l2_clampScale(-sunHorizonDur, 0.5+sunHorizonDur, time) * PI;
-
-	return normalize(vec3(cos(angleRad), sin(angleRad), zWobble));
-}
-
-vec3 pbr_sunRadiance(float skyLight, in float time, float intensity, float rainGradient){
-
-	// wrap time to account for sunrise
-	float customTime = (time >= 0.75) ? (time - 1.0) : time;
-
-    float customIntensity = l2_clampScale(-0.08, 0.00, customTime);
-
-    if(customTime >= 0.25){
-		customIntensity = l2_clampScale(0.58, 0.5, customTime);
-    }
-
-	customIntensity *= mix(1.0, 0.0, rainGradient);
-
-	float sl = l2_skyLight(skyLight, max(customIntensity, intensity));
-
-	// direct sun light doesn't reach into dark spot as much as sky ambient
-	sl = frx_smootherstep(0.5,1.0,sl);
-
-	return sl * l2_sunColor(time);
-}
-
-vec3 pbr_moonDir(float time){
-    float aRad = l2_clampScale(0.56, 0.94, time) * PI;
-	return normalize(vec3(cos(aRad), sin(aRad), 0));
-}
-
-vec3 pbr_moonRadiance(float skyLight, float time, float intensity){
-	float ml = l2_skyLight(skyLight, intensity) * frx_moonSize() * hdr_moonStr;
-	if(time < 0.58){
-		ml *= l2_clampScale(0.54, 0.58, time);
-	} else if(time > 0.92){
-		ml *= l2_clampScale(0.96, 0.92, time);
-	}
-	return vec3(ml);
-}
-
-float l2_ao(frx_FragmentData fragData) {
-#if AO_SHADING_MODE != AO_MODE_NONE
-	float ao = fragData.ao ? _cvv_ao : 1.0;
-	return hdr_gammaAdjust(min(1.0, ao + fragData.emissivity));
-#else
-	return 1.0;
-#endif 
 }
 
 void main() {
@@ -320,21 +62,17 @@ void main() {
 	_cvv_lightcoord
 	);
 
+#ifdef LUMI_PBR
 	pbr_roughness = 1.0;
 	pbr_metallic = 0.0;
 	pbr_f0 = vec3(-1.0);
+#endif
 
 	_cv_startFragment(fragData);
 
 	vec4 a = clamp(fragData.spriteColor * fragData.vertexColor, 0.0, 1.0);
-	vec3 albedo = hdr_gammaAdjust(a.rgb);
-	vec3 dielectricF0 = vec3(0.1) * frx_luminance(albedo);
 	float bloom = fragData.emissivity; // separate bloom from emissivity
 	bool translucent = _cv_getFlag(_CV_FLAG_CUTOUT) == 0.0 && a.a < 0.99;
-
-	pbr_roughness = clamp(pbr_roughness, 0.0, 1.0);
-	pbr_metallic = clamp(pbr_metallic, 0.0, 1.0);
-	pbr_f0 = pbr_f0.r < 0 ? mix(dielectricF0, albedo, pbr_metallic) : clamp(pbr_f0, 0.0, 1.0);
 
 	if(frx_isGui()){
 #if DIFFUSE_SHADING_MODE != DIFFUSE_MODE_NONE
@@ -345,18 +83,9 @@ void main() {
 		}
 #endif
 	} else {
-		a.rgb = albedo;
-
-		float ao = l2_ao(fragData);
-		vec3 emissive = l2_emissiveLight(fragData.emissivity);
-		a.rgb *= emissive;
-		
-		vec3 viewDir = normalize(-pbrv_viewPos) * frx_normalModelMatrix() * gl_NormalMatrix;
-
-		vec3 normal = fragData.vertexNormal * frx_normalModelMatrix();
-
-		vec3 specularAccu = vec3(0.0);
-
+#if DEBUG_MODE != DEBUG_DISABLED
+		debug_shading(a);
+#else
 		float userBrightness;
 		float brightnessBase = texture2D(frxs_lightmap, vec2(0.03125, 0.03125)).r;
 		if(frx_worldHasSkylight()){
@@ -370,68 +99,12 @@ void main() {
 			// 	userBrightness = smoothstep(0.18/*0.271 no true darkness in the end*/, 0.685, brightnessBase);
 			// }
 		}
-
-	#if HANDHELD_LIGHT_RADIUS != 0
-		if (frx_heldLight().w > 0) {
-			vec3 handHeldDir = viewDir;
-			vec3 handHeldRadiance = pbr_handHeldRadiance();
-			if(handHeldRadiance.x * handHeldRadiance.y * handHeldRadiance.z > 0) {
-				vec3 adjustedNormal = fragData.diffuse ? normal : viewDir;
-				a.rgb += pbr_lightCalc(albedo, handHeldRadiance, handHeldDir, viewDir, adjustedNormal, true, false, 0.0, specularAccu);
-			}
-		}
+	#ifdef LUMI_PBR
+		pbr_shading(a, bloom, userBrightness);
+	#else
+		phong_shading(a, bloom, userBrightness);
 	#endif
-
-		vec3 blockRadiance = l2_blockLight(fragData.light.x, userBrightness);
-		vec3 baseAmbientRadiance = l2_baseAmbient(userBrightness);
-		vec3 ambientDir = normalize(vec3(0.1, 0.9, 0.1) + normal);
-
-		a.rgb += pbr_lightCalc(albedo, blockRadiance * ao, ambientDir, viewDir, normal, fragData.diffuse, true, 0.0, specularAccu);
-		a.rgb += pbr_lightCalc(albedo, baseAmbientRadiance * ao, ambientDir, viewDir, normal, fragData.diffuse, true, 0.0, specularAccu);
-
-		if (frx_worldHasSkylight()) {
-			if (fragData.light.y > 0.03125) {
-
-				vec3 moonRadiance = pbr_moonRadiance(fragData.light.y, frx_worldTime(), frx_ambientIntensity());
-				vec3 moonDir = pbr_moonDir(frx_worldTime());
-				vec3 sunRadiance = pbr_sunRadiance(fragData.light.y, frx_worldTime(), frx_ambientIntensity(), frx_rainGradient());
-				vec3 sunDir = pbr_vanillaSunDir(frx_worldTime(), 0.0);
-				vec3 skyRadiance = l2_skyAmbient(fragData.light.y, frx_worldTime(), frx_ambientIntensity());
-
-				a.rgb += pbr_lightCalc(albedo, moonRadiance * ao, moonDir, viewDir, normal, fragData.diffuse, false, 0.15, specularAccu);
-				a.rgb += pbr_lightCalc(albedo, sunRadiance * ao, sunDir, viewDir, normal, fragData.diffuse, false, 0.15, specularAccu);
-				a.rgb += pbr_lightCalc(albedo, skyRadiance * ao, ambientDir, viewDir, normal, fragData.diffuse, true, 0.0, specularAccu);
-
-			}
-
-		} else {
-
-			vec3 skylessRadiance = pbr_skylessRadiance(userBrightness);
-			vec3 skylessDir = pbr_skylessDir();
-
-			a.rgb += pbr_lightCalc(albedo, skylessRadiance * ao, skylessDir, viewDir, normal, fragData.diffuse, false, 0.0, specularAccu);
-
-			if (frx_isSkyDarkened()) {
-
-				vec3 skylessDarkenedDir = pbr_skylessDarkenedDir();
-				a.rgb += pbr_lightCalc(albedo, skylessRadiance * ao, skylessDarkenedDir, viewDir, normal, fragData.diffuse, false, 0.0, specularAccu);
-			}
-
-		}
-
-		// float skyAccess = smoothstep(0.89, 1.0, fragData.light.y);
-
-		float specularLuminance = frx_luminance(specularAccu);
-		float smoothness = (1-pbr_roughness);
-		bloom += specularLuminance * pbr_specularBloomStr * smoothness * smoothness;
-		if (translucent) {
-			a.a += specularLuminance * pbr_specularBloomStr;
-		}
-
-		a.rgb *= hdr_finalMult;
-		a.rgb = pow(hdr_reinhardJodieTonemap(a.rgb), vec3(1.0 / hdr_gamma));
-		// a.rgb = viewDir * 0.5 + 0.5;
-		// a.rgb = normal * 0.5 + 0.5;
+#endif
 	}
 
 	// PERF: varyings better here?

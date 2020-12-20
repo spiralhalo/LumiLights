@@ -1,35 +1,28 @@
-/*
- * Derived from Canvas (https://github.com/grondag/canvas) material_main shader, Apache 2.0 license.
- * Modified to add PBR varyings and support for texture-based bump map generation.
- * The modifications are released under the same license as Lumi Lights. See `README.MD` for license notice.
- */
+/******************************************************************************************************
+ * Derived from Canvas (https://github.com/grondag/canvas) material_main shader, Apache 2.0 license.  *
+ * Modified to add PBR varyings and support for texture-based bump map generation.                    *
+ * The modifications are licensed under the GNU Lesser General Public License version 3.              *
+ ******************************************************************************************************/
 
 #include canvas:shaders/internal/header.glsl
-#include frex:shaders/api/context.glsl
 #include canvas:shaders/internal/varying.glsl
 #include canvas:shaders/internal/vertex.glsl
 #include canvas:shaders/internal/flags.glsl
-#include frex:shaders/api/vertex.glsl
-#include frex:shaders/api/sampler.glsl
 #include canvas:shaders/internal/diffuse.glsl
 #include canvas:shaders/internal/program.glsl
+#include frex:shaders/api/context.glsl
+#include frex:shaders/api/vertex.glsl
+#include frex:shaders/api/sampler.glsl
+#include lumi:config.glsl
 #include lumi:shaders/api/context_bump.glsl
+#include lumi:shaders/internal/varying.glsl
+#include lumi:shaders/internal/main_vert.glsl
 
-#ifdef LUMI_BUMP
-float bump_resolution;
-vec2 uvN;
-vec2 uvT;
-vec2 uvB;
-#endif
-
-#define LUMI_PBR
 #include canvas:apitarget
 
 /******************************************************
   canvas:shaders/internal/material_main.vert
 ******************************************************/
-
-varying vec3 pbrv_viewPos;
 
 void _cv_startVertex(inout frx_VertexData data, in int cv_programId) {
 #include canvas:startvertex
@@ -58,18 +51,14 @@ void main() {
 	_cv_setupProgram();
 
 #ifdef LUMI_BUMP
-	bump_resolution = 1.0;
+	startBump();
 #endif
 
 	int cv_programId = _cv_vertexProgramId();
 	_cv_startVertex(data, cv_programId);
 
 #ifdef LUMI_BUMP
-	float bumpSample = 0.015625 * bump_resolution;
-
-	uvN = clamp(data.spriteUV + vec2(-bumpSample, bumpSample), 0.0, 1.0);
-	uvT = clamp(data.spriteUV + vec2(bumpSample, 0), 0.0, 1.0);
-	uvB = clamp(data.spriteUV - vec2(0, bumpSample), 0.0, 1.0);
+	setupBump();
 #endif
 
 	if (_cvu_atlas[_CV_SPRITE_INFO_TEXTURE_SIZE] != 0.0) {
@@ -88,11 +77,9 @@ void main() {
 
 		data.spriteUV = spriteBounds.xy + data.spriteUV * spriteBounds.zw;
 
-#ifdef LUMI_BUMP
-		uvN = spriteBounds.xy + uvN * spriteBounds.zw;
-		uvT = spriteBounds.xy + uvT * spriteBounds.zw;
-		uvB = spriteBounds.xy + uvB * spriteBounds.zw;
-#endif
+	#ifdef LUMI_BUMP
+		endBump(spriteBounds);
+	#endif
 	}
 
 	data.spriteUV = _cv_textureCoord(data.spriteUV, 0);
@@ -101,7 +88,9 @@ void main() {
 	gl_ClipVertex = viewCoord;
 	gl_FogFragCoord = length(viewCoord.xyz);
 
-	pbrv_viewPos = viewCoord.xyz;
+#ifdef LUMI_PBR
+	setPBRVaryings(viewCoord);
+#endif
 
 	//data.normal *= gl_NormalMatrix;
 	data.vertex = gl_ModelViewProjectionMatrix * data.vertex;
