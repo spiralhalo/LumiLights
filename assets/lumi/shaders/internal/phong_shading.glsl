@@ -68,7 +68,4 @@ void phong_shading(in frx_FragmentData fragData, inout vec4 a, inout float bloom
 
     a.rgb *= light;
     a.rgb += specular;
-
-    a.rgb *= hdr_finalMult;
-    tonemap(a);
 }

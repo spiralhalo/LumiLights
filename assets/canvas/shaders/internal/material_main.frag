@@ -106,6 +106,8 @@ void main() {
 	#else
 		phong_shading(fragData, a, bloom, userBrightness, translucent);
 	#endif
+		a.rgb *= hdr_finalMult;
+		tonemap(a);
 #endif
 	}
 

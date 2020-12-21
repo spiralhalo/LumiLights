@@ -132,7 +132,4 @@ void pbr_shading(in frx_FragmentData fragData, inout vec4 a, inout float bloom, 
     if (translucent) {
         a.a += specularLuminance * pbr_specularBloomStr;
     }
-
-    a.rgb *= hdr_finalMult;
-    tonemap(a);
 }
