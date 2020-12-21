@@ -10,7 +10,8 @@
 #define TONEMAP_MODE 0
 
 /* Comment out to disable PBR
-*******************************/
+ * Disabling PBR can increase performance on low end machines
+ **************************************************************/
 #define LUMI_PBR
 // #define LUMI_PBR // this is example of commented out config
 

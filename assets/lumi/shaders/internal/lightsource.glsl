@@ -33,10 +33,14 @@ const float hdr_relAmbient = 0.09;
 const float hdr_zWobbleDefault = 0.1;
 const vec3 blockColor = vec3(1.0, 0.875, 0.75);
 #if TONEMAP_MODE == TONEMAP_VIBRANT
-const vec3 sunColor = vec3(1.0, 1.0, 1.0);
+const vec3 preSunColor = vec3(1.0, 1.0, 1.0);
 #else
-const vec3 sunColor = vec3(1.0, 1.0, 0.8);
+const vec3 preSunColor = vec3(1.0, 1.0, 0.8);
 #endif
+const vec3 preSunriseColor = vec3(1.0, 0.8, 0.4);
+const vec3 preSunsetColor = vec3(1.0, 0.6, 0.4);
+const vec3 nvColor = vec3(0.63, 0.55, 0.64);
+// const vec3 nvColorPurple = vec3(0.6, 0.5, 0.7);
 
 /*  BLOCK LIGHT
  *******************************************************/
@@ -142,10 +146,15 @@ vec3 l2_skylessRadiance(float userBrightness) {
  *******************************************************/
 
 vec3 l2_baseAmbient(float userBrightness){
-	if(frx_worldHasSkylight()){
-		return vec3(0.1) * mix(hdr_baseMinStr, hdr_baseMaxStr, userBrightness);
+	if (frx_playerHasNightVision()) {
+		//userBrightness is maxed out by night vision so it's useless here
+		return hdr_gammaAdjust(nvColor) * hdr_blockMaxStr;
 	} else {
-		return l2_dimensionColor() * mix(hdr_baseMinStr, hdr_baseMaxStr, userBrightness);
+		if (frx_worldHasSkylight()) {
+			return vec3(0.1) * mix(hdr_baseMinStr, hdr_baseMaxStr, userBrightness);
+		} else {
+			return l2_dimensionColor() * mix(hdr_baseMinStr, hdr_baseMaxStr, userBrightness);
+		}
 	}
 }
 
@@ -153,23 +162,19 @@ vec3 l2_baseAmbient(float userBrightness){
  *******************************************************/
 
 vec3 l2_sunColor(float time){
-	vec3 sunColor = hdr_gammaAdjust(sunColor) * hdr_sunStr;
-	vec3 sunriseColor = hdr_gammaAdjust(vec3(1.0, 0.8, 0.4)) * hdr_sunStr;
-	vec3 sunsetColor = hdr_gammaAdjust(vec3(1.0, 0.6, 0.4)) * hdr_sunStr;
+	vec3 sunColor;
 	if(time > 0.94){
-		sunColor = sunriseColor;
-	} else if(time > 0.56){
-		sunColor = vec3(0); // pitch black at night
-	} else if(time > 0.54){
-		sunColor = mix(sunsetColor, vec3(0), l2_clampScale(0.54, 0.56, time));
+		sunColor = mix(hdr_gammaAdjust(preSunriseColor), vec3(0), l2_clampScale(0.96, 0.94, time));
 	} else if(time > 0.5){
-		sunColor = sunsetColor;
+		sunColor = mix(hdr_gammaAdjust(preSunsetColor), vec3(0), l2_clampScale(0.54, 0.56, time));
 	} else if(time > 0.48){
-		sunColor = mix(sunColor, sunsetColor, l2_clampScale(0.48, 0.5, time));
+		sunColor = mix(hdr_gammaAdjust(preSunColor), hdr_gammaAdjust(preSunsetColor), l2_clampScale(0.48, 0.5, time));
 	} else if(time < 0.02){
-		sunColor = mix(sunColor, sunriseColor, l2_clampScale(0.02, 0, time));
+		sunColor = mix(hdr_gammaAdjust(preSunColor), hdr_gammaAdjust(preSunriseColor), l2_clampScale(0.02, 0, time));
+	} else {
+		sunColor = hdr_gammaAdjust(preSunColor);
 	}
-	return sunColor;
+	return sunColor * hdr_sunStr;
 }
 
 vec3 l2_vanillaSunDir(in float time, float zWobble){

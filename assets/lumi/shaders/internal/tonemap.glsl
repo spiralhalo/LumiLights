@@ -16,7 +16,7 @@ vec3 hdr_vibrantTonemap(in vec3 hdrColor){
 
 void tonemap(inout vec4 a) {
 #if LUMI_Tonemap == LUMI_Tonemap_Film
-    a.rgb = frx_toGamma(frx_toneMap(a.rgb));
+    a.rgb = pow(frx_toneMap(a.rgb), vec3(1.0 / hdr_gamma));
 #elif LUMI_Tonemap == LUMI_Tonemap_Vibrant
     a.rgb = pow(hdr_vibrantTonemap(a.rgb), vec3(1.0 / hdr_gamma));
 #else
