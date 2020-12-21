@@ -37,6 +37,8 @@ const vec3 preSunColor = vec3(1.0, 1.0, 1.0);
 #else
 const vec3 preSunColor = vec3(1.0, 1.0, 0.8);
 #endif
+const vec3 preSunriseColor = vec3(1.0, 0.8, 0.4);
+const vec3 preSunsetColor = vec3(1.0, 0.6, 0.4);
 const vec3 nvColor = vec3(0.63, 0.55, 0.64);
 // const vec3 nvColorPurple = vec3(0.6, 0.5, 0.7);
 
@@ -160,23 +162,19 @@ vec3 l2_baseAmbient(float userBrightness){
  *******************************************************/
 
 vec3 l2_sunColor(float time){
-	vec3 sunColor = hdr_gammaAdjust(preSunColor) * hdr_sunStr;
-	vec3 sunriseColor = hdr_gammaAdjust(vec3(1.0, 0.8, 0.4)) * hdr_sunStr;
-	vec3 sunsetColor = hdr_gammaAdjust(vec3(1.0, 0.6, 0.4)) * hdr_sunStr;
+	vec3 sunColor;
 	if(time > 0.94){
-		sunColor = sunriseColor;
-	} else if(time > 0.56){
-		sunColor = vec3(0); // pitch black at night
-	} else if(time > 0.54){
-		sunColor = mix(sunsetColor, vec3(0), l2_clampScale(0.54, 0.56, time));
+		sunColor = mix(hdr_gammaAdjust(preSunriseColor), vec3(0), l2_clampScale(0.96, 0.94, time));
 	} else if(time > 0.5){
-		sunColor = sunsetColor;
+		sunColor = mix(hdr_gammaAdjust(preSunsetColor), vec3(0), l2_clampScale(0.54, 0.56, time));
 	} else if(time > 0.48){
-		sunColor = mix(sunColor, sunsetColor, l2_clampScale(0.48, 0.5, time));
+		sunColor = mix(hdr_gammaAdjust(preSunColor), hdr_gammaAdjust(preSunsetColor), l2_clampScale(0.48, 0.5, time));
 	} else if(time < 0.02){
-		sunColor = mix(sunColor, sunriseColor, l2_clampScale(0.02, 0, time));
+		sunColor = mix(hdr_gammaAdjust(preSunColor), hdr_gammaAdjust(preSunriseColor), l2_clampScale(0.02, 0, time));
+	} else {
+		sunColor = hdr_gammaAdjust(preSunColor);
 	}
-	return sunColor;
+	return sunColor * hdr_sunStr;
 }
 
 vec3 l2_vanillaSunDir(in float time, float zWobble){
