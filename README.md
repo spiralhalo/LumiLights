@@ -13,15 +13,17 @@ A shader pack for Canvas with PBR Forward Rendering Demo.
 
 ## Using
 
-Download the latest version of [Canvas](https://github.com/grondag/canvas/releases). Please [open an issue](https://github.com/spiralhalo/LumiLightsPBR/issues) if Lumi Lights does not work with the latest version of Canvas.
+Download the latest version of [CANVAS](https://github.com/grondag/canvas/releases).
 
-Download the latest **unified** [release of Lumi Lights](https://github.com/spiralhalo/LumiLightsPBR/releases).
+Download the latest **unified** [RELEASE](https://github.com/spiralhalo/LumiLightsPBR/releases) of Lumi Lights.
 
 **PBR Shading mode is enabled by default.** You can disable it by configuring the shader (see "Configuring" below).
 
-PBR Shading mode is meant to be used with the [Lumi PBR Extension pack](https://github.com/spiralhalo/LumiPBRExt) for maximum effect.
+PBR Shading mode is meant to be used with [LUMI PBR EXT](https://github.com/spiralhalo/LumiPBRExt) for maximum effect.
 
-[Lumi PBR Compat pack](https://github.com/spiralhalo/LumiPBRCompat) is also available for third party mod support.
+[LUMI PBR COMPACT](https://github.com/spiralhalo/LumiPBRCompat) is also available for third party mod support.
+
+*Please [open an issue](https://github.com/spiralhalo/LumiLightsPBR/issues) if Lumi Lights does not work with the latest version of Canvas.
 
 ## Configuring
 
