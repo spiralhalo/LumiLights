@@ -74,7 +74,10 @@ void pbr_shading(in frx_FragmentData fragData, inout vec4 a, inout float bloom, 
 
     vec3 normal = fragData.vertexNormal * frx_normalModelMatrix();
 
-    vec3 specularAccu = vec3(0.0);  
+    vec3 specularAccu = vec3(0.0);
+#ifdef DRAMATIC_LIGHTS
+    float dramaticBloom;
+#endif
 
 #if HANDHELD_LIGHT_RADIUS != 0
     if (frx_heldLight().w > 0) {
@@ -103,8 +106,13 @@ void pbr_shading(in frx_FragmentData fragData, inout vec4 a, inout float bloom, 
             vec3 sunDir = l2_vanillaSunDir(frx_worldTime(), 0.0);
             vec3 skyRadiance = l2_skyAmbient(fragData.light.y, frx_worldTime(), frx_ambientIntensity());
 
+            vec3 sunIrradiance = pbr_lightCalc(albedo, sunRadiance * ao, sunDir, viewDir, normal, fragData.diffuse, false, 0.15, specularAccu);
+        #ifdef DRAMATIC_LIGHTS
+            dramaticBloom = frx_luminance(sunIrradiance) * l2_sunHorizonScale(frx_worldTime());
+        #endif
+
+            a.rgb += sunIrradiance;
             a.rgb += pbr_lightCalc(albedo, moonRadiance * ao, moonDir, viewDir, normal, fragData.diffuse, false, 0.15, specularAccu);
-            a.rgb += pbr_lightCalc(albedo, sunRadiance * ao, sunDir, viewDir, normal, fragData.diffuse, false, 0.15, specularAccu);
             a.rgb += pbr_lightCalc(albedo, skyRadiance * ao, ambientDir, viewDir, normal, fragData.diffuse, true, 0.0, specularAccu);
 
         }
@@ -129,6 +137,9 @@ void pbr_shading(in frx_FragmentData fragData, inout vec4 a, inout float bloom, 
     float specularLuminance = frx_luminance(specularAccu);
     float smoothness = (1-pbr_roughness);
     bloom += specularLuminance * pbr_specularBloomStr * smoothness * smoothness;
+#ifdef DRAMATIC_LIGHTS
+    bloom += dramaticBloom * hdr_dramaticStr;
+#endif
     if (translucent) {
         a.a += specularLuminance * pbr_specularBloomStr;
     }

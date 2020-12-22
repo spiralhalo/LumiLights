@@ -26,6 +26,10 @@
 *****************************************/
 // #define WATER_VERTEX_WAVY
 
+/* Uncomment to enable sunlight bloom during sunrise and sunset
+*****************************************************************/
+// #define DRAMATIC_LIGHTS
+
 /* Comment out to disable bloom on the sky
 ********************************************/
 #define APPLY_SKYBLOOM
