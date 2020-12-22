@@ -18,6 +18,7 @@ const float hdr_baseMinStr = 0.01;
 const float hdr_baseMaxStr = 0.8;
 const float hdr_emissiveStr = 1;
 const float hdr_relAmbient = 0.2;
+const float hdr_dramaticStr = 0.5;
 #else
 const float hdr_sunStr = 2;
 const float hdr_moonStr = 0.4;
@@ -29,6 +30,7 @@ const float hdr_baseMinStr = 0.0;
 const float hdr_baseMaxStr = 0.25;
 const float hdr_emissiveStr = 1;
 const float hdr_relAmbient = 0.09;
+const float hdr_dramaticStr = 0.3;
 #endif
 const float hdr_zWobbleDefault = 0.1;
 const vec3 blockColor = vec3(1.0, 0.875, 0.75);
@@ -175,6 +177,20 @@ vec3 l2_sunColor(float time){
 		sunColor = hdr_gammaAdjust(preSunColor);
 	}
 	return sunColor * hdr_sunStr;
+}
+
+float l2_sunHorizonScale(float time){
+	if(time > 0.94){
+		return frx_smootherstep(0.94, 0.96, time);
+	} else if(time > 0.5){
+		return frx_smootherstep(0.56, 0.54, time);
+	} else if(time > 0.48){
+		return frx_smootherstep(0.48, 0.5, time);
+	} else if(time < 0.02){
+		return frx_smootherstep(0.02, 0, time);
+	} else {
+		return 0.0;
+	}
 }
 
 vec3 l2_vanillaSunDir(in float time, float zWobble){
