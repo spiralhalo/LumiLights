@@ -75,7 +75,7 @@ void pbr_shading(in frx_FragmentData fragData, inout vec4 a, inout float bloom, 
     vec3 normal = fragData.vertexNormal * frx_normalModelMatrix();
 
     vec3 specularAccu = vec3(0.0);
-#ifdef DRAMATIC_LIGHTS
+#ifdef LUMI_ApplyDramaticBloom
     float dramaticBloom;
 #endif
 
@@ -107,7 +107,7 @@ void pbr_shading(in frx_FragmentData fragData, inout vec4 a, inout float bloom, 
             vec3 skyRadiance = l2_skyAmbient(fragData.light.y, frx_worldTime(), frx_ambientIntensity());
 
             vec3 sunIrradiance = pbr_lightCalc(albedo, sunRadiance * ao, sunDir, viewDir, normal, fragData.diffuse, false, 0.15, specularAccu);
-        #ifdef DRAMATIC_LIGHTS
+        #ifdef LUMI_ApplyDramaticBloom
             dramaticBloom = frx_luminance(sunIrradiance) * l2_sunHorizonScale(frx_worldTime());
         #endif
 
@@ -137,7 +137,7 @@ void pbr_shading(in frx_FragmentData fragData, inout vec4 a, inout float bloom, 
     float specularLuminance = frx_luminance(specularAccu);
     float smoothness = (1-pbr_roughness);
     bloom += specularLuminance * pbr_specularBloomStr * smoothness * smoothness;
-#ifdef DRAMATIC_LIGHTS
+#ifdef LUMI_ApplyDramaticBloom
     bloom += dramaticBloom * hdr_dramaticStr;
 #endif
     if (translucent) {

@@ -4,6 +4,7 @@
   "conf": {
     "PBR": true,
     "WavyWaterModel": false,
+    "ApplyDramaticBloom": false,
     "ApplySkyBloom": true,
     "Tonemap": [
       "Default",

@@ -65,7 +65,7 @@ void phong_shading(in frx_FragmentData fragData, inout vec4 a, inout float bloom
         a.a += specularLuminance;
         bloom += specularLuminance;
     }
-#ifdef DRAMATIC_LIGHTS
+#ifdef LUMI_ApplyDramaticBloom
     bloom += frx_luminance(sun) * l2_sunHorizonScale(frx_worldTime()) * hdr_dramaticStr;
 #endif
 
