@@ -8,6 +8,7 @@
  *******************************************************/
 
 #ifndef VERTEX_SHADER
+#define _bump_height(raw) frx_smootherstep(0, 1, pow(raw, 1 + raw * raw))
 vec3 bump_normal(sampler2D tex, vec3 normal, vec2 uvn, vec2 uvt, vec2 uvb)
 {
     vec3 tangentMove = l2_tangent;
