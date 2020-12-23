@@ -7,7 +7,7 @@
  *  published by the Free Software Foundation, Inc.    *
  *******************************************************/
 
-#ifdef LUMI_PBR
+#ifdef LUMI_PBRX
 const float hdr_sunStr = 5;
 const float hdr_moonStr = 0.4;
 const float hdr_blockMinStr = 2;
@@ -17,10 +17,10 @@ const float hdr_skylessStr = 0.2;
 const float hdr_baseMinStr = 0.01;
 const float hdr_baseMaxStr = 0.8;
 const float hdr_emissiveStr = 1;
-const float hdr_relAmbient = 0.2;
+const float hdr_relAmbient = 0.1;
 const float hdr_dramaticStr = 0.5;
 #else
-const float hdr_sunStr = 2;
+const float hdr_sunStr = 1.8;
 const float hdr_moonStr = 0.4;
 const float hdr_blockMinStr = 1.0;
 const float hdr_blockMaxStr = 1.4;
@@ -80,21 +80,25 @@ float l2_skyLight(float skyLight, float intensity) {
 	return hdr_gammaAdjust(sl) * intensity;
 }
 
+const vec3 preAmbient = vec3(0.6, 0.9, 1.0);
+const vec3 preSunriseAmbient = vec3(1.0, 0.8, 0.4);
+const vec3 preSunsetAmbient = vec3(1.0, 0.6, 0.2);
+const vec3 preNightAmbient = vec3(1.0, 1.0, 2.0);
+
 vec3 l2_ambientColor(float time) {
-	vec3 ambientColor = hdr_gammaAdjust(vec3(0.6, 0.9, 1.0)) * hdr_sunStr * hdr_relAmbient;
-	vec3 sunriseAmbient = hdr_gammaAdjust(vec3(1.0, 0.8, 0.4)) * hdr_sunStr * hdr_relAmbient;
-	vec3 sunsetAmbient = hdr_gammaAdjust(vec3(1.0, 0.6, 0.2)) * hdr_sunStr * hdr_relAmbient;
-	vec3 nightAmbient = hdr_gammaAdjust(vec3(1.0, 1.0, 2.0)) * hdr_moonStr * hdr_relAmbient;
+	vec3 ambientColor;
 	if(time > 0.94){
-		ambientColor = mix(nightAmbient, sunriseAmbient, l2_clampScale(0.94, 0.98, time));
+		ambientColor = mix(hdr_gammaAdjust(preNightAmbient) * hdr_moonStr, hdr_gammaAdjust(preSunriseAmbient) * hdr_sunStr, l2_clampScale(0.94, 0.98, time));
 	} else if(time > 0.52){
-		ambientColor = mix(sunsetAmbient, nightAmbient, l2_clampScale(0.52, 0.56, time));
+		ambientColor = mix(hdr_gammaAdjust(preSunsetAmbient) * hdr_sunStr, hdr_gammaAdjust(preNightAmbient) * hdr_moonStr, l2_clampScale(0.52, 0.56, time));
 	} else if(time > 0.48){
-		ambientColor = mix(ambientColor, sunsetAmbient, l2_clampScale(0.48, 0.5, time));
+		ambientColor = mix(hdr_gammaAdjust(preAmbient) * hdr_sunStr, hdr_gammaAdjust(preSunsetAmbient) * hdr_sunStr, l2_clampScale(0.48, 0.5, time));
 	} else if(time < 0.02){
-		ambientColor = mix(ambientColor, sunriseAmbient, l2_clampScale(0.02, 0, time));
+		ambientColor = mix(hdr_gammaAdjust(preAmbient) * hdr_sunStr, hdr_gammaAdjust(preSunriseAmbient) * hdr_sunStr, l2_clampScale(0.02, 0, time));
+	} else {
+		ambientColor = hdr_gammaAdjust(preAmbient) * hdr_sunStr;
 	}
-	return ambientColor;
+	return ambientColor * hdr_relAmbient;
 }
 
 vec3 l2_skyAmbient(float skyLight, float time, float intensity) {

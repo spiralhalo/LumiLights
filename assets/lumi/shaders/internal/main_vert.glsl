@@ -32,6 +32,26 @@ void endBump(vec4 spriteBounds) {
 }
 #endif
 
-void setVaryings(vec4 viewCoord) {
+const mat4 _tRotm = mat4(
+0,  0, -1,  0,
+0,  1,  0,  0,
+1,  0,  0,  0,
+0,  0,  0,  1 );
+
+vec3 _tangent(vec3 normal)
+{
+    vec3 aaNormal = vec3(normal.x + 0.01, 0, normal.z + 0.01);
+        aaNormal = normalize(aaNormal);
+    return (_tRotm * vec4(aaNormal, 0.0)).xyz;
+}
+
+vec3 _bitangent(vec3 normal, vec3 tangent)
+{
+    return cross(normal, tangent);
+}
+
+void setVaryings(vec4 viewCoord, vec3 normal) {
     l2_viewPos = viewCoord.xyz;
+	l2_tangent = _tangent(normal);
+	l2_bitangent = _bitangent(normal, l2_tangent);
 }

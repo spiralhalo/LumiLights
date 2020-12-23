@@ -5,7 +5,7 @@
 #include lumi:shaders/lib/water.glsl
 
 void frx_startFragment(inout frx_FragmentData fragData) {
-#ifdef LUMI_PBR
+#ifdef LUMI_PBRX
 	/* PBR PARAMS */
 	pbr_f0 = vec3(0.02);
     pbr_roughness = 0.05;
@@ -39,5 +39,5 @@ void frx_startFragment(inout frx_FragmentData fragData) {
     vec3 up = fragData.vertexNormal.xyz;// * (1.0 + texAmplitude);
 	vec3 samplePos = frx_var0.xyz;
 	// samplePos = floor(samplePos) + floor(fract(samplePos) * 16) / 16;
-	fragData.vertexNormal = ww_normals(up, samplePos, waveSpeed, scale, amplitude, stretch, moveSpeed);
+	fragData.vertexNormal = ww_normals(up, l2_tangent, l2_bitangent, samplePos, waveSpeed, scale, amplitude, stretch, moveSpeed);
 }

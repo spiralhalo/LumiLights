@@ -2,10 +2,7 @@
  *  lumi:shaders/lib/pbr.glsl                          *
  *******************************************************/
 
-float pbr_dot(vec3 a, vec3 b)
-{
-    return clamp(dot(a, b), 0.0, 1.0);
-}
+#define pbr_dot(a, b) clamp(dot(a, b), 0.0, 1.0)
 
 float pbr_distributionGGX(vec3 N, vec3 H, float roughness)
 {

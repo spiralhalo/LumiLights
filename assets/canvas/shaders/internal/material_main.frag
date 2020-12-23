@@ -22,6 +22,9 @@
 #include frex:shaders/lib/math.glsl
 #include frex:shaders/lib/color.glsl
 #include respackopts:config_supplier
+#ifdef LUMI_PBR
+	#define LUMI_PBRX
+#endif
 #include lumi:shaders/api/pbr_frag.glsl
 #include lumi:shaders/api/context_bump.glsl
 #include lumi:shaders/lib/pbr.glsl
@@ -62,7 +65,7 @@ void main() {
 	_cvv_lightcoord
 	);
 
-#ifdef LUMI_PBR
+#ifdef LUMI_PBRX
 	pbr_roughness = 1.0;
 	pbr_metallic = 0.0;
 	pbr_f0 = vec3(-1.0);
@@ -101,7 +104,7 @@ void main() {
 			// 	userBrightness = smoothstep(0.18/*0.271 no true darkness in the end*/, 0.685, brightnessBase);
 			// }
 		}
-	#ifdef LUMI_PBR
+	#ifdef LUMI_PBRX
 		pbr_shading(fragData, a, bloom, userBrightness, translucent);
 	#else
 		phong_shading(fragData, a, bloom, userBrightness, translucent);
