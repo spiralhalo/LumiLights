@@ -88,7 +88,7 @@ void main() {
 	gl_ClipVertex = viewCoord;
 	gl_FogFragCoord = length(viewCoord.xyz);
 
-	setVaryings(viewCoord, data.normal);
+	setVaryings(viewCoord, data.normal * frx_normalModelMatrix());
 
 	//data.normal *= gl_NormalMatrix;
 	data.vertex = gl_ModelViewProjectionMatrix * data.vertex;
