@@ -5,7 +5,7 @@
 #include lumi:shaders/lib/water.glsl
 
 void frx_startFragment(inout frx_FragmentData fragData) {
-#ifdef LUMI_PBR
+#ifdef LUMI_PBRX
 	/* PBR PARAMS */
 	pbr_f0 = vec3(0.02);
     pbr_roughness = 0.05;

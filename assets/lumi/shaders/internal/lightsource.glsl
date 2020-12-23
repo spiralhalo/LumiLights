@@ -7,7 +7,7 @@
  *  published by the Free Software Foundation, Inc.    *
  *******************************************************/
 
-#ifdef LUMI_PBR
+#ifdef LUMI_PBRX
 const float hdr_sunStr = 5;
 const float hdr_moonStr = 0.4;
 const float hdr_blockMinStr = 2;

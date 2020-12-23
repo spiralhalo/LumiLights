@@ -14,6 +14,9 @@
 #include frex:shaders/api/vertex.glsl
 #include frex:shaders/api/sampler.glsl
 #include lumi:config.glsl
+#ifdef LUMI_PBR
+	#define LUMI_PBRX
+#endif
 #include lumi:shaders/api/context_bump.glsl
 #include lumi:shaders/internal/varying.glsl
 #include lumi:shaders/internal/main_vert.glsl
