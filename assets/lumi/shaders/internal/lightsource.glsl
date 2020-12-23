@@ -17,10 +17,10 @@ const float hdr_skylessStr = 0.2;
 const float hdr_baseMinStr = 0.01;
 const float hdr_baseMaxStr = 0.8;
 const float hdr_emissiveStr = 1;
-const float hdr_relAmbient = 0.2;
+const float hdr_relAmbient = 0.1;
 const float hdr_dramaticStr = 0.5;
 #else
-const float hdr_sunStr = 2;
+const float hdr_sunStr = 1.8;
 const float hdr_moonStr = 0.4;
 const float hdr_blockMinStr = 1.0;
 const float hdr_blockMaxStr = 1.4;
