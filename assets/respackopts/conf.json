@@ -2,7 +2,6 @@
   "id": "LUMI",
   "version": 1,
   "conf": {
-    "UseConfig": true,
     "PBR": true,
     "WavyWaterModel": false,
     "ApplyDramaticBloom": false,
@@ -16,6 +15,7 @@
       "Disabled",
       "Normal",
       "ViewDir"
-    ]
+    ],
+    "SystemMustEnable": true
   }
 }
