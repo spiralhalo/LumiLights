@@ -7,7 +7,7 @@
  *******************************/
 
 #include respackopts:config_supplier
-#ifndef LUMI_UseConfig
+#ifndef LUMI_SystemMustEnable
 
 #define LUMI_Tonemap_Default 0
 #define LUMI_Tonemap_Vibrant 1
