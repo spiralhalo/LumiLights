@@ -23,7 +23,7 @@ varying vec2 _cvv_texcoord;
 void main() {
 	vec4 e = texture2D(_cvu_emissive, _cvv_texcoord);
 
-#ifdef APPLY_SKYBLOOM
+#ifdef LUMI_ApplySkyBloom
 	bool sky = e.g == 0.0;
 	float bloom = sky ? hdr_skyBloom : e.r;
 #else 

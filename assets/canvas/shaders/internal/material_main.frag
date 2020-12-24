@@ -88,7 +88,7 @@ void main() {
 		}
 #endif
 	} else {
-#if DEBUG_MODE != DEBUG_DISABLED
+#if LUMI_DebugMode != LUMI_DebugMode_Disabled
 		debug_shading(fragData, a);
 #else
 		float userBrightness;

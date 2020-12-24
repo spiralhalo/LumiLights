@@ -3,12 +3,10 @@
 #include frex:shaders/lib/noise/noise3d.glsl
 #include lumi:shaders/api/water_param.glsl
 
-// #define WATER_VERTEX_WAVY
-
 void frx_startVertex(inout frx_VertexData data) {
     frx_var0.xyz = data.vertex.xyz + frx_modelOriginWorldPos();
-    #ifdef WATER_VERTEX_WAVY
+#ifdef LUMI_WavyWaterModel
     float amplitude = 0.03;
     data.vertex.y += snoise(vec3(frx_var0.x, frx_renderSeconds(), frx_var0.z)) * amplitude;
-    #endif
+#endif
 }

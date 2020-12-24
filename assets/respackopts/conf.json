@@ -1,0 +1,21 @@
+{
+  "id": "LUMI",
+  "version": 1,
+  "conf": {
+    "UseConfig": true,
+    "PBR": true,
+    "WavyWaterModel": false,
+    "ApplyDramaticBloom": false,
+    "ApplySkyBloom": true,
+    "Tonemap": [
+      "Default",
+      "Vibrant",
+      "Film"
+    ],
+    "DebugMode": [
+      "Disabled",
+      "Normal",
+      "ViewDir"
+    ]
+  }
+}

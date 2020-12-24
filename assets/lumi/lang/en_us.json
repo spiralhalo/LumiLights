@@ -1,0 +1,11 @@
+{
+    "respackopts.title.LUMI": "Lumi Lights",
+    "respackopts.field.LUMI.UseConfig": "Enable configurations",
+    "respackopts.field.LUMI.PBR": "Enable PBR mode",
+    "respackopts.field.LUMI.WavyWaterModel": "Wavy water model",
+    "respackopts.field.LUMI.ApplyDramaticBloom": "Sun-lit bloom during sunrise and sunset",
+    "respackopts.field.LUMI.ApplySkyBloom": "Sky bloom",
+    "respackopts.field.LUMI.Tonemap": "Tonemapping",
+    "respackopts.field.LUMI.DebugMode": "Debug mode"
+}
+  
