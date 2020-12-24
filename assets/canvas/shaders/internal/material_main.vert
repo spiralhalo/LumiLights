@@ -13,7 +13,7 @@
 #include frex:shaders/api/context.glsl
 #include frex:shaders/api/vertex.glsl
 #include frex:shaders/api/sampler.glsl
-#include respackopts:config_supplier
+#include lumi:config.glsl
 #ifdef LUMI_PBR
 	#define LUMI_PBRX
 #endif

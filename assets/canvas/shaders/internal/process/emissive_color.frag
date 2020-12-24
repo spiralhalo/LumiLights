@@ -8,7 +8,7 @@
 #include frex:shaders/lib/color.glsl
 #include frex:shaders/lib/sample.glsl
 #include frex:shaders/lib/math.glsl
-#include respackopts:config_supplier
+#include lumi:config.glsl
 #include lumi:shaders/internal/skybloom.glsl
 
 /******************************************************

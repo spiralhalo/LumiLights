@@ -21,7 +21,7 @@
 #include frex:shaders/api/sampler.glsl
 #include frex:shaders/lib/math.glsl
 #include frex:shaders/lib/color.glsl
-#include respackopts:config_supplier
+#include lumi:config.glsl
 #ifdef LUMI_PBR
 	#define LUMI_PBRX
 #endif
