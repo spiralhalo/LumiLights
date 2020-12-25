@@ -11,8 +11,11 @@
 #define _bump_height(raw) frx_smootherstep(0, 1, pow(raw, 1 + raw * raw))
 vec3 bump_normal(sampler2D tex, vec3 normal, vec2 uvn, vec2 uvt, vec2 uvb)
 {
-    vec3 tangentMove = l2_tangent;
-    vec3 bitangentMove = l2_bitangent;
+    vec3 tangentMove = bump_tangent;
+    vec3 bitangentMove = cross(normal, bump_tangent);
+
+    if (uvn.x > bump_topRightUv.x) { uvt = uvn; }
+    if (uvn.y < bump_topRightUv.y) { uvb = uvn; }
 
     vec4 texel     = texture2D(tex, uvn, _cv_getFlag(_CV_FLAG_UNMIPPED) * -4.0);
     vec3 origin    = _bump_height(frx_luminance(texel.rgb)) * normal;

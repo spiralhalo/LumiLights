@@ -3,5 +3,8 @@
  ***********************************************************/
 
 varying vec3 l2_viewPos;
-varying vec3 l2_tangent;
-varying vec3 l2_bitangent;
+
+#ifdef LUMI_BUMP
+varying vec3 bump_tangent;
+varying vec2 bump_topRightUv;
+#endif

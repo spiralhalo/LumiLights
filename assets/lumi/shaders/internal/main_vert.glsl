@@ -14,21 +14,23 @@ vec2 uvT;
 vec2 uvB;
 
 void startBump() {
-	bump_resolution = 1.0;
+    bump_resolution = 1.0;
 }
 
 void setupBump(frx_VertexData data) {
-	float bumpSample = 0.015625 * bump_resolution;
+    float bumpSample = 0.015625 * bump_resolution;
 
-	uvN = clamp(data.spriteUV + vec2(-bumpSample, bumpSample), 0.0, 1.0);
-	uvT = clamp(data.spriteUV + vec2(bumpSample, 0), 0.0, 1.0);
-	uvB = clamp(data.spriteUV - vec2(0, bumpSample), 0.0, 1.0);
+    uvN = data.spriteUV;
+    uvT = data.spriteUV + vec2(bumpSample, 0);
+    uvB = data.spriteUV - vec2(0, bumpSample);
+    bump_topRightUv = vec2(1.0, 0.0) + vec2(-bumpSample, bumpSample);
 }
 
 void endBump(vec4 spriteBounds) {
     uvN = spriteBounds.xy + uvN * spriteBounds.zw;
     uvT = spriteBounds.xy + uvT * spriteBounds.zw;
     uvB = spriteBounds.xy + uvB * spriteBounds.zw;
+    bump_topRightUv = spriteBounds.xy + topRightUv * spriteBounds.zw;
 }
 #endif
 
@@ -45,13 +47,9 @@ vec3 _tangent(vec3 normal)
     return (_tRotm * vec4(aaNormal, 0.0)).xyz;
 }
 
-vec3 _bitangent(vec3 normal, vec3 tangent)
-{
-    return cross(normal, tangent);
-}
-
 void setVaryings(vec4 viewCoord, vec3 normal) {
     l2_viewPos = viewCoord.xyz;
-	l2_tangent = _tangent(normal);
-	l2_bitangent = _bitangent(normal, l2_tangent);
+    #ifdef LUMI_BUMP
+    bump_tangent = _tangent(normal);
+    #endif
 }
