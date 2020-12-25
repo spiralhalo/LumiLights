@@ -15,11 +15,14 @@ vec3 hdr_vibrantTonemap(in vec3 hdrColor){
 #endif
 
 void tonemap(inout vec4 a) {
+    vec3 c = a.rgb;
 #if LUMI_Tonemap == LUMI_Tonemap_Film
-    a.rgb = pow(frx_toneMap(a.rgb), vec3(1.0 / hdr_gamma));
+    c = frx_toneMap(c);
 #elif LUMI_Tonemap == LUMI_Tonemap_Vibrant
-    a.rgb = pow(hdr_vibrantTonemap(a.rgb), vec3(1.0 / hdr_gamma));
+    c = hdr_vibrantTonemap(c);
 #else
-    a.rgb = pow(hdr_reinhardJodieTonemap(a.rgb), vec3(1.0 / hdr_gamma));
+    c = hdr_reinhardJodieTonemap(c);
 #endif
+    // Somehow the film tonemap requires clamping. I don't understand..
+    a.rgb = pow(clamp(c, 0.0, 1.0), vec3(1.0 / hdr_gamma));
 }

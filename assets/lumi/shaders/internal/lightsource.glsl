@@ -7,6 +7,12 @@
  *  published by the Free Software Foundation, Inc.    *
  *******************************************************/
 
+#if LUMI_Tonemap == LUMI_Tonemap_Film
+	#define toneAdjust(x) (x*1)
+#else
+	#define toneAdjust(x) x
+#endif
+
 #ifdef LUMI_PBRX
 const float hdr_sunStr = 5;
 const float hdr_moonStr = 0.4;
@@ -17,7 +23,7 @@ const float hdr_skylessStr = 0.2;
 const float hdr_baseMinStr = 0.01;
 const float hdr_baseMaxStr = 0.8;
 const float hdr_emissiveStr = 1;
-const float hdr_relAmbient = 0.2;
+const float hdr_relAmbient = toneAdjust(0.2);
 const float hdr_dramaticStr = 0.5;
 #else
 const float hdr_sunStr = 1.8;
@@ -29,12 +35,12 @@ const float hdr_skylessStr = 0.2;
 const float hdr_baseMinStr = 0.0;
 const float hdr_baseMaxStr = 0.25;
 const float hdr_emissiveStr = 1;
-const float hdr_relAmbient = 0.09;
+const float hdr_relAmbient = toneAdjust(0.09);
 const float hdr_dramaticStr = 0.3;
 #endif
 const float hdr_zWobbleDefault = 0.1;
 const vec3 blockColor = vec3(1.0, 0.875, 0.75);
-#if TONEMAP_MODE == TONEMAP_VIBRANT
+#if LUMI_Tonemap == LUMI_Tonemap_Vibrant
 const vec3 preSunColor = vec3(1.0, 1.0, 1.0);
 #else
 const vec3 preSunColor = vec3(1.0, 1.0, 0.8);
