@@ -35,6 +35,10 @@
 #define LUMI_PBR
 // #define LUMI_PBR /* this is example of commented out variable. */
 
+/* Comment out to disable bump generation
+ ******************************************/
+#define LUMI_GenerateBump
+
 /* Debug mode
  * 0 = Disable
  * 1 = Render normals

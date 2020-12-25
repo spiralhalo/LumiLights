@@ -21,12 +21,8 @@
 #include frex:shaders/api/sampler.glsl
 #include frex:shaders/lib/math.glsl
 #include frex:shaders/lib/color.glsl
-#include lumi:config.glsl
-#ifdef LUMI_PBR
-	#define LUMI_PBRX
-#endif
+#include lumi:shaders/internal/context.glsl
 #include lumi:shaders/api/pbr_frag.glsl
-#include lumi:shaders/api/context_bump.glsl
 #include lumi:shaders/lib/pbr.glsl
 #include lumi:shaders/internal/varying.glsl
 #include lumi:shaders/internal/main_frag.glsl

@@ -1,6 +1,7 @@
 {
     "respackopts.title.LUMI": "Lumi Lights",
-    "respackopts.field.LUMI.PBR": "Enable PBR mode",
+    "respackopts.field.LUMI.PBR": "PBR mode",
+    "respackopts.field.LUMI.GenerateBump": "Bump generation",
     "respackopts.field.LUMI.WavyWaterModel": "Wavy water model",
     "respackopts.field.LUMI.ApplyDramaticBloom": "Sun-lit bloom during sunrise and sunset",
     "respackopts.field.LUMI.ApplySkyBloom": "Sky bloom",

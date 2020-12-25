@@ -3,6 +3,7 @@
   "version": 1,
   "conf": {
     "PBR": true,
+    "GenerateBump": true,
     "WavyWaterModel": false,
     "ApplyDramaticBloom": false,
     "ApplySkyBloom": true,
