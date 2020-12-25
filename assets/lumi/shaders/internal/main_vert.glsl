@@ -30,7 +30,7 @@ void endBump(vec4 spriteBounds) {
     uvN = spriteBounds.xy + uvN * spriteBounds.zw;
     uvT = spriteBounds.xy + uvT * spriteBounds.zw;
     uvB = spriteBounds.xy + uvB * spriteBounds.zw;
-    bump_topRightUv = spriteBounds.xy + topRightUv * spriteBounds.zw;
+    bump_topRightUv = spriteBounds.xy + bump_topRightUv * spriteBounds.zw;
 }
 #endif
 
@@ -49,7 +49,5 @@ vec3 _tangent(vec3 normal)
 
 void setVaryings(vec4 viewCoord, vec3 normal) {
     l2_viewPos = viewCoord.xyz;
-    #ifdef LUMI_BUMP
-    bump_tangent = _tangent(normal);
-    #endif
+    l2_tangent = _tangent(normal);
 }
