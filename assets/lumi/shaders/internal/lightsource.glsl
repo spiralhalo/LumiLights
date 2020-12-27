@@ -24,7 +24,7 @@ const float hdr_baseMinStr = 0.01;
 const float hdr_baseMaxStr = 0.8;
 const float hdr_emissiveStr = 1;
 const float hdr_relAmbient = toneAdjust(0.2);
-const float hdr_dramaticStr = 0.5;
+const float hdr_dramaticStr = 1.0;
 const float hdr_dramaticMagicNumber = 6.0;
 #else
 const float hdr_sunStr = 1.8;
@@ -37,7 +37,7 @@ const float hdr_baseMinStr = 0.0;
 const float hdr_baseMaxStr = 0.25;
 const float hdr_emissiveStr = 1;
 const float hdr_relAmbient = toneAdjust(0.09);
-const float hdr_dramaticStr = 0.3;
+const float hdr_dramaticStr = 0.6;
 const float hdr_dramaticMagicNumber = 3.5;
 #endif
 const float hdr_zWobbleDefault = 0.1;
@@ -65,9 +65,15 @@ const vec3 preAmbient = vec3(0.9, 0.9, 0.9);
 #else
 const vec3 preAmbient = vec3(0.6, 0.9, 1.0);
 #endif
+#if LUMI_LightMode == LUMI_LightMode_Dramatic
+const vec3 preSunriseAmbient = vec3(0.5, 0.3, 0.1);
+const vec3 preSunsetAmbient = vec3(0.5, 0.2, 0.0);
+const vec3 preNightAmbient = vec3(1.0, 1.0, 2.0);
+#else
 const vec3 preSunriseAmbient = vec3(1.0, 0.8, 0.4);
 const vec3 preSunsetAmbient = vec3(1.0, 0.6, 0.2);
 const vec3 preNightAmbient = vec3(1.0, 1.0, 2.0);
+#endif
 
 /*  BLOCK LIGHT
  *******************************************************/
@@ -147,7 +153,7 @@ vec3 l2_ambientColor(float time) {
 vec3 l2_skyAmbient(float skyLight, float time, float intensity) {
 	float sl = l2_skyLight(skyLight, intensity);
 #if LUMI_LightMode == LUMI_LightMode_Dramatic
-	sl = frx_smootherstep(0.2, 0.9, sl);
+	sl = smoothstep(0.1, 0.9, sl);
 #endif
 	float sa = sl * 2.5;
 	return sa * l2_ambientColor(time);
