@@ -94,7 +94,11 @@ void pbr_shading(in frx_FragmentData fragData, inout vec4 a, inout float bloom, 
     vec3 baseAmbientRadiance = l2_baseAmbient(userBrightness);
     vec3 ambientDir = normalize(vec3(0.1, 0.9, 0.1) + normal);
 
+#if LUMI_LightMode == LUMI_LightMode_Dramatic
+    a.rgb += pbr_lightCalc(albedo, blockRadiance * mix(ao, 1.0, 0.5), ambientDir, viewDir, normal, fragData.diffuse, true, 0.0, specularAccu);
+#else
     a.rgb += pbr_lightCalc(albedo, blockRadiance * ao, ambientDir, viewDir, normal, fragData.diffuse, true, 0.0, specularAccu);
+#endif
     a.rgb += pbr_lightCalc(albedo, baseAmbientRadiance * ao, ambientDir, viewDir, normal, fragData.diffuse, true, 0.0, specularAccu);
 
     if (frx_worldHasSkylight()) {

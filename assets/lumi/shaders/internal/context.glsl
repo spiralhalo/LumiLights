@@ -7,6 +7,7 @@
  *  variables and externalized context variables.      *
  *******************************************************/
 
+#define LUMI_LightMode_SystemUnused -1
 #ifdef LUMI_PBR
 	#define LUMI_PBRX
 #endif

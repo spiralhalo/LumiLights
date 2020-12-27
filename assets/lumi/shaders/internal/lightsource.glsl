@@ -39,24 +39,47 @@ const float hdr_relAmbient = toneAdjust(0.09);
 const float hdr_dramaticStr = 0.3;
 #endif
 const float hdr_zWobbleDefault = 0.1;
+
 const vec3 blockColor = vec3(1.0, 0.875, 0.75);
+const vec3 dramaticBlockColor = vec3(1.0, 0.75, 0.5);
+
+#if LUMI_LightMode == LUMI_LightMode_Dramatic
+const vec3 preSunColor = vec3(1.0, 1.0, 1.0);
+#else
 #if LUMI_Tonemap == LUMI_Tonemap_Vibrant
 const vec3 preSunColor = vec3(1.0, 1.0, 1.0);
 #else
 const vec3 preSunColor = vec3(1.0, 1.0, 0.8);
 #endif
+#endif
 const vec3 preSunriseColor = vec3(1.0, 0.8, 0.4);
 const vec3 preSunsetColor = vec3(1.0, 0.6, 0.4);
+
 const vec3 nvColor = vec3(0.63, 0.55, 0.64);
 // const vec3 nvColorPurple = vec3(0.6, 0.5, 0.7);
+
+#if LUMI_LightMode == LUMI_LightMode_SystemUnused
+const vec3 preAmbient = vec3(0.9, 0.9, 0.9);
+#else
+const vec3 preAmbient = vec3(0.6, 0.9, 1.0);
+#endif
+const vec3 preSunriseAmbient = vec3(1.0, 0.8, 0.4);
+const vec3 preSunsetAmbient = vec3(1.0, 0.6, 0.2);
+const vec3 preNightAmbient = vec3(1.0, 1.0, 2.0);
 
 /*  BLOCK LIGHT
  *******************************************************/
 
 vec3 l2_blockRadiance(float blockLight, float userBrightness) {
+#if LUMI_LightMode == LUMI_LightMode_Dramatic
+	float dist = (1.001 - l2_clampScale(0.03125, 1.0, blockLight)) * 15;
+	float bl = 6.0 / (dist * dist);
+	return bl * hdr_gammaAdjust(dramaticBlockColor) * mix(hdr_blockMinStr, hdr_blockMaxStr, userBrightness);
+#else
 	float bl = l2_clampScale(0.03125, 1.0, blockLight);
 	bl *= bl * mix(hdr_blockMinStr, hdr_blockMaxStr, userBrightness);
 	return hdr_gammaAdjust(bl * blockColor);
+#endif
 }
 
 /*  HELD LIGHT
@@ -64,10 +87,21 @@ vec3 l2_blockRadiance(float blockLight, float userBrightness) {
 
 #if HANDHELD_LIGHT_RADIUS != 0
 vec3 l2_handHeldRadiance() {
+#if LUMI_LightMode == LUMI_LightMode_Dramatic
+	vec4 held = frx_heldLight();
+	float dist = (1.001 - l2_clampScale(held.w * HANDHELD_LIGHT_RADIUS, 0.0, gl_FogFragCoord)) * 15;
+	float hl = 5 / (dist * dist);
+	vec3 heldColor = held.rgb;
+	if (heldColor == blockColor) {
+		heldColor = dramaticBlockColor;
+	}
+	return hl * hdr_gammaAdjust(heldColor) * hdr_handHeldStr;
+#else
 	vec4 held = frx_heldLight();
 	float hl = l2_clampScale(held.w * HANDHELD_LIGHT_RADIUS, 0.0, gl_FogFragCoord);
 	hl *= hl * hdr_handHeldStr;
 	return hdr_gammaAdjust(held.rgb * hl);
+#endif
 }
 #endif
 
@@ -86,11 +120,6 @@ float l2_skyLight(float skyLight, float intensity) {
 	return hdr_gammaAdjust(sl) * intensity;
 }
 
-const vec3 preAmbient = vec3(0.6, 0.9, 1.0);
-const vec3 preSunriseAmbient = vec3(1.0, 0.8, 0.4);
-const vec3 preSunsetAmbient = vec3(1.0, 0.6, 0.2);
-const vec3 preNightAmbient = vec3(1.0, 1.0, 2.0);
-
 vec3 l2_ambientColor(float time) {
 	vec3 ambientColor;
 	if(time > 0.94){
@@ -108,7 +137,11 @@ vec3 l2_ambientColor(float time) {
 }
 
 vec3 l2_skyAmbient(float skyLight, float time, float intensity) {
-	float sa = l2_skyLight(skyLight, intensity) * 2.5;
+	float sl = l2_skyLight(skyLight, intensity);
+#if LUMI_LightMode == LUMI_LightMode_Dramatic
+	sl = frx_smootherstep(0.2, 0.9, sl);
+#endif
+	float sa = sl * 2.5;
 	return sa * l2_ambientColor(time);
 }
 
@@ -233,9 +266,17 @@ vec3 l2_sunRadiance(float skyLight, in float time, float intensity, float rainGr
 	float sl = l2_skyLight(skyLight, max(customIntensity, intensity));
 
 	// direct sun light doesn't reach into dark spot as much as sky ambient
-	sl = frx_smootherstep(0.5,1.0,sl);
+#if LUMI_LightMode == LUMI_LightMode_Dramatic
+	sl = frx_smootherstep(0.7, 0.97, sl);
+#else
+	sl = frx_smootherstep(0.5, 0.97, sl);
+#endif
 
+#if LUMI_LightMode == LUMI_LightMode_SystemUnused
+	return sl * l2_sunColor(time) * (0.5 - 0.5 * dot(frx_cameraView(), vec3(0.0, 1.0, 0.0)));
+#else
 	return sl * l2_sunColor(time);
+#endif
 }
 
 /*  MOON LIGHT

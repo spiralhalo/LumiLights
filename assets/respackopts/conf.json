@@ -7,6 +7,10 @@
     "WavyWaterModel": false,
     "ApplyDramaticBloom": false,
     "ApplySkyBloom": true,
+    "LightMode": [
+      "Default",
+      "Dramatic"
+    ],
     "Tonemap": [
       "Default",
       "Vibrant",
