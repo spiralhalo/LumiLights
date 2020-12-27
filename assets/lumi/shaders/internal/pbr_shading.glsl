@@ -90,7 +90,13 @@ void pbr_shading(in frx_FragmentData fragData, inout vec4 a, inout float bloom, 
     }
 #endif
 
-    vec3 blockRadiance = l2_blockRadiance(fragData.light.x, userBrightness);
+    float perceivedBl = fragData.light.x;
+#if LUMI_LightMode == LUMI_LightMode_Dramatic
+	if (frx_modelOriginType() != MODEL_ORIGIN_REGION) {
+		perceivedBl = max(0, perceivedBl - fragData.light.y * 0.1);
+	}
+#endif
+    vec3 blockRadiance = l2_blockRadiance(perceivedBl, userBrightness);
     vec3 baseAmbientRadiance = l2_baseAmbient(userBrightness);
     vec3 ambientDir = normalize(vec3(0.1, 0.9, 0.1) + normal);
 
