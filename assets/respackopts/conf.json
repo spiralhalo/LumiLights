@@ -5,7 +5,6 @@
     "PBR": true,
     "GenerateBump": true,
     "WavyWaterModel": false,
-    "ApplyDramaticBloom": false,
     "ApplySkyBloom": true,
     "LightMode": [
       "Default",

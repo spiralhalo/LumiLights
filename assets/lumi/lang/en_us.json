@@ -3,8 +3,8 @@
     "respackopts.field.LUMI.PBR": "PBR mode",
     "respackopts.field.LUMI.GenerateBump": "Bump generation",
     "respackopts.field.LUMI.WavyWaterModel": "Wavy water model",
-    "respackopts.field.LUMI.ApplyDramaticBloom": "Sun-lit bloom during sunrise and sunset",
     "respackopts.field.LUMI.ApplySkyBloom": "Sky bloom",
+    "respackopts.field.LUMI.LightMode": "Lighting mode",
     "respackopts.field.LUMI.Tonemap": "Tonemapping",
     "respackopts.field.LUMI.DebugMode": "Debug mode",
     "respackopts.field.LUMI.SystemMustEnable": "[SYSTEM] MUST BE ENABLED"
