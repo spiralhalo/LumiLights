@@ -25,6 +25,7 @@ const float hdr_baseMaxStr = 0.8;
 const float hdr_emissiveStr = 1;
 const float hdr_relAmbient = toneAdjust(0.2);
 const float hdr_dramaticStr = 0.5;
+const float hdr_dramaticMagicNumber = 6.0;
 #else
 const float hdr_sunStr = 1.8;
 const float hdr_moonStr = 0.4;
@@ -37,6 +38,7 @@ const float hdr_baseMaxStr = 0.25;
 const float hdr_emissiveStr = 1;
 const float hdr_relAmbient = toneAdjust(0.09);
 const float hdr_dramaticStr = 0.3;
+const float hdr_dramaticMagicNumber = 3.5;
 #endif
 const float hdr_zWobbleDefault = 0.1;
 
@@ -73,7 +75,7 @@ const vec3 preNightAmbient = vec3(1.0, 1.0, 2.0);
 vec3 l2_blockRadiance(float blockLight, float userBrightness) {
 #if LUMI_LightMode == LUMI_LightMode_Dramatic
 	float dist = (1.001 - l2_clampScale(0.03125, 1.0, blockLight)) * 15;
-	float bl = 6.0 / (dist * dist);
+	float bl = hdr_dramaticMagicNumber / (dist * dist);
 	return bl * hdr_gammaAdjust(dramaticBlockColor) * mix(hdr_blockMinStr, hdr_blockMaxStr, userBrightness);
 #else
 	float bl = l2_clampScale(0.03125, 1.0, blockLight);
@@ -90,7 +92,7 @@ vec3 l2_handHeldRadiance() {
 #if LUMI_LightMode == LUMI_LightMode_Dramatic
 	vec4 held = frx_heldLight();
 	float dist = (1.001 - l2_clampScale(held.w * HANDHELD_LIGHT_RADIUS, 0.0, gl_FogFragCoord)) * 15;
-	float hl = 5 / (dist * dist);
+	float hl = hdr_dramaticMagicNumber / (dist * dist);
 	vec3 heldColor = held.rgb;
 	if (heldColor == blockColor) {
 		heldColor = dramaticBlockColor;

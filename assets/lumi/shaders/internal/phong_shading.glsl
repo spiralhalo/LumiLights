@@ -33,7 +33,13 @@ void phong_shading(in frx_FragmentData fragData, inout vec4 a, inout float bloom
 #else
     vec3 held = l2_handHeldRadiance();
 #endif
-    vec3 block = l2_blockRadiance(fragData.light.x, userBrightness);
+    float perceivedBl = fragData.light.x;
+#if LUMI_LightMode == LUMI_LightMode_Dramatic
+	if (frx_modelOriginType() != MODEL_ORIGIN_REGION) {
+		perceivedBl = max(0, perceivedBl - fragData.light.y * 0.1);
+	}
+#endif
+    vec3 block = l2_blockRadiance(perceivedBl, userBrightness);
     vec3 sun = l2_sunRadiance(fragData.light.y, frx_worldTime(), frx_ambientIntensity(), frx_rainGradient()) * sunDot;
     vec3 moon = l2_moonRadiance(fragData.light.y, frx_worldTime(), frx_ambientIntensity()) * moonDot;
     vec3 skyAmbient = l2_skyAmbient(fragData.light.y, frx_worldTime(), frx_ambientIntensity());
@@ -42,8 +48,14 @@ void phong_shading(in frx_FragmentData fragData, inout vec4 a, inout float bloom
     vec3 skyless = skylessRadiance * skyLessDot + (frx_isSkyDarkened() ? skylessRadiance * skyLessDarkenedDot : vec3(0.0));
     vec3 baseAmbient = l2_baseAmbient(userBrightness);
 
+#if LUMI_LightMode == LUMI_LightMode_Dramatic
+    vec3 light = baseAmbient + held + moon + skyAmbient + sun + skyless;
+    light *= ao;
+    light += block * mix(ao, 1.0, 0.5);
+#else
     vec3 light = baseAmbient + held + block + moon + skyAmbient + sun + skyless;
     light *= ao; // AO is supposed to be applied to ambient only, but things look better with AO on everything except for emissive light
+#endif
     light += emissive;
     
     vec3 specular = vec3(0.0);
