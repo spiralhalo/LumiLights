@@ -76,6 +76,9 @@ vec3 l2_blockRadiance(float blockLight, float userBrightness) {
 #if LUMI_LightMode == LUMI_LightMode_Dramatic
 	float dist = (1.001 - l2_clampScale(0.03125, 1.0, blockLight)) * 15;
 	float bl = hdr_dramaticMagicNumber / (dist * dist);
+	if (bl <= 0.01 * hdr_dramaticMagicNumber) {
+		bl *= l2_clampScale(0.0045 * hdr_dramaticMagicNumber, 0.01 * hdr_dramaticMagicNumber, bl);
+	}
 	return bl * hdr_gammaAdjust(dramaticBlockColor) * mix(hdr_blockMinStr, hdr_blockMaxStr, userBrightness);
 #else
 	float bl = l2_clampScale(0.03125, 1.0, blockLight);
@@ -93,6 +96,9 @@ vec3 l2_handHeldRadiance() {
 	vec4 held = frx_heldLight();
 	float dist = (1.001 - l2_clampScale(held.w * HANDHELD_LIGHT_RADIUS, 0.0, gl_FogFragCoord)) * 15;
 	float hl = hdr_dramaticMagicNumber / (dist * dist);
+	if (hl <= 0.01 * hdr_dramaticMagicNumber) {
+		hl *= l2_clampScale(0.0045 * hdr_dramaticMagicNumber, 0.01 * hdr_dramaticMagicNumber, hl);
+	}
 	vec3 heldColor = held.rgb;
 	if (heldColor == blockColor) {
 		heldColor = dramaticBlockColor;
