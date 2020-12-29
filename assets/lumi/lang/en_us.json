@@ -4,6 +4,8 @@
     "respackopts.tooltip.LUMI.PBR": "Emulate fresnel effect and metals (performance impact)",
     "respackopts.field.LUMI.GenerateBump": "Bump generation",
     "respackopts.tooltip.LUMI.GenerateBump": "Generate bumps based on texture",
+    "respackopts.field.LUMI.DayAmbientBlue": "Day ambient blue amount",
+    "respackopts.tooltip.LUMI.DayAmbientBlue": "How blue the day ambient is in the overworld",
     "respackopts.field.LUMI.WavyWaterModel": "Wavy water animation",
     "respackopts.tooltip.LUMI.WavyWaterModel": "Wavy water animation",
     "respackopts.field.LUMI.WavyWaterIntensity": "Wavy water intensity",

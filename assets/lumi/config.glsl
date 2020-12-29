@@ -24,12 +24,7 @@
  * vv CONFIGURATIONS START vv  *
  *******************************/
 
-/* Tonemap mode
- * 0 = Default
- * 1 = Vibrant
- * 2 = Film 
- ****************/
-#define LUMI_Tonemap 0
+/* NOTE: These configurations are ignored if Respackopts is present. */
 
 /* Comment out to disable PBR
  * Disabling PBR can increase performance on low end machines
@@ -42,12 +37,9 @@
  ******************************************/
 #define LUMI_GenerateBump
 
-/* Debug mode
- * 0 = Disable
- * 1 = Render normals
- * 2 = Render view direction
- *****************************/
-#define LUMI_DebugMode 0
+/* How blue the day ambient in the overworld is. Range: 0 ... 10 Default: 10
+**************************************************************/
+#define LUMI_DayAmbientBlue 10
 
 /* Uncomment to enable wavy water model
    ("Uncomment" means removing double slash at the beginning)
@@ -55,7 +47,7 @@
 // #define LUMI_WavyWaterModel
 
 /* Intensity of the wavy water model. Range: 1 ... 15 Default: 1
-**********************************************************************/
+*******************************************************************/
 #define LUMI_WavyWaterIntensity 1
 
 /* Uncomment to enable sunlight bloom during sunrise and sunset
@@ -67,7 +59,7 @@
 #define LUMI_ApplySkyBloom
 
 /* Intensity of the sky bloom. Range: 0 ... 10 Default: 5
-***************************************************************/
+************************************************************/
 #define LUMI_SkyBloomIntensity 5
 
 /* Lighting mode
@@ -78,8 +70,30 @@
 #define LUMI_LightingMode 0
 
 /* Intensity of the dramatic bloom. Range: 0 ... 10 Default: 5
-*********************************************************************/
+*****************************************************************/
 #define LUMI_DramaticLighting_DramaticBloomIntensity 5
+
+/* True darkness options
+ * Uncomment to toggle.
+******************************************************/
+// #define LUMI_TrueDarkness_DisableOverworldAmbient
+// #define LUMI_TrueDarkness_DisableMoonlight
+// #define LUMI_TrueDarkness_NetherTrueDarkness
+// #define LUMI_TrueDarkness_TheEndTrueDarkness
+
+/* Tonemap mode
+ * 0 = Default
+ * 1 = Vibrant
+ * 2 = Film 
+ ****************/
+#define LUMI_Tonemap 0
+
+/* Debug mode
+ * 0 = Disable
+ * 1 = Render normals
+ * 2 = Render view direction
+ *****************************/
+#define LUMI_DebugMode 0
 
 
 /*******************************
