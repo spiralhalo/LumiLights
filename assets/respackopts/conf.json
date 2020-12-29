@@ -4,11 +4,6 @@
   "conf": {
     "PBR": true,
     "GenerateBump": true,
-    "DayAmbientBlue": {
-      "default": 10,
-      "min": 0,
-      "max": 10
-    },
     "WavyWaterModel": false,
     "WavyWaterIntensity": {
       "default": 1,

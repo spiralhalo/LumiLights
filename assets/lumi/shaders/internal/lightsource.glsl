@@ -62,7 +62,7 @@ const vec3 preSunsetColor = vec3(1.0, 0.6, 0.4);
 const vec3 nvColor = vec3(0.63, 0.55, 0.64);
 // const vec3 nvColorPurple = vec3(0.6, 0.5, 0.7);
 
-const vec3 preAmbient = mix(vec3(0.8550322), vec3(0.6, 0.9, 1.0), clamp(LUMI_DayAmbientBlue * 0.1, 0.0, 1.0));
+const vec3 preAmbient = vec3(0.6, 0.9, 1.0);
 #if LUMI_LightingMode == LUMI_LightingMode_Dramatic
 const vec3 preSunriseAmbient = vec3(0.5, 0.3, 0.1);
 const vec3 preSunsetAmbient = vec3(0.5, 0.2, 0.0);
