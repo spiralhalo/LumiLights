@@ -137,7 +137,7 @@ vec3 l2_ambientColor(float time) {
 	vec3 ambientColor;
 	if (time > 0.94) {
 		#ifdef LUMI_TrueDarkness_DisableMoonlight
-		ambientColor = mix(hdr_gammaAdjust(preNightAmbient) * hdr_moonStr * hdr_nightAmbientMult, hdr_gammaAdjust(preDayAmbient) * hdr_sunStr, l2_clampScale(0.94, 0.98, time));
+		ambientColor = mix(hdr_gammaAdjust(0.0), hdr_gammaAdjust(preDayAmbient) * hdr_sunStr, l2_clampScale(0.94, 0.98, time));
 		#else
 		ambientColor = mix(hdr_gammaAdjust(preNightAmbient) * hdr_moonStr * hdr_nightAmbientMult, hdr_gammaAdjust(preDayAmbient) * hdr_sunStr, l2_clampScale(0.94, 0.98, time));
 		#endif
