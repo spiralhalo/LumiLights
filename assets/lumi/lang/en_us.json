@@ -3,10 +3,13 @@
     "respackopts.field.LUMI.PBR": "PBR mode",
     "respackopts.field.LUMI.GenerateBump": "Bump generation",
     "respackopts.field.LUMI.WavyWaterModel": "Wavy water model",
+    "respackopts.field.LUMI.WavyWaterIntensity": "Wavy water intensity",
     "respackopts.field.LUMI.ApplySkyBloom": "Sky bloom",
-    "respackopts.field.LUMI.LightMode": "Lighting mode",
+    "respackopts.field.LUMI.SkyBloomIntensity": "Sky bloom intensity",
+    "respackopts.field.LUMI.LightingMode": "Lighting mode",
+    "respackopts.field.LUMI.DramaticLighting": "Dramatic lighting options",
+    "respackopts.field.LUMI.DramaticLighting.DramaticBloomIntensity": "Intensity of bloom on mornings and evenings",
     "respackopts.field.LUMI.Tonemap": "Tonemapping",
-    "respackopts.field.LUMI.DebugMode": "Debug mode",
-    "respackopts.field.LUMI.SystemMustEnable": "[SYSTEM] MUST BE ENABLED"
+    "respackopts.field.LUMI.DebugMode": "Debug mode"
 }
   

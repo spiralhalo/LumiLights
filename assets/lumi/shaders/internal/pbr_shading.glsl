@@ -75,8 +75,8 @@ void pbr_shading(in frx_FragmentData fragData, inout vec4 a, inout float bloom, 
     vec3 normal = fragData.vertexNormal * frx_normalModelMatrix();
 
     vec3 specularAccu = vec3(0.0);
-#if LUMI_LightMode == LUMI_LightMode_Dramatic
-    float dramaticBloom;
+#if LUMI_LightingMode == LUMI_LightingMode_Dramatic
+    float dramaticBloom = 0;
 #endif
 
 #if HANDHELD_LIGHT_RADIUS != 0
@@ -91,7 +91,7 @@ void pbr_shading(in frx_FragmentData fragData, inout vec4 a, inout float bloom, 
 #endif
 
     float perceivedBl = fragData.light.x;
-#if LUMI_LightMode == LUMI_LightMode_Dramatic
+#if LUMI_LightingMode == LUMI_LightingMode_Dramatic
 	if (frx_modelOriginType() != MODEL_ORIGIN_REGION) {
 		perceivedBl = max(0, perceivedBl - fragData.light.y * 0.1);
 	}
@@ -100,7 +100,7 @@ void pbr_shading(in frx_FragmentData fragData, inout vec4 a, inout float bloom, 
     vec3 baseAmbientRadiance = l2_baseAmbient(userBrightness);
     vec3 ambientDir = normalize(vec3(0.1, 0.9, 0.1) + normal);
 
-#if LUMI_LightMode == LUMI_LightMode_Dramatic
+#if LUMI_LightingMode == LUMI_LightingMode_Dramatic
     a.rgb += pbr_lightCalc(albedo, blockRadiance * mix(ao, 1.0, 0.5), ambientDir, viewDir, normal, fragData.diffuse, true, 0.0, specularAccu);
 #else
     a.rgb += pbr_lightCalc(albedo, blockRadiance * ao, ambientDir, viewDir, normal, fragData.diffuse, true, 0.0, specularAccu);
@@ -117,8 +117,8 @@ void pbr_shading(in frx_FragmentData fragData, inout vec4 a, inout float bloom, 
             vec3 skyRadiance = l2_skyAmbient(fragData.light.y, frx_worldTime(), frx_ambientIntensity());
 
             vec3 sunIrradiance = pbr_lightCalc(albedo, sunRadiance * ao, sunDir, viewDir, normal, fragData.diffuse, false, 0.15, specularAccu);
-        #if LUMI_LightMode == LUMI_LightMode_Dramatic
-            dramaticBloom = frx_luminance(sunIrradiance) * l2_sunHorizonScale(frx_worldTime());
+        #if LUMI_LightingMode == LUMI_LightingMode_Dramatic
+            dramaticBloom = frx_luminance(sunIrradiance);
         #endif
 
             a.rgb += sunIrradiance;
@@ -147,8 +147,8 @@ void pbr_shading(in frx_FragmentData fragData, inout vec4 a, inout float bloom, 
     float specularLuminance = frx_luminance(specularAccu);
     float smoothness = (1-pbr_roughness);
     bloom += specularLuminance * pbr_specularBloomStr * smoothness * smoothness;
-#if LUMI_LightMode == LUMI_LightMode_Dramatic
-    bloom += dramaticBloom * hdr_dramaticStr;
+#if LUMI_LightingMode == LUMI_LightingMode_Dramatic
+    bloom += dramaticBloom * l2_sunHorizonScale(frx_worldTime()) * hdr_dramaticStr * clamp(LUMI_DramaticLighting_DramaticBloomIntensity * 0.1, 0.0, 1.0);
 #endif
     if (translucent) {
         a.a += specularLuminance * pbr_specularBloomStr;

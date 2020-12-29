@@ -45,7 +45,7 @@ const float hdr_zWobbleDefault = 0.1;
 const vec3 blockColor = vec3(1.0, 0.875, 0.75);
 const vec3 dramaticBlockColor = vec3(1.0, 0.75, 0.5);
 
-#if LUMI_LightMode == LUMI_LightMode_Dramatic
+#if LUMI_LightingMode == LUMI_LightingMode_Dramatic
 const vec3 preSunColor = vec3(1.0, 1.0, 1.0);
 #else
 #if LUMI_Tonemap == LUMI_Tonemap_Vibrant
@@ -60,12 +60,12 @@ const vec3 preSunsetColor = vec3(1.0, 0.6, 0.4);
 const vec3 nvColor = vec3(0.63, 0.55, 0.64);
 // const vec3 nvColorPurple = vec3(0.6, 0.5, 0.7);
 
-#if LUMI_LightMode == LUMI_LightMode_SystemUnused
+#if LUMI_LightingMode == LUMI_LightingMode_SystemUnused
 const vec3 preAmbient = vec3(0.9, 0.9, 0.9);
 #else
 const vec3 preAmbient = vec3(0.6, 0.9, 1.0);
 #endif
-#if LUMI_LightMode == LUMI_LightMode_Dramatic
+#if LUMI_LightingMode == LUMI_LightingMode_Dramatic
 const vec3 preSunriseAmbient = vec3(0.5, 0.3, 0.1);
 const vec3 preSunsetAmbient = vec3(0.5, 0.2, 0.0);
 const vec3 preNightAmbient = vec3(1.0, 1.0, 2.0);
@@ -79,7 +79,7 @@ const vec3 preNightAmbient = vec3(1.0, 1.0, 2.0);
  *******************************************************/
 
 vec3 l2_blockRadiance(float blockLight, float userBrightness) {
-#if LUMI_LightMode == LUMI_LightMode_Dramatic
+#if LUMI_LightingMode == LUMI_LightingMode_Dramatic
 	float dist = (1.001 - l2_clampScale(0.03125, 1.0, blockLight)) * 15;
 	float bl = hdr_dramaticMagicNumber / (dist * dist);
 	if (bl <= 0.01 * hdr_dramaticMagicNumber) {
@@ -98,7 +98,7 @@ vec3 l2_blockRadiance(float blockLight, float userBrightness) {
 
 #if HANDHELD_LIGHT_RADIUS != 0
 vec3 l2_handHeldRadiance() {
-#if LUMI_LightMode == LUMI_LightMode_Dramatic
+#if LUMI_LightingMode == LUMI_LightingMode_Dramatic
 	vec4 held = frx_heldLight();
 	float dist = (1.001 - l2_clampScale(held.w * HANDHELD_LIGHT_RADIUS, 0.0, gl_FogFragCoord)) * 15;
 	float hl = hdr_dramaticMagicNumber / (dist * dist);
@@ -152,7 +152,7 @@ vec3 l2_ambientColor(float time) {
 
 vec3 l2_skyAmbient(float skyLight, float time, float intensity) {
 	float sl = l2_skyLight(skyLight, intensity);
-#if LUMI_LightMode == LUMI_LightMode_Dramatic
+#if LUMI_LightingMode == LUMI_LightingMode_Dramatic
 	sl = smoothstep(0.1, 0.9, sl);
 #endif
 	float sa = sl * 2.5;
@@ -280,13 +280,13 @@ vec3 l2_sunRadiance(float skyLight, in float time, float intensity, float rainGr
 	float sl = l2_skyLight(skyLight, max(customIntensity, intensity));
 
 	// direct sun light doesn't reach into dark spot as much as sky ambient
-#if LUMI_LightMode == LUMI_LightMode_Dramatic
+#if LUMI_LightingMode == LUMI_LightingMode_Dramatic
 	sl = frx_smootherstep(0.7, 0.97, sl);
 #else
 	sl = frx_smootherstep(0.5, 0.97, sl);
 #endif
 
-#if LUMI_LightMode == LUMI_LightMode_SystemUnused
+#if LUMI_LightingMode == LUMI_LightingMode_SystemUnused
 	return sl * l2_sunColor(time) * (0.5 - 0.5 * dot(frx_cameraView(), vec3(0.0, 1.0, 0.0)));
 #else
 	return sl * l2_sunColor(time);

@@ -5,11 +5,28 @@
     "PBR": true,
     "GenerateBump": true,
     "WavyWaterModel": false,
+    "WavyWaterIntensity": {
+      "default": 1,
+      "min": 1,
+      "max": 15
+    },
     "ApplySkyBloom": true,
-    "LightMode": [
-      "Default",
-      "Dramatic"
+    "SkyBloomIntensity": {
+      "default": 5,
+      "min": 1,
+      "max": 10
+    },
+    "LightingMode": [
+      "Dramatic",
+      "Neutral"
     ],
+    "DramaticLighting": {
+      "DramaticBloomIntensity": {
+        "default": 5,
+        "min": 0,
+        "max": 10
+      }
+    },
     "Tonemap": [
       "Default",
       "Vibrant",
@@ -19,7 +36,6 @@
       "Disabled",
       "Normal",
       "ViewDir"
-    ],
-    "SystemMustEnable": true
+    ]
   }
 }

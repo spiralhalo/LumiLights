@@ -28,7 +28,7 @@ float l2_max3(vec3 vec){
 
 float l2_ao(frx_FragmentData fragData) {
 #if AO_SHADING_MODE != AO_MODE_NONE
-#if LUMI_LightMode == LUMI_LightMode_SystemUnused
+#if LUMI_LightingMode == LUMI_LightingMode_SystemUnused
 	float aoInv = 1.0 - (fragData.ao ? _cvv_ao : 1.0);
 	return 1.0 - 0.8 * smoothstep(0.0, 0.3, aoInv * (0.5 + 0.5 * abs((_cvv_normal * frx_normalModelMatrix()).y)));
 #else

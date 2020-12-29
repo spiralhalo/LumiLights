@@ -8,8 +8,11 @@
 #include frex:shaders/lib/color.glsl
 #include frex:shaders/lib/sample.glsl
 #include frex:shaders/lib/math.glsl
-#include lumi:config.glsl
 #include lumi:shaders/internal/skybloom.glsl
+
+#ifndef LUMI_SkyBloomIntensity
+    #define LUMI_SkyBloomIntensity 5
+#endif
 
 /******************************************************
   canvas:shaders/internal/process/emissive_color.frag
@@ -25,7 +28,7 @@ void main() {
 
 #ifdef LUMI_ApplySkyBloom
 	bool sky = e.g == 0.0;
-	float bloom = sky ? hdr_skyBloom : e.r;
+	float bloom = sky ? (clamp(LUMI_SkyBloomIntensity * 0.1, 0.0, 1.0) * hdr_skyBloom) : e.r;
 #else 
 	float bloom = e.r;
 #endif
