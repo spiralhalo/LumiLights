@@ -62,14 +62,15 @@ const vec3 preSunsetColor = vec3(1.0, 0.6, 0.4);
 const vec3 nvColor = vec3(0.63, 0.55, 0.64);
 // const vec3 nvColorPurple = vec3(0.6, 0.5, 0.7);
 
-const vec3 preAmbient = vec3(0.6, 0.9, 1.0);
+const vec3 preMiddayAmbient = vec3(0.8550322);
+const vec3 preDayAmbient = vec3(0.6, 0.9, 1.0);
 #if LUMI_LightingMode == LUMI_LightingMode_Dramatic
-const vec3 preSunriseAmbient = vec3(0.5, 0.3, 0.1);
-const vec3 preSunsetAmbient = vec3(0.5, 0.2, 0.0);
+// const vec3 preSunriseAmbient = vec3(0.5, 0.3, 0.1);
+// const vec3 preSunsetAmbient = vec3(0.5, 0.2, 0.0);
 const vec3 preNightAmbient = vec3(0.74, 0.4, 1.0);
 #else
-const vec3 preSunriseAmbient = vec3(1.0, 0.8, 0.4);
-const vec3 preSunsetAmbient = vec3(1.0, 0.6, 0.2);
+// const vec3 preSunriseAmbient = vec3(1.0, 0.8, 0.4);
+// const vec3 preSunsetAmbient = vec3(1.0, 0.6, 0.2);
 const vec3 preNightAmbient = vec3(0.5, 0.5, 1.0);
 #endif
 
@@ -134,20 +135,24 @@ float l2_skyLight(float skyLight, float intensity) {
 
 vec3 l2_ambientColor(float time) {
 	vec3 ambientColor;
-	if(time > 0.94){
-		ambientColor = mix(hdr_gammaAdjust(preNightAmbient) * hdr_moonStr, hdr_gammaAdjust(preSunriseAmbient) * hdr_sunStr, l2_clampScale(0.94, 0.98, time));
-	} else if(time > 0.52){
+	if (time > 0.94) {
 		#ifdef LUMI_TrueDarkness_DisableMoonlight
-		ambientColor = mix(hdr_gammaAdjust(preSunsetAmbient) * hdr_sunStr, vec3(0.0), l2_clampScale(0.52, 0.56, time));
+		ambientColor = mix(hdr_gammaAdjust(preNightAmbient) * hdr_moonStr * hdr_nightAmbientMult, hdr_gammaAdjust(preDayAmbient) * hdr_sunStr, l2_clampScale(0.94, 0.98, time));
 		#else
-		ambientColor = mix(hdr_gammaAdjust(preSunsetAmbient) * hdr_sunStr, hdr_gammaAdjust(preNightAmbient) * hdr_moonStr * hdr_nightAmbientMult, l2_clampScale(0.52, 0.56, time));
+		ambientColor = mix(hdr_gammaAdjust(preNightAmbient) * hdr_moonStr * hdr_nightAmbientMult, hdr_gammaAdjust(preDayAmbient) * hdr_sunStr, l2_clampScale(0.94, 0.98, time));
 		#endif
-	} else if(time > 0.48){
-		ambientColor = mix(hdr_gammaAdjust(preAmbient) * hdr_sunStr, hdr_gammaAdjust(preSunsetAmbient) * hdr_sunStr, l2_clampScale(0.48, 0.5, time));
-	} else if(time < 0.02){
-		ambientColor = mix(hdr_gammaAdjust(preAmbient) * hdr_sunStr, hdr_gammaAdjust(preSunriseAmbient) * hdr_sunStr, l2_clampScale(0.02, 0, time));
+	} else if(time > 0.52 ){
+		#ifdef LUMI_TrueDarkness_DisableMoonlight
+		ambientColor = mix(hdr_gammaAdjust(preDayAmbient) * hdr_sunStr, vec3(0.0), l2_clampScale(0.52, 0.56, time));
+		#else
+		ambientColor = mix(hdr_gammaAdjust(preDayAmbient) * hdr_sunStr, hdr_gammaAdjust(preNightAmbient) * hdr_moonStr * hdr_nightAmbientMult, l2_clampScale(0.52, 0.56, time));
+		#endif
+	} else if(time > 0.25) {
+		ambientColor = mix(hdr_gammaAdjust(preMiddayAmbient) * hdr_sunStr, hdr_gammaAdjust(preDayAmbient) * hdr_sunStr, l2_clampScale(0.25, 0.375, time));
+	} else if(time >= 0.02) {
+		ambientColor = mix(hdr_gammaAdjust(preMiddayAmbient) * hdr_sunStr, hdr_gammaAdjust(preDayAmbient) * hdr_sunStr, l2_clampScale(0.25, 0.125, time));
 	} else {
-		ambientColor = hdr_gammaAdjust(preAmbient) * hdr_sunStr;
+		ambientColor = hdr_gammaAdjust(preDayAmbient) * hdr_sunStr;
 	}
 	return ambientColor * hdr_relAmbient;
 }
