@@ -132,6 +132,6 @@ void main() {
 
 #if TARGET_EMISSIVE > 0
 	translucent = translucent && a.a < 0.99;
-	gl_FragData[TARGET_EMISSIVE] = vec4(bloom * a.a, 1.0, 0.0, translucent ? step(hdr_skyBloom, bloom) : 1.0);
+	gl_FragData[TARGET_EMISSIVE] = vec4(bloom * a.a, 1.0, 0.0, translucent ? step(l2_skyBloom(), bloom) : 1.0);
 #endif
 }
