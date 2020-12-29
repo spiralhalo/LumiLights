@@ -269,11 +269,7 @@ vec3 l2_sunRadiance(float skyLight, in float time, float intensity, float rainGr
 	// wrap time to account for sunrise
 	float customTime = (time >= 0.75) ? (time - 1.0) : time;
 
-    float customIntensity = l2_clampScale(-0.08, 0.00, customTime);
-
-    if(customTime >= 0.25){
-		customIntensity = l2_clampScale(0.58, 0.5, customTime);
-    }
+    float customIntensity = (customTime >= 0.25) ? l2_clampScale(0.56, 0.52, customTime) : l2_clampScale(-0.06, -0.02, customTime);
 
 	customIntensity *= mix(1.0, 0.0, rainGradient);
 
