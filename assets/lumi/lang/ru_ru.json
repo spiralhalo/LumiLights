@@ -1,0 +1,19 @@
+{
+    "respackopts.title.LUMI": "Lumi Lights",
+    "respackopts.field.LUMI.PBR": "PBR режим",
+    "respackopts.field.LUMI.GenerateBump": "Bump generation",
+    "respackopts.field.LUMI.WavyWaterModel": "Волнистая вода",
+    "respackopts.field.LUMI.WavyWaterIntensity": "Интенсивность волнистой воды",
+    "respackopts.field.LUMI.ApplySkyBloom": "Bloom неба",
+    "respackopts.field.LUMI.SkyBloomIntensity": "Sky bloom intensity",
+    "respackopts.field.LUMI.LightingMode": "Режим освещения",
+    "respackopts.field.LUMI.DramaticLighting": "Dramatic lighting options",
+    "respackopts.field.LUMI.DramaticLighting.DramaticBloomIntensity": "Intensity of bloom on mornings and evenings",
+    "respackopts.field.LUMI.TrueDarkness": "True darkness options",
+    "respackopts.field.LUMI.TrueDarkness.DisableOverworldAmbient": "Disable overworld ambient light",
+    "respackopts.field.LUMI.TrueDarkness.DisableMoonlight": "Disable moon light",
+    "respackopts.field.LUMI.TrueDarkness.NetherTrueDarkness": "True darkness in the Nether",
+    "respackopts.field.LUMI.TrueDarkness.TheEndTrueDarkness": "True darkness in the End",
+    "respackopts.field.LUMI.Tonemap": "Tonemapping",
+    "respackopts.field.LUMI.DebugMode": "Debug mode"
+}
