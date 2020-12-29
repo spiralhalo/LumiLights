@@ -20,7 +20,6 @@ const float hdr_blockMinStr = 2;
 const float hdr_blockMaxStr = 3;
 const float hdr_handHeldStr = 1.5;
 const float hdr_skylessStr = 0.1;
-const float hdr_skylessRelStr = 0.5;
 const float hdr_baseMinStr = 0.01;
 const float hdr_baseMaxStr = 0.8;
 const float hdr_emissiveStr = 1;
@@ -34,7 +33,6 @@ const float hdr_blockMinStr = 1.0;
 const float hdr_blockMaxStr = 1.4;
 const float hdr_handHeldStr = 0.9;
 const float hdr_skylessStr = 0.05;
-const float hdr_skylessRelStr = 0.5;
 const float hdr_baseMinStr = 0.0;
 const float hdr_baseMaxStr = 0.25;
 const float hdr_emissiveStr = 1;
@@ -42,6 +40,8 @@ const float hdr_relAmbient = toneAdjust(0.09);
 const float hdr_dramaticStr = 0.6;
 const float hdr_dramaticMagicNumber = 3.5;
 #endif
+const float hdr_skylessRelStr = 0.5;
+const float hdr_nightAmbientMult = 2.0;
 const float hdr_zWobbleDefault = 0.1;
 
 const vec3 blockColor = vec3(1.0, 0.875, 0.75);
@@ -66,11 +66,11 @@ const vec3 preAmbient = mix(vec3(0.8550322), vec3(0.6, 0.9, 1.0), clamp(LUMI_Day
 #if LUMI_LightingMode == LUMI_LightingMode_Dramatic
 const vec3 preSunriseAmbient = vec3(0.5, 0.3, 0.1);
 const vec3 preSunsetAmbient = vec3(0.5, 0.2, 0.0);
-const vec3 preNightAmbient = vec3(1.0, 1.0, 2.0);
+const vec3 preNightAmbient = vec3(0.74, 0.4, 1.0);
 #else
 const vec3 preSunriseAmbient = vec3(1.0, 0.8, 0.4);
 const vec3 preSunsetAmbient = vec3(1.0, 0.6, 0.2);
-const vec3 preNightAmbient = vec3(1.0, 1.0, 2.0);
+const vec3 preNightAmbient = vec3(0.5, 0.5, 1.0);
 #endif
 
 /*  BLOCK LIGHT
@@ -140,7 +140,7 @@ vec3 l2_ambientColor(float time) {
 		#ifdef LUMI_TrueDarkness_DisableMoonlight
 		ambientColor = mix(hdr_gammaAdjust(preSunsetAmbient) * hdr_sunStr, vec3(0.0), l2_clampScale(0.52, 0.56, time));
 		#else
-		ambientColor = mix(hdr_gammaAdjust(preSunsetAmbient) * hdr_sunStr, hdr_gammaAdjust(preNightAmbient) * hdr_moonStr, l2_clampScale(0.52, 0.56, time));
+		ambientColor = mix(hdr_gammaAdjust(preSunsetAmbient) * hdr_sunStr, hdr_gammaAdjust(preNightAmbient) * hdr_moonStr * hdr_nightAmbientMult, l2_clampScale(0.52, 0.56, time));
 		#endif
 	} else if(time > 0.48){
 		ambientColor = mix(hdr_gammaAdjust(preAmbient) * hdr_sunStr, hdr_gammaAdjust(preSunsetAmbient) * hdr_sunStr, l2_clampScale(0.48, 0.5, time));
