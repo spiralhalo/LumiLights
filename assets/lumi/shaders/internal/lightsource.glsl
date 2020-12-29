@@ -19,7 +19,8 @@ const float hdr_moonStr = 0.4;
 const float hdr_blockMinStr = 2;
 const float hdr_blockMaxStr = 3;
 const float hdr_handHeldStr = 1.5;
-const float hdr_skylessStr = 0.2;
+const float hdr_skylessStr = 0.1;
+const float hdr_skylessRelStr = 0.5;
 const float hdr_baseMinStr = 0.01;
 const float hdr_baseMaxStr = 0.8;
 const float hdr_emissiveStr = 1;
@@ -32,7 +33,8 @@ const float hdr_moonStr = 0.4;
 const float hdr_blockMinStr = 1.0;
 const float hdr_blockMaxStr = 1.4;
 const float hdr_handHeldStr = 0.9;
-const float hdr_skylessStr = 0.2;
+const float hdr_skylessStr = 0.05;
+const float hdr_skylessRelStr = 0.5;
 const float hdr_baseMinStr = 0.0;
 const float hdr_baseMaxStr = 0.25;
 const float hdr_emissiveStr = 1;
@@ -240,7 +242,7 @@ vec3 l2_baseAmbient(float userBrightness){
 				return vec3(0.0);
 			}
 			#endif
-			return l2_dimensionColor() * mix(hdr_baseMinStr, hdr_baseMaxStr, userBrightness);
+			return l2_dimensionColor() * hdr_skylessRelStr * mix(hdr_baseMinStr, hdr_baseMaxStr, userBrightness);
 		}
 	}
 }
