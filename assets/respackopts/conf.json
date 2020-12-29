@@ -27,6 +27,12 @@
         "max": 10
       }
     },
+    "TrueDarkness": {
+      "DisableOverworldAmbient": false,
+      "DisableMoonlight": false,
+      "NetherTrueDarkness": false,
+      "TheEndTrueDarkness": false
+    },
     "Tonemap": [
       "Default",
       "Vibrant",

@@ -83,7 +83,7 @@ void pbr_shading(in frx_FragmentData fragData, inout vec4 a, inout float bloom, 
     if (frx_heldLight().w > 0) {
         vec3 handHeldDir = viewDir;
         vec3 handHeldRadiance = l2_handHeldRadiance();
-        if(handHeldRadiance.x * handHeldRadiance.y * handHeldRadiance.z > 0) {
+        if (handHeldRadiance.x + handHeldRadiance.y + handHeldRadiance.z > 0) {
             vec3 adjustedNormal = fragData.diffuse ? normal : viewDir;
             a.rgb += pbr_lightCalc(albedo, handHeldRadiance, handHeldDir, viewDir, adjustedNormal, true, false, 0.0, specularAccu);
         }
@@ -109,37 +109,35 @@ void pbr_shading(in frx_FragmentData fragData, inout vec4 a, inout float bloom, 
 
     if (frx_worldHasSkylight()) {
         if (fragData.light.y > 0.03125) {
-
-            vec3 moonRadiance = l2_moonRadiance(fragData.light.y, frx_worldTime(), frx_ambientIntensity());
-            vec3 moonDir = l2_moonDir(frx_worldTime());
             vec3 sunRadiance = l2_sunRadiance(fragData.light.y, frx_worldTime(), frx_ambientIntensity(), frx_rainGradient());
             vec3 sunDir = l2_vanillaSunDir(frx_worldTime(), 0.0);
             vec3 skyRadiance = l2_skyAmbient(fragData.light.y, frx_worldTime(), frx_ambientIntensity());
 
             vec3 sunIrradiance = pbr_lightCalc(albedo, sunRadiance * ao, sunDir, viewDir, normal, fragData.diffuse, false, 0.15, specularAccu);
-        #if LUMI_LightingMode == LUMI_LightingMode_Dramatic
+            #if LUMI_LightingMode == LUMI_LightingMode_Dramatic
             dramaticBloom = frx_luminance(sunIrradiance);
-        #endif
+            #endif
 
             a.rgb += sunIrradiance;
-            a.rgb += pbr_lightCalc(albedo, moonRadiance * ao, moonDir, viewDir, normal, fragData.diffuse, false, 0.15, specularAccu);
             a.rgb += pbr_lightCalc(albedo, skyRadiance * ao, ambientDir, viewDir, normal, fragData.diffuse, true, 0.0, specularAccu);
 
+            #ifndef LUMI_TrueDarkness_DisableMoonlight
+            vec3 moonRadiance = l2_moonRadiance(fragData.light.y, frx_worldTime(), frx_ambientIntensity());
+            vec3 moonDir = l2_moonDir(frx_worldTime());
+            a.rgb += pbr_lightCalc(albedo, moonRadiance * ao, moonDir, viewDir, normal, fragData.diffuse, false, 0.15, specularAccu);
+            #endif
         }
-
     } else {
-
         vec3 skylessRadiance = l2_skylessRadiance(userBrightness);
         vec3 skylessDir = l2_skylessDir();
 
-        a.rgb += pbr_lightCalc(albedo, skylessRadiance * ao, skylessDir, viewDir, normal, fragData.diffuse, false, 0.0, specularAccu);
-
-        if (frx_isSkyDarkened()) {
-
-            vec3 skylessDarkenedDir = l2_skylessDarkenedDir();
-            a.rgb += pbr_lightCalc(albedo, skylessRadiance * ao, skylessDarkenedDir, viewDir, normal, fragData.diffuse, false, 0.0, specularAccu);
+        if (skylessRadiance.r + skylessRadiance.g + skylessRadiance.b > 0) {
+            a.rgb += pbr_lightCalc(albedo, skylessRadiance * ao, skylessDir, viewDir, normal, fragData.diffuse, false, 0.0, specularAccu);
+            if (frx_isSkyDarkened()) {
+                vec3 skylessDarkenedDir = l2_skylessDarkenedDir();
+                a.rgb += pbr_lightCalc(albedo, skylessRadiance * ao, skylessDarkenedDir, viewDir, normal, fragData.diffuse, false, 0.0, specularAccu);
+            }
         }
-
     }
 
     // float skyAccess = smoothstep(0.89, 1.0, fragData.light.y);

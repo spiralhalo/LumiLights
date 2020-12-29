@@ -9,6 +9,11 @@
     "respackopts.field.LUMI.LightingMode": "Lighting mode",
     "respackopts.field.LUMI.DramaticLighting": "Dramatic lighting options",
     "respackopts.field.LUMI.DramaticLighting.DramaticBloomIntensity": "Intensity of bloom on mornings and evenings",
+    "respackopts.field.LUMI.TrueDarkness": "True darkness options",
+    "respackopts.field.LUMI.TrueDarkness.DisableOverworldAmbient": "Disable overworld ambient light",
+    "respackopts.field.LUMI.TrueDarkness.DisableMoonlight": "Disable moon light",
+    "respackopts.field.LUMI.TrueDarkness.NetherTrueDarkness": "True darkness in the Nether",
+    "respackopts.field.LUMI.TrueDarkness.TheEndTrueDarkness": "True darkness in the End",
     "respackopts.field.LUMI.Tonemap": "Tonemapping",
     "respackopts.field.LUMI.DebugMode": "Debug mode"
 }

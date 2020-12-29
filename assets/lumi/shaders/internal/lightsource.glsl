@@ -139,7 +139,11 @@ vec3 l2_ambientColor(float time) {
 	if(time > 0.94){
 		ambientColor = mix(hdr_gammaAdjust(preNightAmbient) * hdr_moonStr, hdr_gammaAdjust(preSunriseAmbient) * hdr_sunStr, l2_clampScale(0.94, 0.98, time));
 	} else if(time > 0.52){
+		#ifdef LUMI_TrueDarkness_DisableMoonlight
+		ambientColor = mix(hdr_gammaAdjust(preSunsetAmbient) * hdr_sunStr, vec3(0.0), l2_clampScale(0.52, 0.56, time));
+		#else
 		ambientColor = mix(hdr_gammaAdjust(preSunsetAmbient) * hdr_sunStr, hdr_gammaAdjust(preNightAmbient) * hdr_moonStr, l2_clampScale(0.52, 0.56, time));
+		#endif
 	} else if(time > 0.48){
 		ambientColor = mix(hdr_gammaAdjust(preAmbient) * hdr_sunStr, hdr_gammaAdjust(preSunsetAmbient) * hdr_sunStr, l2_clampScale(0.48, 0.5, time));
 	} else if(time < 0.02){
@@ -191,6 +195,16 @@ vec3 l2_skylessDir() {
 }
 
 vec3 l2_skylessRadiance(float userBrightness) {
+	#ifdef LUMI_TrueDarkness_NetherTrueDarkness
+	if (frx_isSkyDarkened()) {
+		return vec3(0.0);
+	}
+	#endif
+	#ifdef LUMI_TrueDarkness_TheEndTrueDarkness
+	if (!frx_isSkyDarkened()) {
+		return vec3(0.0);
+	}
+	#endif
 	if (frx_worldHasSkylight()) {
 		return vec3(0);
 	} else {
@@ -210,8 +224,22 @@ vec3 l2_baseAmbient(float userBrightness){
 		return hdr_gammaAdjust(nvColor) * hdr_blockMaxStr;
 	} else {
 		if (frx_worldHasSkylight()) {
+			#ifdef LUMI_TrueDarkness_DisableOverworldAmbient
+			return vec3(0.0);
+			#else
 			return vec3(0.1) * mix(hdr_baseMinStr, hdr_baseMaxStr, userBrightness);
+			#endif
 		} else {
+			#ifdef LUMI_TrueDarkness_NetherTrueDarkness
+			if(frx_isSkyDarkened()){
+				return vec3(0.0);
+			}
+			#endif
+			#ifdef LUMI_TrueDarkness_TheEndTrueDarkness
+			if(!frx_isSkyDarkened()){
+				return vec3(0.0);
+			}
+			#endif
 			return l2_dimensionColor() * mix(hdr_baseMinStr, hdr_baseMaxStr, userBrightness);
 		}
 	}
@@ -298,6 +326,9 @@ vec3 l2_moonDir(float time){
 }
 
 vec3 l2_moonRadiance(float skyLight, float time, float intensity){
+	#ifdef LUMI_TrueDarkness_DisableMoonlight
+	return vec3(0.0);
+	#else
 	float ml = l2_skyLight(skyLight, intensity) * frx_moonSize() * hdr_moonStr;
 	if(time < 0.58){
 		ml *= l2_clampScale(0.54, 0.58, time);
@@ -305,4 +336,5 @@ vec3 l2_moonRadiance(float skyLight, float time, float intensity){
 		ml *= l2_clampScale(0.96, 0.92, time);
 	}
 	return vec3(ml);
+	#endif
 }
