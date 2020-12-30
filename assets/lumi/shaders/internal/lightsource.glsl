@@ -142,9 +142,11 @@ vec3 l2_ambientColor(float time) {
 	#else
 	vec3 nightAmbient = preNightAmbient;
 	#endif
+
 	if (time == 0.0) {
 		return preSunriseAmbient * hdr_relAmbient;
 	}
+
 	const int len = 9;
 	vec3 colors[len] = vec3[](
 		preSunriseAmbient,
@@ -166,17 +168,22 @@ vec3 l2_ambientColor(float time) {
 		0.94,
 		0.98,
 		1.0);
+
 	int i = 1;
 	while (time > times[i] && i < len) i++;
+
 	return mix(colors[i-1], colors[i], l2_clampScale(times[i-1], times[i], time));
 }
 
 vec3 l2_skyAmbient(float skyLight, float time, float intensity) {
 	float sl = l2_skyLight(skyLight, intensity);
+	
 #if LUMI_LightingMode == LUMI_LightingMode_Dramatic
 	sl = smoothstep(0.1, 0.9, sl);
 #endif
+
 	float sa = sl * 2.5;
+
 	return sa * l2_ambientColor(time);
 }
 
@@ -189,8 +196,8 @@ vec3 l2_skylessLightColor() {
 
 vec3 l2_dimensionColor() {
 	if (frx_isWorldTheNether()) {
-		float min_col = min(min(gl_Fog.color.rgb.x, gl_Fog.color.rgb.y), gl_Fog.color.rgb.z);
-		float max_col = max(max(gl_Fog.color.rgb.x, gl_Fog.color.rgb.y), gl_Fog.color.rgb.z);
+		float min_col = l2_min3(gl_Fog.color.rgb);
+		float max_col = l2_max3(gl_Fog.color.rgb);
 		float sat = 0.0;
 		if (max_col != 0.0) {
 			sat = (max_col-min_col)/max_col;
