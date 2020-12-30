@@ -7,24 +7,18 @@
  *  published by the Free Software Foundation, Inc.    *
  *******************************************************/
 
-const float hdr_finalMult = 1;
-const float hdr_gamma = 2.2;
+#define hdr_finalMult 1
+#define hdr_gamma 2.2
 
-float hdr_gammaAdjust(float x){
-	return pow(x, hdr_gamma);
-}
-
-vec3 hdr_gammaAdjust(vec3 x){
-	return pow(x, vec3(hdr_gamma));
-}
+#define hdr_gammaAdjust(x) pow(x, vec3(hdr_gamma))
+#define hdr_gammaAdjustf(x) pow(x, hdr_gamma)
 
 float l2_clampScale(float e0, float e1, float v){
     return clamp((v-e0)/(e1-e0), 0.0, 1.0);
 }
 
-float l2_max3(vec3 vec){
-	return max(vec.x, max(vec.y, vec.z));
-}
+#define l2_min3(vec) min(vec.x, min(vec.y, vec.z))
+#define l2_max3(vec) max(vec.x, max(vec.y, vec.z))
 
 float l2_ao(frx_FragmentData fragData) {
 #if AO_SHADING_MODE != AO_MODE_NONE
@@ -33,7 +27,7 @@ float l2_ao(frx_FragmentData fragData) {
 	return 1.0 - 0.8 * smoothstep(0.0, 0.3, aoInv * (0.5 + 0.5 * abs((_cvv_normal * frx_normalModelMatrix()).y)));
 #else
 	float ao = fragData.ao ? _cvv_ao : 1.0;
-	return hdr_gammaAdjust(min(1.0, ao + fragData.emissivity));
+	return hdr_gammaAdjustf(min(1.0, ao + fragData.emissivity));
 #endif
 #else
 	return 1.0;

@@ -37,6 +37,10 @@
  ******************************************/
 #define LUMI_GenerateBump
 
+/* How blue the day ambient in the overworld is. Range: 0 ... 10 Default: 0
+*****************************************************************************/
+#define LUMI_DayAmbientBlue 0
+
 /* Uncomment to enable wavy water model
    ("Uncomment" means removing double slash at the beginning)
 ***************************************************************/

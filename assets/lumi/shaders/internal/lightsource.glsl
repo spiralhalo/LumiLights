@@ -14,35 +14,36 @@
 #endif
 
 #ifdef LUMI_PBRX
-const float hdr_sunStr = 5;
-const float hdr_moonStr = 0.4;
-const float hdr_blockMinStr = 2;
-const float hdr_blockMaxStr = 3;
-const float hdr_handHeldStr = 1.5;
-const float hdr_skylessStr = 0.1;
-const float hdr_baseMinStr = 0.01;
-const float hdr_baseMaxStr = 0.8;
-const float hdr_emissiveStr = 1;
-const float hdr_relAmbient = toneAdjust(0.2);
-const float hdr_dramaticStr = 1.0;
-const float hdr_dramaticMagicNumber = 6.0;
+	#define hdr_sunStr 5
+	#define hdr_moonStr 0.4
+	#define hdr_blockMinStr 2
+	#define hdr_blockMaxStr 3
+	#define hdr_handHeldStr 1.5
+	#define hdr_skylessStr 0.1
+	#define hdr_baseMinStr 0.01
+	#define hdr_baseMaxStr 0.8
+	#define hdr_emissiveStr 1
+	#define hdr_relAmbient toneAdjust(0.2)
+	#define hdr_dramaticStr 1.0
+	#define hdr_dramaticMagicNumber 6.0
 #else
-const float hdr_sunStr = 1.8;
-const float hdr_moonStr = 0.18;
-const float hdr_blockMinStr = 1.0;
-const float hdr_blockMaxStr = 1.4;
-const float hdr_handHeldStr = 0.9;
-const float hdr_skylessStr = 0.05;
-const float hdr_baseMinStr = 0.0;
-const float hdr_baseMaxStr = 0.25;
-const float hdr_emissiveStr = 1;
-const float hdr_relAmbient = toneAdjust(0.09);
-const float hdr_dramaticStr = 0.6;
-const float hdr_dramaticMagicNumber = 3.5;
+	#define hdr_sunStr 1.8
+	#define hdr_moonStr 0.18
+	#define hdr_blockMinStr 1.0
+	#define hdr_blockMaxStr 1.4
+	#define hdr_handHeldStr 0.9
+	#define hdr_skylessStr 0.05
+	#define hdr_baseMinStr 0.0
+	#define hdr_baseMaxStr 0.25
+	#define hdr_emissiveStr 1
+	#define hdr_relAmbient toneAdjust(0.09)
+	#define hdr_dramaticStr 0.6
+	#define hdr_dramaticMagicNumber 3.5
 #endif
-const float hdr_skylessRelStr = 0.5;
-const float hdr_nightAmbientMult = 2.0;
-const float hdr_zWobbleDefault = 0.1;
+
+#define hdr_nightAmbientMult 2.0
+#define hdr_skylessRelStr 0.5
+#define hdr_zWobbleDefault 0.1
 
 const vec3 blockColor = vec3(1.0, 0.875, 0.75);
 const vec3 dramaticBlockColor = vec3(1.0, 0.7, 0.4);
@@ -62,15 +63,21 @@ const vec3 preSunsetColor = vec3(1.0, 0.6, 0.4);
 const vec3 nvColor = vec3(0.63, 0.55, 0.64);
 // const vec3 nvColorPurple = vec3(0.6, 0.5, 0.7);
 
-const vec3 preAmbient = vec3(0.6, 0.9, 1.0);
+#ifndef LUMI_DayAmbientBlue
+	#define LUMI_DayAmbientBlue 0
+#endif
+
+#define preDayAmbient hdr_gammaAdjust(mix(vec3(0.8550322), vec3(0.6, 0.9, 1.0), clamp(LUMI_DayAmbientBlue * 0.1, 0.0, 1.0))) * hdr_sunStr
+#define preAmbient hdr_gammaAdjust(vec3(0.6, 0.9, 1.0)) * hdr_sunStr
+
 #if LUMI_LightingMode == LUMI_LightingMode_Dramatic
-const vec3 preSunriseAmbient = vec3(0.5, 0.3, 0.1);
-const vec3 preSunsetAmbient = vec3(0.5, 0.2, 0.0);
-const vec3 preNightAmbient = vec3(0.74, 0.4, 1.0);
+	#define preSunriseAmbient hdr_gammaAdjust(vec3(0.5, 0.3, 0.1)) * hdr_sunStr
+	#define preSunsetAmbient hdr_gammaAdjust(vec3(0.5, 0.2, 0.0)) * hdr_sunStr
+	#define preNightAmbient hdr_gammaAdjust(vec3(0.74, 0.4, 1.0)) * hdr_moonStr * hdr_nightAmbientMult
 #else
-const vec3 preSunriseAmbient = vec3(1.0, 0.8, 0.4);
-const vec3 preSunsetAmbient = vec3(1.0, 0.6, 0.2);
-const vec3 preNightAmbient = vec3(0.5, 0.5, 1.0);
+	#define preSunriseAmbient hdr_gammaAdjust(vec3(1.0, 0.8, 0.4)) * hdr_sunStr
+	#define preSunsetAmbient hdr_gammaAdjust(vec3(1.0, 0.6, 0.2)) * hdr_sunStr
+	#define preNightAmbient hdr_gammaAdjust(vec3(0.5, 0.5, 1.0)) * hdr_moonStr * hdr_nightAmbientMult
 #endif
 
 /*  BLOCK LIGHT
@@ -121,7 +128,7 @@ vec3 l2_handHeldRadiance() {
  *******************************************************/
 
 vec3 l2_emissiveRadiance(float emissivity) {
-	return vec3(hdr_gammaAdjust(emissivity) * hdr_emissiveStr);
+	return vec3(hdr_gammaAdjustf(emissivity) * hdr_emissiveStr);
 }
 
 /*  SKY AMBIENT LIGHT
@@ -129,35 +136,61 @@ vec3 l2_emissiveRadiance(float emissivity) {
 
 float l2_skyLight(float skyLight, float intensity) {
 	float sl = l2_clampScale(0.03125, 1.0, skyLight);
-	return hdr_gammaAdjust(sl) * intensity;
+	return hdr_gammaAdjustf(sl) * intensity;
 }
 
 vec3 l2_ambientColor(float time) {
-	vec3 ambientColor;
-	if(time > 0.94){
-		ambientColor = mix(hdr_gammaAdjust(preNightAmbient) * hdr_moonStr, hdr_gammaAdjust(preSunriseAmbient) * hdr_sunStr, l2_clampScale(0.94, 0.98, time));
-	} else if(time > 0.52){
-		#ifdef LUMI_TrueDarkness_DisableMoonlight
-		ambientColor = mix(hdr_gammaAdjust(preSunsetAmbient) * hdr_sunStr, vec3(0.0), l2_clampScale(0.52, 0.56, time));
-		#else
-		ambientColor = mix(hdr_gammaAdjust(preSunsetAmbient) * hdr_sunStr, hdr_gammaAdjust(preNightAmbient) * hdr_moonStr * hdr_nightAmbientMult, l2_clampScale(0.52, 0.56, time));
-		#endif
-	} else if(time > 0.48){
-		ambientColor = mix(hdr_gammaAdjust(preAmbient) * hdr_sunStr, hdr_gammaAdjust(preSunsetAmbient) * hdr_sunStr, l2_clampScale(0.48, 0.5, time));
-	} else if(time < 0.02){
-		ambientColor = mix(hdr_gammaAdjust(preAmbient) * hdr_sunStr, hdr_gammaAdjust(preSunriseAmbient) * hdr_sunStr, l2_clampScale(0.02, 0, time));
-	} else {
-		ambientColor = hdr_gammaAdjust(preAmbient) * hdr_sunStr;
+	#ifdef LUMI_TrueDarkness_DisableMoonlight
+	vec3 nightAmbient = vec3(0.0);
+	#else
+	vec3 nightAmbient = preNightAmbient;
+	#endif
+
+	if (time == 0.0) {
+		return preSunriseAmbient * hdr_relAmbient;
 	}
-	return ambientColor * hdr_relAmbient;
+
+	const int len = 11;
+	vec3 colors[len] = vec3[](
+		preSunriseAmbient,
+		preAmbient,
+		preDayAmbient,
+		preDayAmbient,
+		preAmbient,
+		preSunsetAmbient,
+		preAmbient,
+		nightAmbient,
+		nightAmbient,
+		preAmbient,
+		preSunriseAmbient);
+	float times[len] = float[](
+		0.0,
+		0.02,
+		0.06,
+		0.44,
+		0.48,
+		0.5,
+		0.52,
+		0.56,
+		0.94,
+		0.98,
+		1.0);
+
+	int i = 1;
+	while (time > times[i] && i < len) i++;
+
+	return mix(colors[i-1], colors[i], l2_clampScale(times[i-1], times[i], time)) * hdr_relAmbient;
 }
 
 vec3 l2_skyAmbient(float skyLight, float time, float intensity) {
 	float sl = l2_skyLight(skyLight, intensity);
+	
 #if LUMI_LightingMode == LUMI_LightingMode_Dramatic
 	sl = smoothstep(0.1, 0.9, sl);
 #endif
+
 	float sa = sl * 2.5;
+
 	return sa * l2_ambientColor(time);
 }
 
@@ -170,8 +203,8 @@ vec3 l2_skylessLightColor() {
 
 vec3 l2_dimensionColor() {
 	if (frx_isWorldTheNether()) {
-		float min_col = min(min(gl_Fog.color.rgb.x, gl_Fog.color.rgb.y), gl_Fog.color.rgb.z);
-		float max_col = max(max(gl_Fog.color.rgb.x, gl_Fog.color.rgb.y), gl_Fog.color.rgb.z);
+		float min_col = l2_min3(gl_Fog.color.rgb);
+		float max_col = l2_max3(gl_Fog.color.rgb);
 		float sat = 0.0;
 		if (max_col != 0.0) {
 			sat = (max_col-min_col)/max_col;
