@@ -16,33 +16,33 @@
 #ifdef LUMI_PBRX
 #define hdr_sunStr 5
 #define hdr_moonStr 0.4
-const float hdr_blockMinStr = 2;
-const float hdr_blockMaxStr = 3;
-const float hdr_handHeldStr = 1.5;
-const float hdr_skylessStr = 0.1;
-const float hdr_baseMinStr = 0.01;
-const float hdr_baseMaxStr = 0.8;
-const float hdr_emissiveStr = 1;
-const float hdr_relAmbient = toneAdjust(0.2);
-const float hdr_dramaticStr = 1.0;
-const float hdr_dramaticMagicNumber = 6.0;
+#define hdr_blockMinStr 2
+#define hdr_blockMaxStr 3
+#define hdr_handHeldStr 1.5
+#define hdr_skylessStr 0.1
+#define hdr_baseMinStr 0.01
+#define hdr_baseMaxStr 0.8
+#define hdr_emissiveStr 1
+#define hdr_relAmbient toneAdjust(0.2)
+#define hdr_dramaticStr 1.0
+#define hdr_dramaticMagicNumber 6.0
 #else
 #define hdr_sunStr 1.8
 #define hdr_moonStr 0.18
-const float hdr_blockMinStr = 1.0;
-const float hdr_blockMaxStr = 1.4;
-const float hdr_handHeldStr = 0.9;
-const float hdr_skylessStr = 0.05;
-const float hdr_baseMinStr = 0.0;
-const float hdr_baseMaxStr = 0.25;
-const float hdr_emissiveStr = 1;
-const float hdr_relAmbient = toneAdjust(0.09);
-const float hdr_dramaticStr = 0.6;
-const float hdr_dramaticMagicNumber = 3.5;
+#define hdr_blockMinStr 1.0
+#define hdr_blockMaxStr 1.4
+#define hdr_handHeldStr 0.9
+#define hdr_skylessStr 0.05
+#define hdr_baseMinStr 0.0
+#define hdr_baseMaxStr 0.25
+#define hdr_emissiveStr 1
+#define hdr_relAmbient toneAdjust(0.09)
+#define hdr_dramaticStr 0.6
+#define hdr_dramaticMagicNumber 3.5
 #endif
 #define hdr_nightAmbientMult 2.0
-const float hdr_skylessRelStr = 0.5;
-const float hdr_zWobbleDefault = 0.1;
+#define hdr_skylessRelStr 0.5
+#define hdr_zWobbleDefault 0.1
 
 const vec3 blockColor = vec3(1.0, 0.875, 0.75);
 const vec3 dramaticBlockColor = vec3(1.0, 0.7, 0.4);
