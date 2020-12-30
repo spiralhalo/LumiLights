@@ -48,15 +48,7 @@
 const vec3 blockColor = vec3(1.0, 0.875, 0.75);
 const vec3 dramaticBlockColor = vec3(1.0, 0.7, 0.4);
 
-#if LUMI_LightingMode == LUMI_LightingMode_Dramatic
 const vec3 preSunColor = vec3(1.0, 1.0, 1.0);
-#else
-#if LUMI_Tonemap == LUMI_Tonemap_Vibrant
-const vec3 preSunColor = vec3(1.0, 1.0, 1.0);
-#else
-const vec3 preSunColor = vec3(1.0, 1.0, 0.8);
-#endif
-#endif
 const vec3 preSunriseColor = vec3(1.0, 0.8, 0.4);
 const vec3 preSunsetColor = vec3(1.0, 0.6, 0.4);
 
