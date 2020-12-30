@@ -64,11 +64,11 @@ const vec3 nvColor = vec3(0.63, 0.55, 0.64);
 // const vec3 nvColorPurple = vec3(0.6, 0.5, 0.7);
 
 #ifndef LUMI_DayAmbientBlue
-	#define LUMI_DayAmbientBlue 10
+	#define LUMI_DayAmbientBlue 0
 #endif
 
-#define preAmbient hdr_gammaAdjust(mix(vec3(0.8550322), vec3(0.6, 0.9, 1.0), clamp(LUMI_DayAmbientBlue * 0.1, 0.0, 1.0))) * hdr_sunStr
-#define preBlueAmbient hdr_gammaAdjust(vec3(0.6, 0.9, 1.0)) * hdr_sunStr
+#define preDayAmbient hdr_gammaAdjust(mix(vec3(0.8550322), vec3(0.6, 0.9, 1.0), clamp(LUMI_DayAmbientBlue * 0.1, 0.0, 1.0))) * hdr_sunStr
+#define preAmbient hdr_gammaAdjust(vec3(0.6, 0.9, 1.0)) * hdr_sunStr
 
 #if LUMI_LightingMode == LUMI_LightingMode_Dramatic
 	#define preSunriseAmbient hdr_gammaAdjust(vec3(0.5, 0.3, 0.1)) * hdr_sunStr
@@ -150,10 +150,12 @@ vec3 l2_ambientColor(float time) {
 		return preSunriseAmbient * hdr_relAmbient;
 	}
 
-	const int len = 9;
+	const int len = 11;
 	vec3 colors[len] = vec3[](
 		preSunriseAmbient,
 		preAmbient,
+		preDayAmbient,
+		preDayAmbient,
 		preAmbient,
 		preSunsetAmbient,
 		preAmbient,
@@ -164,6 +166,8 @@ vec3 l2_ambientColor(float time) {
 	float times[len] = float[](
 		0.0,
 		0.02,
+		0.06,
+		0.44,
 		0.48,
 		0.5,
 		0.52,
