@@ -14,8 +14,8 @@
 #endif
 
 #ifdef LUMI_PBRX
-const float hdr_sunStr = 5;
-const float hdr_moonStr = 0.4;
+#define hdr_sunStr 5
+#define hdr_moonStr 0.4
 const float hdr_blockMinStr = 2;
 const float hdr_blockMaxStr = 3;
 const float hdr_handHeldStr = 1.5;
@@ -27,8 +27,8 @@ const float hdr_relAmbient = toneAdjust(0.2);
 const float hdr_dramaticStr = 1.0;
 const float hdr_dramaticMagicNumber = 6.0;
 #else
-const float hdr_sunStr = 1.8;
-const float hdr_moonStr = 0.18;
+#define hdr_sunStr 1.8
+#define hdr_moonStr 0.18
 const float hdr_blockMinStr = 1.0;
 const float hdr_blockMaxStr = 1.4;
 const float hdr_handHeldStr = 0.9;
@@ -40,8 +40,8 @@ const float hdr_relAmbient = toneAdjust(0.09);
 const float hdr_dramaticStr = 0.6;
 const float hdr_dramaticMagicNumber = 3.5;
 #endif
+#define hdr_nightAmbientMult 2.0
 const float hdr_skylessRelStr = 0.5;
-const float hdr_nightAmbientMult = 2.0;
 const float hdr_zWobbleDefault = 0.1;
 
 const vec3 blockColor = vec3(1.0, 0.875, 0.75);
@@ -65,16 +65,16 @@ const vec3 nvColor = vec3(0.63, 0.55, 0.64);
 #ifndef LUMI_DayAmbientBlue
 	#define LUMI_DayAmbientBlue 10
 #endif
-const vec3 preAmbient = hdr_gammaAdjust(mix(vec3(0.8550322), vec3(0.6, 0.9, 1.0), clamp(LUMI_DayAmbientBlue * 0.1, 0.0, 1.0)));
-const vec3 preBlueAmbient = hdr_gammaAdjust(vec3(0.6, 0.9, 1.0));
+const vec3 preAmbient = hdr_gammaAdjust(mix(vec3(0.8550322), vec3(0.6, 0.9, 1.0), clamp(LUMI_DayAmbientBlue * 0.1, 0.0, 1.0))) * hdr_sunStr;
+const vec3 preBlueAmbient = hdr_gammaAdjust(vec3(0.6, 0.9, 1.0)) * hdr_sunStr;
 #if LUMI_LightingMode == LUMI_LightingMode_Dramatic
-const vec3 preSunriseAmbient = hdr_gammaAdjust(vec3(0.5, 0.3, 0.1));
-const vec3 preSunsetAmbient = hdr_gammaAdjust(vec3(0.5, 0.2, 0.0));
-const vec3 preNightAmbient = hdr_gammaAdjust(vec3(0.74, 0.4, 1.0));
+const vec3 preSunriseAmbient = hdr_gammaAdjust(vec3(0.5, 0.3, 0.1)) * hdr_sunStr;
+const vec3 preSunsetAmbient = hdr_gammaAdjust(vec3(0.5, 0.2, 0.0)) * hdr_sunStr;
+const vec3 preNightAmbient = hdr_gammaAdjust(vec3(0.74, 0.4, 1.0)) * hdr_moonStr * hdr_nightAmbientMult;
 #else
-const vec3 preSunriseAmbient = hdr_gammaAdjust(vec3(1.0, 0.8, 0.4));
-const vec3 preSunsetAmbient = hdr_gammaAdjust(vec3(1.0, 0.6, 0.2));
-const vec3 preNightAmbient = hdr_gammaAdjust(vec3(0.5, 0.5, 1.0));
+const vec3 preSunriseAmbient = hdr_gammaAdjust(vec3(1.0, 0.8, 0.4)) * hdr_sunStr;
+const vec3 preSunsetAmbient = hdr_gammaAdjust(vec3(1.0, 0.6, 0.2)) * hdr_sunStr;
+const vec3 preNightAmbient = hdr_gammaAdjust(vec3(0.5, 0.5, 1.0)) * hdr_moonStr * hdr_nightAmbientMult;
 #endif
 
 /*  BLOCK LIGHT
@@ -137,24 +137,38 @@ float l2_skyLight(float skyLight, float intensity) {
 }
 
 vec3 l2_ambientColor(float time) {
-	vec3 ambientColor;
 	#ifdef LUMI_TrueDarkness_DisableMoonlight
 	vec3 nightAmbient = vec3(0.0);
 	#else
-	vec3 nightAmbient = preNightAmbient * hdr_moonStr * hdr_nightAmbientMult;
+	vec3 nightAmbient = preNightAmbient;
 	#endif
-	if(time > 0.94){
-		ambientColor = mix(nightAmbient, preSunriseAmbient * hdr_sunStr, l2_clampScale(0.94, 0.98, time));
-	} else if(time > 0.52){
-		ambientColor = mix(preSunsetAmbient * hdr_sunStr, nightAmbient, l2_clampScale(0.52, 0.56, time));
-	} else if(time > 0.48){
-		ambientColor = mix(preAmbient * hdr_sunStr, preSunsetAmbient * hdr_sunStr, l2_clampScale(0.48, 0.5, time));
-	} else if(time < 0.02){
-		ambientColor = mix(preAmbient * hdr_sunStr, preSunriseAmbient * hdr_sunStr, l2_clampScale(0.02, 0, time));
-	} else {
-		ambientColor = preAmbient * hdr_sunStr;
+	if (time == 0.0) {
+		return preSunriseAmbient * hdr_relAmbient;
 	}
-	return ambientColor * hdr_relAmbient;
+	const int len = 9;
+	vec3 colors[len] = vec3[](
+		preSunriseAmbient,
+		preAmbient,
+		preAmbient,
+		preSunsetAmbient,
+		preAmbient,
+		nightAmbient,
+		nightAmbient,
+		preAmbient,
+		preSunriseAmbient);
+	float times[len] = float[](
+		0.0,
+		0.02,
+		0.48,
+		0.5,
+		0.52,
+		0.56,
+		0.94,
+		0.98,
+		1.0);
+	int i = 1;
+	while (time > times[i] && i < len) i++;
+	return mix(colors[i-1], colors[i], l2_clampScale(times[i-1], times[i], time));
 }
 
 vec3 l2_skyAmbient(float skyLight, float time, float intensity) {
