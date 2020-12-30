@@ -175,7 +175,7 @@ vec3 l2_ambientColor(float time) {
 	int i = 1;
 	while (time > times[i] && i < len) i++;
 
-	return mix(colors[i-1], colors[i], l2_clampScale(times[i-1], times[i], time));
+	return mix(colors[i-1], colors[i], l2_clampScale(times[i-1], times[i], time)) * hdr_relAmbient;
 }
 
 vec3 l2_skyAmbient(float skyLight, float time, float intensity) {
