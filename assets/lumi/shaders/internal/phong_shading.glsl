@@ -7,8 +7,6 @@
  *  published by the Free Software Foundation, Inc.    *
  *******************************************************/
 
-float ww_specular = 0.0;
-
 float l2_specular(float time, vec3 aNormal, vec3 viewDir, float power)
 {
     // calculate sun position (0 zWobble to make it look accurate with vanilla sun visuals)
@@ -59,7 +57,7 @@ void phong_shading(in frx_FragmentData fragData, inout vec4 a, inout float bloom
     light += emissive;
     
     vec3 specular = vec3(0.0);
-    if (ww_specular > 0) {
+    if (phong_specular > 0) {
         vec3 specularNormal = fragData.vertexNormal * frx_normalModelMatrix();
 
         float skyAccess = smoothstep(0.89, 1.0, fragData.light.y);
@@ -69,7 +67,7 @@ void phong_shading(in frx_FragmentData fragData, inout vec4 a, inout float bloom
         vec3 viewDir = normalize(-l2_viewPos) * frx_normalModelMatrix() * gl_NormalMatrix;
         vec3 sun = l2_sunRadiance(fragData.light.y, frx_worldTime(), frx_ambientIntensity(), frx_rainGradient()) * specSunDot;
 
-        float specularAmount = l2_specular(frx_worldTime(), specularNormal, viewDir, ww_specular);
+        float specularAmount = l2_specular(frx_worldTime(), specularNormal, viewDir, phong_specular);
 
         specular = sun * specularAmount * skyAccess;
 

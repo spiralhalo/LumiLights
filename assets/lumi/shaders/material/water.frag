@@ -2,6 +2,7 @@
 #include frex:shaders/api/world.glsl
 #include frex:shaders/lib/noise/noise3d.glsl
 #include frex:shaders/lib/color.glsl
+#include lumi:shaders/api/param_frag.glsl
 #include lumi:shaders/lib/water.glsl
 
 void frx_startFragment(inout frx_FragmentData fragData) {
@@ -15,7 +16,7 @@ void frx_startFragment(inout frx_FragmentData fragData) {
 		fragData.light.y = min(0.96875, fragData.light.y);
 
 		/* LUMI PARAMS */
-		ww_specular = 500.0;
+		phong_specular = 500.0;
 	#endif
 	
 	/* WATER RECOLOR */

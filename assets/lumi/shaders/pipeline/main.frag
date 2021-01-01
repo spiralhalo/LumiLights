@@ -101,13 +101,4 @@ void frx_startPipelineFragment(inout frx_FragmentData fragData)
         translucent = translucent && a.a < 0.99;
         gl_FragData[TARGET_EMISSIVE] = vec4(bloom * a.a, 1.0, 0.0, translucent ? step(l2_skyBloom(), bloom) : 1.0);
     #endif
-
-    // Try resetting here
-    #ifdef LUMI_PBRX
-        pbr_roughness = 1.0;
-        pbr_metallic = 0.0;
-        pbr_f0 = vec3(-1.0);
-    #else
-        ww_specular = 0.0;
-    #endif
 }
