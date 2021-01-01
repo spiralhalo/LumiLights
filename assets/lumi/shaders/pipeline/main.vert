@@ -60,7 +60,7 @@ void frx_startPipelineVertex(inout frx_VertexData data) {
 	gl_ClipVertex = view;
 	gl_FogFragCoord = length(view.xyz);
     l2_viewPos = view.xyz;
-    l2_tangent = _tangent(data.vertexNormal);
+    l2_tangent = _tangent(data.normal);
 }
 
 void frx_endPipelineVertex(inout frx_VertexData data) {

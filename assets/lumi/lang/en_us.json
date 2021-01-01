@@ -1,4 +1,6 @@
 {
+    "pipeline.lumi_lights.name": "Lumi Lights",
+    "pipeline.lumi_lights.desc": "Cool sunrise and shiny stuff methinks",
     "respackopts.title.LUMI": "Lumi Lights",
     "respackopts.field.LUMI.PBR": "PBR mode",
     "respackopts.tooltip.LUMI.PBR": "Emulate fresnel effect and metals (performance impact)",

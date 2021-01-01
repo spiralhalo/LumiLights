@@ -13,14 +13,6 @@
 #include lumi:shaders/api/pbr_frag.glsl
 #include lumi:shaders/lib/util.glsl
 #include lumi:shaders/lib/pbr.glsl
-#include lumi:shaders/internal/varying.glsl
-#include lumi:shaders/internal/main_frag.glsl
-#include lumi:shaders/internal/lightsource.glsl
-#include lumi:shaders/internal/tonemap.glsl
-#include lumi:shaders/internal/pbr_shading.glsl
-#include lumi:shaders/internal/phong_shading.glsl
-#include lumi:shaders/internal/debug_shading.glsl
-#include lumi:shaders/internal/skybloom.glsl
 
 /*******************************************************
  *  lumi:shaders/pipeline/main.frag                    *
@@ -47,6 +39,24 @@ float l2_ao(frx_FragmentData fragData) {
     #endif
 }
 
+// this is literally just Grondag's magic diffuse function and I shall take no credit for it
+float l2_diffuseGui(vec3 normal) {
+	normal = normalize(gl_NormalMatrix * normal);
+	float light = 0.4
+	+ 0.6 * clamp(dot(normal.xyz, vec3(-0.96104145, -0.078606814, -0.2593495)), 0.0, 1.0)
+	+ 0.6 * clamp(dot(normal.xyz, vec3(-0.26765957, -0.95667744, 0.100838766)), 0.0, 1.0);
+	return min(light, 1.0);
+}
+
+#include lumi:shaders/internal/varying.glsl
+#include lumi:shaders/internal/main_frag.glsl
+#include lumi:shaders/internal/lightsource.glsl
+#include lumi:shaders/internal/tonemap.glsl
+#include lumi:shaders/internal/pbr_shading.glsl
+#include lumi:shaders/internal/phong_shading.glsl
+#include lumi:shaders/internal/debug_shading.glsl
+#include lumi:shaders/internal/skybloom.glsl
+
 void frx_startPipelineFragment(inout frx_FragmentData fragData)
 {
     vec4 a = clamp(fragData.spriteColor * fragData.vertexColor, 0.0, 1.0);
@@ -54,8 +64,8 @@ void frx_startPipelineFragment(inout frx_FragmentData fragData)
     bool translucent = _cv_getFlag(_CV_FLAG_CUTOUT) == 0.0 && a.a < 0.99;
     if(frx_isGui()){
         #if DIFFUSE_SHADING_MODE != DIFFUSE_MODE_NONE
-            if(fragData.diffuse){
-                float diffuse = mix(_cvv_diffuse, 1, fragData.emissivity);
+            if (fragData.diffuse) {
+                float diffuse = mix(l2_diffuseGui(fragData.vertexNormal), 1, fragData.emissivity);
                 vec3 shading = mix(vec3(0.5, 0.4, 0.8) * diffuse * diffuse, vec3(1.0), diffuse);
                 a.rgb *= shading;
             }

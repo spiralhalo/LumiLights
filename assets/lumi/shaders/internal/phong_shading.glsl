@@ -7,6 +7,10 @@
  *  published by the Free Software Foundation, Inc.    *
  *******************************************************/
 
+#ifndef LUMI_PARAM_LOADED
+    float phong_specular = 0.0;
+#endif
+
 float l2_specular(float time, vec3 aNormal, vec3 viewDir, float power)
 {
     // calculate sun position (0 zWobble to make it look accurate with vanilla sun visuals)

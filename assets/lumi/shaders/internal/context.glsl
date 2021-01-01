@@ -8,6 +8,9 @@
  *******************************************************/
 
 #define LUMI_LightingMode_SystemUnused -1
+#ifdef LUMI_PipelineActive
+	#define LUMI_LIGHTS
+#endif
 #ifdef LUMI_PBR
 	#define LUMI_PBRX
 #endif

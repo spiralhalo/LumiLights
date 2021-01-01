@@ -6,7 +6,13 @@
  *  GNU Lesser General Public License version 3 as     *
  *  published by the Free Software Foundation, Inc.    *
  *******************************************************/
- 
+
+#ifndef LUMI_PARAM_LOADED
+    float pbr_roughness = 1.0;
+    float pbr_metallic = 0.0;
+    vec3 pbr_f0 = vec3(-1.0);
+#endif
+
 const float pbr_specularBloomStr = 0.01;
 const float pbr_specularAlphaStr = 0.1;
 
