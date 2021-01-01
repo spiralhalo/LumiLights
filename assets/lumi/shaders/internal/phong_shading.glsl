@@ -20,7 +20,8 @@ float l2_specular(float time, vec3 aNormal, vec3 viewDir, float power)
     return pow(max(0.0, dot(reflect(-sunDir, aNormal), viewDir)), power);
 }
 
-void phong_shading(in frx_FragmentData fragData, inout vec4 a, inout float bloom, in float userBrightness, in bool translucent) {
+void phong_shading(in frx_FragmentData fragData, inout vec4 a, inout float bloom, in bool translucent)
+{
     a.rgb = hdr_gammaAdjust(a.rgb);
 
     float ao = l2_ao(fragData);
@@ -41,14 +42,14 @@ void phong_shading(in frx_FragmentData fragData, inout vec4 a, inout float bloom
 		perceivedBl = max(0, perceivedBl - fragData.light.y * 0.1);
 	}
 #endif
-    vec3 block = l2_blockRadiance(perceivedBl, userBrightness);
+    vec3 block = l2_blockRadiance(perceivedBl);
     vec3 sun = l2_sunRadiance(fragData.light.y, frx_worldTime(), frx_ambientIntensity(), frx_rainGradient()) * sunDot;
     vec3 moon = l2_moonRadiance(fragData.light.y, frx_worldTime(), frx_ambientIntensity()) * moonDot;
     vec3 skyAmbient = l2_skyAmbient(fragData.light.y, frx_worldTime(), frx_ambientIntensity());
     vec3 emissive = l2_emissiveRadiance(fragData.emissivity);
-    vec3 skylessRadiance = l2_skylessRadiance(userBrightness);
+    vec3 skylessRadiance = l2_skylessRadiance();
     vec3 skyless = skylessRadiance * skyLessDot + (frx_isSkyDarkened() ? skylessRadiance * skyLessDarkenedDot : vec3(0.0));
-    vec3 baseAmbient = l2_baseAmbient(userBrightness);
+    vec3 baseAmbient = l2_baseAmbient();
 
 #if LUMI_LightingMode == LUMI_LightingMode_Dramatic
     vec3 light = baseAmbient + held + moon + skyAmbient + sun + skyless;

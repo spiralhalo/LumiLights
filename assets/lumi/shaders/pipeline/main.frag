@@ -74,23 +74,10 @@ void frx_startPipelineFragment(inout frx_FragmentData fragData)
         #if LUMI_DebugMode != LUMI_DebugMode_Disabled
             debug_shading(fragData, a);
         #else
-            float userBrightness;
-            float brightnessBase = texture2D(frxs_lightmap, vec2(0.03125, 0.03125)).r;
-            if(frx_worldHasSkylight()){
-                userBrightness = smoothstep(0.053, 0.135, brightnessBase);
-            } else {
-                // simplified for both nether and the end
-                userBrightness = smoothstep(0.15, 0.63, brightnessBase);
-                // if(frx_isWorldTheNether()){
-                //  userBrightness = smoothstep(0.15/*0.207 no true darkness in nether*/, 0.577, brightnessBase);
-                // } else if (frx_isWorldTheEnd(){
-                //  userBrightness = smoothstep(0.18/*0.271 no true darkness in the end*/, 0.685, brightnessBase);
-                // }
-            }
             #ifdef LUMI_PBRX
-                pbr_shading(fragData, a, bloom, userBrightness, translucent);
+                pbr_shading(fragData, a, bloom, translucent);
             #else
-                phong_shading(fragData, a, bloom, userBrightness, translucent);
+                phong_shading(fragData, a, bloom, translucent);
             #endif
             a.rgb *= hdr_finalMult;
             tonemap(a);

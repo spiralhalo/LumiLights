@@ -75,7 +75,7 @@ const vec3 nvColor = vec3(0.63, 0.55, 0.64);
 /*  BLOCK LIGHT
  *******************************************************/
 
-vec3 l2_blockRadiance(float blockLight, float userBrightness)
+vec3 l2_blockRadiance(float blockLight)
 {
     #if LUMI_LightingMode == LUMI_LightingMode_Dramatic
         float dist = (1.001 - min(l2_clampScale(0.03125, 0.95, blockLight), 0.93)) * 15;
@@ -83,10 +83,10 @@ vec3 l2_blockRadiance(float blockLight, float userBrightness)
         if (bl <= 0.01 * hdr_dramaticMagicNumber) {
             bl *= l2_clampScale(0.0045 * hdr_dramaticMagicNumber, 0.01 * hdr_dramaticMagicNumber, bl);
         }
-        return bl * hdr_gammaAdjust(dramaticBlockColor) * mix(hdr_blockMinStr, hdr_blockMaxStr, userBrightness);
+        return bl * hdr_gammaAdjust(dramaticBlockColor) * mix(hdr_blockMinStr, hdr_blockMaxStr, frx_viewBrightness());
     #else
         float bl = l2_clampScale(0.03125, 1.0, blockLight);
-        bl *= bl * mix(hdr_blockMinStr, hdr_blockMaxStr, userBrightness);
+        bl *= bl * mix(hdr_blockMinStr, hdr_blockMaxStr, frx_viewBrightness());
         return hdr_gammaAdjust(bl * blockColor);
     #endif
 }
@@ -198,7 +198,7 @@ vec3 l2_dimensionColor()
 #define l2_skylessDarkenedDir() vec3(0, -0.977358, 0.211593)
 #define l2_skylessDir() vec3(0, 0.977358, 0.211593)
 
-vec3 l2_skylessRadiance(float userBrightness) {
+vec3 l2_skylessRadiance() {
     #ifdef LUMI_TrueDarkness_NetherTrueDarkness
         if (frx_isSkyDarkened()) return vec3(0.0);
     #endif
@@ -206,20 +206,20 @@ vec3 l2_skylessRadiance(float userBrightness) {
         if (!frx_isSkyDarkened()) return vec3(0.0);
     #endif
     if (frx_worldHasSkylight()) return vec3(0);
-    else return (frx_isSkyDarkened() ? 0.5 : 1.0) * hdr_skylessStr * l2_skylessLightColor() * userBrightness;
+    else return (frx_isSkyDarkened() ? 0.5 : 1.0) * hdr_skylessStr * l2_skylessLightColor() * frx_viewBrightness();
 }
 
 /*  BASE AMBIENT LIGHT
  *******************************************************/
 
-vec3 l2_baseAmbient(float userBrightness){
-    //userBrightness is maxed out by night vision so it's useless here
+vec3 l2_baseAmbient(){
+    //frx_viewBrightness() is maxed out by night vision so it's useless here
     if (frx_playerHasNightVision()) return hdr_gammaAdjust(nvColor) * hdr_blockMaxStr;
     if (frx_worldHasSkylight()) {
         #ifdef LUMI_TrueDarkness_DisableOverworldAmbient
             return vec3(0.0);
         #else
-            return vec3(0.1) * mix(hdr_baseMinStr, hdr_baseMaxStr, userBrightness);
+            return vec3(0.1) * mix(hdr_baseMinStr, hdr_baseMaxStr, frx_viewBrightness());
         #endif
     } else {
         #ifdef LUMI_TrueDarkness_NetherTrueDarkness
@@ -232,7 +232,7 @@ vec3 l2_baseAmbient(float userBrightness){
                 return vec3(0.0);
             }
         #endif
-        return l2_dimensionColor() * hdr_skylessRelStr * mix(hdr_baseMinStr, hdr_baseMaxStr, userBrightness);
+        return l2_dimensionColor() * hdr_skylessRelStr * mix(hdr_baseMinStr, hdr_baseMaxStr, frx_viewBrightness());
     }
 }
 

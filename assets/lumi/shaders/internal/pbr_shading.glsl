@@ -16,7 +16,8 @@
 const float pbr_specularBloomStr = 0.01;
 const float pbr_specularAlphaStr = 0.1;
 
-vec3 pbr_specularBRDF(float roughness, vec3 radiance, vec3 halfway, vec3 lightDir, vec3 viewDir, vec3 normal, vec3 fresnel, float NdotL) {
+vec3 pbr_specularBRDF(float roughness, vec3 radiance, vec3 halfway, vec3 lightDir, vec3 viewDir, vec3 normal, vec3 fresnel, float NdotL)
+{
 	// cook-torrance brdf
 	float distribution = pbr_distributionGGX(normal, halfway, roughness);
 	float geometry     = pbr_geometrySmith(normal, viewDir, lightDir, roughness);
@@ -28,8 +29,8 @@ vec3 pbr_specularBRDF(float roughness, vec3 radiance, vec3 halfway, vec3 lightDi
 	return specular * radiance * NdotL;
 }
 
-vec3 pbr_lightCalc(vec3 albedo, vec3 radiance, vec3 lightDir, vec3 viewDir, vec3 normal, bool diffuseOn, bool isAmbiance, float haloBlur, inout vec3 specularAccu) {
-	
+vec3 pbr_lightCalc(vec3 albedo, vec3 radiance, vec3 lightDir, vec3 viewDir, vec3 normal, bool diffuseOn, bool isAmbiance, float haloBlur, inout vec3 specularAccu)
+{
 	vec3 halfway = normalize(viewDir + lightDir);
 	float roughness = pbr_roughness;
 
@@ -62,8 +63,8 @@ vec3 pbr_lightCalc(vec3 albedo, vec3 radiance, vec3 lightDir, vec3 viewDir, vec3
 	return specularRadiance + diffuseRadiance;
 }
 
-void pbr_shading(in frx_FragmentData fragData, inout vec4 a, inout float bloom, in float userBrightness, in bool translucent) {
-
+void pbr_shading(in frx_FragmentData fragData, inout vec4 a, inout float bloom, in bool translucent)
+{
 	vec3 albedo = hdr_gammaAdjust(a.rgb);
 	vec3 dielectricF0 = vec3(0.1) * frx_luminance(albedo);
 	pbr_roughness = clamp(pbr_roughness, 0.0, 1.0);
@@ -102,8 +103,8 @@ void pbr_shading(in frx_FragmentData fragData, inout vec4 a, inout float bloom, 
 		perceivedBl = max(0, perceivedBl - fragData.light.y * 0.1);
 	}
 #endif
-    vec3 blockRadiance = l2_blockRadiance(perceivedBl, userBrightness);
-    vec3 baseAmbientRadiance = l2_baseAmbient(userBrightness);
+    vec3 blockRadiance = l2_blockRadiance(perceivedBl);
+    vec3 baseAmbientRadiance = l2_baseAmbient();
     vec3 ambientDir = normalize(vec3(0.1, 0.9, 0.1) + normal);
 
 #if LUMI_LightingMode == LUMI_LightingMode_Dramatic
@@ -134,7 +135,7 @@ void pbr_shading(in frx_FragmentData fragData, inout vec4 a, inout float bloom, 
             #endif
         }
     } else {
-        vec3 skylessRadiance = l2_skylessRadiance(userBrightness);
+        vec3 skylessRadiance = l2_skylessRadiance();
         vec3 skylessDir = l2_skylessDir();
 
         if (skylessRadiance.r + skylessRadiance.g + skylessRadiance.b > 0) {
