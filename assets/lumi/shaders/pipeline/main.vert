@@ -42,25 +42,11 @@
 // }
 // #endif
 
-const mat4 _tRotm = mat4(
-0,  0, -1,  0,
-0,  1,  0,  0,
-1,  0,  0,  0,
-0,  0,  0,  1 );
-
-vec3 _tangent(vec3 normal)
-{
-    vec3 aaNormal = vec3(normal.x + 0.01, 0, normal.z + 0.01);
-        aaNormal = normalize(aaNormal);
-    return (_tRotm * vec4(aaNormal, 0.0)).xyz;
-}
-
 void frx_startPipelineVertex(inout frx_VertexData data) {
 	vec4 view = gl_ModelViewMatrix * data.vertex;
 	gl_ClipVertex = view;
 	gl_FogFragCoord = length(view.xyz);
     l2_viewPos = view.xyz;
-    l2_tangent = _tangent(data.normal);
 }
 
 void frx_endPipelineVertex(inout frx_VertexData data) {
