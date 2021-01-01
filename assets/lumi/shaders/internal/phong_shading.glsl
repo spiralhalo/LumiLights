@@ -1,13 +1,13 @@
 /*******************************************************
  *  lumi:shaders/internal/phong_shading.glsl           *
  *******************************************************
- *  Copyright (c) 2020 spiralhalo and Contributors.    *
+ *  Copyright (c) 2020-2021 spiralhalo                 *
  *  Released WITHOUT WARRANTY under the terms of the   *
  *  GNU Lesser General Public License version 3 as     *
  *  published by the Free Software Foundation, Inc.    *
  *******************************************************/
 
-float ww_specular;
+float ww_specular = 0.0;
 
 float l2_specular(float time, vec3 aNormal, vec3 viewDir, float power)
 {
