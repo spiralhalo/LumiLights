@@ -91,11 +91,16 @@ void frx_startPipelineFragment(inout frx_FragmentData fragData)
     }
 
     // TODO: need a separate fog pass?
-	gl_FragData[TARGET_BASECOLOR] = _cp_fog(a);
+	gl_FragData[0] = _cp_fog(a);
 	gl_FragDepth = gl_FragCoord.z;
 
-    #if TARGET_EMISSIVE > 0
-        translucent = translucent && a.a < 0.99;
-        gl_FragData[TARGET_EMISSIVE] = vec4(bloom * a.a, 1.0, 0.0, translucent ? step(l2_skyBloom(), bloom) : 1.0);
+    translucent = translucent && a.a < 0.99;
+    gl_FragData[1] = vec4(bloom * a.a, 1.0, 0.0, translucent ? step(l2_skyBloom(), bloom) : 1.0);
+
+    // TODO: f0, albedo
+    #ifdef LUMI_PBRX
+        gl_FragData[2] = vec4(pbr_roughness, pbr_metallic, 0.0, 0.0);
+    #else
+        gl_FragData[2] = vec4(1.0, 0.0, 0.0, 0.0);
     #endif
 }

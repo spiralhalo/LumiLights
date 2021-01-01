@@ -24,7 +24,7 @@ vec2 rt_refine(inout vec3 ray, inout float current_ray_length, inout vec3 ray_vi
     return current_uv;
 }
 
-vec2 rt_march(vec2 start_uv, float init_ray_length, float max_ray_length,
+vec3 rt_march(vec2 start_uv, float init_ray_length, float max_ray_length,
               mat4 projection, mat4 inv_projection, mat4 view, mat4 inv_view,
               sampler2D color_map, sampler2D depth_map, sampler2D normal_map)
 {
@@ -47,7 +47,7 @@ vec2 rt_march(vec2 start_uv, float init_ray_length, float max_ray_length,
         hitbox_z = current_ray_length;
         backface = dot(unit_march, normal(current_uv)) > 0;
         if (delta_z > 0 && delta_z < hitbox_z && !backface) {
-            return rt_refine(ray, current_ray_length, ray_view, init_ray_length);
+            return vec3(rt_refine(ray, current_ray_length, ray_view, init_ray_length), 1.0);
         }
         // if (steps > constantSteps) {
         ray *= 2;
@@ -57,5 +57,5 @@ vec2 rt_march(vec2 start_uv, float init_ray_length, float max_ray_length,
     }
     // Sky reflection
     // if (sky(current_uv) && ray_view.z < 0) return current_uv;
-    return vec2(-1.0);
+    return vec3(0.0);
 }
