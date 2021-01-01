@@ -3,7 +3,7 @@
 /*******************************************************
  *  lumi:shaders/lib/rt_v1.glsl                        *
  *******************************************************
- *  Copyright (c) 2020 spiralhalo and Contributors.    *
+ *  Copyright (c) 2020-2021 spiralhalo                 *
  *  Released WITHOUT WARRANTY under the terms of the   *
  *  GNU Lesser General Public License version 3 as     *
  *  published by the Free Software Foundation, Inc.    *

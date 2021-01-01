@@ -33,9 +33,6 @@
 
 #define hdr_finalMult 1
 
-#define l2_min3(vec) min(vec.x, min(vec.y, vec.z))
-#define l2_max3(vec) max(vec.x, max(vec.y, vec.z))
-
 float l2_ao(frx_FragmentData fragData) {
     #if AO_SHADING_MODE != AO_MODE_NONE
     #if LUMI_LightingMode == LUMI_LightingMode_SystemUnused
