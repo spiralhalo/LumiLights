@@ -11,9 +11,9 @@ vec2 coords_uv(vec3 view, mat4 projection)
 
 vec3 coords_view(vec2 uv, mat4 inv_projection, sampler2D depth_map)
 {
-	vec2 clip = 2.0 * uv - 1.0;
     float depth = texture2DLod(depth_map, uv, 0).r;
-	vec4 view = inv_projection * vec4(clip.x, clip.y, 2.0 * depth - 1.0, 1.0);
+	vec3 clip = vec3(2.0 * uv - 1.0, 2.0 * depth - 1.0);
+	vec4 view = inv_projection * vec4(clip, 1.0);
 	return view.xyz / view.w;
 }
 

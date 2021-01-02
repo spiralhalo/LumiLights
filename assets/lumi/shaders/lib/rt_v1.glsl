@@ -29,7 +29,7 @@ vec3 rt_reflection(vec2 start_uv, float init_ray_length, float max_ray_length,
         ray_view += ray;
         current_uv = coords_uv(ray_view, projection);
         current_view = coords_view(current_uv, inv_projection, depth_map);
-        delta_z = ray_view.z - current_view.z;
+        delta_z = current_view.z - ray_view.z;
         hitbox_z = current_ray_length;
         backface = dot(unit_march, coords_normal(current_uv, normal_map)) > 0;
         if (delta_z > 0 && delta_z < hitbox_z && !backface) {

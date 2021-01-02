@@ -5,6 +5,6 @@
  *  lumi:shaders/pipeline/post/common.glsl             *
  *******************************************************/
 
-uniform ivec2 _cvu_size;
-uniform int _cvu_lod;
+uniform ivec2 frxu_size;
+uniform int frxu_lod;
 varying vec2 v_texcoord;
