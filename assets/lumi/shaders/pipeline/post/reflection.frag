@@ -13,6 +13,7 @@ uniform sampler2D u_material;
 
 #define near 0.0001
 #define far 1.0
+#define fovrad 1.221730476396030703846583537942
 
 mat4 InverseOf(mat4 m) {
 	float
@@ -103,21 +104,21 @@ void main()
         0.0, 0.0, 1.0, 0.0,
         0.0, 0.0, 0.0, 1.0
     );
-    ComputeFOVProjection(u_projection, 70, (16.0/9.0), near, far, true);
+    ComputeFOVProjection(u_projection, fovrad, (16.0/9.0), near, far, true);
     mat4 u_inv_projection = InverseOf(u_projection);
 
     // gl_FragData[0] = vec4(vec3(LinearizeDepth(texture2D(u_depth, v_texcoord).r)), 1.0);
     // gl_FragData[0] = vec4(material.rgb, 1.0);
     if (gloss > 0.01) {
         // TODO: replace matrices with real frx uniforms
-        vec3 reflected_uv = rt_march(v_texcoord, 0.25, 128.0, u_projection, u_inv_projection, u_composite, u_depth, u_normal);
+        vec3 reflected_uv = rt_reflection(v_texcoord, 0.25, 128.0, u_projection, u_inv_projection, u_composite, u_depth, u_normal);
         if (reflected_uv.z <= 0.0) {
             // gl_FragData[0] = vec4(0.0, 1.0, 0.0, 1.0);
             gl_FragData[0] = vec4(base_color.rgb, 1.0);
         } else {
-            vec4 metal = vec4(base_color.rgb, 1.0) + texture2D(u_composite, reflected_uv.xy) * gloss;
-            vec4 diffuse = vec4(base_color.rgb, 1.0) + texture2D(u_composite, reflected_uv.xy) * gloss;
-            gl_FragData[0] = mix(diffuse, metal, material.g);
+            float metal = material.g;
+            float fresnel = reflected_uv.z;
+            gl_FragData[0] = mix(base_color, texture2D(u_composite, reflected_uv.xy), max(fresnel, metal));
         }
     } else {
         gl_FragData[0] = vec4(base_color.rgb, 1.0);

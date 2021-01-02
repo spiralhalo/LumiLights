@@ -9,13 +9,14 @@
  *  published by the Free Software Foundation, Inc.    *
  *******************************************************/
 
-vec3 rt_march(vec2 start_uv, float init_ray_length, float max_ray_length,
+vec3 rt_reflection(vec2 start_uv, float init_ray_length, float max_ray_length,
               mat4 projection, mat4 inv_projection, 
               sampler2D color_map, sampler2D depth_map, sampler2D normal_map)
 {
     vec3 ray_view = coords_view(start_uv, inv_projection, depth_map);
-    vec3 unit_march = reflect(normalize(ray_view), coords_normal(start_uv, normal_map));
-
+    vec3 unit_view = normalize(-ray_view);
+    vec3 unit_march = reflect(-unit_view, coords_normal(start_uv, normal_map));
+    
     vec3 ray = unit_march * init_ray_length;
     float current_ray_length = init_ray_length;
     vec2 current_uv;
@@ -28,7 +29,7 @@ vec3 rt_march(vec2 start_uv, float init_ray_length, float max_ray_length,
         ray_view += ray;
         current_uv = coords_uv(ray_view, projection);
         current_view = coords_view(current_uv, inv_projection, depth_map);
-        delta_z = current_view.z - ray_view.z;
+        delta_z = ray_view.z - current_view.z;
         hitbox_z = current_ray_length;
         backface = dot(unit_march, coords_normal(current_uv, normal_map)) > 0;
         if (delta_z > 0 && delta_z < hitbox_z && !backface) {
@@ -41,7 +42,9 @@ vec3 rt_march(vec2 start_uv, float init_ray_length, float max_ray_length,
                 if (ray_view.z > current_view.z) ray_view += ray;
                 else ray_view -= ray;
             }
-            return vec3(current_uv, 1.0);
+            vec3 halfway = normalize(unit_view + unit_march);
+            float fresnel = pow(1.0 - clamp(dot(unit_view, halfway), 0.0, 1.0), 5.0);
+            return vec3(current_uv, fresnel);
         }
         // if (steps > constantSteps) {
         ray *= 2;
