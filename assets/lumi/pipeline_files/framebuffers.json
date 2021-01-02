@@ -145,10 +145,10 @@
             name: "bloom_upsample_0",
             colorAttachments: [{image: "bloom_upsample"}]
         }, {
-            name: "bloom",
-            colorAttachments: [{image: "bloom_result"}]
-        }, {
             // TODO: just use main fb instead?
+            name: "bloom",
+            colorAttachments: [{image: "solid_main"}]
+        }, {
             name: "reflection",
             colorAttachments: [{image: "solid_main"}]
         }

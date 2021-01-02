@@ -102,7 +102,7 @@ void frx_startPipelineFragment(inout frx_FragmentData fragData)
 
     // TODO: f0, albedo
     #ifdef LUMI_PBRX
-        gl_FragData[3] = vec4(pbr_roughness, pbr_metallic, 0.0, 0.0);
+        gl_FragData[3] = vec4(pbr_roughness, pbr_metallic, 0.0, 1.0);
     #else
         gl_FragData[3] = vec4(1.0, 0.0, 0.0, 0.0);
     #endif

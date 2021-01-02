@@ -132,6 +132,11 @@
                     "particles_main", "particles_depth",
                     "weather_main", "weather_depth",
                     "clouds_main", "clouds_depth"]
+            }, {
+                name: "reflection",
+                program: "reflection",
+                framebuffer: "reflection",
+                samplerImages: ["fab_composite", "solid_depth", "normal", "material"]
             }
         ]
     },
@@ -143,7 +148,7 @@
                 name: "main_copy",
                 program: "copy",
                 framebuffer: "main_copy",
-                samplerImages: ["fab_composite"]
+                samplerImages: ["solid_main"]
             }, {
                 // select emissive portions for blur
                 name: "emissive_color",
@@ -242,11 +247,6 @@
                 program: "bloom",
                 framebuffer: "bloom",
                 samplerImages: ["main_copy", "bloom_upsample"]
-            }, {
-                name: "reflection",
-                program: "reflection",
-                framebuffer: "reflection",
-                samplerImages: ["bloom_result", "solid_depth", "normal", "material"]
             }
         ]
     }
