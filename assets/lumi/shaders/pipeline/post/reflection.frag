@@ -1,10 +1,11 @@
 #include lumi:shaders/pipeline/post/common.glsl
+#include frex:shaders/api/view.glsl
 #include lumi:shaders/lib/rt_v1.glsl
 
-sampler2D u_composite;
-sampler2D u_depth;
-sampler2D u_normal;
-sampler2D u_material;
+uniform sampler2D u_composite;
+uniform sampler2D u_depth;
+uniform sampler2D u_normal;
+uniform sampler2D u_material;
 
 /*******************************************************
  *  lumi:shaders/pipeline/post/reflection.frag         *
@@ -72,16 +73,12 @@ void ComputeFOVProjection( inout mat4 result, float fov, float aspect, float nea
 
     // check for bad parameters to avoid divide by zero:
     // if found, assert and return an identity matrix.
-    if ( fov <= 0 || aspect == 0 )
-    {
-        Assert( fov > 0 && aspect != 0 );
-        return;
-    }
+    if ( fov <= 0 || aspect == 0 ) return;
 
     float frustumDepth = farDist - nearDist;
     float oneOverDepth = 1 / frustumDepth;
 
-    result[1][1] = 1 / tan(0.5f * fov);
+    result[1][1] = 1 / tan(0.5 * fov);
     result[0][0] = (leftHanded ? 1 : -1 ) * result[1][1] / aspect;
     result[2][2] = farDist * oneOverDepth;
     result[3][2] = (-farDist * nearDist) * oneOverDepth;
@@ -89,6 +86,10 @@ void ComputeFOVProjection( inout mat4 result, float fov, float aspect, float nea
     result[3][3] = 0;
 }
 
+float LinearizeDepth(float depth) 
+{
+    return 2.0 * (near * far) / (far + near - (depth * 2.0 - 1.0) * (far - near));    
+}
 void main()
 {
     vec4 material = texture2DLod(u_material, v_texcoord, 0);
@@ -104,15 +105,15 @@ void main()
     ComputeFOVProjection(u_projection, 70, frx_viewAspectRatio(), near, far, true);
     mat4 u_inv_projection = InverseOf(u_projection);
 
-    gl_FragData[0] = texture2D(u_normal, v_texcoord);
+    gl_FragData[0] = vec4(vec3(LinearizeDepth(texture2D(u_depth, v_texcoord).r)), 1.0);
     // if (gloss > 0.01) {
     //     // TODO: replace matrices with real frx uniforms
     //     vec3 reflected_uv = rt_march(v_texcoord, 0.25, 128.0, u_projection, u_inv_projection, u_composite, u_depth, u_normal);
     //     if (reflected_uv.z <= 0.0) {
     //         gl_FragData[0] = vec4(base_color.rgb, 1.0);
     //     } else {
-    //         vec4 metal = vec4(base_color.rgb, 1.0) + texture2D(u_composite, reflected_uv) * gloss;
-    //         vec4 diffuse = max(base_color, texture2D(u_composite, reflected_uv) * gloss);
+    //         vec4 metal = vec4(base_color.rgb, 1.0) + texture2D(u_composite, reflected_uv.xy) * gloss;
+    //         vec4 diffuse = max(base_color, texture2D(u_composite, reflected_uv.xy) * gloss);
     //         gl_FragData[0] = mix(diffuse, metal, material.g);
     //     }
     // } else {

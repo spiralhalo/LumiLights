@@ -9,21 +9,6 @@
  *  published by the Free Software Foundation, Inc.    *
  *******************************************************/
 
-vec2 rt_refine(inout vec3 ray, inout float current_ray_length, inout vec3 ray_view, in float init_ray_length)
-{
-    vec2 current_uv;
-    vec3 current_view;
-    while (current_ray_length > init_ray_length) {
-        current_uv = coords_uv(ray_view);
-        current_view = coords_view(current_uv);
-        ray *= 0.5;
-        current_ray_length *= 0.5;
-        if (ray_view.z > current_view.z) ray_view += ray;
-        else ray_view -= ray;
-    }
-    return current_uv;
-}
-
 vec3 rt_march(vec2 start_uv, float init_ray_length, float max_ray_length,
               mat4 projection, mat4 inv_projection, 
               sampler2D color_map, sampler2D depth_map, sampler2D normal_map)
@@ -47,7 +32,16 @@ vec3 rt_march(vec2 start_uv, float init_ray_length, float max_ray_length,
         hitbox_z = current_ray_length;
         backface = dot(unit_march, coords_normal(current_uv, normal_map)) > 0;
         if (delta_z > 0 && delta_z < hitbox_z && !backface) {
-            return vec3(rt_refine(ray, current_ray_length, ray_view, init_ray_length), 1.0);
+            //refine
+            while (current_ray_length > init_ray_length) {
+                current_uv = coords_uv(ray_view, projection);
+                current_view = coords_view(current_uv, inv_projection, depth_map);
+                ray *= 0.5;
+                current_ray_length *= 0.5;
+                if (ray_view.z > current_view.z) ray_view += ray;
+                else ray_view -= ray;
+            }
+            return vec3(current_uv, 1.0);
         }
         // if (steps > constantSteps) {
         ray *= 2;
