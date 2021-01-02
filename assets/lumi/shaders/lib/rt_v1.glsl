@@ -9,14 +9,16 @@
  *  published by the Free Software Foundation, Inc.    *
  *******************************************************/
 
-vec3 rt_reflection(vec2 start_uv, float init_ray_length, float max_ray_length,
+vec4 rt_reflection(vec2 start_uv, float init_ray_length, float max_ray_length,
               mat4 projection, mat4 inv_projection, 
-              sampler2D color_map, sampler2D depth_map, sampler2D normal_map)
+              sampler2D depth_map, sampler2D normal_map)
 {
     vec3 ray_view = coords_view(start_uv, inv_projection, depth_map);
     vec3 unit_view = normalize(-ray_view);
     vec3 unit_march = reflect(-unit_view, coords_normal(start_uv, normal_map));
-    
+    vec3 halfway = normalize(unit_view + unit_march);
+    float fresnel = pow(1.0 - clamp(dot(unit_view, halfway), 0.0, 1.0), 5.0);
+
     vec3 ray = unit_march * init_ray_length;
     float current_ray_length = init_ray_length;
     vec2 current_uv;
@@ -42,9 +44,7 @@ vec3 rt_reflection(vec2 start_uv, float init_ray_length, float max_ray_length,
                 if (ray_view.z > current_view.z) ray_view += ray;
                 else ray_view -= ray;
             }
-            vec3 halfway = normalize(unit_view + unit_march);
-            float fresnel = pow(1.0 - clamp(dot(unit_view, halfway), 0.0, 1.0), 5.0);
-            return vec3(current_uv, fresnel);
+            return vec4(current_uv, fresnel, 1.0);
         }
         // if (steps > constantSteps) {
         ray *= 2;
@@ -54,5 +54,5 @@ vec3 rt_reflection(vec2 start_uv, float init_ray_length, float max_ray_length,
     }
     // Sky reflection
     // if (sky(current_uv) && ray_view.z < 0) return current_uv;
-    return vec3(0.0);
+    return vec4(current_uv, fresnel, 0.0);
 }
