@@ -18,7 +18,7 @@ void main()
 
     if (gloss > 0.01) {
         // TODO: replace matrices with real frx uniforms
-        vec3 reflected_uv = rt_march(v_texcoord, 0.25, 128.0, u_projection, u_inv_projection, u_view, u_inv_view, u_composite, u_depth, u_normal);
+        vec3 reflected_uv = rt_march(v_texcoord, 0.25, 128.0, u_projection, u_inv_projection, u_composite, u_depth, u_normal);
         if (reflected_uv.z <= 0.0) {
             gl_FragData[0] = vec4(base_color.rgb, 1.0);
         } else {
