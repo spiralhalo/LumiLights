@@ -97,10 +97,13 @@ void frx_startPipelineFragment(inout frx_FragmentData fragData)
     translucent = translucent && a.a < 0.99;
     gl_FragData[1] = vec4(bloom * a.a, 1.0, 0.0, translucent ? step(l2_skyBloom(), bloom) : 1.0);
 
+    vec3 normal = fragData.vertexNormal * frx_normalModelMatrix();
+    gl_FragData[2] = vec4(normal * 0.5 + 0.5, 1.0);
+
     // TODO: f0, albedo
     #ifdef LUMI_PBRX
-        gl_FragData[2] = vec4(pbr_roughness, pbr_metallic, 0.0, 0.0);
+        gl_FragData[3] = vec4(pbr_roughness, pbr_metallic, 0.0, 0.0);
     #else
-        gl_FragData[2] = vec4(1.0, 0.0, 0.0, 0.0);
+        gl_FragData[3] = vec4(1.0, 0.0, 0.0, 0.0);
     #endif
 }

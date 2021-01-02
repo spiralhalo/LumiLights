@@ -132,14 +132,6 @@
                     "particles_main", "particles_depth",
                     "weather_main", "weather_depth",
                     "clouds_main", "clouds_depth"]
-            },
-            {
-                // TODO: reroute passes to reduce copying steps
-                // copy composite to main framebuffer
-                name: "fab_write",
-                program: "copy",
-                framebuffer: "default",
-                samplerImages: ["fab_composite"]
             }
         ]
     },
@@ -151,7 +143,7 @@
                 name: "main_copy",
                 program: "copy",
                 framebuffer: "main_copy",
-                samplerImages: ["solid_main"]
+                samplerImages: ["fab_composite"]
             }, {
                 // select emissive portions for blur
                 name: "emissive_color",
@@ -254,7 +246,7 @@
                 name: "reflection",
                 program: "reflection",
                 framebuffer: "reflection",
-                samplerImages: ["bloom_result", "normal", "material"]
+                samplerImages: ["bloom_result", "solid_depth", "normal", "material"]
             }
         ]
     }
