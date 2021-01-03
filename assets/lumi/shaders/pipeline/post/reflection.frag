@@ -3,6 +3,15 @@
 #include frex:shaders/api/world.glsl
 #include lumi:shaders/lib/rt_v1.glsl
 
+/*******************************************************
+ *  lumi:shaders/pipeline/post/reflection.frag         *
+ *******************************************************
+ *  Copyright (c) 2020-2021 spiralhalo                 *
+ *  Released WITHOUT WARRANTY under the terms of the   *
+ *  GNU Lesser General Public License version 3 as     *
+ *  published by the Free Software Foundation, Inc.    *
+ *******************************************************/
+
 uniform sampler2D u_composite;
 uniform sampler2D u_solid_depth;
 uniform sampler2D u_translucent_depth;
@@ -58,10 +67,6 @@ vec3 coords_normal(vec2 uv)
 
 vec4 rt_reflection(vec2 start_uv, float init_ray_length, float max_ray_length, float length_multiplier, int max_steps,
                    mat4 projection, mat4 inv_projection);
-
-/*******************************************************
- *  lumi:shaders/pipeline/post/reflection.frag         *
- *******************************************************/
 
 void main()
 {

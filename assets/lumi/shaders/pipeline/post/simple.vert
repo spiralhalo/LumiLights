@@ -7,36 +7,19 @@
  *  lumi:shaders/pipeline/post/simple.vert             *
  *******************************************************/
 
+attribute vec2 in_uv;
 const vec3 day_sky = vec3(0.52, 0.69, 1.0);
-const vec3 night_sky = vec3(0.004);
+const vec3 day_fog = vec3(0.75, 0.84375, 1.0);
 
-#define NUM_TIMES 6
 vec3 calc_sky_color()
 {
-    float time = frx_worldTime();
-    vec3 inbetween = mix(day_sky, night_sky, 0.5);
-    float[] times = float[NUM_TIMES](
-        0.0,
-        0.08,
-        0.42,
-        0.58,
-        0.92,
-        1.0
-    );
-    vec3[] colors = vec3[NUM_TIMES](
-        inbetween,
-        day_sky,
-        day_sky,
-        night_sky,
-        night_sky,
-        inbetween
-    );
-    int i = 1;
-    while (time > times[i] && i < NUM_TIMES - 1) i++;
-    return mix(colors[i-1], colors[i], l2_clampScale(times[i-1], times[i], time));
+    if (frx_isWorldTheOverworld()) {
+        vec3 clear = frx_vanillaClearColor();
+        float distanceToFog = distance(normalize(clear), normalize(day_fog));
+        return mix(clear, day_sky, l2_clampScale(0.1, 0.05, distanceToFog));
+    } else return frx_vanillaClearColor();
 }
 
-attribute vec2 in_uv;
 void main()
 {
     // v_inv_projection = inverse(frx_projectionMatrix());
@@ -45,6 +28,36 @@ void main()
     v_texcoord = in_uv;
     v_skycolor = calc_sky_color();
 }
+
+/* Wip sky color, only works in the overworld, not very good */
+// const vec3 day_sky = vec3(0.52, 0.69, 1.0);
+// const vec3 night_sky = vec3(0.004);
+
+// #define NUM_TIMES 6
+// vec3 calc_sky_color()
+// {
+//     float time = frx_worldTime();
+//     vec3 inbetween = mix(day_sky, night_sky, 0.5);
+//     float[] times = float[NUM_TIMES](
+//         0.0,
+//         0.08,
+//         0.42,
+//         0.58,
+//         0.92,
+//         1.0
+//     );
+//     vec3[] colors = vec3[NUM_TIMES](
+//         inbetween,
+//         day_sky,
+//         day_sky,
+//         night_sky,
+//         night_sky,
+//         inbetween
+//     );
+//     int i = 1;
+//     while (time > times[i] && i < NUM_TIMES - 1) i++;
+//     return mix(colors[i-1], colors[i], l2_clampScale(times[i-1], times[i], time));
+// }
 
 // mat4 inverse(mat4 m) {
 // 	float
