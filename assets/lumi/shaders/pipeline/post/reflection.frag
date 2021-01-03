@@ -17,7 +17,7 @@ void main()
     vec4 base_color = texture2D(u_composite, v_texcoord);
     float gloss = 1.0 - material.r;
     if (gloss > 0.01) {
-        vec4 reflected_uv = rt_reflection(v_texcoord, 0.25, 128.0, frx_projectionMatrix(), v_inv_projection, u_depth, u_normal);
+        vec4 reflected_uv = rt_reflection(v_texcoord, 0.25, 128.0, frx_projectionMatrix(), frx_inverseProjectionMatrix(), u_depth, u_normal);
         if (reflected_uv.w <= 0.0) {
             // TODO: sky color
             gl_FragData[0] = vec4(base_color.rgb, 1.0);

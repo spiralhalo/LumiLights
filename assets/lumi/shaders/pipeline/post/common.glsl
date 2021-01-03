@@ -8,4 +8,4 @@
 uniform ivec2 frxu_size;
 uniform int frxu_lod;
 varying vec2 v_texcoord;
-varying mat4 v_inv_projection;
+// varying mat4 v_inv_projection;
