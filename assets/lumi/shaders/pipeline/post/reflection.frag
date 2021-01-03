@@ -1,5 +1,6 @@
 #include lumi:shaders/pipeline/post/common.glsl
 #include frex:shaders/api/view.glsl
+#include frex:shaders/api/world.glsl
 #include lumi:shaders/lib/rt_v1.glsl
 
 uniform sampler2D u_composite;
@@ -65,25 +66,24 @@ vec4 rt_reflection(vec2 start_uv, float init_ray_length, float max_ray_length, f
 void main()
 {
     vec4 material = texture2DLod(u_material, v_texcoord, 0);
-    vec4 base_color = texture2D(u_composite, v_texcoord);
+    vec3 base_color = texture2D(u_composite, v_texcoord).rgb;
     float gloss = 1.0 - material.r;
-    if (gloss > 0.01) {
+    if (gloss > 0.01 && material.a > 0.0) {
         vec4 reflected_uv = rt_reflection(v_texcoord, 0.25, 128.0, 1.2, 20, frx_projectionMatrix(), frx_inverseProjectionMatrix());
+        vec3 reflected;
         if (reflected_uv.w <= 0.0 || reflected_uv.x < 0.0 || reflected_uv.y < 0.0 || reflected_uv.x > 1.0 || reflected_uv.y > 1.0) {
-            // TODO: sky color
-            gl_FragData[0] = vec4(base_color.rgb, 1.0);
+            reflected = v_skycolor;
         } else {
-            float metal   = material.g;
-            float fresnel = reflected_uv.z;
-            vec4 reflected    = texture2D(u_composite, reflected_uv.xy);
-            vec4 tinted_base  = vec4(reflected.rgb * base_color.rgb, 1.0);
-            vec4 blended_base = mix(base_color, tinted_base, metal);
-            gl_FragData[0] = mix(blended_base, reflected, fresnel);
+            reflected = texture2D(u_composite, reflected_uv.xy).rgb;
         }
+        float metal   = material.g;
+        float fresnel = reflected_uv.z;
+        vec3 tinted_base  = reflected * base_color;
+        vec3 blended_base = mix(base_color, tinted_base, metal);
+        gl_FragData[0] = vec4(mix(blended_base, reflected, fresnel), 1.0);
     } else {
-        gl_FragData[0] = vec4(base_color.rgb, 1.0);
+        gl_FragData[0] = vec4(base_color, 1.0);
     }
-    // gl_FragData[0] = vec4(coords_depth(v_texcoord));
 }
 
 vec4 rt_reflection(vec2 start_uv, float init_ray_length, float max_ray_length, float length_multiplier, int max_steps,
