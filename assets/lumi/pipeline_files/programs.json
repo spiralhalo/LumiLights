@@ -45,8 +45,8 @@
         }, {
             name: "fabulous",
             // implements fabulous mode composite - same method as Mojang
-            vertexSource: "canvas:shaders/pipeline/post/simple_full_frame.vert",
-            fragmentSource: "canvas:shaders/pipeline/post/fabulous.frag",
+            vertexSource: "lumi:shaders/pipeline/post/simple.vert",
+            fragmentSource: "lumi:shaders/pipeline/post/fabulous.frag",
             samplers: [
                 "diffuseColor", "diffuseDepth",
                 "translucentColor", "translucentDepth",
@@ -60,7 +60,7 @@
             // implements reflection
             vertexSource: "lumi:shaders/pipeline/post/simple.vert",
             fragmentSource: "lumi:shaders/pipeline/post/reflection.frag",
-            samplers: ["u_composite", "u_depth", "u_normal", "u_material"]
+            samplers: ["u_composite", "u_solid_depth", "u_translucent_depth", "u_entity_depth", "u_particles_depth", "u_normal", "u_material"]
         }, {
             name: "fxaa",
             // implements fxaa
