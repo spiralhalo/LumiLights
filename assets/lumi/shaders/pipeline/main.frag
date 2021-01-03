@@ -67,8 +67,7 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
         #if DIFFUSE_SHADING_MODE != DIFFUSE_MODE_NONE
             if (fragData.diffuse) {
                 float diffuse = mix(pv_diffuse, 1, fragData.emissivity);
-                vec3 shading = mix(vec3(0.5, 0.4, 0.8) * diffuse * diffuse, vec3(1.0), diffuse);
-                a.rgb *= shading;
+                a.rgb *= diffuse;
             }
         #endif
     } else {

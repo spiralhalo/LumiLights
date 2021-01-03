@@ -76,7 +76,5 @@ void frx_writePipelineVertex(inout frx_VertexData data) {
 	pv_ao = data.aoShade;
 #endif
 
-#if DIFFUSE_SHADING_MODE != DIFFUSE_MODE_NONE
 	pv_diffuse = p_diffuseGui(data.normal);
-#endif
 }
