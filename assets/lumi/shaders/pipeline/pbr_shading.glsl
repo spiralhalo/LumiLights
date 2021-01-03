@@ -77,9 +77,8 @@ void pbr_shading(in frx_FragmentData fragData, inout vec4 a, inout float bloom, 
     vec3 emissive = l2_emissiveRadiance(fragData.emissivity);
     a.rgb *= emissive;
     
-    vec3 viewDir = normalize(-l2_viewpos) * frx_normalModelMatrix() * gl_NormalMatrix;
-
-    vec3 normal = fragData.vertexNormal * frx_normalModelMatrix();
+    vec3 viewDir = normalize(-l2_viewpos) * frx_normalModelMatrix();
+    vec3 normal = fragData.vertexNormal;
 
     vec3 specularAccu = vec3(0.0);
 #if LUMI_LightingMode == LUMI_LightingMode_Dramatic

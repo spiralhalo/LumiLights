@@ -1,5 +1,5 @@
 /***********************************************************
- *  lumi:shaders/internal/tonemap.glsl                     *
+ *  lumi:shaders/pipeline/tonemap.glsl                     *
  ***********************************************************/
 
 vec3 hdr_reinhardJodieTonemap(in vec3 v) {

@@ -13,8 +13,6 @@
 #include lumi:shaders/lib/pbr.glsl
 #include lumi:shaders/api/pbr_frag.glsl
 #include lumi:shaders/internal/context.glsl
-#include lumi:shaders/internal/lightsource.glsl
-#include lumi:shaders/internal/tonemap.glsl
 #include lumi:shaders/internal/skybloom.glsl
 
 /*******************************************************
@@ -30,6 +28,8 @@
 
 #include lumi:shaders/pipeline/varying.glsl
 #include lumi:shaders/pipeline/vanilla.glsl
+#include lumi:shaders/pipeline/tonemap.glsl
+#include lumi:shaders/pipeline/lightsource.glsl
 #include lumi:shaders/pipeline/pbr_shading.glsl
 #include lumi:shaders/pipeline/phong_shading.glsl
 #include lumi:shaders/pipeline/debug_shading.glsl

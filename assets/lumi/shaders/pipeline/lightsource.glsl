@@ -1,5 +1,5 @@
 /*******************************************************
- *  lumi:shaders/internal/lightsource.glsl             *
+ *  lumi:shaders/pipeline/lightsource.glsl             *
  *******************************************************
  *  Copyright (c) 2020-2021 spiralhalo, Contributors   *
  *  Released WITHOUT WARRANTY under the terms of the   *
