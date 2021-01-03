@@ -164,7 +164,7 @@ vec3 l2_ambientColor(float time)
         0.98,
         1.0);
     int i = 1;
-    while (time > times[i] && i < len) i++;
+    while (time > times[i] && i < len - 1) i++;
     return mix(colors[i-1], colors[i], l2_clampScale(times[i-1], times[i], time)) * hdr_relAmbient;
 }
 

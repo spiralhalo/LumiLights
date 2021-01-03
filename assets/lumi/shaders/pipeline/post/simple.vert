@@ -7,8 +7,8 @@
  *  lumi:shaders/pipeline/post/simple.vert             *
  *******************************************************/
 
-vec3 day_sky = vec3(0.52, 0.69, 1.0);
-vec3 night_sky = vec3(0.004);
+const vec3 day_sky = vec3(0.52, 0.69, 1.0);
+const vec3 night_sky = vec3(0.004);
 
 #define NUM_TIMES 6
 vec3 calc_sky_color()
@@ -17,7 +17,7 @@ vec3 calc_sky_color()
     vec3 inbetween = mix(day_sky, night_sky, 0.5);
     float[] times = float[NUM_TIMES](
         0.0,
-        0.8,
+        0.08,
         0.42,
         0.58,
         0.92,
