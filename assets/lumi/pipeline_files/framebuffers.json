@@ -147,6 +147,9 @@
         }, {
             // TODO: just use main fb instead?
             name: "bloom",
+            colorAttachments: [{image: "main_copy"}]
+        }, {
+            name: "fxaa",
             colorAttachments: [{image: "solid_main"}]
         }, {
             name: "reflection",

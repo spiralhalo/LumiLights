@@ -61,6 +61,12 @@
             vertexSource: "lumi:shaders/pipeline/post/simple.vert",
             fragmentSource: "lumi:shaders/pipeline/post/reflection.frag",
             samplers: ["u_composite", "u_depth", "u_normal", "u_material"]
+        }, {
+            name: "fxaa",
+            // implements fxaa
+            vertexSource: "lumi:shaders/pipeline/post/simple.vert",
+            fragmentSource: "lumi:shaders/pipeline/post/fxaa.frag",
+            samplers: ["u_color"]
         }
     ]
 }

@@ -144,12 +144,6 @@
     afterRenderHand: {
         passes: [
             {
-                // copy MC fbo color attachment - need it at end for combine step
-                name: "main_copy",
-                program: "copy",
-                framebuffer: "main_copy",
-                samplerImages: ["solid_main"]
-            }, {
                 // select emissive portions for blur
                 name: "emissive_color",
                 program: "emissive_color",
@@ -241,12 +235,17 @@
                 samplerImages: ["bloom_downsample", "bloom_upsample"],
                 lod: 0
             }, {
-                // Switch back to MC main color to draw combined color + bloom
-                // Framebuffer attachment shouldn't draw to self so use copy created earlier
+                // Draw to main copy
                 name: "bloom",
                 program: "bloom",
                 framebuffer: "bloom",
-                samplerImages: ["main_copy", "bloom_upsample"]
+                samplerImages: ["solid_main", "bloom_upsample"]
+            }, {
+                // Draw to main
+                name: "fxaa",
+                program: "fxaa",
+                framebuffer: "fxaa",
+                samplerImages: ["main_copy"]
             }
         ]
     }
