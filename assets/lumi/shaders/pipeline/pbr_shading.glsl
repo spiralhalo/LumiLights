@@ -1,5 +1,5 @@
 /*******************************************************
- *  lumi:shaders/internal/pbr_shading.glsl             *
+ *  lumi:shaders/pipeline/pbr_shading.glsl             *
  *******************************************************
  *  Copyright (c) 2020-2021 spiralhalo                 *
  *  Released WITHOUT WARRANTY under the terms of the   *
@@ -77,7 +77,7 @@ void pbr_shading(in frx_FragmentData fragData, inout vec4 a, inout float bloom, 
     vec3 emissive = l2_emissiveRadiance(fragData.emissivity);
     a.rgb *= emissive;
     
-    vec3 viewDir = normalize(-l2_viewPos) * frx_normalModelMatrix() * gl_NormalMatrix;
+    vec3 viewDir = normalize(-l2_viewpos) * frx_normalModelMatrix() * gl_NormalMatrix;
 
     vec3 normal = fragData.vertexNormal * frx_normalModelMatrix();
 

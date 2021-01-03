@@ -9,10 +9,13 @@
 #include frex:shaders/api/sampler.glsl
 #include frex:shaders/lib/math.glsl
 #include frex:shaders/lib/color.glsl
-#include lumi:shaders/internal/context.glsl
-#include lumi:shaders/api/pbr_frag.glsl
 #include lumi:shaders/lib/util.glsl
 #include lumi:shaders/lib/pbr.glsl
+#include lumi:shaders/api/pbr_frag.glsl
+#include lumi:shaders/internal/context.glsl
+#include lumi:shaders/internal/lightsource.glsl
+#include lumi:shaders/internal/tonemap.glsl
+#include lumi:shaders/internal/skybloom.glsl
 
 /*******************************************************
  *  lumi:shaders/pipeline/main.frag                    *
@@ -25,39 +28,37 @@
 
 #define hdr_finalMult 1
 
-float l2_ao(frx_FragmentData fragData) {
-    #if AO_SHADING_MODE != AO_MODE_NONE
-    #if LUMI_LightingMode == LUMI_LightingMode_SystemUnused
-        float aoInv = 1.0 - (fragData.ao ? _cvv_ao : 1.0);
-        return 1.0 - 0.8 * smoothstep(0.0, 0.3, aoInv * (0.5 + 0.5 * abs((_cvv_normal * frx_normalModelMatrix()).y)));
-    #else
-        float ao = fragData.ao ? _cvv_ao : 1.0;
-        return hdr_gammaAdjustf(min(1.0, ao + fragData.emissivity));
-    #endif
-    #else
-        return 1.0;
-    #endif
+#include lumi:shaders/pipeline/varying.glsl
+#include lumi:shaders/pipeline/vanilla.glsl
+#include lumi:shaders/pipeline/pbr_shading.glsl
+#include lumi:shaders/pipeline/phong_shading.glsl
+#include lumi:shaders/pipeline/debug_shading.glsl
+
+frx_FragmentData frx_createPipelineFragment() {
+#ifdef VANILLA_LIGHTING
+	return frx_FragmentData (
+		texture2D(frxs_spriteAltas, frx_texcoord, frx_matUnmippedFactor() * -4.0),
+		pv_color,
+		frx_matEmissive() ? 1.0 : 0.0,
+		!frx_matDisableDiffuse(),
+		!frx_matDisableAo(),
+		pv_normal,
+		pv_lightcoord,
+		pv_ao
+	);
+#else
+	return frx_FragmentData (
+		texture2D(frxs_spriteAltas, frx_texcoord, frx_matUnmippedFactor() * -4.0),
+		pv_color,
+		frx_matEmissive() ? 1.0 : 0.0,
+		!frx_matDisableDiffuse(),
+		!frx_matDisableAo(),
+		pv_normal
+	);
+#endif
 }
 
-// this is literally just Grondag's magic diffuse function and I shall take no credit for it
-float l2_diffuseGui(vec3 normal) {
-	normal = normalize(gl_NormalMatrix * normal);
-	float light = 0.4
-	+ 0.6 * clamp(dot(normal.xyz, vec3(-0.96104145, -0.078606814, -0.2593495)), 0.0, 1.0)
-	+ 0.6 * clamp(dot(normal.xyz, vec3(-0.26765957, -0.95667744, 0.100838766)), 0.0, 1.0);
-	return min(light, 1.0);
-}
-
-#include lumi:shaders/internal/varying.glsl
-#include lumi:shaders/internal/main_frag.glsl
-#include lumi:shaders/internal/lightsource.glsl
-#include lumi:shaders/internal/tonemap.glsl
-#include lumi:shaders/internal/pbr_shading.glsl
-#include lumi:shaders/internal/phong_shading.glsl
-#include lumi:shaders/internal/debug_shading.glsl
-#include lumi:shaders/internal/skybloom.glsl
-
-void frx_startPipelineFragment(inout frx_FragmentData fragData)
+void frx_writePipelineFragment(in frx_FragmentData fragData)
 {
     vec4 a = clamp(fragData.spriteColor * fragData.vertexColor, 0.0, 1.0);
     float bloom = fragData.emissivity; // separate bloom from emissivity
@@ -65,7 +66,7 @@ void frx_startPipelineFragment(inout frx_FragmentData fragData)
     if(frx_isGui()){
         #if DIFFUSE_SHADING_MODE != DIFFUSE_MODE_NONE
             if (fragData.diffuse) {
-                float diffuse = mix(l2_diffuseGui(fragData.vertexNormal), 1, fragData.emissivity);
+                float diffuse = mix(pv_diffuse, 1, fragData.emissivity);
                 vec3 shading = mix(vec3(0.5, 0.4, 0.8) * diffuse * diffuse, vec3(1.0), diffuse);
                 a.rgb *= shading;
             }
@@ -91,7 +92,7 @@ void frx_startPipelineFragment(inout frx_FragmentData fragData)
     }
 
     // TODO: need a separate fog pass?
-	gl_FragData[0] = _cp_fog(a);
+	gl_FragData[0] = p_fog(a);
 	gl_FragDepth = gl_FragCoord.z;
 
     translucent = translucent && a.a < 0.99;

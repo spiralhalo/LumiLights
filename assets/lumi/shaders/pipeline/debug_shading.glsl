@@ -1,5 +1,5 @@
 /*******************************************************
- *  lumi:shaders/internal/debug_shading.glsl           *
+ *  lumi:shaders/pipeline/debug_shading.glsl           *
  *******************************************************/
 
 #if LUMI_DebugMode != LUMI_DebugMode_Disabled

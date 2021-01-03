@@ -1,5 +1,5 @@
 /*******************************************************
- *  lumi:shaders/internal/phong_shading.glsl           *
+ *  lumi:shaders/pipeline/phong_shading.glsl           *
  *******************************************************
  *  Copyright (c) 2020-2021 spiralhalo                 *
  *  Released WITHOUT WARRANTY under the terms of the   *
@@ -69,7 +69,7 @@ void phong_shading(in frx_FragmentData fragData, inout vec4 a, inout float bloom
 
         vec3 sunDir = l2_vanillaSunDir(frx_worldTime(), 0);
         float specSunDot = max(0.0, dot(l2_vanillaSunDir(frx_worldTime(), hdr_zWobbleDefault), specularNormal));
-        vec3 viewDir = normalize(-l2_viewPos) * frx_normalModelMatrix() * gl_NormalMatrix;
+        vec3 viewDir = normalize(-l2_viewpos) * frx_normalModelMatrix() * gl_NormalMatrix;
         vec3 sun = l2_sunRadiance(fragData.light.y, frx_worldTime(), frx_ambientIntensity(), frx_rainGradient()) * specSunDot;
 
         float specularAmount = l2_specular(frx_worldTime(), specularNormal, viewDir, phong_specular);
