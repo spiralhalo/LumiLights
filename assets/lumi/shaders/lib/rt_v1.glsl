@@ -9,6 +9,9 @@
  *  published by the Free Software Foundation, Inc.    *
  *******************************************************/
 
+#define mult 1.2
+#define divi 1/mult
+
 vec4 rt_reflection(vec2 start_uv, float init_ray_length, float max_ray_length,
               mat4 projection, mat4 inv_projection, 
               sampler2D depth_map, sampler2D normal_map)
@@ -39,16 +42,16 @@ vec4 rt_reflection(vec2 start_uv, float init_ray_length, float max_ray_length,
             while (current_ray_length > init_ray_length) {
                 current_uv = coords_uv(ray_view, projection);
                 current_view = coords_view(current_uv, inv_projection, depth_map);
-                ray *= 0.5;
-                current_ray_length *= 0.5;
+                ray *= divi;
+                current_ray_length *= divi;
                 if (ray_view.z > current_view.z) ray_view += ray;
                 else ray_view -= ray;
             }
             return vec4(current_uv, fresnel, 1.0);
         }
         // if (steps > constantSteps) {
-        ray *= 2;
-        current_ray_length *= 2;
+        ray *= mult;
+        current_ray_length *= mult;
         // }
         // steps ++;
     }
