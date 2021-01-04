@@ -202,6 +202,21 @@
             ]
         },
 
+        {
+            name: "albedo",
+            lod: 0,
+            internalFormat: "RGBA8",
+            pixelFormat: "RGBA",
+            pixelDataType: "UNSIGNED_BYTE",
+            target: "TEXTURE_2D",
+            texParams: [
+                {name: "TEXTURE_MIN_FILTER", val: "LINEAR"},
+                {name: "TEXTURE_MAG_FILTER", val: "LINEAR"},
+                {name: "TEXTURE_WRAP_S", val: "CLAMP"},
+                {name: "TEXTURE_WRAP_T", val: "CLAMP"}
+            ]
+        },
+
         // attached as secondary in managed draws to capture emissive layer
         {
             name: "emissive",

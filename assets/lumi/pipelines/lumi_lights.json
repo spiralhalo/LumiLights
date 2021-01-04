@@ -136,7 +136,7 @@
                 name: "reflection",
                 program: "reflection",
                 framebuffer: "reflection",
-                samplerImages: ["fab_composite", "solid_depth", "translucent_depth", "entity_depth", "particles_depth", "normal", "material"]
+                samplerImages: ["fab_composite", "albedo", "solid_depth", "translucent_depth", "entity_depth", "particles_depth", "normal", "material"]
             }
         ]
     },

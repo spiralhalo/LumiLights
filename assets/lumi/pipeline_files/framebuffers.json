@@ -36,7 +36,8 @@
                 {image: "solid_main", clearColor: 0x00000000},
                 {image: "emissive", clearColor: 0x00000000},
                 {image: "normal", clearColor: 0x00000000},
-                {image: "material", clearColor: 0x00000000}
+                {image: "material", clearColor: 0x00000000},
+                {image: "albedo", clearColor: 0x00000000}
             ]
         }, {
             name: "entity",
@@ -46,8 +47,9 @@
                 {image: "entity_main", clearColor: 0x00000000},
                 // emissive not cleared here because shared - only cleared once on solid depth
                 {image: "emissive"},
-                {image:"normal"},
-                {image: "material"}
+                {image: "normal"},
+                {image: "material"},
+                {image: "albedo"}
             ]
         }, {
             name: "particles",
@@ -55,8 +57,9 @@
             colorAttachments: [
                 {image: "particles_main", clearColor: 0x00000000},
                 {image: "emissive"},
-                {image:"normal"},
-                {image: "material"}
+                {image: "normal"},
+                {image: "material"},
+                {image: "albedo"}
             ]
         }, {
             name: "weather",
@@ -64,8 +67,9 @@
             colorAttachments: [
                 {image: "weather_main", clearColor: 0x00000000},
                 {image: "emissive"},
-                {image:"normal"},
-                {image: "material"}
+                {image: "normal"},
+                {image: "material"},
+                {image: "albedo"}
             ]
         }, {
             name: "clouds",
@@ -73,8 +77,9 @@
             colorAttachments: [
                 {image: "clouds_main", clearColor: 0x00000000},
                 {image: "emissive"},
-                {image:"normal"},
-                {image: "material"}
+                {image: "normal"},
+                {image: "material"},
+                {image: "albedo"}
             ]
         }, {
             name: "translucent",
@@ -82,8 +87,9 @@
             colorAttachments: [
                 {image: "translucent_main", clearColor: 0x00000000},
                 {image: "emissive"},
-                {image:"normal"},
-                {image: "material"}
+                {image: "normal"},
+                {image: "material"},
+                {image: "albedo"}
             ]
         },
 

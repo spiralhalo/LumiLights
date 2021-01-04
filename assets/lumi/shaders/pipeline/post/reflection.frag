@@ -1,4 +1,5 @@
 #include lumi:shaders/pipeline/post/common.glsl
+#include frex:shaders/lib/math.glsl
 #include frex:shaders/api/view.glsl
 #include frex:shaders/api/world.glsl
 #include lumi:shaders/lib/rt_v1.glsl
@@ -13,6 +14,7 @@
  *******************************************************/
 
 uniform sampler2D u_composite;
+uniform sampler2D u_albedo;
 uniform sampler2D u_solid_depth;
 uniform sampler2D u_translucent_depth;
 uniform sampler2D u_entity_depth;
@@ -77,15 +79,17 @@ void main()
         vec4 reflected_uv = rt_reflection(v_texcoord, 0.25, 128.0, 1.2, 20, frx_projectionMatrix(), frx_inverseProjectionMatrix());
         vec3 reflected;
         if (reflected_uv.w <= 0.0 || reflected_uv.x < 0.0 || reflected_uv.y < 0.0 || reflected_uv.x > 1.0 || reflected_uv.y > 1.0) {
-            reflected = v_skycolor;
+            float blending_factor = clamp(frx_luminance(base_color.rgb) - frx_luminance(v_skycolor), 0.0, 1.0);
+            reflected = mix(v_skycolor, base_color.rgb, blending_factor);
         } else {
             reflected = texture2D(u_composite, reflected_uv.xy).rgb;
         }
-        float metal   = material.g;
-        float fresnel = reflected_uv.z;
-        vec3 tinted_base  = reflected * base_color;
-        vec3 blended_base = mix(base_color, tinted_base, metal);
-        gl_FragData[0] = vec4(mix(blended_base, reflected, fresnel), 1.0);
+        float metal  = material.g;
+        vec3 albedo  = texture2D(u_albedo, v_texcoord).rgb;
+        vec3 dielectric_fresnel = vec3(reflected_uv.z);
+        vec3 metallic_fresnel = max(dielectric_fresnel, albedo);
+        vec3 fresnel = mix(dielectric_fresnel, metallic_fresnel, metal);
+        gl_FragData[0] = vec4(mix(base_color.rgb, reflected, fresnel), 1.0);
     } else {
         gl_FragData[0] = vec4(base_color, 1.0);
     }

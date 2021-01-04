@@ -2,6 +2,7 @@
 #include frex:shaders/api/world.glsl
 #include frex:shaders/lib/noise/noise3d.glsl
 #include frex:shaders/lib/color.glsl
+#include frex:shaders/lib/math.glsl
 #include lumi:shaders/internal/material_varying.glsl
 #include lumi:shaders/internal/context.glsl
 #include lumi:shaders/api/param_frag.glsl
