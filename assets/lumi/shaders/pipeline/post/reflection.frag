@@ -1,8 +1,8 @@
 #include lumi:shaders/pipeline/post/common.glsl
-#include frex:shaders/lib/math.glsl
 #include frex:shaders/api/view.glsl
 #include frex:shaders/api/world.glsl
-#include lumi:shaders/lib/rt_v1.glsl
+#include frex:shaders/lib/math.glsl
+#include lumi:shaders/lib/util.glsl
 
 /*******************************************************
  *  lumi:shaders/pipeline/post/reflection.frag         *
@@ -67,8 +67,24 @@ vec3 coords_normal(vec2 uv)
 	return 2.0 * texture2DLod(u_normal, uv, 0).xyz - 1.0;
 }
 
-vec4 rt_reflection(vec2 start_uv, float init_ray_length, float max_ray_length, float length_multiplier, int max_steps,
+struct rt_Result
+{
+    vec2 reflected_uv;
+    float fresnel;
+    bool hit;
+    vec3 unit_march;
+};
+
+rt_Result rt_reflection(vec2 start_uv, float init_ray_length, float max_ray_length, float length_multiplier, int max_steps,
                    mat4 projection, mat4 inv_projection);
+                   
+float blendScreen(float base, float blend) {
+	return 1.0-((1.0-base)*(1.0-blend));
+}
+
+vec3 blendScreen(vec3 base, vec3 blend) {
+	return vec3(blendScreen(base.r,blend.r),blendScreen(base.g,blend.g),blendScreen(base.b,blend.b));
+}
 
 void main()
 {
@@ -76,26 +92,27 @@ void main()
     vec3 base_color = texture2D(u_composite, v_texcoord).rgb;
     float gloss = 1.0 - material.r;
     if (gloss > 0.01 && material.a > 0.0) {
-        vec4 reflected_uv = rt_reflection(v_texcoord, 0.25, 128.0, 1.2, 20, frx_projectionMatrix(), frx_inverseProjectionMatrix());
+        rt_Result result = rt_reflection(v_texcoord, 0.25, 128.0, 1.2, 20, frx_projectionMatrix(), frx_inverseProjectionMatrix());
         vec3 reflected;
-        if (reflected_uv.w <= 0.0 || reflected_uv.x < 0.0 || reflected_uv.y < 0.0 || reflected_uv.x > 1.0 || reflected_uv.y > 1.0) {
-            float blending_factor = clamp(frx_luminance(base_color.rgb) - frx_luminance(v_skycolor), 0.0, 1.0);
-            reflected = mix(v_skycolor, base_color.rgb, blending_factor);
+        if (!result.hit || result.reflected_uv.x < 0.0 || result.reflected_uv.y < 0.0 || result.reflected_uv.x > 1.0 || result.reflected_uv.y > 1.0) {
+            vec3 fallback = v_skycolor * smoothstep(-0.05, 0.0, dot(result.unit_march, v_up));
+            float blending_factor = frx_luminance(base_color.rgb) - frx_luminance(fallback);
+            reflected = mix(fallback, base_color.rgb, blending_factor);
         } else {
-            reflected = texture2D(u_composite, reflected_uv.xy).rgb;
+            reflected = texture2D(u_composite, result.reflected_uv).rgb;
         }
         float metal  = material.g;
         vec3 albedo  = texture2D(u_albedo, v_texcoord).rgb;
-        vec3 dielectric_fresnel = vec3(reflected_uv.z);
+        vec3 dielectric_fresnel = vec3(result.fresnel);
         vec3 metallic_fresnel = max(dielectric_fresnel, albedo);
         vec3 fresnel = mix(dielectric_fresnel, metallic_fresnel, metal);
-        gl_FragData[0] = vec4(mix(base_color.rgb, reflected, fresnel), 1.0);
+        gl_FragData[0] = vec4(mix(base_color.rgb, reflected, fresnel * gloss), 1.0);
     } else {
         gl_FragData[0] = vec4(base_color, 1.0);
     }
 }
 
-vec4 rt_reflection(vec2 start_uv, float init_ray_length, float max_ray_length, float length_multiplier, int max_steps,
+rt_Result rt_reflection(vec2 start_uv, float init_ray_length, float max_ray_length, float length_multiplier, int max_steps,
                    mat4 projection, mat4 inv_projection)
 {
     float length_divisor = 1.0 / length_multiplier;
@@ -131,7 +148,7 @@ vec4 rt_reflection(vec2 start_uv, float init_ray_length, float max_ray_length, f
                 if (ray_view.z > current_view.z) ray_view += ray;
                 else ray_view -= ray;
             }
-            return vec4(current_uv, fresnel, 1.0);
+            return rt_Result(current_uv, fresnel, true, unit_march);
         }
         // if (steps > constantSteps) {
         ray *= length_multiplier;
@@ -141,5 +158,5 @@ vec4 rt_reflection(vec2 start_uv, float init_ray_length, float max_ray_length, f
     }
     // Sky reflection
     // if (sky(current_uv) && ray_view.z < 0) return current_uv;
-    return vec4(current_uv, fresnel, 0.0);
+    return rt_Result(current_uv, fresnel, false, unit_march);
 }

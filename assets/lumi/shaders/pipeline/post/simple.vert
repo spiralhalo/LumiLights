@@ -27,6 +27,7 @@ void main()
     gl_Position = vec4(screen.xy, 0.2, 1.0);
     v_texcoord = in_uv;
     v_skycolor = calc_sky_color();
+    v_up = frx_normalModelMatrix() * vec3(0.0, 1.0, 0.0);
 }
 
 /* Wip sky color, only works in the overworld, not very good */
