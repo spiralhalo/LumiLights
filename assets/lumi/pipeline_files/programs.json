@@ -43,18 +43,14 @@
             fragmentSource: "canvas:shaders/pipeline/post/upsample.frag",
             samplers: ["_cvu_input", "cvu_prior"]
         }, {
-            name: "fabulous",
+            name: "shading",
             // implements fabulous mode composite - same method as Mojang
             vertexSource: "lumi:shaders/pipeline/post/simple.vert",
-            fragmentSource: "lumi:shaders/pipeline/post/fabulous.frag",
+            fragmentSource: "lumi:shaders/pipeline/post/shading.frag",
             samplers: [
                 "diffuseColor", "diffuseDepth",
-                "translucentColor", "translucentDepth",
-                "entityColor", "entityDepth",
-                "particleColor", "particleDepth",
-                "weatherColor", "weatherDepth",
-                "cloudsColor", "cloudsDepth"
-            ],
+                "translucentColor", "translucentDepth"
+            ]
         }, {
             name: "reflection",
             // implements reflection
@@ -62,7 +58,7 @@
             fragmentSource: "lumi:shaders/pipeline/post/reflection.frag",
             samplers: [
                 "u_composite", "u_albedo",
-                "u_solid_depth", "u_translucent_depth", "u_entity_depth", "u_particles_depth",
+                "u_solid_depth", "u_translucent_depth",
                 "u_light", "u_normal", "u_material"
             ]
         }, {

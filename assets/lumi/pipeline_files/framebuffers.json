@@ -8,22 +8,6 @@
             depthAttachment: {image: "solid_depth"},
             colorAttachments: [{image: "solid_main"}]
         }, {
-            name: "fab_entity",
-            depthAttachment: {image: "entity_depth"},
-            colorAttachments: [{image: "entity_main"}]
-        }, {
-            name: "fab_particles",
-            depthAttachment: {image: "particles_depth"},
-            colorAttachments: [{image: "particles_main"}]
-        }, {
-            name: "fab_weather",
-            depthAttachment: {image: "weather_depth"},
-            colorAttachments: [{image: "weather_main"}]
-        }, {
-            name: "fab_clouds",
-            depthAttachment: {image: "clouds_depth"},
-            colorAttachments: [{image: "clouds_main"}]
-        }, {
             name: "fab_translucent",
             depthAttachment: {image: "translucent_depth"},
             colorAttachments: [{image: "translucent_main"}]
@@ -38,48 +22,6 @@
                 {image: "normal", clearColor: 0x00000000},
                 {image: "material", clearColor: 0x00000000},
                 {image: "albedo", clearColor: 0x00000000}
-            ]
-        }, {
-            name: "entity",
-            // depth not cleared because always copied from solid
-            depthAttachment: {image: "entity_depth"},
-            colorAttachments: [
-                {image: "entity_main", clearColor: 0x00000000},
-                // light not cleared here because shared - only cleared once on solid depth
-                {image: "light"},
-                {image: "normal"},
-                {image: "material"},
-                {image: "albedo"}
-            ]
-        }, {
-            name: "particles",
-            depthAttachment: {image: "particles_depth"},
-            colorAttachments: [
-                {image: "particles_main", clearColor: 0x00000000},
-                {image: "light"},
-                {image: "normal"},
-                {image: "material"},
-                {image: "albedo"}
-            ]
-        }, {
-            name: "weather",
-            depthAttachment: {image: "weather_depth"},
-            colorAttachments: [
-                {image: "weather_main", clearColor: 0x00000000},
-                {image: "light"},
-                {image: "normal"},
-                {image: "material"},
-                {image: "albedo"}
-            ]
-        }, {
-            name: "clouds",
-            depthAttachment: {image: "clouds_depth"},
-            colorAttachments: [
-                {image: "clouds_main", clearColor: 0x00000000},
-                {image: "light"},
-                {image: "normal"},
-                {image: "material"},
-                {image: "albedo"}
             ]
         }, {
             name: "translucent",

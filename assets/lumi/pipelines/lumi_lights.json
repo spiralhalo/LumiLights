@@ -32,11 +32,11 @@
     drawTargets: {
         solidTerrain: "solid",
         translucentTerrain: "translucent",
-        translucentEntity: "entity",
-        weather: "weather",
-        clouds: "clouds",
+        translucentEntity: "solid",
+        weather: "solid",
+        clouds: "solid",
         // TODO: segregate solid particles
-        translucentParticles: "particles"
+        translucentParticles: "solid"
     },
 
     // When present, will force Minecraft to operate as if "fabulous" mode was selected.
@@ -66,10 +66,10 @@
     //
     // The values here must be valid framebuffer names from the framebuffers block.
     fabulousTargets: {
-        entity: "fab_entity",
-        particles: "fab_particles",
-        weather: "fab_weather",
-        clouds: "fab_clouds",
+        entity: "default",
+        particles: "default",
+        weather: "default",
+        clouds: "default",
         translucent: "fab_translucent"
     },
 
@@ -94,22 +94,6 @@
                 framebuffer: "solid",
                 program: "frex_clear"
             }, {
-                name: "clear_entity",
-                framebuffer: "entity",
-                program: "frex_clear"
-            }, {
-                name: "clear_particles",
-                framebuffer: "particles",
-                program: "frex_clear"
-            }, {
-                name: "clear_weather",
-                framebuffer: "weather",
-                program: "frex_clear"
-            }, {
-                name: "clear_clouds",
-                framebuffer: "clouds",
-                program: "frex_clear"
-            }, {
                 name: "clear_translucent",
                 framebuffer: "translucent",
                 program: "frex_clear"
@@ -122,21 +106,17 @@
         passes: [
             {
                 // faulous mode composite
-                name: "fabulous",
-                program: "fabulous",
+                name: "shading",
+                program: "shading",
                 framebuffer: "fab_composite",
                 samplerImages: [
                     "solid_main", "solid_depth",
-                    "translucent_main", "translucent_depth",
-                    "entity_main", "entity_depth",
-                    "particles_main", "particles_depth",
-                    "weather_main", "weather_depth",
-                    "clouds_main", "clouds_depth"]
+                    "translucent_main", "translucent_depth"]
             }, {
                 name: "reflection",
                 program: "reflection",
                 framebuffer: "reflection",
-                samplerImages: ["fab_composite", "albedo", "solid_depth", "translucent_depth", "entity_depth", "particles_depth", "light", "normal", "material"]
+                samplerImages: ["fab_composite", "albedo", "solid_depth", "translucent_depth", "light", "normal", "material"]
             }
         ]
     },

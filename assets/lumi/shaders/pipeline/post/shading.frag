@@ -10,16 +10,8 @@ uniform sampler2D diffuseColor;
 uniform sampler2D diffuseDepth;
 uniform sampler2D translucentColor;
 uniform sampler2D translucentDepth;
-uniform sampler2D entityColor;
-uniform sampler2D entityDepth;
-uniform sampler2D particleColor;
-uniform sampler2D particleDepth;
-uniform sampler2D weatherColor;
-uniform sampler2D weatherDepth;
-uniform sampler2D cloudsColor;
-uniform sampler2D cloudsDepth;
 
-#define NUM_LAYERS 6
+#define NUM_LAYERS 2
 
 vec4 color_layers[NUM_LAYERS];
 float depth_layers[NUM_LAYERS];
@@ -59,10 +51,6 @@ void main() {
     active_layers = 1;
 
     try_insert(texture2D(translucentColor, v_texcoord), texture2D(translucentDepth, v_texcoord).r);
-    try_insert(texture2D(entityColor, v_texcoord), texture2D(entityDepth, v_texcoord).r);
-    try_insert(texture2D(particleColor, v_texcoord), texture2D(particleDepth, v_texcoord).r);
-    try_insert(texture2D(weatherColor, v_texcoord), texture2D(weatherDepth, v_texcoord).r);
-    try_insert(texture2D(cloudsColor, v_texcoord), texture2D(cloudsDepth, v_texcoord).r);
 
     vec3 texelAccum = color_layers[0].rgb;
 

@@ -17,8 +17,6 @@ uniform sampler2D u_composite;
 uniform sampler2D u_albedo;
 uniform sampler2D u_solid_depth;
 uniform sampler2D u_translucent_depth;
-uniform sampler2D u_entity_depth;
-uniform sampler2D u_particles_depth;
 uniform sampler2D u_light;
 uniform sampler2D u_normal;
 uniform sampler2D u_material;
@@ -34,17 +32,14 @@ float coords_depth_source(vec2 uv)
 {
     float solid_depth = texture2DLod(u_solid_depth, uv, 0).r;
     float translucent_depth = texture2DLod(u_translucent_depth, uv, 0).r;
-    float entity_depth = texture2DLod(u_entity_depth, uv, 0).r;
-    return min(solid_depth, min(translucent_depth, entity_depth));
+    return min(solid_depth, translucent_depth);
 }
 
 float coords_depth(vec2 uv)
 {
     float solid_depth = texture2DLod(u_solid_depth, uv, 0).r;
     float translucent_depth = texture2DLod(u_translucent_depth, uv, 0).r;
-    float entity_depth = texture2DLod(u_entity_depth, uv, 0).r;
-    float particles_depth = texture2DLod(u_particles_depth, uv, 0).r;
-    return min(solid_depth, min(translucent_depth, min(entity_depth, particles_depth)));
+    return min(solid_depth, translucent_depth);
 }
 
 vec3 coords_view_source(vec2 uv, mat4 inv_projection)
@@ -94,6 +89,7 @@ vec3 blendScreen(vec3 base, vec3 blend) {
 
 void main()
 {
+    gl_FragData[0] = vec4(coords_normal(v_texcoord), 1.0);
     vec4 material = texture2DLod(u_material, v_texcoord, 0);
     float sky_light = texture2DLod(u_light, v_texcoord, 0).z;
     vec3 base_color = texture2D(u_composite, v_texcoord).rgb;
