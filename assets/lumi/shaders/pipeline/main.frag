@@ -63,7 +63,7 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
     vec4 a = clamp(fragData.spriteColor * fragData.vertexColor, 0.0, 1.0);
     float bloom = fragData.emissivity; // separate bloom from emissivity
     bool translucent = _cv_getFlag(_CV_FLAG_CUTOUT) == 0.0 && a.a < 0.99;
-    vec4 albedo = vec4(a.rgb, 1.0);
+    vec4 albedo = a;
     if(frx_isGui()){
         #if DIFFUSE_SHADING_MODE != DIFFUSE_MODE_NONE
             if (fragData.diffuse) {
@@ -96,7 +96,7 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
 	gl_FragDepth = gl_FragCoord.z;
 
     translucent = translucent && a.a < 0.99;
-    gl_FragData[1] = vec4(bloom * a.a, 1.0, 0.0, translucent ? step(l2_skyBloom(), bloom) : 1.0);
+    gl_FragData[1] = vec4(bloom * a.a, fragData.light.x, fragData.light.y, translucent ? step(l2_skyBloom(), bloom) : 1.0);
 
     vec3 normal = frx_normalModelMatrix() * fragData.vertexNormal;
     gl_FragData[2] = vec4(normal * 0.5 + 0.5, 1.0);

@@ -19,6 +19,7 @@ uniform sampler2D u_solid_depth;
 uniform sampler2D u_translucent_depth;
 uniform sampler2D u_entity_depth;
 uniform sampler2D u_particles_depth;
+uniform sampler2D u_light;
 uniform sampler2D u_normal;
 uniform sampler2D u_material;
 
@@ -67,6 +68,11 @@ vec3 coords_normal(vec2 uv)
 	return 2.0 * texture2DLod(u_normal, uv, 0).xyz - 1.0;
 }
 
+float skylight_adjust(float skyLight, float intensity)
+{
+    return l2_clampScale(0.03125, 1.0, skyLight) * intensity;
+}
+
 struct rt_Result
 {
     vec2 reflected_uv;
@@ -89,13 +95,19 @@ vec3 blendScreen(vec3 base, vec3 blend) {
 void main()
 {
     vec4 material = texture2DLod(u_material, v_texcoord, 0);
+    float sky_light = texture2DLod(u_light, v_texcoord, 0).z;
     vec3 base_color = texture2D(u_composite, v_texcoord).rgb;
     float gloss = 1.0 - material.r;
     if (gloss > 0.01 && material.a > 0.0) {
         rt_Result result = rt_reflection(v_texcoord, 0.25, 128.0, 1.2, 20, frx_projectionMatrix(), frx_inverseProjectionMatrix());
         vec3 reflected;
         if (!result.hit || result.reflected_uv.x < 0.0 || result.reflected_uv.y < 0.0 || result.reflected_uv.x > 1.0 || result.reflected_uv.y > 1.0) {
-            vec3 fallback = v_skycolor * smoothstep(-0.05, 0.0, dot(result.unit_march, v_up));
+            vec3 fallback;
+            if (frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT)) {
+                fallback = v_skycolor * smoothstep(-0.05, 0.0, dot(result.unit_march, v_up)) * skylight_adjust(sky_light, frx_ambientIntensity());
+            } else {
+                fallback = v_skycolor;
+            }
             float blending_factor = frx_luminance(base_color.rgb) - frx_luminance(fallback);
             reflected = mix(fallback, base_color.rgb, blending_factor);
         } else {
@@ -106,7 +118,7 @@ void main()
         vec3 dielectric_fresnel = vec3(result.fresnel);
         vec3 metallic_fresnel = max(dielectric_fresnel, albedo);
         vec3 fresnel = mix(dielectric_fresnel, metallic_fresnel, metal);
-        gl_FragData[0] = vec4(mix(base_color.rgb, reflected, fresnel * gloss), 1.0);
+        gl_FragData[0] = vec4(mix(base_color.rgb, reflected, fresnel * gloss * gloss), 1.0);
     } else {
         gl_FragData[0] = vec4(base_color, 1.0);
     }

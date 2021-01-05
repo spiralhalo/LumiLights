@@ -60,7 +60,11 @@
             // implements reflection
             vertexSource: "lumi:shaders/pipeline/post/simple.vert",
             fragmentSource: "lumi:shaders/pipeline/post/reflection.frag",
-            samplers: ["u_composite", "u_albedo", "u_solid_depth", "u_translucent_depth", "u_entity_depth", "u_particles_depth", "u_normal", "u_material"]
+            samplers: [
+                "u_composite", "u_albedo",
+                "u_solid_depth", "u_translucent_depth", "u_entity_depth", "u_particles_depth",
+                "u_light", "u_normal", "u_material"
+            ]
         }, {
             name: "fxaa",
             // implements fxaa

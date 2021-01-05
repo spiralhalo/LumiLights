@@ -136,7 +136,7 @@
                 name: "reflection",
                 program: "reflection",
                 framebuffer: "reflection",
-                samplerImages: ["fab_composite", "albedo", "solid_depth", "translucent_depth", "entity_depth", "particles_depth", "normal", "material"]
+                samplerImages: ["fab_composite", "albedo", "solid_depth", "translucent_depth", "entity_depth", "particles_depth", "light", "normal", "material"]
             }
         ]
     },
@@ -148,7 +148,7 @@
                 name: "emissive_color",
                 program: "emissive_color",
                 framebuffer: "emissive_color",
-                samplerImages: ["solid_main", "emissive"]
+                samplerImages: ["solid_main", "light"]
             }, {
                 // build bloom mipmaps, blurring as part of downscale
                 name: "bloom_downsample_0",

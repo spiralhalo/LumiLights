@@ -34,7 +34,7 @@
             depthAttachment: {image: "solid_depth", clearDepth: 1.0},
             colorAttachments: [
                 {image: "solid_main", clearColor: 0x00000000},
-                {image: "emissive", clearColor: 0x00000000},
+                {image: "light", clearColor: 0x00000000},
                 {image: "normal", clearColor: 0x00000000},
                 {image: "material", clearColor: 0x00000000},
                 {image: "albedo", clearColor: 0x00000000}
@@ -45,8 +45,8 @@
             depthAttachment: {image: "entity_depth"},
             colorAttachments: [
                 {image: "entity_main", clearColor: 0x00000000},
-                // emissive not cleared here because shared - only cleared once on solid depth
-                {image: "emissive"},
+                // light not cleared here because shared - only cleared once on solid depth
+                {image: "light"},
                 {image: "normal"},
                 {image: "material"},
                 {image: "albedo"}
@@ -56,7 +56,7 @@
             depthAttachment: {image: "particles_depth"},
             colorAttachments: [
                 {image: "particles_main", clearColor: 0x00000000},
-                {image: "emissive"},
+                {image: "light"},
                 {image: "normal"},
                 {image: "material"},
                 {image: "albedo"}
@@ -66,7 +66,7 @@
             depthAttachment: {image: "weather_depth"},
             colorAttachments: [
                 {image: "weather_main", clearColor: 0x00000000},
-                {image: "emissive"},
+                {image: "light"},
                 {image: "normal"},
                 {image: "material"},
                 {image: "albedo"}
@@ -76,7 +76,7 @@
             depthAttachment: {image: "clouds_depth"},
             colorAttachments: [
                 {image: "clouds_main", clearColor: 0x00000000},
-                {image: "emissive"},
+                {image: "light"},
                 {image: "normal"},
                 {image: "material"},
                 {image: "albedo"}
@@ -86,7 +86,7 @@
             depthAttachment: {image: "translucent_depth"},
             colorAttachments: [
                 {image: "translucent_main", clearColor: 0x00000000},
-                {image: "emissive"},
+                {image: "light"},
                 {image: "normal"},
                 {image: "material"},
                 {image: "albedo"}
@@ -98,10 +98,6 @@
         {
             name: "fab_composite",
             colorAttachments: [{image: "fab_composite", clearColor: 0x00000000}]
-        }, {
-            // TODO: should be able to remove this now
-            name: "emissive",
-            colorAttachments: [{image: "emissive", clearColor: 0x00000000}]
         }, {
             name: "main_copy",
             colorAttachments: [{image: "main_copy"}]

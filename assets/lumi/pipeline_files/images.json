@@ -217,9 +217,9 @@
             ]
         },
 
-        // attached as secondary in managed draws to capture emissive layer
+        // attached as secondary in managed draws to capture emissive and light levels
         {
-            name: "emissive",
+            name: "light",
             lod: 0,
             internalFormat: "RGBA8",
             target: "TEXTURE_2D",
