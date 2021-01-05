@@ -13,13 +13,19 @@
  *  published by the Free Software Foundation, Inc.    *
  *******************************************************/
 
-uniform sampler2D u_composite;
-uniform sampler2D u_albedo;
+uniform sampler2D u_solid_color;
+uniform sampler2D u_solid_albedo;
 uniform sampler2D u_solid_depth;
+uniform sampler2D u_light_solid;
+uniform sampler2D u_normal_solid;
+uniform sampler2D u_material_solid;
+
+uniform sampler2D u_translucent_color;
+uniform sampler2D u_translucent_albedo;
 uniform sampler2D u_translucent_depth;
-uniform sampler2D u_light;
-uniform sampler2D u_normal;
-uniform sampler2D u_material;
+uniform sampler2D u_light_translucent;
+uniform sampler2D u_normal_translucent;
+uniform sampler2D u_material_translucent;
 
 vec2 coords_uv(vec3 view, mat4 projection)
 {
@@ -60,7 +66,7 @@ vec3 coords_view(vec2 uv, mat4 inv_projection)
 
 vec3 coords_normal(vec2 uv)
 {
-	return 2.0 * texture2DLod(u_normal, uv, 0).xyz - 1.0;
+	return 2.0 * texture2DLod(u_normal_solid, uv, 0).xyz - 1.0;
 }
 
 float skylight_adjust(float skyLight, float intensity)
@@ -90,9 +96,9 @@ vec3 blendScreen(vec3 base, vec3 blend) {
 void main()
 {
     gl_FragData[0] = vec4(coords_normal(v_texcoord), 1.0);
-    vec4 material = texture2DLod(u_material, v_texcoord, 0);
-    float sky_light = texture2DLod(u_light, v_texcoord, 0).z;
-    vec3 base_color = texture2D(u_composite, v_texcoord).rgb;
+    vec4 material = texture2DLod(u_material_solid, v_texcoord, 0);
+    float sky_light = texture2DLod(u_light_solid, v_texcoord, 0).z;
+    vec3 base_color = texture2D(u_solid_color, v_texcoord).rgb;
     float gloss = 1.0 - material.r;
     if (gloss > 0.01 && material.a > 0.0) {
         rt_Result result = rt_reflection(v_texcoord, 0.25, 128.0, 1.2, 20, frx_projectionMatrix(), frx_inverseProjectionMatrix());
@@ -107,10 +113,10 @@ void main()
             float blending_factor = frx_luminance(base_color.rgb) - frx_luminance(fallback);
             reflected = mix(fallback, base_color.rgb, blending_factor);
         } else {
-            reflected = texture2D(u_composite, result.reflected_uv).rgb;
+            reflected = texture2D(u_solid_color, result.reflected_uv).rgb;
         }
         float metal  = material.g;
-        vec3 albedo  = texture2D(u_albedo, v_texcoord).rgb;
+        vec3 albedo  = texture2D(u_solid_albedo, v_texcoord).rgb;
         vec3 dielectric_fresnel = vec3(result.fresnel);
         vec3 metallic_fresnel = max(dielectric_fresnel, albedo);
         vec3 fresnel = mix(dielectric_fresnel, metallic_fresnel, metal);

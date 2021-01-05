@@ -11,7 +11,7 @@
 void frx_startFragment(inout frx_FragmentData fragData) {
 	#ifdef LUMI_PBRX
 		/* PBR PARAMS */
-		pbr_f0 = vec3(0.02);
+		pbr_f0 = 0.02;
 		pbr_roughness = 0.05;
 	#else
 		/* HACK */
@@ -31,7 +31,7 @@ void frx_startFragment(inout frx_FragmentData fragData) {
 
 	float l = frx_luminance(fragData.spriteColor.rgb);
 	#ifdef LUMI_PBRX
-		pbr_f0 = mix(pbr_f0, vec3(0.2), l * l);
+		pbr_f0 = mix(pbr_f0, 0.2, l * l);
 	#endif
 	
 	/* WAVY NORMALS */

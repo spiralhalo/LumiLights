@@ -1,5 +1,10 @@
+#include frex:shaders/lib/math.glsl
+#include frex:shaders/api/world.glsl
+#include frex:shaders/api/player.glsl
+#include lumi:shaders/lib/util.glsl
+
 /*******************************************************
- *  lumi:shaders/pipeline/lightsource.glsl             *
+ *  lumi:shaders/lib/lightsource.glsl                  *
  *******************************************************
  *  Copyright (c) 2020-2021 spiralhalo, Contributors   *
  *  Released WITHOUT WARRANTY under the terms of the   *

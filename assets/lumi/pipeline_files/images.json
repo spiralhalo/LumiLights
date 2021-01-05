@@ -36,6 +36,51 @@
                 {name: "TEXTURE_COMPARE_MODE", val: "NONE"}
             ]
         },
+        
+        {
+            name: "light_solid",
+            lod: 0,
+            internalFormat: "RGBA8",
+            pixelFormat: "RGBA",
+            pixelDataType: "UNSIGNED_BYTE",
+            target: "TEXTURE_2D",
+            texParams: [
+                {name: "TEXTURE_MIN_FILTER", val: "LINEAR"},
+                {name: "TEXTURE_MAG_FILTER", val: "LINEAR"},
+                {name: "TEXTURE_WRAP_S", val: "CLAMP"},
+                {name: "TEXTURE_WRAP_T", val: "CLAMP"}
+            ]
+        },
+
+        {
+            name: "normal_solid",
+            lod: 0,
+            internalFormat: "RGBA8",
+            pixelFormat: "RGBA",
+            pixelDataType: "UNSIGNED_BYTE",
+            target: "TEXTURE_2D",
+            texParams: [
+                {name: "TEXTURE_MIN_FILTER", val: "LINEAR"},
+                {name: "TEXTURE_MAG_FILTER", val: "LINEAR"},
+                {name: "TEXTURE_WRAP_S", val: "CLAMP"},
+                {name: "TEXTURE_WRAP_T", val: "CLAMP"}
+            ]
+        },
+
+        {
+            name: "material_solid",
+            lod: 0,
+            internalFormat: "RGBA8",
+            pixelFormat: "RGBA",
+            pixelDataType: "UNSIGNED_BYTE",
+            target: "TEXTURE_2D",
+            texParams: [
+                {name: "TEXTURE_MIN_FILTER", val: "LINEAR"},
+                {name: "TEXTURE_MAG_FILTER", val: "LINEAR"},
+                {name: "TEXTURE_WRAP_S", val: "CLAMP"},
+                {name: "TEXTURE_WRAP_T", val: "CLAMP"}
+            ]
+        },
 
         // color attachment for terain translucency
         {
@@ -69,9 +114,9 @@
                 {name: "TEXTURE_COMPARE_MODE", val: "NONE"}
             ]
         },
-
+        
         {
-            name: "albedo",
+            name: "light_translucent",
             lod: 0,
             internalFormat: "RGBA8",
             pixelFormat: "RGBA",
@@ -85,11 +130,12 @@
             ]
         },
 
-        // attached as secondary in managed draws to capture emissive and light levels
         {
-            name: "light",
+            name: "normal_translucent",
             lod: 0,
             internalFormat: "RGBA8",
+            pixelFormat: "RGBA",
+            pixelDataType: "UNSIGNED_BYTE",
             target: "TEXTURE_2D",
             texParams: [
                 {name: "TEXTURE_MIN_FILTER", val: "LINEAR"},
@@ -99,11 +145,12 @@
             ]
         },
 
-        // attached as third in managed draws to capture normal layer
         {
-            name: "normal",
+            name: "material_translucent",
             lod: 0,
             internalFormat: "RGBA8",
+            pixelFormat: "RGBA",
+            pixelDataType: "UNSIGNED_BYTE",
             target: "TEXTURE_2D",
             texParams: [
                 {name: "TEXTURE_MIN_FILTER", val: "LINEAR"},
@@ -113,9 +160,40 @@
             ]
         },
 
-        // attached as fourth in managed draws to capture material layer
+        // HDR shading result for solid
         {
-            name: "material",
+            name: "solid_shaded",
+            lod: 0,
+            internalFormat: "GL_RGBA16F",
+            pixelFormat: "RGBA",
+            pixelDataType: "FLOAT",
+            target: "TEXTURE_2D",
+            texParams: [
+                {name: "TEXTURE_MIN_FILTER", val: "LINEAR"},
+                {name: "TEXTURE_MAG_FILTER", val: "LINEAR"},
+                {name: "TEXTURE_WRAP_S", val: "CLAMP"},
+                {name: "TEXTURE_WRAP_T", val: "CLAMP"}
+            ]
+        },
+
+        // HDR shading result for translucent
+        {
+            name: "translucent_shaded",
+            lod: 0,
+            internalFormat: "GL_RGBA16F",
+            pixelFormat: "RGBA",
+            pixelDataType: "FLOAT",
+            target: "TEXTURE_2D",
+            texParams: [
+                {name: "TEXTURE_MIN_FILTER", val: "LINEAR"},
+                {name: "TEXTURE_MAG_FILTER", val: "LINEAR"},
+                {name: "TEXTURE_WRAP_S", val: "CLAMP"},
+                {name: "TEXTURE_WRAP_T", val: "CLAMP"}
+            ]
+        },
+        
+        {
+            name: "emissive",
             lod: 0,
             internalFormat: "RGBA8",
             target: "TEXTURE_2D",

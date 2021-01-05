@@ -44,12 +44,21 @@
             samplers: ["_cvu_input", "cvu_prior"]
         }, {
             name: "shading",
-            // implements fabulous mode composite - same method as Mojang
+            // deferred shading
             vertexSource: "lumi:shaders/pipeline/post/simple.vert",
             fragmentSource: "lumi:shaders/pipeline/post/shading.frag",
             samplers: [
-                "diffuseColor", "diffuseDepth",
-                "translucentColor", "translucentDepth"
+                "u_solid_color",
+                "u_solid_depth",
+                "u_light_solid",
+                "u_normal_solid",
+                "u_material_solid",
+
+                "u_translucent_color",
+                "u_translucent_depth",
+                "u_light_translucent",
+                "u_normal_translucent",
+                "u_material_translucent",
             ]
         }, {
             name: "reflection",
@@ -57,9 +66,28 @@
             vertexSource: "lumi:shaders/pipeline/post/simple.vert",
             fragmentSource: "lumi:shaders/pipeline/post/reflection.frag",
             samplers: [
-                "u_composite", "u_albedo",
-                "u_solid_depth", "u_translucent_depth",
-                "u_light", "u_normal", "u_material"
+                "u_solid_color",
+                "u_solid_albedo",
+                "u_solid_depth",
+                "u_light_solid",
+                "u_normal_solid",
+                "u_material_solid",
+
+                "u_translucent_color",
+                "u_translucent_albedo",
+                "u_translucent_depth",
+                "u_light_translucent",
+                "u_normal_translucent",
+                "u_material_translucent",
+            ]
+        }, {
+            name: "composite",
+            // implements fabulous mode composite - same method as Mojang
+            vertexSource: "lumi:shaders/pipeline/post/simple.vert",
+            fragmentSource: "lumi:shaders/pipeline/post/composite.frag",
+            samplers: [
+                "diffuseColor", "diffuseDepth",
+                "translucentColor", "translucentDepth"
             ]
         }, {
             name: "fxaa",

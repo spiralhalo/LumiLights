@@ -105,18 +105,26 @@
     fabulous: {
         passes: [
             {
-                // faulous mode composite
                 name: "shading",
                 program: "shading",
-                framebuffer: "fab_composite",
+                framebuffer: "shading",
                 samplerImages: [
-                    "solid_main", "solid_depth",
-                    "translucent_main", "translucent_depth"]
-            }, {
+                    "solid_main", "solid_depth", "light_solid", "normal_solid", "material_solid",
+                    "translucent_main", "translucent_depth", "light_translucent", "normal_translucent", "material_translucent"]
+            },/* {
                 name: "reflection",
                 program: "reflection",
                 framebuffer: "reflection",
-                samplerImages: ["fab_composite", "albedo", "solid_depth", "translucent_depth", "light", "normal", "material"]
+                samplerImages: [
+                    "solid_shaded", "solid_main", "solid_depth", "light_solid", "normal_solid", "material_solid",
+                    "translucent_shaded", "translucent_main", "translucent_depth", "light_translucent", "normal_translucent", "material_translucent"]
+            },*/ {
+                name: "composite",
+                program: "composite",
+                framebuffer: "composite",
+                samplerImages: [
+                    "solid_shaded", "solid_depth",
+                    "translucent_shaded", "translucent_depth"]
             }
         ]
     },
@@ -128,7 +136,7 @@
                 name: "emissive_color",
                 program: "emissive_color",
                 framebuffer: "emissive_color",
-                samplerImages: ["solid_main", "light"]
+                samplerImages: ["solid_main", "emissive"]
             }, {
                 // build bloom mipmaps, blurring as part of downscale
                 name: "bloom_downsample_0",

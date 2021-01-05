@@ -12,35 +12,48 @@
             depthAttachment: {image: "translucent_depth"},
             colorAttachments: [{image: "translucent_main"}]
         },
-
+        
         {
             name: "solid",
             depthAttachment: {image: "solid_depth", clearDepth: 1.0},
             colorAttachments: [
                 {image: "solid_main", clearColor: 0x00000000},
-                {image: "light", clearColor: 0x00000000},
-                {image: "normal", clearColor: 0x00000000},
-                {image: "material", clearColor: 0x00000000},
-                {image: "albedo", clearColor: 0x00000000}
+                {image: "light_solid", clearColor: 0x00000000},
+                {image: "normal_solid", clearColor: 0x00000000},
+                {image: "material_solid", clearColor: 0x00000000}
             ]
         }, {
             name: "translucent",
             depthAttachment: {image: "translucent_depth"},
             colorAttachments: [
                 {image: "translucent_main", clearColor: 0x00000000},
-                {image: "light"},
-                {image: "normal"},
-                {image: "material"},
-                {image: "albedo"}
+                {image: "light_translucent"},
+                {image: "normal_translucent"},
+                {image: "material_translucent"}
             ]
         },
 
 
 
         {
-            name: "fab_composite",
-            colorAttachments: [{image: "fab_composite", clearColor: 0x00000000}]
+            name: "shading",
+            colorAttachments: [
+                {image: "solid_shaded", clearColor: 0x00000000},
+                {image: "translucent_shaded", clearColor: 0x00000000},
+                {image: "emissive", clearColor: 0x00000000},
+            ]
         }, {
+            name: "reflection",
+            //TODO: lol
+            colorAttachments: [{image: "solid_main"}]
+        }, {
+            name: "composite",
+            colorAttachments: [{image: "solid_main"}]
+        },
+        
+
+
+        {
             name: "main_copy",
             colorAttachments: [{image: "main_copy"}]
         }, {
@@ -94,9 +107,6 @@
             colorAttachments: [{image: "main_copy"}]
         }, {
             name: "fxaa",
-            colorAttachments: [{image: "solid_main"}]
-        }, {
-            name: "reflection",
             colorAttachments: [{image: "solid_main"}]
         }
     ]
