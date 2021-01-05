@@ -43,7 +43,7 @@ vec4 hdr_shaded_color(vec2 uv, sampler2D scolor, sampler2D sdepth, sampler2D sli
     vec4 a = texture2DLod(scolor, uv, 0.0);
     vec3 normal = texture2DLod(snormal, uv, 0.0).xyz;
     if (normal.x + normal.y + normal.z <= 0.01) return a;
-    bool diffuse = normal.x + normal.y + normal.z < 2.0;
+    bool diffuse = normal.x + normal.y + normal.z < 2.5;
     normal = diffuse ? (normal * 2.0 - 1.0) : vec3(.0, 1.0, .0);
     float depth = texture2DLod(sdepth, uv, 0.0).r;
     vec4 light = texture2DLod(slight, uv, 0.0);
