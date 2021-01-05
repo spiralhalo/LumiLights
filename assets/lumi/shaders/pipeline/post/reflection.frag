@@ -115,7 +115,7 @@ void main()
 rt_Result rt_reflection(vec2 start_uv, float init_ray_length, float max_ray_length, float length_multiplier, int max_steps,
                    mat4 projection, mat4 inv_projection)
 {
-    float length_divisor = 1.0 / length_multiplier;
+    // float length_divisor = 1.0 / length_multiplier;
     vec3 ray_view = coords_view_source(start_uv, inv_projection);
     vec3 unit_view = normalize(-ray_view);
     vec3 unit_march = reflect(-unit_view, coords_normal(start_uv));
@@ -131,6 +131,7 @@ rt_Result rt_reflection(vec2 start_uv, float init_ray_length, float max_ray_leng
     bool backface;
     
     int steps = 0;
+    int refine_steps = 0;
     while (current_ray_length < max_ray_length && steps < max_steps) {
         ray_view += ray;
         current_uv = coords_uv(ray_view, projection);
@@ -140,13 +141,15 @@ rt_Result rt_reflection(vec2 start_uv, float init_ray_length, float max_ray_leng
         backface = dot(unit_march, coords_normal(current_uv)) > 0;
         if (delta_z > 0 && delta_z < hitbox_z && !backface) {
             //refine
-            while (current_ray_length > init_ray_length) {
-                current_uv = coords_uv(ray_view, projection);
-                current_view = coords_view(current_uv, inv_projection);
-                ray *= length_divisor;
-                current_ray_length *= length_divisor;
+            while (current_ray_length > init_ray_length && refine_steps < max_steps) {
+                ray = abs(delta_z) * unit_march;
+                current_ray_length = abs(delta_z);
                 if (ray_view.z > current_view.z) ray_view += ray;
                 else ray_view -= ray;
+                current_uv = coords_uv(ray_view, projection);
+                current_view = coords_view(current_uv, inv_projection);
+                delta_z = current_view.z - ray_view.z;
+                refine_steps ++;
             }
             return rt_Result(current_uv, fresnel, true, unit_march);
         }
