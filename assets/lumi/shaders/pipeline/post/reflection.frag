@@ -95,6 +95,7 @@ vec3 blendScreen(vec3 base, vec3 blend) {
 
 void main()
 {
+    // TODO: handle diffuse (normal = 1.0, 1.0, 1.0)
     gl_FragData[0] = vec4(coords_normal(v_texcoord), 1.0);
     vec4 material = texture2DLod(u_material_solid, v_texcoord, 0);
     float sky_light = texture2DLod(u_light_solid, v_texcoord, 0).z;
