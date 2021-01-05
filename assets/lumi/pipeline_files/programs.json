@@ -86,8 +86,8 @@
             vertexSource: "lumi:shaders/pipeline/post/simple.vert",
             fragmentSource: "lumi:shaders/pipeline/post/composite.frag",
             samplers: [
-                "diffuseColor", "diffuseDepth",
-                "translucentColor", "translucentDepth"
+                "u_hdr_solid", "u_solid_depth",
+                "u_hdr_translucent", "u_translucent_depth"
             ]
         }, {
             name: "fxaa",

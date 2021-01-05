@@ -19,8 +19,8 @@ vec3 ldr_vibrantTonemap(in vec3 hdrColor){
 }
 #endif
 
-vec3 ldr_tonemap(vec3 a) {
-    vec3 c = a;
+vec4 ldr_tonemap(vec4 a) {
+    vec3 c = a.rgb;
 #if LUMI_Tonemap == LUMI_Tonemap_Film
     c = frx_toneMap(c);
 #elif LUMI_Tonemap == LUMI_Tonemap_Vibrant
@@ -30,5 +30,5 @@ vec3 ldr_tonemap(vec3 a) {
 #endif
     // Somehow the film tonemap requires clamping. I don't understand..
     c = pow(clamp(c, 0.0, 1.0), vec3(1.0 / hdr_gamma));
-    return c;
+    return vec4(c, a.a);
 }

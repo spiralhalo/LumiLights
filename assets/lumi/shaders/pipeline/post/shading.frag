@@ -42,7 +42,7 @@ vec4 hdr_shaded_color(vec2 uv, sampler2D scolor, sampler2D sdepth, sampler2D sli
 {
     vec4 a = texture2DLod(scolor, uv, 0.0);
     vec3 normal = texture2DLod(snormal, uv, 0.0).xyz;
-    if (normal.x + normal.y + normal.z <= 0.01) return a;
+    if (normal.x + normal.y + normal.z <= 0.01) return vec4(a.rgb, 0.0);
     bool diffuse = normal.x + normal.y + normal.z < 2.5;
     normal = diffuse ? (normal * 2.0 - 1.0) : vec3(.0, 1.0, .0);
     float depth = texture2DLod(sdepth, uv, 0.0).r;
@@ -57,7 +57,7 @@ vec4 hdr_shaded_color(vec2 uv, sampler2D scolor, sampler2D sdepth, sampler2D sli
     // else if (frx_matHurt()) a = vec4(0.25 + a.r * 0.75, a.g * 0.75, a.b * 0.75, a.a);
     // TODO: do fog in shading
     // PERF: don't bother shade past max fog distance
-    return vec4(ldr_tonemap(a.rgb), a.a);//p_fog(a);
+    return a;//p_fog(a);
 }
 
 void main()

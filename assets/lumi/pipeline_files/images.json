@@ -133,9 +133,9 @@
         {
             name: "normal_translucent",
             lod: 0,
-            internalFormat: "RGBA8",
+            internalFormat: "RGBA32F",
             pixelFormat: "RGBA",
-            pixelDataType: "UNSIGNED_BYTE",
+            pixelDataType: "FLOAT",
             target: "TEXTURE_2D",
             texParams: [
                 {name: "TEXTURE_MIN_FILTER", val: "LINEAR"},
@@ -164,7 +164,7 @@
         {
             name: "solid_shaded",
             lod: 0,
-            internalFormat: "GL_RGBA16F",
+            internalFormat: "RGBA16F",
             pixelFormat: "RGBA",
             pixelDataType: "FLOAT",
             target: "TEXTURE_2D",
@@ -180,7 +180,7 @@
         {
             name: "translucent_shaded",
             lod: 0,
-            internalFormat: "GL_RGBA16F",
+            internalFormat: "RGBA16F",
             pixelFormat: "RGBA",
             pixelDataType: "FLOAT",
             target: "TEXTURE_2D",
