@@ -4,9 +4,9 @@
 #include frex:shaders/api/view.glsl
 #include frex:shaders/api/material.glsl
 #include lumi:shaders/lib/util.glsl
-#include lumi:shaders/lib/pbr_shading.glsl
 #include lumi:shaders/lib/fog.glsl
 #include lumi:shaders/lib/tonemap.glsl
+#include lumi:shaders/lib/pbr_shading.glsl
 
 /*******************************************************
  *  lumi:shaders/pipeline/post/shading.frag            *
