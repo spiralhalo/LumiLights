@@ -116,24 +116,31 @@ vec4 hdr_shaded_color(vec2 uv, sampler2D scolor, sampler2D sdepth, sampler2D sli
     vec4 a = texture2DLod(scolor, uv, 0.0);
     vec3 normal = texture2DLod(snormal, uv, 0.0).xyz;
     if (normal.x + normal.y + normal.z <= 0.01) return vec4(a.rgb, 0.0);
-    bool diffuse = normal.x + normal.y + normal.z < 2.5;
-    normal = diffuse ? (normal * 2.0 - 1.0) : vec3(.0, 1.0, .0);
-    float depth = texture2DLod(sdepth, uv, 0.0).r;
-    vec4 light = texture2DLod(slight, uv, 0.0);
-    vec3 material = texture2DLod(smaterial, uv, 0.0).xyz;
-    // return vec4(coords_view(uv, frx_inverseProjectionMatrix(), depth), 1.0);
-    vec3 viewPos = coords_view(uv, frx_inverseProjectionMatrix(), depth);
+
+    float depth     = texture2DLod(sdepth, uv, 0.0).r;
+    vec4  light     = texture2DLod(slight, uv, 0.0);
+    vec3  material  = texture2DLod(smaterial, uv, 0.0).xyz;
+    vec3  viewPos   = coords_view(uv, frx_inverseProjectionMatrix(), depth);
+    float f0        = material.z;
     float bloom_raw = light.z * 2.0 - 1.0;
+    bool  diffuse   = normal.x + normal.y + normal.z < 2.5;
+    bool  matflash  = f0 > 0.9;
+    bool  mathurt   = f0 > 0.7 && f0 < 0.9;
+    // return vec4(coords_view(uv, frx_inverseProjectionMatrix(), depth), 1.0);
+
     bloom_out = max(0.0, bloom_raw);
-    pbr_shading(a, bloom_out, viewPos, light.xy, normal, material.x, material.y, material.z, diffuse, translucent);
+    normal = diffuse ? (normal * 2.0 - 1.0) : vec3(.0, 1.0, .0);
+    pbr_shading(a, bloom_out, viewPos, light.xy, normal, material.x, material.y, f0 > 0.7 ? 0.0 : material.z, diffuse, translucent);
+
     float ao_shaded = 1.0 + min(0.0, bloom_raw);
     a.rgb *= ao_shaded * ao_shaded;
+    if (matflash) a.rgb += 1.0;
+    if (mathurt) a.r += 0.5;
     // float ao = ambient_occlusion(viewPos, normal, 1.0, v_kernel, frx_projectionMatrix(), frx_inverseProjectionMatrix(), sdepth);
     // float ao = min(1.0, bloom_out + ambient_occlusion(viewPos, normal, 0.25, frx_projectionMatrix(), frx_inverseProjectionMatrix(), sdepth, snormal));
     // a.rgb *= ao * ao * ao * ao;
-    // TODO: white / red flash
+    // TODO: white flash ???
     // if (frx_matFlash()) a = a * 0.25 + 0.75;
-    // else if (frx_matHurt()) a = vec4(0.25 + a.r * 0.75, a.g * 0.75, a.b * 0.75, a.a);
     // TODO: do fog in shading
     // PERF: don't bother shade past max fog distance
     return a;//p_fog(a);
