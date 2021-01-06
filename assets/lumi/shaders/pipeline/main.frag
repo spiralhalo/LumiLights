@@ -53,10 +53,12 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
         gl_FragData[0] = a;
     } else {
         vec3 normalizedNormal = (!fragData.diffuse) ? vec3(1.0, 1.0, 1.0) : (normalize(fragData.vertexNormal) * 0.5 + 0.5);
-        float bloom = fragData.emissivity;
+        float bloom = fragData.emissivity * a.a;
+		float ao = fragData.ao ? (1.0 - fragData.aoShade) * a.a : 0.0;
+		float normalizedBloom = (bloom - ao) * 0.5 + 0.5;
         gl_FragDepth = gl_FragCoord.z;
         gl_FragData[0] = a;
-        gl_FragData[1] = vec4(fragData.light.x, fragData.light.y, bloom * a.a, 1.0);
+        gl_FragData[1] = vec4(fragData.light.x, fragData.light.y, normalizedBloom, 1.0);
         gl_FragData[2] = vec4(normalizedNormal, 1.0);
         gl_FragData[3] = vec4(pbr_roughness, pbr_metallic, pbr_f0, 1.0);
     }

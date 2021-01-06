@@ -8,6 +8,9 @@
 #include lumi:shaders/lib/tonemap.glsl
 #include lumi:shaders/lib/pbr_shading.glsl
 
+// #define sampleKernelSize 16
+// #include lumi:shaders/lib/ao.glsl
+
 /*******************************************************
  *  lumi:shaders/pipeline/post/shading.frag            *
  *******************************************************
@@ -29,7 +32,7 @@ uniform sampler2D u_light_translucent;
 uniform sampler2D u_normal_translucent;
 uniform sampler2D u_material_translucent;
 
-#define NUM_LAYERS 2
+// varying vec3[sampleKernelSize] v_kernel;
 
 vec3 coords_view(vec2 uv, mat4 inv_projection, float depth)
 {
@@ -37,6 +40,76 @@ vec3 coords_view(vec2 uv, mat4 inv_projection, float depth)
 	vec4 view = inv_projection * vec4(clip, 1.0);
 	return view.xyz / view.w;
 }
+
+vec2 coords_uv(vec3 view, mat4 projection)
+{
+	vec4 clip = projection * vec4(view, 1.0);
+	clip.xyz /= clip.w;
+	return clip.xy * 0.5 + 0.5;
+}
+
+// float ambient_occlusion(vec3 origin, vec3 normal, float radius, mat4 projectionMat, mat4 invProjectionMat, sampler2D sdepth, sampler2D snormal)
+// {
+//     float occlusion = 0.0;
+//     const int size = 2;
+//     vec3 sample;
+//     vec3 sample_view;
+//     vec2 hit_uv;
+//     float hit_depth;
+//     vec3 hit_view;
+//     vec3 hit_normal;
+//     float rangeCheck;
+//     float normalCheck;
+//     for (int i = 0; i < size; i++) {
+//         for (int j = 0; j < size; j++) {
+//             for (int k = 0; k < size; k++) {
+//                 sample = normalize(vec3(i, j, k));
+//                 // sample = normalize(sample+normal);
+//                 sample_view = origin + sample * radius;
+//                 hit_uv = coords_uv(sample_view, projectionMat);
+//                 hit_depth = texture2DLod(sdepth, hit_uv, 0.0).r;
+//                 hit_view = coords_view(hit_uv, invProjectionMat, hit_depth);
+//                 hit_normal = texture2DLod(snormal, hit_uv, 0.0).xyz * 2.0 - 1.0;
+//                 rangeCheck = abs(origin.z - hit_view.z) < radius ? 1.0 : 0.0;
+//                 normalCheck = dot(hit_normal, normal) < 0.5 ? 1.0 : 0.0;
+//                 normalCheck *= dot(sample, normal) < 0.5 ? 1.0 : 0.0;
+//                 occlusion += (hit_view.z > sample_view.z ? 1.0 : 0.0) * rangeCheck * normalCheck;
+//             }
+//         }
+//     }
+//     return clamp(1.0 - occlusion/(size*size*size), 0.0, 1.0);
+// }
+
+// float ambient_occlusion(vec3 origin, vec3 normal, float radius, mat4 projectionMat, mat4 invProjectionMat, sampler2D sdepth)
+// {
+//     float occlusion = 0.0;
+//     const int size = 2;
+//     vec3 sample;
+//     vec3 sample_view;
+//     vec2 hit_uv;
+//     float hit_depth;
+//     vec3 hit_view;
+//     float rangeCheck;
+//     float normalCheck;
+//     float uvCheck;
+//     for (int i = 0; i < size; i++) {
+//         for (int j = 0; j < size; j++) {
+//             for (int k = 0; k < size; k++) {
+//                 sample = normalize(vec3(i, j, k));
+//                 sample = normalize(sample+normal);
+//                 sample_view = origin + sample * radius;
+//                 hit_uv = coords_uv(sample_view, projectionMat);
+//                 hit_depth = texture2DLod(sdepth, hit_uv, 0.0).r;
+//                 hit_view = coords_view(hit_uv, invProjectionMat, hit_depth);
+//                 rangeCheck = abs(origin.z - hit_view.z) < radius ? 1.0 : 0.0;
+//                 normalCheck = dot(sample, normal) > 0.5 ? 1.0 : 0.0;
+//                 uvCheck = (hit_uv.x > 1.0 || hit_uv.x < 0.0 || hit_uv.y > 1.0 || hit_uv.y < 0.0) ? 0.0 : 1.0;
+//                 occlusion += (hit_view.z > sample_view.z ? 1.0 : 0.0) * rangeCheck * normalCheck * uvCheck;
+//             }
+//         }
+//     }
+//     return clamp(1.0 - occlusion/(size*size*size), 0.0, 1.0);
+// }
 
 vec4 hdr_shaded_color(vec2 uv, sampler2D scolor, sampler2D sdepth, sampler2D slight, sampler2D snormal, sampler2D smaterial, bool translucent, out float bloom_out)
 {
@@ -50,8 +123,14 @@ vec4 hdr_shaded_color(vec2 uv, sampler2D scolor, sampler2D sdepth, sampler2D sli
     vec3 material = texture2DLod(smaterial, uv, 0.0).xyz;
     // return vec4(coords_view(uv, frx_inverseProjectionMatrix(), depth), 1.0);
     vec3 viewPos = coords_view(uv, frx_inverseProjectionMatrix(), depth);
-    bloom_out = light.z;
+    float bloom_raw = light.z * 2.0 - 1.0;
+    bloom_out = max(0.0, bloom_raw);
     pbr_shading(a, bloom_out, viewPos, light.xy, normal, material.x, material.y, material.z, diffuse, translucent);
+    float ao_shaded = 1.0 + min(0.0, bloom_raw);
+    a.rgb *= ao_shaded * ao_shaded;
+    // float ao = ambient_occlusion(viewPos, normal, 1.0, v_kernel, frx_projectionMatrix(), frx_inverseProjectionMatrix(), sdepth);
+    // float ao = min(1.0, bloom_out + ambient_occlusion(viewPos, normal, 0.25, frx_projectionMatrix(), frx_inverseProjectionMatrix(), sdepth, snormal));
+    // a.rgb *= ao * ao * ao * ao;
     // TODO: white / red flash
     // if (frx_matFlash()) a = a * 0.25 + 0.75;
     // else if (frx_matHurt()) a = vec4(0.25 + a.r * 0.75, a.g * 0.75, a.b * 0.75, a.a);
