@@ -118,12 +118,19 @@
                 samplerImages: [
                     "solid_shaded", "solid_main", "solid_depth", "light_solid", "normal_solid", "material_solid",
                     "translucent_shaded", "translucent_main", "translucent_depth", "light_translucent", "normal_translucent", "material_translucent"]
-            },*/ {
+            },*/{
+                name: "refraction",
+                program: "refraction",
+                framebuffer: "refraction",
+                samplerImages: [
+                    "solid_shaded", "solid_depth", "normal_solid",
+                    "translucent_depth", "light_translucent", "normal_translucent"]
+            }, {
                 name: "composite",
                 program: "composite",
                 framebuffer: "composite",
                 samplerImages: [
-                    "solid_shaded", "solid_depth",
+                    "solid_shaded_swap", "solid_depth",
                     "translucent_shaded", "translucent_depth"]
             }
         ]

@@ -47,6 +47,9 @@
             //TODO: lol
             colorAttachments: [{image: "solid_main"}]
         }, {
+            name: "refraction",
+            colorAttachments: [{image: "solid_shaded_swap"}]
+        }, {
             name: "composite",
             colorAttachments: [{image: "solid_main"}]
         },
