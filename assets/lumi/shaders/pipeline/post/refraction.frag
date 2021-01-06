@@ -87,6 +87,13 @@ void main()
         rt_Result result = rt_refraction(v_texcoord, 0.25, 256.0, 2.0, 20, frx_projectionMatrix(), frx_inverseProjectionMatrix());
         if (result.refracted_uv.x < 0.0 || result.refracted_uv.y < 0.0 || result.refracted_uv.x > 1.0 || result.refracted_uv.y > 1.0) {
             gl_FragData[0] = texture2D(u_solid_color, v_texcoord);
+        } else if (!result.hit) {
+            vec4 refracted = texture2D(u_solid_color, result.refracted_uv);
+            if (refracted.a == 0.0) {
+                gl_FragData[0] = refracted;
+            } else {
+                gl_FragData[0] = texture2D(u_solid_color, v_texcoord);
+            }
         } else {
             gl_FragData[0] = texture2D(u_solid_color, result.refracted_uv);
         }
