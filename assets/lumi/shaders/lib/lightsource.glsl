@@ -100,11 +100,11 @@ vec3 l2_blockRadiance(float blockLight)
  *******************************************************/
 
 #if HANDHELD_LIGHT_RADIUS != 0
-    vec3 l2_handHeldRadiance()
+    vec3 l2_handHeldRadiance(vec3 viewPos)
     {
         #if LUMI_LightingMode == LUMI_LightingMode_Dramatic
             vec4 held = frx_heldLight();
-            float dist = (1.001 - l2_clampScale(held.w * HANDHELD_LIGHT_RADIUS, 0.0, gl_FogFragCoord)) * 15;
+            float dist = (1.001 - l2_clampScale(held.w * HANDHELD_LIGHT_RADIUS, 0.0, viewPos.z)) * 15;
             float hl = hdr_dramaticMagicNumber / (dist * dist);
             if (hl <= 0.01 * hdr_dramaticMagicNumber) {
                 hl *= l2_clampScale(0.0045 * hdr_dramaticMagicNumber, 0.01 * hdr_dramaticMagicNumber, hl);
@@ -114,7 +114,7 @@ vec3 l2_blockRadiance(float blockLight)
             return hl * hdr_gammaAdjust(heldColor) * hdr_handHeldStr;
         #else
             vec4 held = frx_heldLight();
-            float hl = l2_clampScale(held.w * HANDHELD_LIGHT_RADIUS, 0.0, gl_FogFragCoord);
+            float hl = l2_clampScale(held.w * HANDHELD_LIGHT_RADIUS, 0.0, viewPos.z);
             hl *= hl * hdr_handHeldStr;
             return hdr_gammaAdjust(held.rgb * hl);
         #endif

@@ -49,9 +49,9 @@ vec4 hdr_shaded_color(vec2 uv, sampler2D scolor, sampler2D sdepth, sampler2D sli
     vec4 light = texture2DLod(slight, uv, 0.0);
     vec3 material = texture2DLod(smaterial, uv, 0.0).xyz;
     // return vec4(coords_view(uv, frx_inverseProjectionMatrix(), depth), 1.0);
-    vec3 viewDir = normalize(-coords_view(uv, frx_inverseProjectionMatrix(), depth)) * frx_normalModelMatrix();
+    vec3 viewPos = coords_view(uv, frx_inverseProjectionMatrix(), depth);
     bloom_out = light.z;
-    pbr_shading(a, bloom_out, viewDir, light.xy, normal, material.x, material.y, material.z, diffuse, translucent);
+    pbr_shading(a, bloom_out, viewPos, light.xy, normal, material.x, material.y, material.z, diffuse, translucent);
     // TODO: white / red flash
     // if (frx_matFlash()) a = a * 0.25 + 0.75;
     // else if (frx_matHurt()) a = vec4(0.25 + a.r * 0.75, a.g * 0.75, a.b * 0.75, a.a);
