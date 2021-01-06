@@ -124,8 +124,8 @@ vec4 hdr_shaded_color(vec2 uv, sampler2D scolor, sampler2D sdepth, sampler2D sli
     float f0        = material.z;
     float bloom_raw = light.z * 2.0 - 1.0;
     bool  diffuse   = normal.x + normal.y + normal.z < 2.5;
-    bool  matflash  = f0 > 0.9;
-    bool  mathurt   = f0 > 0.7 && f0 < 0.9;
+    bool  matflash  = f0 > 0.95;
+    bool  mathurt   = f0 > 0.85 && !matflash;
     // return vec4(coords_view(uv, frx_inverseProjectionMatrix(), depth), 1.0);
 
     bloom_out = max(0.0, bloom_raw);
