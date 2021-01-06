@@ -21,8 +21,12 @@ void main() {
     
     vec4 translucent = ldr_tonemap(texture2D(u_hdr_translucent, v_texcoord));
     float depth_translucent = texture2D(u_translucent_depth, v_texcoord).r;
-
-    gl_FragData[0] = translucent + solid * max(0.0, 1.0 - translucent.a);
+ 
+    if (depth_solid < depth_translucent) {
+        gl_FragData[0] = solid;
+    } else {
+        gl_FragData[0] = translucent + solid * max(0.0, 1.0 - translucent.a);
+    }
 }
 
 
