@@ -1,6 +1,7 @@
 #include lumi:shaders/pipeline/post/common.glsl
 #include lumi:shaders/internal/context.glsl
 #include frex:shaders/lib/math.glsl
+#include frex:shaders/lib/noise/noise2d.glsl
 #include frex:shaders/api/view.glsl
 #include frex:shaders/api/material.glsl
 #include lumi:shaders/lib/util.glsl
@@ -111,6 +112,34 @@ vec2 coords_uv(vec3 view, mat4 projection)
 //     return clamp(1.0 - occlusion/(size*size*size), 0.0, 1.0);
 // }
 
+#define WATER_LEVEL 62.0
+#define FOG_NOISE_SCALE 0.125
+#define FOG_NOISE_SPEED 0.25
+#define FOG_NOISE_HEIGHT 4.0
+#define FOG_TOP WATER_LEVEL + 32.0
+#define FOG_BOTTOM WATER_LEVEL - 32.0
+#define FOG_FAR 256.0
+#define FOG_NEAR 64.0
+#define FOG_DENSITY 0.5
+
+vec4 fog (vec4 a, vec3 viewPos)
+{
+    vec3 worldPos = frx_cameraPos() + (frx_inversViewMatrix() * vec4(viewPos, 1.0)).xyz;
+    float zigZagTime = abs(frx_worldTime()-0.5);
+    float timeFactor = l2_clampScale(0.45, 0.5, zigZagTime) + l2_clampScale(0.05, 0.0, zigZagTime);
+
+    // TODO: retrieve fog distance from render distance ?
+    // TODO: use projection z (linear depth) instead of viewPos.z ?
+    float distFactor = l2_clampScale(FOG_NEAR, FOG_FAR, -viewPos.z);
+    distFactor *= distFactor;
+    
+    // float fog_noise = snoise(worldPos.xz * FOG_NOISE_SCALE + frx_renderSeconds() * FOG_NOISE_SPEED) * FOG_NOISE_HEIGHT;
+    float heightFactor = l2_clampScale(FOG_TOP /*+ fog_noise*/, FOG_BOTTOM, worldPos.y);
+
+    float fogFactor = FOG_DENSITY * distFactor * heightFactor * timeFactor;
+    return vec4(mix(a.rgb, frx_vanillaClearColor(), fogFactor), 1.0);
+}
+
 vec4 hdr_shaded_color(vec2 uv, sampler2D scolor, sampler2D sdepth, sampler2D slight, sampler2D snormal, sampler2D smaterial, bool translucent, out float bloom_out)
 {
     vec4 a = texture2DLod(scolor, uv, 0.0);
@@ -136,14 +165,12 @@ vec4 hdr_shaded_color(vec2 uv, sampler2D scolor, sampler2D sdepth, sampler2D sli
     a.rgb *= ao_shaded * ao_shaded;
     if (matflash) a.rgb += 1.0;
     if (mathurt) a.r += 0.5;
+
     // float ao = ambient_occlusion(viewPos, normal, 1.0, v_kernel, frx_projectionMatrix(), frx_inverseProjectionMatrix(), sdepth);
     // float ao = min(1.0, bloom_out + ambient_occlusion(viewPos, normal, 0.25, frx_projectionMatrix(), frx_inverseProjectionMatrix(), sdepth, snormal));
     // a.rgb *= ao * ao * ao * ao;
-    // TODO: white flash ???
-    // if (frx_matFlash()) a = a * 0.25 + 0.75;
-    // TODO: do fog in shading
     // PERF: don't bother shade past max fog distance
-    return a;//p_fog(a);
+    return fog(a, viewPos);
 }
 
 void main()

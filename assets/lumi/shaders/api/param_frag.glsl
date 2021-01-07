@@ -1,3 +1,6 @@
+#include lumi:shaders/internal/context.glsl
+// load the contexts as soon as the params are requested
+
 /*******************************************************
  *  lumi:shaders/api/param_frag.glsl                     *
  *******************************************************/
