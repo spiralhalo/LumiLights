@@ -137,7 +137,7 @@ vec4 fog (vec4 a, vec3 viewPos)
     float heightFactor = l2_clampScale(FOG_TOP /*+ fog_noise*/, FOG_BOTTOM, worldPos.y);
 
     float fogFactor = FOG_DENSITY * distFactor * heightFactor * timeFactor;
-    return vec4(mix(a.rgb, frx_vanillaClearColor(), fogFactor), 1.0);
+    return vec4(mix(a.rgb, frx_vanillaClearColor(), fogFactor), a.a);
 }
 
 vec4 hdr_shaded_color(vec2 uv, sampler2D scolor, sampler2D sdepth, sampler2D slight, sampler2D snormal, sampler2D smaterial, bool translucent, out float bloom_out)
