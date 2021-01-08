@@ -8,6 +8,10 @@
 #include lumi:shaders/api/param_frag.glsl
 #include lumi:shaders/lib/water.glsl
 
+const float waveSpeed = 1;
+const float scale = 1.5;
+const float amplitude = 0.01;
+const float stretch = 2;
 void frx_startFragment(inout frx_FragmentData fragData) {
 	#ifdef LUMI_PBRX
 		/* PBR PARAMS */
@@ -24,26 +28,16 @@ void frx_startFragment(inout frx_FragmentData fragData) {
 	
 	/* WATER RECOLOR */
 	vec3 desat = vec3(frx_luminance(fragData.vertexColor.rgb));
-	fragData.vertexColor.rgb = mix(fragData.vertexColor.rgb, desat, 0.7);
-
-	float maxc = max(fragData.spriteColor.r, max(fragData.spriteColor.g, fragData.spriteColor.b)); 
-	fragData.spriteColor.rgb *= fragData.spriteColor.rgb * fragData.spriteColor.rgb * 2.0;
-
-	float l = frx_luminance(fragData.spriteColor.rgb);
+	fragData.vertexColor.rgb = mix(fragData.vertexColor.rgb, desat, 0.6);
+	fragData.spriteColor.rgb *= fragData.spriteColor.rgb * fragData.spriteColor.rgb * 1.6;
 	#ifdef LUMI_PBRX
-		pbr_f0 = mix(pbr_f0, 0.2, l * l);
+		pbr_f0 = mix(pbr_f0, 0.2, desat.x * desat.x);
 	#endif
 	
 	/* WAVY NORMALS */
-	float waveSpeed = 1;
-	float scale = 1.5;
-	float amplitude = 0.01;
-	float stretch = 2;
 	// wave movement doesn't necessarily follow flow direction for the time being
-	vec3 moveSpeed = vec3(0.5, 1.5, -0.5);
-	// const float texAmplitude = 0.005;
-	vec3 up = fragData.vertexNormal.xyz;// * (1.0 + texAmplitude);
+	vec3 moveSpeed = frx_var1.xyz;
+	vec3 up = fragData.vertexNormal.xyz;
 	vec3 samplePos = frx_var0.xyz;
-	// samplePos = floor(samplePos) + floor(fract(samplePos) * 16) / 16;
 	fragData.vertexNormal = ww_normals(up, l2_tangent, cross(up, l2_tangent), samplePos, waveSpeed, scale, amplitude, stretch, moveSpeed);
 }
