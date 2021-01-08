@@ -103,26 +103,22 @@ void pbr_shading(inout vec4 a, inout float bloom, vec3 viewPos, vec2 light, vec3
     a.rgb += pbr_lightCalc(albedo, pbr_roughness, pbr_metallic, f0, blockRadiance, ambientDir, viewDir, normal, isDiffuse, true, 0.0, specularAccu);
     a.rgb += pbr_lightCalc(albedo, pbr_roughness, pbr_metallic, f0, baseAmbientRadiance, ambientDir, viewDir, normal, isDiffuse, true, 0.0, specularAccu);
 
-    if (frx_worldHasSkylight()) {
-        if (light.y > 0.03125) {
+    if (frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) && light.y > 0.03125) {
+        if (!frx_worldFlag(FRX_WORLD_IS_MOONLIT)) {
             vec3 sunRadiance = l2_sunRadiance(light.y, frx_worldTime(), frx_ambientIntensity(), frx_rainGradient());
-            vec3 sunDir = l2_vanillaSunDir(frx_worldTime(), 0.0);
-            vec3 skyRadiance = l2_skyAmbient(light.y, frx_worldTime(), frx_ambientIntensity());
-
-            vec3 sunIrradiance = pbr_lightCalc(albedo, pbr_roughness, pbr_metallic, f0, sunRadiance, sunDir, viewDir, normal, isDiffuse, false, 0.15, specularAccu);
-            #if LUMI_LightingMode == LUMI_LightingMode_Dramatic
-            dramaticBloom = frx_luminance(sunIrradiance);
-            #endif
-
+            vec3 sunIrradiance = pbr_lightCalc(albedo, pbr_roughness, pbr_metallic, f0, sunRadiance, frx_skyLightVector(), viewDir, normal, isDiffuse, false, 0.15, specularAccu);
             a.rgb += sunIrradiance;
-            a.rgb += pbr_lightCalc(albedo, pbr_roughness, pbr_metallic, f0, skyRadiance, ambientDir, viewDir, normal, isDiffuse, true, 0.0, specularAccu);
-
+            #if LUMI_LightingMode == LUMI_LightingMode_Dramatic
+                dramaticBloom = frx_luminance(sunIrradiance);
+            #endif
+        } else {
             #ifndef LUMI_TrueDarkness_DisableMoonlight
-            vec3 moonRadiance = l2_moonRadiance(light.y, frx_worldTime(), frx_ambientIntensity());
-            vec3 moonDir = l2_moonDir(frx_worldTime());
-            a.rgb += pbr_lightCalc(albedo, pbr_roughness, pbr_metallic, f0, moonRadiance, moonDir, viewDir, normal, isDiffuse, false, 0.15, specularAccu);
+                vec3 moonRadiance = l2_moonRadiance(light.y, frx_worldTime(), frx_ambientIntensity());
+                a.rgb += pbr_lightCalc(albedo, pbr_roughness, pbr_metallic, f0, moonRadiance, frx_skyLightVector(), viewDir, normal, isDiffuse, false, 0.15, specularAccu);
             #endif
         }
+        vec3 skyRadiance = l2_skyAmbient(light.y, frx_worldTime(), frx_ambientIntensity());
+        a.rgb += pbr_lightCalc(albedo, pbr_roughness, pbr_metallic, f0, skyRadiance, ambientDir, viewDir, normal, isDiffuse, true, 0.0, specularAccu);
     } else {
         vec3 skylessRadiance = l2_skylessRadiance();
         vec3 skylessDir = l2_skylessDir();
@@ -135,7 +131,6 @@ void pbr_shading(inout vec4 a, inout float bloom, vec3 viewPos, vec2 light, vec3
             }
         }
     }
-    // float skyAccess = smoothstep(0.89, 1.0, light.y);
     float specularLuminance = frx_luminance(specularAccu);
     float smoothness = (1-pbr_roughness);
     bloom += specularLuminance * pbr_specularBloomStr * smoothness * smoothness;
