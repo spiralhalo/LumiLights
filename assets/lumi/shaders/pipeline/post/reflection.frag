@@ -61,13 +61,11 @@ float skylight_adjust(float skyLight, float intensity)
 struct rt_Result
 {
     vec2 reflected_uv;
-    // float fresnel;
     bool hit;
-    vec3 unit_view;
-    vec3 unit_march;
 };
 
 rt_Result rt_reflection(
+    vec3 ray_view, vec3 unit_view, vec3 normal, vec3 unit_march,
     vec2 start_uv, float init_ray_length, float max_ray_length, float length_multiplier, int max_steps,
     mat3 normal_matrix, mat4 projection, mat4 inv_projection,
     in sampler2D reflector_depth, in sampler2D reflector_normal, in sampler2D reflected_depth, in sampler2D reflected_normal
@@ -83,7 +81,8 @@ vec3 work_on_pair(
 
     in sampler2D reflected_color,
     in sampler2D reflected_depth,
-    in sampler2D reflected_normal
+    in sampler2D reflected_normal,
+    float fallback
 );
 
 bool diffuseCheck(vec3 normal)
@@ -97,10 +96,10 @@ void main()
     vec3 solid_albedo = texture2D(u_solid_albedo, v_texcoord).rgb;
     vec4 translucent_base = texture2D(u_translucent_color, v_texcoord);
     vec3 translucent_albedo = texture2D(u_translucent_albedo, v_texcoord).rgb;
-    vec3 solid_solid       = work_on_pair(solid_base, solid_albedo, u_solid_depth, u_light_solid, u_normal_solid, u_material_solid, u_solid_color, u_solid_depth, u_normal_solid);
-    vec3 solid_translucent = work_on_pair(solid_base, solid_albedo, u_solid_depth, u_light_solid, u_normal_solid, u_material_solid, u_translucent_color, u_translucent_depth, u_normal_translucent);
-    vec3 translucent_solid       = work_on_pair(translucent_base, translucent_albedo, u_translucent_depth, u_light_translucent, u_normal_translucent, u_material_translucent, u_solid_color, u_solid_depth, u_normal_solid);
-    vec3 translucent_translucent = work_on_pair(translucent_base, translucent_albedo, u_translucent_depth, u_light_translucent, u_normal_translucent, u_material_translucent, u_translucent_color, u_translucent_depth, u_normal_translucent);
+    vec3 solid_solid       = work_on_pair(solid_base, solid_albedo, u_solid_depth, u_light_solid, u_normal_solid, u_material_solid, u_solid_color, u_solid_depth, u_normal_solid, 1.0);
+    vec3 solid_translucent = work_on_pair(solid_base, solid_albedo, u_solid_depth, u_light_solid, u_normal_solid, u_material_solid, u_translucent_color, u_translucent_depth, u_normal_translucent, 0.0);
+    vec3 translucent_solid       = work_on_pair(translucent_base, translucent_albedo, u_translucent_depth, u_light_translucent, u_normal_translucent, u_material_translucent, u_solid_color, u_solid_depth, u_normal_solid, 1.0);
+    vec3 translucent_translucent = work_on_pair(translucent_base, translucent_albedo, u_translucent_depth, u_light_translucent, u_normal_translucent, u_material_translucent, u_translucent_color, u_translucent_depth, u_normal_translucent, 0.0);
     gl_FragData[0] = vec4(solid_base.rgb + solid_solid + solid_translucent, solid_base.a);
     gl_FragData[1] = vec4(translucent_base.rgb + translucent_solid + translucent_translucent, translucent_base.a);
 }
@@ -115,46 +114,49 @@ vec3 work_on_pair(
 
     in sampler2D reflected_color,
     in sampler2D reflected_depth,
-    in sampler2D reflected_normal
+    in sampler2D reflected_normal,
+    float fallback
 )
 {
+    vec3 noreturn = vec3(0.0);
     vec3 dummy    = vec3(0.0);
     vec4 material = texture2DLod(reflector_material, v_texcoord, 0);
-    vec3 normal   = coords_normal(v_texcoord, reflector_normal);
+    vec3 worldNormal = coords_normal(v_texcoord, reflector_normal);
     float gloss   = 1.0 - material.x;
-    if (gloss > 0.01 && material.a > 0.0 && diffuseCheck(normal)) {
+    if (gloss > 0.01 && material.a > 0.0 && diffuseCheck(worldNormal)) {
+        vec3 ray_view = coords_view(v_texcoord, frx_inverseProjectionMatrix(), reflector_depth);
+        vec3 normal = frx_normalModelMatrix() * normalize(worldNormal);
+        // if (ray_view.y < normal.y) return noreturn;
+        vec3 unit_view = normalize(-ray_view);
+        vec3 unit_march = reflect(-unit_view, normal);
         float sky_light = texture2DLod(reflector_light, v_texcoord, 0).y;
         vec3 reg_f0     = vec3(material.y < 0.7 ? material.y : 0.0);
         vec3 f0         = mix(reg_f0, albedo, material.y);
-        rt_Result result = rt_reflection(v_texcoord, 0.25, 128.0, 1.2, 20, frx_normalModelMatrix(), frx_projectionMatrix(), frx_inverseProjectionMatrix(), reflector_depth, reflector_normal, reflected_depth, reflected_normal);
+        rt_Result result = rt_reflection(ray_view, unit_view, normal, unit_march, v_texcoord, 0.25, 128.0, 2.0, 20, frx_normalModelMatrix(), frx_projectionMatrix(), frx_inverseProjectionMatrix(), reflector_depth, reflector_normal, reflected_depth, reflected_normal);
         vec3 reflected;
         if (!result.hit || result.reflected_uv.x < 0.0 || result.reflected_uv.y < 0.0 || result.reflected_uv.x > 1.0 || result.reflected_uv.y > 1.0) {
             if (frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT)) {
-                reflected = v_skycolor * smoothstep(-0.05, 0.0, dot(result.unit_march, v_up)) * skylight_adjust(sky_light, frx_ambientIntensity());
+                reflected = v_skycolor * smoothstep(-0.05, 0.0, dot(unit_march, v_up)) * skylight_adjust(sky_light, frx_ambientIntensity());
             } else {
                 reflected = v_skycolor;
             }
+            reflected *= fallback;
         } else {
             reflected = texture2D(reflected_color, result.reflected_uv).rgb;
         }
         // mysterious roughness hax
-        return pbr_lightCalc(albedo, 0.4 + material.x * 0.6, material.y, f0, reflected.rgb * base_color.a, result.unit_march * frx_normalModelMatrix(), result.unit_view * frx_normalModelMatrix(), normal, true, false, 0.0, dummy);
-    } else return vec3(0.0);
+        return pbr_lightCalc(albedo, 0.4 + material.x * 0.6, material.y, f0, reflected.rgb * base_color.a, unit_march * frx_normalModelMatrix(), unit_view * frx_normalModelMatrix(), worldNormal, true, false, 0.0, dummy);
+    } else return noreturn;
 }
 
 rt_Result rt_reflection(
+    vec3 ray_view, vec3 unit_view, vec3 normal, vec3 unit_march,
     vec2 start_uv, float init_ray_length, float max_ray_length, float length_multiplier, int max_steps,
     mat3 normal_matrix, mat4 projection, mat4 inv_projection,
     in sampler2D reflector_depth, in sampler2D reflector_normal, in sampler2D reflected_depth, in sampler2D reflected_normal
 )
 {
     // float length_divisor = 1.0 / length_multiplier;
-    vec3 ray_view = coords_view(start_uv, inv_projection, reflector_depth);
-    vec3 unit_view = normalize(-ray_view);
-    vec3 normal = normal_matrix * normalize(coords_normal(start_uv, reflector_normal));
-    vec3 unit_march = reflect(-unit_view, normal);
-    vec3 halfway = normalize(unit_view + unit_march);
-    // float fresnel = pow(1.0 - clamp(dot(unit_view, halfway), 0.0, 1.0), 5.0);
 
     vec3 ray = unit_march * init_ray_length;
     float current_ray_length = init_ray_length;
@@ -176,7 +178,7 @@ rt_Result rt_reflection(
         // TODO: handle diffuse (normal = 1.0, 1.0, 1.0) PROPERLY
         reflectedNormal = coords_normal(current_uv, reflected_normal);
         backface = dot(unit_march, normal_matrix * normalize(reflectedNormal)) > 0;
-        if (delta_z > 0 && delta_z < hitbox_z && (!backface || diffuseCheck(reflectedNormal))) {
+        if (delta_z > 0 && delta_z < hitbox_z && (!backface || !diffuseCheck(reflectedNormal))) {
             //refine
             while (current_ray_length > init_ray_length && refine_steps < max_steps) {
                 ray = abs(delta_z) * unit_march;
@@ -188,7 +190,7 @@ rt_Result rt_reflection(
                 delta_z = current_view.z - ray_view.z;
                 refine_steps ++;
             }
-            return rt_Result(current_uv, /*fresnel,*/ true, unit_view, unit_march);
+            return rt_Result(current_uv, /*fresnel,*/ true);
         }
         // if (steps > constantSteps) {
         ray *= length_multiplier;
@@ -198,5 +200,5 @@ rt_Result rt_reflection(
     }
     // Sky reflection
     // if (sky(current_uv) && ray_view.z < 0) return current_uv;
-    return rt_Result(current_uv, /*fresnel,*/ false, unit_view, unit_march);
+    return rt_Result(current_uv, /*fresnel,*/ false);
 }

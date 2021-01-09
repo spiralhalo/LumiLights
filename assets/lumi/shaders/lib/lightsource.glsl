@@ -244,15 +244,15 @@ vec3 l2_baseAmbient(){
 /*  SUN LIGHT
  *******************************************************/
 
-vec3 l2_sunColor(float time)
+vec3 ldr_sunColor(float time)
 {
     vec3 sunColor;
-    if(time > 0.94) sunColor = mix(hdr_gammaAdjust(preSunriseColor), vec3(0), l2_clampScale(0.96, 0.94, time));
-    else if(time > 0.5) sunColor = mix(hdr_gammaAdjust(preSunsetColor), vec3(0), l2_clampScale(0.54, 0.56, time));
-    else if(time > 0.48) sunColor = mix(hdr_gammaAdjust(preSunColor), hdr_gammaAdjust(preSunsetColor), l2_clampScale(0.48, 0.5, time));
-    else if(time < 0.02) sunColor = mix(hdr_gammaAdjust(preSunColor), hdr_gammaAdjust(preSunriseColor), l2_clampScale(0.02, 0, time));
-    else sunColor = hdr_gammaAdjust(preSunColor);
-    return sunColor * hdr_sunStr;
+    if(time > 0.94) sunColor = mix(preSunriseColor, vec3(0), l2_clampScale(0.96, 0.94, time));
+    else if(time > 0.5) sunColor = mix(preSunsetColor, vec3(0), l2_clampScale(0.54, 0.56, time));
+    else if(time > 0.48) sunColor = mix(preSunColor, preSunsetColor, l2_clampScale(0.48, 0.5, time));
+    else if(time < 0.02) sunColor = mix(preSunColor, preSunriseColor, l2_clampScale(0.02, 0, time));
+    else sunColor = preSunColor;
+    return sunColor;
 }
 
 float l2_sunHorizonScale(float time)
@@ -289,9 +289,9 @@ vec3 l2_sunRadiance(float skyLight, in float time, float intensity, float rainGr
         sl = frx_smootherstep(0.5, 0.97, sl);
     #endif
     #if LUMI_LightingMode == LUMI_LightingMode_SystemUnused
-        return sl * l2_sunColor(time) * (0.5 - 0.5 * dot(frx_cameraView(), vec3(0.0, 1.0, 0.0)));
+        return sl * hdr_sunStr * hdr_gammaAdjust(ldr_sunColor(time)) * (0.5 - 0.5 * dot(frx_cameraView(), vec3(0.0, 1.0, 0.0)));
     #else
-        return sl * l2_sunColor(time);
+        return sl * hdr_sunStr * hdr_gammaAdjust(ldr_sunColor(time));
     #endif
 }
 

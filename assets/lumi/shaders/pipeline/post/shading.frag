@@ -8,6 +8,7 @@
 #include lumi:shaders/lib/fog.glsl
 #include lumi:shaders/lib/tonemap.glsl
 #include lumi:shaders/lib/pbr_shading.glsl
+#include lumi:shaders/internal/skybloom.glsl
 
 // #define sampleKernelSize 16
 // #include lumi:shaders/lib/ao.glsl
@@ -143,10 +144,14 @@ vec4 fog (vec4 a, vec3 viewPos)
 vec4 hdr_shaded_color(vec2 uv, sampler2D scolor, sampler2D sdepth, sampler2D slight, sampler2D snormal, sampler2D smaterial, bool translucent, out float bloom_out)
 {
     vec4 a = texture2DLod(scolor, uv, 0.0);
-    vec3 normal = texture2DLod(snormal, uv, 0.0).xyz;
-    if (normal.x + normal.y + normal.z <= 0.01) return vec4(a.rgb, 0.0);
+    float depth = texture2DLod(sdepth, uv, 0.0).r;
+    if (depth == 1.0) {
+        // the sky
+        bloom_out = l2_skyBloom();
+        return vec4(a.rgb, 0.0);
+    }
 
-    float depth     = texture2DLod(sdepth, uv, 0.0).r;
+    vec3 normal = texture2DLod(snormal, uv, 0.0).xyz;
     vec4  light     = texture2DLod(slight, uv, 0.0);
     vec3  material  = texture2DLod(smaterial, uv, 0.0).xyz;
     vec3  viewPos   = coords_view(uv, frx_inverseProjectionMatrix(), depth);
