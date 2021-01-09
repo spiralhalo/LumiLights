@@ -87,10 +87,10 @@ void main()
     }
     vec2 diff = abs(v_texcoord - v_skylightpos);
     diff.x *= v_aspect_adjuster;
-    float godlightfactor = frx_smootherstep(0.35, 0.0, length(diff)) * v_godray_intensity;
+    float godlightfactor = frx_smootherstep(0.6, 0.0, length(diff)) * v_godray_intensity;
     float godhack = depth_solid == 1.0 ? 0.5 : 1.0;
     if (godlightfactor > 0.0) {
-        vec3 godlight = godrays(1.0, 0.8, 0.99, 0.02, 50, u_solid_depth, u_clouds_depth, v_skylightpos, v_texcoord);
+        vec3 godlight = godrays(1.0, 0.8, 0.99, 0.013, 50, u_solid_depth, u_clouds_depth, v_skylightpos, v_texcoord);
         c.rgb += godlightfactor * godlight * godhack;
     }
     c.a = 1.0; // frx_luminance(c.rgb); // FXAA 3 would need this
