@@ -115,14 +115,14 @@
                 samplerImages: [
                     "solid_main", "solid_depth", "light_solid", "normal_solid", "material_solid",
                     "translucent_main", "translucent_depth", "light_translucent", "normal_translucent", "material_translucent"]
-            },/* {
+            }, {
                 name: "reflection",
                 program: "reflection",
                 framebuffer: "reflection",
                 samplerImages: [
                     "solid_shaded", "solid_main", "solid_depth", "light_solid", "normal_solid", "material_solid",
                     "translucent_shaded", "translucent_main", "translucent_depth", "light_translucent", "normal_translucent", "material_translucent"]
-            }, {
+            }, /*{
                 name: "refraction",
                 program: "refraction",
                 framebuffer: "refraction",
@@ -134,8 +134,8 @@
                 program: "composite",
                 framebuffer: "composite",
                 samplerImages: [
-                    "solid_shaded", "solid_depth",
-                    "translucent_shaded", "translucent_depth",
+                    "solid_shaded_swap", "solid_depth",
+                    "translucent_shaded_swap", "translucent_depth",
                     "clouds", "clouds_depth"]
             }
         ]
