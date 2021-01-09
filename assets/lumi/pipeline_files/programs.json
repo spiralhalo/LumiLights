@@ -101,14 +101,9 @@
             fragmentSource: "lumi:shaders/pipeline/post/composite.frag",
             samplers: [
                 "u_hdr_solid", "u_solid_depth",
-                "u_hdr_translucent", "u_translucent_depth"
+                "u_hdr_translucent", "u_translucent_depth",
+                "u_clouds", "u_clouds_depth",
             ]
-        }, {
-            name: "fxaa",
-            // implements fxaa
-            vertexSource: "lumi:shaders/pipeline/post/simple.vert",
-            fragmentSource: "lumi:shaders/pipeline/post/fxaa.frag",
-            samplers: ["u_color"]
         }
     ]
 }

@@ -11,6 +11,10 @@
             name: "fab_translucent",
             depthAttachment: {image: "translucent_depth"},
             colorAttachments: [{image: "translucent_main"}]
+        }, {
+            name: "fab_clouds",
+            depthAttachment: {image: "clouds_depth"},
+            colorAttachments: [{image: "clouds"}]
         },
         
         {
@@ -31,6 +35,10 @@
                 {image: "normal_translucent"},
                 {image: "material_translucent"}
             ]
+        }, {
+            name: "clouds",
+            depthAttachment: {image: "clouds_depth", clearDepth: 1.0},
+            colorAttachments: [{image: "clouds", clearColor: 0x00000000}]
         },
 
 

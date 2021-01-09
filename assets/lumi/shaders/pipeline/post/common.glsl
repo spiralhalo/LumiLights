@@ -10,4 +10,3 @@ uniform int frxu_lod;
 varying vec2 v_texcoord;
 varying vec3 v_skycolor;
 varying vec3 v_up;
-// varying mat4 v_inv_projection;

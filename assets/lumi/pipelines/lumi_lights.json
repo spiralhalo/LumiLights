@@ -34,7 +34,7 @@
         translucentTerrain: "translucent",
         translucentEntity: "solid",
         weather: "solid",
-        clouds: "solid",
+        clouds: "clouds",
         // TODO: segregate solid particles
         translucentParticles: "solid"
     },
@@ -69,7 +69,7 @@
         entity: "default",
         particles: "default",
         weather: "default",
-        clouds: "default",
+        clouds: "fab_clouds",
         translucent: "fab_translucent"
     },
 
@@ -97,6 +97,10 @@
                 name: "clear_translucent",
                 framebuffer: "translucent",
                 program: "frex_clear"
+            }, {
+                name: "clear_clouds",
+                framebuffer: "clouds",
+                program: "frex_clear"
             }
         ]
     },
@@ -118,27 +122,34 @@
                 samplerImages: [
                     "solid_shaded", "solid_main", "solid_depth", "light_solid", "normal_solid", "material_solid",
                     "translucent_shaded", "translucent_main", "translucent_depth", "light_translucent", "normal_translucent", "material_translucent"]
-            },*/{
+            }, {
                 name: "refraction",
                 program: "refraction",
                 framebuffer: "refraction",
                 samplerImages: [
                     "solid_shaded", "solid_depth", "normal_solid",
                     "translucent_depth", "light_translucent", "normal_translucent"]
-            }, {
+            },*/ {
                 name: "composite",
                 program: "composite",
                 framebuffer: "composite",
                 samplerImages: [
-                    "solid_shaded_swap", "solid_depth",
-                    "translucent_shaded", "translucent_depth"]
+                    "solid_shaded", "solid_depth",
+                    "translucent_shaded", "translucent_depth",
+                    "clouds", "clouds_depth"]
             }
         ]
     },
 
     afterRenderHand: {
         passes: [
-            {
+			{
+				// copy MC fbo color attachment - need it at end for combine step
+				name: "main_copy",
+				program: "copy",
+				framebuffer: "main_copy",
+				samplerImages: ["solid_main"]
+			}, {
                 // select emissive portions for blur
                 name: "emissive_color",
                 program: "emissive_color",
@@ -230,17 +241,11 @@
                 samplerImages: ["bloom_downsample", "bloom_upsample"],
                 lod: 0
             }, {
-                // Draw to main copy
+                // Draw to main
                 name: "bloom",
                 program: "bloom",
                 framebuffer: "bloom",
-                samplerImages: ["solid_main", "bloom_upsample"]
-            }, {
-                // Draw to main
-                name: "fxaa",
-                program: "fxaa",
-                framebuffer: "fxaa",
-                samplerImages: ["main_copy"]
+                samplerImages: ["main_copy", "bloom_upsample"]
             }
         ]
     }
