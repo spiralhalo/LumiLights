@@ -97,7 +97,7 @@
         }, {
             name: "composite",
             // implements fabulous mode composite - same method as Mojang
-            vertexSource: "lumi:shaders/pipeline/post/simple.vert",
+            vertexSource: "lumi:shaders/pipeline/post/godrays.vert",
             fragmentSource: "lumi:shaders/pipeline/post/composite.frag",
             samplers: [
                 "u_hdr_solid", "u_solid_depth",
