@@ -6,6 +6,7 @@
  *  SYSTEM -DO NOT EDIT-       *
  *******************************/
 
+#include lumi:lighting_config
 #include respackopts:config_supplier
 #ifndef respackopts_loaded
 

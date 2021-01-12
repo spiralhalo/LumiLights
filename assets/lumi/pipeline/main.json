@@ -1,0 +1,424 @@
+{
+// When present, will force Minecraft to operate as if "fabulous" mode was selected.
+// Normally this means translucent geometry will be drawn to different framebuffers
+// and mc and mods expect five additional framebuffers will be available:
+//        mc_entity               - item entities
+//        mc_particles
+//        mc_weather
+//    mc_clouds
+//    mc_translucent  - terrain
+//
+// The main purpose of this setting is compatibility with mods that draw directly.
+// These extra framebuffers which are visible to mods and some of them
+// will target a specific buffer when fabulous mode is active.  If you want mods
+// to draw direct translucency to separate buffers, configure this.  If you want them to
+// target the default framebuffer set this false.
+//
+// The actual target for managed draws will be controlled by the stage configuration.
+// These mappings will *only* affect unmanaged draws that directly target one of these buffers.
+//
+// The structure of these should match the default framebuffer and be compatible
+// with direct draws.
+
+// Canvas does *not* automatically do the necessary passes for fabulous mode
+// to compsite the transparency layers. That must be configured in the pipeline
+// - this offers maximum flexiblity for shader devs.
+//
+// The values here must be valid framebuffer names from the framebuffers block.
+    fabulousTargets: {
+        entity: "default",
+        particles: "default",
+        weather: "fab_clouds",
+        clouds: "fab_clouds",
+        translucent: "fab_translucent"
+    },
+
+    programs: [
+        {
+            name: "shading",
+            vertexSource: "lumi:shaders/pipeline/post/simple.vert",
+            fragmentSource: "lumi:shaders/pipeline/post/shading.frag",
+            samplers: [
+                "u_solid_color",
+                "u_solid_depth",
+                "u_light_solid",
+                "u_normal_solid",
+                "u_material_solid",
+
+                "u_translucent_color",
+                "u_translucent_depth",
+                "u_light_translucent",
+                "u_normal_translucent",
+                "u_material_translucent",
+            ]
+        }, {
+            name: "reflection",
+            vertexSource: "lumi:shaders/pipeline/post/simple.vert",
+            fragmentSource: "lumi:shaders/pipeline/post/reflection.frag",
+            samplers: [
+                "u_solid_color",
+                "u_solid_albedo",
+                "u_solid_depth",
+                "u_light_solid",
+                "u_normal_solid",
+                "u_material_solid",
+
+                "u_translucent_color",
+                "u_translucent_albedo",
+                "u_translucent_depth",
+                "u_light_translucent",
+                "u_normal_translucent",
+                "u_material_translucent",
+            ]
+        }, {
+            name: "refraction",
+            vertexSource: "lumi:shaders/pipeline/post/simple.vert",
+            fragmentSource: "lumi:shaders/pipeline/post/refraction.frag",
+            samplers: [
+                "u_solid_color",
+                "u_solid_depth",
+                "u_normal_solid",
+
+                "u_translucent_depth",
+                "u_light_translucent",
+                "u_normal_translucent",
+            ]
+        }, {
+            name: "composite",
+            vertexSource: "lumi:shaders/pipeline/post/godrays.vert",
+            fragmentSource: "lumi:shaders/pipeline/post/composite.frag",
+            samplers: [
+                "u_hdr_solid", "u_solid_depth",
+                "u_hdr_translucent", "u_translucent_depth",
+                "u_clouds", "u_clouds_depth",
+            ]
+        }
+    ],
+
+    beforeWorldRender: {
+        passes: [
+            {
+                name: "clear_main",
+                framebuffer: "solid",
+                program: "frex_clear"
+            }, {
+                name: "clear_translucent",
+                framebuffer: "translucent",
+                program: "frex_clear"
+            }, {
+                name: "clear_clouds",
+                framebuffer: "clouds",
+                program: "frex_clear"
+            }
+        ]
+    },
+
+    fabulous: {
+        passes: [
+            {
+                name: "shading",
+                program: "shading",
+                framebuffer: "shading",
+                samplerImages: [
+                    "solid_main", "solid_depth", "light_solid", "normal_solid", "material_solid",
+                    "translucent_main", "translucent_depth", "light_translucent", "normal_translucent", "material_translucent"]
+            }, {
+                name: "reflection",
+                program: "reflection",
+                framebuffer: "reflection",
+                samplerImages: [
+                    "solid_shaded", "solid_main", "solid_depth", "light_solid", "normal_solid", "material_solid",
+                    "translucent_shaded", "translucent_main", "translucent_depth", "light_translucent", "normal_translucent", "material_translucent"]
+            }, /*{
+                name: "refraction",
+                program: "refraction",
+                framebuffer: "refraction",
+                samplerImages: [
+                    "solid_shaded", "solid_depth", "normal_solid",
+                    "translucent_depth", "light_translucent", "normal_translucent"]
+            },*/ {
+                name: "composite",
+                program: "composite",
+                framebuffer: "composite",
+                samplerImages: [
+                    "solid_shaded_swap", "solid_depth",
+                    "translucent_shaded_swap", "translucent_depth",
+                    "clouds", "clouds_depth"]
+            }
+        ]
+    },
+
+    images: [
+        /* SOLID */
+        {
+            name: "solid_main",
+            lod: 0,
+            internalFormat: "RGBA8",
+            pixelFormat: "RGBA",
+            pixelDataType: "UNSIGNED_BYTE",
+            target: "TEXTURE_2D",
+            texParams: [
+                {name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
+                {name: "TEXTURE_WRAP_S", val: "CLAMP"}, {name: "TEXTURE_WRAP_T", val: "CLAMP"}
+            ]
+        }, {
+            name: "solid_depth",
+            lod: 0,
+            internalFormat: "DEPTH_COMPONENT",
+            pixelFormat: "DEPTH_COMPONENT",
+            pixelDataType: "FLOAT",
+            target: "TEXTURE_2D",
+            texParams: [ 
+                {name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
+                {name: "TEXTURE_WRAP_S", val: "CLAMP"}, {name: "TEXTURE_WRAP_T", val: "CLAMP"},
+                {name: "TEXTURE_COMPARE_MODE", val: "NONE"}
+            ]
+        }, {
+            name: "light_solid",
+            lod: 0,
+            internalFormat: "RGBA16F",
+            pixelFormat: "RGBA",
+            pixelDataType: "FLOAT",
+            target: "TEXTURE_2D",
+            texParams: [
+                {name: "TEXTURE_MIN_FILTER", val: "LINEAR"}, {name: "TEXTURE_MAG_FILTER", val: "LINEAR"},
+                {name: "TEXTURE_WRAP_S", val: "CLAMP"}, {name: "TEXTURE_WRAP_T", val: "CLAMP"}
+            ]
+        }, {
+            name: "normal_solid",
+            lod: 0,
+            internalFormat: "RGBA8",
+            pixelFormat: "RGBA",
+            pixelDataType: "UNSIGNED_BYTE",
+            target: "TEXTURE_2D",
+            texParams: [
+                {name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
+                {name: "TEXTURE_WRAP_S", val: "CLAMP"}, {name: "TEXTURE_WRAP_T", val: "CLAMP"}
+            ]
+        }, {
+            name: "material_solid",
+            lod: 0,
+            internalFormat: "RGBA8",
+            pixelFormat: "RGBA",
+            pixelDataType: "UNSIGNED_BYTE",
+            target: "TEXTURE_2D",
+            texParams: [
+                {name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
+                {name: "TEXTURE_WRAP_S", val: "CLAMP"}, {name: "TEXTURE_WRAP_T", val: "CLAMP"}
+            ]
+        },
+        /* TRANSLUCENT */
+        {
+            name: "translucent_main",
+            lod: 0,
+            internalFormat: "RGBA8",
+            pixelFormat: "RGBA",
+            pixelDataType: "UNSIGNED_BYTE",
+            target: "TEXTURE_2D",
+            texParams: [
+                {name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
+                {name: "TEXTURE_WRAP_S", val: "CLAMP"}, {name: "TEXTURE_WRAP_T", val: "CLAMP"}
+            ]
+        }, {
+            name: "translucent_depth",
+            lod: 0,
+            internalFormat: "DEPTH_COMPONENT",
+            pixelFormat: "DEPTH_COMPONENT",
+            pixelDataType: "FLOAT",
+            target: "TEXTURE_2D",
+            texParams: [
+                {name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
+                {name: "TEXTURE_WRAP_S", val: "CLAMP"}, {name: "TEXTURE_WRAP_T", val: "CLAMP"},
+                {name: "TEXTURE_COMPARE_MODE", val: "NONE"}
+            ]
+        }, {
+            name: "light_translucent",
+            lod: 0,
+            internalFormat: "RGBA8",
+            pixelFormat: "RGBA",
+            pixelDataType: "UNSIGNED_BYTE",
+            target: "TEXTURE_2D",
+            texParams: [
+                {name: "TEXTURE_MIN_FILTER", val: "LINEAR"}, {name: "TEXTURE_MAG_FILTER", val: "LINEAR"},
+                {name: "TEXTURE_WRAP_S", val: "CLAMP"}, {name: "TEXTURE_WRAP_T", val: "CLAMP"}
+            ]
+        }, {
+            name: "normal_translucent",
+            lod: 0,
+            internalFormat: "RGBA32F",
+            pixelFormat: "RGBA",
+            pixelDataType: "FLOAT",
+            target: "TEXTURE_2D",
+            texParams: [
+                {name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
+                {name: "TEXTURE_WRAP_S", val: "CLAMP"}, {name: "TEXTURE_WRAP_T", val: "CLAMP"}
+            ]
+        }, {
+            name: "material_translucent",
+            lod: 0,
+            internalFormat: "RGBA8",
+            pixelFormat: "RGBA",
+            pixelDataType: "UNSIGNED_BYTE",
+            target: "TEXTURE_2D",
+            texParams: [
+                {name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
+                {name: "TEXTURE_WRAP_S", val: "CLAMP"}, {name: "TEXTURE_WRAP_T", val: "CLAMP"}
+            ]
+        }, 
+        /* CLOUDS */
+        {
+            name: "clouds",
+            lod: 0,
+            internalFormat: "RGBA8",
+            pixelFormat: "RGBA",
+            pixelDataType: "UNSIGNED_BYTE",
+            target: "TEXTURE_2D",
+            texParams: [
+                {name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
+                {name: "TEXTURE_WRAP_S", val: "CLAMP"}, {name: "TEXTURE_WRAP_T", val: "CLAMP"}
+            ]
+        }, {
+            name: "clouds_depth",
+            lod: 0,
+            internalFormat: "DEPTH_COMPONENT",
+            pixelFormat: "DEPTH_COMPONENT",
+            pixelDataType: "FLOAT",
+            target: "TEXTURE_2D",
+            texParams: [
+                {name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
+                {name: "TEXTURE_WRAP_S", val: "CLAMP"}, {name: "TEXTURE_WRAP_T", val: "CLAMP"}
+                {name: "TEXTURE_COMPARE_MODE", val: "NONE"}
+            ]
+        },
+        /* SHADING SOLID */
+        {
+            name: "solid_shaded",
+            lod: 0,
+            internalFormat: "RGBA16F",
+            pixelFormat: "RGBA",
+            pixelDataType: "FLOAT",
+            target: "TEXTURE_2D",
+            texParams: [
+                {name: "TEXTURE_MIN_FILTER", val: "LINEAR"}, {name: "TEXTURE_MAG_FILTER", val: "LINEAR"},
+                {name: "TEXTURE_WRAP_S", val: "CLAMP"}, {name: "TEXTURE_WRAP_T", val: "CLAMP"}
+            ]
+        }, {
+            name: "solid_shaded_swap",
+            lod: 0,
+            internalFormat: "RGBA16F",
+            pixelFormat: "RGBA",
+            pixelDataType: "FLOAT",
+            target: "TEXTURE_2D",
+            texParams: [
+                {name: "TEXTURE_MIN_FILTER", val: "LINEAR"}, {name: "TEXTURE_MAG_FILTER", val: "LINEAR"},
+                {name: "TEXTURE_WRAP_S", val: "CLAMP"}, {name: "TEXTURE_WRAP_T", val: "CLAMP"}
+            ]
+        },
+        /* SHADING TRANSLUCENT */
+        {
+            name: "translucent_shaded",
+            lod: 0,
+            internalFormat: "RGBA16F",
+            pixelFormat: "RGBA",
+            pixelDataType: "FLOAT",
+            target: "TEXTURE_2D",
+            texParams: [
+                {name: "TEXTURE_MIN_FILTER", val: "LINEAR"}, {name: "TEXTURE_MAG_FILTER", val: "LINEAR"},
+                {name: "TEXTURE_WRAP_S", val: "CLAMP"}, {name: "TEXTURE_WRAP_T", val: "CLAMP"}
+            ]
+        }, {
+            name: "translucent_shaded_swap",
+            lod: 0,
+            internalFormat: "RGBA16F",
+            pixelFormat: "RGBA",
+            pixelDataType: "FLOAT",
+            target: "TEXTURE_2D",
+            texParams: [
+                {name: "TEXTURE_MIN_FILTER", val: "LINEAR"}, {name: "TEXTURE_MAG_FILTER", val: "LINEAR"},
+                {name: "TEXTURE_WRAP_S", val: "CLAMP"}, {name: "TEXTURE_WRAP_T", val: "CLAMP"}
+            ]
+        },
+        /* COMPOSITE */
+        {
+            name: "composite",
+            lod: 0,
+            internalFormat: "RGBA8",
+            target: "TEXTURE_2D",
+            texParams: [
+                // nearest because don't want filtering when copy back to main
+                {name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
+                {name: "TEXTURE_WRAP_S", val: "CLAMP"}, {name: "TEXTURE_WRAP_T", val: "CLAMP"}
+            ]
+        },
+    ],
+
+    framebuffers: [
+        // These are the framebuffers visible to the game and to mods.
+        // They exist mainly so mods can't mess up the managed fb state.
+        // Attachements are the same as those for managed draws.
+        {
+            name: "default",
+                depthAttachment: {image: "solid_depth"},
+                colorAttachments: [{image: "solid_main"}]
+        }, {
+            name: "fab_translucent",
+                depthAttachment: {image: "translucent_depth"},
+                colorAttachments: [{image: "translucent_main"}]
+        }, {
+            name: "fab_clouds",
+                depthAttachment: {image: "clouds_depth"},
+                colorAttachments: [{image: "clouds"}]
+        },
+        /* FORWARD */
+        {
+            name: "solid",
+            depthAttachment: {image: "solid_depth", clearDepth: 1.0},
+            colorAttachments: [
+                {image: "solid_main", clearColor: 0x00000000},
+                {image: "light_solid", clearColor: 0x00000000},
+                {image: "normal_solid", clearColor: 0x00000000},
+                {image: "material_solid", clearColor: 0x00000000}
+            ]
+        }, {
+            name: "translucent",
+            depthAttachment: {image: "translucent_depth"},
+            colorAttachments: [
+                {image: "translucent_main", clearColor: 0x00000000},
+                {image: "light_translucent"},
+                {image: "normal_translucent"},
+                {image: "material_translucent"}
+            ]
+        }, {
+            name: "clouds",
+            depthAttachment: {image: "clouds_depth", clearDepth: 1.0},
+            colorAttachments: [{image: "clouds", clearColor: 0x00000000}]
+        },
+        /* DEFERRED SHADING */
+        {
+            name: "shading",
+            colorAttachments: [
+                {image: "solid_shaded", clearColor: 0x00000000},
+                {image: "translucent_shaded", clearColor: 0x00000000},
+                {image: "emissive", clearColor: 0x00000000},
+            ]
+        }, {
+            name: "reflection",
+            colorAttachments: [
+                {image: "solid_shaded_swap", clearColor: 0x00000000},
+                {image: "translucent_shaded_swap", clearColor: 0x00000000}
+            ]
+        }, {
+            name: "refraction",
+            colorAttachments: [{image: "solid_shaded_swap"}]
+        }, {
+            name: "composite",
+            colorAttachments: [{image: "solid_main"}]
+        }
+    ],
+
+    // Framebuffer that will be visible to the game and to mods as the primary framebuffer.
+    // Should generally keep it the same as vanilla has it and avoid using it except as a
+    // sink for unmanaged draws and for final output.
+    // Canvas will make no managed draws to this framebuffer unless requested.
+    defaultFramebuffer: "default",
+}

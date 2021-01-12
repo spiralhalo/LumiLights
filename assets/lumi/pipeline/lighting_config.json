@@ -1,0 +1,17 @@
+{
+    options: [
+        {
+            includeToken: "lumi:lighting_config",
+            categoryKey: "config.lumi_lights.category.lighting",
+            options: {
+                handheld_light_radius: {
+                    default: 10,
+                    min: 0,
+                    max: 14,
+                    nameKey: "config.lumi_lights.value.handheld_light_radius",
+                    descriptionKey: "config.lumi_lights.help.handheld_light_radius"
+                }
+            }
+        }
+    ]
+}

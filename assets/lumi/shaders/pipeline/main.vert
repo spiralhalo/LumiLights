@@ -13,34 +13,6 @@
  *  published by the Free Software Foundation, Inc.    *
  *******************************************************/
 
-// Might not need these anymore in favor of frex texcoords conversion
-// #ifdef LUMI_BUMP
-// float bump_resolution;
-// vec2 uvN;
-// vec2 uvT;
-// vec2 uvB;
-
-// void startBump() {
-//     bump_resolution = 1.0;
-// }
-
-// void setupBump(frx_VertexData data) {
-//     float bumpSample = 0.015625 * bump_resolution;
-
-//     uvN = data.spriteUV;
-//     uvT = data.spriteUV + vec2(bumpSample, 0);
-//     uvB = data.spriteUV - vec2(0, bumpSample);
-//     bump_topRightUv = vec2(1.0, 0.0) + vec2(-bumpSample, bumpSample);
-// }
-
-// void endBump(vec4 spriteBounds) {
-//     uvN = spriteBounds.xy + uvN * spriteBounds.zw;
-//     uvT = spriteBounds.xy + uvT * spriteBounds.zw;
-//     uvB = spriteBounds.xy + uvB * spriteBounds.zw;
-//     bump_topRightUv = spriteBounds.xy + bump_topRightUv * spriteBounds.zw;
-// }
-// #endif
-
 // Grondag's vanilla diffuse
 float p_diffuseGui(vec3 normal) {
 	normal = normalize(gl_NormalMatrix * normal);
