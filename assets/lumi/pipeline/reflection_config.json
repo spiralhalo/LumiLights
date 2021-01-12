@@ -1,0 +1,45 @@
+{
+    options: [
+        {
+            includeToken: "lumi:reflection_config",
+            categoryKey: "config.lumi_lights.category.reflection",
+            options: {
+                constant_reflection_steps: {
+                    default: 4,
+                    min: 0,
+                    max: 50,
+                    nameKey: "config.lumi_lights.value.constant_reflection_steps",
+                    descriptionKey: "config.lumi_lights.help.constant_reflection_steps"
+                },
+                multiplicative_reflection_steps: {
+                    default: 20,
+                    min: 10,
+                    max: 50,
+                    nameKey: "config.lumi_lights.value.multiplicative_reflection_steps",
+                    descriptionKey: "config.lumi_lights.help.multiplicative_reflection_steps"
+                },
+                reflection_ray_initial_length: {
+                    default: 0.25,
+                    min: 0.05,
+                    max: 1.0,
+                    nameKey: "config.lumi_lights.value.reflection_ray_initial_length",
+                    descriptionKey: "config.lumi_lights.help.reflection_ray_initial_length"
+                },
+                reflection_ray_max_length: {
+                    default: 128.0,
+                    min: 32.0,
+                    max: 512.0,
+                    nameKey: "config.lumi_lights.value.reflection_ray_max_length",
+                    descriptionKey: "config.lumi_lights.help.reflection_ray_max_length"
+                },
+                reflection_ray_multiplier: {
+                    default: 2.0,
+                    min: 1.1,
+                    max: 2.5,
+                    nameKey: "config.lumi_lights.value.reflection_ray_multiplier",
+                    descriptionKey: "config.lumi_lights.help.reflection_ray_multiplier"
+                }
+            }
+        }
+    ]
+}

@@ -4,6 +4,7 @@
 #include frex:shaders/lib/math.glsl
 #include lumi:shaders/lib/util.glsl
 #include lumi:shaders/lib/pbr_shading.glsl
+#include lumi:reflection_config
 
 /*******************************************************
  *  lumi:shaders/pipeline/post/reflection.frag         *
@@ -132,9 +133,10 @@ vec3 work_on_pair(
         float sky_light = texture2DLod(reflector_light, v_texcoord, 0).y;
         vec3 reg_f0     = vec3(material.y < 0.7 ? material.y : 0.0);
         vec3 f0         = mix(reg_f0, albedo, material.y);
-        rt_Result result = rt_reflection(ray_view, unit_view, normal, unit_march, v_texcoord, 0.25, 128.0, 2.0, 0, 20, frx_normalModelMatrix(), frx_projectionMatrix(), frx_inverseProjectionMatrix(), reflector_depth, reflector_normal, reflected_depth, reflected_normal);
+        rt_Result result = rt_reflection(ray_view, unit_view, normal, unit_march, v_texcoord, REFLECTION_RAY_INITIAL_LENGTH, 128.0, REFLECTION_RAY_MULTIPLIER, CONSTANT_REFLECTION_STEPS, CONSTANT_REFLECTION_STEPS + MULTIPLICATIVE_REFLECTION_STEPS, frx_normalModelMatrix(), frx_projectionMatrix(), frx_inverseProjectionMatrix(), reflector_depth, reflector_normal, reflected_depth, reflected_normal);
         vec3 reflected;
-        if (!result.hit || result.reflected_uv.x < 0.0 || result.reflected_uv.y < 0.0 || result.reflected_uv.x > 1.0 || result.reflected_uv.y > 1.0) {
+        float reflected_depth_value = coords_depth(result.reflected_uv, reflected_depth);
+        if (reflected_depth_value == 1.0 || !result.hit || result.reflected_uv.x < 0.0 || result.reflected_uv.y < 0.0 || result.reflected_uv.x > 1.0 || result.reflected_uv.y > 1.0) {
             if (frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT)) {
                 reflected = v_skycolor * smoothstep(-0.05, 0.0, dot(unit_march, v_up)) * skylight_adjust(sky_light, frx_ambientIntensity());
             } else {
@@ -169,7 +171,7 @@ rt_Result rt_reflection(
     
     int steps = 0;
     int refine_steps = 0;
-    while (current_ray_length < max_ray_length && steps < max_steps) {
+    while (steps < max_steps) {
         ray_view += ray;
         current_uv = coords_uv(ray_view, projection);
         current_view = coords_view(current_uv, inv_projection, reflected_depth);
@@ -192,7 +194,7 @@ rt_Result rt_reflection(
             }
             return rt_Result(current_uv, /*fresnel,*/ true);
         }
-        if (steps > constant_steps) {
+        if (steps > constant_steps && current_ray_length < max_ray_length) {
             ray *= length_multiplier;
             current_ray_length *= length_multiplier;
         }

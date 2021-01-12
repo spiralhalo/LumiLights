@@ -1,3 +1,5 @@
+#include frex:shaders/api/view.glsl
+
 /******************************************************
   lumi:shaders/pipeline/shadow.vert
 ******************************************************/

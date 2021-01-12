@@ -53,7 +53,7 @@
             ]
         }, {
             name: "reflection",
-            vertexSource: "lumi:shaders/pipeline/post/simple.vert",
+            vertexSource: "lumi:shaders/pipeline/post/hdr.vert",
             fragmentSource: "lumi:shaders/pipeline/post/reflection.frag",
             samplers: [
                 "u_solid_color",

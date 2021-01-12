@@ -5,30 +5,30 @@
             categoryKey: "config.lumi_lights.category.bloom",
             options: {
                 bloom_intensity: {
-                    default: 10,
+                    default: 5,
                     min: 1,
-                    max: 80,
+                    max: 40,
                     nameKey: "config.lumi_lights.value.bloom_intensity",
                     descriptionKey: "config.lumi_lights.help.bloom_intensity"
                 },
                 bloom_downsample_dist: {
-                    default: 100,
-                    min: 10,
-                    max: 200,
+                    default: 25,
+                    min: 3,
+                    max: 50,
                     nameKey: "config.lumi_lights.value.bloom_downsample_scale",
                     descriptionKey: "config.lumi_lights.help.bloom_downsample_scale"
                 },
                 bloom_upsample_dist: {
-                    default: 10,
-                    min: 2,
-                    max: 100,
+                    default: 5,
+                    min: 1,
+                    max: 50,
                     nameKey: "config.lumi_lights.value.bloom_upsample_scale",
                     descriptionKey: "config.lumi_lights.help.bloom_upsample_scale"
                 },
                 bloom_cutoff: {
-                    default: 20,
-                    min: 5,
-                    max: 100,
+                    default: 10,
+                    min: 3,
+                    max: 50,
                     nameKey: "config.lumi_lights.value.bloom_cutoff",
                     descriptionKey: "config.lumi_lights.help.bloom_cutoff"
                 }
