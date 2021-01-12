@@ -2,6 +2,7 @@
 #include lumi:shaders/internal/context.glsl
 #include frex:shaders/lib/math.glsl
 #include frex:shaders/lib/noise/noise2d.glsl
+#include frex:shaders/api/sampler.glsl
 #include frex:shaders/api/view.glsl
 #include frex:shaders/api/material.glsl
 #include lumi:shaders/lib/util.glsl
@@ -55,9 +56,8 @@ vec2 coords_uv(vec3 view, mat4 projection)
 #define FOG_NEAR 64.0
 #define FOG_DENSITY 0.5
 
-vec4 fog (vec4 a, vec3 viewPos)
+vec4 fog (vec4 a, vec3 viewPos, vec3 worldPos)
 {
-    vec3 worldPos = frx_cameraPos() + (frx_inverseViewMatrix() * vec4(viewPos, 1.0)).xyz;
     float zigZagTime = abs(frx_worldTime()-0.5);
     float timeFactor = l2_clampScale(0.45, 0.5, zigZagTime) + l2_clampScale(0.05, 0.0, zigZagTime);
 
@@ -87,6 +87,7 @@ vec4 hdr_shaded_color(vec2 uv, sampler2D scolor, sampler2D sdepth, sampler2D sli
     vec4  light     = texture2DLod(slight, uv, 0.0);
     vec3  material  = texture2DLod(smaterial, uv, 0.0).xyz;
     vec3  viewPos   = coords_view(uv, frx_inverseProjectionMatrix(), depth);
+    vec3  worldPos  = frx_cameraPos() + (frx_inverseViewMatrix() * vec4(viewPos, 1.0)).xyz;
     float f0        = material.z;
     float bloom_raw = light.z * 2.0 - 1.0;
     bool  diffuse   = normal.x + normal.y + normal.z < 2.5;
@@ -104,7 +105,7 @@ vec4 hdr_shaded_color(vec2 uv, sampler2D scolor, sampler2D sdepth, sampler2D sli
     if (mathurt) a.r += 0.5;
 
     // PERF: don't shade past max fog distance
-    return fog(a, viewPos);
+    return fog(a, viewPos, worldPos);
 }
 
 void main()

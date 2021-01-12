@@ -52,7 +52,26 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
         gl_FragDepth = gl_FragCoord.z;
         gl_FragData[0] = a;
     } else {
+
+		vec3 shadowCoords = pv_shadowpos.xyz / pv_shadowpos.w;
+		// Transform from screen coordinates to texture coordinates
+		shadowCoords = shadowCoords * 0.5 + 0.5;
+		float shadowFactor = 0.0;
+		vec2 inc = vec2(1.0 / 16384.0);
+		float shadowDepth;
+		for(int row = -1; row <= 1; ++row)
+		{
+			for(int col = -1; col <= 1; ++col)
+			{
+				shadowDepth = texture2D(frxs_shadowMap, shadowCoords.xy + vec2(row, col) * inc).r; 
+				shadowFactor += shadowDepth < shadowCoords.z ? 0.2 : 0.0;      
+			}    
+		}
+		shadowFactor /= 9.0;
+		float directSkylight = 1.0 - shadowFactor;
+		
 		vec2 light = fragData.light.xy;
+		light.y = min(directSkylight, light.y);
 		// hijack f0 for matHurt and matflash because hurting things are not reflective I guess
 		if (frx_matFlash()) pbr_f0 = 1.0;
 		else if (frx_matHurt()) pbr_f0 = 0.9;
@@ -64,7 +83,7 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
 		float normalizedBloom = (bloom - ao) * 0.5 + 0.5;
         gl_FragDepth = gl_FragCoord.z;
         gl_FragData[0] = a;
-        gl_FragData[1] = vec4(fragData.light.x, fragData.light.y, normalizedBloom, 1.0);
+        gl_FragData[1] = vec4(light.x, light.y, normalizedBloom, 1.0);
         gl_FragData[2] = vec4(normalizedNormal, 1.0);
         gl_FragData[3] = vec4(pbr_roughness, pbr_metallic, pbr_f0, 1.0);
     }

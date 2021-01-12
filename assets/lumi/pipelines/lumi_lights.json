@@ -36,6 +36,7 @@
 	include: [
 		"lumi:pipeline/main.json",
 		"lumi:pipeline/bloom.json",
+		"lumi:pipeline/skyshadow.json",
 		"lumi:pipeline/lighting_config.json",
 	],
 

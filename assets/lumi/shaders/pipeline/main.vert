@@ -39,6 +39,8 @@ void frx_writePipelineVertex(inout frx_VertexData data) {
     	l2_viewpos = viewCoord.xyz;
 	}
 
+	pv_shadowpos = frx_shadowViewProjectionMatrix() * data.vertex;
+
 #ifdef VANILLA_LIGHTING
 	pv_lightcoord = data.light;
 	pv_ao = data.aoShade;
