@@ -85,7 +85,7 @@ void pbr_shading(inout vec4 a, inout float bloom, vec3 viewPos, vec2 light, vec3
         vec3 handHeldRadiance = l2_handHeldRadiance(viewPos);
         if (handHeldRadiance.x + handHeldRadiance.y + handHeldRadiance.z > 0) {
             vec3 adjustedNormal = isDiffuse ? normal : viewDir;
-            a.rgb += pbr_lightCalc(albedo, pbr_roughness, pbr_metallic, f0, handHeldRadiance, handHeldDir, viewDir, adjustedNormal, true, false, 0.0, specularAccu);
+            a.rgb += pbr_lightCalc(albedo, clamp(pbr_roughness, 0.02, 1.0), pbr_metallic, f0, handHeldRadiance, handHeldDir, viewDir, adjustedNormal, true, false, 0.0, specularAccu);
         }
     }
 #endif
