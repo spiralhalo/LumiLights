@@ -66,7 +66,7 @@ struct rt_Result
 
 rt_Result rt_reflection(
     vec3 ray_view, vec3 unit_view, vec3 normal, vec3 unit_march,
-    vec2 start_uv, float init_ray_length, float max_ray_length, float length_multiplier, int max_steps,
+    vec2 start_uv, float init_ray_length, float max_ray_length, float length_multiplier, int constant_steps, int max_steps,
     mat3 normal_matrix, mat4 projection, mat4 inv_projection,
     in sampler2D reflector_depth, in sampler2D reflector_normal, in sampler2D reflected_depth, in sampler2D reflected_normal
 );
@@ -132,7 +132,7 @@ vec3 work_on_pair(
         float sky_light = texture2DLod(reflector_light, v_texcoord, 0).y;
         vec3 reg_f0     = vec3(material.y < 0.7 ? material.y : 0.0);
         vec3 f0         = mix(reg_f0, albedo, material.y);
-        rt_Result result = rt_reflection(ray_view, unit_view, normal, unit_march, v_texcoord, 0.25, 128.0, 2.0, 20, frx_normalModelMatrix(), frx_projectionMatrix(), frx_inverseProjectionMatrix(), reflector_depth, reflector_normal, reflected_depth, reflected_normal);
+        rt_Result result = rt_reflection(ray_view, unit_view, normal, unit_march, v_texcoord, 0.25, 128.0, 2.0, 0, 20, frx_normalModelMatrix(), frx_projectionMatrix(), frx_inverseProjectionMatrix(), reflector_depth, reflector_normal, reflected_depth, reflected_normal);
         vec3 reflected;
         if (!result.hit || result.reflected_uv.x < 0.0 || result.reflected_uv.y < 0.0 || result.reflected_uv.x > 1.0 || result.reflected_uv.y > 1.0) {
             if (frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT)) {
@@ -151,7 +151,7 @@ vec3 work_on_pair(
 
 rt_Result rt_reflection(
     vec3 ray_view, vec3 unit_view, vec3 normal, vec3 unit_march,
-    vec2 start_uv, float init_ray_length, float max_ray_length, float length_multiplier, int max_steps,
+    vec2 start_uv, float init_ray_length, float max_ray_length, float length_multiplier, int constant_steps, int max_steps,
     mat3 normal_matrix, mat4 projection, mat4 inv_projection,
     in sampler2D reflector_depth, in sampler2D reflector_normal, in sampler2D reflected_depth, in sampler2D reflected_normal
 )
@@ -192,10 +192,10 @@ rt_Result rt_reflection(
             }
             return rt_Result(current_uv, /*fresnel,*/ true);
         }
-        // if (steps > constantSteps) {
-        ray *= length_multiplier;
-        current_ray_length *= length_multiplier;
-        // }
+        if (steps > constant_steps) {
+            ray *= length_multiplier;
+            current_ray_length *= length_multiplier;
+        }
         steps ++;
     }
     // Sky reflection
