@@ -15,7 +15,7 @@ float pbr_distributionGGX(vec3 N, vec3 H, float roughness)
     float denom = (NdotH2 * (a2 - 1.0) + 1.0);
     denom = PI * denom * denom;
 	
-    return num / denom;
+    return num / max(denom, 0.00001);
 }
 
 float pbr_geometrySchlickGGX(float NdotV, float roughness)

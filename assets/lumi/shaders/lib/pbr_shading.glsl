@@ -66,8 +66,6 @@ vec3 pbr_lightCalc(vec3 albedo, float pbr_roughness, float pbr_metallic, vec3 pb
 
 void pbr_shading(inout vec4 a, inout float bloom, vec3 viewPos, vec2 light, vec3 normal, float pbr_roughness, float pbr_metallic, float pbr_f0, bool isDiffuse, bool translucent)
 {
-    // I can't begin to explain how this even fix a major bug with held light and brightness setting
-    pbr_roughness = clamp(pbr_roughness, 0.6, 1.0);
 	vec3 albedo = hdr_gammaAdjust(a.rgb);
 	vec3 dielectricF0 = vec3(0.1) * frx_luminance(albedo);
 	vec3 f0 = pbr_f0 <= 0.0 ? mix(dielectricF0, albedo, pbr_metallic) : vec3(pbr_f0);
