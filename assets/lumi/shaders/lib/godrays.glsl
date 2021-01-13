@@ -1,7 +1,6 @@
 /************************************************************************************
  *  lumi:shaders/lib/godrays.glsl
  ************************************************************************************
- *
  *  Original work:
  *  https://github.com/Erkaman/glsl-godrays (MIT License)
  *  
@@ -34,7 +33,6 @@
  *
  *  The derivative work is further licensed under the GNU Lesser General Public
  *  License version 3 alongside the rest of Lumi Lights source code.
- *
  ************************************************************************************/
 
 vec3 godrays(float density, float weight, float decay, float exposure, int numSamples, sampler2D sdepth1, sampler2D sdepth2, vec2 screenSpaceLightPos, vec2 texcoord)

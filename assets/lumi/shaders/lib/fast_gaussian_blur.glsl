@@ -1,5 +1,5 @@
 /*************************************************************************************
- *  lumi:shaders/lib/fast_gaussian_blur.glsl                  
+ *  lumi:shaders/lib/fast_gaussian_blur.glsl
  *************************************************************************************
  *  Source:
  *  https://github.com/Jam3/glsl-fast-gaussian-blur
@@ -25,7 +25,6 @@
  *  DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
  *  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
  *  OR OTHER DEALINGS IN THE SOFTWARE.
- *
  *************************************************************************************/
 
 vec4 blur13(sampler2D image, vec2 uv, vec2 resolution, vec2 direction)

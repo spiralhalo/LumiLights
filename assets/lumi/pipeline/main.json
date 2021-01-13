@@ -88,8 +88,8 @@
             vertexSource: "lumi:shaders/pipeline/post/godrays.vert",
             fragmentSource: "lumi:shaders/pipeline/post/composite.frag",
             samplers: [
-                "u_hdr_solid", "u_solid_depth",
-                "u_hdr_translucent", "u_translucent_depth",
+                "u_hdr_solid", "u_hdr_solid_swap", "u_solid_depth",
+                "u_hdr_translucent", "u_hdr_translucent_swap", "u_translucent_depth",
                 "u_clouds", "u_clouds_depth",
             ]
         }
@@ -141,8 +141,8 @@
                 program: "composite",
                 framebuffer: "composite",
                 samplerImages: [
-                    "solid_shaded_swap", "solid_depth",
-                    "translucent_shaded_swap", "translucent_depth",
+                    "solid_shaded", "solid_shaded_swap", "solid_depth",
+                    "translucent_shaded", "translucent_shaded_swap", "translucent_depth",
                     "clouds", "clouds_depth"]
             }
         ]
