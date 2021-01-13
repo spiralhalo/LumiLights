@@ -1,6 +1,8 @@
 {
     "pipeline.lumi_lights.name": "Lumi Lights",
     "pipeline.lumi_lights.desc": "Cool sunrise and shiny stuff methinks",
+    "pipeline.lumi_lights_dev.name": "Lumi Lights Dev",
+    "pipeline.lumi_lights_dev.desc": "Cool sunrise and buggy shadows",
     "config.lumi_lights.category.bloom": "Bloom",
     "config.lumi_lights.value.bloom_intensity": "Bloom Intensity",
     "config.lumi_lights.help.bloom_intensity": "Intensity of glow effect around light sources.",

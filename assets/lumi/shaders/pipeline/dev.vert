@@ -5,13 +5,15 @@
 #include lumi:shaders/pipeline/varying.glsl
 
 /*******************************************************
- *  lumi:shaders/pipeline/main.vert                    *
+ *  lumi:shaders/pipeline/dev.vert                     *
  *******************************************************
  *  Copyright (c) 2020-2021 spiralhalo                 *
  *  Released WITHOUT WARRANTY under the terms of the   *
  *  GNU Lesser General Public License version 3 as     *
  *  published by the Free Software Foundation, Inc.    *
  *******************************************************/
+
+varying vec4 pv_shadowpos;
 
 // Grondag's vanilla diffuse
 float p_diffuseGui(vec3 normal) {
@@ -38,6 +40,8 @@ void frx_writePipelineVertex(inout frx_VertexData data) {
 		gl_Position = frx_projectionMatrix() * viewCoord;
     	l2_viewpos = viewCoord.xyz;
 	}
+
+	pv_shadowpos = frx_shadowViewProjectionMatrix() * data.vertex;
 
 #ifdef VANILLA_LIGHTING
 	pv_lightcoord = data.light;

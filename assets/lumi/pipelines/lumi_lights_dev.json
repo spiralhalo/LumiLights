@@ -18,10 +18,10 @@
 	// If you don't want to deal with localization, use literal strings -
 	// those will fail localization lookup and be used directly.
 
-	nameKey: "pipeline.lumi_lights.name",
-	descriptionKey: "pipeline.lumi_lights.desc",
-	materialVertexShader: "lumi:shaders/pipeline/main.vert",
-	materialFragmentShader: "lumi:shaders/pipeline/main.frag",
+	nameKey: "pipeline.lumi_lights_dev.name",
+	descriptionKey: "pipeline.lumi_lights_dev.desc",
+	materialVertexShader: "lumi:shaders/pipeline/dev.vert",
+	materialFragmentShader: "lumi:shaders/pipeline/dev.frag",
 
 	drawTargets: {
 		solidTerrain: "solid",
@@ -36,6 +36,7 @@
 	include: [
 		"lumi:pipeline/main.json",
 		"lumi:pipeline/bloom.json",
+		"lumi:pipeline/skyshadow.json",
 		"lumi:pipeline/lighting_config.json",
 		"lumi:pipeline/reflection_config.json",
 	],
