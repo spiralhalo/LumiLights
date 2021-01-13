@@ -112,7 +112,7 @@ void main()
     gl_FragData[1] = vec4(translucent_solid + translucent_translucent, roughness2);
 }
 
-const float JITTER_STRENGTH = 0.3;
+const float JITTER_STRENGTH = 0.2;
 
 vec3 work_on_pair(
     in vec4 base_color,
@@ -194,7 +194,7 @@ rt_Result rt_reflection(
         backface = dot(unit_march, normal_matrix * normalize(reflectedNormal)) > 0;
         if (delta_z > 0 && delta_z < hitbox_z && (!backface || !diffuseCheck(reflectedNormal))) {
             //refine
-            while (current_ray_length > init_ray_length && refine_steps < max_steps) {
+            while (current_ray_length > init_ray_length * init_ray_length && refine_steps < max_steps) {
                 ray = abs(delta_z) * unit_march;
                 current_ray_length = abs(delta_z);
                 if (ray_view.z > current_view.z) ray_view += ray;
