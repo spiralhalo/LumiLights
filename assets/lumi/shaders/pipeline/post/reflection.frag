@@ -49,6 +49,11 @@ vec3 coords_view(vec2 uv, mat4 inv_projection, in sampler2D target)
 	return view.xyz / view.w;
 }
 
+vec3 coords_world(vec3 view, mat4 inv_view)
+{
+    return frx_cameraPos() + (inv_view * vec4(view, 1.0)).xyz;
+}
+
 vec3 coords_normal(vec2 uv, in sampler2D target)
 {
 	return 2.0 * texture2DLod(target, uv, 0).xyz - 1.0;
@@ -105,6 +110,8 @@ void main()
     gl_FragData[1] = vec4(translucent_base.rgb + translucent_solid + translucent_translucent, translucent_base.a);
 }
 
+const float JITTER_STRENGTH = 0.3;
+
 vec3 work_on_pair(
     in vec4 base_color,
     in vec3 albedo,
@@ -125,11 +132,14 @@ vec3 work_on_pair(
     vec3 worldNormal = coords_normal(v_texcoord, reflector_normal);
     float gloss   = 1.0 - material.x;
     if (gloss > 0.01 && material.a > 0.0 && diffuseCheck(worldNormal)) {
-        vec3 ray_view = coords_view(v_texcoord, frx_inverseProjectionMatrix(), reflector_depth);
-        vec3 normal = frx_normalModelMatrix() * normalize(worldNormal);
+        vec3 ray_view  = coords_view(v_texcoord, frx_inverseProjectionMatrix(), reflector_depth);
+        vec3 ray_world = coords_world(ray_view, frx_inverseViewMatrix());
+        vec3 jitter    = 2.0 * vec3(frx_noise2d(ray_world.yz), frx_noise2d(ray_world.zx), frx_noise2d(ray_world.xy)) - 1.0;
+        vec3 normal    = frx_normalModelMatrix() * normalize(worldNormal);
+        float roughness2 = material.x * material.x;
         // if (ray_view.y < normal.y) return noreturn;
-        vec3 unit_view = normalize(-ray_view);
-        vec3 unit_march = reflect(-unit_view, normal);
+        vec3 unit_view  = normalize(-ray_view);
+        vec3 unit_march = normalize(reflect(-unit_view, normal) + mix(vec3(0.0, 0.0, 0.0), jitter * JITTER_STRENGTH, roughness2));
         float sky_light = texture2DLod(reflector_light, v_texcoord, 0).y;
         vec3 reg_f0     = vec3(material.y < 0.7 ? material.y : 0.0);
         vec3 f0         = mix(reg_f0, albedo, material.y);
@@ -147,7 +157,7 @@ vec3 work_on_pair(
             reflected = texture2D(reflected_color, result.reflected_uv).rgb;
         }
         // mysterious roughness hax
-        return pbr_lightCalc(albedo, 0.4 + material.x * 0.6, material.y, f0, reflected.rgb * base_color.a, unit_march * frx_normalModelMatrix(), unit_view * frx_normalModelMatrix(), worldNormal, true, false, 0.0, dummy);
+        return pbr_lightCalc(albedo, 0.4 + material.x * 0.6, material.y, f0, reflected.rgb * base_color.a * gloss, unit_march * frx_normalModelMatrix(), unit_view * frx_normalModelMatrix(), worldNormal, true, false, 0.0, dummy);
     } else return noreturn;
 }
 
