@@ -35,7 +35,7 @@
  *  License version 3 alongside the rest of Lumi Lights source code.
  ************************************************************************************/
 
-vec3 godrays(float density, float weight, float decay, float exposure, int numSamples, sampler2D sdepth1, sampler2D sdepth2, vec2 screenSpaceLightPos, vec2 texcoord)
+float godrays(float density, float weight, float decay, float exposure, int numSamples, sampler2D sdepth1, sampler2D sdepth2, vec2 screenSpaceLightPos, vec2 texcoord)
 {
     float strength = 0.0;
     vec2 deltaTexcoord = vec2(texcoord - screenSpaceLightPos.xy);
@@ -51,5 +51,5 @@ vec3 godrays(float density, float weight, float decay, float exposure, int numSa
         strength += samp;
         illuminationDecay *= decay;
     }
-    return vec3(strength * exposure);
+    return strength * exposure;
 }

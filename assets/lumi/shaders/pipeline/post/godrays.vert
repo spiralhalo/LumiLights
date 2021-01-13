@@ -3,11 +3,13 @@
 #include frex:shaders/api/world.glsl
 #include frex:shaders/lib/math.glsl
 #include lumi:shaders/lib/util.glsl
+#include lumi:shaders/lib/lightsource.glsl
 
 /*******************************************************
  *  lumi:shaders/pipeline/post/godrays.vert            *
  *******************************************************/
 
+varying vec3 v_godray_color;
 varying vec2 v_skylightpos;
 varying float v_godray_intensity;
 varying float v_aspect_adjuster;
@@ -37,4 +39,5 @@ void main()
     v_skylightpos = (skylight_clip.xy / skylight_clip.w) * 0.5 + 0.5;
     v_godray_intensity = frx_smootherstep(0.0, 0.1, dot(frx_skyLightVector(), frx_cameraView())) * frx_skyLightStrength();
     v_aspect_adjuster = float(frxu_size.x)/float(frxu_size.y);
+    v_godray_color = frx_worldFlag(FRX_WORLD_IS_MOONLIT) ? vec3(1.0) : ldr_sunColor(frx_worldTime());
 }

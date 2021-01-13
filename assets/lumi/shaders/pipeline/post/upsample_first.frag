@@ -3,7 +3,7 @@
 #include frex:shaders/lib/sample.glsl
 
 /******************************************************
-  lumi:shaders/pipeline/post/downsample.frag
+  lumi:shaders/pipeline/post/upsample_first.frag
 ******************************************************/
 uniform sampler2D u_input;
 
