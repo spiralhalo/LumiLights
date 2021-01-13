@@ -19,7 +19,7 @@
 #endif
 
 #ifdef LUMI_PBRX
-    #define hdr_sunStr 5
+    #define hdr_sunStr 6
     #define hdr_moonStr 0.4
     #define hdr_blockMinStr 2
     #define hdr_blockMaxStr 3
