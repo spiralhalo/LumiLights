@@ -24,11 +24,13 @@ varying vec2 v_skylightpos;
 varying float v_godray_intensity;
 varying float v_aspect_adjuster;
 
+// arbitrary chosen depth threshold
+#define blurDepthThreshold 0.001
 void main()
 {
     vec4 solid = texture2D(u_hdr_solid, v_texcoord);
     float solid_roughness = texture2D(u_hdr_solid_swap, v_texcoord).a;
-    vec4 solid_swap = blur13(u_hdr_solid_swap, v_texcoord, frxu_size, vec2(solid_roughness));
+    vec4 solid_swap = blur13withDepth(u_hdr_solid_swap, u_solid_depth, blurDepthThreshold, v_texcoord, frxu_size, vec2(solid_roughness));
     if (solid.a > 0.01) {
         solid = ldr_tonemap(solid + solid_swap);
     }
@@ -36,7 +38,7 @@ void main()
     
     vec4 translucent = texture2D(u_hdr_translucent, v_texcoord);
     float translucent_roughness = texture2D(u_hdr_translucent_swap, v_texcoord).a;
-    vec4 translucent_swap = blur13(u_hdr_translucent_swap, v_texcoord, frxu_size, vec2(translucent_roughness));
+    vec4 translucent_swap = blur13withDepth(u_hdr_translucent_swap, u_translucent_depth, blurDepthThreshold, v_texcoord, frxu_size, vec2(translucent_roughness));
     translucent = ldr_tonemap(translucent + translucent_swap * step(0.1, translucent.a));
     float depth_translucent = texture2D(u_translucent_depth, v_texcoord).r;
  
