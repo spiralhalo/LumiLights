@@ -56,7 +56,7 @@ vec2 coords_uv(vec3 view, mat4 projection)
 #define FOG_NEAR 64.0
 #define FOG_DENSITY 0.5
 
-vec4 fog (vec4 a, vec3 viewPos, vec3 worldPos)
+vec4 fog (float skylightFactor, vec4 a, vec3 viewPos, vec3 worldPos)
 {
     float zigZagTime = abs(frx_worldTime()-0.5);
     float timeFactor = l2_clampScale(0.45, 0.5, zigZagTime) + l2_clampScale(0.05, 0.0, zigZagTime);
@@ -69,7 +69,7 @@ vec4 fog (vec4 a, vec3 viewPos, vec3 worldPos)
     // float fog_noise = snoise(worldPos.xz * FOG_NOISE_SCALE + frx_renderSeconds() * FOG_NOISE_SPEED) * FOG_NOISE_HEIGHT;
     float heightFactor = l2_clampScale(FOG_TOP /*+ fog_noise*/, FOG_BOTTOM, worldPos.y);
 
-    float fogFactor = FOG_DENSITY * distFactor * heightFactor * timeFactor;
+    float fogFactor = FOG_DENSITY * distFactor * heightFactor * timeFactor * skylightFactor;
     return vec4(mix(a.rgb, frx_vanillaClearColor(), fogFactor), a.a);
 }
 
@@ -105,7 +105,7 @@ vec4 hdr_shaded_color(vec2 uv, sampler2D scolor, sampler2D sdepth, sampler2D sli
     if (mathurt) a.r += 0.5;
 
     // PERF: don't shade past max fog distance
-    return fog(a, viewPos, worldPos);
+    return fog(light.y, a, viewPos, worldPos);
 }
 
 void main()
