@@ -4,6 +4,7 @@
 #include frex:shaders/lib/noise/noise2d.glsl
 #include frex:shaders/api/sampler.glsl
 #include frex:shaders/api/view.glsl
+#include frex:shaders/api/world.glsl
 #include frex:shaders/api/material.glsl
 #include lumi:shaders/lib/util.glsl
 #include lumi:shaders/lib/fog.glsl
@@ -105,7 +106,7 @@ vec4 hdr_shaded_color(vec2 uv, sampler2D scolor, sampler2D sdepth, sampler2D sli
     if (mathurt) a.r += 0.5;
 
     // PERF: don't shade past max fog distance
-    return fog(light.y, a, viewPos, worldPos);
+    return fog(frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? light.y : 1.0, a, viewPos, worldPos);
 }
 
 void main()
