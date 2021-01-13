@@ -26,14 +26,16 @@ varying float v_aspect_adjuster;
 void main()
 {
     vec4 solid = texture2D(u_hdr_solid, v_texcoord);
-    vec4 solid_swap = smartDeNoise(u_hdr_solid_swap, v_texcoord, 3.0, 3.0, 0.3);
+    float solid_roughness = texture2D(u_hdr_solid_swap, v_texcoord).a;
+    vec4 solid_swap = smartDeNoise(u_hdr_solid_swap, v_texcoord, 3.0, 3.0, 0.05 + solid_roughness);
     if (solid.a > 0.01) {
         solid = ldr_tonemap(solid + solid_swap);
     }
     float depth_solid = texture2D(u_solid_depth, v_texcoord).r;
     
-    vec4 translucent_swap = smartDeNoise(u_hdr_translucent_swap, v_texcoord, 3.0, 3.0, 0.3);
     vec4 translucent = texture2D(u_hdr_translucent, v_texcoord);
+    float translucent_roughness = texture2D(u_hdr_translucent_swap, v_texcoord).a;
+    vec4 translucent_swap = smartDeNoise(u_hdr_translucent_swap, v_texcoord, 3.0, 3.0, 0.05 + translucent_roughness);
     translucent = ldr_tonemap(translucent + translucent_swap * step(0.1, translucent.a));
     float depth_translucent = texture2D(u_translucent_depth, v_texcoord).r;
  

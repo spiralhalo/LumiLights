@@ -106,8 +106,10 @@ void main()
     vec3 solid_translucent = work_on_pair(solid_base, solid_albedo, u_solid_depth, u_light_solid, u_normal_solid, u_material_solid, u_translucent_color, u_translucent_depth, u_normal_translucent, 0.0);
     vec3 translucent_solid       = work_on_pair(translucent_base, translucent_albedo, u_translucent_depth, u_light_translucent, u_normal_translucent, u_material_translucent, u_solid_color, u_solid_depth, u_normal_solid, 1.0);
     vec3 translucent_translucent = work_on_pair(translucent_base, translucent_albedo, u_translucent_depth, u_light_translucent, u_normal_translucent, u_material_translucent, u_translucent_color, u_translucent_depth, u_normal_translucent, 0.0);
-    gl_FragData[0] = vec4(solid_solid + solid_translucent, 0.0);
-    gl_FragData[1] = vec4(translucent_solid + translucent_translucent, 0.0);
+    float roughness1 = texture2DLod(u_material_solid, v_texcoord, 0).x;
+    float roughness2 = texture2DLod(u_material_translucent, v_texcoord, 0).x;
+    gl_FragData[0] = vec4(solid_solid + solid_translucent, roughness1);
+    gl_FragData[1] = vec4(translucent_solid + translucent_translucent, roughness2);
 }
 
 const float JITTER_STRENGTH = 0.3;
