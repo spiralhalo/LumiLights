@@ -17,19 +17,6 @@
 const float pbr_specularBloomStr = 0.01;
 const float pbr_specularAlphaStr = 0.1;
 
-vec3 pbr_specularBRDF(float roughness, vec3 radiance, vec3 halfway, vec3 lightDir, vec3 viewDir, vec3 normal, vec3 fresnel, float NdotL)
-{
-	// cook-torrance brdf
-	float distribution = pbr_distributionGGX(normal, halfway, roughness);
-	float geometry     = pbr_geometrySmith(normal, viewDir, lightDir, roughness);
-
-	vec3  num   = distribution * geometry * fresnel;
-	float denom = 4.0 * pbr_dot(normal, viewDir) * NdotL;
-
-	vec3  specular = num / max(denom, 0.001);
-	return specular * radiance * NdotL;
-}
-
 vec3 pbr_lightCalc(vec3 albedo, float pbr_roughness, float pbr_metallic, vec3 pbr_f0, vec3 radiance, vec3 lightDir, vec3 viewDir, vec3 normal, bool diffuseOn, bool isAmbiance, float haloBlur, inout vec3 specularAccu)
 {
 	vec3 halfway = normalize(viewDir + lightDir);
