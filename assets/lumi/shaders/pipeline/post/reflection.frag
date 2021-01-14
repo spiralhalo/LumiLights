@@ -3,7 +3,7 @@
 #include frex:shaders/api/world.glsl
 #include frex:shaders/lib/math.glsl
 #include lumi:shaders/lib/util.glsl
-#include lumi:shaders/lib/pbr_shading.glsl
+#include lumi:shaders/lib/pbr.glsl
 #include lumi:reflection_config
 
 /*******************************************************
@@ -112,6 +112,16 @@ void main()
     gl_FragData[1] = vec4(translucent_solid.rgb * (1.0 - translucent_translucent.a) + translucent_translucent.rgb, roughness2);
 }
 
+
+vec3 pbr_lightCalc(float roughness, vec3 f0, vec3 radiance, vec3 lightDir, vec3 viewDir, vec3 normal)
+{
+	vec3 halfway = normalize(viewDir + lightDir);
+	vec3 fresnel = pbr_fresnelSchlick(pbr_dot(viewDir, halfway), f0);
+	float NdotL = pbr_dot(normal, lightDir);
+
+	return pbr_specularBRDF(roughness, radiance, halfway, lightDir, viewDir, normal, fresnel, NdotL);
+}
+
 const float JITTER_STRENGTH = 0.2;
 
 vec4 work_on_pair(
@@ -129,7 +139,6 @@ vec4 work_on_pair(
 )
 {
     vec4 noreturn = vec4(0.0);
-    vec3 dummy    = vec3(0.0);
     vec4 material = texture2DLod(reflector_material, v_texcoord, 0);
     vec3 worldNormal = coords_normal(v_texcoord, reflector_normal);
     float gloss   = 1.0 - material.x;
@@ -160,7 +169,7 @@ vec4 work_on_pair(
             reflected = texture2D(reflected_color, result.reflected_uv);
         }
         // mysterious roughness hax
-        return vec4(pbr_lightCalc(albedo, 0.4 + material.x * 0.6, material.y, f0, reflected.rgb * base_color.a * gloss, unit_march * frx_normalModelMatrix(), unit_view * frx_normalModelMatrix(), worldNormal, true, false, 0.0, dummy), reflected.a);
+        return vec4(pbr_lightCalc(0.4 + material.x * 0.6, f0, reflected.rgb * base_color.a * gloss, unit_march * frx_normalModelMatrix(), unit_view * frx_normalModelMatrix(), worldNormal), reflected.a);
     } else return noreturn;
 }
 
