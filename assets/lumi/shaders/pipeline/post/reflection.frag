@@ -68,6 +68,7 @@ struct rt_Result
 {
     vec2 reflected_uv;
     bool hit;
+    int hits;
 };
 
 rt_Result rt_reflection(
@@ -122,6 +123,7 @@ vec3 pbr_lightCalc(float roughness, vec3 f0, vec3 radiance, vec3 lightDir, vec3 
 	return pbr_specularBRDF(roughness, radiance, halfway, lightDir, viewDir, normal, fresnel, NdotL);
 }
 
+const int HITCOUNT_THRESHOLD = MULTIPLICATIVE_REFLECTION_STEPS / 2;
 const float JITTER_STRENGTH = 0.2;
 
 vec4 work_on_pair(
@@ -163,6 +165,7 @@ vec4 work_on_pair(
             } else {
                 reflected.rgb = v_skycolor;
             }
+            reflected.rgb *= result.hits > HITCOUNT_THRESHOLD ? 0.0 : 1.0;
             reflected.rgb *= fallback;
             reflected.a = fallback;
         } else {
@@ -191,6 +194,7 @@ rt_Result rt_reflection(
     bool backface;
     vec3 reflectedNormal;
     
+    int hits = 0;
     int steps = 0;
     int refine_steps = 0;
     while (steps < max_steps) {
@@ -202,19 +206,22 @@ rt_Result rt_reflection(
         // TODO: handle diffuse (normal = 1.0, 1.0, 1.0) PROPERLY
         reflectedNormal = coords_normal(current_uv, reflected_normal);
         backface = dot(unit_march, normal_matrix * normalize(reflectedNormal)) > 0;
-        if (delta_z > 0 && delta_z < hitbox_z && (!backface || !diffuseCheck(reflectedNormal))) {
-            //refine
-            while (current_ray_length > init_ray_length * init_ray_length && refine_steps < max_steps) {
-                ray = abs(delta_z) * unit_march;
-                current_ray_length = abs(delta_z);
-                if (ray_view.z > current_view.z) ray_view += ray;
-                else ray_view -= ray;
-                current_uv = coords_uv(ray_view, projection);
-                current_view = coords_view(current_uv, inv_projection, reflected_depth);
-                delta_z = current_view.z - ray_view.z;
-                refine_steps ++;
+        if (delta_z > 0 && (!backface || !diffuseCheck(reflectedNormal))) {
+            hits ++;
+            if (delta_z < hitbox_z) {
+                //refine
+                while (current_ray_length > init_ray_length * init_ray_length && refine_steps < max_steps) {
+                    ray = abs(delta_z) * unit_march;
+                    current_ray_length = abs(delta_z);
+                    if (ray_view.z > current_view.z) ray_view += ray;
+                    else ray_view -= ray;
+                    current_uv = coords_uv(ray_view, projection);
+                    current_view = coords_view(current_uv, inv_projection, reflected_depth);
+                    delta_z = current_view.z - ray_view.z;
+                    refine_steps ++;
+                }
+                return rt_Result(current_uv, true, hits);
             }
-            return rt_Result(current_uv, /*fresnel,*/ true);
         }
         if (steps > constant_steps && current_ray_length < max_ray_length) {
             ray *= length_multiplier;
@@ -222,7 +229,5 @@ rt_Result rt_reflection(
         }
         steps ++;
     }
-    // Sky reflection
-    // if (sky(current_uv) && ray_view.z < 0) return current_uv;
-    return rt_Result(current_uv, /*fresnel,*/ false);
+    return rt_Result(current_uv, false, hits);
 }
