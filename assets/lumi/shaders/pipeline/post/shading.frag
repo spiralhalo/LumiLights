@@ -85,21 +85,22 @@ vec4 hdr_shaded_color(vec2 uv, sampler2D scolor, sampler2D sdepth, sampler2D sli
         return vec4(a.rgb, 0.0);
     }
 
-    vec3  normal    = texture2DLod(snormal, uv, 0.0).xyz;
+    vec3  normal    = texture2DLod(snormal, uv, 0.0).xyz * 2.0 - 1.0;
     vec4  light     = texture2DLod(slight, uv, 0.0);
     vec3  material  = texture2DLod(smaterial, uv, 0.0).xyz;
+    float roughness = min(1.0, 1.02 * material.x);
+    float metallic  = material.y;
     vec3  viewPos   = coords_view(uv, frx_inverseProjectionMatrix(), depth);
     vec3  worldPos  = frx_cameraPos() + (frx_inverseViewMatrix() * vec4(viewPos, 1.0)).xyz;
     float f0        = material.z;
     float bloom_raw = light.z * 2.0 - 1.0;
-    bool  diffuse   = normal.x + normal.y + normal.z < 2.5;
+    bool  diffuse   = material.x < 1.0;
     bool  matflash  = f0 > 0.95;
     bool  mathurt   = f0 > 0.85 && !matflash;
     // return vec4(coords_view(uv, frx_inverseProjectionMatrix(), depth), 1.0);
 
     bloom_out = max(0.0, bloom_raw);
-    normal = diffuse ? (normal * 2.0 - 1.0) : vec3(.0, 1.0, .0);
-    pbr_shading(a, bloom_out, viewPos, light.xy, normal, material.x, material.y, f0 > 0.7 ? 0.0 : material.z, diffuse, translucent);
+    pbr_shading(a, bloom_out, viewPos, light.xy, normal, roughness, metallic, f0 > 0.7 ? 0.0 : material.z, diffuse, translucent);
 
     float ao_shaded = 1.0 + min(0.0, bloom_raw);
     a.rgb *= ao_shaded * ao_shaded;

@@ -92,11 +92,6 @@ vec4 work_on_pair(
     float fallback
 );
 
-bool diffuseCheck(vec3 normal)
-{
-    return (normal.x + normal.y + normal.z < 2.5);
-}
-
 void main()
 {
     vec4 solid_base = texture2D(u_solid_color, v_texcoord);
@@ -144,7 +139,7 @@ vec4 work_on_pair(
     vec4 material = texture2DLod(reflector_material, v_texcoord, 0);
     vec3 worldNormal = coords_normal(v_texcoord, reflector_normal);
     float gloss   = 1.0 - material.x;
-    if (gloss > 0.01 && material.a > 0.0 && diffuseCheck(worldNormal)) {
+    if (gloss > 0.01 && material.a > 0.0) {
         vec3 ray_view  = coords_view(v_texcoord, frx_inverseProjectionMatrix(), reflector_depth);
         vec3 ray_world = coords_world(ray_view, frx_inverseViewMatrix());
         vec3 jitter    = 2.0 * vec3(frx_noise2d(ray_world.yz), frx_noise2d(ray_world.zx), frx_noise2d(ray_world.xy)) - 1.0;
@@ -206,7 +201,7 @@ rt_Result rt_reflection(
         // TODO: handle diffuse (normal = 1.0, 1.0, 1.0) PROPERLY
         reflectedNormal = coords_normal(current_uv, reflected_normal);
         backface = dot(unit_march, normal_matrix * normalize(reflectedNormal)) > 0;
-        if (delta_z > 0 && (!backface || !diffuseCheck(reflectedNormal))) {
+        if (delta_z > 0 && !backface) {
             hits ++;
             if (delta_z < hitbox_z) {
                 //refine
