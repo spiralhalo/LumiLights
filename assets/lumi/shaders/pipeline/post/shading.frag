@@ -61,6 +61,7 @@ vec4 fog (float skylightFactor, vec4 a, vec3 viewPos, vec3 worldPos)
 {
     float zigZagTime = abs(frx_worldTime()-0.5);
     float timeFactor = l2_clampScale(0.45, 0.5, zigZagTime) + l2_clampScale(0.05, 0.0, zigZagTime);
+    timeFactor = frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? timeFactor : 1.0;
 
     // TODO: retrieve fog distance from render distance ?
     // TODO: use projection z (linear depth) instead of viewPos.z ?
