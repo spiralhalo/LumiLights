@@ -1,3 +1,5 @@
+#include lumi:shaders/lib/util.glsl
+
 /*******************************************************
  *  lumi:shaders/lib/fast_gaussian_blur.glsl           *
  *******************************************************
@@ -39,7 +41,7 @@ vec4 blur13(sampler2D image, vec2 uv, vec2 resolution, vec2 direction)
  *  published by the Free Software Foundation, Inc.    *
  *******************************************************/
 
-#define blur13depthOf(s, uv) texture2D(s, uv).r
+#define blur13depthOf(s, uv) ldepth(texture2D(s, uv).r)
 #define blue13depthDiffFac(f, s, uv, t) (abs(blur13depthOf(s, uv) - f) < t ? 1.0 : 0.0)
 vec4 blur13withDepth(sampler2D image, sampler2D depth, float depthThreshold, vec2 uv, vec2 resolution, vec2 direction)
 {
