@@ -27,7 +27,7 @@
 		solidTerrain: "solid",
 		translucentTerrain: "translucent",
 		translucentEntity: "solid",
-		weather: "clouds",
+		weather: "weather",
 		clouds: "clouds",
 		// TODO: segregate solid particles
 		translucentParticles: "solid"

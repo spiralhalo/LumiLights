@@ -28,7 +28,7 @@
     fabulousTargets: {
         entity: "default",
         particles: "default",
-        weather: "fab_clouds",
+        weather: "fab_weather",
         clouds: "fab_clouds",
         translucent: "fab_translucent"
     },
@@ -91,6 +91,7 @@
                 "u_hdr_solid", "u_hdr_solid_swap", "u_solid_depth",
                 "u_hdr_translucent", "u_hdr_translucent_swap", "u_translucent_depth",
                 "u_clouds", "u_clouds_depth",
+                "u_weather", "u_weather_depth",
             ]
         }
     ],
@@ -108,6 +109,10 @@
             }, {
                 name: "clear_clouds",
                 framebuffer: "clouds",
+                program: "frex_clear"
+            }, {
+                name: "clear_weather",
+                framebuffer: "weather",
                 program: "frex_clear"
             }
         ]
@@ -143,7 +148,8 @@
                 samplerImages: [
                     "solid_shaded", "solid_shaded_swap", "solid_depth",
                     "translucent_shaded", "translucent_shaded_swap", "translucent_depth",
-                    "clouds", "clouds_depth"]
+                    "clouds", "clouds_depth",
+                    "weather", "weather_depth"]
             }
         ]
     },
@@ -290,6 +296,31 @@
                 {name: "TEXTURE_COMPARE_MODE", val: "NONE"}
             ]
         },
+        /* WEATHER */
+        {
+            name: "weather",
+            lod: 0,
+            internalFormat: "RGBA8",
+            pixelFormat: "RGBA",
+            pixelDataType: "UNSIGNED_BYTE",
+            target: "TEXTURE_2D",
+            texParams: [
+                {name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
+                {name: "TEXTURE_WRAP_S", val: "CLAMP"}, {name: "TEXTURE_WRAP_T", val: "CLAMP"}
+            ]
+        }, {
+            name: "weather_depth",
+            lod: 0,
+            internalFormat: "DEPTH_COMPONENT",
+            pixelFormat: "DEPTH_COMPONENT",
+            pixelDataType: "FLOAT",
+            target: "TEXTURE_2D",
+            texParams: [
+                {name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
+                {name: "TEXTURE_WRAP_S", val: "CLAMP"}, {name: "TEXTURE_WRAP_T", val: "CLAMP"}
+                {name: "TEXTURE_COMPARE_MODE", val: "NONE"}
+            ]
+        },
         /* SHADING SOLID */
         {
             name: "solid_shaded",
@@ -368,6 +399,10 @@
             name: "fab_clouds",
                 depthAttachment: {image: "clouds_depth"},
                 colorAttachments: [{image: "clouds"}]
+        }, {
+            name: "fab_weather",
+                depthAttachment: {image: "weather_depth"},
+                colorAttachments: [{image: "weather"}]
         },
         /* FORWARD */
         {
@@ -392,6 +427,10 @@
             name: "clouds",
             depthAttachment: {image: "clouds_depth", clearDepth: 1.0},
             colorAttachments: [{image: "clouds", clearColor: 0x00000000}]
+        }, {
+            name: "weather",
+            depthAttachment: {image: "weather_depth", clearDepth: 1.0},
+            colorAttachments: [{image: "weather", clearColor: 0x00000000}]
         },
         /* DEFERRED SHADING */
         {
