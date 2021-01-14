@@ -92,8 +92,8 @@ void main()
     depth_layers[0] = depth_solid;
     active_layers = 1;
 
-    try_insert(clouds, depth_clouds);
     try_insert(translucent, depth_translucent);
+    try_insert(clouds, depth_clouds);
     try_insert(weather, depth_weather);
     
     vec3 c = color_layers[0].rgb;

@@ -106,6 +106,8 @@ vec4 hdr_shaded_color(vec2 uv, sampler2D scolor, sampler2D sdepth, sampler2D sli
     if (matflash) a.rgb += 1.0;
     if (mathurt) a.r += 0.5;
 
+    a.a = min(1.0, a.a);
+
     // PERF: don't shade past max fog distance
     return fog(frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? light.y : 1.0, a, viewPos, worldPos);
 }
