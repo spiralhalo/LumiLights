@@ -72,7 +72,8 @@ void main()
     vec2 variable_blur_solid = vec2(solid_roughness) * (1.0 - ldepth(depth_solid));
     vec4 solid_swap = blur13withDepth(u_hdr_solid_swap, u_solid_depth, blurDepthThreshold, v_texcoord, frxu_size, variable_blur_solid);
     if (solid.a > 0.01) {
-        solid = ldr_tonemap(solid + solid_swap);
+        solid.rgb = solid.rgb + solid_swap.rgb;
+        solid = ldr_tonemap(solid);
     }
     
     vec4 translucent = texture2D(u_hdr_translucent, v_texcoord);
@@ -80,7 +81,8 @@ void main()
     float depth_translucent = texture2D(u_translucent_depth, v_texcoord).r;
     vec2 variable_blur_translucent = vec2(translucent_roughness) * (1.0 - ldepth(depth_translucent));
     vec4 translucent_swap = blur13withDepth(u_hdr_translucent_swap, u_translucent_depth, blurDepthThreshold, v_texcoord, frxu_size, variable_blur_translucent);
-    translucent = ldr_tonemap(translucent + translucent_swap * step(0.1, translucent.a));
+    translucent.rgb = translucent.rgb + translucent_swap.rgb * step(0.1, translucent.a);
+    translucent = ldr_tonemap(translucent);
 
     float depth_clouds = texture2D(u_clouds_depth, v_texcoord).r;
     vec4 clouds = blur13(u_clouds, v_texcoord, frxu_size, vec2(1.0, 1.0));
