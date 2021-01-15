@@ -160,7 +160,7 @@ vec4 work_on_pair(
             } else {
                 reflected.rgb = v_skycolor;
             }
-            reflected.rgb *= result.hits > HITCOUNT_THRESHOLD ? 0.0 : 1.0;
+            reflected.rgb *= result.hits > HITCOUNT_THRESHOLD ? 0.1 : 1.0;
             reflected.rgb *= fallback;
             reflected.a = fallback;
         } else {
