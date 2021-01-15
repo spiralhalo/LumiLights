@@ -48,6 +48,15 @@ vec2 coords_uv(vec3 view, mat4 projection)
 	return clip.xy * 0.5 + 0.5;
 }
 
+/* DEVNOTE: on high skyscrapers, high fog look good
+ * on low forests however, the high fog looks atrocious.
+ * the ideal solution would be a fog that is "highest block-conscious"
+ * but how is that possible? Make sky bloom cancel out the fog, perhaps?
+ *
+ * There is also the idea of making the fog depend on where
+ * you look vertically, but that would be NAUSEATINGLY BAD.
+ */
+
 #define WATER_LEVEL 62.0
 #define FOG_NOISE_SCALE 0.125
 #define FOG_NOISE_SPEED 0.25
@@ -55,7 +64,7 @@ vec2 coords_uv(vec3 view, mat4 projection)
 #define FOG_TOP WATER_LEVEL + 128.0
 #define FOG_BOTTOM WATER_LEVEL - 8.0
 #define FOG_FAR 128.0
-#define FOG_NEAR 4.0
+#define FOG_NEAR 32.0
 #define FOG_DENSITY 0.5
 
 vec4 fog (float skylightFactor, vec4 a, vec3 viewPos, vec3 worldPos)
