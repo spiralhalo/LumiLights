@@ -63,8 +63,7 @@ void pbr_shading(inout vec4 a, inout float bloom, vec3 viewPos, vec2 light, vec3
     float dramaticBloom = 0;
 #endif
 
-    a.rgb = albedo;
-    a.rgb *= emissive;
+    a.rgb = albedo * emissive;
 
 #if HANDHELD_LIGHT_RADIUS != 0
     if (frx_heldLight().w > 0) {
