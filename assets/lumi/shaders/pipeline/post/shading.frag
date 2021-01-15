@@ -71,7 +71,7 @@ vec2 coords_uv(vec3 view, mat4 projection)
 #define UNDERWATER_FOG_NEAR UNDERWATER_FOG_NEAR_CHUNKS * 16.0
 #define UNDERWATER_FOG_DENSITY UNDERWATER_FOG_DENSITY_RELATIVE / 20.0
 
-vec4 fog (float skylightFactor, vec4 a, vec3 viewPos, vec3 worldPos)
+vec4 fog (float skylightFactor, vec4 a, vec3 viewPos, vec3 worldPos, bool translucent, inout float bloom)
 {
     float zigZagTime = abs(frx_worldTime()-0.5);
     float timeFactor = (l2_clampScale(0.45, 0.5, zigZagTime) + l2_clampScale(0.05, 0.0, zigZagTime));
@@ -111,7 +111,10 @@ vec4 fog (float skylightFactor, vec4 a, vec3 viewPos, vec3 worldPos)
     distFactor *= distFactor;
 
     fogFactor = clamp(fogFactor * distFactor, 0.0, 1.0);
-    return vec4(mix(a.rgb, v_skycolor, fogFactor), a.a);
+    
+    vec4 fogColor = vec4(v_skycolor, 1.0);
+    bloom = mix(bloom, 0.0, fogFactor);
+    return mix(a, fogColor, fogFactor);
 }
 
 vec4 hdr_shaded_color(vec2 uv, sampler2D scolor, sampler2D sdepth, sampler2D slight, sampler2D snormal, sampler2D smaterial, bool translucent, out float bloom_out)
@@ -150,7 +153,7 @@ vec4 hdr_shaded_color(vec2 uv, sampler2D scolor, sampler2D sdepth, sampler2D sli
     a.a = min(1.0, a.a);
 
     // PERF: don't shade past max fog distance
-    return fog(frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? light.y * frx_ambientIntensity() : 1.0, a, viewPos, worldPos);
+    return fog(frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? light.y * frx_ambientIntensity() : 1.0, a, viewPos, worldPos, translucent, bloom_out);
 }
 
 void main()
