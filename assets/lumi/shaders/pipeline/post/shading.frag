@@ -52,7 +52,7 @@ vec2 coords_uv(vec3 view, mat4 projection)
 #define FOG_NOISE_SCALE 0.125
 #define FOG_NOISE_SPEED 0.25
 #define FOG_NOISE_HEIGHT 4.0
-#define FOG_TOP WATER_LEVEL + 32.0
+#define FOG_TOP WATER_LEVEL + 128.0
 #define FOG_BOTTOM WATER_LEVEL - 8.0
 #define FOG_FAR 128.0
 #define FOG_NEAR 4.0
