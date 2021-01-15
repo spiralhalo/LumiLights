@@ -85,16 +85,26 @@ vec4 fog (float skylightFactor, vec4 a, vec3 viewPos, vec3 worldPos)
     fogFar = max(fogNear, fogFar);
 
     float fogTop = FOG_TOP * 0.5 + 0.5 * FOG_TOP * timeFactor;
-
-    // TODO: retrieve fog distance from render distance ?
-    // TODO: use projection z (linear depth) instead of viewPos.z ? alternatively length(viewPos) but might be expensive
-    float distFactor = l2_clampScale(fogNear, fogFar, -viewPos.z);
-    distFactor *= distFactor;
     
     // float fog_noise = snoise(worldPos.xz * FOG_NOISE_SCALE + frx_renderSeconds() * FOG_NOISE_SPEED) * FOG_NOISE_HEIGHT;
-    float heightFactor = (frx_playerFlag(FRX_PLAYER_EYE_IN_FLUID) ? 1.0 : l2_clampScale(FOG_TOP /*+ fog_noise*/, FOG_BOTTOM, worldPos.y));
+    float heightFactor = l2_clampScale(FOG_TOP /*+ fog_noise*/, FOG_BOTTOM, worldPos.y);
+    heightFactor = frx_playerFlag(FRX_PLAYER_EYE_IN_FLUID) ? 1.0 : heightFactor;
 
-    float fogFactor = fogDensity * distFactor * heightFactor * skylightFactor;
+    float fogFactor = fogDensity * heightFactor * skylightFactor;
+
+    if (frx_playerHasEffect(FRX_EFFECT_BLINDNESS)) {
+        float blindnessModifier = l2_clampScale(0.5, 1.0, 1.0 - frx_luminance(v_skycolor));
+        fogFar = mix(fogFar, 4.0, blindnessModifier);
+        fogNear = mix(fogNear, 0.0, blindnessModifier);
+        fogFactor = mix(fogFactor, 1.0, blindnessModifier);
+    }
+
+    // TODO: retrieve fog distance from render distance ?
+    // PERF: use projection z (linear depth) instead of length(viewPos)
+    float distFactor = l2_clampScale(fogNear, fogFar, length(viewPos));
+    distFactor *= distFactor;
+
+    fogFactor = fogFactor * distFactor;
     return vec4(mix(a.rgb, v_skycolor, fogFactor), a.a);
 }
 
