@@ -94,9 +94,15 @@ vec4 fog (float skylightFactor, vec4 a, vec3 viewPos, vec3 worldPos)
 
     if (frx_playerHasEffect(FRX_EFFECT_BLINDNESS)) {
         float blindnessModifier = l2_clampScale(0.5, 1.0, 1.0 - frx_luminance(v_skycolor));
-        fogFar = mix(fogFar, 4.0, blindnessModifier);
+        fogFar = mix(fogFar, 3.0, blindnessModifier);
         fogNear = mix(fogNear, 0.0, blindnessModifier);
         fogFactor = mix(fogFactor, 1.0, blindnessModifier);
+    }
+
+    if (frx_playerFlag(FRX_PLAYER_EYE_IN_LAVA)) {
+        fogFar = frx_playerHasEffect(FRX_EFFECT_FIRE_RESISTANCE) ? 2.5 : 0.5;
+        fogNear = 0.0;
+        fogFactor = 1.0;
     }
 
     // TODO: retrieve fog distance from render distance ?
@@ -104,7 +110,7 @@ vec4 fog (float skylightFactor, vec4 a, vec3 viewPos, vec3 worldPos)
     float distFactor = l2_clampScale(fogNear, fogFar, length(viewPos));
     distFactor *= distFactor;
 
-    fogFactor = fogFactor * distFactor;
+    fogFactor = clamp(fogFactor * distFactor, 0.0, 1.0);
     return vec4(mix(a.rgb, v_skycolor, fogFactor), a.a);
 }
 
