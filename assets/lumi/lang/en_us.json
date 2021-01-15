@@ -1,8 +1,10 @@
 {
     "pipeline.lumi_lights.name": "Lumi Lights",
     "pipeline.lumi_lights.desc": "Cool sunrise and shiny stuff methinks",
+
     "pipeline.lumi_lights_dev.name": "Lumi Lights Dev",
     "pipeline.lumi_lights_dev.desc": "Cool sunrise and buggy shadows",
+
     "config.lumi_lights.category.bloom": "Bloom",
     "config.lumi_lights.value.bloom_intensity": "Bloom Intensity",
     "config.lumi_lights.help.bloom_intensity": "Intensity of glow effect around light sources.",
@@ -12,9 +14,29 @@
     "config.lumi_lights.help.bloom_upsample_scale": "Affects Size of bloom effect around light sources.",
     "config.lumi_lights.value.bloom_cutoff": "Cutoff Threshold",
     "config.lumi_lights.help.bloom_cutoff": "Clamps low-intensity bloom edges to reduce halos and banding.",
+
     "config.lumi_lights.category.lighting": "Lighting",
     "config.lumi_lights.value.handheld_light_radius": "Held light radius",
     "config.lumi_lights.help.handheld_light_radius": "Max reach of held light source. Set to 0 to disable",
+
+    "config.lumi_lights.category.fog": "Fog",
+    "config.lumi_lights.value.fog_near_chunks": "Near chunks",
+    "config.lumi_lights.help.fog_near_chunks": "Distance where fog starts in chunks",
+    "config.lumi_lights.value.fog_far_chunks": "Far chunks",
+    "config.lumi_lights.help.fog_far_chunks": "Distance where fog gets the thickest in chunks",
+    "config.lumi_lights.value.fog_below_water_level_chunks": "Below water level chunks",
+    "config.lumi_lights.help.fog_below_water_level_chunks": "Where fog is at the thickest below water level (in chunks)",
+    "config.lumi_lights.value.fog_above_water_level_chunks": "Above water level chunks",
+    "config.lumi_lights.help.fog_above_water_level_chunks": "Where fog is at the thinnest above water level (in chunks)",
+    "config.lumi_lights.value.fog_density_relative": "Fog density",
+    "config.lumi_lights.help.fog_density_relative": "Overall density of the fog",
+    "config.lumi_lights.value.underwater_fog_near_chunks": "Near chunks (underwater)",
+    "config.lumi_lights.help.underwater_fog_near_chunks": "Distance where fog starts in chunks (underwater)",
+    "config.lumi_lights.value.underwater_fog_far_chunks": "Far chunks (underwater)",
+    "config.lumi_lights.help.underwater_fog_far_chunks": "Distance where fog gets the thickest in chunks (underwater)",
+    "config.lumi_lights.value.underwater_fog_density_relative": "Underwater fog density",
+    "config.lumi_lights.help.underwater_fog_density_relative": "Overall density of underwater fog",
+
     "config.lumi_lights.category.reflection": "Reflection",
     "config.lumi_lights.value.constant_reflection_steps": "Fine ray steps",
     "config.lumi_lights.help.constant_reflection_steps": "Constant-length ray steps for nearby reflections. High performance impact",
@@ -26,6 +48,7 @@
     "config.lumi_lights.help.reflection_ray_max_length": "Limit the length of coarse ray steps",
     "config.lumi_lights.value.reflection_ray_multiplier": "Ray length multiplier",
     "config.lumi_lights.help.reflection_ray_multiplier": "Multiplier for coarse ray steps. Higher means coarser but longer reflections",
+
     "respackopts.title.LUMI": "Lumi Lights",
     "respackopts.field.LUMI.PBR": "PBR mode",
     "respackopts.tooltip.LUMI.PBR": "Emulate fresnel effect and metals (performance impact)",

@@ -12,6 +12,7 @@
 #include lumi:shaders/lib/tonemap.glsl
 #include lumi:shaders/lib/pbr_shading.glsl
 #include lumi:shaders/internal/skybloom.glsl
+#include lumi:fog_config
 
 /*******************************************************
  *  lumi:shaders/pipeline/post/shading.frag            *
@@ -61,28 +62,39 @@ vec2 coords_uv(vec3 view, mat4 projection)
 #define FOG_NOISE_SCALE 0.125
 #define FOG_NOISE_SPEED 0.25
 #define FOG_NOISE_HEIGHT 4.0
-#define FOG_TOP WATER_LEVEL + 128.0
-#define FOG_BOTTOM WATER_LEVEL - 8.0
-#define FOG_FAR 128.0
-#define FOG_NEAR 32.0
-#define FOG_DENSITY 0.5
+#define FOG_TOP WATER_LEVEL + FOG_ABOVE_WATER_LEVEL_CHUNKS * 16.0
+#define FOG_BOTTOM WATER_LEVEL - FOG_BELOW_WATER_LEVEL_CHUNKS * 16.0
+#define FOG_FAR FOG_FAR_CHUNKS * 16.0
+#define FOG_NEAR FOG_NEAR_CHUNKS * 16.0
+#define FOG_DENSITY FOG_DENSITY_RELATIVE / 20.0
+#define UNDERWATER_FOG_FAR UNDERWATER_FOG_FAR_CHUNKS * 16.0
+#define UNDERWATER_FOG_NEAR UNDERWATER_FOG_NEAR_CHUNKS * 16.0
+#define UNDERWATER_FOG_DENSITY UNDERWATER_FOG_DENSITY_RELATIVE / 20.0
 
 vec4 fog (float skylightFactor, vec4 a, vec3 viewPos, vec3 worldPos)
 {
     float zigZagTime = abs(frx_worldTime()-0.5);
-    float timeFactor = 0.5 + 0.5 * (l2_clampScale(0.45, 0.5, zigZagTime) + l2_clampScale(0.05, 0.0, zigZagTime));
+    float timeFactor = (l2_clampScale(0.45, 0.5, zigZagTime) + l2_clampScale(0.05, 0.0, zigZagTime));
     timeFactor = frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? timeFactor : 1.0;
 
+    // TODO: blindness fog
+    // TODO: lava fog
+    float fogDensity = frx_playerFlag(FRX_PLAYER_EYE_IN_FLUID) ? UNDERWATER_FOG_DENSITY : FOG_DENSITY;
+    float fogFar = frx_playerFlag(FRX_PLAYER_EYE_IN_FLUID) ? UNDERWATER_FOG_FAR : FOG_FAR;
+    float fogNear = frx_playerFlag(FRX_PLAYER_EYE_IN_FLUID) ? UNDERWATER_FOG_NEAR : FOG_NEAR;
+    fogFar = max(fogNear, fogFar);
+
+    float fogTop = FOG_TOP * 0.5 + 0.5 * FOG_TOP * timeFactor;
+
     // TODO: retrieve fog distance from render distance ?
-    // TODO: use projection z (linear depth) instead of viewPos.z ?
-    float eyeInFluidFarFactor = frx_playerFlag(FRX_PLAYER_EYE_IN_FLUID) ? 0.1 : 1.0;
-    float distFactor = l2_clampScale(FOG_NEAR, FOG_FAR * eyeInFluidFarFactor, -viewPos.z);
+    // TODO: use projection z (linear depth) instead of viewPos.z ? alternatively length(viewPos) but might be expensive
+    float distFactor = l2_clampScale(fogNear, fogFar, -viewPos.z);
     distFactor *= distFactor;
     
     // float fog_noise = snoise(worldPos.xz * FOG_NOISE_SCALE + frx_renderSeconds() * FOG_NOISE_SPEED) * FOG_NOISE_HEIGHT;
     float heightFactor = (frx_playerFlag(FRX_PLAYER_EYE_IN_FLUID) ? 1.0 : l2_clampScale(FOG_TOP /*+ fog_noise*/, FOG_BOTTOM, worldPos.y));
 
-    float fogFactor = FOG_DENSITY * distFactor * heightFactor * skylightFactor;
+    float fogFactor = fogDensity * distFactor * heightFactor * skylightFactor;
     return vec4(mix(a.rgb, v_skycolor, fogFactor), a.a);
 }
 
@@ -121,7 +133,7 @@ vec4 hdr_shaded_color(vec2 uv, sampler2D scolor, sampler2D sdepth, sampler2D sli
     a.a = min(1.0, a.a);
 
     // PERF: don't shade past max fog distance
-    return fog(frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? light.y : 1.0, a, viewPos, worldPos);
+    return fog(frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? light.y * frx_ambientIntensity() : 1.0, a, viewPos, worldPos);
 }
 
 void main()
