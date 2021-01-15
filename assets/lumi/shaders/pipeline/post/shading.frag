@@ -119,9 +119,10 @@ vec4 hdr_shaded_color(vec2 uv, sampler2D scolor, sampler2D sdepth, sampler2D sli
     vec4 a = texture2DLod(scolor, uv, 0.0);
     float depth = texture2DLod(sdepth, uv, 0.0).r;
     if (depth == 1.0) {
+        float blindnessFactor = frx_playerHasEffect(FRX_EFFECT_BLINDNESS) ? 0.0 : 1.0;
         // the sky
-        bloom_out = l2_skyBloom();
-        return vec4(a.rgb, 0.0);
+        bloom_out = l2_skyBloom() * blindnessFactor;
+        return vec4(a.rgb * blindnessFactor, 0.0);
     }
 
     vec3  normal    = texture2DLod(snormal, uv, 0.0).xyz * 2.0 - 1.0;
