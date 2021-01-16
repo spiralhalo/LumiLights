@@ -1,4 +1,5 @@
 #include lumi:shaders/pipeline/post/common.glsl
+#include lumi:shaders/pipeline/post/common_vertex.glsl
 #include frex:shaders/api/view.glsl
 #include frex:shaders/api/world.glsl
 #include lumi:shaders/lib/util.glsl
