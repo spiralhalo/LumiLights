@@ -10,11 +10,9 @@
   lumi:shaders/pipeline/post/composite.frag
 ******************************************************/
 
-uniform sampler2D u_hdr_solid;
-uniform sampler2D u_hdr_solid_swap;
+uniform sampler2D u_combine_solid;
 uniform sampler2D u_solid_depth;
-uniform sampler2D u_hdr_translucent;
-uniform sampler2D u_hdr_translucent_swap;
+uniform sampler2D u_combine_translucent;
 uniform sampler2D u_translucent_depth;
 uniform sampler2D u_clouds;
 uniform sampler2D u_clouds_depth;
@@ -66,23 +64,11 @@ vec3 blend(vec3 dst, vec4 src)
 #define blurDepthThreshold 0.01
 void main()
 {
-    vec4 solid = texture2D(u_hdr_solid, v_texcoord);
-    float solid_roughness = texture2D(u_hdr_solid_swap, v_texcoord).a;
+    vec4 solid = texture2D(u_combine_solid, v_texcoord);
     float depth_solid = texture2D(u_solid_depth, v_texcoord).r;
-    vec2 variable_blur_solid = vec2(solid_roughness) * (1.0 - ldepth(depth_solid));
-    vec4 solid_swap = blur13withDepth(u_hdr_solid_swap, u_solid_depth, blurDepthThreshold, v_texcoord, frxu_size, variable_blur_solid);
-    if (solid.a > 0.01) {
-        solid.rgb = solid.rgb + solid_swap.rgb;
-        solid = ldr_tonemap(solid);
-    }
     
-    vec4 translucent = texture2D(u_hdr_translucent, v_texcoord);
-    float translucent_roughness = texture2D(u_hdr_translucent_swap, v_texcoord).a;
+    vec4 translucent = texture2D(u_combine_translucent, v_texcoord);
     float depth_translucent = texture2D(u_translucent_depth, v_texcoord).r;
-    vec2 variable_blur_translucent = vec2(translucent_roughness) * (1.0 - ldepth(depth_translucent));
-    vec4 translucent_swap = blur13withDepth(u_hdr_translucent_swap, u_translucent_depth, blurDepthThreshold, v_texcoord, frxu_size, variable_blur_translucent);
-    translucent.rgb = translucent.rgb + translucent_swap.rgb * step(0.1, translucent.a);
-    translucent = ldr_tonemap(translucent);
 
     float depth_clouds = texture2D(u_clouds_depth, v_texcoord).r;
     vec4 clouds = blur13(u_clouds, v_texcoord, frxu_size, vec2(1.0, 1.0));
