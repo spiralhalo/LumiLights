@@ -25,7 +25,7 @@ vec4 ldr_combine(sampler2D a, sampler2D b, sampler2D sdepth, vec2 uv)
 {
     vec4 a1 = texture2D(a, uv);
     float roughness = texture2D(b, uv).a;
-    if (roughness == 0.0) return a1; // unmanaged draw
+    if (roughness == 0.0) return vec4(ldr_tonemap3(hdr_gammaAdjust(a1.rgb)), a1.a); // unmanaged draw
     float depth = texture2D(sdepth, uv).r;
     vec2 variable_blur = vec2(roughness) * (1.0 - ldepth(depth));
     vec4 b1 = blur13withDepth(b, sdepth, blurDepthThreshold, uv, frxu_size, variable_blur);

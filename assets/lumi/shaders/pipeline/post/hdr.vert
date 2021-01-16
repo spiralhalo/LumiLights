@@ -4,21 +4,10 @@
 #include lumi:shaders/lib/util.glsl
 
 /*******************************************************
- *  lumi:shaders/pipeline/post/simple.vert             *
+ *  lumi:shaders/pipeline/post/hdr.vert                *
  *******************************************************/
 
 attribute vec2 in_uv;
-const vec3 day_sky = vec3(0.52, 0.69, 1.0);
-const vec3 day_fog = vec3(0.75, 0.84375, 1.0);
-
-vec3 calc_sky_color()
-{
-    if (frx_isWorldTheOverworld()) {
-        vec3 clear = frx_vanillaClearColor();
-        float distanceToFog = distance(normalize(clear), normalize(day_fog));
-        return mix(clear, day_sky, l2_clampScale(0.1, 0.05, distanceToFog));
-    } else return frx_vanillaClearColor();
-}
 
 void main()
 {
