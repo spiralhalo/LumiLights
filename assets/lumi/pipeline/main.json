@@ -375,7 +375,8 @@
                 {image: "solid_main", clearColor: 0x00000000},
                 {image: "light_solid", clearColor: 0x00000000},
                 {image: "normal_solid", clearColor: 0x00000000},
-                {image: "material_solid", clearColor: 0x00000000}
+                {image: "material_solid", clearColor: 0x00000000},
+                {image: "emissive"}
             ]
         }, {
             name: "translucent",

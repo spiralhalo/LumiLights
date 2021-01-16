@@ -5,6 +5,8 @@
 #include frex:shaders/api/view.glsl
 #include lumi:shaders/internal/context.glsl
 #include lumi:shaders/api/param_frag.glsl
+#include lumi:shaders/lib/tonemap.glsl
+#include lumi:shaders/lib/pbr_shading.glsl
 
 /*******************************************************
  *  lumi:shaders/pipeline/main.frag                    *
@@ -44,12 +46,21 @@ frx_FragmentData frx_createPipelineFragment() {
 void frx_writePipelineFragment(in frx_FragmentData fragData)
 {
     vec4 a = clamp(fragData.spriteColor * fragData.vertexColor, 0.0, 1.0);
-    if (frx_isGui()) {
-        if (fragData.diffuse) {
-            float diffuse = mix(pv_diffuse, 1, fragData.emissivity);
-            a.rgb *= diffuse;
-        }
-        gl_FragDepth = gl_FragCoord.z;
+    if (frx_modelOriginType() == MODEL_ORIGIN_SCREEN) {
+		if (frx_isGui() || gl_FragCoord.z < 0.5) { //hack that treats player doll as gui.
+			if (fragData.diffuse) {
+				float diffuse = mix(pv_diffuse, 1, fragData.emissivity);
+				a.rgb *= diffuse;
+			}
+		} else {
+			float bloom_out = fragData.emissivity;
+			vec3 normal = fragData.vertexNormal * frx_normalModelMatrix();
+			pbr_roughness = max(pbr_metallic * 0.5, pbr_roughness);
+    		pbr_shading(a, bloom_out, l2_viewpos, fragData.light, normal, pbr_roughness, pbr_metallic, pbr_f0, fragData.diffuse, true);
+			a = ldr_tonemap(a);
+        	gl_FragData[4] = vec4(bloom_out, 0.0, 0.0, 1.0);
+		}
+		gl_FragDepth = 0.3 + gl_FragCoord.z * 0.7; //hack that unbreaks text rendering. don't ask questions.
         gl_FragData[0] = a;
     } else {
 		vec2 light = fragData.light.xy;
