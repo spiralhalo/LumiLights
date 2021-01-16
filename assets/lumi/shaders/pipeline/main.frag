@@ -47,7 +47,7 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
 {
     vec4 a = clamp(fragData.spriteColor * fragData.vertexColor, 0.0, 1.0);
     if (frx_modelOriginType() == MODEL_ORIGIN_SCREEN) {
-		if (frx_isGui() || gl_FragCoord.z < 0.5) { //hack that treats player doll as gui.
+		if (frx_isGui() || gl_FragCoord.z < 0.6) { //hack that treats player doll as gui.
 			float diffuse = mix(pv_diffuse, 1, fragData.emissivity);
 			diffuse = frx_isGui() ? diffuse : min(1.0, 1.5 - diffuse);
 			diffuse = fragData.diffuse ? diffuse : 1.0;
