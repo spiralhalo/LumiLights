@@ -2,6 +2,7 @@
 #include frex:shaders/lib/math.glsl
 #include frex:shaders/lib/color.glsl
 #include frex:shaders/api/world.glsl
+#include lumi:shaders/lib/util.glsl
 #include lumi:shaders/lib/tonemap.glsl
 #include lumi:shaders/lib/fast_gaussian_blur.glsl
 #include lumi:shaders/lib/godrays.glsl
@@ -72,9 +73,11 @@ void main()
 
     float depth_clouds = texture2D(u_clouds_depth, v_texcoord).r;
     vec4 clouds = blur13(u_clouds, v_texcoord, frxu_size, vec2(1.0, 1.0));
+    clouds.rgb = ldr_tonemap3(hdr_gammaAdjust(clouds.rgb));
 
     float depth_weather = texture2D(u_weather_depth, v_texcoord).r;
     vec4 weather = texture2D(u_weather, v_texcoord);
+    weather.rgb = ldr_tonemap3(hdr_gammaAdjust(weather.rgb));
 
     color_layers[0] = vec4(solid. rgb, 1.0);
     depth_layers[0] = depth_solid;
