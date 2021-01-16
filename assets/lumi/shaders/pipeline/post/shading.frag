@@ -131,7 +131,7 @@ vec4 hdr_shaded_color(vec2 uv, sampler2D scolor, sampler2D sdepth, sampler2D sli
     vec3  normal    = texture2DLod(snormal, uv, 0.0).xyz * 2.0 - 1.0;
     vec4  light     = texture2DLod(slight, uv, 0.0);
     vec3  material  = texture2DLod(smaterial, uv, 0.0).xyz;
-    float roughness = min(1.0, 1.02 * material.x);
+    float roughness = material.x == 0.0 ? 1.0 : min(1.0, 1.02 * material.x);
     float metallic  = material.y;
     vec3  viewPos   = coords_view(uv, frx_inverseProjectionMatrix(), depth);
     vec3  worldPos  = frx_cameraPos() + (frx_inverseViewMatrix() * vec4(viewPos, 1.0)).xyz;
