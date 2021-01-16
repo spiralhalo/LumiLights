@@ -157,7 +157,7 @@ vec4 work_on_pair(
         float reflected_depth_value = coords_depth(result.reflected_uv, reflected_depth);
         if (reflected_depth_value == 1.0 || !result.hit || result.reflected_uv.x < 0.0 || result.reflected_uv.y < 0.0 || result.reflected_uv.x > 1.0 || result.reflected_uv.y > 1.0) {
             if (frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT)) {
-                reflected.rgb = v_skycolor * smoothstep(-0.05, 0.0, dot(unit_march, v_up)) * skylight_adjust(sky_light, frx_ambientIntensity());
+                reflected.rgb = v_skycolor * skylight_adjust(sky_light, frx_ambientIntensity());
             } else {
                 reflected.rgb = v_skycolor;
             }
