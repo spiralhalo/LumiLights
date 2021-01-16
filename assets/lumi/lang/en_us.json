@@ -5,6 +5,9 @@
     "pipeline.lumi_lights_dev.name": "Lumi Lights Dev",
     "pipeline.lumi_lights_dev.desc": "Cool sunrise and buggy shadows",
 
+    "pipeline.kaleidoskop.name": "KALEIDOSKOP",
+    "pipeline.kaleidoskop.desc": "A trip to the moon",
+
     "config.lumi_lights.category.bloom": "Bloom",
     "config.lumi_lights.value.bloom_intensity": "Bloom Intensity",
     "config.lumi_lights.help.bloom_intensity": "Intensity of glow effect around light sources.",
