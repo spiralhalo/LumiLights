@@ -33,6 +33,10 @@
         translucent: "fab_translucent"
     },
 
+    include: [
+        "lumi:pipeline/reflection.json"
+    ],
+
     programs: [
         {
             name: "shading",
@@ -46,25 +50,6 @@
                 "u_material_solid",
 
                 "u_translucent_color",
-                "u_translucent_depth",
-                "u_light_translucent",
-                "u_normal_translucent",
-                "u_material_translucent",
-            ]
-        }, {
-            name: "reflection",
-            vertexSource: "lumi:shaders/pipeline/post/hdr.vert",
-            fragmentSource: "lumi:shaders/pipeline/post/reflection.frag",
-            samplers: [
-                "u_solid_color",
-                "u_solid_albedo",
-                "u_solid_depth",
-                "u_light_solid",
-                "u_normal_solid",
-                "u_material_solid",
-
-                "u_translucent_color",
-                "u_translucent_albedo",
                 "u_translucent_depth",
                 "u_light_translucent",
                 "u_normal_translucent",
@@ -333,32 +318,10 @@
                 {name: "TEXTURE_MIN_FILTER", val: "LINEAR"}, {name: "TEXTURE_MAG_FILTER", val: "LINEAR"},
                 {name: "TEXTURE_WRAP_S", val: "CLAMP"}, {name: "TEXTURE_WRAP_T", val: "CLAMP"}
             ]
-        }, {
-            name: "solid_shaded_swap",
-            lod: 0,
-            internalFormat: "RGBA16F",
-            pixelFormat: "RGBA",
-            pixelDataType: "FLOAT",
-            target: "TEXTURE_2D",
-            texParams: [
-                {name: "TEXTURE_MIN_FILTER", val: "LINEAR"}, {name: "TEXTURE_MAG_FILTER", val: "LINEAR"},
-                {name: "TEXTURE_WRAP_S", val: "CLAMP"}, {name: "TEXTURE_WRAP_T", val: "CLAMP"}
-            ]
-        },
+        }, 
         /* SHADING TRANSLUCENT */
         {
             name: "translucent_shaded",
-            lod: 0,
-            internalFormat: "RGBA16F",
-            pixelFormat: "RGBA",
-            pixelDataType: "FLOAT",
-            target: "TEXTURE_2D",
-            texParams: [
-                {name: "TEXTURE_MIN_FILTER", val: "LINEAR"}, {name: "TEXTURE_MAG_FILTER", val: "LINEAR"},
-                {name: "TEXTURE_WRAP_S", val: "CLAMP"}, {name: "TEXTURE_WRAP_T", val: "CLAMP"}
-            ]
-        }, {
-            name: "translucent_shaded_swap",
             lod: 0,
             internalFormat: "RGBA16F",
             pixelFormat: "RGBA",
@@ -439,12 +402,6 @@
                 {image: "solid_shaded", clearColor: 0x00000000},
                 {image: "translucent_shaded", clearColor: 0x00000000},
                 {image: "emissive", clearColor: 0x00000000},
-            ]
-        }, {
-            name: "reflection",
-            colorAttachments: [
-                {image: "solid_shaded_swap", clearColor: 0x00000000},
-                {image: "translucent_shaded_swap", clearColor: 0x00000000}
             ]
         }, {
             name: "refraction",

@@ -1,0 +1,27 @@
+{
+    programs: [
+        {
+            // utility, does what it says on the tin
+            name: "copy",
+            vertexSource: "lumi:shaders/pipeline/post/simple.vert",
+            fragmentSource: "lumi:shaders/pipeline/post/copy.frag",
+            samplers: ["u_input"]
+        }
+    ],
+    
+    images: [
+        // attached as secondary in managed draws to capture emissive layer
+        {
+                name: "emissive",
+                lod: 0,
+                internalFormat: "RGBA8",
+                target: "TEXTURE_2D",
+                texParams: [
+                        {name: "TEXTURE_MIN_FILTER", val: "LINEAR"},
+                        {name: "TEXTURE_MAG_FILTER", val: "LINEAR"},
+                        {name: "TEXTURE_WRAP_S", val: "CLAMP"},
+                        {name: "TEXTURE_WRAP_T", val: "CLAMP"}
+                ]
+        },
+    ]
+}
