@@ -68,10 +68,10 @@ vec4 work_on_pair(
             reflected.rgb *= fallback;
             reflected.a = fallback;
         } else {
-            vec4 reflected_shaded = texture2D(reflected_color, result.reflected_uv);
-            vec4 reflected_combine = texture2D(reflected_combine, result.reflected_uv);
-            float reflected_normal_y = abs(2.0 * texture2D(reflected_normal, result.reflected_uv).y - 1.0);
-            reflected = mix(reflected_combine, reflected_shaded, abs(reflected_normal_y - abs(worldNormal.y)));
+            vec4 reflectedShaded = texture2D(reflected_color, result.reflected_uv);
+            vec4 reflectedCombine = texture2D(reflected_combine, result.reflected_uv);
+            vec3 reflectedNormal = coords_normal(result.reflected_uv, reflected_normal);
+            reflected = mix(reflectedShaded, reflectedCombine, l2_clampScale(0.5, 1.0, -dot(worldNormal, reflectedNormal)));
         }
         // mysterious roughness hax
         return vec4(pbr_lightCalc(0.4 + roughness * 0.6, f0, reflected.rgb * base_color.a * gloss, unit_march * frx_normalModelMatrix(), unit_view * frx_normalModelMatrix(), worldNormal), reflected.a);
