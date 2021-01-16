@@ -1,6 +1,7 @@
 #include frex:shaders/lib/math.glsl
 #include frex:shaders/api/world.glsl
 #include frex:shaders/api/view.glsl
+#include lumi:lighting_config
 #include lumi:shaders/lib/lightsource.glsl
 #include lumi:shaders/lib/pbr.glsl
 #include lumi:shaders/lib/util.glsl
@@ -98,7 +99,7 @@ void pbr_shading(inout vec4 a, inout float bloom, vec3 viewPos, vec2 light, vec3
                 dramaticBloom = frx_luminance(sunIrradiance);
             #endif
         } else {
-            #ifndef LUMI_TrueDarkness_DisableMoonlight
+            #ifndef TRUE_DARKNESS_MOONLIGHT
                 vec3 moonRadiance = l2_moonRadiance(light.y, frx_worldTime(), frx_ambientIntensity());
                 a.rgb += pbr_lightCalc(albedo, pbr_roughness, pbr_metallic, f0, moonRadiance, frx_skyLightVector(), viewDir, normal, isDiffuse, false, 0.15, specularAccu);
             #endif

@@ -74,14 +74,6 @@
 *****************************************************************/
 #define LUMI_DramaticLighting_DramaticBloomIntensity 5
 
-/* True darkness options
- * Uncomment to toggle.
-******************************************************/
-// #define LUMI_TrueDarkness_DisableOverworldAmbient
-// #define LUMI_TrueDarkness_DisableMoonlight
-// #define LUMI_TrueDarkness_NetherTrueDarkness
-// #define LUMI_TrueDarkness_TheEndTrueDarkness
-
 /* Tonemap mode
  * 0 = Default
  * 1 = Vibrant

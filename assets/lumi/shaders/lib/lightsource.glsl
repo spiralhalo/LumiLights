@@ -2,6 +2,7 @@
 #include frex:shaders/api/world.glsl
 #include frex:shaders/api/player.glsl
 #include lumi:shaders/lib/util.glsl
+#include lumi:lighting_config
 
 /*******************************************************
  *  lumi:shaders/lib/lightsource.glsl                  *
@@ -137,7 +138,7 @@ float l2_skyLight(float skyLight, float intensity)
 
 vec3 l2_ambientColor(float time)
 {
-    #ifdef LUMI_TrueDarkness_DisableMoonlight
+    #ifdef TRUE_DARKNESS_MOONLIGHT
         vec3 nightAmbient = vec3(0.0);
     #else
         vec3 nightAmbient = preNightAmbient;
@@ -204,10 +205,10 @@ vec3 l2_dimensionColor()
 #define l2_skylessDir() vec3(0, 0.977358, 0.211593)
 
 vec3 l2_skylessRadiance() {
-    #ifdef LUMI_TrueDarkness_NetherTrueDarkness
+    #ifdef TRUE_DARKNESS_NETHER
         if (frx_isSkyDarkened()) return vec3(0.0);
     #endif
-    #ifdef LUMI_TrueDarkness_TheEndTrueDarkness
+    #ifdef TRUE_DARKNESS_END
         if (!frx_isSkyDarkened()) return vec3(0.0);
     #endif
     if (frx_worldHasSkylight()) return vec3(0);
@@ -221,18 +222,18 @@ vec3 l2_baseAmbient(){
     //frx_viewBrightness() is maxed out by night vision so it's useless here
     if (frx_playerHasNightVision()) return hdr_gammaAdjust(nvColor) * hdr_blockMaxStr;
     if (frx_worldHasSkylight()) {
-        #ifdef LUMI_TrueDarkness_DisableOverworldAmbient
+        #ifdef TRUE_DARKNESS_DEFAULT
             return vec3(0.0);
         #else
             return vec3(0.1) * mix(hdr_baseMinStr, hdr_baseMaxStr, frx_viewBrightness());
         #endif
     } else {
-        #ifdef LUMI_TrueDarkness_NetherTrueDarkness
+        #ifdef TRUE_DARKNESS_NETHER
             if(frx_isSkyDarkened()){
                 return vec3(0.0);
             }
         #endif
-        #ifdef LUMI_TrueDarkness_TheEndTrueDarkness
+        #ifdef TRUE_DARKNESS_END
             if(!frx_isSkyDarkened()){
                 return vec3(0.0);
             }
@@ -304,7 +305,7 @@ vec3 l2_moonDir(float time){
 }
 
 vec3 l2_moonRadiance(float skyLight, float time, float intensity){
-    #ifdef LUMI_TrueDarkness_DisableMoonlight
+    #ifdef TRUE_DARKNESS_MOONLIGHT
         return vec3(0.0);
     #else
     float ml = l2_skyLight(skyLight, intensity) * frx_moonSize() * hdr_moonStr;
