@@ -161,7 +161,9 @@ vec4 work_on_pair(
             } else {
                 reflected.rgb = v_skycolor;
             }
-            reflected.rgb *= result.hits > HITCOUNT_THRESHOLD ? 0.1 : 1.0;
+            #ifdef REFLECTION_USE_HITBOX
+                reflected.rgb *= result.hits > HITCOUNT_THRESHOLD ? 0.1 : 1.0;
+            #endif
             reflected.rgb *= fallback;
             reflected.a = fallback;
         } else {
@@ -204,20 +206,27 @@ rt_Result rt_reflection(
         backface = dot(unit_march, normal_matrix * normalize(reflectedNormal)) > 0;
         if (delta_z > 0 && !backface) {
             hits ++;
-            if (delta_z < hitbox_z) {
-                //refine
-                while (current_ray_length > init_ray_length * init_ray_length && refine_steps < max_steps) {
-                    ray = abs(delta_z) * unit_march;
-                    current_ray_length = abs(delta_z);
-                    if (ray_view.z > current_view.z) ray_view += ray;
-                    else ray_view -= ray;
-                    current_uv = coords_uv(ray_view, projection);
-                    current_view = coords_view(current_uv, inv_projection, reflected_depth);
-                    delta_z = current_view.z - ray_view.z;
-                    refine_steps ++;
-                }
-                return rt_Result(current_uv, true, hits);
+            
+            #ifdef REFLECTION_USE_HITBOX
+                if (delta_z < hitbox_z) {
+            #endif
+
+            //refine
+            while (current_ray_length > init_ray_length * init_ray_length && refine_steps < max_steps) {
+                ray = abs(delta_z) * unit_march;
+                current_ray_length = abs(delta_z);
+                if (ray_view.z > current_view.z) ray_view += ray;
+                else ray_view -= ray;
+                current_uv = coords_uv(ray_view, projection);
+                current_view = coords_view(current_uv, inv_projection, reflected_depth);
+                delta_z = current_view.z - ray_view.z;
+                refine_steps ++;
             }
+            return rt_Result(current_uv, true, hits);
+
+            #ifdef REFLECTION_USE_HITBOX
+                }
+            #endif
         }
         if (steps > constant_steps && current_ray_length < max_ray_length) {
             ray *= length_multiplier;

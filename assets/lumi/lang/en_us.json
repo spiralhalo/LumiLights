@@ -56,6 +56,8 @@
     "config.lumi_lights.help.reflection_ray_max_length": "Limit the length of coarse ray steps",
     "config.lumi_lights.value.reflection_ray_multiplier": "Ray length multiplier",
     "config.lumi_lights.help.reflection_ray_multiplier": "Multiplier for coarse ray steps. Higher means coarser but longer reflections",
+    "config.lumi_lights.value.reflection_use_hitbox": "Use hitbox",
+    "config.lumi_lights.help.reflection_use_hitbox": "Use hitbox",
 
     "respackopts.title.LUMI": "Lumi Lights",
     "respackopts.field.LUMI.PBR": "PBR mode",
