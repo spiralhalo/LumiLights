@@ -61,7 +61,7 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
 			a = ldr_tonemap(a);
         	gl_FragData[4] = vec4(bloom_out, 0.0, 0.0, 1.0);
 		}
-		gl_FragDepth = 0.2 + gl_FragCoord.z * 0.8; //hack that unbreaks text rendering. don't ask questions.
+		gl_FragDepth = gl_FragCoord.z;
         gl_FragData[0] = a;
     } else {
 		vec2 light = fragData.light.xy;
