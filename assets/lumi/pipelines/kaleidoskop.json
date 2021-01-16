@@ -35,7 +35,7 @@
 
 	include: [
 		"lumi:pipeline/main.json",
-		"lumi:pipeline/kaleidoskop_passes.json",
+		"lumi:pipeline/kaleidoskop.json",
 		"lumi:pipeline/common.json",
 		"lumi:pipeline/bloom.json",
 		"lumi:pipeline/config.json",

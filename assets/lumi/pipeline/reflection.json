@@ -6,16 +6,16 @@
             fragmentSource: "lumi:shaders/pipeline/post/reflection.frag",
             samplers: [
                 "u_solid_color",
+                "u_solid_combine",
                 "u_solid_albedo",
                 "u_solid_depth",
-                "u_light_solid",
                 "u_normal_solid",
                 "u_material_solid",
 
                 "u_translucent_color",
+                "u_translucent_combine",
                 "u_translucent_albedo",
                 "u_translucent_depth",
-                "u_light_translucent",
                 "u_normal_translucent",
                 "u_material_translucent",
             ]

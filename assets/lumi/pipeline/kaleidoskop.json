@@ -1,4 +1,27 @@
 {
+    programs: [
+         {
+            name: "kaleidoskop",
+            vertexSource: "lumi:shaders/pipeline/post/hdr.vert",
+            fragmentSource: "lumi:shaders/pipeline/post/kaleidoskop.frag",
+            samplers: [
+                "u_solid_color",
+                "u_solid_albedo",
+                "u_solid_depth",
+                "u_light_solid",
+                "u_normal_solid",
+                "u_material_solid",
+
+                "u_translucent_color",
+                "u_translucent_albedo",
+                "u_translucent_depth",
+                "u_light_translucent",
+                "u_normal_translucent",
+                "u_material_translucent",
+            ]
+        }, 
+    ],
+
     fabulous: {
         passes: [
             {
@@ -9,9 +32,9 @@
                     "solid_main", "solid_depth", "light_solid", "normal_solid", "material_solid",
                     "translucent_main", "translucent_depth", "light_translucent", "normal_translucent", "material_translucent"]
             }, {
-                name: "reflection",
-                program: "reflection",
-                framebuffer: "reflection",
+                name: "kaleidoskop",
+                program: "kaleidoskop",
+                framebuffer: "kaleidoskop",
                 samplerImages: [
                     "solid_combine", "solid_main", "solid_depth", "light_solid", "normal_solid", "material_solid",
                     "translucent_combine", "translucent_main", "translucent_depth", "light_translucent", "normal_translucent", "material_translucent"]
@@ -41,4 +64,14 @@
             }
         ]
     },
+
+    framebuffers: [
+        {
+            name: "kaleidoskop",
+            colorAttachments: [
+                {image: "solid_shaded_swap", clearColor: 0x00000000},
+                {image: "translucent_shaded_swap", clearColor: 0x00000000}
+            ]
+        }
+    ]
 }

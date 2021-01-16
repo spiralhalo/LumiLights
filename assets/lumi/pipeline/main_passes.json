@@ -13,8 +13,8 @@
                 program: "reflection",
                 framebuffer: "reflection",
                 samplerImages: [
-                    "solid_shaded", "solid_main", "solid_depth", "light_solid", "normal_solid", "material_solid",
-                    "translucent_shaded", "translucent_main", "translucent_depth", "light_translucent", "normal_translucent", "material_translucent"]
+                    "solid_shaded", "solid_combine", "solid_main", "solid_depth", "normal_solid", "material_solid",
+                    "translucent_shaded", "translucent_combine", "translucent_main", "translucent_depth", "normal_translucent", "material_translucent"]
             }, /*{
                 name: "refraction",
                 program: "refraction",
