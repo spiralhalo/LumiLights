@@ -21,19 +21,19 @@ uniform sampler2D u_translucent_depth;
 
 // arbitrary chosen depth threshold
 #define blurDepthThreshold 0.01
-vec4 ldr_combine(sampler2D a, sampler2D b, sampler2D sdepth, vec2 uv)
+vec4 hdr_combine(sampler2D a, sampler2D b, sampler2D sdepth, vec2 uv)
 {
     vec4 a1 = texture2D(a, uv);
     float roughness = texture2D(b, uv).a;
-    if (roughness == 0.0) return vec4(ldr_tonemap3(hdr_gammaAdjust(a1.rgb)), a1.a); // unmanaged draw
+    if (roughness == 0.0) return vec4(hdr_gammaAdjust(a1.rgb), a1.a); // unmanaged draw
     float depth = texture2D(sdepth, uv).r;
     vec2 variable_blur = vec2(roughness) * (1.0 - ldepth(depth));
     vec4 b1 = blur13withDepth(b, sdepth, blurDepthThreshold, uv, frxu_size, variable_blur);
-    return ldr_tonemap(vec4(a1.rgb + b1.rgb, a1.a));
+    return vec4(a1.rgb + b1.rgb, a1.a);
 }
 
 void main()
 {
-    gl_FragData[0] = ldr_combine(u_hdr_solid, u_hdr_solid_swap, u_solid_depth, v_texcoord);
-    gl_FragData[1] = ldr_combine(u_hdr_translucent, u_hdr_translucent_swap, u_translucent_depth, v_texcoord);
+    gl_FragData[0] = hdr_combine(u_hdr_solid, u_hdr_solid_swap, u_solid_depth, v_texcoord);
+    gl_FragData[1] = hdr_combine(u_hdr_translucent, u_hdr_translucent_swap, u_translucent_depth, v_texcoord);
 }

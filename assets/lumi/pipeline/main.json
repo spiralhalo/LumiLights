@@ -125,8 +125,8 @@
                 program: "reflection",
                 framebuffer: "reflection",
                 samplerImages: [
-                    "solid_shaded", "solid_main", "solid_depth", "light_solid", "normal_solid", "material_solid",
-                    "translucent_shaded", "translucent_main", "translucent_depth", "light_translucent", "normal_translucent", "material_translucent"]
+                    "solid_combine", "solid_main", "solid_depth", "light_solid", "normal_solid", "material_solid",
+                    "translucent_combine", "translucent_main", "translucent_depth", "light_translucent", "normal_translucent", "material_translucent"]
             }, /*{
                 name: "refraction",
                 program: "refraction",
@@ -351,9 +351,9 @@
         {
             name: "solid_combine",
             lod: 0,
-            internalFormat: "RGBA8",
+            internalFormat: "RGBA16F",
             pixelFormat: "RGBA",
-            pixelDataType: "UNSIGNED_BYTE",
+            pixelDataType: "FLOAT",
             target: "TEXTURE_2D",
             texParams: [
                 {name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
@@ -362,9 +362,9 @@
         }, {
             name: "translucent_combine",
             lod: 0,
-            internalFormat: "RGBA8",
+            internalFormat: "RGBA16F",
             pixelFormat: "RGBA",
-            pixelDataType: "UNSIGNED_BYTE",
+            pixelDataType: "FLOAT",
             target: "TEXTURE_2D",
             texParams: [
                 {name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},

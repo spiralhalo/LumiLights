@@ -65,10 +65,10 @@ vec3 blend(vec3 dst, vec4 src)
 #define blurDepthThreshold 0.01
 void main()
 {
-    vec4 solid = texture2D(u_combine_solid, v_texcoord);
+    vec4 solid = ldr_tonemap(texture2D(u_combine_solid, v_texcoord));
     float depth_solid = texture2D(u_solid_depth, v_texcoord).r;
     
-    vec4 translucent = texture2D(u_combine_translucent, v_texcoord);
+    vec4 translucent = ldr_tonemap(texture2D(u_combine_translucent, v_texcoord));
     float depth_translucent = texture2D(u_translucent_depth, v_texcoord).r;
 
     float depth_clouds = texture2D(u_clouds_depth, v_texcoord).r;
