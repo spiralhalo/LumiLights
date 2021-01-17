@@ -2,13 +2,12 @@
   "id": "LUMI",
   "version": 1,
   "conf": {
-    "PBR": true,
-    "GenerateBump": true,
     "DayAmbientBlue": {
       "default": 0,
       "min": 0,
       "max": 10
     },
+    "WaterTexture": true,
     "WavyWaterModel": false,
     "WavyWaterIntensity": {
       "default": 1,

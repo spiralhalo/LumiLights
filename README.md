@@ -30,7 +30,6 @@ A shader pack for Canvas with PBR Forward Rendering Demo.
 
 - To personalize your installation of Lumi Lights, extract it into a `Lumi Lights` folder inside your resource pack folder.
 - Open the `Lumi Lights` folder and navigate to `/assets/lumi/`. Open `config.glsl` in a text editor.
-- To disable PBR shading mode, simply remove the line `#define LUMI_PBR`. Readd that line to re-enable it.
 - Other configuration options are version dependent and instructions to configure them are included within the config file.
 
 \*If you have [Respackopts](https://modrinth.com/mod/TiF5QWZY/) installed you may use the **respackopts** edition (available in all releases since v0.5) which comes with a config screen that lets you change the configurations on the fly.

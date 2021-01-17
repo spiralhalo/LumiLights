@@ -26,17 +26,6 @@
 
 /* NOTE: These configurations are ignored if Respackopts is present. */
 
-/* Comment out to disable PBR
- * Disabling PBR can increase performance on low end machines
-   ("Comment out" means adding double slash at the beginning)
- **************************************************************/
-#define LUMI_PBR
-// #define LUMI_PBR /* this is example of commented out variable. */
-
-/* Comment out to disable bump generation
- ******************************************/
-#define LUMI_GenerateBump
-
 /* How blue the day ambient in the overworld is. Range: 0 ... 10 Default: 0
 *****************************************************************************/
 #define LUMI_DayAmbientBlue 0

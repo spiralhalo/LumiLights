@@ -29,9 +29,13 @@ void frx_startFragment(inout frx_FragmentData fragData) {
 	/* WATER RECOLOR */
 	vec3 desat = vec3(frx_luminance(fragData.vertexColor.rgb));
 	fragData.vertexColor.rgb = mix(fragData.vertexColor.rgb, desat, 0.6);
-	fragData.spriteColor.rgb *= fragData.spriteColor.rgb * fragData.spriteColor.rgb * 1.6;
-	#ifdef LUMI_PBRX
-		pbr_f0 = mix(pbr_f0, 0.2, desat.x * desat.x);
+	#ifdef LUMI_WaterTexture
+		fragData.spriteColor.rgb *= fragData.spriteColor.rgb * fragData.spriteColor.rgb * 1.6;
+		#ifdef LUMI_PBRX
+			pbr_f0 = mix(pbr_f0, 0.2, desat.x * desat.x);
+		#endif
+	#else
+		fragData.spriteColor.rgb = vec3(0.6);
 	#endif
 	
 	/* WAVY NORMALS */

@@ -8,9 +8,4 @@
  *******************************************************/
 
 #define LUMI_LightingMode_SystemUnused -1
-#ifdef LUMI_PBR
-	#define LUMI_PBRX
-#endif
-#ifdef LUMI_GenerateBump
-#include lumi:shaders/api/context_bump.glsl
-#endif
+#define LUMI_PBRX
