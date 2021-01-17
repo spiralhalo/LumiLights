@@ -26,6 +26,7 @@ uniform sampler2D u_material_translucent;
 
 const int HITCOUNT_THRESHOLD = MULTIPLICATIVE_REFLECTION_STEPS / 2;
 const float JITTER_STRENGTH = 0.2;
+const vec3 UP_VECTOR = vec3(0.0, 1.0, 0.0);
 
 vec4 work_on_pair(
     in vec4 base_color,
@@ -61,7 +62,7 @@ vec4 work_on_pair(
         vec4 reflected;
         float reflected_depth_value = coords_depth(result.reflected_uv, reflected_depth);
         if (reflected_depth_value == 1.0 || !result.hit || result.reflected_uv.x < 0.0 || result.reflected_uv.y < 0.0 || result.reflected_uv.x > 1.0 || result.reflected_uv.y > 1.0) {
-            reflected.rgb = v_skycolor;
+            reflected.rgb = v_skycolor * l2_clampScale(-1.0, 1.0, dot(worldNormal, UP_VECTOR));
             #ifdef REFLECTION_USE_HITBOX
                 reflected.rgb *= result.hits > HITCOUNT_THRESHOLD ? 0.1 : 1.0;
             #endif
