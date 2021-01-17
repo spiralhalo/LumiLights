@@ -1,12 +1,11 @@
 {
   skyShadows: {
-		framebuffer: "shadow",
-		includeTerrain: true,
-		includeEntities: true,
-		includeParticles: true,
-		supportForwardRender: true,
-		vertexShader: "lumi:shaders/pipeline/shadow.vert",
-		fragmentShader: "lumi:shaders/pipeline/shadow.frag",
+    framebuffer: "shadow",
+    allowEntities: true,
+    allowParticles: true,
+    supportForwardRender: true,
+    vertexShader: "lumi:shaders/pipeline/shadow.vert",
+    fragmentShader: "lumi:shaders/pipeline/shadow.frag",
   },
 
   beforeWorldRender: {
@@ -40,8 +39,8 @@
 
   framebuffers: [
     {
-			name: "shadow",
-			depthAttachment: {image: "shadow_depth", clearDepth: 1.0}
-		}
-	]
+      name: "shadow",
+      depthAttachment: {image: "shadow_depth", clearDepth: 1.0}
+    }
+  ]
 }

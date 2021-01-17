@@ -20,8 +20,8 @@
 
 	nameKey: "pipeline.lumi_lights_dev.name",
 	descriptionKey: "pipeline.lumi_lights_dev.desc",
-	materialVertexShader: "lumi:shaders/pipeline/dev.vert",
-	materialFragmentShader: "lumi:shaders/pipeline/dev.frag",
+	materialVertexShader: "lumi:shaders/pipeline/main.vert",
+	materialFragmentShader: "lumi:shaders/pipeline/main.frag",
 
 	drawTargets: {
 		solidTerrain: "solid",
