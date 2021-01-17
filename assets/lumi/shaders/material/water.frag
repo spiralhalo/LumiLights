@@ -8,10 +8,8 @@
 #include lumi:shaders/api/param_frag.glsl
 #include lumi:shaders/lib/water.glsl
 
-const float waveSpeed = 1;
-const float scale = 1.5;
-const float amplitude = 0.01;
 const float stretch = 2;
+
 void frx_startFragment(inout frx_FragmentData fragData) {
 	#ifdef LUMI_PBRX
 		/* PBR PARAMS */
@@ -40,7 +38,10 @@ void frx_startFragment(inout frx_FragmentData fragData) {
 	
 	/* WAVY NORMALS */
 	// wave movement doesn't necessarily follow flow direction for the time being
-	vec3 moveSpeed = frx_var1.xyz;
+	float waveSpeed = frx_var2.x;
+	float scale = frx_var2.y;
+	float amplitude = frx_var2.z;
+	vec3 moveSpeed = frx_var1.xyz * waveSpeed;
 	vec3 up = fragData.vertexNormal.xyz;
 	vec3 samplePos = frx_var0.xyz;
 	fragData.vertexNormal = ww_normals(up, l2_tangent, cross(up, l2_tangent), samplePos, waveSpeed, scale, amplitude, stretch, moveSpeed);
