@@ -54,13 +54,7 @@ float calc_ssao(
     float radius_world = length(out1 - out0);
     vec2 deltaUV = vec2(1.0, 0.0) * (radius_screen / (float(NUM_SAMPLE_DIRECTIONS * NUM_SAMPLE_STEPS) + 1.0));
 
-    // TODO: Use noise texture?
-    // vec3 seed = coords_world(uv, inv_view_projection, sdepth);
-    // seed = cameraPos + seed;
-    // seed.xz += seed.yy;
-    // vec3 sampleNoise = normalize(vec3(frx_noise2d(seed.xy), frx_noise2d(seed.yz), frx_noise2d(seed.zx)));
-    // vec3 seed = vec3(uv, random);
-    // vec3 sampleNoise = normalize(vec3(frx_noise2d(seed.xy), frx_noise2d(seed.yz), frx_noise2d(seed.zx)));
+    // PERF: Use noise texture?
     vec2 seed = fract(uv * (tex_size/noise_size));
     vec3 sampleNoise = normalize(vec3(frx_noise2d(seed.xx * seed.yy), frx_noise2d(seed.xy), frx_noise2d(seed.yx)));
     sampleNoise.xy   = sampleNoise.xy * 2.0 - vec2(1.0);
