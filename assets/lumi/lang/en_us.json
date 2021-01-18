@@ -12,9 +12,9 @@
     "config.lumi_lights.value.bloom_intensity": "Bloom Intensity",
     "config.lumi_lights.help.bloom_intensity": "Intensity of glow effect around light sources.",
     "config.lumi_lights.value.bloom_downsample_scale": "Downsample Scale",
-    "config.lumi_lights.help.bloom_downsample_scale": "Affects size of bloom effect around light sources.",
-    "config.lumi_lights.value.bloom_upsample_scale": "Downsample Scale",
-    "config.lumi_lights.help.bloom_upsample_scale": "Affects Size of bloom effect around light sources.",
+    "config.lumi_lights.help.bloom_downsample_scale": "Affects the size of bloom effect around light sources.",
+    "config.lumi_lights.value.bloom_upsample_scale": "Upsample Scale",
+    "config.lumi_lights.help.bloom_upsample_scale": "Affects the size of bloom effect around light sources.",
     "config.lumi_lights.value.bloom_cutoff": "Cutoff Threshold",
     "config.lumi_lights.help.bloom_cutoff": "Clamps low-intensity bloom edges to reduce halos and banding.",
 

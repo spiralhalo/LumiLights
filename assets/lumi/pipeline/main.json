@@ -34,7 +34,8 @@
     },
 
     include: [
-        "lumi:pipeline/reflection.json"
+        "lumi:pipeline/reflection.json",
+        "lumi:pipeline/ao.json"
     ],
 
     programs: [
@@ -54,6 +55,7 @@
                 "u_light_translucent",
                 "u_normal_translucent",
                 "u_material_translucent",
+                "u_ao"
             ]
         }, {
             name: "refraction",

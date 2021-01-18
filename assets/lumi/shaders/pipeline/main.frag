@@ -90,6 +90,7 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
 			}
 			shadowFactor /= 9.0;
 			shadowFactor *= shadowFactor > gate ? 1.0 : 0.0;
+			// shadowFactor = mix(shadowFactor, 1.0, 1.0 - frx_skyLightTransitionFactor());
 
 			float directSkylight = 1.0 - shadowFactor * 0.2;
 			light.y = min(directSkylight, light.y);
@@ -106,6 +107,7 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
 		float normalizedBloom = (bloom - ao) * 0.5 + 0.5;
 		float roughness = fragData.diffuse ? pbr_roughness * 0.98 : 1.0;
 
+		// PERF: view normal, more useful than world normal
         gl_FragDepth = gl_FragCoord.z;
         gl_FragData[0] = a;
         gl_FragData[1] = vec4(light.x, light.y, normalizedBloom, 1.0);

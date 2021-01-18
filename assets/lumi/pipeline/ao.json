@@ -1,0 +1,51 @@
+{
+    programs:[
+         {
+            name: "ssao",
+            vertexSource: "lumi:shaders/pipeline/post/simple.vert",
+            fragmentSource: "lumi:shaders/pipeline/post/ssao.frag",
+            samplers: ["u_normal", "u_depth"]
+        }, {
+            name: "one_filter",
+            vertexSource: "lumi:shaders/pipeline/post/simple.vert",
+            fragmentSource: "lumi:shaders/pipeline/post/one_filter.frag",
+            samplers: ["u_source", "u_depth"]
+        }
+    ],
+    
+    images: [
+        {
+            name: "ao_values",
+            lod: 0,
+            internalFormat: "RGBA8",
+            pixelFormat: "RGBA",
+            pixelDataType: "UNSIGNED_BYTE",
+            target: "TEXTURE_2D",
+            texParams: [
+                {name: "TEXTURE_MIN_FILTER", val: "LINEAR"}, {name: "TEXTURE_MAG_FILTER", val: "LINEAR"},
+                {name: "TEXTURE_WRAP_S", val: "CLAMP"}, {name: "TEXTURE_WRAP_T", val: "CLAMP"}
+            ]
+        }, {
+            name: "ao_filtered",
+            lod: 0,
+            internalFormat: "RGBA8",
+            pixelFormat: "RGBA",
+            pixelDataType: "UNSIGNED_BYTE",
+            target: "TEXTURE_2D",
+            texParams: [
+                {name: "TEXTURE_MIN_FILTER", val: "LINEAR"}, {name: "TEXTURE_MAG_FILTER", val: "LINEAR"},
+                {name: "TEXTURE_WRAP_S", val: "CLAMP"}, {name: "TEXTURE_WRAP_T", val: "CLAMP"}
+            ]
+        }, 
+    ],
+    
+    framebuffers: [
+        {
+            name: "ao_values",
+            colorAttachments: [{image: "ao_values", clearColor: 0x00000000}]
+        }, {
+            name: "ao_filtered",
+            colorAttachments: [{image: "ao_filtered", clearColor: 0x00000000}]
+        }
+    ]
+}

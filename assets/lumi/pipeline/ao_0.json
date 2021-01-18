@@ -1,0 +1,212 @@
+{
+    programs:[
+         {
+            name: "ssao",
+            vertexSource: "lumi:shaders/pipeline/post/simple.vert",
+            fragmentSource: "lumi:shaders/pipeline/post/ssao.frag",
+            samplers: [
+                "u_normal", "u_depth"
+            ]
+        }, {
+            name: "one_filter",
+            vertexSource: "lumi:shaders/pipeline/post/simple.vert",
+            fragmentSource: "lumi:shaders/pipeline/post/one_filter.frag",
+            samplers: [
+                "u_source"
+            ]
+        },  {
+            name: "upsample_avg",
+            vertexSource: "lumi:shaders/pipeline/post/simple.vert",
+            fragmentSource: "lumi:shaders/pipeline/post/upsample_avg.frag",
+            samplers: ["u_input", "u_prior"]
+        }
+    ],
+    
+    images: [
+        {
+            name: "ao_values",
+            lod: 0,
+            internalFormat: "RGBA8",
+            pixelFormat: "RGBA",
+            pixelDataType: "UNSIGNED_BYTE",
+            target: "TEXTURE_2D",
+            texParams: [
+                {name: "TEXTURE_MIN_FILTER", val: "LINEAR"}, {name: "TEXTURE_MAG_FILTER", val: "LINEAR"},
+                {name: "TEXTURE_WRAP_S", val: "CLAMP"}, {name: "TEXTURE_WRAP_T", val: "CLAMP"}
+            ]
+        }, {
+            name: "ao_downsample",
+            lod: 6,
+            internalFormat: "RGBA8",
+            target: "TEXTURE_2D",
+            texParams: [
+                {name: "TEXTURE_MIN_FILTER", val: "LINEAR_MIPMAP_NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "LINEAR"},
+                {name: "TEXTURE_WRAP_S", val: "CLAMP"}, {name: "TEXTURE_WRAP_T", val: "CLAMP"}
+            ]
+        }, {
+            name: "ao_upsample",
+            lod: 6,
+            internalFormat: "RGBA8",
+            target: "TEXTURE_2D",
+            texParams: [
+                {name: "TEXTURE_MIN_FILTER", val: "LINEAR_MIPMAP_NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "LINEAR"},
+                {name: "TEXTURE_WRAP_S", val: "CLAMP"}, {name: "TEXTURE_WRAP_T", val: "CLAMP"}
+            ]
+        }
+    ],
+    
+    framebuffers: [
+        {
+            name: "ao_values",
+            colorAttachments: [
+                {image: "ao_values", clearColor: 0x00000000}
+            ]
+        }, {
+            name: "ao_downsample_0",
+            colorAttachments: [{image: "ao_downsample", clearColor: 0x00000000}]
+        }, {
+            name: "ao_downsample_1",
+            colorAttachments: [{image: "ao_downsample", lod: 1}]
+        }, {
+            name: "ao_downsample_2",
+            colorAttachments: [{image: "ao_downsample", lod: 2}]
+        }, {
+            name: "ao_downsample_3",
+            colorAttachments: [{image: "ao_downsample", lod: 3}]
+        }, {
+            name: "ao_downsample_4",
+            colorAttachments: [{image: "ao_downsample", lod: 4}]
+        }, {
+            name: "ao_downsample_5",
+            colorAttachments: [{image: "ao_downsample", lod: 5}]
+        }, {
+            name: "ao_downsample_6",
+            colorAttachments: [{image: "ao_downsample", lod: 6}]
+        }, {
+            name: "ao_upsample_6",
+            colorAttachments: [{image: "ao_upsample", lod: 6}]
+        }, {
+            name: "ao_upsample_5",
+            colorAttachments: [{image: "ao_upsample", lod: 5}]
+        }, {
+            name: "ao_upsample_4",
+            colorAttachments: [{image: "ao_upsample", lod: 4}]
+        }, {
+            name: "ao_upsample_3",
+            colorAttachments: [{image: "ao_upsample", lod: 3}]
+        }, {
+            name: "ao_upsample_2",
+            colorAttachments: [{image: "ao_upsample", lod: 2}]
+        }, {
+            name: "ao_upsample_1",
+            colorAttachments: [{image: "ao_upsample", lod: 1}]
+        }, {
+            name: "ao_upsample_0",
+            colorAttachments: [{image: "ao_upsample"}]
+        }
+    ],
+
+    
+    fabulous: {
+        passes: [
+            {
+                name: "ssao",
+                program: "ssao",
+                framebuffer: "ao_values",
+                samplerImages: [
+                    "normal_solid", "solid_depth"]
+            }, {
+                name: "one_filter",
+                program: "one_filter",
+                framebuffer: "ao_upsample",
+                samplerImages: [
+                    "ao_values"]
+            }, {
+                // build ao mipmaps, blurring as part of downscale
+                name: "ao_downsample_0",
+                program: "downsample",
+                framebuffer: "ao_downsample_0",
+                samplerImages: ["ao_values"],
+            }, {
+                name: "ao_downsample_1",
+                program: "downsample",
+                framebuffer: "ao_downsample_1",
+                samplerImages: ["ao_downsample"],
+                lod: 1
+            }, {
+                name: "ao_downsample_2",
+                program: "downsample",
+                framebuffer: "ao_downsample_2",
+                samplerImages: ["ao_downsample"],
+                lod: 2
+            }, {
+                name: "ao_downsample_3",
+                program: "downsample",
+                framebuffer: "ao_downsample_3",
+                samplerImages: ["ao_downsample"],
+                lod: 3
+            }, {
+                name: "ao_downsample_4",
+                program: "downsample",
+                framebuffer: "ao_downsample_4",
+                samplerImages: ["ao_downsample"],
+                lod: 4
+            }, {
+                name: "ao_downsample_5",
+                program: "downsample",
+                framebuffer: "ao_downsample_5",
+                samplerImages: ["ao_downsample"],
+                lod: 5
+            }, {
+                name: "ao_downsample_6",
+                program: "downsample",
+                framebuffer: "ao_downsample_6",
+                samplerImages: ["ao_downsample"],
+                lod: 6
+            }, {
+                // upscale ao mipmaps, bluring again as we go
+                name: "ao_upsample_6",
+                program: "upsample_first",
+                framebuffer: "ao_upsample_6",
+                samplerImages: ["ao_downsample"],
+                lod: 6
+            }, {
+                name: "ao_upsample_5",
+                program: "upsample_avg",
+                framebuffer: "ao_upsample_5",
+                samplerImages: ["ao_downsample", "ao_upsample"],
+                lod: 5
+            }, {
+                name: "ao_upsample_4",
+                program: "upsample_avg",
+                framebuffer: "ao_upsample_4",
+                samplerImages: ["ao_downsample", "ao_upsample"],
+                lod: 4
+            }, {
+                name: "ao_upsample_3",
+                program: "upsample_avg",
+                framebuffer: "ao_upsample_3",
+                samplerImages: ["ao_downsample", "ao_upsample"],
+                lod: 3
+            }, {
+                name: "ao_upsample_2",
+                program: "upsample_avg",
+                framebuffer: "ao_upsample_2",
+                samplerImages: ["ao_downsample", "ao_upsample"],
+                lod: 2
+            }, {
+                name: "ao_upsample_1",
+                program: "upsample_avg",
+                framebuffer: "ao_upsample_1",
+                samplerImages: ["ao_downsample", "ao_upsample"],
+                lod: 1
+            }, {
+                name: "ao_upsample_0",
+                program: "upsample_avg",
+                framebuffer: "ao_upsample_0",
+                samplerImages: ["ao_downsample", "ao_upsample"],
+                lod: 0
+            }
+        ]
+    }
+}

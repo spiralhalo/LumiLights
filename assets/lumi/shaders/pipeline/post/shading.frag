@@ -11,6 +11,7 @@
 #include lumi:shaders/lib/fog.glsl
 #include lumi:shaders/lib/tonemap.glsl
 #include lumi:shaders/lib/pbr_shading.glsl
+#include lumi:shaders/lib/ssao.glsl
 #include lumi:shaders/internal/skybloom.glsl
 #include lumi:fog_config
 
@@ -34,6 +35,8 @@ uniform sampler2D u_translucent_depth;
 uniform sampler2D u_light_translucent;
 uniform sampler2D u_normal_translucent;
 uniform sampler2D u_material_translucent;
+
+uniform sampler2D u_ao;
 
 vec3 coords_view(vec2 uv, mat4 inv_projection, float depth)
 {
@@ -117,7 +120,11 @@ vec4 fog (float skylightFactor, vec4 a, vec3 viewPos, vec3 worldPos, bool transl
     return mix(a, fogColor, fogFactor);
 }
 
-vec4 hdr_shaded_color(vec2 uv, sampler2D scolor, sampler2D sdepth, sampler2D slight, sampler2D snormal, sampler2D smaterial, bool translucent, out float bloom_out)
+const float RADIUS = 0.4;
+const float BIAS = 0.4;
+const float INTENSITY = 10.0;
+
+vec4 hdr_shaded_color(vec2 uv, sampler2D scolor, sampler2D sdepth, sampler2D slight, sampler2D snormal, sampler2D smaterial, float aoval, bool translucent, out float bloom_out)
 {
     vec4 a = texture2DLod(scolor, uv, 0.0);
     float depth = texture2DLod(sdepth, uv, 0.0).r;
@@ -146,7 +153,8 @@ vec4 hdr_shaded_color(vec2 uv, sampler2D scolor, sampler2D sdepth, sampler2D sli
     pbr_shading(a, bloom_out, viewPos, light.xy, normal, roughness, metallic, f0 > 0.7 ? 0.0 : material.z, diffuse, translucent);
 
     float ao_shaded = 1.0 + min(0.0, bloom_raw);
-    a.rgb *= ao_shaded * ao_shaded;
+    float ssao = mix(aoval, 1.0, min(bloom_out, 1.0));
+    a.rgb *= ao_shaded * ssao;
     if (matflash) a.rgb += 1.0;
     if (mathurt) a.r += 0.5;
 
@@ -160,8 +168,9 @@ void main()
 {
     float bloom1;
     float bloom2;
-    vec4 a1 = hdr_shaded_color(v_texcoord, u_solid_color, u_solid_depth, u_light_solid, u_normal_solid, u_material_solid, false, bloom1);
-    vec4 a2 = hdr_shaded_color(v_texcoord, u_translucent_color, u_translucent_depth, u_light_translucent, u_normal_translucent, u_material_translucent, true, bloom2);
+    float ssao = texture2D(u_ao, v_texcoord).r;
+    vec4 a1 = hdr_shaded_color(v_texcoord, u_solid_color, u_solid_depth, u_light_solid, u_normal_solid, u_material_solid, ssao, false, bloom1);
+    vec4 a2 = hdr_shaded_color(v_texcoord, u_translucent_color, u_translucent_depth, u_light_translucent, u_normal_translucent, u_material_translucent, 1.0, true, bloom2);
     gl_FragData[0] = a1;
     gl_FragData[1] = a2;
     gl_FragData[2] = vec4(bloom1 + bloom2, 0.0, 0.0, 1.0);
