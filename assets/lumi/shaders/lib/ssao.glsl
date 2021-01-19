@@ -43,7 +43,7 @@ const mat2 deltaRotationMatrix = mat2(
 );
 
 float calc_ssao(
-    in sampler2D snormal, in sampler2D sdepth, mat3 normal_mat, mat4 inv_projection, mat4 inv_view_projection, vec2 tex_size, float noise_size,
+    in sampler2D snormal, in sampler2D sdepth, mat3 normal_mat, mat4 inv_projection, mat4 inv_view_projection, vec2 tex_size, int noise_size,
     vec2 uv, float sample_radius, float angle_bias, float intensity)
 {
     vec3 origin_view = coords_view(uv, inv_projection, sdepth);
