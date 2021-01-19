@@ -67,61 +67,58 @@ vec3 pbr_lightCalc(float roughness, vec3 f0, vec3 radiance, vec3 lightDir, vec3 
 
 rt_Result rt_reflection(
     vec3 ray_view, vec3 unit_view, vec3 normal, vec3 unit_march,
-    vec2 start_uv, float init_ray_length, float max_ray_length, float length_multiplier, int constant_steps, int max_steps,
     mat3 normal_matrix, mat4 projection, mat4 inv_projection,
     in sampler2D reflector_depth, in sampler2D reflector_normal, in sampler2D reflected_depth, in sampler2D reflected_normal
 )
 {
-    // float length_divisor = 1.0 / length_multiplier;
+    vec3 start_view = ray_view.xyz;
+    float hitbox_z = 0.125;
+    vec3 ray = unit_march * hitbox_z;
 
-    vec3 ray = unit_march * init_ray_length;
-    float current_ray_length = init_ray_length;
     vec2 current_uv;
     vec3 current_view;
     float delta_z;
-    float hitbox_z;
     bool backface;
     vec3 reflectedNormal;
     
     int hits = 0;
     int steps = 0;
     int refine_steps = 0;
-    while (steps < max_steps) {
+    while (steps < 50) {
         ray_view += ray;
         current_uv = coords_uv(ray_view, projection);
         current_view = coords_view(current_uv, inv_projection, reflected_depth);
         delta_z = current_view.z - ray_view.z;
-        hitbox_z = current_ray_length;
-        // TODO: handle diffuse (normal = 1.0, 1.0, 1.0) PROPERLY
         reflectedNormal = coords_normal(current_uv, reflected_normal);
         backface = dot(unit_march, normal_matrix * normalize(reflectedNormal)) > 0;
         if (delta_z > 0 && !backface) {
-            hits ++;
-            
-            #ifdef REFLECTION_USE_HITBOX
-                if (delta_z < hitbox_z) {
-            #endif
-
-            //refine
-            while (current_ray_length > init_ray_length * init_ray_length && refine_steps < max_steps) {
-                ray = abs(delta_z) * unit_march;
-                current_ray_length = abs(delta_z);
-                if (ray_view.z > current_view.z) ray_view += ray;
-                else ray_view -= ray;
-                current_uv = coords_uv(ray_view, projection);
-                current_view = coords_view(current_uv, inv_projection, reflected_depth);
-                delta_z = current_view.z - ray_view.z;
-                refine_steps ++;
+            // TODO: handle ray coming at camera ?
+            if (current_view.z < start_view.z
+                && current_uv.x >= 0.0 && current_uv.y >= 0.0
+                && current_uv.x <= 1.0 && current_uv.y <= 1.0) {
+                hits ++;
             }
-            return rt_Result(current_uv, true, hits);
-
-            #ifdef REFLECTION_USE_HITBOX
+            if (delta_z < hitbox_z) {
+                //refine
+                vec2 prev_uv;
+                float prev_delta_z;
+                ray = unit_march * 0.0625;
+                while (refine_steps < 16) {
+                    prev_uv = current_uv;
+                    prev_delta_z = delta_z;
+                    ray_view -= ray;
+                    current_uv = coords_uv(ray_view, projection);
+                    current_view = coords_view(current_uv, inv_projection, reflected_depth);
+                    delta_z = current_view.z - ray_view.z;
+                    if (abs(delta_z) > abs(prev_delta_z)) break;
+                    refine_steps ++;
                 }
-            #endif
+                return rt_Result(prev_uv, true, hits);
+            }
         }
-        if (steps > constant_steps && current_ray_length < max_ray_length) {
-            ray *= length_multiplier;
-            current_ray_length *= length_multiplier;
+        if (mod(steps, 7) == 0) {
+            ray *= 2.0;
+            hitbox_z *= 2.0;
         }
         steps ++;
     }
