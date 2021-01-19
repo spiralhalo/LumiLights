@@ -14,7 +14,7 @@ void main()
 {
     float random = v_texcoord.x*v_texcoord.y;
     float ssao = calc_ssao(
-        u_normal, u_depth, frx_normalModelMatrix(), frx_inverseProjectionMatrix(), frx_inverseViewProjectionMatrix(), frxu_size, 9.0,
+        u_normal, u_depth, frx_normalModelMatrix(), frx_inverseProjectionMatrix(), frx_inverseViewProjectionMatrix(), frxu_size, 4.0,
         v_texcoord, RADIUS, BIAS, INTENSITY);
     gl_FragData[0] = vec4(ssao, 0.0, 0.0, 1.0);
 }
