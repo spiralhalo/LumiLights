@@ -24,8 +24,8 @@ uniform sampler2D u_light_translucent;
 uniform sampler2D u_normal_translucent;
 uniform sampler2D u_material_translucent;
 
-const int HITCOUNT_THRESHOLD = MULTIPLICATIVE_REFLECTION_STEPS / 2;
 const float JITTER_STRENGTH = 0.2;
+const vec3 UP_VECTOR = vec3(0.0, 1.0, 0.0);
 
 vec4 work_on_pair(
     in vec4 base_color,
@@ -58,18 +58,12 @@ vec4 work_on_pair(
         float sky_light = texture2DLod(reflector_light, v_texcoord, 0).y;
         vec3 reg_f0     = vec3(material.y < 0.7 ? material.y : 0.0);
         vec3 f0         = mix(reg_f0, albedo, material.y);
-        rt_Result result = rt_reflection(ray_view, unit_view, normal, unit_march, v_texcoord, REFLECTION_RAY_INITIAL_LENGTH, 128.0, REFLECTION_RAY_MULTIPLIER, CONSTANT_REFLECTION_STEPS, CONSTANT_REFLECTION_STEPS + MULTIPLICATIVE_REFLECTION_STEPS, frx_normalModelMatrix(), frx_projectionMatrix(), frx_inverseProjectionMatrix(), reflector_depth, reflector_normal, reflected_depth, reflected_normal);
+        rt_Result result = rt_reflection(ray_view, unit_view, normal, unit_march, frx_normalModelMatrix(), frx_projectionMatrix(), frx_inverseProjectionMatrix(), reflector_depth, reflector_normal, reflected_depth, reflected_normal);
         vec4 reflected;
         float reflected_depth_value = coords_depth(result.reflected_uv, reflected_depth);
         if (reflected_depth_value == 1.0 || !result.hit || result.reflected_uv.x < 0.0 || result.reflected_uv.y < 0.0 || result.reflected_uv.x > 1.0 || result.reflected_uv.y > 1.0) {
-            if (frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT)) {
-                reflected.rgb = v_skycolor * skylight_adjust(sky_light, frx_ambientIntensity());
-            } else {
-                reflected.rgb = v_skycolor;
-            }
-            #ifdef REFLECTION_USE_HITBOX
-                reflected.rgb *= result.hits > HITCOUNT_THRESHOLD ? 0.1 : 1.0;
-            #endif
+            reflected.rgb = v_skycolor * frx_ambientIntensity() * l2_clampScale(-1.0, 1.0, dot(worldNormal, UP_VECTOR));
+            reflected.rgb *= result.hits > 1 ? 0.1 : 1.0;
             reflected.rgb *= fallback;
             reflected.a = fallback;
         } else {

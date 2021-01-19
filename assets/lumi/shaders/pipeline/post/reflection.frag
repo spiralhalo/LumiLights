@@ -24,7 +24,6 @@ uniform sampler2D u_translucent_depth;
 uniform sampler2D u_normal_translucent;
 uniform sampler2D u_material_translucent;
 
-const int HITCOUNT_THRESHOLD = MULTIPLICATIVE_REFLECTION_STEPS / 2;
 const float JITTER_STRENGTH = 0.2;
 const vec3 UP_VECTOR = vec3(0.0, 1.0, 0.0);
 

@@ -44,5 +44,5 @@ void frx_startFragment(inout frx_FragmentData fragData) {
 	vec3 moveSpeed = frx_var1.xyz * waveSpeed;
 	vec3 up = fragData.vertexNormal.xyz;
 	vec3 samplePos = frx_var0.xyz;
-	// fragData.vertexNormal = ww_normals(up, l2_tangent, cross(up, l2_tangent), samplePos, waveSpeed, scale, amplitude, stretch, moveSpeed);
+	fragData.vertexNormal = ww_normals(up, l2_tangent, cross(up, l2_tangent), samplePos, waveSpeed, scale, amplitude, stretch, moveSpeed);
 }

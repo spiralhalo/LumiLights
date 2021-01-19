@@ -25,12 +25,23 @@
     fabulous: {
         passes: [
             {
+                name: "ssao",
+                program: "ssao",
+                framebuffer: "ao_values",
+                samplerImages: ["normal_solid", "solid_depth"]
+            }, {
+                name: "one_filter",
+                program: "one_filter",
+                framebuffer: "ao_filtered",
+                samplerImages: ["ao_values", "solid_depth"]
+            }, {
                 name: "shading",
                 program: "shading",
                 framebuffer: "shading",
                 samplerImages: [
                     "solid_main", "solid_depth", "light_solid", "normal_solid", "material_solid",
-                    "translucent_main", "translucent_depth", "light_translucent", "normal_translucent", "material_translucent"]
+                    "translucent_main", "translucent_depth", "light_translucent", "normal_translucent", "material_translucent",
+                    "ao_filtered"]
             }, {
                 name: "kaleidoskop",
                 program: "kaleidoskop",
