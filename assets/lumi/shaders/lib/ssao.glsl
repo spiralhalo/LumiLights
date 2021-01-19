@@ -1,4 +1,5 @@
 #include frex:shaders/lib/math.glsl
+#include lumi:shaders/lib/tile_noise.glsl
 
 /*******************************************************
  *  lumi:shaders/lib/ssao.glsl                         *
@@ -55,8 +56,7 @@ float calc_ssao(
     vec2 deltaUV = vec2(1.0, 0.0) * (radius_screen / (float(NUM_SAMPLE_DIRECTIONS * NUM_SAMPLE_STEPS) + 1.0));
 
     // PERF: Use noise texture?
-    vec2 seed = fract(uv * (tex_size/noise_size));
-    vec3 sampleNoise = normalize(vec3(frx_noise2d(seed.xx * seed.yy), frx_noise2d(seed.xy), frx_noise2d(seed.yx)));
+    vec3 sampleNoise = normalize(tile_noise_3d(uv, tex_size, noise_size));
     sampleNoise.xy   = sampleNoise.xy * 2.0 - vec2(1.0);
     mat2 rotationMatrix = mat2(
         sampleNoise.x, -sampleNoise.y,
