@@ -2,7 +2,18 @@
 #include lumi:shaders/lib/ssao.glsl
 #include frex:shaders/api/view.glsl
 #include frex:shaders/api/world.glsl
+#include lumi:shaders/context/global/lighting.glsl
 
+/*******************************************************
+ *  lumi:shaders/pipeline/post/ssao.frag               *
+ *******************************************************
+ *  Copyright (c) 2020-2021 spiralhalo                 *
+ *  Released WITHOUT WARRANTY under the terms of the   *
+ *  GNU Lesser General Public License version 3 as     *
+ *  published by the Free Software Foundation, Inc.    *
+ *******************************************************/
+
+#if AMBIENT_OCCLUSION == AMBIENT_OCCLUSION_SSAO
 uniform sampler2D u_normal;
 uniform sampler2D u_depth;
 
@@ -18,3 +29,9 @@ void main()
         v_texcoord, RADIUS, BIAS, INTENSITY);
     gl_FragData[0] = vec4(ssao, 0.0, 0.0, 1.0);
 }
+#else
+void main()
+{
+    gl_FragData[0] = vec4(1.0, 0.0, 0.0, 1.0);
+}
+#endif

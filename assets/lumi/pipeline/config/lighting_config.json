@@ -12,6 +12,14 @@
                     nameKey: "config.lumi_lights.value.lighting_profile",
                     descriptionKey: "config.lumi_lights.help.lighting_profile"
                 },
+                ambient_occlusion: {
+                    default: "ssao",
+                    choices: ["none", "vanilla", "ssao"],
+                    enum: true,
+                    prefix: "ambient_occlusion_",
+                    nameKey: "config.lumi_lights.value.ambient_occlusion",
+                    descriptionKey: "config.lumi_lights.help.ambient_occlusion"
+                },
                 handheld_light_radius: {
                     default: 10,
                     min: 0,

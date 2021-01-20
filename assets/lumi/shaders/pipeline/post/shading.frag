@@ -14,6 +14,7 @@
 #include lumi:shaders/lib/ssao.glsl
 #include lumi:shaders/internal/skybloom.glsl
 #include lumi:shaders/context/post/fog.glsl
+#include lumi:shaders/context/global/lighting.glsl
 
 /*******************************************************
  *  lumi:shaders/pipeline/post/shading.frag            *
@@ -130,9 +131,12 @@ vec4 hdr_shaded_color(vec2 uv, sampler2D scolor, sampler2D sdepth, sampler2D sli
     bloom_out = max(0.0, bloom_raw);
     pbr_shading(a, bloom_out, viewPos, light.xy, normal, roughness, metallic, f0 > 0.7 ? 0.0 : material.z, diffuse, translucent);
 
+
+#if AMBIENT_OCCLUSION != AMBIENT_OCCLUSION_NONE
     float ao_shaded = 1.0 + min(0.0, bloom_raw);
     float ssao = mix(aoval, 1.0, min(bloom_out, 1.0));
     a.rgb *= ao_shaded * ssao;
+#endif
     if (matflash) a.rgb += 1.0;
     if (mathurt) a.r += 0.5;
 

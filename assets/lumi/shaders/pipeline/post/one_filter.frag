@@ -2,6 +2,7 @@
 #include frex:shaders/lib/math.glsl
 #include lumi:shaders/lib/util.glsl
 #include lumi:shaders/lib/tile_noise.glsl
+#include lumi:shaders/context/global/lighting.glsl
 
 /*******************************************************
  *  lumi:shaders/pipeline/post/one_filter.frag         *
@@ -12,6 +13,7 @@
  *  published by the Free Software Foundation, Inc.    *
  *******************************************************/
 
+#if AMBIENT_OCCLUSION == AMBIENT_OCCLUSION_SSAO
 uniform sampler2D u_source;
 uniform sampler2D u_depth;
 
@@ -22,3 +24,9 @@ void main()
 {
     gl_FragData[0] = vec4(tile_denoise1_depth(v_texcoord, u_source, u_depth, inv_size, size), 0.0, 0.0, 1.0);
 }
+#else
+void main()
+{
+    gl_FragData[0] = texture2D(u_source, v_texcoord);
+}
+#endif
