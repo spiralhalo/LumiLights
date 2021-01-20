@@ -2,6 +2,7 @@
 #include lumi:shaders/lib/tonemap.glsl
 #include lumi:shaders/lib/util.glsl
 #include lumi:shaders/lib/fast_gaussian_blur.glsl
+#include lumi:shaders/context/post/reflection.glsl
 
 /*******************************************************
  *  lumi:shaders/pipeline/post/shading_combine.frag    *
@@ -19,6 +20,7 @@ uniform sampler2D u_hdr_translucent;
 uniform sampler2D u_hdr_translucent_swap;
 uniform sampler2D u_translucent_depth;
 
+#if REFLECTION_PROFILE != REFLECTION_PROFILE_NONE
 // arbitrary chosen depth threshold
 #define blurDepthThreshold 0.01
 vec4 hdr_combine(sampler2D a, sampler2D b, sampler2D sdepth, vec2 uv)
@@ -37,3 +39,10 @@ void main()
     gl_FragData[0] = hdr_combine(u_hdr_solid, u_hdr_solid_swap, u_solid_depth, v_texcoord);
     gl_FragData[1] = hdr_combine(u_hdr_translucent, u_hdr_translucent_swap, u_translucent_depth, v_texcoord);
 }
+#else
+void main()
+{
+    gl_FragData[0] = texture2D(u_hdr_solid, v_texcoord);
+    gl_FragData[1] = texture2D(u_hdr_translucent, v_texcoord);
+}
+#endif

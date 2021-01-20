@@ -1,5 +1,6 @@
 #include lumi:shaders/pipeline/post/common.glsl
 #include lumi:shaders/pipeline/post/reflection_common.glsl
+#include lumi:shaders/context/post/reflection.glsl
 
 /*******************************************************
  *  lumi:shaders/pipeline/post/reflection.frag         *
@@ -24,6 +25,7 @@ uniform sampler2D u_translucent_depth;
 uniform sampler2D u_normal_translucent;
 uniform sampler2D u_material_translucent;
 
+#if REFLECTION_PROFILE != REFLECTION_PROFILE_NONE
 const float JITTER_STRENGTH = 0.2;
 const vec3 UP_VECTOR = vec3(0.0, 1.0, 0.0);
 
@@ -91,3 +93,10 @@ void main()
     gl_FragData[0] = vec4(solid_solid.rgb * (1.0 - solid_translucent.a) + solid_translucent.rgb, roughness1);
     gl_FragData[1] = vec4(translucent_solid.rgb * (1.0 - translucent_translucent.a) + translucent_translucent.rgb, roughness2);
 }
+#else
+void main()
+{
+    gl_FragData[0] = vec4(0.0, 0.0, 0.0, 1.0);
+    gl_FragData[1] = vec4(0.0, 0.0, 0.0, 1.0);
+}
+#endif

@@ -3,7 +3,7 @@
 #include frex:shaders/lib/math.glsl
 #include lumi:shaders/lib/util.glsl
 #include lumi:shaders/lib/pbr.glsl
-#include lumi:reflection_config
+#include lumi:shaders/context/post/reflection.glsl
 
 /*******************************************************
  *  lumi:shaders/pipeline/post/reflection_common.frag  *
@@ -14,6 +14,7 @@
  *  published by the Free Software Foundation, Inc.    *
  *******************************************************/
 
+#if REFLECTION_PROFILE != REFLECTION_PROFILE_NONE
 vec2 coords_uv(vec3 view, mat4 projection)
 {
 	vec4 clip = projection * vec4(view, 1.0);
@@ -72,7 +73,7 @@ rt_Result rt_reflection(
 )
 {
     vec3 start_view = ray_view.xyz;
-    float hitbox_z = 0.125;
+    float hitbox_z = HITBOX;
     vec3 ray = unit_march * hitbox_z;
 
     vec2 current_uv;
@@ -84,7 +85,7 @@ rt_Result rt_reflection(
     int hits = 0;
     int steps = 0;
     int refine_steps = 0;
-    while (steps < 50) {
+    while (steps < MAXSTEPS) {
         ray_view += ray;
         current_uv = coords_uv(ray_view, projection);
         current_view = coords_view(current_uv, inv_projection, reflected_depth);
@@ -106,7 +107,7 @@ rt_Result rt_reflection(
                 ray = unit_march * refine_ray_length;
                 // 0.01 is the delta_z at which no more detail will be achieved even for very nearby reflection
                 // PERF: adapt based on initial z
-                while (refine_steps < 16 && abs(delta_z) > 0.01) {
+                while (refine_steps < REFINE && abs(delta_z) > 0.01) {
                     if (abs(delta_z) < refine_ray_length) {
                         refine_ray_length = abs(delta_z);
                         ray = unit_march * refine_ray_length;
@@ -124,7 +125,7 @@ rt_Result rt_reflection(
                 return rt_Result(prev_uv, true, hits);
             }
         }
-        if (mod(steps, 7) == 0) {
+        if (mod(steps, PERIOD) == 0) {
             ray *= 2.0;
             hitbox_z *= 2.0;
         }
@@ -132,3 +133,4 @@ rt_Result rt_reflection(
     }
     return rt_Result(current_uv, false, hits);
 }
+#endif

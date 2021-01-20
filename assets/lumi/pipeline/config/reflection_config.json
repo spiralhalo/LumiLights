@@ -1,0 +1,18 @@
+{
+    options: [
+        {
+            includeToken: "lumi:reflection_config",
+            categoryKey: "config.lumi_lights.category.reflection",
+            options: {
+                reflection_profile: {
+                    default: "high",
+                    choices: ["none", "low", "medium", "high", "extreme"],
+                    enum: true,
+                    prefix: "reflection_profile_",
+                    nameKey: "config.lumi_lights.value.reflection_profile",
+                    descriptionKey: "config.lumi_lights.help.reflection_profile"
+                },
+            }
+        }
+    ]
+}
