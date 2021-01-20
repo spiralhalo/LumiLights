@@ -100,17 +100,25 @@ rt_Result rt_reflection(
             }
             if (delta_z < hitbox_z) {
                 //refine
-                vec2 prev_uv;
-                float prev_delta_z;
-                ray = unit_march * 0.0625;
-                while (refine_steps < 16) {
-                    prev_uv = current_uv;
-                    prev_delta_z = delta_z;
+                vec2 prev_uv = current_uv;
+                float prev_delta_z = delta_z;
+                float refine_ray_length = 0.0625;
+                ray = unit_march * refine_ray_length;
+                // 0.01 is the delta_z at which no more detail will be achieved even for very nearby reflection
+                // PERF: adapt based on initial z
+                while (refine_steps < 16 && abs(delta_z) > 0.01) {
+                    if (abs(delta_z) < refine_ray_length) {
+                        refine_ray_length = abs(delta_z);
+                        ray = unit_march * refine_ray_length;
+                    }
                     ray_view -= ray;
                     current_uv = coords_uv(ray_view, projection);
                     current_view = coords_view(current_uv, inv_projection, reflected_depth);
                     delta_z = current_view.z - ray_view.z;
+                    // Ensure delta_z never exceeds the amount we started with
                     if (abs(delta_z) > abs(prev_delta_z)) break;
+                    prev_uv = current_uv;
+                    prev_delta_z = delta_z;
                     refine_steps ++;
                 }
                 return rt_Result(prev_uv, true, hits);
