@@ -48,10 +48,6 @@
 ************************************************************/
 #define LUMI_SkyBloomIntensity 5
 
-/* Intensity of the dramatic bloom. Range: 0 ... 10 Default: 5
-*****************************************************************/
-#define LUMI_DramaticLighting_DramaticBloomIntensity 5
-
 /* Tonemap mode
  * 0 = Default
  * 1 = Vibrant

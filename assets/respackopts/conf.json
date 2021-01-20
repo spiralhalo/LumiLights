@@ -20,17 +20,6 @@
       "min": 1,
       "max": 10
     },
-    "LightingMode": [
-      "Dramatic",
-      "Neutral"
-    ],
-    "DramaticLighting": {
-      "DramaticBloomIntensity": {
-        "default": 5,
-        "min": 0,
-        "max": 10
-      }
-    },
     "Tonemap": [
       "Default",
       "Vibrant",

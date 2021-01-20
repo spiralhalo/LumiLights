@@ -122,7 +122,7 @@ void pbr_shading(inout vec4 a, inout float bloom, vec3 viewPos, vec2 light, vec3
     float smoothness = (1-pbr_roughness);
     bloom += specularLuminance * pbr_specularBloomStr * smoothness * smoothness;
 #if LIGHTING_PROFILE == LIGHTING_PROFILE_MOODY
-    bloom += dramaticBloom * l2_sunHorizonScale(frx_worldTime()) * hdr_dramaticStr * clamp(LUMI_DramaticLighting_DramaticBloomIntensity * 0.1, 0.0, 1.0);
+    bloom += dramaticBloom * l2_sunHorizonScale(frx_worldTime()) * hdr_dramaticStr;
 #endif
     if (translucent) {
         a.a += specularLuminance * pbr_specularBloomStr;
