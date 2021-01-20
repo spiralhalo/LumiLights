@@ -1,7 +1,7 @@
 #include lumi:bloom_config
 
 /******************************************************
-  lumi:shaders/pipeline/post/bloom_common.glsl
+  lumi:shaders/context/post/bloom.glsl
 ******************************************************/
 
 const float BLOOM_INTENSITY_FLOAT = BLOOM_INTENSITY / 50.0;

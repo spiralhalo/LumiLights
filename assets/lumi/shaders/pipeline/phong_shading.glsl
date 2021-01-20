@@ -37,7 +37,7 @@ void phong_shading(in frx_FragmentData fragData, inout vec4 a, inout float bloom
     vec3 held = l2_handHeldRadiance();
 #endif
     float perceivedBl = fragData.light.x;
-#if LUMI_LightingMode == LUMI_LightingMode_Dramatic
+#if LIGHTING_PROFILE == LIGHTING_PROFILE_MOODY
 	if (frx_modelOriginType() != MODEL_ORIGIN_REGION) {
 		perceivedBl = max(0, perceivedBl - fragData.light.y * 0.1);
 	}
@@ -51,7 +51,7 @@ void phong_shading(in frx_FragmentData fragData, inout vec4 a, inout float bloom
     vec3 skyless = skylessRadiance * skyLessDot + (frx_isSkyDarkened() ? skylessRadiance * skyLessDarkenedDot : vec3(0.0));
     vec3 baseAmbient = l2_baseAmbient();
 
-#if LUMI_LightingMode == LUMI_LightingMode_Dramatic
+#if LIGHTING_PROFILE == LIGHTING_PROFILE_MOODY
     vec3 light = baseAmbient + held + moon + skyAmbient + sun + skyless;
     light *= ao;
     light += block * mix(ao, 1.0, 0.5);
@@ -80,7 +80,7 @@ void phong_shading(in frx_FragmentData fragData, inout vec4 a, inout float bloom
         a.a += specularLuminance;
         bloom += specularLuminance;
     }
-#if LUMI_LightingMode == LUMI_LightingMode_Dramatic
+#if LIGHTING_PROFILE == LIGHTING_PROFILE_MOODY
     bloom += frx_luminance(sun) * l2_sunHorizonScale(frx_worldTime()) * hdr_dramaticStr * clamp(LUMI_DramaticLighting_DramaticBloomIntensity * 0.1, 0.0, 1.0);
 #endif
 

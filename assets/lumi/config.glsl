@@ -17,9 +17,6 @@
 #define LUMI_DebugMode_Normal 1
 #define LUMI_DebugMode_ViewDir 2
 
-#define LUMI_LightingMode_Dramatic 0
-#define LUMI_LightingMode_Neutral 1
-
 /*******************************
  * vv CONFIGURATIONS START vv  *
  *******************************/
@@ -50,13 +47,6 @@
 /* Intensity of the sky bloom. Range: 0 ... 10 Default: 5
 ************************************************************/
 #define LUMI_SkyBloomIntensity 5
-
-/* Lighting mode
- * 0 = Dramatic: morning bloom and warm indoor lights
- * 1 = Neutral: neutral lighting
- * Note: these options may change in future versions.
- ******************************************************/
-#define LUMI_LightingMode 0
 
 /* Intensity of the dramatic bloom. Range: 0 ... 10 Default: 5
 *****************************************************************/

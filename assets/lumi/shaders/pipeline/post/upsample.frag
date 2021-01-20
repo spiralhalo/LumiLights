@@ -1,5 +1,5 @@
 #include lumi:shaders/pipeline/post/common.glsl
-#include lumi:shaders/pipeline/post/bloom_common.glsl
+#include lumi:shaders/context/post/bloom.glsl
 #include frex:shaders/lib/sample.glsl
 
 /******************************************************

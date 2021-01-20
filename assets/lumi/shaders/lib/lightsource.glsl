@@ -2,7 +2,7 @@
 #include frex:shaders/api/world.glsl
 #include frex:shaders/api/player.glsl
 #include lumi:shaders/lib/util.glsl
-#include lumi:lighting_config
+#include lumi:shaders/context/global/lighting.glsl
 
 /*******************************************************
  *  lumi:shaders/lib/lightsource.glsl                  *
@@ -13,77 +13,12 @@
  *  published by the Free Software Foundation, Inc.    *
  *******************************************************/
 
-#if LUMI_Tonemap == LUMI_Tonemap_Film
-    #define toneAdjust(x) (x*1)
-#else
-    #define toneAdjust(x) x
-#endif
-
-#ifdef LUMI_PBRX
-    #define hdr_sunStr 6
-    #define hdr_moonStr 0.4
-    #define hdr_blockMinStr 2
-    #define hdr_blockMaxStr 3
-    #define hdr_handHeldStr 1.5
-    #define hdr_skylessStr 0.1
-    #define hdr_baseMinStr 0.01
-    #define hdr_baseMaxStr 0.8
-    #define hdr_emissiveStr 1
-    #define hdr_relAmbient toneAdjust(0.2)
-    #define hdr_dramaticStr 1.0
-    #define hdr_dramaticMagicNumber 6.0
-#else
-    #define hdr_sunStr 1.8
-    #define hdr_moonStr 0.18
-    #define hdr_blockMinStr 1.0
-    #define hdr_blockMaxStr 1.4
-    #define hdr_handHeldStr 0.9
-    #define hdr_skylessStr 0.05
-    #define hdr_baseMinStr 0.0
-    #define hdr_baseMaxStr 0.25
-    #define hdr_emissiveStr 1
-    #define hdr_relAmbient toneAdjust(0.09)
-    #define hdr_dramaticStr 0.6
-    #define hdr_dramaticMagicNumber 3.5
-#endif
-
-#define hdr_nightAmbientMult 2.0
-#define hdr_skylessRelStr 0.5
-#define hdr_zWobbleDefault 0.1
-
-const vec3 blockColor = vec3(1.0, 0.875, 0.75);
-const vec3 dramaticBlockColor = vec3(1.0, 0.7, 0.4);
-
-const vec3 preSunColor = vec3(1.0, 1.0, 1.0);
-const vec3 preSunriseColor = vec3(1.0, 0.8, 0.4);
-const vec3 preSunsetColor = vec3(1.0, 0.6, 0.4);
-
-const vec3 nvColor = vec3(0.63, 0.55, 0.64);
-// const vec3 nvColorPurple = vec3(0.6, 0.5, 0.7);
-
-#ifndef LUMI_DayAmbientBlue
-    #define LUMI_DayAmbientBlue 0
-#endif
-
-#define preDayAmbient hdr_gammaAdjust(mix(vec3(0.8550322), vec3(0.6, 0.9, 1.0), clamp(LUMI_DayAmbientBlue * 0.1, 0.0, 1.0))) * hdr_sunStr
-#define preAmbient hdr_gammaAdjust(vec3(0.6, 0.9, 1.0)) * hdr_sunStr
-
-#if LUMI_LightingMode == LUMI_LightingMode_Dramatic
-    #define preSunriseAmbient hdr_gammaAdjust(vec3(0.5, 0.3, 0.1)) * hdr_sunStr
-    #define preSunsetAmbient hdr_gammaAdjust(vec3(0.5, 0.2, 0.0)) * hdr_sunStr
-    #define preNightAmbient hdr_gammaAdjust(vec3(0.74, 0.4, 1.0)) * hdr_moonStr * hdr_nightAmbientMult
-#else
-    #define preSunriseAmbient hdr_gammaAdjust(vec3(1.0, 0.8, 0.4)) * hdr_sunStr
-    #define preSunsetAmbient hdr_gammaAdjust(vec3(1.0, 0.6, 0.2)) * hdr_sunStr
-    #define preNightAmbient hdr_gammaAdjust(vec3(0.5, 0.5, 1.0)) * hdr_moonStr * hdr_nightAmbientMult
-#endif
-
 /*  BLOCK LIGHT
  *******************************************************/
 
 vec3 l2_blockRadiance(float blockLight)
 {
-    #if LUMI_LightingMode == LUMI_LightingMode_Dramatic
+    #if LIGHTING_PROFILE == LIGHTING_PROFILE_MOODY
         float dist = (1.001 - min(l2_clampScale(0.03125, 0.95, blockLight), 0.93)) * 15;
         float bl = hdr_dramaticMagicNumber / (dist * dist);
         if (bl <= 0.01 * hdr_dramaticMagicNumber) {
@@ -103,7 +38,7 @@ vec3 l2_blockRadiance(float blockLight)
 #if HANDHELD_LIGHT_RADIUS != 0
     vec3 l2_handHeldRadiance(vec3 viewPos)
     {
-        #if LUMI_LightingMode == LUMI_LightingMode_Dramatic
+        #if LIGHTING_PROFILE == LIGHTING_PROFILE_MOODY
             vec4 held = frx_heldLight();
             float dist = (1.001 - l2_clampScale(held.w * HANDHELD_LIGHT_RADIUS, 0.0, -viewPos.z+0.5)) * 15;
             float hl = hdr_dramaticMagicNumber / (dist * dist);
@@ -177,7 +112,7 @@ vec3 l2_ambientColor(float time)
 vec3 l2_skyAmbient(float skyLight, float time, float intensity)
 {
     float sl = l2_skyLight(skyLight, intensity);
-    #if LUMI_LightingMode == LUMI_LightingMode_Dramatic
+    #if LIGHTING_PROFILE == LIGHTING_PROFILE_MOODY
         sl = smoothstep(0.1, 0.9, sl);
     #endif
     float sa = sl * 2.5;
@@ -191,6 +126,7 @@ vec3 l2_skyAmbient(float skyLight, float time, float intensity)
 
 vec3 l2_dimensionColor()
 {
+#if LIGHTING_PROFILE == LIGHTING_PROFILE_MOODY
     if (frx_isWorldTheNether()) {
         float min_col = l2_min3(gl_Fog.color.rgb);
         float max_col = l2_max3(gl_Fog.color.rgb);
@@ -199,6 +135,9 @@ vec3 l2_dimensionColor()
         return hdr_gammaAdjust(clamp((gl_Fog.color.rgb*(1/max_col))+pow(sat,2)/2, 0.0, 1.0));
     }
     return hdr_gammaAdjust(vec3(0.8, 0.7, 1.0));
+#else
+    return vec3(1.0, 1.0, 1.0);
+#endif
 }
 
 #define l2_skylessDarkenedDir() vec3(0, -0.977358, 0.211593)
@@ -238,7 +177,7 @@ vec3 l2_baseAmbient(){
                 return vec3(0.0);
             }
         #endif
-        return l2_dimensionColor() * hdr_skylessRelStr * mix(hdr_baseMinStr, hdr_baseMaxStr, frx_viewBrightness());
+        return l2_dimensionColor() * hdr_skylessRelStr * mix(hdr_skylessBaseMinStr, hdr_skylessBaseMaxStr, frx_viewBrightness());
     }
 }
 
@@ -284,12 +223,12 @@ vec3 l2_sunRadiance(float skyLight, in float time, float intensity, float rainGr
     customIntensity *= mix(1.0, 0.0, rainGradient);
     float sl = l2_skyLight(skyLight, max(customIntensity, intensity));
     // direct sun light doesn't reach into dark spot as much as sky ambient
-    #if LUMI_LightingMode == LUMI_LightingMode_Dramatic
+    #if LIGHTING_PROFILE == LIGHTING_PROFILE_MOODY
         sl = frx_smootherstep(0.7, 0.97, sl);
     #else
         sl = frx_smootherstep(0.5, 0.97, sl);
     #endif
-    #if LUMI_LightingMode == LUMI_LightingMode_SystemUnused
+    #if LIGHTING_PROFILE == LIGHTING_PROFILE_SystemUnused
         return sl * hdr_sunStr * hdr_gammaAdjust(ldr_sunColor(time)) * (0.5 - 0.5 * dot(frx_cameraView(), vec3(0.0, 1.0, 0.0)));
     #else
         return sl * hdr_sunStr * hdr_gammaAdjust(ldr_sunColor(time));

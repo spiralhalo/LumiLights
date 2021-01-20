@@ -60,7 +60,7 @@ void pbr_shading(inout vec4 a, inout float bloom, vec3 viewPos, vec2 light, vec3
     vec3 viewDir = normalize(-viewPos) * frx_normalModelMatrix();
     vec3 emissive = l2_emissiveRadiance(bloom);
     vec3 specularAccu = vec3(0.0);
-#if LUMI_LightingMode == LUMI_LightingMode_Dramatic
+#if LIGHTING_PROFILE == LIGHTING_PROFILE_MOODY
     float dramaticBloom = 0;
 #endif
 
@@ -78,7 +78,7 @@ void pbr_shading(inout vec4 a, inout float bloom, vec3 viewPos, vec2 light, vec3
 #endif
 
     float perceivedBl = light.x;
-// #if LUMI_LightingMode == LUMI_LightingMode_Dramatic
+// #if LIGHTING_PROFILE == LIGHTING_PROFILE_MOODY
 // 	if (frx_modelOriginType() != MODEL_ORIGIN_REGION) {
 // 		perceivedBl = max(0, perceivedBl - light.y * 0.1);
 // 	}
@@ -95,7 +95,7 @@ void pbr_shading(inout vec4 a, inout float bloom, vec3 viewPos, vec2 light, vec3
             vec3 sunRadiance = l2_sunRadiance(light.y, frx_worldTime(), frx_ambientIntensity(), frx_rainGradient());
             vec3 sunIrradiance = pbr_lightCalc(albedo, pbr_roughness, pbr_metallic, f0, sunRadiance, frx_skyLightVector(), viewDir, normal, isDiffuse, false, 0.15, specularAccu);
             a.rgb += sunIrradiance;
-            #if LUMI_LightingMode == LUMI_LightingMode_Dramatic
+            #if LIGHTING_PROFILE == LIGHTING_PROFILE_MOODY
                 dramaticBloom = frx_luminance(sunIrradiance);
             #endif
         } else {
@@ -121,7 +121,7 @@ void pbr_shading(inout vec4 a, inout float bloom, vec3 viewPos, vec2 light, vec3
     float specularLuminance = frx_luminance(specularAccu);
     float smoothness = (1-pbr_roughness);
     bloom += specularLuminance * pbr_specularBloomStr * smoothness * smoothness;
-#if LUMI_LightingMode == LUMI_LightingMode_Dramatic
+#if LIGHTING_PROFILE == LIGHTING_PROFILE_MOODY
     bloom += dramaticBloom * l2_sunHorizonScale(frx_worldTime()) * hdr_dramaticStr * clamp(LUMI_DramaticLighting_DramaticBloomIntensity * 0.1, 0.0, 1.0);
 #endif
     if (translucent) {
