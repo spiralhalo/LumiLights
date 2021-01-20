@@ -25,7 +25,7 @@ vec3 hdr_skyColor()
     } else skyColor = frx_vanillaClearColor();
 
     vec3 grayScale = vec3(frx_luminance(skyColor));
-    skyColor = mix(skyColor, grayScale, frx_playerFlag(FRX_PLAYER_EYE_IN_WATER) ? 1.0 : 0.0);
+    // skyColor = mix(skyColor, grayScale, frx_playerFlag(FRX_PLAYER_EYE_IN_WATER) ? 0.5 : 0.0);
     
     return hdr_gammaAdjust(skyColor);
 }
