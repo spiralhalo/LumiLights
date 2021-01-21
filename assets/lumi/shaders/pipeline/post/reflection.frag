@@ -1,6 +1,7 @@
 #include lumi:shaders/pipeline/post/common.glsl
 #include lumi:shaders/pipeline/post/reflection_common.glsl
 #include lumi:shaders/context/post/reflection.glsl
+#include lumi:shaders/context/global/lighting.glsl
 
 /*******************************************************
  *  lumi:shaders/pipeline/post/reflection.frag         *
@@ -38,6 +39,7 @@ rt_color_depth work_on_pair(
     in vec4 base_color,
     in vec3 albedo,
     in sampler2D reflector_depth,
+    in sampler2D reflector_light,
     in sampler2D reflector_normal,
     in sampler2D reflector_material,
 
@@ -68,8 +70,11 @@ rt_color_depth work_on_pair(
         vec4 reflected;
         float reflected_depth_value = coords_depth(result.reflected_uv, reflected_depth);
         if (reflected_depth_value == 1.0 || !result.hit || result.reflected_uv.x < 0.0 || result.reflected_uv.y < 0.0 || result.reflected_uv.x > 1.0 || result.reflected_uv.y > 1.0) {
-            reflected.rgb = v_skycolor * frx_ambientIntensity() * l2_clampScale(-1.0, 1.0, dot(worldNormal, UP_VECTOR));
-            reflected.rgb *= result.hits > 1 ? 0.1 : 1.0;
+            vec2 light = texture2D(reflector_light, v_texcoord).xy;
+            float occlusionFactor = result.hits > 1 ? 0.1 : 1.0;
+            float upFactor = l2_clampScale(-1.0, 1.0, dot(worldNormal, UP_VECTOR));
+            reflected.rgb = mix(vec3(0.0), activeBlockColor, light.x);
+            reflected.rgb = mix(reflected.rgb, v_skycolor, light.y * frx_ambientIntensity() * occlusionFactor * upFactor);
             reflected.rgb *= fallback;
             reflected.a = fallback;
             reflected_depth_value = 1.0;
@@ -89,8 +94,8 @@ void main()
 {
     vec4 source_base = texture2D(u_source_color, v_texcoord);
     vec3 source_albedo = texture2D(u_source_albedo, v_texcoord).rgb;
-    rt_color_depth source_source = work_on_pair(source_base, source_albedo, u_source_depth, u_normal_source, u_material_source, u_source_color, u_source_combine, u_source_depth, u_normal_source, 1.0);
-    rt_color_depth source_target = work_on_pair(source_base, source_albedo, u_source_depth, u_normal_source, u_material_source, u_target_color, u_target_combine, u_target_depth, u_normal_target, 0.0);
+    rt_color_depth source_source = work_on_pair(source_base, source_albedo, u_source_depth, u_light_source, u_normal_source, u_material_source, u_source_color, u_source_combine, u_source_depth, u_normal_source, 1.0);
+    rt_color_depth source_target = work_on_pair(source_base, source_albedo, u_source_depth, u_light_source, u_normal_source, u_material_source, u_target_color, u_target_combine, u_target_depth, u_normal_target, 0.0);
     float roughness1 = texture2DLod(u_material_source, v_texcoord, 0).x;
     vec3 reflection_color1 = (source_source.depth < source_target.depth)
         ? source_source.color.rgb

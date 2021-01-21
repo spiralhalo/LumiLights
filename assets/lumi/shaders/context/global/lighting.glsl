@@ -31,6 +31,11 @@
 
 const vec3 blockColor = vec3(1.0, 0.875, 0.75);
 const vec3 dramaticBlockColor = vec3(1.0, 0.7, 0.4);
+#if LIGHTING_PROFILE == LIGHTING_PROFILE_MOODY
+    const vec3 activeBlockColor = dramaticBlockColor;
+#else
+    const vec3 activeBlockColor = blockColor;
+#endif
 
 const vec3 preSunColor = vec3(1.0, 1.0, 1.0);
 const vec3 preSunriseColor = vec3(1.0, 0.8, 0.4);
