@@ -10,9 +10,9 @@
  *******************************************************/
 
 #if REFLECTION_PROFILE == REFLECTION_PROFILE_EXTREME
-    const float HITBOX = 0.125;
-    const int MAXSTEPS = 100;
-    const int PERIOD = 24;
+    const float HITBOX = 0.0375;
+    const int MAXSTEPS = 109;
+    const int PERIOD = 18;
     const int REFINE = 16;
 #endif
 
