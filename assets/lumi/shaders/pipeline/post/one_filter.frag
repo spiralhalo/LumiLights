@@ -13,12 +13,11 @@
  *  published by the Free Software Foundation, Inc.    *
  *******************************************************/
 
-#if AMBIENT_OCCLUSION == AMBIENT_OCCLUSION_SSAO
 uniform sampler2D u_source;
 uniform sampler2D u_depth;
 
+#if AMBIENT_OCCLUSION == AMBIENT_OCCLUSION_SSAO
 vec2 inv_size = 1.0 / frxu_size;
-
 const int size = 4;
 void main()
 {
