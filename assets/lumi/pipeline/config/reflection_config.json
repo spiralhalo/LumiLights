@@ -12,6 +12,13 @@
                     nameKey: "config.lumi_lights.value.reflection_profile",
                     descriptionKey: "config.lumi_lights.help.reflection_profile"
                 },
+                reflection_minimum_roughness_relative: {
+                    default: 7,
+                    min: 1,
+                    max: 10,
+                    nameKey: "config.lumi_lights.value.reflection_minimum_roughness_relative",
+                    descriptionKey: "config.lumi_lights.help.reflection_minimum_roughness_relative"
+                },
             }
         }
     ]

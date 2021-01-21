@@ -55,6 +55,8 @@
     "config.lumi_lights.category.reflection": "Reflection",
     "config.lumi_lights.value.reflection_profile": "Quality",
     "config.lumi_lights.help.reflection_profile": "Quality of reflections",
+    "config.lumi_lights.value.reflection_minimum_roughness_relative": "Minimum roughness",
+    "config.lumi_lights.help.reflection_minimum_roughness_relative": "Limits amount of reflection. Lower to improve performance",
 
     "respackopts.title.LUMI": "Lumi Lights",
     "respackopts.field.LUMI.DayAmbientBlue": "Day ambient blue amount",

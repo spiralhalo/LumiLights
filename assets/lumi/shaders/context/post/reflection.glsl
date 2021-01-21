@@ -36,3 +36,5 @@
     const int PERIOD = 3;
     const int REFINE = 8;
 #endif
+
+const float REFLECTION_MINIMUM_ROUGHNESS = REFLECTION_MINIMUM_ROUGHNESS_RELATIVE / 10.0;
