@@ -5,19 +5,18 @@
             vertexSource: "lumi:shaders/pipeline/post/hdr.vert",
             fragmentSource: "lumi:shaders/pipeline/post/reflection.frag",
             samplers: [
-                "u_solid_color",
-                "u_solid_combine",
-                "u_solid_albedo",
-                "u_solid_depth",
-                "u_normal_solid",
-                "u_material_solid",
+                "u_source_color",
+                "u_source_combine",
+                "u_source_albedo",
+                "u_source_depth",
+                "u_light_source",
+                "u_normal_source",
+                "u_material_source",
 
-                "u_translucent_color",
-                "u_translucent_combine",
-                "u_translucent_albedo",
-                "u_translucent_depth",
-                "u_normal_translucent",
-                "u_material_translucent",
+                "u_target_color",
+                "u_target_combine",
+                "u_target_depth",
+                "u_normal_target",
             ]
         }, 
     ],
@@ -72,9 +71,13 @@
     
     framebuffers: [
         {
-            name: "reflection",
+            name: "reflection_solid",
             colorAttachments: [
-                {image: "solid_shaded_swap", clearColor: 0x00000000},
+                {image: "solid_shaded_swap", clearColor: 0x00000000}
+            ]
+        }, {
+            name: "reflection_translucent",
+            colorAttachments: [
                 {image: "translucent_shaded_swap", clearColor: 0x00000000}
             ]
         }, {

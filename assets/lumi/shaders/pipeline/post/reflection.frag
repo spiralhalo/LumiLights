@@ -11,19 +11,18 @@
  *  published by the Free Software Foundation, Inc.    *
  *******************************************************/
 
-uniform sampler2D u_solid_color;
-uniform sampler2D u_solid_combine;
-uniform sampler2D u_solid_albedo;
-uniform sampler2D u_solid_depth;
-uniform sampler2D u_normal_solid;
-uniform sampler2D u_material_solid;
+uniform sampler2D u_source_color;
+uniform sampler2D u_source_combine;
+uniform sampler2D u_source_albedo;
+uniform sampler2D u_source_depth;
+uniform sampler2D u_light_source;
+uniform sampler2D u_normal_source;
+uniform sampler2D u_material_source;
 
-uniform sampler2D u_translucent_color;
-uniform sampler2D u_translucent_combine;
-uniform sampler2D u_translucent_albedo;
-uniform sampler2D u_translucent_depth;
-uniform sampler2D u_normal_translucent;
-uniform sampler2D u_material_translucent;
+uniform sampler2D u_target_color;
+uniform sampler2D u_target_combine;
+uniform sampler2D u_target_depth;
+uniform sampler2D u_normal_target;
 
 #if REFLECTION_PROFILE != REFLECTION_PROFILE_NONE
 const float JITTER_STRENGTH = 0.2;
@@ -88,31 +87,20 @@ rt_color_depth work_on_pair(
 
 void main()
 {
-    vec4 solid_base = texture2D(u_solid_color, v_texcoord);
-    vec3 solid_albedo = texture2D(u_solid_albedo, v_texcoord).rgb;
-    vec4 translucent_base = texture2D(u_translucent_color, v_texcoord);
-    vec3 translucent_albedo = texture2D(u_translucent_albedo, v_texcoord).rgb;
-    rt_color_depth solid_solid       = work_on_pair(solid_base, solid_albedo, u_solid_depth, u_normal_solid, u_material_solid, u_solid_color, u_solid_combine, u_solid_depth, u_normal_solid, 1.0);
-    rt_color_depth solid_translucent = work_on_pair(solid_base, solid_albedo, u_solid_depth, u_normal_solid, u_material_solid, u_translucent_color, u_translucent_combine, u_translucent_depth, u_normal_translucent, 0.0);
-    rt_color_depth translucent_solid       = work_on_pair(translucent_base, translucent_albedo, u_translucent_depth, u_normal_translucent, u_material_translucent, u_solid_color, u_solid_combine, u_solid_depth, u_normal_solid, 1.0);
-    rt_color_depth translucent_translucent = work_on_pair(translucent_base, translucent_albedo, u_translucent_depth, u_normal_translucent, u_material_translucent, u_translucent_color, u_translucent_combine, u_translucent_depth, u_normal_translucent, 0.0);
-    float roughness1 = texture2DLod(u_material_solid, v_texcoord, 0).x;
-    float roughness2 = texture2DLod(u_material_translucent, v_texcoord, 0).x;
-    vec3 reflection_color1 = (solid_solid.depth < solid_translucent.depth)
-        ? solid_solid.color.rgb
-        : (solid_solid.color.rgb * (1.0 - solid_translucent.color.a) + solid_translucent.color.rgb);
-    vec3 reflection_color2 = (translucent_solid.depth < translucent_translucent.depth)
-        ? translucent_solid.color.rgb
-        : (translucent_solid.color.rgb * (1.0 - translucent_translucent.color.a) + translucent_translucent.color.rgb);
+    vec4 source_base = texture2D(u_source_color, v_texcoord);
+    vec3 source_albedo = texture2D(u_source_albedo, v_texcoord).rgb;
+    rt_color_depth source_source = work_on_pair(source_base, source_albedo, u_source_depth, u_normal_source, u_material_source, u_source_color, u_source_combine, u_source_depth, u_normal_source, 1.0);
+    rt_color_depth source_target = work_on_pair(source_base, source_albedo, u_source_depth, u_normal_source, u_material_source, u_target_color, u_target_combine, u_target_depth, u_normal_target, 0.0);
+    float roughness1 = texture2DLod(u_material_source, v_texcoord, 0).x;
+    vec3 reflection_color1 = (source_source.depth < source_target.depth)
+        ? source_source.color.rgb
+        : (source_source.color.rgb * (1.0 - source_target.color.a) + source_target.color.rgb);
     gl_FragData[0] = vec4(reflection_color1, roughness1);
-    gl_FragData[1] = vec4(reflection_color2, roughness2);
 }
 #else
 void main()
 { 
-    float roughness1 = texture2D(u_material_solid, v_texcoord).x;
-    float roughness2 = texture2D(u_material_translucent, v_texcoord).x;
+    float roughness1 = texture2D(u_material_source, v_texcoord).x;
     gl_FragData[0] = vec4(0.0, 0.0, 0.0, roughness1);
-    gl_FragData[1] = vec4(0.0, 0.0, 0.0, roughness2);
 }
 #endif
