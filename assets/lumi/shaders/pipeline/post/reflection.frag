@@ -29,7 +29,13 @@ uniform sampler2D u_material_translucent;
 const float JITTER_STRENGTH = 0.2;
 const vec3 UP_VECTOR = vec3(0.0, 1.0, 0.0);
 
-vec4 work_on_pair(
+struct rt_color_depth
+{
+    vec4 color;
+    float depth;
+};
+
+rt_color_depth work_on_pair(
     in vec4 base_color,
     in vec3 albedo,
     in sampler2D reflector_depth,
@@ -43,7 +49,7 @@ vec4 work_on_pair(
     float fallback
 )
 {
-    vec4 noreturn = vec4(0.0);
+    rt_color_depth noreturn = rt_color_depth(vec4(0.0), 1.0);
     vec4 material = texture2DLod(reflector_material, v_texcoord, 0);
     vec3 worldNormal = coords_normal(v_texcoord, reflector_normal);
     float roughness = material.x == 0.0 ? 1.0 : min(1.0, 1.0203 * material.x - 0.01); //prevent gloss on unmanaged draw
@@ -67,6 +73,7 @@ vec4 work_on_pair(
             reflected.rgb *= result.hits > 1 ? 0.1 : 1.0;
             reflected.rgb *= fallback;
             reflected.a = fallback;
+            reflected_depth_value = 1.0;
         } else {
             vec4 reflectedShaded = texture2D(reflected_color, result.reflected_uv);
             vec4 reflectedCombine = texture2D(reflected_combine, result.reflected_uv);
@@ -74,7 +81,8 @@ vec4 work_on_pair(
             reflected = mix(reflectedShaded, reflectedCombine, l2_clampScale(0.5, 1.0, -dot(worldNormal, reflectedNormal)));
         }
         // mysterious roughness hax
-        return vec4(pbr_lightCalc(0.4 + roughness * 0.6, f0, reflected.rgb * base_color.a * gloss, unit_march * frx_normalModelMatrix(), unit_view * frx_normalModelMatrix(), worldNormal), reflected.a);
+        vec4 pbr_color = vec4(pbr_lightCalc(0.4 + roughness * 0.6, f0, reflected.rgb * base_color.a * gloss, unit_march * frx_normalModelMatrix(), unit_view * frx_normalModelMatrix(), worldNormal), reflected.a);
+        return rt_color_depth(pbr_color, reflected_depth_value);
     } else return noreturn;
 }
 
@@ -84,14 +92,20 @@ void main()
     vec3 solid_albedo = texture2D(u_solid_albedo, v_texcoord).rgb;
     vec4 translucent_base = texture2D(u_translucent_color, v_texcoord);
     vec3 translucent_albedo = texture2D(u_translucent_albedo, v_texcoord).rgb;
-    vec4 solid_solid       = work_on_pair(solid_base, solid_albedo, u_solid_depth, u_normal_solid, u_material_solid, u_solid_color, u_solid_combine, u_solid_depth, u_normal_solid, 1.0);
-    vec4 solid_translucent = work_on_pair(solid_base, solid_albedo, u_solid_depth, u_normal_solid, u_material_solid, u_translucent_color, u_translucent_combine, u_translucent_depth, u_normal_translucent, 0.0);
-    vec4 translucent_solid       = work_on_pair(translucent_base, translucent_albedo, u_translucent_depth, u_normal_translucent, u_material_translucent, u_solid_color, u_solid_combine, u_solid_depth, u_normal_solid, 1.0);
-    vec4 translucent_translucent = work_on_pair(translucent_base, translucent_albedo, u_translucent_depth, u_normal_translucent, u_material_translucent, u_translucent_color, u_translucent_combine, u_translucent_depth, u_normal_translucent, 0.0);
+    rt_color_depth solid_solid       = work_on_pair(solid_base, solid_albedo, u_solid_depth, u_normal_solid, u_material_solid, u_solid_color, u_solid_combine, u_solid_depth, u_normal_solid, 1.0);
+    rt_color_depth solid_translucent = work_on_pair(solid_base, solid_albedo, u_solid_depth, u_normal_solid, u_material_solid, u_translucent_color, u_translucent_combine, u_translucent_depth, u_normal_translucent, 0.0);
+    rt_color_depth translucent_solid       = work_on_pair(translucent_base, translucent_albedo, u_translucent_depth, u_normal_translucent, u_material_translucent, u_solid_color, u_solid_combine, u_solid_depth, u_normal_solid, 1.0);
+    rt_color_depth translucent_translucent = work_on_pair(translucent_base, translucent_albedo, u_translucent_depth, u_normal_translucent, u_material_translucent, u_translucent_color, u_translucent_combine, u_translucent_depth, u_normal_translucent, 0.0);
     float roughness1 = texture2DLod(u_material_solid, v_texcoord, 0).x;
     float roughness2 = texture2DLod(u_material_translucent, v_texcoord, 0).x;
-    gl_FragData[0] = vec4(solid_solid.rgb * (1.0 - solid_translucent.a) + solid_translucent.rgb, roughness1);
-    gl_FragData[1] = vec4(translucent_solid.rgb * (1.0 - translucent_translucent.a) + translucent_translucent.rgb, roughness2);
+    vec3 reflection_color1 = (solid_solid.depth < solid_translucent.depth)
+        ? solid_solid.color.rgb
+        : (solid_solid.color.rgb * (1.0 - solid_translucent.color.a) + solid_translucent.color.rgb);
+    vec3 reflection_color2 = (translucent_solid.depth < translucent_translucent.depth)
+        ? translucent_solid.color.rgb
+        : (translucent_solid.color.rgb * (1.0 - translucent_translucent.color.a) + translucent_translucent.color.rgb);
+    gl_FragData[0] = vec4(reflection_color1, roughness1);
+    gl_FragData[1] = vec4(reflection_color2, roughness2);
 }
 #else
 void main()
