@@ -23,11 +23,16 @@ const float INTENSITY = 5.0;
 
 void main()
 {
-    float random = v_texcoord.x*v_texcoord.y;
-    float ssao = calc_ssao(
-        u_normal, u_depth, frx_normalModelMatrix(), frx_inverseProjectionMatrix(), frx_inverseViewProjectionMatrix(), frxu_size, 4,
-        v_texcoord, RADIUS, BIAS, INTENSITY);
-    gl_FragData[0] = vec4(ssao, 0.0, 0.0, 1.0);
+    // Modest performance saving by skipping the sky
+    if (texture2D(u_depth, v_texcoord).r == 1.0) {
+        gl_FragData[0] = vec4(1.0, 0.0, 0.0, 1.0);
+    } else {
+        float random = v_texcoord.x*v_texcoord.y;
+        float ssao = calc_ssao(
+            u_normal, u_depth, frx_normalModelMatrix(), frx_inverseProjectionMatrix(), frx_inverseViewProjectionMatrix(), frxu_size, 4,
+            v_texcoord, RADIUS, BIAS, INTENSITY);
+        gl_FragData[0] = vec4(ssao, 0.0, 0.0, 1.0);
+    }
 }
 #else
 void main()
