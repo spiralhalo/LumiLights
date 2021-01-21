@@ -46,7 +46,7 @@ vec4 work_on_pair(
     vec4 noreturn = vec4(0.0);
     vec4 material = texture2DLod(reflector_material, v_texcoord, 0);
     vec3 worldNormal = coords_normal(v_texcoord, reflector_normal);
-    float roughness = material.x == 0.0 ? 1.0 : material.x; //prevent gloss on unmanaged draw
+    float roughness = material.x == 0.0 ? 1.0 : min(1.0, 1.0205 * material.x); //prevent gloss on unmanaged draw
     float gloss   = 1.0 - roughness;
     if (gloss > 0.01 && material.a > 0.0) {
         vec3 ray_view  = coords_view(v_texcoord, frx_inverseProjectionMatrix(), reflector_depth);
