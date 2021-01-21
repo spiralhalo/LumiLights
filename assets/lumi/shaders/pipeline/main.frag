@@ -112,6 +112,6 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
         gl_FragData[0] = a;
         gl_FragData[1] = vec4(light.x, light.y, normalizedBloom, 1.0);
         gl_FragData[2] = vec4(normalizedNormal, 1.0);
-        gl_FragData[3] = vec4(roughness, pbr_metallic, pbr_f0, 1.0);
+        gl_FragData[3] = vec4(pbr_roughness, pbr_metallic, pbr_f0, 1.0);
     }
 }
