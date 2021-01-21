@@ -67,14 +67,18 @@ rt_color_depth work_on_pair(
         vec3 reg_f0     = vec3(material.y < 0.7 ? material.y : 0.0);
         vec3 f0         = mix(reg_f0, albedo, material.y);
         rt_Result result = rt_reflection(ray_view, unit_view, normal, unit_march, frx_normalModelMatrix(), frx_projectionMatrix(), frx_inverseProjectionMatrix(), reflector_depth, reflector_normal, reflected_depth, reflected_normal);
+        // more useful in worldspace after rt computation is done
+        unit_view *= frx_normalModelMatrix();
+        unit_march *= frx_normalModelMatrix();
         vec4 reflected;
         float reflected_depth_value = coords_depth(result.reflected_uv, reflected_depth);
         if (reflected_depth_value == 1.0 || !result.hit || result.reflected_uv.x < 0.0 || result.reflected_uv.y < 0.0 || result.reflected_uv.x > 1.0 || result.reflected_uv.y > 1.0) {
             vec2 light = texture2D(reflector_light, v_texcoord).xy;
             float occlusionFactor = result.hits > 1 ? 0.1 : 1.0;
-            float upFactor = l2_clampScale(-1.0, 1.0, dot(worldNormal, UP_VECTOR));
-            reflected.rgb = mix(vec3(0.0), activeBlockColor, light.x);
-            reflected.rgb = mix(reflected.rgb, v_skycolor, light.y * frx_ambientIntensity() * occlusionFactor * upFactor);
+            float upFactor = frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? l2_clampScale(-1.0, 1.0, dot(unit_march, UP_VECTOR)) : 1.0;
+            float skyLightFactor = frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? (light.y * light.y * frx_ambientIntensity()) : 0.5; // 0.5 = arbitrary skyless factor. TODO: make constant
+            reflected.rgb = mix(vec3(0.0), hdr_gammaAdjust(activeBlockColor), light.x * light.x);
+            reflected.rgb = mix(reflected.rgb, v_skycolor, skyLightFactor * occlusionFactor * upFactor);
             reflected.rgb *= fallback;
             reflected.a = fallback;
             reflected_depth_value = 1.0;
@@ -85,7 +89,7 @@ rt_color_depth work_on_pair(
             reflected = mix(reflectedShaded, reflectedCombine, l2_clampScale(0.5, 1.0, -dot(worldNormal, reflectedNormal)));
         }
         // mysterious roughness hax
-        vec4 pbr_color = vec4(pbr_lightCalc(0.4 + roughness * 0.6, f0, reflected.rgb * base_color.a * gloss, unit_march * frx_normalModelMatrix(), unit_view * frx_normalModelMatrix(), worldNormal), reflected.a);
+        vec4 pbr_color = vec4(pbr_lightCalc(0.4 + roughness * 0.6, f0, reflected.rgb * base_color.a * gloss, unit_march, unit_view, worldNormal), reflected.a);
         return rt_color_depth(pbr_color, reflected_depth_value);
     } else return noreturn;
 }
