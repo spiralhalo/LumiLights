@@ -105,7 +105,8 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
         float bloom = fragData.emissivity * a.a;
 		float ao = fragData.ao ? (1.0 - fragData.aoShade) * a.a : 0.0;
 		float normalizedBloom = (bloom - ao) * 0.5 + 0.5;
-		float roughness = fragData.diffuse ? pbr_roughness * 0.98 : 1.0;
+		//pad with 0.01 to prevent conflation with unmanaged draw
+		float roughness = fragData.diffuse ? 0.01 + pbr_roughness * 0.98 : 1.0;
 
 		// PERF: view normal, more useful than world normal
         gl_FragDepth = gl_FragCoord.z;
