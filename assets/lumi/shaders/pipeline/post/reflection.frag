@@ -95,8 +95,10 @@ void main()
 }
 #else
 void main()
-{
-    gl_FragData[0] = vec4(0.0, 0.0, 0.0, 1.0);
-    gl_FragData[1] = vec4(0.0, 0.0, 0.0, 1.0);
+{ 
+    float roughness1 = texture2D(u_material_solid, v_texcoord).x;
+    float roughness2 = texture2D(u_material_translucent, v_texcoord).x;
+    gl_FragData[0] = vec4(0.0, 0.0, 0.0, roughness1);
+    gl_FragData[1] = vec4(0.0, 0.0, 0.0, roughness2);
 }
 #endif
