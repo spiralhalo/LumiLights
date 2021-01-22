@@ -76,6 +76,9 @@ rt_Result rt_reflection(
     float hitbox_z = HITBOX;
     vec3 ray = unit_march * hitbox_z;
 
+    // Pad hitbox to reduce "stripes" artifact when ray goes in -z direction
+    float min_hitbox = mix(HITBOX, 2.0, l2_clampScale(0.4, 0.6, dot(unit_march, vec3(0.0, 0.0, -1.0))));
+
     vec2 current_uv;
     vec3 current_view;
     float delta_z;
@@ -90,16 +93,15 @@ rt_Result rt_reflection(
         current_uv = coords_uv(ray_view, projection);
         current_view = coords_view(current_uv, inv_projection, reflected_depth);
         delta_z = current_view.z - ray_view.z;
-        reflectedNormal = coords_normal(current_uv, reflected_normal);
-        backface = dot(unit_march, normal_matrix * normalize(reflectedNormal)) > 0;
-        if (delta_z > 0 && !backface) {
-            // TODO: handle ray coming at camera ?
-            if (current_view.z < start_view.z
-                && current_uv.x >= 0.0 && current_uv.y >= 0.0
-                && current_uv.x <= 1.0 && current_uv.y <= 1.0) {
-                hits ++;
-            }
-            if (delta_z < hitbox_z) {
+        reflectedNormal = normalize(normal_matrix * coords_normal(current_uv, reflected_normal));
+        backface = dot(unit_march, reflectedNormal) > 0;
+        if (delta_z > 0 && !backface && (current_view.z < start_view.z || unit_march.z > 0.0)) {
+            // Remove "occlusion factor" (result.hit > 1) because it doesn't work when looking down, i.e. where it is needed the most
+            // if (current_uv.x >= 0.0 && current_uv.y >= 0.0
+            //     && current_uv.x <= 1.0 && current_uv.y <= 1.0) {
+            //     hits ++;
+            // }
+            if (delta_z < max(hitbox_z, min_hitbox)) {
                 //refine
                 vec2 prev_uv = current_uv;
                 float prev_delta_z = delta_z;
