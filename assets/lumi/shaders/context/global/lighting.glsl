@@ -38,7 +38,7 @@ const vec3 SUNRISE_LIGHT_COLOR = vec3(1.0, 0.8, 0.4);
 const vec3 SUNSET_LIGHT_COLOR = vec3(1.0, 0.6, 0.4);
 const vec3 NIGHT_VISION_COLOR = vec3(0.63, 0.55, 0.64);
 const vec3 SKYLESS_LIGHT_COLOR = vec3(1.0, 1.0, 1.0);
-const vec3 NETHER_SKYLESS_LIGHT_COLOR = vec3(1.0, 0.5, 0.0);
+const vec3 NETHER_SKYLESS_LIGHT_COLOR = vec3(1.0, 0.5, 0.3);
 
 // PREADJUSTED AMBIENT
 const vec3 HDR_NOON_AMBIENT = hdr_gammaAdjust(vec3(0.8550322)) * SUNLIGHT_STR;
