@@ -92,15 +92,28 @@ vec3 hdr_calcSkyLight(inout light_data data)
     if (frx_worldHasSkylight()) {
         vec3 sunLightRadiance = l2_sunRadiance(data.light.y, frx_worldTime(), frx_ambientIntensity(), frx_rainGradient());
         #ifdef TRUE_DARKNESS_MOONLIGHT
-        vec3 moonLightRadiance = vec3(0.0);
+            vec3 moonLightRadiance = vec3(0.0);
+            if (frx_luminance(sunLightRadiance) == 0.0) return moonLightRadiance;
         #else
-        vec3 moonLightRadiance = l2_moonRadiance(data.light.y, frx_worldTime(), frx_ambientIntensity());
+            vec3 moonLightRadiance = l2_moonRadiance(data.light.y, frx_worldTime(), frx_ambientIntensity());
         #endif
+        vec3 irradiance;
+        vec3 skylightRadiance;
+        vec3 skylightDir;
         if (frx_luminance(sunLightRadiance) > frx_luminance(moonLightRadiance)) {
-            return pbr_lightCalc(data.albedo, data.roughness, data.metallic, data.f0, sunLightRadiance, l2_vanillaSunDir(frx_worldTime(), 0.0), data.viewDir, data.normal, data.diffuse, data.specularAccu);
-        } else {            
-            return pbr_lightCalc(data.albedo, data.roughness, data.metallic, data.f0, moonLightRadiance, l2_moonDir(frx_worldTime()), data.viewDir, data.normal, data.diffuse, data.specularAccu);
+            skylightRadiance = sunLightRadiance;
+            skylightDir = l2_vanillaSunDir(frx_worldTime(), 0.0);
+        } else {
+            skylightRadiance = moonLightRadiance;
+            skylightDir = l2_moonDir(frx_worldTime());
         }
+        irradiance = pbr_lightCalc(data.albedo, data.roughness, data.metallic, data.f0, skylightRadiance, skylightDir, data.viewDir, data.normal, data.diffuse, data.specularAccu);
+        float haloBlur = 0.15;
+        if (data.roughness < haloBlur) {
+            irradiance *= 0.75;
+            irradiance += 0.25 * pbr_lightCalc(data.albedo, haloBlur, data.metallic, data.f0, skylightRadiance, skylightDir, data.viewDir, data.normal, data.diffuse, data.specularAccu);
+        }
+        return irradiance;
     } else {
         vec3 skylessRadiance = l2_skylessRadiance();
         vec3 skylessDir = l2_skylessDir();
