@@ -1,7 +1,7 @@
 #include frex:shaders/lib/math.glsl
 #include frex:shaders/api/world.glsl
 #include frex:shaders/api/view.glsl
-#include lumi:lighting_config
+#include lumi:shaders/context/global/lighting.glsl
 #include lumi:shaders/lib/lightsource.glsl
 #include lumi:shaders/lib/pbr.glsl
 #include lumi:shaders/lib/util.glsl
@@ -15,116 +15,126 @@
  *  published by the Free Software Foundation, Inc.    *
  *******************************************************/
 
-const float pbr_specularBloomStr = 0.01;
-const float pbr_specularAlphaStr = 0.1;
+const float PBR_SPECULAR_BLOOM_ADD = 0.01;
+const float PBR_SPECULAR_ALPHA_ADD = 0.01;
 
-vec3 pbr_lightCalc(vec3 albedo, float pbr_roughness, float pbr_metallic, vec3 pbr_f0, vec3 radiance, vec3 lightDir, vec3 viewDir, vec3 normal, bool diffuseOn, bool isAmbiance, float haloBlur, inout vec3 specularAccu)
+vec3 pbr_fakeMetallicDiffuseMultiplier(vec3 albedo, float metallic, vec3 radiance)
 {
-	vec3 halfway = normalize(viewDir + lightDir);
-	float roughness = pbr_roughness;
-
-	// ambiance hack
-	if (isAmbiance) {
-		roughness = min(1.0, roughness + 0.5 * (1 - pbr_metallic));
-	}
-	
-	// disableDiffuse hack
-	if (!diffuseOn) {
-		return albedo / PI * radiance * pbr_dot(lightDir, vec3(.0, 1.0, .0));
-	}
-
-	vec3 specularRadiance;
-	vec3 fresnel = pbr_fresnelSchlick(pbr_dot(viewDir, halfway), pbr_f0);
-	float NdotL = pbr_dot(normal, lightDir);
-
-	if (haloBlur > roughness) {
-		// sun halo hack
-		specularRadiance = pbr_specularBRDF(roughness, radiance * 0.75, halfway, lightDir, viewDir, normal, fresnel, NdotL);
-		specularRadiance += pbr_specularBRDF(haloBlur, radiance * 0.25, halfway, lightDir, viewDir, normal, fresnel, NdotL);
-	} else {
-		specularRadiance = pbr_specularBRDF(roughness, radiance, halfway, lightDir, viewDir, normal, fresnel, NdotL);
-	}
-
-	vec3 diffuse = (1.0 - fresnel) * (1.0 - pbr_metallic);
-	vec3 diffuseRadiance = albedo * diffuse / PI * radiance * NdotL;
-	specularAccu += specularRadiance;
-
-	return specularRadiance + diffuseRadiance;
+    return mix(vec3(1.0), albedo * frx_luminance(clamp(radiance, 0.0, 1.0)) * 0.25, metallic);
 }
 
-void pbr_shading(inout vec4 a, inout float bloom, vec3 viewPos, vec2 light, vec3 normal, float pbr_roughness, float pbr_metallic, float pbr_f0, bool isDiffuse, bool translucent)
+vec3 pbr_nonDirectional(vec3 albedo, float metallic, vec3 radiance)
 {
-	vec3 albedo = hdr_gammaAdjust(a.rgb);
-	vec3 dielectricF0 = vec3(0.1) * frx_luminance(albedo);
-	vec3 f0 = pbr_f0 <= 0.0 ? mix(dielectricF0, albedo, pbr_metallic) : vec3(pbr_f0);
-    vec3 viewDir = normalize(-viewPos) * frx_normalModelMatrix();
-    vec3 emissive = l2_emissiveRadiance(bloom);
-    vec3 specularAccu = vec3(0.0);
-#if LIGHTING_PROFILE == LIGHTING_PROFILE_MOODY
-    float dramaticBloom = 0;
-#endif
+    return albedo * pbr_fakeMetallicDiffuseMultiplier(albedo, metallic, radiance) / PI * radiance;
+}
 
-    a.rgb = albedo * emissive;
+vec3 pbr_lightCalc(vec3 albedo, float roughness, float metallic, vec3 pbr_f0, vec3 radiance, vec3 lightDir, vec3 viewDir, vec3 normal, bool diffuseOn, inout vec3 specularAccu)
+{
+    vec3 halfway = normalize(viewDir + lightDir);
+    // disableDiffuse hack
+    if (!diffuseOn) {
+        return albedo / PI * radiance * pbr_dot(lightDir, vec3(.0, 1.0, .0));
+    }
+    vec3 fresnel = pbr_fresnelSchlick(pbr_dot(viewDir, halfway), pbr_f0);
+    float NdotL = pbr_dot(normal, lightDir);
+    vec3 specularRadiance = pbr_specularBRDF(roughness, radiance, halfway, lightDir, viewDir, normal, fresnel, NdotL);
+    //Fake metallic diffuse applied
+    vec3 diffuse = (1.0 - fresnel);
+    vec3 diffuseRadiance = albedo * pbr_fakeMetallicDiffuseMultiplier(albedo, metallic, radiance) / PI * radiance * NdotL;
+    specularAccu += specularRadiance;
+    return specularRadiance + diffuseRadiance;
+}
 
+struct light_data{
+    bool diffuse;
+    vec3 albedo;
+    float roughness;
+    float metallic;
+    vec3 f0;
+    vec2 light;
+    vec3 normal;
+    vec3 viewDir;
+    vec3 viewPos;
+    vec3 specularAccu;
+};
+
+vec3 hdr_calcHeldLight(inout light_data data)
+{
 #if HANDHELD_LIGHT_RADIUS != 0
     if (frx_heldLight().w > 0) {
-        vec3 handHeldDir = viewDir;
-        vec3 handHeldRadiance = l2_handHeldRadiance(viewPos);
+        vec3 handHeldDir = data.viewDir;
+        vec3 handHeldRadiance = l2_handHeldRadiance(data.viewPos);
         if (handHeldRadiance.x + handHeldRadiance.y + handHeldRadiance.z > 0) {
-            vec3 adjustedNormal = isDiffuse ? normal : viewDir;
-            a.rgb += pbr_lightCalc(albedo, pbr_roughness, pbr_metallic, f0, handHeldRadiance, handHeldDir, viewDir, adjustedNormal, true, false, 0.0, specularAccu);
+            vec3 adjustedNormal = data.diffuse ? data.normal : data.viewDir;
+            return pbr_lightCalc(data.albedo, data.roughness, data.metallic, data.f0, handHeldRadiance, handHeldDir, data.viewDir, adjustedNormal, true, data.specularAccu);
         }
     }
 #endif
+    return vec3(0.0);
+}
 
-    float perceivedBl = light.x;
-// #if LIGHTING_PROFILE == LIGHTING_PROFILE_MOODY
-// 	if (frx_modelOriginType() != MODEL_ORIGIN_REGION) {
-// 		perceivedBl = max(0, perceivedBl - light.y * 0.1);
-// 	}
-// #endif
-    vec3 blockRadiance = l2_blockRadiance(perceivedBl);
-    vec3 baseAmbientRadiance = l2_baseAmbient();
-    vec3 ambientDir = normalize(vec3(0.1, 0.9, 0.1) + normal);
+vec3 hdr_calcSkyAmbientLight(inout light_data data)
+{
+    if (frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT))
+    {
+        vec3 skyRadiance = l2_skyAmbient(data.light.y, frx_worldTime(), frx_ambientIntensity());
+        return pbr_nonDirectional(data.albedo, data.metallic, skyRadiance);
+    }
+    return vec3(0.0);
+}
 
-    a.rgb += pbr_lightCalc(albedo, pbr_roughness, pbr_metallic, f0, blockRadiance, ambientDir, viewDir, normal, isDiffuse, true, 0.0, specularAccu);
-    a.rgb += pbr_lightCalc(albedo, pbr_roughness, pbr_metallic, f0, baseAmbientRadiance, ambientDir, viewDir, normal, isDiffuse, true, 0.0, specularAccu);
-
-    if (frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) && light.y > 0.03125) {
+vec3 hdr_calcSkyLight(inout light_data data)
+{
+    if (frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT)) {
+        vec3 skyLightRadiance;
         if (!frx_worldFlag(FRX_WORLD_IS_MOONLIT)) {
-            vec3 sunRadiance = l2_sunRadiance(light.y, frx_worldTime(), frx_ambientIntensity(), frx_rainGradient());
-            vec3 sunIrradiance = pbr_lightCalc(albedo, pbr_roughness, pbr_metallic, f0, sunRadiance, frx_skyLightVector(), viewDir, normal, isDiffuse, false, 0.15, specularAccu);
-            a.rgb += sunIrradiance;
-            #if LIGHTING_PROFILE == LIGHTING_PROFILE_MOODY
-                dramaticBloom = frx_luminance(sunIrradiance);
-            #endif
+            skyLightRadiance = l2_sunRadiance(data.light.y, frx_worldTime(), frx_ambientIntensity(), frx_rainGradient());
         } else {
-            #ifndef TRUE_DARKNESS_MOONLIGHT
-                vec3 moonRadiance = l2_moonRadiance(light.y, frx_worldTime(), frx_ambientIntensity());
-                a.rgb += pbr_lightCalc(albedo, pbr_roughness, pbr_metallic, f0, moonRadiance, frx_skyLightVector(), viewDir, normal, isDiffuse, false, 0.15, specularAccu);
+            #ifdef TRUE_DARKNESS_MOONLIGHT
+                return vec3(0.0);
             #endif
+            skyLightRadiance = l2_moonRadiance(data.light.y, frx_worldTime(), frx_ambientIntensity());
         }
-        vec3 skyRadiance = l2_skyAmbient(light.y, frx_worldTime(), frx_ambientIntensity());
-        a.rgb += pbr_lightCalc(albedo, pbr_roughness, pbr_metallic, f0, skyRadiance, ambientDir, viewDir, normal, isDiffuse, true, 0.0, specularAccu);
+        return pbr_lightCalc(data.albedo, data.roughness, data.metallic, data.f0, skyLightRadiance, frx_skyLightVector(), data.viewDir, data.normal, data.diffuse, data.specularAccu);
     } else {
         vec3 skylessRadiance = l2_skylessRadiance();
         vec3 skylessDir = l2_skylessDir();
-
-        if (skylessRadiance.r + skylessRadiance.g + skylessRadiance.b > 0) {
-            a.rgb += pbr_lightCalc(albedo, pbr_roughness, pbr_metallic, f0, skylessRadiance, skylessDir, viewDir, normal, isDiffuse, false, 0.0, specularAccu);
-            if (frx_isSkyDarkened()) {
-                vec3 skylessDarkenedDir = l2_skylessDarkenedDir();
-                a.rgb += pbr_lightCalc(albedo, pbr_roughness, pbr_metallic, f0, skylessRadiance, skylessDarkenedDir, viewDir, normal, isDiffuse, false, 0.0, specularAccu);
-            }
+        vec3 skylessLight = pbr_lightCalc(data.albedo, data.roughness, data.metallic, data.f0, skylessRadiance, skylessDir, data.viewDir, data.normal, data.diffuse, data.specularAccu);
+        if (frx_isSkyDarkened()) {
+            vec3 skylessDarkenedDir = l2_skylessDarkenedDir();
+            skylessLight += pbr_lightCalc(data.albedo, data.roughness, data.metallic, data.f0, skylessRadiance, skylessDarkenedDir, data.viewDir, data.normal, data.diffuse, data.specularAccu);
         }
+        return skylessLight;
     }
-    float specularLuminance = frx_luminance(specularAccu);
-    float smoothness = (1-pbr_roughness);
-    bloom += specularLuminance * pbr_specularBloomStr * smoothness * smoothness;
-#if LIGHTING_PROFILE == LIGHTING_PROFILE_MOODY
-    bloom += dramaticBloom * l2_sunHorizonScale(frx_worldTime()) * hdr_dramaticStr;
-#endif
-    if (translucent) {
-        a.a += specularLuminance * pbr_specularBloomStr;
-    }
+}
+
+void pbr_shading(inout vec4 a, inout float bloom, vec3 viewPos, vec2 light, vec3 normal, float roughness, float metallic, float pbr_f0, bool isDiffuse, bool translucent)
+{
+    vec3 albedo = hdr_gammaAdjust(a.rgb);
+    light_data data = light_data(
+        isDiffuse,
+        albedo,
+        roughness,
+        metallic,
+        mix(vec3(pbr_f0), albedo, metallic),
+        light,
+        normal,
+        normalize(-viewPos) * frx_normalModelMatrix(),
+        viewPos,
+        vec3(0.0)
+    );
+
+    vec3 held_light = hdr_calcHeldLight(data);
+    vec3 block_light = pbr_nonDirectional(data.albedo, data.metallic, l2_blockRadiance(data.light.x));
+    vec3 base_ambient_light = pbr_nonDirectional(data.albedo, data.metallic, l2_baseAmbient());
+    vec3 sky_ambient_light = hdr_calcSkyAmbientLight(data);
+    vec3 sky_light = hdr_calcSkyLight(data);
+    vec3 emissive_light = pbr_nonDirectional(data.albedo, data.metallic, l2_emissiveRadiance(data.albedo, bloom));
+    
+    a.rgb = held_light + block_light + base_ambient_light + sky_ambient_light + sky_light + emissive_light;
+
+    float specularLuminance = frx_luminance(data.specularAccu);
+    float smoothness = 1 - data.roughness;
+    bloom += specularLuminance * PBR_SPECULAR_BLOOM_ADD * smoothness * smoothness;
+    if (translucent) a.a += specularLuminance * PBR_SPECULAR_ALPHA_ADD;
 }

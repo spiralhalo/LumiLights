@@ -19,8 +19,6 @@
     "config.lumi_lights.help.bloom_cutoff": "Clamps low-intensity bloom edges to reduce halos and banding",
 
     "config.lumi_lights.category.lighting": "Lighting",
-    "config.lumi_lights.value.lighting_profile": "Lighting profile",
-    "config.lumi_lights.help.lighting_profile": "Choose between aesthetics or gameplay-friendly lighting",
     "config.lumi_lights.value.ambient_occlusion": "Ambient occlusion",
     "config.lumi_lights.help.ambient_occlusion": "Choose ambient occlusion profile. SSAO affects performance",
     "config.lumi_lights.value.handheld_light_radius": "Held light radius",

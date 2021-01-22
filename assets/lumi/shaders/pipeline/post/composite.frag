@@ -6,6 +6,7 @@
 #include lumi:shaders/lib/tonemap.glsl
 #include lumi:shaders/lib/fast_gaussian_blur.glsl
 #include lumi:shaders/lib/godrays.glsl
+#include lumi:shaders/context/global/lighting.glsl
 
 /******************************************************
   lumi:shaders/pipeline/post/composite.frag
@@ -65,19 +66,23 @@ vec3 blend(vec3 dst, vec4 src)
 #define blurDepthThreshold 0.01
 void main()
 {
-    vec4 solid = ldr_tonemap(texture2D(u_combine_solid, v_texcoord));
+    float brightnessMult = mix(1.0, BRIGHT_FINAL_MULT, frx_viewBrightness());
+
     float depth_solid = texture2D(u_solid_depth, v_texcoord).r;
+    vec4 solid = texture2D(u_combine_solid, v_texcoord);
+    solid.rgb = ldr_tonemap3(solid.rgb * brightnessMult);
     
-    vec4 translucent = ldr_tonemap(texture2D(u_combine_translucent, v_texcoord));
     float depth_translucent = texture2D(u_translucent_depth, v_texcoord).r;
+    vec4 translucent = texture2D(u_combine_translucent, v_texcoord);
+    translucent.rgb = ldr_tonemap3(translucent.rgb * brightnessMult);
 
     float depth_clouds = texture2D(u_clouds_depth, v_texcoord).r;
     vec4 clouds = blur13(u_clouds, v_texcoord, frxu_size, vec2(1.0, 1.0));
-    clouds.rgb = ldr_tonemap3(hdr_gammaAdjust(clouds.rgb));
+    clouds.rgb = ldr_tonemap3(hdr_gammaAdjust(clouds.rgb) * brightnessMult);
 
     float depth_weather = texture2D(u_weather_depth, v_texcoord).r;
     vec4 weather = texture2D(u_weather, v_texcoord);
-    weather.rgb = ldr_tonemap3(hdr_gammaAdjust(weather.rgb));
+    weather.rgb = ldr_tonemap3(hdr_gammaAdjust(weather.rgb) * brightnessMult);
 
     color_layers[0] = vec4(solid. rgb, 1.0);
     depth_layers[0] = depth_solid;

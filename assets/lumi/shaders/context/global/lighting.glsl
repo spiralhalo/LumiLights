@@ -10,52 +10,39 @@
  *  published by the Free Software Foundation, Inc.    *
  *******************************************************/
 
-#define hdr_sunStr 6
-#define hdr_moonStr 0.4
-#define hdr_blockMinStr 2
-#define hdr_blockMaxStr 3
-#define hdr_handHeldStr 1.5
-#define hdr_skylessStr 0.1
-#define hdr_baseMinStr 0.01
-#define hdr_baseMaxStr 0.8
-#define hdr_skylessBaseMinStr 0.2
-#define hdr_skylessBaseMaxStr 1.0
-#define hdr_emissiveStr 1
-#define hdr_relAmbient 0.2
-#define hdr_dramaticStr 1.0
-#define hdr_dramaticMagicNumber 6.0
+// STRENGTHS
+const float SUNLIGHT_STR = 6.0;
+const float MOONLIGHT_STR = 0.8;
+const float BLOCK_LIGHT_STR = 3.0;
+const float BASE_AMBIENT_STR = 0.02;
+const float SKYLESS_AMBIENT_STR = 0.4;
+const float HELD_LIGHT_STR = 1.5;
+const float SKYLESS_LIGHT_STR = 1.0;
+const float EMISSIVE_LIGHT_STR = 1.0;
+const float NIGHT_VISION_STR = 3.0;
 
-#define hdr_nightAmbientMult 2.0
-#define hdr_skylessRelStr 0.5
-#define hdr_zWobbleDefault 0.1
+// MULTIPLIERS
+const float SKY_AMBIENT_MULT = 0.1;
+const float BRIGHT_FINAL_MULT = 2.0;
 
-const vec3 blockColor = vec3(1.0, 0.875, 0.75);
-const vec3 dramaticBlockColor = vec3(1.0, 0.7, 0.4);
-#if LIGHTING_PROFILE == LIGHTING_PROFILE_MOODY
-    const vec3 activeBlockColor = dramaticBlockColor;
-#else
-    const vec3 activeBlockColor = blockColor;
-#endif
+// ADJUSTERS
+const float BLOCK_LIGHT_ADJUSTER = 6.0;
 
-const vec3 preSunColor = vec3(1.0, 1.0, 1.0);
-const vec3 preSunriseColor = vec3(1.0, 0.8, 0.4);
-const vec3 preSunsetColor = vec3(1.0, 0.6, 0.4);
+// PREFERENCE
+const float DEFAULT_Z_WOBBLE = 0.1;
 
-const vec3 nvColor = vec3(0.63, 0.55, 0.64);
+// LIGHT COLORS
+const vec3 BLOCK_LIGHT_COLOR = vec3(1.0, 0.7, 0.4);
+const vec3 DAY_SUNLIGHT_COLOR = vec3(1.0, 1.0, 1.0);
+const vec3 SUNRISE_LIGHT_COLOR = vec3(1.0, 0.8, 0.4);
+const vec3 SUNSET_LIGHT_COLOR = vec3(1.0, 0.6, 0.4);
+const vec3 NIGHT_VISION_COLOR = vec3(0.63, 0.55, 0.64);
+const vec3 SKYLESS_LIGHT_COLOR = vec3(1.0, 1.0, 1.0);
+const vec3 NETHER_SKYLESS_LIGHT_COLOR = vec3(1.0, 0.5, 0.0);
 
-#ifndef LUMI_DayAmbientBlue
-    #define LUMI_DayAmbientBlue 0
-#endif
-
-#define preDayAmbient hdr_gammaAdjust(mix(vec3(0.8550322), vec3(0.6, 0.9, 1.0), clamp(LUMI_DayAmbientBlue * 0.1, 0.0, 1.0))) * hdr_sunStr
-#define preAmbient hdr_gammaAdjust(vec3(0.6, 0.9, 1.0)) * hdr_sunStr
-
-#if LIGHTING_PROFILE == LIGHTING_PROFILE_MOODY
-    #define preSunriseAmbient hdr_gammaAdjust(vec3(0.5, 0.3, 0.1)) * hdr_sunStr
-    #define preSunsetAmbient hdr_gammaAdjust(vec3(0.5, 0.2, 0.0)) * hdr_sunStr
-    #define preNightAmbient hdr_gammaAdjust(vec3(0.74, 0.4, 1.0)) * hdr_moonStr * hdr_nightAmbientMult
-#else
-    #define preSunriseAmbient hdr_gammaAdjust(vec3(1.0, 0.8, 0.4)) * hdr_sunStr
-    #define preSunsetAmbient hdr_gammaAdjust(vec3(1.0, 0.6, 0.2)) * hdr_sunStr
-    #define preNightAmbient hdr_gammaAdjust(vec3(0.5, 0.5, 1.0)) * hdr_moonStr * hdr_nightAmbientMult
-#endif
+// PREADJUSTED AMBIENT
+const vec3 HDR_NOON_AMBIENT = hdr_gammaAdjust(vec3(0.8550322)) * SUNLIGHT_STR;
+const vec3 HDR_BLUE_AMBIENT = hdr_gammaAdjust(vec3(0.6, 0.9, 1.0)) * SUNLIGHT_STR;
+const vec3 HDR_SUNRISE_AMBIENT = hdr_gammaAdjust(vec3(0.5, 0.3, 0.1)) * SUNLIGHT_STR;
+const vec3 HDR_SUNSET_AMBIENT = hdr_gammaAdjust(vec3(0.5, 0.2, 0.0)) * SUNLIGHT_STR;
+const vec3 HDR_NIGHT_AMBIENT = hdr_gammaAdjust(vec3(0.74, 0.4, 1.0)) * MOONLIGHT_STR;

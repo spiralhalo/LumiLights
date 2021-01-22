@@ -3,6 +3,7 @@
 #include frex:shaders/api/material.glsl
 #include frex:shaders/api/world.glsl
 #include frex:shaders/api/view.glsl
+#include frex:shaders/lib/math.glsl
 #include lumi:shaders/internal/context.glsl
 #include lumi:shaders/api/param_frag.glsl
 #include lumi:shaders/lib/util.glsl
@@ -47,6 +48,14 @@ frx_FragmentData frx_createPipelineFragment() {
 void frx_writePipelineFragment(in frx_FragmentData fragData)
 {
     vec4 a = clamp(fragData.spriteColor * fragData.vertexColor, 0.0, 1.0);
+
+	if (pbr_f0 < 0.0) {
+		pbr_f0 = frx_luminance(hdr_gammaAdjust(a.rgb)) * 0.1;
+	}
+	pbr_f0 = clamp(pbr_f0, 0.0, 1.0);
+	pbr_roughness = clamp(pbr_roughness, 0.0, 1.0);
+	pbr_metallic = clamp(pbr_metallic, 0.0, 1.0);
+
     if (frx_modelOriginType() == MODEL_ORIGIN_SCREEN) {
 		if (frx_isGui() || gl_FragCoord.z < 0.6) { //hack that treats player doll as gui.
 			float diffuse = mix(pv_diffuse, 1, fragData.emissivity);
@@ -56,7 +65,6 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
 		} else {
 			float bloom_out = fragData.emissivity;
 			vec3 normal = fragData.vertexNormal * frx_normalModelMatrix();
-			pbr_roughness = max(pbr_metallic * 0.5, pbr_roughness);
     		pbr_shading(a, bloom_out, l2_viewpos, fragData.light, normal, pbr_roughness, pbr_metallic, pbr_f0, fragData.diffuse, true);
 			a = ldr_tonemap(a);
         	gl_FragData[4] = vec4(bloom_out, 0.0, 0.0, 1.0);
