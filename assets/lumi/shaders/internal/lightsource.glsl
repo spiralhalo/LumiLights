@@ -14,35 +14,31 @@
 #endif
 
 #ifdef LUMI_PBRX
-	#define hdr_sunStr 5
-	#define hdr_moonStr 0.4
-	#define hdr_blockMinStr 2
-	#define hdr_blockMaxStr 3
+	#define hdr_sunStr 6.0
+	#define hdr_moonStr 0.8
+	#define hdr_blockMinStr 3.0
 	#define hdr_handHeldStr 1.5
-	#define hdr_skylessStr 0.1
-	#define hdr_baseMinStr 0.01
-	#define hdr_baseMaxStr 0.8
-	#define hdr_emissiveStr 1
-	#define hdr_relAmbient toneAdjust(0.2)
+	#define hdr_skylessStr 1.0
+	#define hdr_baseMinStr 0.02
+	#define hdr_emissiveStr 1.0
+	#define hdr_relAmbient toneAdjust(0.1)
 	#define hdr_dramaticStr 1.0
 	#define hdr_dramaticMagicNumber 6.0
 #else
 	#define hdr_sunStr 1.8
-	#define hdr_moonStr 0.18
-	#define hdr_blockMinStr 1.0
-	#define hdr_blockMaxStr 1.4
+	#define hdr_moonStr 0.4
+	#define hdr_blockMinStr 1.5
 	#define hdr_handHeldStr 0.9
-	#define hdr_skylessStr 0.05
-	#define hdr_baseMinStr 0.0
-	#define hdr_baseMaxStr 0.25
-	#define hdr_emissiveStr 1
+	#define hdr_skylessStr 0.4
+	#define hdr_baseMinStr 0.01
+	#define hdr_emissiveStr 1.0
 	#define hdr_relAmbient toneAdjust(0.09)
 	#define hdr_dramaticStr 0.6
 	#define hdr_dramaticMagicNumber 3.5
 #endif
 
 #define hdr_nightAmbientMult 2.0
-#define hdr_skylessRelStr 0.5
+#define hdr_skylessRelStr 20.0
 #define hdr_zWobbleDefault 0.1
 
 const vec3 blockColor = vec3(1.0, 0.875, 0.75);
@@ -75,17 +71,17 @@ const vec3 nvColor = vec3(0.63, 0.55, 0.64);
 /*  BLOCK LIGHT
  *******************************************************/
 
-vec3 l2_blockRadiance(float blockLight, float userBrightness) {
+vec3 l2_blockRadiance(float blockLight) {
 #if LUMI_LightingMode == LUMI_LightingMode_Dramatic
 	float dist = (1.001 - min(l2_clampScale(0.03125, 0.95, blockLight), 0.93)) * 15;
 	float bl = hdr_dramaticMagicNumber / (dist * dist);
 	if (bl <= 0.01 * hdr_dramaticMagicNumber) {
 		bl *= l2_clampScale(0.0045 * hdr_dramaticMagicNumber, 0.01 * hdr_dramaticMagicNumber, bl);
 	}
-	return bl * hdr_gammaAdjust(dramaticBlockColor) * mix(hdr_blockMinStr, hdr_blockMaxStr, userBrightness);
+	return bl * hdr_gammaAdjust(dramaticBlockColor) * hdr_blockMinStr;
 #else
 	float bl = l2_clampScale(0.03125, 1.0, blockLight);
-	bl *= bl * mix(hdr_blockMinStr, hdr_blockMaxStr, userBrightness);
+	bl *= bl * hdr_blockMinStr;
 	return hdr_gammaAdjust(bl * blockColor);
 #endif
 }
@@ -119,8 +115,8 @@ vec3 l2_handHeldRadiance() {
 /*  EMISSIVE LIGHT
  *******************************************************/
 
-vec3 l2_emissiveRadiance(float emissivity) {
-	return vec3(hdr_gammaAdjustf(emissivity) * hdr_emissiveStr);
+vec3 l2_emissiveRadiance(vec3 hdrFragColor, float emissivity) {
+	return hdrFragColor * hdr_gammaAdjustf(emissivity) * hdr_emissiveStr;
 }
 
 /*  SKY AMBIENT LIGHT
@@ -217,7 +213,7 @@ vec3 l2_skylessDir() {
 	return vec3(0, 0.977358, 0.211593);
 }
 
-vec3 l2_skylessRadiance(float userBrightness) {
+vec3 l2_skylessRadiance() {
 	#ifdef LUMI_TrueDarkness_NetherTrueDarkness
 	if (frx_isSkyDarkened()) {
 		return vec3(0.0);
@@ -233,24 +229,22 @@ vec3 l2_skylessRadiance(float userBrightness) {
 	} else {
 		return ( frx_isSkyDarkened() ? 0.5 : 1.0 )
 			* hdr_skylessStr
-			* l2_skylessLightColor()
-			* userBrightness;
+			* l2_skylessLightColor();
 	}
 }
 
 /*  BASE AMBIENT LIGHT
  *******************************************************/
 
-vec3 l2_baseAmbient(float userBrightness){
+vec3 l2_baseAmbient(){
 	if (frx_playerHasNightVision()) {
-		//userBrightness is maxed out by night vision so it's useless here
-		return hdr_gammaAdjust(nvColor) * hdr_blockMaxStr;
+		return hdr_gammaAdjust(nvColor) * hdr_blockMinStr;
 	} else {
 		if (frx_worldHasSkylight()) {
 			#ifdef LUMI_TrueDarkness_DisableOverworldAmbient
 			return vec3(0.0);
 			#else
-			return vec3(0.1) * mix(hdr_baseMinStr, hdr_baseMaxStr, userBrightness);
+			return vec3(0.1) * hdr_baseMinStr;
 			#endif
 		} else {
 			#ifdef LUMI_TrueDarkness_NetherTrueDarkness
@@ -263,7 +257,7 @@ vec3 l2_baseAmbient(float userBrightness){
 				return vec3(0.0);
 			}
 			#endif
-			return l2_dimensionColor() * hdr_skylessRelStr * mix(hdr_baseMinStr, hdr_baseMaxStr, userBrightness);
+			return l2_dimensionColor() * hdr_skylessRelStr * hdr_baseMinStr;
 		}
 	}
 }

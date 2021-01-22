@@ -101,6 +101,12 @@ void main() {
 			// }
 		}
 	#ifdef LUMI_PBRX
+		if (pbr_f0.r < 0.0) {
+			pbr_f0 = frx_luminance(hdr_gammaAdjust(a.rgb)) * vec3(0.1);
+		}
+		pbr_f0 = clamp(pbr_f0, 0.0, 1.0);
+		pbr_roughness = clamp(pbr_roughness, 0.0, 1.0);
+		pbr_metallic = clamp(pbr_metallic, 0.0, 1.0);
 		pbr_shading(fragData, a, bloom, userBrightness, translucent);
 	#else
 		phong_shading(fragData, a, bloom, userBrightness, translucent);
