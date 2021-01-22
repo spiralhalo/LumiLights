@@ -9,8 +9,14 @@
 const vec4 wavyWater_loParams = vec4(2.0, 0.5, 2.0, 0.03);
 const vec4 wavyWater_hiParams = vec4(1.0, 1.0, 1.0, 0.05);
 
+const float waveSpeed = 1;
+const float scale = 1.5;
+const float amplitude = 0.01;
+
 void frx_startVertex(inout frx_VertexData data) {
     frx_var0.xyz = data.vertex.xyz + frx_modelOriginWorldPos();
+    frx_var1.xyz = vec3(0.5, 3.0, -1.0) * (0.5 + 0.5 - data.normal * 0.5);
+    frx_var2.xyz = vec3(waveSpeed, scale, amplitude);
 #ifdef LUMI_WavyWaterModel
     vec4 params = mix(wavyWater_loParams, wavyWater_hiParams, clamp((LUMI_WavyWaterIntensity - 1) * 0.1, 0.0, 1.5));
     data.vertex.y += snoise(vec3(frx_var0.x, frx_renderSeconds(), frx_var0.z) * params.xyz) * params.w;

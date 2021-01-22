@@ -4,6 +4,8 @@
 #include frex:shaders/lib/color.glsl
 #include lumi:shaders/lib/water.glsl
 
+const float stretch = 2;
+
 void frx_startFragment(inout frx_FragmentData fragData) {
 #ifdef LUMI_PBRX
 	/* PBR PARAMS */
@@ -20,21 +22,15 @@ void frx_startFragment(inout frx_FragmentData fragData) {
 	
 	/* WATER RECOLOR */
 	vec3 desat = vec3(frx_luminance(fragData.vertexColor.rgb));
-	fragData.vertexColor.rgb = mix(fragData.vertexColor.rgb, desat, 0.7);
-
-	float maxc = max(fragData.spriteColor.r, max(fragData.spriteColor.g, fragData.spriteColor.b)); 
-	fragData.spriteColor.rgb *= fragData.spriteColor.rgb * fragData.spriteColor.rgb * 2.0;
-
-	float l = frx_luminance(fragData.spriteColor.rgb);
-	pbr_f0 = mix(pbr_f0, vec3(0.2), l * l);
+	fragData.vertexColor.rgb = mix(fragData.vertexColor.rgb, desat, 0.6);
+	fragData.spriteColor.rgb *= fragData.spriteColor.rgb * (fragData.spriteColor.rgb + vec3(1.0)) * 0.8;
 	
 	/* WAVY NORMALS */
-	float waveSpeed = 1;
-	float scale = 1.5;
-	float amplitude = 0.01;
-	float stretch = 2;
 	// wave movement doesn't necessarily follow flow direction for the time being
-	vec3 moveSpeed = vec3(0.5, 1.5, -0.5);
+	float waveSpeed = frx_var2.x;
+	float scale = frx_var2.y;
+	float amplitude = frx_var2.z;
+	vec3 moveSpeed = frx_var1.xyz * waveSpeed;
 	// const float texAmplitude = 0.005;
     vec3 up = fragData.vertexNormal.xyz;// * (1.0 + texAmplitude);
 	vec3 samplePos = frx_var0.xyz;
