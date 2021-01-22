@@ -186,6 +186,7 @@ vec3 l2_skyAmbient(float skyLight, float time, float intensity) {
  *******************************************************/
 
 vec3 l2_skylessLightColor() {
+	if (frx_isWorldTheNether()) return hdr_gammaAdjust(vec3(1.0, 0.6, 0.2));
 	return hdr_gammaAdjust(vec3(1.0));
 }
 
