@@ -76,8 +76,7 @@ rt_Result rt_reflection(
     float hitbox_z = HITBOX;
     vec3 ray = unit_march * hitbox_z;
 
-    float min_hitbox = HITBOX;
-
+    float hitbox_mult;
     vec2 current_uv;
     vec3 current_view;
     float delta_z;
@@ -102,11 +101,9 @@ rt_Result rt_reflection(
             // }
 
             // Pad hitbox to reduce "stripes" artifact when surface is almost perpendicular to camera
-            min_hitbox = (1.0 - max(0.0, dot(vec3(0.0, 0.0, 1.0), reflectedNormal)));
-            //min_hitbox *= min_hitbox; //the scale is non-linear, dunno though, probably goes to infinity
-            min_hitbox *= 1.5; //brute forced number to get much sampling and little oversampling
+            hitbox_mult = 1.0 + 3.0 * (1.0 - dot(vec3(0.0, 0.0, 1.0), reflectedNormal)); // dot is unclamped intentionally
 
-            if (delta_z < max(hitbox_z, min_hitbox)) {
+            if (delta_z < hitbox_z * hitbox_mult) {
                 //refine
                 vec2 prev_uv = current_uv;
                 float prev_delta_z = delta_z;
