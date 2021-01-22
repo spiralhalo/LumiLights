@@ -123,7 +123,7 @@ void pbr_shading(in frx_FragmentData fragData, inout vec4 a, inout float bloom, 
         pbr_metallic,
         mix(pbr_f0, albedo, pbr_metallic),
         fragData.light,
-        fragData.vertexNormal,
+        fragData.vertexNormal * frx_normalModelMatrix(),
         normalize(-l2_viewPos) * frx_normalModelMatrix() * gl_NormalMatrix,
         l2_viewPos,
         vec3(0.0)
