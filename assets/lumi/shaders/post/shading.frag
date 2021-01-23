@@ -2,6 +2,7 @@
 #include lumi:shaders/context/forward/common.glsl
 #include frex:shaders/lib/math.glsl
 #include frex:shaders/lib/noise/noise2d.glsl
+#include frex:shaders/lib/noise/noise3d.glsl
 #include frex:shaders/api/sampler.glsl
 #include frex:shaders/api/view.glsl
 #include frex:shaders/api/world.glsl
@@ -38,6 +39,8 @@ uniform sampler2D u_normal_translucent;
 uniform sampler2D u_material_translucent;
 
 uniform sampler2D u_ao;
+
+varying mat4 v_star_rotator;
 
 vec3 coords_view(vec2 uv, mat4 inv_projection, float depth)
 {
@@ -107,11 +110,18 @@ vec4 hdr_shaded_color(vec2 uv, sampler2D scolor, sampler2D sdepth, sampler2D sli
 {
     vec4 a = texture2DLod(scolor, uv, 0.0);
     float depth = texture2DLod(sdepth, uv, 0.0).r;
+    vec3 viewPos = coords_view(uv, frx_inverseProjectionMatrix(), depth);
     if (depth == 1.0) {
         float blindnessFactor = frx_playerHasEffect(FRX_EFFECT_BLINDNESS) ? 0.0 : 1.0;
         // the sky
-        bloom_out = l2_skyBloom() * blindnessFactor;
-        return vec4(a.rgb * blindnessFactor, 0.0);
+        vec3 skyVec = normalize(viewPos);
+        vec4 skyVecWorld = v_star_rotator * vec4(skyVec * frx_normalModelMatrix(), 0.0);
+        float star = l2_clampScale(0.4, 0.2, frx_luminance(a.rgb)) * smoothstep(0.75, 0.9, snoise(skyVecWorld.xyz * 100));
+        bloom_out = star + l2_skyBloom() * blindnessFactor;
+        vec3 starRadiance = vec3(star);
+        // vec3 skyDownColor = vec3(frx_ambientIntensity());
+        // starRadiance + mix(skyDownColor, v_skycolor, l2_clampScale(-1.0, 1.0, dot(skyVec, v_up)))
+        return vec4((a.rgb + starRadiance) * blindnessFactor, 0.0);
     }
 
     vec3  normal    = texture2DLod(snormal, uv, 0.0).xyz * 2.0 - 1.0;
@@ -119,7 +129,6 @@ vec4 hdr_shaded_color(vec2 uv, sampler2D scolor, sampler2D sdepth, sampler2D sli
     vec3  material  = texture2DLod(smaterial, uv, 0.0).xyz;
     float roughness = material.x == 0.0 ? 1.0 : min(1.0, 1.0203 * material.x - 0.01);
     float metallic  = material.y;
-    vec3  viewPos   = coords_view(uv, frx_inverseProjectionMatrix(), depth);
     vec3  worldPos  = frx_cameraPos() + (frx_inverseViewMatrix() * vec4(viewPos, 1.0)).xyz;
     float f0        = material.z;
     float bloom_raw = light.z * 2.0 - 1.0;

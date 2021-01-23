@@ -76,7 +76,7 @@ rt_color_depth work_on_pair(
             vec2 light = texture2D(reflector_light, v_texcoord).xy;
             float occlusionFactor = result.hits > 1 ? 0.1 : 1.0;
             float upFactor = frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? l2_clampScale(-0.1, 0.1, dot(unit_march, UP_VECTOR)) : 1.0;
-            float skyLightFactor = frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? (light.y * light.y * frx_ambientIntensity()) : 0.5; // 0.5 = arbitrary skyless factor. TODO: make constant
+            float skyLightFactor = frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? hdr_gammaAdjustf(light.y * frx_ambientIntensity()) : 0.5; // 0.5 = arbitrary skyless factor. TODO: make constant
             // reflected.rgb = mix(vec3(0.0), hdr_gammaAdjust(BLOCK_LIGHT_COLOR), pow(light.x, 6.0) * material.y);
             reflected.rgb = v_skycolor * skyLightFactor * occlusionFactor * upFactor;
             reflected.rgb *= fallback;
