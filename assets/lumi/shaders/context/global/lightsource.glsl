@@ -55,7 +55,7 @@ vec3 hdr_ambientColor(float time)
     #else
         vec3 nightAmbient = HDR_NIGHT_AMBIENT;
     #endif
-    if (time == 0.0) return HDR_SUNRISE_AMBIENT * SKY_AMBIENT_MULT;
+    if (time == 0.0) return HDR_SUNRISE_AMBIENT * SKY_AMBIENT_STR;
     const int len = 11;
     vec3 colors[len] = vec3[](
         HDR_SUNRISE_AMBIENT,
@@ -83,7 +83,7 @@ vec3 hdr_ambientColor(float time)
         1.0);
     int i = 1;
     while (time > times[i] && i < len - 1) i++;
-    return mix(colors[i-1], colors[i], l2_clampScale(times[i-1], times[i], time)) * SKY_AMBIENT_MULT;
+    return mix(colors[i-1], colors[i], l2_clampScale(times[i-1], times[i], time)) * SKY_AMBIENT_STR;
 }
 
 vec3 hdr_dimensionColor()
@@ -191,24 +191,20 @@ vec3 l2_skyAmbientRadiance(float skyLight, float time, float intensity)
     return sa * hdr_ambientColor(time);
 }
 
-vec3 l2_sunRadiance(float skyLight, in float time, float intensity, float rainGradient)
+vec3 l2_sunRadiance(float skyLight, in float time, float transitionFactor, float rainGradient)
 {
-    // wrap time to account for sunrise
-    float customTime = (time >= 0.75) ? (time - 1.0) : time;
-    float customIntensity = (customTime >= 0.25) ? l2_clampScale(0.56, 0.52, customTime) : l2_clampScale(-0.06, -0.02, customTime);
-    customIntensity *= mix(1.0, 0.0, rainGradient);
-    float sl = l2_skyLight(skyLight, max(customIntensity, intensity));
+    float sl = l2_skyLight(skyLight, transitionFactor);
     // direct sun light doesn't reach into dark spot as much as sky ambient
     sl = frx_smootherstep(0.7, 0.97, sl);
     return sl * SUNLIGHT_STR * hdr_gammaAdjust(ldr_sunColor(time));
 }
 
-vec3 l2_moonRadiance(float skyLight, float time, float intensity)
+vec3 l2_moonRadiance(float skyLight, float time, float transitionFactor)
 {
     #ifdef TRUE_DARKNESS_MOONLIGHT
         return vec3(0.0);
     #else
-    float ml = l2_skyLight(skyLight, intensity) * frx_moonSize() * MOONLIGHT_STR;
+    float ml = l2_skyLight(skyLight, transitionFactor) * frx_moonSize() * MOONLIGHT_STR;
     if(time < 0.58) ml *= l2_clampScale(0.54, 0.58, time);
     else if(time > 0.92) ml *= l2_clampScale(0.96, 0.92, time);
     return vec3(ml);
