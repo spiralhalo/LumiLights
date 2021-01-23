@@ -1,5 +1,5 @@
 #include lumi:shaders/post/common.glsl
-#include lumi:shaders/internal/context.glsl
+#include lumi:shaders/context/forward/common.glsl
 #include frex:shaders/lib/math.glsl
 #include frex:shaders/lib/noise/noise2d.glsl
 #include frex:shaders/api/sampler.glsl

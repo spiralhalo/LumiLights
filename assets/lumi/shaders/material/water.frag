@@ -3,8 +3,7 @@
 #include frex:shaders/lib/noise/noise3d.glsl
 #include frex:shaders/lib/color.glsl
 #include frex:shaders/lib/math.glsl
-#include lumi:shaders/internal/material_varying.glsl
-#include lumi:shaders/internal/context.glsl
+#include lumi:shaders/context/forward/common.glsl
 #include lumi:shaders/api/param_frag.glsl
 #include lumi:shaders/lib/water.glsl
 
@@ -26,12 +25,12 @@ void frx_startFragment(inout frx_FragmentData fragData) {
 	
 	/* WATER RECOLOR */
 	vec3 desat = vec3(frx_luminance(fragData.vertexColor.rgb));
-	#ifdef LUMI_WaterTexture
-		fragData.vertexColor.rgb = mix(fragData.vertexColor.rgb, desat, 0.6);
-		fragData.spriteColor.rgb *= fragData.spriteColor.rgb;
-	#else
+	#ifdef LUMI_NoWaterTexture
 		fragData.vertexColor.rgb = mix(fragData.vertexColor.rgb, desat, 0.3);
 		fragData.spriteColor.rgb = vec3(0.4);
+	#else
+		fragData.vertexColor.rgb = mix(fragData.vertexColor.rgb, desat, 0.6);
+		fragData.spriteColor.rgb *= fragData.spriteColor.rgb;
 	#endif
 	
 	/* WAVY NORMALS */

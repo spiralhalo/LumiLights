@@ -1,7 +1,7 @@
 #include frex:shaders/api/context.glsl
 #include frex:shaders/api/vertex.glsl
 #include frex:shaders/api/sampler.glsl
-#include lumi:shaders/internal/context.glsl
+#include lumi:shaders/context/forward/common.glsl
 #include lumi:shaders/forward/varying.glsl
 
 /*******************************************************

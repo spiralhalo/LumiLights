@@ -1,6 +1,6 @@
 #version 130
 #extension GL_EXT_gpu_shader4 : enable
-#include lumi:shaders/internal/context.glsl
+#include lumi:shaders/context/forward/common.glsl
 
 /*******************************************************
  *  lumi:shaders/post/common.glsl             *

@@ -1,4 +1,4 @@
-#include lumi:shaders/internal/context.glsl
+#include lumi:shaders/context/forward/common.glsl
 #include frex:shaders/lib/math.glsl
 #include frex:shaders/lib/color.glsl
 #include lumi:shaders/lib/util.glsl

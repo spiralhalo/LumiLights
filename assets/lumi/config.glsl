@@ -9,59 +9,24 @@
 #include respackopts:config_supplier
 #ifndef respackopts_loaded
 
-#define LUMI_Tonemap_Default 0
-#define LUMI_Tonemap_Vibrant 1
-#define LUMI_Tonemap_Film 2
-
-#define LUMI_DebugMode_Disabled 0
-#define LUMI_DebugMode_Normal 1
-#define LUMI_DebugMode_ViewDir 2
-
 /*******************************
  * vv CONFIGURATIONS START vv  *
  *******************************/
 
 /* NOTE: These configurations are ignored if Respackopts is present. */
 
-/* How blue the day ambient in the overworld is. Range: 0 ... 10 Default: 0
-*****************************************************************************/
-#define LUMI_DayAmbientBlue 0
+/* Uncomment to enable textureless water
+   ("Uncomment" means removing double slash at the beginning)
+***************************************************************/
+// #define LUMI_NoWaterTexture
 
 /* Uncomment to enable wavy water model
-   ("Uncomment" means removing double slash at the beginning)
 ***************************************************************/
 // #define LUMI_WavyWaterModel
 
 /* Intensity of the wavy water model. Range: 1 ... 15 Default: 1
 *******************************************************************/
 #define LUMI_WavyWaterIntensity 1
-
-/* Uncomment to enable sunlight bloom during sunrise and sunset
-*****************************************************************/
-// #define LUMI_ApplyDramaticBloom
-
-/* Comment out to disable bloom on the sky
-********************************************/
-#define LUMI_ApplySkyBloom
-
-/* Intensity of the sky bloom. Range: 0 ... 10 Default: 5
-************************************************************/
-#define LUMI_SkyBloomIntensity 5
-
-/* Tonemap mode
- * 0 = Default
- * 1 = Vibrant
- * 2 = Film 
- ****************/
-#define LUMI_Tonemap 0
-
-/* Debug mode
- * 0 = Disable
- * 1 = Render normals
- * 2 = Render view direction
- *****************************/
-#define LUMI_DebugMode 0
-
 
 /*******************************
  * ^^ CONFIGURATIONS END ^^    *

@@ -2,33 +2,12 @@
   "id": "LUMI",
   "version": 1,
   "conf": {
-    "DayAmbientBlue": {
-      "default": 0,
-      "min": 0,
-      "max": 10
-    },
-    "WaterTexture": true,
+    "NoWaterTexture": false,
     "WavyWaterModel": false,
     "WavyWaterIntensity": {
       "default": 1,
       "min": 1,
       "max": 15
-    },
-    "ApplySkyBloom": true,
-    "SkyBloomIntensity": {
-      "default": 5,
-      "min": 1,
-      "max": 10
-    },
-    "Tonemap": [
-      "Default",
-      "Vibrant",
-      "Film"
-    ],
-    "DebugMode": [
-      "Disabled",
-      "Normal",
-      "ViewDir"
-    ]
+    }
   }
 }
