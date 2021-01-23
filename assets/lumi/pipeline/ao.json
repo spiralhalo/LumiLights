@@ -2,13 +2,13 @@
     programs:[
          {
             name: "ssao",
-            vertexSource: "lumi:shaders/pipeline/post/simple.vert",
-            fragmentSource: "lumi:shaders/pipeline/post/ssao.frag",
+            vertexSource: "lumi:shaders/post/simple.vert",
+            fragmentSource: "lumi:shaders/post/ssao.frag",
             samplers: ["u_normal", "u_depth"]
         }, {
             name: "one_filter",
-            vertexSource: "lumi:shaders/pipeline/post/simple.vert",
-            fragmentSource: "lumi:shaders/pipeline/post/one_filter.frag",
+            vertexSource: "lumi:shaders/post/simple.vert",
+            fragmentSource: "lumi:shaders/post/one_filter.frag",
             samplers: ["u_source", "u_depth"]
         }
     ],

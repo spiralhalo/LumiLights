@@ -40,32 +40,32 @@
         {
             // copies colored pixels from main color buffer if marked emissive
             name: "emissive_color",
-            vertexSource: "lumi:shaders/pipeline/post/simple.vert",
-            fragmentSource: "lumi:shaders/pipeline/post/emissive_color.frag",
+            vertexSource: "lumi:shaders/post/simple.vert",
+            fragmentSource: "lumi:shaders/post/emissive_color.frag",
             samplers: ["u_base", "u_emissive"]
         }, {
             // combines final bloom image and main color buffer
             name: "bloom",
-            vertexSource: "lumi:shaders/pipeline/post/simple.vert",
-            fragmentSource: "lumi:shaders/pipeline/post/bloom.frag",
+            vertexSource: "lumi:shaders/post/simple.vert",
+            fragmentSource: "lumi:shaders/post/bloom.frag",
             samplers: ["u_base", "u_bloom"]
         }, {
             // uses a fancy sampling algo for higher quality, not a conventional mipmap
             name: "downsample",
-            vertexSource: "lumi:shaders/pipeline/post/simple.vert",
-            fragmentSource: "lumi:shaders/pipeline/post/downsample.frag",
+            vertexSource: "lumi:shaders/post/simple.vert",
+            fragmentSource: "lumi:shaders/post/downsample.frag",
             samplers: ["u_input"]
         }, {
             // less fancy (but still slightly fancy) upsample of downsample outputs
             name: "upsample_first",
-            vertexSource: "lumi:shaders/pipeline/post/simple.vert",
-            fragmentSource: "lumi:shaders/pipeline/post/upsample_first.frag",
+            vertexSource: "lumi:shaders/post/simple.vert",
+            fragmentSource: "lumi:shaders/post/upsample_first.frag",
             samplers: ["u_input"]
         }, {
             name: "upsample",
             // same as upsample_first but combines with next lower level of detail
-            vertexSource: "lumi:shaders/pipeline/post/simple.vert",
-            fragmentSource: "lumi:shaders/pipeline/post/upsample.frag",
+            vertexSource: "lumi:shaders/post/simple.vert",
+            fragmentSource: "lumi:shaders/post/upsample.frag",
             samplers: ["u_input", "u_prior"]
         }
     ],

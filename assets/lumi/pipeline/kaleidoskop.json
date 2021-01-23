@@ -2,8 +2,8 @@
     programs: [
          {
             name: "kaleidoskop",
-            vertexSource: "lumi:shaders/pipeline/post/hdr.vert",
-            fragmentSource: "lumi:shaders/pipeline/post/kaleidoskop.frag",
+            vertexSource: "lumi:shaders/post/hdr.vert",
+            fragmentSource: "lumi:shaders/post/kaleidoskop.frag",
             samplers: [
                 "u_solid_color",
                 "u_solid_albedo",

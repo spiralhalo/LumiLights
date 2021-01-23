@@ -3,8 +3,8 @@
         {
             // utility, does what it says on the tin
             name: "copy",
-            vertexSource: "lumi:shaders/pipeline/post/simple.vert",
-            fragmentSource: "lumi:shaders/pipeline/post/copy.frag",
+            vertexSource: "lumi:shaders/post/simple.vert",
+            fragmentSource: "lumi:shaders/post/copy.frag",
             samplers: ["u_input"]
         }
     ],

@@ -2,8 +2,8 @@
     programs: [
          {
             name: "reflection",
-            vertexSource: "lumi:shaders/pipeline/post/hdr.vert",
-            fragmentSource: "lumi:shaders/pipeline/post/reflection.frag",
+            vertexSource: "lumi:shaders/post/hdr.vert",
+            fragmentSource: "lumi:shaders/post/reflection.frag",
             samplers: [
                 "u_source_color",
                 "u_source_combine",

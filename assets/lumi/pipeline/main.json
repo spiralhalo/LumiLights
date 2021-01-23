@@ -41,8 +41,8 @@
     programs: [
         {
             name: "shading",
-            vertexSource: "lumi:shaders/pipeline/post/simple.vert",
-            fragmentSource: "lumi:shaders/pipeline/post/shading.frag",
+            vertexSource: "lumi:shaders/post/simple.vert",
+            fragmentSource: "lumi:shaders/post/shading.frag",
             samplers: [
                 "u_solid_color",
                 "u_solid_depth",
@@ -59,8 +59,8 @@
             ]
         }, {
             name: "refraction",
-            vertexSource: "lumi:shaders/pipeline/post/simple.vert",
-            fragmentSource: "lumi:shaders/pipeline/post/refraction.frag",
+            vertexSource: "lumi:shaders/post/simple.vert",
+            fragmentSource: "lumi:shaders/post/refraction.frag",
             samplers: [
                 "u_solid_color",
                 "u_solid_depth",
@@ -72,16 +72,16 @@
             ]
         }, {
             name: "shading_combine",
-            vertexSource: "lumi:shaders/pipeline/post/simple.vert",
-            fragmentSource: "lumi:shaders/pipeline/post/shading_combine.frag",
+            vertexSource: "lumi:shaders/post/simple.vert",
+            fragmentSource: "lumi:shaders/post/shading_combine.frag",
             samplers: [
                 "u_hdr_solid", "u_hdr_solid_swap", "u_solid_depth",
                 "u_hdr_translucent", "u_hdr_translucent_swap", "u_translucent_depth",
             ]
         }, {
             name: "composite",
-            vertexSource: "lumi:shaders/pipeline/post/godrays.vert",
-            fragmentSource: "lumi:shaders/pipeline/post/composite.frag",
+            vertexSource: "lumi:shaders/post/godrays.vert",
+            fragmentSource: "lumi:shaders/post/composite.frag",
             samplers: [
                 "u_combine_solid", "u_solid_depth",
                 "u_combine_translucent", "u_translucent_depth",

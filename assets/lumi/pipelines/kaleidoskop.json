@@ -20,8 +20,8 @@
 
 	nameKey: "pipeline.kaleidoskop.name",
 	descriptionKey: "pipeline.kaleidoskop.desc",
-	materialVertexShader: "lumi:shaders/pipeline/main.vert",
-	materialFragmentShader: "lumi:shaders/pipeline/main.frag",
+	materialVertexShader: "lumi:shaders/forward/main.vert",
+	materialFragmentShader: "lumi:shaders/forward/main.frag",
 
 	drawTargets: {
 		solidTerrain: "solid",

@@ -4,7 +4,7 @@
 #include lumi:shaders/lib/util.glsl
 
 /***********************************************************
- *  lumi:shaders/pipeline/tonemap.glsl                     *
+ *  lumi:shaders/forward/tonemap.glsl                     *
  ***********************************************************/
 
 vec3 ldr_reinhardJodieTonemap(in vec3 v) {

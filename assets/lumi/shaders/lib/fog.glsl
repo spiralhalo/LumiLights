@@ -1,6 +1,6 @@
 #include frex:shaders/api/context.glsl
 #include frex:shaders/api/fog.glsl
-#include canvas:shaders/pipeline/options.glsl
+#include canvas:shaders/forward/options.glsl
 
 /******************************************************
   lumi:shaders/lib/fog.glsl

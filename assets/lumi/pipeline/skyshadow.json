@@ -4,8 +4,8 @@
     allowEntities: true,
     allowParticles: true,
     supportForwardRender: true,
-    vertexShader: "lumi:shaders/pipeline/shadow.vert",
-    fragmentShader: "lumi:shaders/pipeline/shadow.frag",
+    vertexShader: "lumi:shaders/forward/shadow.vert",
+    fragmentShader: "lumi:shaders/forward/shadow.frag",
   },
 
   beforeWorldRender: {
