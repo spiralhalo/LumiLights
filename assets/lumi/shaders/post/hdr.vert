@@ -1,4 +1,5 @@
 #include lumi:shaders/context/post/header.glsl
+#include lumi:shaders/context/global/lightsource.glsl
 #include frex:shaders/api/view.glsl
 #include frex:shaders/api/world.glsl
 #include lumi:shaders/lib/util.glsl
@@ -16,4 +17,5 @@ void main()
     v_texcoord = in_uv;
     v_skycolor = hdr_skyColor() /*hdr_skyStr*/;
     v_up = frx_normalModelMatrix() * vec3(0.0, 1.0, 0.0);
+    lightsource_setVars();
 }

@@ -1,6 +1,7 @@
 #include frex:shaders/api/context.glsl
 #include frex:shaders/api/vertex.glsl
 #include frex:shaders/api/sampler.glsl
+#include lumi:shaders/context/global/lightsource.glsl
 #include lumi:shaders/context/forward/common.glsl
 #include lumi:shaders/forward/varying.glsl
 
@@ -25,6 +26,7 @@ float p_diffuseGui(vec3 normal) {
 void frx_writePipelineVertex(inout frx_VertexData data) {
 
 	if (frx_modelOriginType() == MODEL_ORIGIN_SCREEN) {
+		if (!frx_isGui()) lightsource_setVars();
 		vec4 viewCoord = gl_ModelViewMatrix * data.vertex;
 		gl_ClipVertex = viewCoord;
 		gl_FogFragCoord = length(viewCoord.xyz);

@@ -37,9 +37,17 @@ float l2_sunHorizonScale(float time)
     else return 0.0;
 }
 
+/*  COLOR VARYINGS
+ *******************************************************/
+
+varying vec3 vhdr_ambientColor;
+varying vec3 vhdr_dimensionColor;
+varying vec3 vldr_sunColor;
+
 /*  COLORS
  *******************************************************/
 
+#ifdef VERTEX_SHADER
 vec3 hdr_ambientColor(float time)
 {
     #ifdef TRUE_DARKNESS_MOONLIGHT
@@ -102,6 +110,18 @@ vec3 ldr_sunColor(float time)
     else sunColor = DAY_SUNLIGHT_COLOR;
     return sunColor;
 }
+
+void lightsource_setVars()
+{
+    vhdr_ambientColor = hdr_ambientColor(frx_worldTime());
+    vhdr_dimensionColor = hdr_dimensionColor();
+    vldr_sunColor = ldr_sunColor(frx_worldTime());
+}
+#else
+vec3 hdr_ambientColor(float time) {return vhdr_ambientColor;}
+vec3 hdr_dimensionColor() {return vhdr_dimensionColor;}
+vec3 ldr_sunColor(float time) {return vldr_sunColor;}
+#endif
 
 /*  RADIANCE
  *******************************************************/

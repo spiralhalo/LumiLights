@@ -1,6 +1,8 @@
 #version 130
 #extension GL_EXT_gpu_shader4 : enable
 
+#define POST_SHADER
+
 #include lumi:shaders/lib/util.glsl
 #include lumi:shaders/lib/tonemap.glsl
 #include frex:shaders/api/world.glsl

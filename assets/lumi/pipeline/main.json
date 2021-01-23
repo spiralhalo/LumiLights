@@ -41,7 +41,7 @@
     programs: [
         {
             name: "shading",
-            vertexSource: "lumi:shaders/post/simple.vert",
+            vertexSource: "lumi:shaders/post/hdr.vert",
             fragmentSource: "lumi:shaders/post/shading.frag",
             samplers: [
                 "u_solid_color",
@@ -59,7 +59,7 @@
             ]
         }, {
             name: "refraction",
-            vertexSource: "lumi:shaders/post/simple.vert",
+            vertexSource: "lumi:shaders/post/hdr.vert",
             fragmentSource: "lumi:shaders/post/refraction.frag",
             samplers: [
                 "u_solid_color",
