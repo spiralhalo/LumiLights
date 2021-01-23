@@ -2,7 +2,7 @@
 #include frex:shaders/api/world.glsl
 #include frex:shaders/api/view.glsl
 #include lumi:shaders/context/global/lighting.glsl
-#include lumi:shaders/lib/lightsource.glsl
+#include lumi:shaders/context/global/lightsource.glsl
 #include lumi:shaders/lib/pbr.glsl
 #include lumi:shaders/lib/util.glsl
 
@@ -77,7 +77,7 @@ vec3 hdr_calcSkyAmbientLight(inout light_data data)
 {
     if (frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT))
     {
-        vec3 skyRadiance = l2_skyAmbient(data.light.y, frx_worldTime(), frx_ambientIntensity());
+        vec3 skyRadiance = l2_skyAmbientRadiance(data.light.y, frx_worldTime(), frx_ambientIntensity());
         return pbr_nonDirectional(data.albedo, data.metallic, skyRadiance);
     }
     return vec3(0.0);
@@ -126,7 +126,7 @@ void pbr_shading(inout vec4 a, inout float bloom, vec3 viewPos, vec2 light, vec3
 
     vec3 held_light = hdr_calcHeldLight(data);
     vec3 block_light = pbr_nonDirectional(data.albedo, data.metallic, l2_blockRadiance(data.light.x));
-    vec3 base_ambient_light = pbr_nonDirectional(data.albedo, data.metallic, l2_baseAmbient());
+    vec3 base_ambient_light = pbr_nonDirectional(data.albedo, data.metallic, l2_baseAmbientRadiance());
     vec3 sky_ambient_light = hdr_calcSkyAmbientLight(data);
     vec3 sky_light = hdr_calcSkyLight(data);
     vec3 emissive_light = pbr_nonDirectional(data.albedo, data.metallic, l2_emissiveRadiance(data.albedo, bloom));

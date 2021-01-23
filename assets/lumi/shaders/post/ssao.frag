@@ -1,4 +1,4 @@
-#include lumi:shaders/post/common.glsl
+#include lumi:shaders/context/post/header.glsl
 #include lumi:shaders/lib/ssao.glsl
 #include frex:shaders/api/view.glsl
 #include frex:shaders/api/world.glsl

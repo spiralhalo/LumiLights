@@ -1,4 +1,4 @@
-#include lumi:shaders/post/common.glsl
+#include lumi:shaders/context/post/header.glsl
 #include lumi:shaders/context/post/bloom.glsl
 #include frex:shaders/lib/color.glsl
 #include frex:shaders/lib/sample.glsl

@@ -5,7 +5,7 @@
 #include lumi:shaders/context/global/lighting.glsl
 
 /*******************************************************
- *  lumi:shaders/lib/lightsource.glsl                  *
+ *  lumi:shaders/context/global/lightsource.glsl       *
  *******************************************************
  *  Copyright (c) 2020-2021 spiralhalo, Contributors   *
  *  Released WITHOUT WARRANTY under the terms of the   *
@@ -13,48 +13,13 @@
  *  published by the Free Software Foundation, Inc.    *
  *******************************************************/
 
-/*  BLOCK LIGHT
+/*  DIRECTIONS
  *******************************************************/
 
-vec3 l2_blockRadiance(float blockLight)
-{
-    float dist = (1.001 - min(l2_clampScale(0.03125, 0.95, blockLight), 0.93)) * 15;
-    float bl = BLOCK_LIGHT_ADJUSTER / (dist * dist);
-    // CLAMP DOWN TO ZERO
-    if (bl <= 0.01 * BLOCK_LIGHT_ADJUSTER) {
-        bl *= l2_clampScale(0.0045 * BLOCK_LIGHT_ADJUSTER, 0.01 * BLOCK_LIGHT_ADJUSTER, bl);
-    }
-    bl *= BLOCK_LIGHT_STR;
-    return bl * hdr_gammaAdjust(BLOCK_LIGHT_COLOR);
-}
+#define l2_skylessDarkenedDir() vec3(0, -0.977358, 0.211593)
+#define l2_skylessDir() vec3(0, 0.977358, 0.211593)
 
-/*  HELD LIGHT
- *******************************************************/
-
-#if HANDHELD_LIGHT_RADIUS != 0
-vec3 l2_handHeldRadiance(vec3 viewPos)
-{
-    vec4 heldLight = frx_heldLight();
-    float dist = (1.001 - l2_clampScale(heldLight.w * HANDHELD_LIGHT_RADIUS, 0.0, -viewPos.z+0.5)) * 15;
-    float hl = BLOCK_LIGHT_ADJUSTER / (dist * dist);
-    // CLAMP DOWN TO ZERO
-    if (hl <= 0.01 * BLOCK_LIGHT_ADJUSTER) {
-        hl *= l2_clampScale(0.0045 * BLOCK_LIGHT_ADJUSTER, 0.01 * BLOCK_LIGHT_ADJUSTER, hl);
-    }
-    hl *= BLOCK_LIGHT_STR;
-    return hl * hdr_gammaAdjust(heldLight.rgb);
-}
-#endif
-
-/*  EMISSIVE LIGHT
- *******************************************************/
-
-vec3 l2_emissiveRadiance(vec3 hdrFragColor, float emissivity)
-{
-    return hdrFragColor * hdr_gammaAdjustf(emissivity) * EMISSIVE_LIGHT_STR;
-}
-
-/*  SKY AMBIENT LIGHT
+/*  MULTIPLIERS
  *******************************************************/
 
 float l2_skyLight(float skyLight, float intensity)
@@ -63,7 +28,19 @@ float l2_skyLight(float skyLight, float intensity)
     return hdr_gammaAdjustf(sl) * intensity;
 }
 
-vec3 l2_ambientColor(float time)
+float l2_sunHorizonScale(float time)
+{
+    if(time > 0.94) return frx_smootherstep(0.94, 0.96, time);
+    else if(time > 0.5) return frx_smootherstep(0.56, 0.54, time);
+    else if(time > 0.48) return frx_smootherstep(0.48, 0.5, time);
+    else if(time < 0.02) return frx_smootherstep(0.02, 0, time);
+    else return 0.0;
+}
+
+/*  COLORS
+ *******************************************************/
+
+vec3 hdr_ambientColor(float time)
 {
     #ifdef TRUE_DARKNESS_MOONLIGHT
         vec3 nightAmbient = vec3(0.0);
@@ -101,18 +78,7 @@ vec3 l2_ambientColor(float time)
     return mix(colors[i-1], colors[i], l2_clampScale(times[i-1], times[i], time)) * SKY_AMBIENT_MULT;
 }
 
-vec3 l2_skyAmbient(float skyLight, float time, float intensity)
-{
-    float sl = l2_skyLight(skyLight, intensity);
-    sl = smoothstep(0.1, 0.9, sl); // STEEP SKY LIGHT (PSEUDO SHADOW)
-    float sa = sl * 2.5;
-    return sa * l2_ambientColor(time);
-}
-
-/*  SKYLESS LIGHT
- *******************************************************/
-
-vec3 l2_dimensionColor()
+vec3 hdr_dimensionColor()
 {
     // THE NETHER
     if (frx_isWorldTheNether()) {
@@ -126,29 +92,53 @@ vec3 l2_dimensionColor()
     return hdr_gammaAdjust(vec3(0.8, 0.7, 1.0));
 }
 
-#define l2_skylessDarkenedDir() vec3(0, -0.977358, 0.211593)
-#define l2_skylessDir() vec3(0, 0.977358, 0.211593)
-
-vec3 l2_skylessRadiance()
+vec3 ldr_sunColor(float time)
 {
-    #ifdef TRUE_DARKNESS_NETHER
-        if (frx_isSkyDarkened()) return vec3(0.0);
-    #endif
-    #ifdef TRUE_DARKNESS_END
-        if (!frx_isSkyDarkened()) return vec3(0.0);
-    #endif
-    if (frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT)) return vec3(0);
-    else {
-        vec3 color = frx_worldFlag(FRX_WORLD_IS_NETHER) ? NETHER_SKYLESS_LIGHT_COLOR : SKYLESS_LIGHT_COLOR;
-        float darkenedFactor = frx_isSkyDarkened() ? 0.5 : 1.0;
-        return darkenedFactor * SKYLESS_LIGHT_STR * hdr_gammaAdjust(color);
-    }
+    vec3 sunColor;
+    if(time > 0.94) sunColor = mix(SUNRISE_LIGHT_COLOR, vec3(0), l2_clampScale(0.96, 0.94, time));
+    else if(time > 0.5) sunColor = mix(SUNSET_LIGHT_COLOR, vec3(0), l2_clampScale(0.54, 0.56, time));
+    else if(time > 0.48) sunColor = mix(DAY_SUNLIGHT_COLOR, SUNSET_LIGHT_COLOR, l2_clampScale(0.48, 0.5, time));
+    else if(time < 0.02) sunColor = mix(DAY_SUNLIGHT_COLOR, SUNRISE_LIGHT_COLOR, l2_clampScale(0.02, 0, time));
+    else sunColor = DAY_SUNLIGHT_COLOR;
+    return sunColor;
 }
 
-/*  BASE AMBIENT LIGHT
+/*  RADIANCE
  *******************************************************/
 
-vec3 l2_baseAmbient()
+vec3 l2_blockRadiance(float blockLight)
+{
+    float dist = (1.001 - min(l2_clampScale(0.03125, 0.95, blockLight), 0.93)) * 15;
+    float bl = BLOCK_LIGHT_ADJUSTER / (dist * dist);
+    // CLAMP DOWN TO ZERO
+    if (bl <= 0.01 * BLOCK_LIGHT_ADJUSTER) {
+        bl *= l2_clampScale(0.0045 * BLOCK_LIGHT_ADJUSTER, 0.01 * BLOCK_LIGHT_ADJUSTER, bl);
+    }
+    bl *= BLOCK_LIGHT_STR;
+    return bl * hdr_gammaAdjust(BLOCK_LIGHT_COLOR);
+}
+
+#if HANDHELD_LIGHT_RADIUS != 0
+vec3 l2_handHeldRadiance(vec3 viewPos)
+{
+    vec4 heldLight = frx_heldLight();
+    float dist = (1.001 - l2_clampScale(heldLight.w * HANDHELD_LIGHT_RADIUS, 0.0, -viewPos.z+0.5)) * 15;
+    float hl = BLOCK_LIGHT_ADJUSTER / (dist * dist);
+    // CLAMP DOWN TO ZERO
+    if (hl <= 0.01 * BLOCK_LIGHT_ADJUSTER) {
+        hl *= l2_clampScale(0.0045 * BLOCK_LIGHT_ADJUSTER, 0.01 * BLOCK_LIGHT_ADJUSTER, hl);
+    }
+    hl *= BLOCK_LIGHT_STR;
+    return hl * hdr_gammaAdjust(heldLight.rgb);
+}
+#endif
+
+vec3 l2_emissiveRadiance(vec3 hdrFragColor, float emissivity)
+{
+    return hdrFragColor * hdr_gammaAdjustf(emissivity) * EMISSIVE_LIGHT_STR;
+}
+
+vec3 l2_baseAmbientRadiance()
 {
     //frx_viewBrightness() is maxed out by night vision so it's useless here
     if (frx_playerHasNightVision()) return hdr_gammaAdjust(NIGHT_VISION_COLOR) * NIGHT_VISION_STR;
@@ -169,31 +159,16 @@ vec3 l2_baseAmbient()
                 return vec3(0.0);
             }
         #endif
-        return l2_dimensionColor() * SKYLESS_AMBIENT_STR;
+        return hdr_dimensionColor() * SKYLESS_AMBIENT_STR;
     }
 }
 
-/*  SUN LIGHT
- *******************************************************/
-
-vec3 ldr_sunColor(float time)
+vec3 l2_skyAmbientRadiance(float skyLight, float time, float intensity)
 {
-    vec3 sunColor;
-    if(time > 0.94) sunColor = mix(SUNRISE_LIGHT_COLOR, vec3(0), l2_clampScale(0.96, 0.94, time));
-    else if(time > 0.5) sunColor = mix(SUNSET_LIGHT_COLOR, vec3(0), l2_clampScale(0.54, 0.56, time));
-    else if(time > 0.48) sunColor = mix(DAY_SUNLIGHT_COLOR, SUNSET_LIGHT_COLOR, l2_clampScale(0.48, 0.5, time));
-    else if(time < 0.02) sunColor = mix(DAY_SUNLIGHT_COLOR, SUNRISE_LIGHT_COLOR, l2_clampScale(0.02, 0, time));
-    else sunColor = DAY_SUNLIGHT_COLOR;
-    return sunColor;
-}
-
-float l2_sunHorizonScale(float time)
-{
-    if(time > 0.94) return frx_smootherstep(0.94, 0.96, time);
-    else if(time > 0.5) return frx_smootherstep(0.56, 0.54, time);
-    else if(time > 0.48) return frx_smootherstep(0.48, 0.5, time);
-    else if(time < 0.02) return frx_smootherstep(0.02, 0, time);
-    else return 0.0;
+    float sl = l2_skyLight(skyLight, intensity);
+    sl = smoothstep(0.1, 0.9, sl); // STEEP SKY LIGHT (PSEUDO SHADOW)
+    float sa = sl * 2.5;
+    return sa * hdr_ambientColor(time);
 }
 
 vec3 l2_sunRadiance(float skyLight, in float time, float intensity, float rainGradient)
@@ -208,9 +183,6 @@ vec3 l2_sunRadiance(float skyLight, in float time, float intensity, float rainGr
     return sl * SUNLIGHT_STR * hdr_gammaAdjust(ldr_sunColor(time));
 }
 
-/*  MOON LIGHT
- *******************************************************/
-
 vec3 l2_moonRadiance(float skyLight, float time, float intensity)
 {
     #ifdef TRUE_DARKNESS_MOONLIGHT
@@ -221,4 +193,20 @@ vec3 l2_moonRadiance(float skyLight, float time, float intensity)
     else if(time > 0.92) ml *= l2_clampScale(0.96, 0.92, time);
     return vec3(ml);
     #endif
+}
+
+vec3 l2_skylessRadiance()
+{
+    #ifdef TRUE_DARKNESS_NETHER
+        if (frx_isSkyDarkened()) return vec3(0.0);
+    #endif
+    #ifdef TRUE_DARKNESS_END
+        if (!frx_isSkyDarkened()) return vec3(0.0);
+    #endif
+    if (frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT)) return vec3(0);
+    else {
+        vec3 color = frx_worldFlag(FRX_WORLD_IS_NETHER) ? NETHER_SKYLESS_LIGHT_COLOR : SKYLESS_LIGHT_COLOR;
+        float darkenedFactor = frx_isSkyDarkened() ? 0.5 : 1.0;
+        return darkenedFactor * SKYLESS_LIGHT_STR * hdr_gammaAdjust(color);
+    }
 }

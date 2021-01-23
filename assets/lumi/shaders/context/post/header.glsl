@@ -1,12 +1,24 @@
+#version 130
+#extension GL_EXT_gpu_shader4 : enable
+
 #include lumi:shaders/lib/util.glsl
 #include lumi:shaders/lib/tonemap.glsl
 #include frex:shaders/api/world.glsl
 #include frex:shaders/api/player.glsl
 
+#define VERTEX_SHADER
+
 /*******************************************************
- *  lumi:shaders/post/common_vertex.glsl      *
+ *  lumi:shaders/context/post/header.glsl              *
  *******************************************************/
 
+uniform ivec2 frxu_size;
+uniform int frxu_lod;
+varying vec2 v_texcoord;
+varying vec3 v_skycolor;
+varying vec3 v_up;
+
+#ifdef VERTEX_SHADER
 const vec3 day_sky = vec3(0.52, 0.69, 1.0);
 const vec3 day_fog = vec3(0.75, 0.84375, 1.0);
 
@@ -34,3 +46,4 @@ vec3 ldr_skyColor()
 {
     return ldr_tonemap3(hdr_skyColor());
 }
+#endif

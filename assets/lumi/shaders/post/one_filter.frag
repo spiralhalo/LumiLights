@@ -1,4 +1,4 @@
-#include lumi:shaders/post/common.glsl
+#include lumi:shaders/context/post/header.glsl
 #include frex:shaders/lib/math.glsl
 #include lumi:shaders/lib/util.glsl
 #include lumi:shaders/lib/tile_noise.glsl

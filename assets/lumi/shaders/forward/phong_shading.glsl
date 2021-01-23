@@ -45,11 +45,11 @@ void phong_shading(in frx_FragmentData fragData, inout vec4 a, inout float bloom
     vec3 block = l2_blockRadiance(perceivedBl);
     vec3 sun = l2_sunRadiance(fragData.light.y, frx_worldTime(), frx_ambientIntensity(), frx_rainGradient()) * sunDot;
     vec3 moon = l2_moonRadiance(fragData.light.y, frx_worldTime(), frx_ambientIntensity()) * moonDot;
-    vec3 skyAmbient = l2_skyAmbient(fragData.light.y, frx_worldTime(), frx_ambientIntensity());
+    vec3 skyAmbient = l2_skyAmbientRadiance(fragData.light.y, frx_worldTime(), frx_ambientIntensity());
     vec3 emissive = l2_emissiveRadiance(fragData.emissivity);
     vec3 skylessRadiance = l2_skylessRadiance();
     vec3 skyless = skylessRadiance * skyLessDot + (frx_isSkyDarkened() ? skylessRadiance * skyLessDarkenedDot : vec3(0.0));
-    vec3 baseAmbient = l2_baseAmbient();
+    vec3 baseAmbient = l2_baseAmbientRadiance();
 
 #if LIGHTING_PROFILE == LIGHTING_PROFILE_MOODY
     vec3 light = baseAmbient + held + moon + skyAmbient + sun + skyless;

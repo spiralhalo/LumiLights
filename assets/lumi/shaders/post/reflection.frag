@@ -1,4 +1,4 @@
-#include lumi:shaders/post/common.glsl
+#include lumi:shaders/context/post/header.glsl
 #include lumi:shaders/post/reflection_common.glsl
 #include lumi:shaders/context/post/reflection.glsl
 #include lumi:shaders/context/global/lighting.glsl

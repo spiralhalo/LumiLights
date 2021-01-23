@@ -1,4 +1,4 @@
-#include lumi:shaders/post/common.glsl
+#include lumi:shaders/context/post/header.glsl
 #include lumi:shaders/lib/tonemap.glsl
 #include lumi:shaders/lib/util.glsl
 #include lumi:shaders/lib/fast_gaussian_blur.glsl
