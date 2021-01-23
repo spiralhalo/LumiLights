@@ -115,10 +115,18 @@ vec4 hdr_shaded_color(vec2 uv, sampler2D scolor, sampler2D sdepth, sampler2D sli
         float blindnessFactor = frx_playerHasEffect(FRX_EFFECT_BLINDNESS) ? 0.0 : 1.0;
         // the sky
         vec3 skyVec = normalize(viewPos);
-        vec4 skyVecWorld = v_star_rotator * vec4(skyVec * frx_normalModelMatrix(), 0.0);
-        float star = l2_clampScale(0.4, 0.2, frx_luminance(a.rgb)) * smoothstep(0.75, 0.9, snoise(skyVecWorld.xyz * 100));
-        bloom_out = star + l2_skyBloom() * blindnessFactor;
-        vec3 starRadiance = vec3(star);
+
+        float night = l2_clampScale(0.4, 0.0, frx_luminance(a.rgb));
+        vec3 milkyVec = skyVec * frx_normalModelMatrix();
+        vec4 starVec = v_star_rotator * vec4(milkyVec, 0.0);
+        vec3 nonMilkyAxis = vec3(-0.598964, 0.531492, 0.598964);
+        float milkyness = l2_clampScale(0.5, 0.0, abs(dot(nonMilkyAxis, milkyVec.xyz)));
+        float star = night * smoothstep(0.75 - milkyness * 0.3, 0.9, snoise(starVec.xyz * 100));
+        float milkyHaze = night * (1.0-frx_ambientIntensity()) * milkyness * 0.4 * l2_clampScale(-1.0, 1.0, snoise(starVec.xyz * 2.0));
+        vec3 starRadiance = vec3(star) + vec3(0.9, 0.75, 1.0) * milkyHaze;
+        
+        bloom_out = star + milkyHaze + l2_skyBloom() * blindnessFactor;
+
         // vec3 skyDownColor = vec3(frx_ambientIntensity());
         // starRadiance + mix(skyDownColor, v_skycolor, l2_clampScale(-1.0, 1.0, dot(skyVec, v_up)))
         return vec4((a.rgb + starRadiance) * blindnessFactor, 0.0);
