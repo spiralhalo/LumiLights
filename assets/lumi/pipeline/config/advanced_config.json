@@ -1,0 +1,18 @@
+{
+    options: [
+        {
+            includeToken: "lumi:advanced_config",
+            categoryKey: "config.lumi_lights.category.advanced",
+            options: {
+                specular_method: {
+                    default: "cook_torrance",
+                    choices: ["blinn", "cook_torrance"],
+                    enum: true,
+                    prefix: "specular_method_",
+                    nameKey: "config.lumi_lights.value.specular_method",
+                    descriptionKey: "config.lumi_lights.help.specular_method"
+                },
+            }
+        }
+    ]
+}

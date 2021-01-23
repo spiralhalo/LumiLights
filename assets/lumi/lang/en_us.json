@@ -58,6 +58,10 @@
     "config.lumi_lights.value.reflection_minimum_roughness_relative": "Minimum roughness",
     "config.lumi_lights.help.reflection_minimum_roughness_relative": "Limits amount of reflection. Lower to improve performance",
 
+    "config.lumi_lights.category.advanced": "Advanced",
+    "config.lumi_lights.value.specular_method": "Specular method",
+    "config.lumi_lights.help.specular_method": "Method to calculate specular reflection. Affects performance",
+
     "respackopts.title.LUMI": "Lumi Lights",
     "respackopts.field.LUMI.NoWaterTexture": "Textureless water",
     "respackopts.tooltip.LUMI.NoWaterTexture": "Enable textureless water",

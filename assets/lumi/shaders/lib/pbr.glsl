@@ -1,3 +1,5 @@
+#include lumi:shaders/context/global/advanced.glsl
+
 /*******************************************************
  *  lumi:shaders/lib/pbr.glsl                          *
  *******************************************************/
@@ -44,6 +46,7 @@ vec3 pbr_fresnelSchlick(float cosTheta, vec3 F0)
     return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
 }
 
+#if SPECULAR_METHOD == SPECULAR_METHOD_COOK_TORRANCE
 vec3 pbr_specularBRDF(float roughness, vec3 radiance, vec3 halfway, vec3 lightDir, vec3 viewDir, vec3 normal, vec3 fresnel, float NdotL)
 {
 	// cook-torrance brdf
@@ -56,3 +59,13 @@ vec3 pbr_specularBRDF(float roughness, vec3 radiance, vec3 halfway, vec3 lightDi
 	vec3  specular = num / max(denom, 0.001);
 	return specular * radiance * NdotL;
 }
+#else
+vec3 pbr_specularBRDF(float roughness, vec3 radiance, vec3 halfway, vec3 lightDir, vec3 viewDir, vec3 normal, vec3 fresnel, float NdotL)
+{
+    // blinn specular
+    float NdotH = pbr_dot(normal, halfway);
+    float k = 1.999 / max(0.0001, roughness * roughness);
+
+    return min(1.0, 3.0 * 0.0398 * k) * pow(NdotH, min(10000.0, k)) * radiance * fresnel * (NdotL > 0.0 ? 1.0 : 0.0);
+}
+#endif
