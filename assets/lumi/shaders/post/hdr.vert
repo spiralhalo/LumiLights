@@ -10,12 +10,20 @@
  *******************************************************/
 
 varying mat4 v_star_rotator;
+varying mat4 v_cloud_rotator;
 
 attribute vec2 in_uv;
 
 void main()
 {
     v_star_rotator = l2_rotationMatrix(vec3(1.0, 0.0, 1.0), frx_worldTime() * PI);
+
+    float cloud_day_angle = (frx_worldDay() + frx_worldTime()) * PI;
+    float cloud_pos_angle_x = frx_cameraPos().x * 0.01 * PI;
+    float cloud_pos_angle_z = frx_cameraPos().z * 0.01 * PI;
+    v_cloud_rotator = l2_rotationMatrix(vec3(1.0, 0.0, 0.0), cloud_pos_angle_z + cloud_day_angle)
+                    * l2_rotationMatrix(vec3(0.0, 0.0, 1.0), cloud_pos_angle_x);
+
     vec4 screen = gl_ProjectionMatrix * vec4(gl_Vertex.xy * frxu_size, 0.0, 1.0);
     gl_Position = vec4(screen.xy, 0.2, 1.0);
     v_texcoord = in_uv;
