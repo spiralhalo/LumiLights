@@ -11,6 +11,8 @@
     "config.lumi_lights.category.bloom": "Bloom",
     "config.lumi_lights.value.bloom_intensity": "Bloom intensity",
     "config.lumi_lights.help.bloom_intensity": "Intensity of glow effect around light sources",
+    "config.lumi_lights.value.sky_bloom_intensity": "Sky bloom intensity",
+    "config.lumi_lights.help.sky_bloom_intensity": "Intensity of glow effect on the sky",
     "config.lumi_lights.value.bloom_downsample_scale": "Downsample scale",
     "config.lumi_lights.help.bloom_downsample_scale": "Affects the size of bloom effect around light sources",
     "config.lumi_lights.value.bloom_upsample_scale": "Upsample scale",

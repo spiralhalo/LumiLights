@@ -12,7 +12,7 @@
 #include lumi:shaders/lib/tonemap.glsl
 #include lumi:shaders/lib/pbr_shading.glsl
 #include lumi:shaders/lib/ssao.glsl
-#include lumi:shaders/internal/skybloom.glsl
+#include lumi:shaders/context/post/bloom.glsl
 #include lumi:shaders/context/post/fog.glsl
 #include lumi:shaders/context/global/lighting.glsl
 
