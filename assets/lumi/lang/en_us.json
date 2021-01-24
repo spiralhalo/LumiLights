@@ -58,9 +58,11 @@
     "config.lumi_lights.value.reflection_minimum_roughness_relative": "Minimum roughness",
     "config.lumi_lights.help.reflection_minimum_roughness_relative": "Limits amount of reflection. Lower to improve performance",
 
-    "config.lumi_lights.category.advanced": "Advanced",
+    "config.lumi_lights.category.experimental": "Experimental",
     "config.lumi_lights.value.specular_method": "Specular method",
     "config.lumi_lights.help.specular_method": "Method to calculate specular reflection. Affects performance",
+    "config.lumi_lights.value.custom_cloud_rendering": "Custom cloud rendering",
+    "config.lumi_lights.help.custom_cloud_rendering": "Render procedurally generated clouds",
 
     "respackopts.title.LUMI": "Lumi Lights",
     "respackopts.field.LUMI.NoWaterTexture": "Textureless water",
@@ -69,5 +71,7 @@
     "respackopts.tooltip.LUMI.WavyWaterModel": "Enable wavy water animation",
     "respackopts.field.LUMI.WavyWaterIntensity": "Wavy water intensity",
     "respackopts.tooltip.LUMI.WavyWaterIntensity": "Set the speed and intensity of wavy water animation",
+
+    "_comment_": "No trailing comma."
 }
   

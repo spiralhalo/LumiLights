@@ -1,8 +1,8 @@
 {
     options: [
         {
-            includeToken: "lumi:advanced_config",
-            categoryKey: "config.lumi_lights.category.advanced",
+            includeToken: "lumi:experimental_config",
+            categoryKey: "config.lumi_lights.category.experimental",
             options: {
                 specular_method: {
                     default: "cook_torrance",
@@ -11,6 +11,11 @@
                     prefix: "specular_method_",
                     nameKey: "config.lumi_lights.value.specular_method",
                     descriptionKey: "config.lumi_lights.help.specular_method"
+                },
+                custom_cloud_rendering: {
+                    default: false,
+                    nameKey: "config.lumi_lights.value.custom_cloud_rendering",
+                    descriptionKey: "config.lumi_lights.help.custom_cloud_rendering"
                 },
             }
         }

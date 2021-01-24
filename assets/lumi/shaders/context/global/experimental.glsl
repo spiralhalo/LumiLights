@@ -1,5 +1,5 @@
-#include lumi:advanced_config
+#include lumi:experimental_config
 
 /*******************************************************
- *  lumi:shaders/context/global/advanced.glsl          *
+ *  lumi:shaders/context/global/experimental.glsl      *
  *******************************************************/

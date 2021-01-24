@@ -7,6 +7,7 @@
 #include lumi:shaders/lib/fast_gaussian_blur.glsl
 #include lumi:shaders/lib/godrays.glsl
 #include lumi:shaders/context/global/lighting.glsl
+#include lumi:shaders/context/global/experimental.glsl
 
 /******************************************************
   lumi:shaders/post/composite.frag
@@ -76,9 +77,14 @@ void main()
     vec4 translucent = texture2D(u_combine_translucent, v_texcoord);
     translucent.rgb = ldr_tonemap3(translucent.rgb * brightnessMult);
 
-    float depth_clouds = texture2D(u_clouds_depth, v_texcoord).r;
-    vec4 clouds = blur13(u_clouds, v_texcoord, frxu_size, vec2(1.0, 1.0));
-    clouds.rgb = ldr_tonemap3(hdr_gammaAdjust(clouds.rgb) * brightnessMult);
+    #ifdef CUSTOM_CLOUD_RENDERING
+        float depth_clouds = 1.0;
+        vec4 clouds = vec4(0.0);
+    #else
+        float depth_clouds = texture2D(u_clouds_depth, v_texcoord).r;
+        vec4 clouds = blur13(u_clouds, v_texcoord, frxu_size, vec2(1.0, 1.0));
+        clouds.rgb = ldr_tonemap3(hdr_gammaAdjust(clouds.rgb) * brightnessMult);
+    #endif
 
     float depth_weather = texture2D(u_weather_depth, v_texcoord).r;
     vec4 weather = texture2D(u_weather, v_texcoord);
