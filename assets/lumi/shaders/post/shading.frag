@@ -43,6 +43,7 @@ uniform sampler2D u_ao;
 
 varying mat4 v_star_rotator;
 varying mat4 v_cloud_rotator;
+varying float v_fov;
 
 vec3 coords_view(vec2 uv, mat4 inv_projection, float depth)
 {
@@ -121,6 +122,7 @@ vec4 hdr_shaded_color(vec2 uv, sampler2D scolor, sampler2D sdepth, sampler2D sli
         bloom_out = 0.0;
 
         if (frx_worldFlag(FRX_WORLD_IS_OVERWORLD)) {
+            float rainFactor = frx_rainGradient() * 0.67 + frx_thunderGradient() * 0.33;
             float cloud = 0.0;
             #ifdef CUSTOM_CLOUD_RENDERING
                 // cloud
@@ -133,7 +135,7 @@ vec4 hdr_shaded_color(vec2 uv, sampler2D scolor, sampler2D sdepth, sampler2D sli
 
                 float cloudBase = 1.0
                     * l2_clampScale(0.0, 0.1, skyDotUp)
-                    * l2_clampScale(-0.5, 1.0, snoise(rotatedCloudPlane * 0.005));
+                    * l2_clampScale(-0.5 - rainFactor * 0.5, 1.0 - rainFactor, snoise(rotatedCloudPlane * 0.005));
                 float cloud1 = cloudBase * l2_clampScale(-1.0, 1.0, snoise(rotatedCloudPlane * 0.015));
                 float cloud2 = cloud1 * l2_clampScale(-1.0, 1.0, snoise(rotatedCloudPlane * 0.04));
                 float cloud3 = cloud2 * l2_clampScale(-1.0, 1.0, snoise(rotatedCloudPlane * 0.1));
@@ -141,22 +143,26 @@ vec4 hdr_shaded_color(vec2 uv, sampler2D scolor, sampler2D sdepth, sampler2D sli
                 cloud = cloud1 * 0.5 + cloud2 * 0.75 + cloud3;
                 cloud = l2_clampScale(0.1, 0.4, cloud);
                 
-                vec3 cloudColor = vec3(frx_ambientIntensity()*frx_ambientIntensity());
+                float cloudColor = frx_ambientIntensity() * frx_ambientIntensity() * (1.0 - 0.3 * rainFactor);
 
                 // blend
-                a.rgb = a.rgb * (1.0 - cloud) + cloudColor * cloud;
+                a.rgb = a.rgb * (1.0 - cloud) + vec3(cloudColor) * cloud;
             #endif
 
             // stars
-            float night = l2_clampScale(0.4, 0.0, frx_luminance(a.rgb));
+            float starry = l2_clampScale(0.4, 0.0, frx_luminance(a.rgb));
+            float occlusion = (1.0 - rainFactor) * (1.0 - cloud);
             vec4 starVec = v_star_rotator * vec4(worldSkyVec, 0.0);
             vec3 nonMilkyAxis = vec3(-0.598964, 0.531492, 0.598964);
             float milkyness = l2_clampScale(0.5, 0.0, abs(dot(nonMilkyAxis, worldSkyVec.xyz)));
-            float star = night * smoothstep(0.75 - milkyness * 0.3, 0.9, snoise(starVec.xyz * 100));
-            float milkyHaze = night * (1.0-frx_ambientIntensity()) * milkyness * 0.4 * l2_clampScale(-1.0, 1.0, snoise(starVec.xyz * 2.0));
+            float star = starry * smoothstep(0.75 - milkyness * 0.3, 0.9, snoise(starVec.xyz * 100));
+            // zoom sharpening
+            float zoomFactor = l2_clampScale(90, 30, v_fov);
+            star = l2_clampScale(0.3 * zoomFactor, 1.0 - 0.6 * zoomFactor, star) * occlusion;
+            float milkyHaze = starry * occlusion * (1.0-frx_ambientIntensity()) * milkyness * 0.4 * l2_clampScale(-1.0, 1.0, snoise(starVec.xyz * 2.0));
             vec3 starRadiance = vec3(star) + vec3(0.9, 0.75, 1.0) * milkyHaze;
-            a.rgb += starRadiance * (1.0 - cloud);
-            bloom_out += (star + milkyHaze) * (1.0 - cloud);
+            a.rgb += starRadiance;
+            bloom_out += (star + milkyHaze);
         }
 
         bloom_out += l2_skyBloom();
