@@ -86,14 +86,15 @@ vec3 hdr_calcSkyAmbientLight(inout light_data data)
 vec3 hdr_calcSkyLight(inout light_data data)
 {
     if (frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT)) {
+        float weatherFactor = min(mix(1.0, SKY_LIGHT_RAINING_MULT, frx_rainGradient()), mix(1.0, SKY_LIGHT_THUNDERING_MULT, frx_thunderGradient()));
         vec3 skyLightRadiance;
         if (!frx_worldFlag(FRX_WORLD_IS_MOONLIT)) {
-            skyLightRadiance = l2_sunRadiance(data.light.y, frx_worldTime(), frx_skyLightTransitionFactor(), frx_rainGradient());
+            skyLightRadiance = l2_sunRadiance(data.light.y, frx_worldTime(), weatherFactor * frx_skyLightTransitionFactor(), frx_rainGradient());
         } else {
             #ifdef TRUE_DARKNESS_MOONLIGHT
                 return vec3(0.0);
             #endif
-            skyLightRadiance = l2_moonRadiance(data.light.y, frx_worldTime(), frx_skyLightTransitionFactor());
+            skyLightRadiance = l2_moonRadiance(data.light.y, frx_worldTime(), weatherFactor * frx_skyLightTransitionFactor());
         }
         return pbr_lightCalc(data.albedo, data.roughness, data.metallic, data.f0, skyLightRadiance, frx_skyLightVector(), data.viewDir, data.normal, data.diffuse, data.specularAccu);
     } else {
