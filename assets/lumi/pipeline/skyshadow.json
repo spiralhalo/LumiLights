@@ -22,11 +22,12 @@
     // depth attachment for shadow map
     {
       name: "shadow_depth",
+      depth: 4,
       size: 16384,
       internalFormat: "DEPTH_COMPONENT32",
       pixelFormat: "DEPTH_COMPONENT",
       pixelDataType: "FLOAT",
-      target: "TEXTURE_2D",
+      target: "TEXTURE_2D_ARRAY",
       texParams: [
         {name: "TEXTURE_MIN_FILTER", val: "NEAREST"},
         {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},

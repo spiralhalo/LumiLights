@@ -92,7 +92,7 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
 			{
 				for(int col = -1; col <= 1; ++col)
 				{
-					shadowDepth = texture2D(frxs_shadowMap, shadowCoords.xy + vec2(row, col) * inc).r; 
+					shadowDepth = texture2DArray(frxs_shadowMap, vec3(shadowCoords.xy + vec2(row, col) * inc, 0)).r; 
 					shadowFactor += shadowDepth + bias < shadowCoords.z ? 1.0 : 0.0;      
 				}    
 			}
