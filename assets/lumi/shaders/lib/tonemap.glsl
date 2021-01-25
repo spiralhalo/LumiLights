@@ -1,6 +1,6 @@
-#include lumi:shaders/context/forward/common.glsl
 #include frex:shaders/lib/math.glsl
 #include frex:shaders/lib/color.glsl
+#include lumi:shaders/context/global/experimental.glsl
 #include lumi:shaders/lib/util.glsl
 
 /***********************************************************
@@ -43,14 +43,11 @@ vec3 hable_filmic(vec3 v)
 vec4 ldr_tonemap(vec4 a)
 {
     vec3 c = a.rgb;
-    c = hable_filmic(c);
-// #if LUMI_Tonemap == LUMI_Tonemap_Film
-//     c = frx_toneMap(c);
-// #elif LUMI_Tonemap == LUMI_Tonemap_Vibrant
-//     c = ldr_vibrantTonemap(c);
-// #else
-//     c = ldr_reinhardJodieTonemap(c);
-// #endif
+    #ifdef HIGH_CONTRAST
+        c = frx_toneMap(c);
+    #else
+        c = hable_filmic(c);
+    #endif
     // Somehow the film tonemap requires clamping. I don't understand..
     c = pow(clamp(c, 0.0, 1.0), vec3(1.0 / hdr_gamma));
     return vec4(c, a.a);
@@ -59,7 +56,11 @@ vec4 ldr_tonemap(vec4 a)
 vec3 ldr_tonemap3(vec3 a)
 {
     vec3 c = a.rgb;
-    c = hable_filmic(c);
+    #ifdef HIGH_CONTRAST
+        c = frx_toneMap(c);
+    #else
+        c = hable_filmic(c);
+    #endif
     c = pow(clamp(c, 0.0, 1.0), vec3(1.0 / hdr_gamma));
     return c;
 }

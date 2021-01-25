@@ -1,4 +1,5 @@
 #include lumi:shaders/lib/util.glsl
+#include lumi:shaders/context/global/experimental.glsl
 #include lumi:lighting_config
 
 /*******************************************************
@@ -11,14 +12,22 @@
  *******************************************************/
 
 // STRENGTHS
+#ifdef HIGH_CONTRAST
+const float SUNLIGHT_STR = 12.0;
+const float MOONLIGHT_STR = 0.2;
+const float SKY_AMBIENT_STR = 1.2;
+const float SKYLESS_AMBIENT_STR = 0.8;
+const float SKYLESS_LIGHT_STR = 2.0;
+#else
 const float SUNLIGHT_STR = 6.0;
 const float MOONLIGHT_STR = 0.1;
 const float SKY_AMBIENT_STR = 0.6;
+const float SKYLESS_AMBIENT_STR = 0.4;
+const float SKYLESS_LIGHT_STR = 1.0;
+#endif
 const float BLOCK_LIGHT_STR = 3.0;
 const float BASE_AMBIENT_STR = 0.02;
-const float SKYLESS_AMBIENT_STR = 0.4;
 const float HELD_LIGHT_STR = 1.5;
-const float SKYLESS_LIGHT_STR = 1.0;
 const float EMISSIVE_LIGHT_STR = 1.0;
 const float NIGHT_VISION_STR = 3.0;
 
