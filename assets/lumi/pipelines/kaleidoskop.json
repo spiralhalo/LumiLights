@@ -23,16 +23,6 @@
 	materialVertexShader: "lumi:shaders/forward/main.vert",
 	materialFragmentShader: "lumi:shaders/forward/main.frag",
 
-	drawTargets: {
-		solidTerrain: "solid",
-		translucentTerrain: "translucent",
-		translucentEntity: "solid",
-		weather: "weather",
-		clouds: "clouds",
-		// TODO: segregate solid particles
-		translucentParticles: "solid"
-	},
-
 	include: [
 		"lumi:pipeline/main.json",
 		"lumi:pipeline/kaleidoskop.json",

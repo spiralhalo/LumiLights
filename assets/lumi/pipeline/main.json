@@ -1,4 +1,13 @@
 {
+	drawTargets: {
+		solidTerrain: "solid",
+		translucentTerrain: "translucent",
+		translucentEntity: "solid",
+		weather: "weather",
+		clouds: "clouds",
+		// TODO: segregate solid particles
+		translucentParticles: "solid"
+	},
 // When present, will force Minecraft to operate as if "fabulous" mode was selected.
 // Normally this means translucent geometry will be drawn to different framebuffers
 // and mc and mods expect five additional framebuffers will be available:
