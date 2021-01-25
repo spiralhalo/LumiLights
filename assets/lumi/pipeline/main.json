@@ -2,7 +2,7 @@
 	drawTargets: {
 		solidTerrain: "solid",
 		translucentTerrain: "translucent",
-		translucentEntity: "solid",
+		translucentEntity: "translucent",
 		weather: "weather",
 		clouds: "clouds",
 		// TODO: segregate solid particles
@@ -35,7 +35,7 @@
 //
 // The values here must be valid framebuffer names from the framebuffers block.
     fabulousTargets: {
-        entity: "default",
+        entity: "fab_translucent",
         particles: "default",
         weather: "fab_weather",
         clouds: "fab_clouds",
