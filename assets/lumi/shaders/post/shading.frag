@@ -44,6 +44,11 @@ uniform sampler2D u_ao;
 varying mat4 v_star_rotator;
 varying mat4 v_cloud_rotator;
 varying float v_fov;
+varying float v_night;
+varying float v_not_in_void;
+varying float v_near_void_core;
+
+const vec3 VOID_CORE_COLOR = hdr_gammaAdjust(vec3(1.0, 0.7, 0.5));
 
 vec3 coords_view(vec2 uv, mat4 inv_projection, float depth)
 {
@@ -65,8 +70,6 @@ vec4 fog (float skylightFactor, vec4 a, vec3 viewPos, vec3 worldPos, bool transl
     float timeFactor = (l2_clampScale(0.45, 0.5, zigZagTime) + l2_clampScale(0.05, 0.0, zigZagTime));
     timeFactor = frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? timeFactor : 1.0;
 
-    // TODO: blindness fog
-    // TODO: lava fog
     float fogDensity = frx_playerFlag(FRX_PLAYER_EYE_IN_FLUID) ? UNDERWATER_FOG_DENSITY : FOG_DENSITY;
     float fogFar = frx_playerFlag(FRX_PLAYER_EYE_IN_FLUID) ? UNDERWATER_FOG_FAR : FOG_FAR;
     float fogNear = frx_playerFlag(FRX_PLAYER_EYE_IN_FLUID) ? UNDERWATER_FOG_NEAR : FOG_NEAR;
@@ -119,15 +122,15 @@ vec4 hdr_shaded_color(vec2 uv, sampler2D scolor, sampler2D sdepth, sampler2D sli
         // the sky
         vec3 skyVec = normalize(viewPos);
         vec3 worldSkyVec = skyVec * frx_normalModelMatrix();
+        float skyDotUp = dot(skyVec, v_up);
         bloom_out = 0.0;
 
-        if (frx_worldFlag(FRX_WORLD_IS_OVERWORLD)) {
+        if (frx_worldFlag(FRX_WORLD_IS_OVERWORLD) && v_not_in_void > 0.0) {
             float rainFactor = frx_rainGradient() * 0.67 + frx_thunderGradient() * 0.33;
             float cloud = 0.0;
             #ifdef CUSTOM_CLOUD_RENDERING
                 // cloud
                 // convert hemisphere to plane centered around cameraPos
-                float skyDotUp = max(0.0, dot(skyVec, v_up));
                 vec2 cloudPlane = worldSkyVec.xz / (0.1 + worldSkyVec.y) * 100.0
                     + frx_cameraPos().xz + vec2(4.0) * frx_renderSeconds();//(frx_worldDay() + frx_worldTime());
                 vec2 rotatedCloudPlane = (v_cloud_rotator * vec4(cloudPlane.x, 0.0, cloudPlane.y, 0.0)).xz;
@@ -150,7 +153,8 @@ vec4 hdr_shaded_color(vec2 uv, sampler2D scolor, sampler2D sdepth, sampler2D sli
             #endif
 
             // stars
-            float starry = l2_clampScale(0.4, 0.0, frx_luminance(a.rgb));
+            float starry = l2_clampScale(0.4, 0.0, frx_luminance(a.rgb)) * v_night;
+            starry *= l2_clampScale(-0.6, -0.5, skyDotUp); //prevent star near the void core
             float occlusion = (1.0 - rainFactor) * (1.0 - cloud);
             vec4 starVec = v_star_rotator * vec4(worldSkyVec, 0.0);
             vec3 nonMilkyAxis = vec3(-0.598964, 0.531492, 0.598964);
@@ -163,6 +167,15 @@ vec4 hdr_shaded_color(vec2 uv, sampler2D scolor, sampler2D sdepth, sampler2D sli
             vec3 starRadiance = vec3(star) + vec3(0.9, 0.75, 1.0) * milkyHaze;
             a.rgb += starRadiance;
             bloom_out += (star + milkyHaze);
+        }
+
+        //prevent sky in the void for extra immersion
+        if (frx_worldFlag(FRX_WORLD_IS_OVERWORLD)) {
+            // VOID CORE
+            float voidCore = l2_clampScale(-0.8 + v_near_void_core, -1.0 + v_near_void_core, skyDotUp); 
+            vec3 voidColor = mix(vec3(0.0), VOID_CORE_COLOR, voidCore);
+            bloom_out = voidCore;
+            a.rgb = mix(voidColor, a.rgb, v_not_in_void);
         }
 
         bloom_out += l2_skyBloom();

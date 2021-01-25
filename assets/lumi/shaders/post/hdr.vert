@@ -12,6 +12,9 @@
 varying mat4 v_star_rotator;
 varying mat4 v_cloud_rotator;
 varying float v_fov;
+varying float v_night;
+varying float v_not_in_void;
+varying float v_near_void_core;
 
 attribute vec2 in_uv;
 
@@ -20,6 +23,9 @@ void main()
     v_star_rotator = l2_rotationMatrix(vec3(1.0, 0.0, 1.0), frx_worldTime() * PI);
     v_cloud_rotator = l2_rotationMatrix(vec3(0.0, 1.0, 0.0), PI * 0.25);
     v_fov = 2.0 * atan(1.0/frx_projectionMatrix()[1][1]) * 180.0 / PI;
+    v_night = min(smoothstep(0.50, 0.54, frx_worldTime()), smoothstep(1.0, 0.96, frx_worldTime()));
+    v_not_in_void = l2_clampScale(1.0, 10.0, frx_cameraPos().y);
+    v_near_void_core = l2_clampScale(10.0, -90.0, frx_cameraPos().y) * 1.8;
 
     vec4 screen = gl_ProjectionMatrix * vec4(gl_Vertex.xy * frxu_size, 0.0, 1.0);
     gl_Position = vec4(screen.xy, 0.2, 1.0);

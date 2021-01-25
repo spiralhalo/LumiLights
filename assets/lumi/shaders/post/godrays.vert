@@ -28,9 +28,16 @@ void main()
     float dimensionFactor = frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? 1.0 : 0.0;
     float blindnessFactor = frx_playerHasEffect(FRX_EFFECT_BLINDNESS) ? 0.0 : 1.0;
     float cameraViewFactor = frx_smootherstep(0.0, 0.1, dot(frx_skyLightVector(), frx_cameraView()));
+    float notInVoidFactor = l2_clampScale(1.0, 10.0, frx_cameraPos().y);
+    v_godray_intensity = cameraViewFactor
+        * frx_skyLightTransitionFactor()
+        * moonFactor
+        * dimensionFactor
+        * blindnessFactor
+        * notInVoidFactor;
+    
     vec4 skylight_clip = frx_projectionMatrix() * vec4(frx_normalModelMatrix() * frx_skyLightVector() * 1000, 1.0);
     v_skylightpos = (skylight_clip.xy / skylight_clip.w) * 0.5 + 0.5;
-    v_godray_intensity = cameraViewFactor * frx_skyLightTransitionFactor() * moonFactor * dimensionFactor * blindnessFactor;
     v_aspect_adjuster = float(frxu_size.x)/float(frxu_size.y);
     v_godray_color = frx_worldFlag(FRX_WORLD_IS_MOONLIT) ? vec3(0.5) : ldr_sunColor(frx_worldTime());
 }
