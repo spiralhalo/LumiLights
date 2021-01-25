@@ -108,7 +108,7 @@ void main()
         vec2 diff = abs(v_texcoord - v_skylightpos);
         diff.x *= v_aspect_adjuster;
         float rainFactor = 1.0 - frx_rainGradient();
-        float godlightfactor = frx_smootherstep(0.6, 0.0, length(diff)) * v_godray_intensity * rainFactor;
+        float godlightfactor = frx_smootherstep(frx_worldFlag(FRX_WORLD_IS_MOONLIT) ? 0.3 : 0.6, 0.0, length(diff)) * v_godray_intensity * rainFactor;
         float godhack = depth_solid == 1.0 ? 0.5 : 1.0;
         if (godlightfactor > 0.0) {
             vec3 godlight = v_godray_color * godrays(1.0, 0.8, 0.99, 0.016, 50, u_solid_depth, u_clouds_depth, v_skylightpos, v_texcoord);
