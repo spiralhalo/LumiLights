@@ -28,7 +28,7 @@ void main()
     float dimensionFactor = frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? 1.0 : 0.0;
     float blindnessFactor = frx_playerHasEffect(FRX_EFFECT_BLINDNESS) ? 0.0 : 1.0;
     float cameraViewFactor = frx_smootherstep(0.0, 0.1, dot(frx_skyLightVector(), frx_cameraView()));
-    float notInVoidFactor = l2_clampScale(1.0, 10.0, frx_cameraPos().y);
+    float notInVoidFactor = l2_clampScale(-1.0, 0.0, frx_cameraPos().y);
     v_godray_intensity = cameraViewFactor
         * frx_skyLightTransitionFactor()
         * moonFactor
