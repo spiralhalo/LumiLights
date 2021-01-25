@@ -2,6 +2,7 @@
 #include frex:shaders/api/vertex.glsl
 #include frex:shaders/api/sampler.glsl
 #include lumi:shaders/context/global/lightsource.glsl
+#include lumi:shaders/context/global/experimental.glsl
 #include lumi:shaders/context/forward/common.glsl
 #include lumi:shaders/forward/varying.glsl
 
@@ -30,6 +31,11 @@ void frx_writePipelineVertex(inout frx_VertexData data) {
 		vec4 viewCoord = gl_ModelViewMatrix * data.vertex;
 		gl_ClipVertex = viewCoord;
 		gl_FogFragCoord = length(viewCoord.xyz);
+		#ifdef ENCHANTMENT_GLINT_FIX
+		if (frx_isGui()) {
+			viewCoord.z -= 0.00006103516; //"fix" enchantment glint on flat item but may break glint on 3d item
+		}
+		#endif
 		gl_Position = gl_ProjectionMatrix * viewCoord;
     	l2_viewpos = viewCoord.xyz;
 	} else {
