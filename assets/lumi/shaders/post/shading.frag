@@ -39,6 +39,8 @@ uniform sampler2D u_light_translucent;
 uniform sampler2D u_normal_translucent;
 uniform sampler2D u_material_translucent;
 
+uniform sampler2D u_emissive_particles;
+
 uniform sampler2D u_ao;
 
 varying mat4 v_star_rotator;
@@ -221,12 +223,13 @@ void main()
 {
     float bloom1;
     float bloom2;
+    float bloom3 = texture2D(u_emissive_particles, v_texcoord).z;
     float ssao = texture2D(u_ao, v_texcoord).r;
     vec4 a1 = hdr_shaded_color(v_texcoord, u_solid_color, u_solid_depth, u_light_solid, u_normal_solid, u_material_solid, ssao, false, bloom1);
     vec4 a2 = hdr_shaded_color(v_texcoord, u_translucent_color, u_translucent_depth, u_light_translucent, u_normal_translucent, u_material_translucent, 1.0, true, bloom2);
     gl_FragData[0] = a1;
     gl_FragData[1] = a2;
-    gl_FragData[2] = vec4(bloom1 + bloom2, 0.0, 0.0, 1.0);
+    gl_FragData[2] = vec4(bloom1 + bloom2 + bloom3, 0.0, 0.0, 1.0);
 }
 
 

@@ -41,6 +41,7 @@
                 samplerImages: [
                     "solid_main", "solid_depth", "light_solid", "normal_solid", "material_solid",
                     "translucent_main", "translucent_depth", "light_translucent", "normal_translucent", "material_translucent",
+                    "emissive_particles",
                     "ao_filtered"]
             }, {
                 name: "kaleidoskop",
@@ -70,6 +71,7 @@
                 samplerImages: [
                     "solid_combine", "solid_depth",
                     "translucent_combine", "translucent_depth",
+                    "particles", "particles_depth",
                     "clouds", "clouds_depth",
                     "weather", "weather_depth"]
             }

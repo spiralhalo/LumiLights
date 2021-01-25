@@ -17,6 +17,8 @@ uniform sampler2D u_combine_solid;
 uniform sampler2D u_solid_depth;
 uniform sampler2D u_combine_translucent;
 uniform sampler2D u_translucent_depth;
+uniform sampler2D u_particles;
+uniform sampler2D u_particles_depth;
 uniform sampler2D u_clouds;
 uniform sampler2D u_clouds_depth;
 uniform sampler2D u_weather;
@@ -77,6 +79,9 @@ void main()
     vec4 translucent = texture2D(u_combine_translucent, v_texcoord);
     translucent.rgb = ldr_tonemap3(translucent.rgb * brightnessMult);
 
+    float depth_particles = texture2D(u_particles_depth, v_texcoord).r;
+    vec4 particles = texture2D(u_particles, v_texcoord);
+
     #ifdef CUSTOM_CLOUD_RENDERING
         float depth_clouds = 1.0;
         vec4 clouds = vec4(0.0);
@@ -95,6 +100,7 @@ void main()
     active_layers = 1;
 
     try_insert(translucent, depth_translucent);
+    try_insert(particles, depth_particles);
     try_insert(clouds, depth_clouds);
     try_insert(weather, depth_weather);
     

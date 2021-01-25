@@ -6,7 +6,7 @@
 		weather: "weather",
 		clouds: "clouds",
 		// TODO: segregate solid particles
-		translucentParticles: "solid"
+		translucentParticles: "particles"
 	},
 // When present, will force Minecraft to operate as if "fabulous" mode was selected.
 // Normally this means translucent geometry will be drawn to different framebuffers
@@ -36,7 +36,7 @@
 // The values here must be valid framebuffer names from the framebuffers block.
     fabulousTargets: {
         entity: "fab_translucent",
-        particles: "default",
+        particles: "fab_particles",
         weather: "fab_weather",
         clouds: "fab_clouds",
         translucent: "fab_translucent"
@@ -64,6 +64,9 @@
                 "u_light_translucent",
                 "u_normal_translucent",
                 "u_material_translucent",
+
+                "u_emissive_particles",
+
                 "u_ao"
             ]
         }, {
@@ -94,6 +97,7 @@
             samplers: [
                 "u_combine_solid", "u_solid_depth",
                 "u_combine_translucent", "u_translucent_depth",
+                "u_particles", "u_particles_depth",
                 "u_clouds", "u_clouds_depth",
                 "u_weather", "u_weather_depth",
             ]
@@ -109,6 +113,10 @@
             }, {
                 name: "clear_translucent",
                 framebuffer: "translucent",
+                program: "frex_clear"
+            }, {
+                name: "clear_particles",
+                framebuffer: "particles",
                 program: "frex_clear"
             }, {
                 name: "clear_clouds",
@@ -239,6 +247,42 @@
                 {name: "TEXTURE_WRAP_S", val: "CLAMP"}, {name: "TEXTURE_WRAP_T", val: "CLAMP"}
             ]
         }, 
+        /* PARTICLES */
+        {
+            name: "particles",
+            lod: 0,
+            internalFormat: "RGBA8",
+            pixelFormat: "RGBA",
+            pixelDataType: "UNSIGNED_BYTE",
+            target: "TEXTURE_2D",
+            texParams: [
+                {name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
+                {name: "TEXTURE_WRAP_S", val: "CLAMP"}, {name: "TEXTURE_WRAP_T", val: "CLAMP"}
+            ]
+        }, {
+            name: "emissive_particles",
+            lod: 0,
+            internalFormat: "RGBA8",
+            pixelFormat: "RGBA",
+            pixelDataType: "UNSIGNED_BYTE",
+            target: "TEXTURE_2D",
+            texParams: [
+                {name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
+                {name: "TEXTURE_WRAP_S", val: "CLAMP"}, {name: "TEXTURE_WRAP_T", val: "CLAMP"}
+            ]
+        }, {
+            name: "particles_depth",
+            lod: 0,
+            internalFormat: "DEPTH_COMPONENT",
+            pixelFormat: "DEPTH_COMPONENT",
+            pixelDataType: "FLOAT",
+            target: "TEXTURE_2D",
+            texParams: [
+                {name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
+                {name: "TEXTURE_WRAP_S", val: "CLAMP"}, {name: "TEXTURE_WRAP_T", val: "CLAMP"}
+                {name: "TEXTURE_COMPARE_MODE", val: "NONE"}
+            ]
+        },
         /* CLOUDS */
         {
             name: "clouds",
@@ -364,6 +408,10 @@
                 depthAttachment: {image: "translucent_depth"},
                 colorAttachments: [{image: "translucent_main"}]
         }, {
+            name: "fab_particles",
+                depthAttachment: {image: "particles_depth"},
+                colorAttachments: [{image: "particles"}]
+        }, {
             name: "fab_clouds",
                 depthAttachment: {image: "clouds_depth"},
                 colorAttachments: [{image: "clouds"}]
@@ -392,6 +440,12 @@
                 {image: "normal_translucent"},
                 {image: "material_translucent"}
             ]
+        }, {
+            name: "particles",
+            depthAttachment: {image: "particles_depth", clearDepth: 1.0},
+            colorAttachments: [
+                {image: "particles", clearColor: 0x00000000},
+                {image: "emissive_particles", clearColor: 0x00000000}]
         }, {
             name: "clouds",
             depthAttachment: {image: "clouds_depth", clearDepth: 1.0},

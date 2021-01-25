@@ -63,7 +63,7 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
 			diffuse = fragData.diffuse ? diffuse : 1.0;
 			a.rgb *= diffuse;
 		} else {
-			float bloom_out = fragData.emissivity;
+			float bloom_out = fragData.emissivity * a.a;
 			vec3 normal = fragData.vertexNormal * frx_normalModelMatrix();
     		pbr_shading(a, bloom_out, l2_viewpos, fragData.light, normal, pbr_roughness, pbr_metallic, pbr_f0, fragData.diffuse, true);
 			a = ldr_tonemap(a);
@@ -119,7 +119,7 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
 		// PERF: view normal, more useful than world normal
         gl_FragDepth = gl_FragCoord.z;
         gl_FragData[0] = a;
-        gl_FragData[1] = vec4(light.x, light.y, normalizedBloom, 1.0);
+        gl_FragData[1] = vec4(light.x, light.y, (frx_renderTarget() == TARGET_PARTICLES) ? bloom : normalizedBloom, 1.0);
         gl_FragData[2] = vec4(normalizedNormal, 1.0);
         gl_FragData[3] = vec4(roughness, pbr_metallic, pbr_f0, 1.0);
     }
