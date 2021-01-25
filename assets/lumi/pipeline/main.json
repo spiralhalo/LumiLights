@@ -65,7 +65,9 @@
                 "u_normal_translucent",
                 "u_material_translucent",
 
-                "u_emissive_particles",
+                "u_particles_color",
+                "u_particles_depth",
+                "u_light_particles",
 
                 "u_ao"
             ]
@@ -260,7 +262,7 @@
                 {name: "TEXTURE_WRAP_S", val: "CLAMP"}, {name: "TEXTURE_WRAP_T", val: "CLAMP"}
             ]
         }, {
-            name: "emissive_particles",
+            name: "light_particles",
             lod: 0,
             internalFormat: "RGBA8",
             pixelFormat: "RGBA",
@@ -345,10 +347,23 @@
                 {name: "TEXTURE_MIN_FILTER", val: "LINEAR"}, {name: "TEXTURE_MAG_FILTER", val: "LINEAR"},
                 {name: "TEXTURE_WRAP_S", val: "CLAMP"}, {name: "TEXTURE_WRAP_T", val: "CLAMP"}
             ]
-        }, 
+        },
         /* SHADING TRANSLUCENT */
         {
             name: "translucent_shaded",
+            lod: 0,
+            internalFormat: "RGBA16F",
+            pixelFormat: "RGBA",
+            pixelDataType: "FLOAT",
+            target: "TEXTURE_2D",
+            texParams: [
+                {name: "TEXTURE_MIN_FILTER", val: "LINEAR"}, {name: "TEXTURE_MAG_FILTER", val: "LINEAR"},
+                {name: "TEXTURE_WRAP_S", val: "CLAMP"}, {name: "TEXTURE_WRAP_T", val: "CLAMP"}
+            ]
+        },
+        /* SHADING PARTICLES */
+        {
+            name: "particles_final",
             lod: 0,
             internalFormat: "RGBA16F",
             pixelFormat: "RGBA",
@@ -445,7 +460,7 @@
             depthAttachment: {image: "particles_depth", clearDepth: 1.0},
             colorAttachments: [
                 {image: "particles", clearColor: 0x00000000},
-                {image: "emissive_particles", clearColor: 0x00000000}]
+                {image: "light_particles", clearColor: 0x00000000}]
         }, {
             name: "clouds",
             depthAttachment: {image: "clouds_depth", clearDepth: 1.0},
@@ -461,6 +476,7 @@
             colorAttachments: [
                 {image: "solid_shaded", clearColor: 0x00000000},
                 {image: "translucent_shaded", clearColor: 0x00000000},
+                {image: "particles_final", clearColor: 0x00000000}
                 {image: "emissive", clearColor: 0x00000000},
             ]
         }, {
