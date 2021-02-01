@@ -31,7 +31,7 @@ vec4 hdr_combine(sampler2D a, sampler2D b, sampler2D sdepth, vec2 uv, bool enabl
     if (enableBlur) {
         float depth = texture2D(sdepth, uv).r;
         vec2 variable_blur = vec2(roughness) * (1.0 - ldepth(depth));
-        b1 = tile_denoise_depth(uv, b, sdepth, 1.0/frxu_size, 4);
+        b1 = tile_denoise_depth(uv, b, sdepth, 1.0/frxu_size, int(8*roughness));
     } else {
         b1 = texture2D(b, uv);
     }
