@@ -68,6 +68,19 @@ vec2 coords_uv(vec3 view, mat4 projection)
 	return clip.xy * 0.5 + 0.5;
 }
 
+float raymarched_fog_density(vec3 viewPos, vec3 worldPos, float fogFar)
+{
+    vec3 unitMarch = normalize(-viewPos);
+    vec3 ray_view = viewPos;
+    float distToCamera = distance(worldPos, frx_cameraPos());
+    int stepCount = 0;
+    while (ray_view.z < 0 && stepCount < 128) {
+        stepCount ++;
+        ray_view += unitMarch;
+    }
+    return float(stepCount) / fogFar;
+}
+
 vec4 fog (float skylightFactor, vec4 a, vec3 viewPos, vec3 worldPos, inout float bloom)
 {
     float zigZagTime = abs(frx_worldTime()-0.5);
@@ -85,7 +98,11 @@ vec4 fog (float skylightFactor, vec4 a, vec3 viewPos, vec3 worldPos, inout float
     float heightFactor = l2_clampScale(FOG_TOP /*+ fog_noise*/, FOG_BOTTOM, worldPos.y);
     heightFactor = frx_playerFlag(FRX_PLAYER_EYE_IN_FLUID) ? 1.0 : heightFactor;
 
+    #if defined(VOLUMETRIC_FOG)
+    float fogFactor = fogDensity * heightFactor;
+    #else
     float fogFactor = fogDensity * heightFactor * skylightFactor;
+    #endif
 
     if (frx_playerHasEffect(FRX_EFFECT_BLINDNESS)) {
         float blindnessModifier = l2_clampScale(0.5, 1.0, 1.0 - frx_luminance(v_skycolor));
@@ -102,8 +119,13 @@ vec4 fog (float skylightFactor, vec4 a, vec3 viewPos, vec3 worldPos, inout float
 
     // TODO: retrieve fog distance from render distance ?
     // PERF: use projection z (linear depth) instead of length(viewPos)
+
+    #if defined(VOLUMETRIC_FOG)
+    float distFactor = raymarched_fog_density(viewPos, worldPos, fogFar);
+    #else
     float distFactor = l2_clampScale(fogNear, fogFar, length(viewPos));
     distFactor *= distFactor;
+    #endif
 
     fogFactor = clamp(fogFactor * distFactor, 0.0, 1.0);
     

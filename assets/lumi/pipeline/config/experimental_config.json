@@ -22,6 +22,11 @@
                     nameKey: "config.lumi_lights.value.high_contrast",
                     descriptionKey: "config.lumi_lights.help.high_contrast"
                 },
+                volumetric_fog: {
+                    default: false,
+                    nameKey: "config.lumi_lights.value.volumetric_fog",
+                    descriptionKey: "config.lumi_lights.help.volumetric_fog"
+                },
                 enchantment_glint_fix: {
                     default: false,
                     nameKey: "config.lumi_lights.value.enchantment_glint_fix",
