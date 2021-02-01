@@ -1,7 +1,7 @@
 #include lumi:shaders/context/post/header.glsl
 #include lumi:shaders/lib/tonemap.glsl
 #include lumi:shaders/lib/util.glsl
-#include lumi:shaders/lib/fast_gaussian_blur.glsl
+#include lumi:shaders/lib/tile_noise.glsl
 #include lumi:shaders/context/post/reflection.glsl
 
 /*******************************************************
@@ -31,7 +31,7 @@ vec4 hdr_combine(sampler2D a, sampler2D b, sampler2D sdepth, vec2 uv, bool enabl
     if (enableBlur) {
         float depth = texture2D(sdepth, uv).r;
         vec2 variable_blur = vec2(roughness) * (1.0 - ldepth(depth));
-        b1 = blur13withDepthSameAlpha(b, sdepth, blurDepthThreshold, uv, frxu_size, variable_blur);
+        b1 = tile_denoise_depth(uv, b, sdepth, 1.0/frxu_size, 4);
     } else {
         b1 = texture2D(b, uv);
     }
