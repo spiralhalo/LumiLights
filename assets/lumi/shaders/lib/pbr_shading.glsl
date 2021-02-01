@@ -51,7 +51,7 @@ struct light_data{
     float roughness;
     float metallic;
     vec3 f0;
-    vec2 light;
+    vec3 light;
     vec3 normal;
     vec3 viewDir;
     vec3 viewPos;
@@ -89,12 +89,12 @@ vec3 hdr_calcSkyLight(inout light_data data)
         float weatherFactor = min(mix(1.0, SKY_LIGHT_RAINING_MULT, frx_rainGradient()), mix(1.0, SKY_LIGHT_THUNDERING_MULT, frx_thunderGradient()));
         vec3 skyLightRadiance;
         if (!frx_worldFlag(FRX_WORLD_IS_MOONLIT)) {
-            skyLightRadiance = l2_sunRadiance(data.light.y, frx_worldTime(), weatherFactor * frx_skyLightTransitionFactor(), frx_rainGradient());
+            skyLightRadiance = l2_sunRadiance(data.light.z, frx_worldTime(), weatherFactor * frx_skyLightTransitionFactor(), frx_rainGradient());
         } else {
             #ifdef TRUE_DARKNESS_MOONLIGHT
                 return vec3(0.0);
             #endif
-            skyLightRadiance = l2_moonRadiance(data.light.y, frx_worldTime(), weatherFactor * frx_skyLightTransitionFactor());
+            skyLightRadiance = l2_moonRadiance(data.light.z, frx_worldTime(), weatherFactor * frx_skyLightTransitionFactor());
         }
         return pbr_lightCalc(data.albedo, data.roughness, data.metallic, data.f0, skyLightRadiance, frx_skyLightVector(), data.viewDir, data.normal, data.diffuse, data.specularAccu);
     } else {
@@ -109,7 +109,7 @@ vec3 hdr_calcSkyLight(inout light_data data)
     }
 }
 
-void pbr_shading(inout vec4 a, inout float bloom, vec3 viewPos, vec2 light, vec3 normal, float roughness, float metallic, float pbr_f0, bool isDiffuse, bool translucent)
+void pbr_shading(inout vec4 a, inout float bloom, vec3 viewPos, vec3 light, vec3 normal, float roughness, float metallic, float pbr_f0, bool isDiffuse, bool translucent)
 {
     vec3 albedo = hdr_gammaAdjust(a.rgb);
     light_data data = light_data(

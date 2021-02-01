@@ -5,6 +5,7 @@
 #include frex:shaders/api/view.glsl
 #include frex:shaders/lib/math.glsl
 #include lumi:shaders/context/forward/common.glsl
+#include lumi:shaders/context/global/experimental.glsl
 #include lumi:shaders/api/param_frag.glsl
 #include lumi:shaders/lib/util.glsl
 #include lumi:shaders/lib/tonemap.glsl
@@ -65,7 +66,8 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
 		} else {
 			float bloom_out = fragData.emissivity * a.a;
 			vec3 normal = fragData.vertexNormal * frx_normalModelMatrix();
-    		pbr_shading(a, bloom_out, l2_viewpos, fragData.light, normal, pbr_roughness, pbr_metallic, pbr_f0, fragData.diffuse, true);
+			//TODO: apply shadowmap perhaps
+    		pbr_shading(a, bloom_out, l2_viewpos, fragData.light.xyy, normal, pbr_roughness, pbr_metallic, pbr_f0, fragData.diffuse, true);
 			a = ldr_tonemap(a);
         	gl_FragData[4] = vec4(bloom_out, 0.0, 0.0, 1.0);
 		}
@@ -74,7 +76,7 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
     } else {
 		vec2 light = fragData.light.xy;
 
-		#ifdef SHADOW_MAP_PRESENT
+		#if defined(SHADOW_MAP_PRESENT) && !defined(DEFERRED_SHADOW)
 			vec3 shadowCoords = pv_shadowpos.xyz / pv_shadowpos.w;
 			// Transform from screen coordinates to texture coordinates
 			shadowCoords = shadowCoords * 0.5 + 0.5;

@@ -56,16 +56,16 @@ const vec3 VOID_CORE_COLOR = hdr_gammaAdjust(vec3(1.0, 0.7, 0.5));
 
 vec3 coords_view(vec2 uv, mat4 inv_projection, float depth)
 {
-	vec3 clip = vec3(2.0 * uv - 1.0, 2.0 * depth - 1.0);
-	vec4 view = inv_projection * vec4(clip, 1.0);
-	return view.xyz / view.w;
+    vec3 clip = vec3(2.0 * uv - 1.0, 2.0 * depth - 1.0);
+    vec4 view = inv_projection * vec4(clip, 1.0);
+    return view.xyz / view.w;
 }
 
 vec2 coords_uv(vec3 view, mat4 projection)
 {
-	vec4 clip = projection * vec4(view, 1.0);
-	clip.xyz /= clip.w;
-	return clip.xy * 0.5 + 0.5;
+    vec4 clip = projection * vec4(view, 1.0);
+    clip.xyz /= clip.w;
+    return clip.xy * 0.5 + 0.5;
 }
 
 float raymarched_fog_density(vec3 viewPos, vec3 worldPos, float fogFar)
@@ -230,8 +230,20 @@ vec4 hdr_shaded_color(vec2 uv, sampler2D scolor, sampler2D sdepth, sampler2D sli
     bool  mathurt   = f0 > 0.85 && !matflash;
     // return vec4(coords_view(uv, frx_inverseProjectionMatrix(), depth), 1.0);
 
+    #if defined(SHADOW_MAP_PRESENT) && defined(DEFERRED_SHADOW)
+        vec4 shadowCoords = frx_shadowViewProjectionMatrix() * vec4(worldPos, 1.0);
+        shadowCoords.xyz /= shadowCoords.w;
+        shadowCoords.xyz = shadowCoords.xyz * 0.5 + 0.5;
+        float bias = 0.0;
+        float shadowDepth = texture2DArray(frxs_shadowMap, vec3(shadowCoords.xy, 0)).r; 
+        float shadowFactor = (shadowDepth + bias < shadowCoords.z) ? 1.0 : 0.0;      
+        light.z = 1.0 - shadowFactor;
+    #else
+        light.z = light.y;
+    #endif
+
     bloom_out = max(0.0, bloom_raw);
-    pbr_shading(a, bloom_out, viewPos, light.xy, normal, roughness, metallic, f0 > 0.7 ? 0.0 : material.z, diffuse, translucent);
+    pbr_shading(a, bloom_out, viewPos, light.xyz, normal, roughness, metallic, f0 > 0.7 ? 0.0 : material.z, diffuse, translucent);
 
 
 #if AMBIENT_OCCLUSION != AMBIENT_OCCLUSION_NONE
@@ -259,7 +271,7 @@ vec4 ldr_shaded_particle(vec2 uv, sampler2D scolor, sampler2D sdepth, sampler2D 
     vec3  worldPos  = frx_cameraPos() + (frx_inverseViewMatrix() * vec4(viewPos, 1.0)).xyz;
 
     bloom_out = light.z;
-    pbr_shading(a, bloom_out, viewPos, light.xy, normal, 1.0, 0.0, 0.0, false, false);
+    pbr_shading(a, bloom_out, viewPos, light.xyy, normal, 1.0, 0.0, 0.0, false, false);
 
     a.a = min(1.0, a.a);
 

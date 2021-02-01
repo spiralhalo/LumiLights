@@ -27,6 +27,11 @@
                     nameKey: "config.lumi_lights.value.volumetric_fog",
                     descriptionKey: "config.lumi_lights.help.volumetric_fog"
                 },
+                deferred_shadow: {
+                    default: false,
+                    nameKey: "config.lumi_lights.value.deferred_shadow",
+                    descriptionKey: "config.lumi_lights.help.deferred_shadow"
+                },
                 enchantment_glint_fix: {
                     default: false,
                     nameKey: "config.lumi_lights.value.enchantment_glint_fix",

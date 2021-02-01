@@ -47,7 +47,7 @@ void frx_writePipelineVertex(inout frx_VertexData data) {
     	l2_viewpos = viewCoord.xyz;
 	}
 
-#ifdef SHADOW_MAP_PRESENT
+#if defined(SHADOW_MAP_PRESENT) && !defined(DEFERRED_SHADOW)
 	pv_shadowpos = frx_shadowViewProjectionMatrix() * data.vertex;
 #endif
 

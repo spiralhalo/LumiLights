@@ -1,3 +1,5 @@
+#include lumi:shaders/context/global/experimental.glsl
+
 /***********************************************************
  *  lumi:shaders/forward/varying.glsl                     *
  ***********************************************************/
@@ -7,6 +9,6 @@ varying vec2 pv_lightcoord;
 varying float pv_ao;
 varying float pv_diffuse;
 
-#ifdef SHADOW_MAP_PRESENT
+#if defined(SHADOW_MAP_PRESENT) && !defined(DEFERRED_SHADOW)
 varying vec4 pv_shadowpos;
 #endif
