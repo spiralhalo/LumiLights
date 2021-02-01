@@ -2,6 +2,7 @@
 #include lumi:shaders/post/reflection_common.glsl
 #include lumi:shaders/context/post/reflection.glsl
 #include lumi:shaders/context/global/lighting.glsl
+#include lumi:shaders/lib/tile_noise.glsl
 
 /*******************************************************
  *  lumi:shaders/post/reflection.frag         *
@@ -58,7 +59,7 @@ rt_color_depth work_on_pair(
         float gloss    = 1.0 - roughness;
         vec3 ray_view  = coords_view(v_texcoord, frx_inverseProjectionMatrix(), reflector_depth);
         vec3 ray_world = coords_world(ray_view, frx_inverseViewMatrix());
-        vec3 jitter    = 2.0 * vec3(frx_noise2d(ray_world.yz), frx_noise2d(ray_world.zx), frx_noise2d(ray_world.xy)) - 1.0;
+        vec3 jitter    = 2.0 * tile_noise_3d(v_texcoord, frxu_size, 5) - 1.0;
         vec3 normal    = frx_normalModelMatrix() * normalize(worldNormal);
         float roughness2 = roughness * roughness;
         // if (ray_view.y < normal.y) return noreturn;
