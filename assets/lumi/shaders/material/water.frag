@@ -24,12 +24,12 @@ void frx_startFragment(inout frx_FragmentData fragData) {
 	#endif
 	
 	/* WATER RECOLOR */
-	vec3 desat = vec3(frx_luminance(fragData.vertexColor.rgb));
+	// vec3 desat = vec3(frx_luminance(fragData.vertexColor.rgb));
 	#ifdef LUMI_NoWaterTexture
-		fragData.vertexColor.rgb = mix(fragData.vertexColor.rgb, desat, 0.3);
+		// fragData.vertexColor.rgb = mix(fragData.vertexColor.rgb, desat, 0.3);
 		fragData.spriteColor.rgb = vec3(0.4);
 	#else
-		fragData.vertexColor.rgb = mix(fragData.vertexColor.rgb, desat, 0.6);
+		// fragData.vertexColor.rgb = mix(fragData.vertexColor.rgb, desat, 0.6);
 		fragData.spriteColor.rgb *= fragData.spriteColor.rgb;
 	#endif
 	
@@ -41,5 +41,6 @@ void frx_startFragment(inout frx_FragmentData fragData) {
 	vec3 moveSpeed = frx_var1.xyz * waveSpeed;
 	vec3 up = fragData.vertexNormal.xyz;
 	vec3 samplePos = frx_var0.xyz;
-	fragData.vertexNormal = ww_normals(up, l2_tangent, cross(up, l2_tangent), samplePos, waveSpeed, scale, amplitude, stretch, moveSpeed);
+	vec3 noisyNormal = ww_normals(up, l2_tangent, cross(up, l2_tangent), samplePos, waveSpeed, scale, amplitude, stretch, moveSpeed);
+	fragData.vertexNormal = mix(noisyNormal, fragData.vertexNormal, pow(gl_FragCoord.z, 500.0));
 }

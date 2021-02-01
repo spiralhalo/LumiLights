@@ -9,8 +9,14 @@
 
 float ww_noise(vec3 pos, vec3 move, float invScale, float amplitude, float stretch)
 {
-	vec3 noisePos = vec3(pos.x * invScale * stretch, pos.y * invScale, pos.z * invScale) + move;
-    return (snoise(noisePos) * 0.5 + 0.5) * amplitude;
+	vec3 hh = vec3(pos.x * invScale * stretch, pos.y * invScale, pos.z * invScale);
+	vec3 pp1 = hh + move;
+	vec3 pp2 = hh * 5.0 + move;
+	// vec3 pp3 = hh * 10.0 + move;
+	float xx1 = (snoise(pp1) * 0.5 + 0.5) * 0.9;
+	float xx2 = (snoise(pp2) * 0.5 + 0.5) * 0.1;
+	// float xx3 = (snoise(pp3) * 0.5 + 0.5) * 0.05;
+    return (xx1 + xx2) * amplitude;
 }
 
 vec3 ww_normals(vec3 up, vec3 tgt, vec3 btgt, vec3 samplePos, float waveSpeed, float scale, float amplitude, float stretch, vec3 moveSpeed)
