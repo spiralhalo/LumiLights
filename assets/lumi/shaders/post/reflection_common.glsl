@@ -57,13 +57,12 @@ struct rt_Result
     int hits;
 };
 
-vec3 pbr_lightCalc(float roughness, vec3 f0, vec3 radiance, vec3 lightDir, vec3 viewDir, vec3 normal)
+vec3 pbr_lightCalc(float roughness, vec3 f0, vec3 radiance, vec3 lightDir, vec3 viewDir)
 {
 	vec3 halfway = normalize(viewDir + lightDir);
 	vec3 fresnel = pbr_fresnelSchlick(pbr_dot(viewDir, halfway), f0);
-	float NdotL = pbr_dot(normal, lightDir);
 
-	return pbr_specularBRDF(roughness, radiance, halfway, lightDir, viewDir, normal, fresnel, NdotL);
+    return fresnel * radiance * (1-roughness);
 }
 
 rt_Result rt_reflection(

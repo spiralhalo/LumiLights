@@ -88,8 +88,7 @@ rt_color_depth work_on_pair(
             vec3 reflectedNormal = coords_normal(result.reflected_uv, reflected_normal);
             reflected = mix(reflectedShaded, reflectedCombine, l2_clampScale(0.5, 1.0, -dot(worldNormal, reflectedNormal)));
         }
-        // mysterious roughness hax
-        vec4 pbr_color = vec4(pbr_lightCalc(0.4 + roughness * 0.6, f0, reflected.rgb * base_color.a * gloss, unit_march, unit_view, worldNormal), reflected.a);
+        vec4 pbr_color = vec4(pbr_lightCalc(roughness, f0, reflected.rgb * base_color.a, unit_march, unit_view), reflected.a);
         return rt_color_depth(pbr_color, reflected_depth_value);
     } else return noreturn;
 }

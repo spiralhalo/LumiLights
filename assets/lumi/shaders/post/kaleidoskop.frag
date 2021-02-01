@@ -69,8 +69,7 @@ vec4 work_on_pair(
         } else {
             reflected = texture2D(reflected_color, result.reflected_uv);
         }
-        // mysterious roughness hax
-        return vec4(pbr_lightCalc(0.4 + roughness * 0.6, f0, reflected.rgb * base_color.a * gloss, unit_march * frx_normalModelMatrix(), unit_view * frx_normalModelMatrix(), worldNormal), reflected.a);
+        return vec4(pbr_lightCalc(roughness, f0, reflected.rgb * base_color.a, unit_march * frx_normalModelMatrix(), unit_view * frx_normalModelMatrix()), reflected.a);
     } else return noreturn;
 }
 
