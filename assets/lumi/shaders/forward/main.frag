@@ -83,12 +83,12 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
 			float shadowFactor = 0.0;
 
 			// For some reason, looking down causes stripes to appear. This fixes that.
-			float bias = mix(0, 0.0005, l2_clampScale(0.8, 1.0, dot(frx_cameraView(), vec3(0.0, -1.0, 0.0))));
+			float bias = 0.0005;//mix(0, 0.0005, l2_clampScale(0.8, 1.0, dot(frx_cameraView(), vec3(0.0, -1.0, 0.0))));
 
 			// Remove flicker, only necessary when the sky light vector is perfectly axis-aligned (such as vanilla)
 			float gate = 0.9 * l2_clampScale(0.1, 0.0, abs(dot(frx_normal /*use original normal to prevent normalmap bamboozle*/, frx_skyLightVector())));
 
-			const vec2 inc = vec2(0.5 / 16384.0);
+			const vec2 inc = vec2(1.0 / 16384.0);
 			float shadowDepth;
 			for(int row = -1; row <= 1; ++row)
 			{
@@ -100,10 +100,9 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
 			}
 			shadowFactor /= 9.0;
 			shadowFactor *= shadowFactor > gate ? 1.0 : 0.0;
-			// shadowFactor = mix(shadowFactor, 1.0, 1.0 - frx_skyLightTransitionFactor());
 
 			float directSkylight = 1.0 - shadowFactor * 0.2;
-			light.y = min(directSkylight, light.y);
+			light.y = directSkylight * frx_skyLightTransitionFactor() + (1 - frx_skyLightTransitionFactor()) * light.y;
 		#endif
 		
 		// hijack f0 for matHurt and matflash because hurting things are not reflective I guess
