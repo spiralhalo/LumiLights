@@ -65,7 +65,7 @@ struct light_data{
 vec3 hdr_calcBlockLight(inout light_data data, vec3 radiance)
 {
     if (data.diffuse) {
-        return pbr_lightCalc(data.albedo, data.roughness, data.metallic, data.f0, radiance, data.normal, data.viewDir, data.normal, true, data.specularAccu);
+        return pbr_lightCalc(data.albedo, max(data.roughness, 0.4), data.metallic, data.f0, radiance, data.normal, data.viewDir, data.normal, true, data.specularAccu);
     } else {
         return pbr_nonDirectional(data.albedo, data.metallic, radiance);
     }
