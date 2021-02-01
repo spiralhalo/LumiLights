@@ -62,6 +62,15 @@ struct light_data{
     vec3 specularAccu;
 };
 
+vec3 hdr_calcBlockLight(inout light_data data, vec3 radiance)
+{
+    if (data.diffuse) {
+        return pbr_lightCalc(data.albedo, data.roughness, data.metallic, data.f0, radiance, data.normal, data.viewDir, data.normal, true, data.specularAccu);
+    } else {
+        return pbr_nonDirectional(data.albedo, data.metallic, radiance);
+    }
+}
+
 vec3 hdr_calcHeldLight(inout light_data data)
 {
 #if HANDHELD_LIGHT_RADIUS != 0
@@ -152,7 +161,7 @@ void pbr_shading(in frx_FragmentData fragData, inout vec4 a, inout float bloom, 
     
     float ao = l2_ao(fragData);
     vec3 held_light = hdr_calcHeldLight(data);
-    vec3 block_light = pbr_nonDirectional(data.albedo, data.metallic, l2_blockRadiance(data.light.x));
+    vec3 block_light = hdr_calcBlockLight(data, l2_blockRadiance(data.light.x));
     vec3 base_ambient_light = pbr_nonDirectional(data.albedo, data.metallic, l2_baseAmbient());
     vec3 sky_ambient_light = hdr_calcSkyAmbientLight(data);
     vec3 sky_light = hdr_calcSkyLight(data);
