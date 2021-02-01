@@ -18,12 +18,14 @@ vec3 tile_noise_3d(vec2 uv, vec2 tex_size, int noise_size)
 }
 
 const float depth_threshold = 0.0001;
-vec4 tile_denoise_depth(vec2 uv, sampler2D scolor, sampler2D sdepth, vec2 inv_size, int noise_size)
+vec4 tile_denoise_depth_alpha(vec2 uv, sampler2D scolor, sampler2D sdepth, vec2 inv_size, int noise_size)
 {
     vec4 accum = vec4(0.0);
     float origin_depth = ldepth(texture2D(sdepth, uv).r);
+    float origin_a = texture2D(scolor, uv).a;
 
     float target_depth;
+    vec4 target_color;
     float delta_depth;
     vec2 target_uv;
 
@@ -32,9 +34,10 @@ vec4 tile_denoise_depth(vec2 uv, sampler2D scolor, sampler2D sdepth, vec2 inv_si
         for (int j = -noise_size; j <= noise_size; j++) {
             target_uv = uv + vec2(i, j) * inv_size;
             target_depth = ldepth(texture2D(sdepth, target_uv).r);
+            target_color = texture2D(scolor, target_uv);
             delta_depth = abs(target_depth - origin_depth);
-            if (delta_depth <= depth_threshold) {
-                accum += texture2D(scolor, target_uv);
+            if (delta_depth <= depth_threshold && origin_a == target_color.a) {
+                accum += target_color;
                 count ++;
             }
         }
