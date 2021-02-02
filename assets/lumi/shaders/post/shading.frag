@@ -259,7 +259,7 @@ vec4 hdr_shaded_color(
                 #if defined(SHADOW_MAP_PRESENT)
                     light.z = mix(light.z, 0.0, min(1.0, 0.25 * caustics(worldPos)));
                 #else
-                    light.z = mix(1.0, light.z, min(1.0, 2.0 * caustics(worldPos)));
+                    light.z = mix(1.0, light.z, min(1.0, 1.5 * caustics(worldPos)));
                 #endif
             }
         }
