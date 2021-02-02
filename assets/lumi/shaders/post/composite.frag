@@ -110,7 +110,7 @@ void main()
         c = blend(c, color_layers[i]);
     }
 
-    if (frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT)) {
+    if (frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) && v_godray_intensity > 0.0) {
         vec2 diff = abs(v_texcoord - v_skylightpos);
         diff.x *= v_aspect_adjuster;
         float rainFactor = 1.0 - frx_rainGradient();

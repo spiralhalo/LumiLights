@@ -35,6 +35,14 @@ void main()
         * dimensionFactor
         * blindnessFactor
         * notInVoidFactor;
+
+    if (frx_playerFlag(FRX_PLAYER_EYE_IN_FLUID)) {
+        #if CAUSTICS_MODE == CAUSTICS_MODE_TEXTURE
+            v_godray_intensity = 0.0;
+        #else
+            v_godray_intensity *= 0.5;
+        #endif
+    }
     
     vec4 skylight_clip = frx_projectionMatrix() * vec4(frx_normalModelMatrix() * frx_skyLightVector() * 1000, 1.0);
     v_skylightpos = (skylight_clip.xy / skylight_clip.w) * 0.5 + 0.5;
