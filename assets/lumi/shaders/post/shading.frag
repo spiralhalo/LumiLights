@@ -141,6 +141,37 @@ float caustics(vec3 worldPos)
     return 1.0 - abs(cellular2x2x2(vec3(worldPos.xz - worldPos.y * frx_skyLightVector().xz, frx_renderSeconds())).x);
 }
 
+float volumetric_caustics_beam(vec3 worldPos)
+{
+    // const float stepSize = 0.125;
+    // const float maxDist = 16.0;
+    const float stepSize = 0.25;
+    const float maxDist = 8.0;
+    const float stepLimit = maxDist / stepSize;
+    const int iStepLimit = int(stepLimit);
+
+    vec3 unitMarch = normalize(frx_cameraPos()-worldPos);
+    vec3 stepMarch = unitMarch * stepSize;
+    vec3 ray_world = worldPos;
+
+    float distToCamera = distance(worldPos, frx_cameraPos());
+    int maxSteps = min(iStepLimit, int(distToCamera / stepSize));
+
+    if (distToCamera >= maxDist) {
+        ray_world += unitMarch * (distToCamera - maxDist);
+    }
+
+    int stepCount = 0;
+    float power = 0.0;
+    while (stepCount < maxSteps) {
+        power += 1.0-1.5*caustics(ray_world);
+        stepCount ++;
+        ray_world += stepMarch;
+    }
+
+    return max(0.0, float(power) / stepLimit);
+}
+
 void custom_sky(in vec3 viewPos, in float blindnessFactor, inout vec4 a, inout float bloom_out)
 {
     vec3 skyVec = normalize(viewPos);
@@ -259,7 +290,7 @@ vec4 hdr_shaded_color(
                 #if defined(SHADOW_MAP_PRESENT)
                     light.z = mix(light.z, 0.0, min(1.0, 0.25 * caustics(worldPos)));
                 #else
-                    light.z = mix(1.0, light.z, min(1.0, 1.5 * caustics(worldPos)));
+                    light.z = mix(1.0, light.z, (1.0-light.z) * min(1.0, 1.5 * caustics(worldPos)));
                 #endif
             }
         }
@@ -280,7 +311,15 @@ vec4 hdr_shaded_color(
     a.a = min(1.0, a.a);
 
     // PERF: don't shade past max fog distance
-    return fog(frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? light.y * frx_ambientIntensity() : 1.0, a, viewPos, worldPos, bloom_out);
+    a = fog(frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? light.y * frx_ambientIntensity() : 1.0, a, viewPos, worldPos, bloom_out);
+
+    #if CAUSTICS_MODE == CAUSTICS_MODE_TEXTURE
+        if (frx_playerFlag(FRX_PLAYER_EYE_IN_FLUID) && translucentDepth >= depth) {
+            a.rgb += light.y * light.y * 0.1 * v_sky_radiance * volumetric_caustics_beam(worldPos);
+        }
+    #endif
+
+    return a;
 }
 
 vec4 ldr_shaded_particle(vec2 uv, sampler2D scolor, sampler2D sdepth, sampler2D slight, out float bloom_out)
