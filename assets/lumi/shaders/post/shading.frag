@@ -138,7 +138,10 @@ vec4 fog (float skylightFactor, vec4 a, vec3 viewPos, vec3 worldPos, inout float
 float caustics(vec3 worldPos)
 {
     if (!frx_worldFlag(FRX_WORLD_IS_OVERWORLD)) return 0.0;
-    return 1.0 - abs(cellular2x2x2(vec3(worldPos.xz - worldPos.y * frx_skyLightVector().xz, frx_renderSeconds())).x);
+    // turns out, to get accurate coords, a global y-coordinate of water surface is required :S
+    // 64 is used for the time being..
+    // TODO: might need to prevent division by 0 ?
+    return 1.0 - abs(cellular2x2x2(vec3(worldPos.xz + (64.0-worldPos.y) * frx_skyLightVector().xz / frx_skyLightVector().y, frx_renderSeconds())).x);
 }
 
 float volumetric_caustics_beam(vec3 worldPos)
@@ -164,6 +167,7 @@ float volumetric_caustics_beam(vec3 worldPos)
     int stepCount = 0;
     float power = 0.0;
     while (stepCount < maxSteps) {
+        // power += smoothstep(0.5, 0.0, caustics(ray_world));
         power += 1.0-1.5*caustics(ray_world);
         stepCount ++;
         ray_world += stepMarch;
