@@ -15,6 +15,7 @@ varying float v_fov;
 varying float v_night;
 varying float v_not_in_void;
 varying float v_near_void_core;
+varying vec3 v_sky_radiance;
 
 attribute vec2 in_uv;
 
@@ -26,6 +27,9 @@ void main()
     v_night = min(smoothstep(0.50, 0.54, frx_worldTime()), smoothstep(1.0, 0.96, frx_worldTime()));
     v_not_in_void = l2_clampScale(-1.0, 0.0, frx_cameraPos().y);
     v_near_void_core = l2_clampScale(10.0, -90.0, frx_cameraPos().y) * 1.8;
+    v_sky_radiance = frx_worldFlag(FRX_WORLD_IS_MOONLIT)
+        ? l2_moonRadiance(1.0, frx_worldTime(), frx_skyLightTransitionFactor())
+        : l2_sunRadiance(1.0, frx_worldTime(), frx_skyLightTransitionFactor(), frx_rainGradient());
 
     vec4 screen = gl_ProjectionMatrix * vec4(gl_Vertex.xy * frxu_size, 0.0, 1.0);
     gl_Position = vec4(screen.xy, 0.2, 1.0);

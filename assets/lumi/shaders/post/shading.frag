@@ -3,6 +3,7 @@
 #include frex:shaders/lib/math.glsl
 #include frex:shaders/lib/noise/noise2d.glsl
 #include frex:shaders/lib/noise/noise3d.glsl
+#include frex:shaders/lib/noise/cellular2x2x2.glsl
 #include frex:shaders/api/sampler.glsl
 #include frex:shaders/api/view.glsl
 #include frex:shaders/api/world.glsl
@@ -12,7 +13,6 @@
 #include lumi:shaders/lib/fog.glsl
 #include lumi:shaders/lib/tonemap.glsl
 #include lumi:shaders/lib/pbr_shading.glsl
-#include lumi:shaders/lib/ssao.glsl
 #include lumi:shaders/context/post/bloom.glsl
 #include lumi:shaders/context/post/fog.glsl
 #include lumi:shaders/context/global/lighting.glsl
@@ -51,6 +51,7 @@ varying float v_fov;
 varying float v_night;
 varying float v_not_in_void;
 varying float v_near_void_core;
+varying vec3 v_sky_radiance;
 
 const vec3 VOID_CORE_COLOR = hdr_gammaAdjust(vec3(1.0, 0.7, 0.5));
 
@@ -134,6 +135,12 @@ vec4 fog (float skylightFactor, vec4 a, vec3 viewPos, vec3 worldPos, inout float
     return mix(a, fogColor, fogFactor);
 }
 
+float caustics(vec3 worldPos)
+{
+    if (!frx_worldFlag(FRX_WORLD_IS_OVERWORLD)) return 0.0;
+    return 1.0 - abs(cellular2x2x2(vec3(worldPos.xz - worldPos.y * frx_skyLightVector().xz, frx_renderSeconds())).x);
+}
+
 void custom_sky(in vec3 viewPos, in float blindnessFactor, inout vec4 a, inout float bloom_out)
 {
     vec3 skyVec = normalize(viewPos);
@@ -205,7 +212,10 @@ const float RADIUS = 0.4;
 const float BIAS = 0.4;
 const float INTENSITY = 10.0;
 
-vec4 hdr_shaded_color(vec2 uv, sampler2D scolor, sampler2D sdepth, sampler2D slight, sampler2D snormal, sampler2D smaterial, float aoval, bool translucent, out float bloom_out)
+vec4 hdr_shaded_color(
+    vec2 uv,
+    sampler2D scolor, sampler2D sdepth, sampler2D slight, sampler2D snormal, sampler2D smaterial,
+    float aoval, bool translucent, float translucentDepth, out float bloom_out)
 {
     vec4 a = texture2DLod(scolor, uv, 0.0);
     float depth = texture2DLod(sdepth, uv, 0.0).r;
@@ -240,6 +250,19 @@ vec4 hdr_shaded_color(vec2 uv, sampler2D scolor, sampler2D sdepth, sampler2D sli
         light.z = 1.0 - shadowFactor;
     #else
         light.z = light.y;
+    #endif
+
+    #if CAUSTICS_MODE == CAUSTICS_MODE_TEXTURE
+        if (!translucent) {
+            if ((translucentDepth >= depth && frx_playerFlag(FRX_PLAYER_EYE_IN_FLUID))
+                || (translucentDepth < depth && !frx_playerFlag(FRX_PLAYER_EYE_IN_FLUID))) {
+                #if defined(SHADOW_MAP_PRESENT)
+                    light.z = mix(light.z, 0.0, min(1.0, 0.25 * caustics(worldPos)));
+                #else
+                    light.z = mix(1.0, light.z, min(1.0, 2.0 * caustics(worldPos)));
+                #endif
+            }
+        }
     #endif
 
     bloom_out = max(0.0, bloom_raw);
@@ -286,8 +309,9 @@ void main()
     float bloom2;
     float bloom3;
     float ssao = texture2D(u_ao, v_texcoord).r;
-    vec4 a1 = hdr_shaded_color(v_texcoord, u_solid_color, u_solid_depth, u_light_solid, u_normal_solid, u_material_solid, ssao, false, bloom1);
-    vec4 a2 = hdr_shaded_color(v_texcoord, u_translucent_color, u_translucent_depth, u_light_translucent, u_normal_translucent, u_material_translucent, 1.0, true, bloom2);
+    float translucentDepth = texture2D(u_translucent_depth, v_texcoord).r;
+    vec4 a1 = hdr_shaded_color(v_texcoord, u_solid_color, u_solid_depth, u_light_solid, u_normal_solid, u_material_solid, ssao, false, translucentDepth, bloom1);
+    vec4 a2 = hdr_shaded_color(v_texcoord, u_translucent_color, u_translucent_depth, u_light_translucent, u_normal_translucent, u_material_translucent, 1.0, true, 1.0, bloom2);
     vec4 a3 = ldr_shaded_particle(v_texcoord, u_particles_color, u_particles_depth, u_light_particles, bloom3);
     gl_FragData[0] = a1;
     gl_FragData[1] = a2;

@@ -193,6 +193,7 @@ vec3 l2_skyAmbientRadiance(float skyLight, float time, float intensity)
 
 vec3 l2_sunRadiance(float skyLight, in float time, float transitionFactor, float rainGradient)
 {
+    // todo: rainGradient should affect something or is it already done somewhere else ?
     float sl = l2_skyLight(skyLight, transitionFactor);
     // direct sun light doesn't reach into dark spot as much as sky ambient
     sl = frx_smootherstep(0.7, 0.97, sl);
