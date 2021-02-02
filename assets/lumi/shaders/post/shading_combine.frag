@@ -28,7 +28,7 @@ vec4 hdr_combine(sampler2D a, sampler2D b, sampler2D sdepth, vec2 uv, bool enabl
     float roughness = texture2D(b, uv).a;
     if (roughness == 0.0) return vec4(hdr_gammaAdjust(a1.rgb), a1.a); // unmanaged draw
     vec4 b1;
-    if (enableBlur) {
+    if (enableBlur && roughness <= REFLECTION_MAXIMUM_ROUGHNESS) {
         float depth = texture2D(sdepth, uv).r;
         vec2 variable_blur = vec2(roughness) * (1.0 - ldepth(depth));
         b1 = tile_denoise_depth_alpha(uv, b, sdepth, 1.0/frxu_size, int(8*roughness));
