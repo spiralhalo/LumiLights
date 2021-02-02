@@ -11,26 +11,26 @@
 #define NUM_SAMPLE_DIRECTIONS 5
 #define NUM_SAMPLE_STEPS      5
 
-#define coords_depth(uv, target) texture2DLod(target, uv, 0).r
+#define coords_depth(uv, target) texture2D(target, uv).r
 vec3 coords_world(vec2 uv, mat4 inv_view_projection, in sampler2D target)
 {
     float depth = coords_depth(uv, target);
-	vec3 clip = vec3(2.0 * uv - 1.0, 2.0 * depth - 1.0);
-	vec4 world = inv_view_projection * vec4(clip, 1.0);
-	return world.xyz / world.w;
+    vec3 clip = vec3(2.0 * uv - 1.0, 2.0 * depth - 1.0);
+    vec4 world = inv_view_projection * vec4(clip, 1.0);
+    return world.xyz / world.w;
 }
 
 vec3 coords_view(vec2 uv, mat4 inv_projection, in sampler2D target)
 {
     float depth = coords_depth(uv, target);
-	vec3 clip = vec3(2.0 * uv - 1.0, 2.0 * depth - 1.0);
-	vec4 view = inv_projection * vec4(clip, 1.0);
-	return view.xyz / view.w;
+    vec3 clip = vec3(2.0 * uv - 1.0, 2.0 * depth - 1.0);
+    vec4 view = inv_projection * vec4(clip, 1.0);
+    return view.xyz / view.w;
 }
 
 vec3 coords_normal(vec2 uv, mat3 normal_mat, in sampler2D target)
 {
-	return normal_mat * (2.0 * texture2DLod(target, uv, 0).xyz - 1.0);
+    return normal_mat * (2.0 * texture2D(target, uv).xyz - 1.0);
 }
 
 const float TWO_PI = 2.0 * PI;

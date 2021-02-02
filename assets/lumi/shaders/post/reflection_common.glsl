@@ -17,22 +17,22 @@
 #if REFLECTION_PROFILE != REFLECTION_PROFILE_NONE
 vec2 coords_uv(vec3 view, mat4 projection)
 {
-	vec4 clip = projection * vec4(view, 1.0);
-	clip.xyz /= clip.w;
-	return clip.xy * 0.5 + 0.5;
+    vec4 clip = projection * vec4(view, 1.0);
+    clip.xyz /= clip.w;
+    return clip.xy * 0.5 + 0.5;
 }
 
 float coords_depth(vec2 uv, in sampler2D target)
 {
-    return texture2DLod(target, uv, 0).r;
+    return texture2D(target, uv).r;
 }
 
 vec3 coords_view(vec2 uv, mat4 inv_projection, in sampler2D target)
 {
     float depth = coords_depth(uv, target);
-	vec3 clip = vec3(2.0 * uv - 1.0, 2.0 * depth - 1.0);
-	vec4 view = inv_projection * vec4(clip, 1.0);
-	return view.xyz / view.w;
+    vec3 clip = vec3(2.0 * uv - 1.0, 2.0 * depth - 1.0);
+    vec4 view = inv_projection * vec4(clip, 1.0);
+    return view.xyz / view.w;
 }
 
 vec3 coords_world(vec3 view, mat4 inv_view)
@@ -42,7 +42,7 @@ vec3 coords_world(vec3 view, mat4 inv_view)
 
 vec3 coords_normal(vec2 uv, in sampler2D target)
 {
-	return 2.0 * texture2DLod(target, uv, 0).xyz - 1.0;
+    return 2.0 * texture2D(target, uv).xyz - 1.0;
 }
 
 float skylight_adjust(float skyLight, float intensity)
@@ -59,8 +59,8 @@ struct rt_Result
 
 vec3 pbr_lightCalc(float roughness, vec3 f0, vec3 radiance, vec3 lightDir, vec3 viewDir)
 {
-	vec3 halfway = normalize(viewDir + lightDir);
-	vec3 fresnel = pbr_fresnelSchlick(pbr_dot(viewDir, halfway), f0);
+    vec3 halfway = normalize(viewDir + lightDir);
+    vec3 fresnel = pbr_fresnelSchlick(pbr_dot(viewDir, halfway), f0);
     float roughnessFade = smoothstep(REFLECTION_MAXIMUM_ROUGHNESS, REFLECTION_MAXIMUM_ROUGHNESS - 0.05, roughness);
 
     return clamp(fresnel * radiance * roughnessFade * (1-roughness), 0.0, 1.0);

@@ -7,5 +7,5 @@ uniform sampler2D u_input;
 
 void main()
 {
-	gl_FragData[0] = texture2D(u_input, v_texcoord);
+    gl_FragData[0] = texture2D(u_input, v_texcoord);
 }

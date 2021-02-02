@@ -52,7 +52,7 @@ rt_color_depth work_on_pair(
 )
 {
     rt_color_depth noreturn = rt_color_depth(vec4(0.0), 1.0);
-    vec4 material = texture2DLod(reflector_material, v_texcoord, 0);
+    vec4 material = texture2D(reflector_material, v_texcoord);
     vec3 worldNormal = coords_normal(v_texcoord, reflector_normal);
     float roughness = material.x == 0.0 ? 1.0 : min(1.0, 1.0203 * material.x - 0.01); //prevent gloss on unmanaged draw
     if (roughness <= REFLECTION_MAXIMUM_ROUGHNESS && material.a > 0.0) {
@@ -100,7 +100,7 @@ void main()
     vec3 source_albedo = texture2D(u_source_albedo, v_texcoord).rgb;
     rt_color_depth source_source = work_on_pair(source_base, source_albedo, u_source_depth, u_light_source, u_normal_source, u_material_source, u_source_color, u_source_combine, u_source_depth, u_normal_source, 1.0);
     rt_color_depth source_target = work_on_pair(source_base, source_albedo, u_source_depth, u_light_source, u_normal_source, u_material_source, u_target_color, u_target_combine, u_target_depth, u_normal_target, 0.0);
-    float roughness1 = texture2DLod(u_material_source, v_texcoord, 0).x;
+    float roughness1 = texture2D(u_material_source, v_texcoord).x;
     vec3 reflection_color1 = (source_source.depth < source_target.depth)
         ? source_source.color.rgb
         : (source_source.color.rgb * (1.0 - source_target.color.a) + source_target.color.rgb);

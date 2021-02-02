@@ -9,12 +9,12 @@
 ******************************************************/
 
 frx_FragmentData frx_createPipelineFragment() {
-	return frx_FragmentData (
-		texture2D(frxs_spriteAltas, frx_texcoord, frx_matUnmippedFactor() * -4.0),
-		frx_color
-	);
+    return frx_FragmentData (
+        texture2D(frxs_spriteAltas, frx_texcoord, frx_matUnmippedFactor() * -4.0),
+        frx_color
+    );
 }
 
 void frx_writePipelineFragment(in frx_FragmentData fragData) {
-	gl_FragDepth = gl_FragCoord.z;
+    gl_FragDepth = gl_FragCoord.z;
 }

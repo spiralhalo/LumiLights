@@ -217,8 +217,8 @@ vec4 hdr_shaded_color(
     sampler2D scolor, sampler2D sdepth, sampler2D slight, sampler2D snormal, sampler2D smaterial,
     float aoval, bool translucent, float translucentDepth, out float bloom_out)
 {
-    vec4 a = texture2DLod(scolor, uv, 0.0);
-    float depth = texture2DLod(sdepth, uv, 0.0).r;
+    vec4 a = texture2D(scolor, uv);
+    float depth = texture2D(sdepth, uv).r;
     vec3 viewPos = coords_view(uv, frx_inverseProjectionMatrix(), depth);
     if (depth == 1.0 && !translucent) {
         // the sky
@@ -227,9 +227,9 @@ vec4 hdr_shaded_color(
         return vec4(a.rgb * blindnessFactor, 0.0);
     }
 
-    vec3  normal    = texture2DLod(snormal, uv, 0.0).xyz * 2.0 - 1.0;
-    vec4  light     = texture2DLod(slight, uv, 0.0);
-    vec3  material  = texture2DLod(smaterial, uv, 0.0).xyz;
+    vec3  normal    = texture2D(snormal, uv).xyz * 2.0 - 1.0;
+    vec4  light     = texture2D(slight, uv);
+    vec3  material  = texture2D(smaterial, uv).xyz;
     float roughness = material.x == 0.0 ? 1.0 : min(1.0, 1.0203 * material.x - 0.01);
     float metallic  = material.y;
     vec3  worldPos  = frx_cameraPos() + (frx_inverseViewMatrix() * vec4(viewPos, 1.0)).xyz;

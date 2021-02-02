@@ -42,7 +42,7 @@ vec4 work_on_pair(
 )
 {
     vec4 noreturn = vec4(0.0);
-    vec4 material = texture2DLod(reflector_material, v_texcoord, 0);
+    vec4 material = texture2D(reflector_material, v_texcoord);
     vec3 worldNormal = coords_normal(v_texcoord, reflector_normal);
     float roughness = material.x == 0.0 ? 1.0 : material.x; //prevent gloss on unmanaged draw
     float gloss   = 1.0 - roughness;
@@ -55,7 +55,7 @@ vec4 work_on_pair(
         // if (ray_view.y < normal.y) return noreturn;
         vec3 unit_view  = normalize(-ray_view);
         vec3 unit_march = normalize(reflect(-unit_view, normal) + mix(vec3(0.0, 0.0, 0.0), jitter * JITTER_STRENGTH, roughness2));
-        float sky_light = texture2DLod(reflector_light, v_texcoord, 0).y;
+        float sky_light = texture2D(reflector_light, v_texcoord).y;
         vec3 reg_f0     = vec3(material.y < 0.7 ? material.y : 0.0);
         vec3 f0         = mix(reg_f0, albedo, material.y);
         rt_Result result = rt_reflection(ray_view, unit_view, normal, unit_march, frx_normalModelMatrix(), frx_projectionMatrix(), frx_inverseProjectionMatrix(), reflector_depth, reflector_normal, reflected_depth, reflected_normal);
@@ -83,8 +83,8 @@ void main()
     vec4 solid_translucent = work_on_pair(solid_base, solid_albedo, u_solid_depth, u_light_solid, u_normal_solid, u_material_solid, u_translucent_color, u_translucent_depth, u_normal_translucent, 0.0);
     vec4 translucent_solid       = work_on_pair(translucent_base, translucent_albedo, u_translucent_depth, u_light_translucent, u_normal_translucent, u_material_translucent, u_solid_color, u_solid_depth, u_normal_solid, 1.0);
     vec4 translucent_translucent = work_on_pair(translucent_base, translucent_albedo, u_translucent_depth, u_light_translucent, u_normal_translucent, u_material_translucent, u_translucent_color, u_translucent_depth, u_normal_translucent, 0.0);
-    float roughness1 = texture2DLod(u_material_solid, v_texcoord, 0).x;
-    float roughness2 = texture2DLod(u_material_translucent, v_texcoord, 0).x;
+    float roughness1 = texture2D(u_material_solid, v_texcoord).x;
+    float roughness2 = texture2D(u_material_translucent, v_texcoord).x;
     gl_FragData[0] = vec4(solid_solid.rgb * (1.0 - solid_translucent.a) + solid_translucent.rgb, roughness1);
     gl_FragData[1] = vec4(translucent_solid.rgb * (1.0 - translucent_translucent.a) + translucent_translucent.rgb, roughness2);
 }
