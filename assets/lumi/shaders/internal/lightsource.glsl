@@ -185,23 +185,13 @@ vec3 l2_skyAmbient(float skyLight, float time, float intensity) {
 	return sa * l2_ambientColor(time);
 }
 
-vec3 l2_skyRadiance(float skyLight, float time, float intensity) {
-	#ifdef LUMI_TrueDarkness_DisableMoonlight
-	vec3 adjNightSky = vec3(0.0);
-	#else
-	vec3 adjNightSky = nightSky;
-	#endif
-
-	if (time == 0.0) {
-		return adjNightSky;
-	}
-
+vec3 l2_skyRadiance(float skyLight, float time, float intensity, float rainGradient) {
 	const int len = 4;
 	vec3 colors[len] = vec3[](
-		adjNightSky,
+		nightSky,
 		daySky,
 		daySky,
-		adjNightSky);
+		nightSky);
 	float times[len] = float[](
 		0.0,
 		0.02,
@@ -211,7 +201,7 @@ vec3 l2_skyRadiance(float skyLight, float time, float intensity) {
 	int i = 1;
 	while (time > times[i] && i < len) i++;
 
-	float sl = l2_skyLight(skyLight, intensity);
+	float sl = l2_skyLight(skyLight, intensity) * (1.0 - rainGradient * 0.5);
 	return sl * mix(colors[i-1], colors[i], l2_clampScale(times[i-1], times[i], time));
 }
 
