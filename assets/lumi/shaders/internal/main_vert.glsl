@@ -47,7 +47,8 @@ vec3 _tangent(vec3 normal)
     return (_tRotm * vec4(aaNormal, 0.0)).xyz;
 }
 
-void setVaryings(vec4 viewCoord, vec3 normal) {
+void setVaryings(vec4 vertPos, vec4 viewCoord, vec3 normal) {
+    l2_worldPos = vertPos.xyz + frx_modelOriginWorldPos();
     l2_viewPos = viewCoord.xyz;
     l2_tangent = _tangent(normal);
 }

@@ -3,6 +3,7 @@
  ***********************************************************/
 
 varying vec3 l2_viewPos;
+varying vec3 l2_worldPos;
 varying vec3 l2_tangent;
 
 #ifdef LUMI_BUMP

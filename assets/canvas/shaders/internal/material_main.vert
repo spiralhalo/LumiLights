@@ -13,6 +13,7 @@
 #include frex:shaders/api/context.glsl
 #include frex:shaders/api/vertex.glsl
 #include frex:shaders/api/sampler.glsl
+#include frex:shaders/api/world.glsl
 #include lumi:shaders/internal/context.glsl
 #include lumi:shaders/internal/varying.glsl
 #include lumi:shaders/internal/main_vert.glsl
@@ -87,7 +88,7 @@ void main() {
 	gl_ClipVertex = viewCoord;
 	gl_FogFragCoord = length(viewCoord.xyz);
 
-	setVaryings(viewCoord, data.normal * frx_normalModelMatrix());
+	setVaryings(data.vertex, viewCoord, data.normal * frx_normalModelMatrix());
 
 	//data.normal *= gl_NormalMatrix;
 	data.vertex = gl_ModelViewProjectionMatrix * data.vertex;

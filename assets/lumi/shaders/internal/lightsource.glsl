@@ -201,7 +201,7 @@ vec3 l2_skyRadiance(float skyLight, float time, float intensity, float rainGradi
 	int i = 1;
 	while (time > times[i] && i < len) i++;
 
-	float sl = l2_skyLight(skyLight, intensity) * (1.0 - rainGradient * 0.5);
+	float sl = l2_skyLight(skyLight, intensity) * (1.0 - rainGradient * 0.7);
 	return sl * mix(colors[i-1], colors[i], l2_clampScale(times[i-1], times[i], time));
 }
 
