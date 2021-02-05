@@ -41,7 +41,7 @@ void phong_shading(in frx_FragmentData fragData, inout vec4 a, inout float bloom
 #endif
     vec3 block = l2_blockRadiance(perceivedBl);
     vec3 sun = l2_sunRadiance(fragData.light.y, frx_worldTime(), frx_ambientIntensity(), frx_rainGradient()) * sunDot;
-    vec3 moon = l2_moonRadiance(fragData.light.y, frx_worldTime(), frx_ambientIntensity()) * moonDot;
+    vec3 moon = l2_moonRadiance(fragData.light.y, frx_worldTime(), frx_ambientIntensity(), frx_rainGradient()) * moonDot;
     vec3 skyAmbient = l2_skyAmbient(fragData.light.y, frx_worldTime(), frx_ambientIntensity());
     vec3 emissive = l2_emissiveRadiance(a.rgb, fragData.emissivity);
     vec3 skylessRadiance = l2_skylessRadiance();
@@ -59,6 +59,7 @@ void phong_shading(in frx_FragmentData fragData, inout vec4 a, inout float bloom
     light += emissive;
     
     vec3 specular = vec3(0.0);
+    vec3 viewDir = normalize(-l2_viewPos) * frx_normalModelMatrix() * gl_NormalMatrix;
     if (ww_specular > 0) {
         vec3 specularNormal = fragData.vertexNormal * frx_normalModelMatrix();
 
@@ -66,7 +67,6 @@ void phong_shading(in frx_FragmentData fragData, inout vec4 a, inout float bloom
 
         vec3 sunDir = l2_vanillaSunDir(frx_worldTime(), 0);
         float specSunDot = max(0.0, dot(l2_vanillaSunDir(frx_worldTime(), hdr_zWobbleDefault), specularNormal));
-        vec3 viewDir = normalize(-l2_viewPos) * frx_normalModelMatrix() * gl_NormalMatrix;
         vec3 sun = l2_sunRadiance(fragData.light.y, frx_worldTime(), frx_ambientIntensity(), frx_rainGradient()) * specSunDot;
 
         float specularAmount = l2_specular(frx_worldTime(), specularNormal, viewDir, ww_specular);
@@ -84,4 +84,7 @@ void phong_shading(in frx_FragmentData fragData, inout vec4 a, inout float bloom
     a.rgb *= mix(1.0, 2.0, userBrightness);
     a.rgb *= light;
     a.rgb += specular;
+    if (translucent && fragData.diffuse) {
+        a.a = mix(a.a, 1.0, pow(1.0 - pbr_dot(viewDir, diffuseNormal), 5.0));
+    }
 }

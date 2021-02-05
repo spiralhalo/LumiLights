@@ -37,7 +37,6 @@
 	#define hdr_dramaticMagicNumber 3.5
 #endif
 
-#define hdr_nightAmbientMult 2.0
 #define hdr_skylessRelStr 20.0
 #define hdr_zWobbleDefault 0.1
 
@@ -61,12 +60,11 @@ const vec3 nvColor = vec3(0.63, 0.55, 0.64);
 #if LUMI_LightingMode == LUMI_LightingMode_Dramatic
 	#define preSunriseAmbient hdr_gammaAdjust(vec3(0.5, 0.3, 0.1)) * hdr_sunStr
 	#define preSunsetAmbient hdr_gammaAdjust(vec3(0.5, 0.2, 0.0)) * hdr_sunStr
-	#define preNightAmbient hdr_gammaAdjust(vec3(0.74, 0.4, 1.0)) * hdr_moonStr * hdr_nightAmbientMult
 #else
 	#define preSunriseAmbient hdr_gammaAdjust(vec3(1.0, 0.8, 0.4)) * hdr_sunStr
 	#define preSunsetAmbient hdr_gammaAdjust(vec3(1.0, 0.6, 0.2)) * hdr_sunStr
-	#define preNightAmbient hdr_gammaAdjust(vec3(0.5, 0.5, 1.0)) * hdr_moonStr * hdr_nightAmbientMult
 #endif
+#define preNightAmbient hdr_gammaAdjust(vec3(0.6, 0.7, 1.0))* hdr_sunStr
 
 #define sunriseSky hdr_gammaAdjust(vec3(0.5, 0.3, 0.1))
 #define sunsetSky hdr_gammaAdjust(vec3(0.5, 0.2, 0.0))
@@ -388,11 +386,11 @@ vec3 l2_moonDir(float time){
 	return normalize(vec3(cos(aRad), sin(aRad), 0));
 }
 
-vec3 l2_moonRadiance(float skyLight, float time, float intensity){
+vec3 l2_moonRadiance(float skyLight, float time, float intensity, float rainGradient){
 	#ifdef LUMI_TrueDarkness_DisableMoonlight
 	return vec3(0.0);
 	#else
-	float ml = l2_skyLight(skyLight, intensity) * frx_moonSize() * hdr_moonStr;
+	float ml = l2_skyLight(skyLight, intensity) * (1.0 - rainGradient) * frx_moonSize() * hdr_moonStr;
 	if(time < 0.58){
 		ml *= l2_clampScale(0.54, 0.58, time);
 	} else if(time > 0.92){

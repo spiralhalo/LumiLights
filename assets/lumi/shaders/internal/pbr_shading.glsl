@@ -111,7 +111,7 @@ vec3 hdr_calcSkyLight(inout light_data data)
             vec3 moonLightRadiance = vec3(0.0);
             if (frx_luminance(sunLightRadiance) == 0.0) return moonLightRadiance;
         #else
-            vec3 moonLightRadiance = l2_moonRadiance(data.light.y, frx_worldTime(), frx_ambientIntensity());
+            vec3 moonLightRadiance = l2_moonRadiance(data.light.y, frx_worldTime(), frx_ambientIntensity(), frx_rainGradient());
         #endif
         vec3 irradiance;
         vec3 skylightRadiance;
