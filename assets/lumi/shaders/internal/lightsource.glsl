@@ -68,6 +68,11 @@ const vec3 nvColor = vec3(0.63, 0.55, 0.64);
 	#define preNightAmbient hdr_gammaAdjust(vec3(0.5, 0.5, 1.0)) * hdr_moonStr * hdr_nightAmbientMult
 #endif
 
+#define sunriseSky hdr_gammaAdjust(vec3(0.5, 0.3, 0.1))
+#define sunsetSky hdr_gammaAdjust(vec3(0.5, 0.2, 0.0))
+#define nightSky hdr_gammaAdjust(vec3(0.01, 0.01, 0.01))
+#define daySky hdr_gammaAdjust(vec3(0.52, 0.69, 1.0))
+
 /*  BLOCK LIGHT
  *******************************************************/
 
@@ -180,6 +185,46 @@ vec3 l2_skyAmbient(float skyLight, float time, float intensity) {
 	float sa = sl * 2.5;
 
 	return sa * l2_ambientColor(time);
+}
+
+vec3 l2_skyColor(float time) {
+	#ifdef LUMI_TrueDarkness_DisableMoonlight
+	vec3 adjNightSky = vec3(0.0);
+	#else
+	vec3 adjNightSky = nightSky;
+	#endif
+
+	if (time == 0.0) {
+		return sunriseSky;
+	}
+
+	const int len = 7;
+	vec3 colors[len] = vec3[](
+		sunriseSky,
+		daySky,
+		daySky,
+		sunsetSky,
+		adjNightSky,
+		adjNightSky,
+		sunriseSky);
+	float times[len] = float[](
+		0.0,
+		0.02,
+		0.48,
+		0.5,
+		0.56,
+		0.94,
+		1.0);
+
+	int i = 1;
+	while (time > times[i] && i < len) i++;
+
+	return mix(colors[i-1], colors[i], l2_clampScale(times[i-1], times[i], time));
+}
+
+vec3 l2_skyRadiance(float skyLight, float time, float intensity) {
+	float sl = l2_skyLight(skyLight, intensity);
+	return sl * l2_skyColor(time);
 }
 
 /*  SKYLESS LIGHT

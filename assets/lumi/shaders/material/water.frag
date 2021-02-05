@@ -4,7 +4,7 @@
 #include frex:shaders/lib/color.glsl
 #include lumi:shaders/lib/water.glsl
 
-const float stretch = 2;
+const float stretch = 1.2;
 
 void frx_startFragment(inout frx_FragmentData fragData) {
 #ifdef LUMI_PBRX
@@ -24,6 +24,7 @@ void frx_startFragment(inout frx_FragmentData fragData) {
 	vec3 desat = vec3(frx_luminance(fragData.vertexColor.rgb));
 	fragData.vertexColor.rgb = mix(fragData.vertexColor.rgb, desat, 0.6);
 	fragData.spriteColor.rgb *= fragData.spriteColor.rgb * (fragData.spriteColor.rgb + vec3(1.0)) * 0.8;
+	fragData.spriteColor.a *= 0.5;
 	
 	/* WAVY NORMALS */
 	// wave movement doesn't necessarily follow flow direction for the time being

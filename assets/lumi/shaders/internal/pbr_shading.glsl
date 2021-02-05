@@ -62,10 +62,10 @@ struct light_data{
     vec3 specularAccu;
 };
 
-vec3 hdr_calcAmbientLight(inout light_data data, vec3 radiance)
+vec3 hdr_calcAmbientLight(inout light_data data, vec3 radiance, vec3 reflectionRadiance)
 {
     vec3 ambientReflection = pbr_fresnelSchlick(pbr_dot(data.viewDir, data.normal), data.f0 * data.metallic) * (1.0 - data.roughness);
-    return data.albedo * pbr_fakeMetallicDiffuseMultiplier(data.albedo, data.metallic, radiance) / PI * radiance * (1.0 - ambientReflection) + ambientReflection * radiance;
+    return data.albedo * pbr_fakeMetallicDiffuseMultiplier(data.albedo, data.metallic, radiance) / PI * radiance + ambientReflection * reflectionRadiance;
 }
 
 vec3 hdr_calcBlockLight(inout light_data data, vec3 radiance)
@@ -96,8 +96,9 @@ vec3 hdr_calcSkyAmbientLight(inout light_data data)
 {
     if (frx_worldHasSkylight())
     {
-        vec3 skyRadiance = l2_skyAmbient(data.light.y, frx_worldTime(), frx_ambientIntensity());
-        return hdr_calcAmbientLight(data, skyRadiance);
+        vec3 skyAmbientRadiance = l2_skyAmbient(data.light.y, frx_worldTime(), frx_ambientIntensity());
+        vec3 skyRadiance = mix(0.1 * skyAmbientRadiance, l2_skyRadiance(data.light.y, frx_worldTime(), frx_ambientIntensity()), l2_clampScale(-0.1, 0.1, data.normal.y));
+        return hdr_calcAmbientLight(data, skyAmbientRadiance, skyRadiance);
     }
     return vec3(0.0);
 }
@@ -168,7 +169,7 @@ void pbr_shading(in frx_FragmentData fragData, inout vec4 a, inout float bloom, 
     float ao = l2_ao(fragData);
     vec3 held_light = hdr_calcHeldLight(data);
     vec3 block_light = hdr_calcBlockLight(data, l2_blockRadiance(data.light.x));
-    vec3 base_ambient_light = hdr_calcAmbientLight(data, l2_baseAmbient());
+    vec3 base_ambient_light = hdr_calcAmbientLight(data, l2_baseAmbient(), l2_baseAmbient());
     vec3 sky_ambient_light = hdr_calcSkyAmbientLight(data);
     vec3 sky_light = hdr_calcSkyLight(data);
     vec3 emissive_light = pbr_nonDirectional(data.albedo, data.metallic, l2_emissiveRadiance(data.albedo, bloom));
@@ -179,7 +180,10 @@ void pbr_shading(in frx_FragmentData fragData, inout vec4 a, inout float bloom, 
     float specularLuminance = frx_luminance(data.specularAccu);
     float smoothness = 1 - data.roughness;
     bloom += specularLuminance * PBR_SPECULAR_BLOOM_ADD * smoothness * smoothness;
-    if (translucent) a.a += specularLuminance * PBR_SPECULAR_ALPHA_ADD;
+    if (translucent) {
+        a.a = mix(a.a, 1.0, pow(1.0 - pbr_dot(data.viewDir, data.normal), 5.0));
+        a.a += specularLuminance * PBR_SPECULAR_ALPHA_ADD;
+    }
 }
 
 
