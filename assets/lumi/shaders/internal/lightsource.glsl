@@ -185,7 +185,8 @@ vec3 l2_skyAmbient(float skyLight, float time, float intensity) {
 	return sa * l2_ambientColor(time);
 }
 
-vec3 l2_skyColor(float time) {
+vec3 l2_vanillaSunDir(in float time, float zWobble);
+vec3 l2_skyRadiance(vec3 viewDir, float skyLight, float time, float intensity) {
 	#ifdef LUMI_TrueDarkness_DisableMoonlight
 	vec3 adjNightSky = vec3(0.0);
 	#else
@@ -196,15 +197,16 @@ vec3 l2_skyColor(float time) {
 		return sunriseSky;
 	}
 
+	float vDotSun = max(0.0, dot(viewDir, l2_vanillaSunDir(time, 0.0)));
 	const int len = 7;
 	vec3 colors[len] = vec3[](
-		sunriseSky,
+		mix(sunriseSky, adjNightSky, vDotSun),
 		daySky,
 		daySky,
-		sunsetSky,
+		mix(sunsetSky, adjNightSky, vDotSun),
 		adjNightSky,
 		adjNightSky,
-		sunriseSky);
+		mix(sunriseSky, adjNightSky, vDotSun));
 	float times[len] = float[](
 		0.0,
 		0.02,
@@ -217,12 +219,8 @@ vec3 l2_skyColor(float time) {
 	int i = 1;
 	while (time > times[i] && i < len) i++;
 
-	return mix(colors[i-1], colors[i], l2_clampScale(times[i-1], times[i], time));
-}
-
-vec3 l2_skyRadiance(float skyLight, float time, float intensity) {
 	float sl = l2_skyLight(skyLight, intensity);
-	return sl * l2_skyColor(time);
+	return sl * mix(colors[i-1], colors[i], l2_clampScale(times[i-1], times[i], time));
 }
 
 /*  SKYLESS LIGHT
