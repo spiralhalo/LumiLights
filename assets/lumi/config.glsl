@@ -50,6 +50,10 @@
 *******************************************************************/
 #define LUMI_WavyWaterIntensity 1
 
+/* Uncomment to enable textureless water
+*****************************************/
+// #define LUMI_TexturelessWater
+
 /* Uncomment to enable sunlight bloom during sunrise and sunset
 *****************************************************************/
 // #define LUMI_ApplyDramaticBloom

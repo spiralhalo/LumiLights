@@ -10,6 +10,8 @@
     "respackopts.tooltip.LUMI.WavyWaterModel": "Wavy water animation",
     "respackopts.field.LUMI.WavyWaterIntensity": "Wavy water intensity",
     "respackopts.tooltip.LUMI.WavyWaterIntensity": "Wavy water intensity",
+    "respackopts.field.LUMI.TexturelessWater": "Textureless water",
+    "respackopts.tooltip.LUMI.TexturelessWater": "Replace water texture with neutral color",
     "respackopts.field.LUMI.ApplySkyBloom": "Sky bloom",
     "respackopts.tooltip.LUMI.ApplySkyBloom": "Sky bloom",
     "respackopts.field.LUMI.SkyBloomIntensity": "Sky bloom intensity",

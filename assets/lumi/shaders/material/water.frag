@@ -21,8 +21,13 @@ void frx_startFragment(inout frx_FragmentData fragData) {
 #endif
 	
 	/* WATER RECOLOR */
+#ifdef LUMI_TexturelessWater
+	fragData.spriteColor.rgb = vec3(1.0);
+	fragData.spriteColor.a = 0.3;
+#else
 	fragData.spriteColor.rgb *= fragData.spriteColor.rgb * (fragData.spriteColor.rgb + vec3(1.0)) * 0.8;
 	fragData.spriteColor.a *= 0.5;
+#endif
 	
 	/* WAVY NORMALS */
 	// wave movement doesn't necessarily follow flow direction for the time being
