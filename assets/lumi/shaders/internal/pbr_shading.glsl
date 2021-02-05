@@ -166,6 +166,7 @@ void pbr_shading(in frx_FragmentData fragData, inout vec4 a, inout float bloom, 
 #endif
     data.light.x = perceivedBl;
     
+    // TODO: [PERF] one time calculation for rain gradient factor (moderate performance impact)
     float ao = l2_ao(fragData);
     vec3 held_light = hdr_calcHeldLight(data);
     vec3 block_light = hdr_calcBlockLight(data, l2_blockRadiance(data.light.x));
