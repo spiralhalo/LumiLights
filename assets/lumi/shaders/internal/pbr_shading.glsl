@@ -97,7 +97,7 @@ vec3 hdr_calcSkyAmbientLight(inout light_data data)
     if (frx_worldHasSkylight())
     {
         vec3 skyAmbientRadiance = l2_skyAmbient(data.light.y, frx_worldTime(), frx_ambientIntensity());
-        vec3 skyRadiance = mix(0.1 * skyAmbientRadiance, l2_skyRadiance(data.viewDir, data.light.y, frx_worldTime(), frx_ambientIntensity()), l2_clampScale(-0.1, 0.1, data.normal.y));
+        vec3 skyRadiance = mix(0.1 * skyAmbientRadiance, l2_skyRadiance(data.light.y, frx_worldTime(), frx_ambientIntensity()), l2_clampScale(-0.1, 0.1, data.normal.y));
         return hdr_calcAmbientLight(data, skyAmbientRadiance, skyRadiance);
     }
     return vec3(0.0);
