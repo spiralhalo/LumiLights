@@ -21,8 +21,6 @@ void frx_startFragment(inout frx_FragmentData fragData) {
 #endif
 	
 	/* WATER RECOLOR */
-	vec3 desat = vec3(frx_luminance(fragData.vertexColor.rgb));
-	fragData.vertexColor.rgb = mix(fragData.vertexColor.rgb, desat, 0.6);
 	fragData.spriteColor.rgb *= fragData.spriteColor.rgb * (fragData.spriteColor.rgb + vec3(1.0)) * 0.8;
 	fragData.spriteColor.a *= 0.5;
 	
