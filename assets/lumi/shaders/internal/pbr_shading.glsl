@@ -181,7 +181,7 @@ void pbr_shading(in frx_FragmentData fragData, inout vec4 a, inout float bloom, 
     float specularLuminance = frx_luminance(data.specularAccu);
     float smoothness = 1 - data.roughness;
     bloom += specularLuminance * PBR_SPECULAR_BLOOM_ADD * smoothness * smoothness;
-    if (translucent) {
+    if (translucent && data.diffuse) {
         a.a = mix(a.a, 1.0, pow(1.0 - pbr_dot(data.viewDir, data.normal), 5.0));
         a.a += specularLuminance * PBR_SPECULAR_ALPHA_ADD;
     }
