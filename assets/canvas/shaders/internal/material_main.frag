@@ -116,7 +116,7 @@ void main() {
 		pbr_shading(fragData, a, bloom, userBrightness, translucent);
 	#else
     	if (fragData.diffuse) {
-    		ww_puddle_phong(a, ww_specular, fragData.light.y, fragData.vertexNormal, l2_worldPos);
+    		ww_puddle_phong(a, fragData.light.y, fragData.vertexNormal, l2_worldPos);
 		}
 		phong_shading(fragData, a, bloom, userBrightness, translucent);
 	#endif
