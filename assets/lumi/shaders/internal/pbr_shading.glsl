@@ -64,7 +64,7 @@ struct light_data{
 
 vec3 hdr_calcAmbientLight(inout light_data data, vec3 radiance, vec3 reflectionRadiance)
 {
-    vec3 ambientReflection = pbr_fresnelSchlick(pbr_dot(data.viewDir, data.normal), data.f0 * data.metallic) * (1.0 - data.roughness);
+    vec3 ambientReflection = pbr_fresnelSchlick(pbr_dot(data.viewDir, data.normal), data.f0 * data.metallic) * pow(1.0 - data.roughness, 2.0);
     return data.albedo * pbr_fakeMetallicDiffuseMultiplier(data.albedo, data.metallic, radiance) / PI * radiance + ambientReflection * reflectionRadiance;
 }
 
@@ -170,7 +170,7 @@ void pbr_shading(in frx_FragmentData fragData, inout vec4 a, inout float bloom, 
     float ao = l2_ao(fragData);
     vec3 held_light = hdr_calcHeldLight(data);
     vec3 block_light = hdr_calcBlockLight(data, l2_blockRadiance(data.light.x));
-    vec3 base_ambient_light = hdr_calcAmbientLight(data, l2_baseAmbient(), l2_baseAmbient());
+    vec3 base_ambient_light = hdr_calcAmbientLight(data, l2_baseAmbient(), (frx_isWorldTheOverworld() ? 1.0 : 0.25) * l2_baseAmbient());
     vec3 sky_ambient_light = hdr_calcSkyAmbientLight(data);
     vec3 sky_light = hdr_calcSkyLight(data);
     vec3 emissive_light = pbr_nonDirectional(data.albedo, data.metallic, l2_emissiveRadiance(data.albedo, bloom));
