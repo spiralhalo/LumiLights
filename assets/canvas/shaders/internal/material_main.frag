@@ -110,14 +110,18 @@ void main() {
 		pbr_f0 = clamp(pbr_f0, 0.0, 1.0);
 		pbr_roughness = clamp(pbr_roughness, 0.0, 1.0);
 		pbr_metallic = clamp(pbr_metallic, 0.0, 1.0);
-    	if (fragData.diffuse) {
-			ww_puddle_pbr(a, pbr_roughness, fragData.light.y, fragData.vertexNormal, l2_worldPos);
-		}
+		#ifdef LUMI_RainWetness
+			if (fragData.diffuse) {
+				ww_puddle_pbr(a, pbr_roughness, fragData.light.y, fragData.vertexNormal, l2_worldPos);
+			}
+		#endif
 		pbr_shading(fragData, a, bloom, userBrightness, translucent);
 	#else
-    	if (fragData.diffuse) {
-    		ww_puddle_phong(a, fragData.light.y, fragData.vertexNormal, l2_worldPos);
-		}
+		#ifdef LUMI_RainWetness
+			if (fragData.diffuse) {
+				ww_puddle_phong(a, fragData.light.y, fragData.vertexNormal, l2_worldPos);
+			}
+		#endif
 		phong_shading(fragData, a, bloom, userBrightness, translucent);
 	#endif
 		a.rgb *= hdr_finalMult;

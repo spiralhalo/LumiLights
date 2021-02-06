@@ -85,6 +85,10 @@
 // #define LUMI_TrueDarkness_NetherTrueDarkness
 // #define LUMI_TrueDarkness_TheEndTrueDarkness
 
+/* Uncomment to enable puddles during rain (broken in snowy/dry regions)
+**************************************************************************/
+// #define LUMI_RainWetness
+
 /* Tonemap mode
  * 0 = Default
  * 1 = Vibrant

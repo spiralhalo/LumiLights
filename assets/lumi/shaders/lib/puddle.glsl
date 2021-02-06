@@ -7,6 +7,7 @@
  *  published by the Free Software Foundation, Inc.    *
  *******************************************************/
 
+#ifdef LUMI_RainWetness
 void ww_puddle_pbr(inout vec4 a, inout float roughness, in float light_y, inout vec3 normal, in vec3 worldPos) {
     float rainExposure = smoothstep(0.88, 0.94, light_y) * frx_rainGradient() * smoothstep(0.7, 1.0, normal.y);
     if (rainExposure == 0.0 || frx_modelOriginType() != MODEL_ORIGIN_REGION) return;
@@ -28,3 +29,4 @@ void ww_puddle_phong(inout vec4 a, in float light_y, in vec3 normal, in vec3 wor
     wet = 0.5 * frx_rainGradient() + 0.5 * smoothstep(0.1, 0.7, wet);
     a.rgb *= 1.0 - 0.3 * wet;
 }
+#endif

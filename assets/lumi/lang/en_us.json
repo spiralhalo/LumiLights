@@ -30,6 +30,8 @@
     "respackopts.tooltip.LUMI.TrueDarkness.NetherTrueDarkness": "Completely disable ambient light in the Nether",
     "respackopts.field.LUMI.TrueDarkness.TheEndTrueDarkness": "True darkness in the End",
     "respackopts.tooltip.LUMI.TrueDarkness.TheEndTrueDarkness": "Completely disable ambient light in the End",
+    "respackopts.field.LUMI.RainWetness": "Rain wet effect (WIP)",
+    "respackopts.tooltip.LUMI.RainWetness": "Puddles during rain (broken in snowy/dry regions)",
     "respackopts.field.LUMI.Tonemap": "Tone mapping",
     "respackopts.tooltip.LUMI.Tonemap": "Tone mapping algorithm",
     "respackopts.field.LUMI.DebugMode": "Debug mode",

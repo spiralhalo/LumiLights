@@ -39,6 +39,7 @@
       "NetherTrueDarkness": false,
       "TheEndTrueDarkness": false
     },
+    "RainWetness": false,
     "Tonemap": [
       "Default",
       "Vibrant",
