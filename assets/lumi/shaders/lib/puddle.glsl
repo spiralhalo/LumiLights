@@ -8,7 +8,7 @@
  *******************************************************/
 
 void ww_puddle_pbr(inout vec4 a, inout float roughness, in float light_y, inout vec3 normal, in vec3 worldPos) {
-    float rainExposure = (light_y >= 0.93 ? 1.0 : 0.0) * frx_rainGradient() * smoothstep(0.0, 1.0, normal.y);
+    float rainExposure = smoothstep(0.88, 0.94, light_y) * frx_rainGradient() * smoothstep(0.3, 1.0, normal.y);
     if (rainExposure == 0.0 || frx_modelOriginType() != MODEL_ORIGIN_REGION) return;
     float wet = rainExposure * (0.5 + 0.5 * snoise(0.1 * worldPos.xz));
     float puddly = smoothstep(0.7, 0.8, wet);
