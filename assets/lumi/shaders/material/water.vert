@@ -7,8 +7,8 @@
 #ifndef LUMI_WavyWaterIntensity
     #define LUMI_WavyWaterIntensity 1
 #endif
-#define wavyWater_loParams vec4(2.0, 0.5, 2.0, 0.03)
-#define wavyWater_hiParams vec4(1.0, 1.0, 1.0, 0.05)
+const vec4 wavyWater_loParams = vec4(2.0, 0.5, 2.0, 0.03);
+const vec4 wavyWater_hiParams = vec4(1.0, 1.0, 1.0, 0.05);
 
 const float smol_waveSpeed = 1;
 const float smol_scale = 1.5;

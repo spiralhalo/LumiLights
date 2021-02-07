@@ -7,7 +7,7 @@
 #include lumi:shaders/api/param_frag.glsl
 #include lumi:shaders/lib/water.glsl
 
-const float stretch = 2;
+const float stretch = 1.2;
 
 void frx_startFragment(inout frx_FragmentData fragData) {
     #ifdef LUMI_PBRX
@@ -27,10 +27,12 @@ void frx_startFragment(inout frx_FragmentData fragData) {
     // vec3 desat = vec3(frx_luminance(fragData.vertexColor.rgb));
     #ifdef LUMI_NoWaterTexture
         // fragData.vertexColor.rgb = mix(fragData.vertexColor.rgb, desat, 0.3);
-        fragData.spriteColor.rgb = vec3(0.4);
+        fragData.spriteColor.rgb = vec3(1.0);
+        fragData.spriteColor.a = 0.3;
     #else
         // fragData.vertexColor.rgb = mix(fragData.vertexColor.rgb, desat, 0.6);
         fragData.spriteColor.rgb *= fragData.spriteColor.rgb;
+        fragData.spriteColor.a = 0.5;
     #endif
     
     /* WAVY NORMALS */

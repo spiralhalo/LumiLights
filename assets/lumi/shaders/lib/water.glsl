@@ -9,7 +9,7 @@
 
 float ww_noise(vec3 pos, vec3 move, float invScale, float amplitude, float stretch)
 {
-    vec3 hh = vec3(pos.x * invScale * stretch, pos.y * invScale, pos.z * invScale);
+    vec3 hh = vec3(pos.x * invScale, pos.y * invScale, pos.z * invScale * stretch);
     vec3 pp1 = hh + move;
     vec3 pp2 = hh * 5.0 + move;
     // vec3 pp3 = hh * 10.0 + move;

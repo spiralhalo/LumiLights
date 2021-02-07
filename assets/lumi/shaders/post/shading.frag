@@ -13,6 +13,7 @@
 #include lumi:shaders/lib/fog.glsl
 #include lumi:shaders/lib/tonemap.glsl
 #include lumi:shaders/lib/pbr_shading.glsl
+#include lumi:shaders/lib/puddle.glsl
 #include lumi:shaders/context/post/bloom.glsl
 #include lumi:shaders/context/post/fog.glsl
 #include lumi:shaders/context/global/lighting.glsl
@@ -301,6 +302,7 @@ vec4 hdr_shaded_color(
     #endif
 
     bloom_out = max(0.0, bloom_raw);
+    ww_puddle_pbr(a, roughness, light.y, normal, worldPos);
     pbr_shading(a, bloom_out, viewPos, light.xyz, normal, roughness, metallic, f0 > 0.7 ? 0.0 : material.z, diffuse, translucent);
 
 
