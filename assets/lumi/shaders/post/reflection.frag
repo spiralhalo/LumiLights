@@ -3,6 +3,9 @@
 #include lumi:shaders/context/post/reflection.glsl
 #include lumi:shaders/context/global/lighting.glsl
 #include lumi:shaders/lib/tile_noise.glsl
+#include frex:shaders/lib/noise/noise2d.glsl
+#include frex:shaders/lib/noise/noise3d.glsl
+#include lumi:shaders/lib/puddle.glsl
 
 /*******************************************************
  *  lumi:shaders/post/reflection.frag         *
@@ -55,10 +58,14 @@ rt_color_depth work_on_pair(
     vec4 material = texture2D(reflector_material, v_texcoord);
     vec3 worldNormal = coords_normal(v_texcoord, reflector_normal);
     float roughness = material.x == 0.0 ? 1.0 : min(1.0, 1.0203 * material.x - 0.01); //prevent gloss on unmanaged draw
+    vec3 ray_view  = coords_view(v_texcoord, frx_inverseProjectionMatrix(), reflector_depth);
+    vec3 ray_world = coords_world(ray_view, frx_inverseViewMatrix());
+    // TODO: optimize puddle by NOT calling it twice in shading and in reflection
+    vec2 light = texture2D(reflector_light, v_texcoord).xy;
+    vec4 fake = vec4(0.0);
+    ww_puddle_pbr(fake, roughness, light.y, worldNormal, ray_world);
     if (roughness <= REFLECTION_MAXIMUM_ROUGHNESS && material.a > 0.0) {
         float gloss    = 1.0 - roughness;
-        vec3 ray_view  = coords_view(v_texcoord, frx_inverseProjectionMatrix(), reflector_depth);
-        vec3 ray_world = coords_world(ray_view, frx_inverseViewMatrix());
         vec3 jitter    = 2.0 * tile_noise_3d(v_texcoord, frxu_size, 4) - 1.0;
         vec3 normal    = frx_normalModelMatrix() * normalize(worldNormal);
         float roughness2 = roughness * roughness;
@@ -74,7 +81,6 @@ rt_color_depth work_on_pair(
         vec4 reflected;
         float reflected_depth_value = coords_depth(result.reflected_uv, reflected_depth);
         if (reflected_depth_value == 1.0 || !result.hit || result.reflected_uv.x < 0.0 || result.reflected_uv.y < 0.0 || result.reflected_uv.x > 1.0 || result.reflected_uv.y > 1.0) {
-            vec2 light = texture2D(reflector_light, v_texcoord).xy;
             float occlusionFactor = result.hits > 1 ? 0.1 : 1.0;
             float upFactor = frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? l2_clampScale(-0.1, 0.1, dot(unit_march, UP_VECTOR)) : 1.0;
             float skyLightFactor = frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? hdr_gammaAdjustf(light.y * frx_ambientIntensity()) : 0.5; // 0.5 = arbitrary skyless factor. TODO: make constant
