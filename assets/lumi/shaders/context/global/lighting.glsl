@@ -55,7 +55,7 @@ const vec3 NETHER_SKYLESS_LIGHT_COLOR = vec3(1.0, 0.5, 0.3);
 // const vec3 SUNRISE_SKY_COLOR = vec3(0.5, 0.3, 0.1);
 const vec3 ORANGE_SKY_COLOR = vec3(0.5, 0.2, 0.0);
 #ifdef CUSTOM_SKY
-const vec3 NIGHT_SKY_COLOR = vec3(0.05, 0.05, 0.3);
+const vec3 NIGHT_SKY_COLOR = vec3(0.2, 0.272, 0.4);
 #else
 const vec3 NIGHT_SKY_COLOR = vec3(0.01, 0.01, 0.01);
 #endif
