@@ -29,7 +29,7 @@ vec3 hdr_skyColor()
 {
     vec3 skyColor;
     bool customOverworldColor =
-        frx_isWorldTheOverworld()
+        frx_worldFlag(FRX_WORLD_IS_OVERWORLD)
         && !frx_playerFlag(FRX_PLAYER_EYE_IN_WATER);
 
     if (customOverworldColor) {
@@ -41,12 +41,16 @@ vec3 hdr_skyColor()
         const vec3 dayc = DAY_SKY_COLOR;
 
         const int len = 4;
-        const vec3 colors[len] =  vec3[](ngtc, dayc, dayc, ngtc);
-        const float times[len] = float[](0.00, 0.02, 0.48, 0.50);
+        const vec3 colors[len] =  vec3[](dayc, ngtc, ngtc, dayc);
+        const float times[len] = float[](0.50, 0.52, 0.98, 1.0);
 
-        int i = 1;
-        while (frx_worldTime() > times[i] && i < len) i++;
-        skyColor = mix(colors[i-1], colors[i], l2_clampScale(times[i-1], times[i], frx_worldTime()));
+        if (frx_worldTime() <= times[0]) {
+            skyColor = colors[0];
+        } else {
+            int i = 1;
+            while (frx_worldTime() > times[i] && i < len) i++;
+            skyColor = mix(colors[i-1], colors[i], l2_clampScale(times[i-1], times[i], frx_worldTime()));
+        }
     } else {
         skyColor = frx_vanillaClearColor();
     }
@@ -60,5 +64,15 @@ vec3 hdr_skyColor()
 vec3 ldr_skyColor()
 {
     return ldr_tonemap3(hdr_skyColor());
+}
+#else
+vec3 hdr_orangeSkyColor(vec3 viewDir) {
+    if (frx_worldFlag(FRX_WORLD_IS_OVERWORLD) && !frx_worldFlag(FRX_WORLD_IS_MOONLIT)) {
+        float vDotSun = l2_clampScale(0.0, -1.0, dot(viewDir, frx_normalModelMatrix()*frx_skyLightVector()));
+        float sunHorizonFactor = l2_clampScale(0.5 /*BRUTE FORCED NUMBER*/, 0.0, frx_skyLightVector().y);
+        return mix(v_skycolor, ORANGE_SKY_COLOR, sunHorizonFactor * vDotSun * frx_skyLightTransitionFactor());
+    } else {
+        return v_skycolor;
+    }
 }
 #endif

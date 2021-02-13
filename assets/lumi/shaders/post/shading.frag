@@ -131,7 +131,7 @@ vec4 fog (float skylightFactor, vec4 a, vec3 viewPos, vec3 worldPos, inout float
 
     fogFactor = clamp(fogFactor * distFactor, 0.0, 1.0);
     
-    vec4 fogColor = vec4(v_skycolor, 1.0);
+    vec4 fogColor = vec4(hdr_orangeSkyColor(normalize(-viewPos)), 1.0);
     bloom = mix(bloom, 0.0, fogFactor);
     return mix(a, fogColor, fogFactor);
 }
