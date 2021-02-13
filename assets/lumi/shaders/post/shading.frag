@@ -313,7 +313,9 @@ vec4 hdr_shaded_color(
     #endif
 
     bloom_out = max(0.0, bloom_raw);
-    ww_puddle_pbr(a, roughness, light.y, normal, worldPos);
+    #ifdef RAIN_PUDDLES
+        ww_puddle_pbr(a, roughness, light.y, normal, worldPos);
+    #endif
     pbr_shading(a, bloom_out, viewPos, light.xyz, normal, roughness, metallic, f0 > 0.7 ? 0.0 : material.z, diffuse, translucent);
 
 

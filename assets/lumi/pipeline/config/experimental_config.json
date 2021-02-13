@@ -22,6 +22,11 @@
                     nameKey: "config.lumi_lights.value.high_contrast",
                     descriptionKey: "config.lumi_lights.help.high_contrast"
                 },
+                rain_puddles: {
+                    default: false,
+                    nameKey: "config.lumi_lights.value.rain_puddles",
+                    descriptionKey: "config.lumi_lights.help.rain_puddles"
+                },
                 volumetric_fog: {
                     default: false,
                     nameKey: "config.lumi_lights.value.volumetric_fog",

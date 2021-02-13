@@ -2,6 +2,7 @@
 #include lumi:shaders/post/reflection_common.glsl
 #include lumi:shaders/context/post/reflection.glsl
 #include lumi:shaders/context/global/lighting.glsl
+#include lumi:shaders/context/global/experimental.glsl
 #include lumi:shaders/lib/tile_noise.glsl
 #include frex:shaders/lib/noise/noise2d.glsl
 #include frex:shaders/lib/noise/noise3d.glsl
@@ -62,7 +63,9 @@ rt_color_depth work_on_pair(
     // TODO: optimize puddle by NOT calling it twice in shading and in reflection
     vec2 light = texture2D(reflector_light, v_texcoord).xy;
     vec4 fake = vec4(0.0);
-    ww_puddle_pbr(fake, roughness, light.y, worldNormal, ray_world);
+    #ifdef RAIN_PUDDLES
+        ww_puddle_pbr(fake, roughness, light.y, worldNormal, ray_world);
+    #endif
     if (roughness <= REFLECTION_MAXIMUM_ROUGHNESS && material.a > 0.0) {
         float gloss    = 1.0 - roughness;
         vec3 jitter    = 2.0 * tile_noise_3d(v_texcoord, frxu_size, 4) - 1.0;
