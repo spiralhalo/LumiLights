@@ -41,7 +41,7 @@ void main()
     vec3 skyColor = hdr_skyColor();
     if (frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT)) {
         float thunderFactor = frx_rainGradient() *0.5 + frx_thunderGradient() *0.5;
-        skyColor *= (1.0 - thunderFactor * 0.75);
+        skyColor *= (1.0 - thunderFactor * 0.9);
         vec3 grayScale = vec3(frx_luminance(skyColor));
         v_fogcolor = mix(skyColor, grayScale, thunderFactor);
     } else {

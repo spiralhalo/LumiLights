@@ -99,12 +99,12 @@ vec4 fog (float skylightFactor, vec4 a, vec3 viewPos, vec3 worldPos, inout float
         float zigZagTime = abs(frx_worldTime()-0.5);
         float timeFactor = (l2_clampScale(0.45, 0.5, zigZagTime) + l2_clampScale(0.05, 0.0, zigZagTime));
         float thickener = 1.0;
-        thickener -= 0.5 * timeFactor;
+        thickener -= 0.25 * timeFactor;
         thickener -= 0.5 * thickener * frx_rainGradient();
         thickener -= 0.5 * thickener * frx_thunderGradient();
         fogNear *= thickener;
         fogFar *= thickener;
-        fogTop = mix(fogTop, 256.0, (1.0 - thickener));
+        fogTop = mix(fogTop, max(FOG_TOP, 128.0), (1.0 - thickener));
         fogDensity = mix(fogDensity, 1.0, (1.0 - thickener));
     }
     
