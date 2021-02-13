@@ -81,7 +81,7 @@ rt_color_depth work_on_pair(
             float upFactor = frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? l2_clampScale(-0.1, 0.1, dot(unit_march, v_up)) : 1.0;
             float skyLightFactor = frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? hdr_gammaAdjustf(light.y * frx_ambientIntensity()) : 0.5; // 0.5 = arbitrary skyless factor. TODO: make constant
             // reflected.rgb = mix(vec3(0.0), hdr_gammaAdjust(BLOCK_LIGHT_COLOR), pow(light.x, 6.0) * material.y);
-            reflected.rgb = hdr_orangeSkyColor(unit_view) * skyLightFactor * occlusionFactor * upFactor;
+            reflected.rgb = hdr_orangeSkyColor(v_skycolor, unit_view) * skyLightFactor * occlusionFactor * upFactor;
             reflected.rgb *= fallback;
             reflected.a = fallback;
             reflected_depth_value = 1.0;

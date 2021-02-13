@@ -53,6 +53,7 @@ varying float v_night;
 varying float v_not_in_void;
 varying float v_near_void_core;
 varying vec3 v_sky_radiance;
+varying vec3 v_fogcolor;
 
 const vec3 VOID_CORE_COLOR = hdr_gammaAdjust(vec3(1.0, 0.7, 0.5));
 
@@ -85,19 +86,29 @@ float raymarched_fog_density(vec3 viewPos, vec3 worldPos, float fogFar)
 
 vec4 fog (float skylightFactor, vec4 a, vec3 viewPos, vec3 worldPos, inout float bloom)
 {
-    float zigZagTime = abs(frx_worldTime()-0.5);
-    float timeFactor = (l2_clampScale(0.45, 0.5, zigZagTime) + l2_clampScale(0.05, 0.0, zigZagTime));
-    timeFactor = frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? timeFactor : 1.0;
 
     float fogDensity = frx_playerFlag(FRX_PLAYER_EYE_IN_FLUID) ? UNDERWATER_FOG_DENSITY : FOG_DENSITY;
     float fogFar = frx_playerFlag(FRX_PLAYER_EYE_IN_FLUID) ? UNDERWATER_FOG_FAR : FOG_FAR;
     float fogNear = frx_playerFlag(FRX_PLAYER_EYE_IN_FLUID) ? UNDERWATER_FOG_NEAR : FOG_NEAR;
     fogFar = max(fogNear, fogFar);
 
-    float fogTop = FOG_TOP * 0.5 + 0.5 * FOG_TOP * timeFactor;
-    
     // float fog_noise = snoise(worldPos.xz * FOG_NOISE_SCALE + frx_renderSeconds() * FOG_NOISE_SPEED) * FOG_NOISE_HEIGHT;
-    float heightFactor = l2_clampScale(FOG_TOP /*+ fog_noise*/, FOG_BOTTOM, worldPos.y);
+    float fogTop = FOG_TOP /*+ fog_noise*/;
+    
+    if (!frx_playerFlag(FRX_PLAYER_EYE_IN_FLUID) && frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT)) {
+        float zigZagTime = abs(frx_worldTime()-0.5);
+        float timeFactor = (l2_clampScale(0.45, 0.5, zigZagTime) + l2_clampScale(0.05, 0.0, zigZagTime));
+        float thickener = 1.0;
+        thickener -= 0.5 * timeFactor;
+        thickener -= 0.5 * thickener * frx_rainGradient();
+        thickener -= 0.5 * thickener * frx_thunderGradient();
+        fogNear *= thickener;
+        fogFar *= thickener;
+        fogTop = mix(fogTop, 256.0, (1.0 - thickener));
+        fogDensity = mix(fogDensity, 1.0, (1.0 - thickener));
+    }
+    
+    float heightFactor = l2_clampScale(fogTop, FOG_BOTTOM, worldPos.y);
     heightFactor = frx_playerFlag(FRX_PLAYER_EYE_IN_FLUID) ? 1.0 : heightFactor;
 
     #if defined(VOLUMETRIC_FOG)
@@ -131,7 +142,7 @@ vec4 fog (float skylightFactor, vec4 a, vec3 viewPos, vec3 worldPos, inout float
 
     fogFactor = clamp(fogFactor * distFactor, 0.0, 1.0);
     
-    vec4 fogColor = vec4(hdr_orangeSkyColor(normalize(-viewPos)), 1.0);
+    vec4 fogColor = vec4(hdr_orangeSkyColor(v_fogcolor, normalize(-viewPos)), 1.0);
     bloom = mix(bloom, 0.0, fogFactor);
     return mix(a, fogColor, fogFactor);
 }

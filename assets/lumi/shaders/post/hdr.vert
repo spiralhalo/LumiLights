@@ -16,6 +16,7 @@ varying float v_night;
 varying float v_not_in_void;
 varying float v_near_void_core;
 varying vec3 v_sky_radiance;
+varying vec3 v_fogcolor;
 
 attribute vec2 in_uv;
 
@@ -34,7 +35,17 @@ void main()
     vec4 screen = gl_ProjectionMatrix * vec4(gl_Vertex.xy * frxu_size, 0.0, 1.0);
     gl_Position = vec4(screen.xy, 0.2, 1.0);
     v_texcoord = in_uv;
-    v_skycolor = hdr_skyColor() /*hdr_skyStr*/;
     v_up = frx_normalModelMatrix() * vec3(0.0, 1.0, 0.0);
     lightsource_setVars();
+
+    vec3 skyColor = hdr_skyColor();
+    if (frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT)) {
+        float thunderFactor = frx_rainGradient() *0.5 + frx_thunderGradient() *0.5;
+        skyColor *= (1.0 - thunderFactor * 0.75);
+        vec3 grayScale = vec3(frx_luminance(skyColor));
+        v_fogcolor = mix(skyColor, grayScale, thunderFactor);
+    } else {
+        v_fogcolor = skyColor;
+    }
+    v_skycolor = skyColor;
 }
