@@ -5,6 +5,7 @@
 
 #include lumi:shaders/lib/util.glsl
 #include lumi:shaders/lib/tonemap.glsl
+#include lumi:shaders/context/global/lighting.glsl
 #include frex:shaders/api/world.glsl
 #include frex:shaders/api/player.glsl
 
@@ -32,11 +33,23 @@ vec3 hdr_skyColor()
         && !frx_playerFlag(FRX_PLAYER_EYE_IN_WATER);
 
     if (customOverworldColor) {
-        // TODO: better color calc instead of using camera-based overworld fog color
-        vec3 clear = frx_vanillaClearColor();
-        float distanceToFog = distance(normalize(clear), normalize(day_fog));
-        skyColor = mix(clear, day_sky, l2_clampScale(0.1, 0.05, distanceToFog));
-    } else skyColor = frx_vanillaClearColor();
+        #ifdef TRUE_DARKNESS_MOONLIGHT
+            const vec3 ngtc = vec3(0.0);
+        #else
+            const vec3 ngtc = NIGHT_SKY_COLOR;
+        #endif
+        const vec3 dayc = DAY_SKY_COLOR;
+
+        const int len = 4;
+        const vec3 colors[len] =  vec3[](ngtc, dayc, dayc, ngtc);
+        const float times[len] = float[](0.00, 0.02, 0.48, 0.50);
+
+        int i = 1;
+        while (frx_worldTime() > times[i] && i < len) i++;
+        skyColor = mix(colors[i-1], colors[i], l2_clampScale(times[i-1], times[i], frx_worldTime()));
+    } else {
+        skyColor = frx_vanillaClearColor();
+    }
 
     vec3 grayScale = vec3(frx_luminance(skyColor));
     // skyColor = mix(skyColor, grayScale, frx_playerFlag(FRX_PLAYER_EYE_IN_WATER) ? 0.5 : 0.0);
