@@ -196,6 +196,10 @@ void custom_sky(in vec3 viewPos, in float blindnessFactor, inout vec4 a, inout f
     bloom_out = 0.0;
 
     if (frx_worldFlag(FRX_WORLD_IS_OVERWORLD) && v_not_in_void > 0.0) {
+        #ifdef CUSTOM_SKY
+            a.rgb = hdr_orangeSkyColor(v_skycolor, skyVec);
+        #endif
+
         float rainFactor = frx_rainGradient() * 0.67 + frx_thunderGradient() * 0.33;
         float cloud = 0.0;
         #ifdef CUSTOM_CLOUD_RENDERING

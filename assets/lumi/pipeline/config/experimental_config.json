@@ -17,6 +17,11 @@
                     nameKey: "config.lumi_lights.value.custom_cloud_rendering",
                     descriptionKey: "config.lumi_lights.help.custom_cloud_rendering"
                 },
+                custom_sky: {
+                    default: false,
+                    nameKey: "config.lumi_lights.value.custom_sky",
+                    descriptionKey: "config.lumi_lights.help.custom_sky"
+                },
                 high_contrast: {
                     default: false,
                     nameKey: "config.lumi_lights.value.high_contrast",
