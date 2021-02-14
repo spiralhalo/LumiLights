@@ -7,6 +7,7 @@
 *  published by the Free Software Foundation, Inc.    *
 *******************************************************/
 
+// Adapted from Builderb0y's shadow tutorial
 vec4 distortedShadowPos(vec4 shadowVertex, int cascade)
 {
     vec4 shadow_ndc = frx_shadowViewProjectionMatrix(0) * shadowVertex;
