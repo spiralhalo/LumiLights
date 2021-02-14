@@ -102,8 +102,9 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
             }
             shadowFactor /= 9.0;
 
-            float directSkylight = 1.0 - shadowFactor * 0.2;
-            light.y = directSkylight * frx_skyLightTransitionFactor() + (1 - frx_skyLightTransitionFactor()) * light.y;
+            float directSkylight = 1.0 - shadowFactor;
+            // sunlight requires > 0.7 skylight (see lightsource.glsl) therefore the light.y is clamped to this 
+            light.y = max(directSkylight * frx_skyLightTransitionFactor(), min(0.7, light.y));
         #endif
         
         // hijack f0 for matHurt and matflash because hurting things are not reflective I guess
