@@ -4,10 +4,11 @@
 /******************************************************
   lumi:shaders/forward/shadow.vert
 ******************************************************/
+ 
+uniform int frxu_cascade;
 
 void frx_writePipelineVertex(in frx_VertexData data) {
     // move to camera origin
     vec4 shadowVertex = data.vertex + frx_modelToCamera();
-    gl_ClipVertex = frx_shadowViewMatrix() * shadowVertex;
-    gl_Position = frx_shadowViewProjectionMatrix() * shadowVertex;
+    gl_Position = frx_shadowViewProjectionMatrix(frxu_cascade) * shadowVertex;
 }

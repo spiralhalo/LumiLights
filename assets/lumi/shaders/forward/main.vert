@@ -29,7 +29,6 @@ void frx_writePipelineVertex(inout frx_VertexData data) {
     if (frx_modelOriginType() == MODEL_ORIGIN_SCREEN) {
         if (!frx_isGui()) lightsource_setVars();
         vec4 viewCoord = gl_ModelViewMatrix * data.vertex;
-        gl_ClipVertex = viewCoord;
         gl_FogFragCoord = length(viewCoord.xyz);
         #ifdef ENCHANTMENT_GLINT_FIX
         if (frx_isGui()) {
@@ -41,7 +40,6 @@ void frx_writePipelineVertex(inout frx_VertexData data) {
     } else {
         data.vertex += frx_modelToCamera();
         vec4 viewCoord = frx_viewMatrix() * data.vertex;
-        gl_ClipVertex = viewCoord;
         gl_FogFragCoord = length(viewCoord.xyz);
         gl_Position = frx_projectionMatrix() * viewCoord;
         l2_viewpos = viewCoord.xyz;
@@ -49,7 +47,7 @@ void frx_writePipelineVertex(inout frx_VertexData data) {
 
 #if defined(SHADOW_MAP_PRESENT) && !defined(DEFERRED_SHADOW)
     vec4 shadowVertex = data.vertex;
-    pv_shadowpos = frx_shadowViewProjectionMatrix() * shadowVertex;
+    pv_shadowpos = frx_shadowViewProjectionMatrix(0) * shadowVertex;
 #endif
 
 #ifdef VANILLA_LIGHTING
