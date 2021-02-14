@@ -80,8 +80,12 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
             vec3 shadowCoords = pv_shadowpos.xyz / pv_shadowpos.w;
             shadowCoords = shadowCoords * 0.5 + 0.5; // Transform from screen coordinates to texture coordinates
             float shadowFactor = 0.0;
-            float bias = 0.0006; // Pretty good bias that covers all angles (direct above can use smaller bias)
-            const vec2 inc = vec2(1.0 / 4096.0);
+            float bias = 0.00001; // Brute force
+            // float shadowDepth = texture2DArray(frxs_shadowMap, vec3(shadowCoords.xy, 0)).r;
+            // float shadowFactor = (shadowCoords.xy != clamp(shadowCoords.xy, 0.0, 1.0))
+            //                     ? 0.0
+            //                     : (shadowDepth + bias < shadowCoords.z ? 1.0 : 0.0);
+            const vec2 inc = vec2(1.0 / 2048.0);
             float shadowDepth;
             vec2 shadowTexCoord;
             for(int row = -1; row <= 1; ++row)

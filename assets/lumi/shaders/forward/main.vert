@@ -4,6 +4,7 @@
 #include lumi:shaders/context/global/lightsource.glsl
 #include lumi:shaders/context/global/experimental.glsl
 #include lumi:shaders/context/forward/common.glsl
+#include lumi:shaders/lib/shadow_distort.glsl
 #include lumi:shaders/forward/varying.glsl
 
 /*******************************************************
@@ -47,7 +48,7 @@ void frx_writePipelineVertex(inout frx_VertexData data) {
 
 #if defined(SHADOW_MAP_PRESENT) && !defined(DEFERRED_SHADOW)
     vec4 shadowVertex = data.vertex;
-    pv_shadowpos = frx_shadowViewProjectionMatrix(0) * shadowVertex;
+    pv_shadowpos = distortedShadowPos(shadowVertex, 0);
 #endif
 
 #ifdef VANILLA_LIGHTING
