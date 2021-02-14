@@ -3,7 +3,7 @@
 #include lumi:shaders/lib/shadow_distort.glsl
 
 /******************************************************
-  lumi:shaders/forward/shadow.vert
+    lumi:shaders/forward/shadow.vert
 ******************************************************/
  
 uniform int frxu_cascade;
