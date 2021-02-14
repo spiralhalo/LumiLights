@@ -1,13 +1,13 @@
 {
-	drawTargets: {
-		solidTerrain: "solid",
-		translucentTerrain: "translucent",
-		translucentEntity: "translucent",
-		weather: "weather",
-		clouds: "clouds",
-		// TODO: segregate solid particles
-		translucentParticles: "particles"
-	},
+    drawTargets: {
+        solidTerrain: "solid",
+        translucentTerrain: "translucent",
+        translucentEntity: "translucent",
+        weather: "weather",
+        clouds: "clouds",
+        // TODO: segregate solid particles
+        translucentParticles: "particles"
+    },
 // When present, will force Minecraft to operate as if "fabulous" mode was selected.
 // Normally this means translucent geometry will be drawn to different framebuffers
 // and mc and mods expect five additional framebuffers will be available:
@@ -328,16 +328,16 @@
             ]
         }, {
             name: "custom_clouds_depth",
-			"internalFormat": "GL_R32F",
-			"pixelFormat": "GL_RED",
-			"pixelDataType": "FLOAT",
-			"texParams": [
-				{ "name": "TEXTURE_MIN_FILTER", "val": "NEAREST" },
-				{ "name": "TEXTURE_MAG_FILTER", "val": "NEAREST" },
-				{ "name": "TEXTURE_WRAP_S", "val": "CLAMP" },
-				{ "name": "TEXTURE_WRAP_T", "val": "CLAMP" },
-				{ "name": "TEXTURE_COMPARE_MODE", "val": "NONE" }
-			]
+            "internalFormat": "GL_R32F",
+            "pixelFormat": "GL_RED",
+            "pixelDataType": "FLOAT",
+            "texParams": [
+                { "name": "TEXTURE_MIN_FILTER", "val": "NEAREST" },
+                { "name": "TEXTURE_MAG_FILTER", "val": "NEAREST" },
+                { "name": "TEXTURE_WRAP_S", "val": "CLAMP" },
+                { "name": "TEXTURE_WRAP_T", "val": "CLAMP" },
+                { "name": "TEXTURE_COMPARE_MODE", "val": "NONE" }
+            ]
         },
         /* WEATHER */
         {
