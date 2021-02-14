@@ -14,6 +14,7 @@
 #include lumi:shaders/lib/tonemap.glsl
 #include lumi:shaders/lib/pbr_shading.glsl
 #include lumi:shaders/lib/puddle.glsl
+#include lumi:shaders/lib/tile_noise.glsl
 #include lumi:shaders/context/post/bloom.glsl
 #include lumi:shaders/context/post/fog.glsl
 #include lumi:shaders/context/global/lighting.glsl
@@ -57,6 +58,9 @@ varying vec3 v_fogcolor;
 
 const vec3 VOID_CORE_COLOR = hdr_gammaAdjust(vec3(1.0, 0.7, 0.5));
 
+// const float JITTER_STRENGTH = 0.4;
+// vec3 tileJitter;
+
 vec3 coords_view(vec2 uv, mat4 inv_projection, float depth)
 {
     vec3 clip = vec3(2.0 * uv - 1.0, 2.0 * depth - 1.0);
@@ -74,6 +78,7 @@ vec2 coords_uv(vec3 view, mat4 projection)
 float raymarched_fog_density(vec3 viewPos, vec3 worldPos, float fogFar)
 {
     vec3 unitMarch = normalize(-viewPos);
+    // unitMarch = normalize(unitMarch + tileJitter);
     vec3 ray_view = viewPos;
     float distToCamera = distance(worldPos, frx_cameraPos());
     int stepCount = 0;
@@ -376,6 +381,8 @@ vec4 ldr_shaded_particle(vec2 uv, sampler2D scolor, sampler2D sdepth, sampler2D 
 
 void main()
 {
+    // tileJitter = 2.0 * tile_noise_3d(v_texcoord, frxu_size, 4) - 1.0;
+    // tileJitter *= JITTER_STRENGTH;
     float bloom1;
     float bloom2;
     float bloom3;
