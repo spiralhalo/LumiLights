@@ -78,9 +78,10 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
 
         #if defined(SHADOW_MAP_PRESENT) && !defined(DEFERRED_SHADOW)
             vec3 shadowCoords = pv_shadowpos.xyz / pv_shadowpos.w;
+            float distCenter = length(shadowCoords.xyz);
             shadowCoords = shadowCoords * 0.5 + 0.5; // Transform from screen coordinates to texture coordinates
             float shadowFactor = 0.0;
-            float bias = 0.00001; // Brute force
+            float bias = 0.00004/(1.0-distCenter); // Brute force
             // float shadowDepth = texture2DArray(frxs_shadowMap, vec3(shadowCoords.xy, 0)).r;
             // float shadowFactor = (shadowCoords.xy != clamp(shadowCoords.xy, 0.0, 1.0))
             //                     ? 0.0

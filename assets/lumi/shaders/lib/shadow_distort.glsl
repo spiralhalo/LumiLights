@@ -17,5 +17,6 @@ vec4 distortedShadowPos(vec4 shadowVertex, int cascade)
     float distortion_rate = 0.01 + length(shadow_ndc.xy) * 0.99;
     shadow_ndc.xy /= distortion_rate;
     shadow_ndc.xy -= translator;
+    shadow_ndc.xy = clamp(shadow_ndc.xy, -1.0, 1.0);
     return shadow_ndc;
 }
