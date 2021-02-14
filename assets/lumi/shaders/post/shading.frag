@@ -1,5 +1,4 @@
 #include lumi:shaders/context/post/header.glsl
-#include lumi:shaders/context/forward/common.glsl
 #include frex:shaders/lib/math.glsl
 #include frex:shaders/lib/noise/noise2d.glsl
 #include frex:shaders/lib/noise/noise3d.glsl
@@ -21,7 +20,7 @@
 #include lumi:shaders/context/global/experimental.glsl
 
 /*******************************************************
- *  lumi:shaders/post/shading.frag            *
+ *  lumi:shaders/post/shading.frag                     *
  *******************************************************
  *  Copyright (c) 2020-2021 spiralhalo                 *
  *  Released WITHOUT WARRANTY under the terms of the   *
@@ -46,6 +45,10 @@ uniform sampler2D u_particles_depth;
 uniform sampler2D u_light_particles;
 
 uniform sampler2D u_ao;
+
+/*******************************************************
+    vertexShader: lumi:shaders/post/hdr.vert
+ *******************************************************/
 
 varying mat4 v_star_rotator;
 varying mat4 v_cloud_rotator;
@@ -212,35 +215,11 @@ void custom_sky(in vec3 viewPos, in float blindnessFactor, inout vec4 a, inout f
         #endif
 
         float rainFactor = frx_rainGradient() * 0.67 + frx_thunderGradient() * 0.33;
-        float cloud = 0.0;
-        #ifdef CUSTOM_CLOUD_RENDERING
-            // cloud
-            // convert hemisphere to plane centered around cameraPos
-            vec2 cloudPlane = worldSkyVec.xz / (0.1 + worldSkyVec.y) * 100.0
-                + frx_cameraPos().xz + vec2(4.0) * frx_renderSeconds();//(frx_worldDay() + frx_worldTime());
-            vec2 rotatedCloudPlane = (v_cloud_rotator * vec4(cloudPlane.x, 0.0, cloudPlane.y, 0.0)).xz;
-            cloudPlane *= 0.1;
-
-            float cloudBase = 1.0
-                * l2_clampScale(0.0, 0.1, skyDotUp)
-                * l2_clampScale(-0.5 - rainFactor * 0.5, 1.0 - rainFactor, snoise(rotatedCloudPlane * 0.005));
-            float cloud1 = cloudBase * l2_clampScale(-1.0, 1.0, snoise(rotatedCloudPlane * 0.015));
-            float cloud2 = cloud1 * l2_clampScale(-1.0, 1.0, snoise(rotatedCloudPlane * 0.04));
-            float cloud3 = cloud2 * l2_clampScale(-1.0, 1.0, snoise(rotatedCloudPlane * 0.1));
-
-            cloud = cloud1 * 0.5 + cloud2 * 0.75 + cloud3;
-            cloud = l2_clampScale(0.1, 0.4, cloud);
-            
-            float cloudColor = frx_ambientIntensity() * frx_ambientIntensity() * (1.0 - 0.3 * rainFactor);
-
-            // blend
-            a.rgb = a.rgb * (1.0 - cloud) + vec3(cloudColor) * cloud;
-        #endif
 
         // stars
         float starry = l2_clampScale(0.4, 0.0, frx_luminance(a.rgb)) * v_night;
         starry *= l2_clampScale(-0.6, -0.5, skyDotUp); //prevent star near the void core
-        float occlusion = (1.0 - rainFactor) * (1.0 - cloud);
+        float occlusion = (1.0 - rainFactor);
         vec4 starVec = v_star_rotator * vec4(worldSkyVec, 0.0);
         vec3 nonMilkyAxis = vec3(-0.598964, 0.531492, 0.598964);
         float milkyness = l2_clampScale(0.5, 0.0, abs(dot(nonMilkyAxis, worldSkyVec.xyz)));

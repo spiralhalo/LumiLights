@@ -69,6 +69,12 @@
                     "solid_shaded", "solid_shaded_swap", "solid_depth",
                     "translucent_shaded", "translucent_shaded_swap", "translucent_depth",]
             }, {
+                name: "clouds",
+                program: "clouds",
+                framebuffer: "custom_clouds",
+                samplerImages: [
+                    "clouds", "clouds_depth"]
+            }, {
                 name: "composite",
                 program: "composite",
                 framebuffer: "composite",
@@ -76,7 +82,7 @@
                     "solid_combine", "solid_depth",
                     "translucent_combine", "translucent_depth",
                     "particles_final", "particles_depth",
-                    "clouds", "clouds_depth",
+                    "custom_clouds", "custom_clouds_depth",
                     "weather", "weather_depth"]
             }
         ]

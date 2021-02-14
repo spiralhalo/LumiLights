@@ -93,6 +93,13 @@
                 "u_hdr_translucent", "u_hdr_translucent_swap", "u_translucent_depth",
             ]
         }, {
+            name: "clouds",
+            vertexSource: "lumi:shaders/post/hdr.vert",
+            fragmentSource: "lumi:shaders/post/clouds.frag",
+            samplers: [
+                "u_clouds", "u_clouds_depth",
+            ]
+        }, {
             name: "composite",
             vertexSource: "lumi:shaders/post/godrays.vert",
             fragmentSource: "lumi:shaders/post/composite.frag",
@@ -310,6 +317,28 @@
                 {name: "TEXTURE_COMPARE_MODE", val: "NONE"}
             ]
         },
+        {
+            name: "custom_clouds",
+            internalFormat: "RGBA8",
+            pixelFormat: "RGBA",
+            pixelDataType: "UNSIGNED_BYTE",
+            texParams: [
+                {name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
+                {name: "TEXTURE_WRAP_S", val: "CLAMP"}, {name: "TEXTURE_WRAP_T", val: "CLAMP"}
+            ]
+        }, {
+            name: "custom_clouds_depth",
+			"internalFormat": "GL_R32F",
+			"pixelFormat": "GL_RED",
+			"pixelDataType": "FLOAT",
+			"texParams": [
+				{ "name": "TEXTURE_MIN_FILTER", "val": "NEAREST" },
+				{ "name": "TEXTURE_MAG_FILTER", "val": "NEAREST" },
+				{ "name": "TEXTURE_WRAP_S", "val": "CLAMP" },
+				{ "name": "TEXTURE_WRAP_T", "val": "CLAMP" },
+				{ "name": "TEXTURE_COMPARE_MODE", "val": "NONE" }
+			]
+        },
         /* WEATHER */
         {
             name: "weather",
@@ -465,6 +494,11 @@
             name: "clouds",
             depthAttachment: {image: "clouds_depth", clearDepth: 1.0},
             colorAttachments: [{image: "clouds", clearColor: 0x00000000}]
+        }, {
+            name: "custom_clouds",
+            colorAttachments: [
+                {image: "custom_clouds", clearColor: "0x00000000"},
+                {image: "custom_clouds_depth", clearColor: "0xFFFFFFFF"}]
         }, {
             name: "weather",
             depthAttachment: {image: "weather_depth", clearDepth: 1.0},
