@@ -10,8 +10,8 @@
 // Adapted from Builderb0y's shadow tutorial
 vec4 distortedShadowPos(vec4 shadowVertex, int cascade)
 {
-    vec4 shadow_ndc = frx_shadowViewProjectionMatrix() * shadowVertex;
-    vec4 center = frx_shadowViewProjectionMatrix() * vec4(0.0, 0.0, 0.0, 1.0);
+    vec4 shadow_ndc = frx_shadowViewProjectionMatrix(cascade) * shadowVertex;
+    vec4 center = frx_shadowViewProjectionMatrix(cascade) * vec4(0.0, 0.0, 0.0, 1.0);
     vec2 translator = vec2(0.0, 0.0) - center.xy;
     shadow_ndc.xy += translator;
     float distortion_rate = 0.01 + length(shadow_ndc.xy) * 0.99;
