@@ -78,10 +78,9 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
 
         #if defined(SHADOW_MAP_PRESENT) && !defined(DEFERRED_SHADOW)
             vec3 shadowCoords = pv_shadowpos.xyz / pv_shadowpos.w;
-            float distCenter = length(shadowCoords.xyz);
             shadowCoords = shadowCoords * 0.5 + 0.5; // Transform from screen coordinates to texture coordinates
             float shadowFactor = 0.0;
-            float bias = 0.00004/(1.0-distCenter); // Brute force
+            float bias = 0.00001; // Brute force
             // float shadowDepth = texture2DArray(frxs_shadowMap, vec3(shadowCoords.xy, 0)).r;
             // float shadowFactor = (shadowCoords.xy != clamp(shadowCoords.xy, 0.0, 1.0))
             //                     ? 0.0
@@ -103,7 +102,7 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
             }
             shadowFactor /= 9.0;
 
-            float directSkylight = 1.0 - shadowFactor;
+            float directSkylight = mix(1.0 - shadowFactor, 1.0 - shadowFactor * 0.2, l2_clampScale(0.7, 0.9, light.y));
             // sunlight requires > 0.7 skylight (see lightsource.glsl) therefore the light.y is clamped to this 
             light.y = max(directSkylight * frx_skyLightTransitionFactor(), min(0.7, light.y));
         #endif
