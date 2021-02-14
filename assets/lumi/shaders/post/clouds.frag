@@ -63,7 +63,7 @@ void main()
         
         float cloudColor = frx_ambientIntensity() * frx_ambientIntensity() * (1.0 - 0.3 * rainFactor);
 
-        vec4 clouds = vec4(cloudColor, cloudColor, cloudColor, 1.0) * cloud;
+        vec4 clouds = vec4(hdr_orangeSkyColor(vec3(cloudColor), -skyVec), 1.0) * cloud;
         gl_FragData[0] = clouds;
         gl_FragData[1] = vec4(cloud > 0.5 ? 0.99999 : 1.0);
     #else
