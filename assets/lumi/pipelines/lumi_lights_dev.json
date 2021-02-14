@@ -23,6 +23,11 @@
 	materialVertexShader: "lumi:shaders/forward/main.vert",
 	materialFragmentShader: "lumi:shaders/forward/main.frag",
 
+	sky: {
+		// Used when dimension/celestial object does not specify
+		defaultZenithAngle: 30
+	},
+
 	include: [
 		"lumi:pipeline/main.json",
 		"lumi:pipeline/main_passes.json",

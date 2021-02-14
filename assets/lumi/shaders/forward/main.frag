@@ -78,28 +78,25 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
 
         #if defined(SHADOW_MAP_PRESENT) && !defined(DEFERRED_SHADOW)
             vec3 shadowCoords = pv_shadowpos.xyz / pv_shadowpos.w;
-            // Transform from screen coordinates to texture coordinates
-            shadowCoords = shadowCoords * 0.5 + 0.5;
+            shadowCoords = shadowCoords * 0.5 + 0.5; // Transform from screen coordinates to texture coordinates
             float shadowFactor = 0.0;
-
-            // For some reason, looking down causes stripes to appear. This fixes that.
-            float bias = 0.0005;//mix(0, 0.0005, l2_clampScale(0.8, 1.0, dot(frx_cameraView(), vec3(0.0, -1.0, 0.0))));
-
-            // Remove flicker, only necessary when the sky light vector is perfectly axis-aligned (such as vanilla)
-            float gate = 0.9 * l2_clampScale(0.1, 0.0, abs(dot(frx_normal /*use original normal to prevent normalmap bamboozle*/, frx_skyLightVector())));
-
-            const vec2 inc = vec2(1.0 / 16384.0);
+            float bias = 0.0006; // Pretty good bias that covers all angles (direct above can use smaller bias)
+            const vec2 inc = vec2(1.0 / 4096.0);
             float shadowDepth;
+            vec2 shadowTexCoord;
             for(int row = -1; row <= 1; ++row)
             {
                 for(int col = -1; col <= 1; ++col)
                 {
-                    shadowDepth = texture2DArray(frxs_shadowMap, vec3(shadowCoords.xy + vec2(row, col) * inc, 0)).r; 
-                    shadowFactor += shadowDepth + bias < shadowCoords.z ? 1.0 : 0.0;      
-                }    
+                    shadowTexCoord = shadowCoords.xy + vec2(row, col) * inc;
+                    shadowDepth = texture2DArray(frxs_shadowMap, vec3(shadowTexCoord, 0)).r;
+                    shadowFactor += (shadowDepth + bias < shadowCoords.z ? 1.0 : 0.0);
+                    // shadowFactor += (shadowTexCoord != clamp(shadowTexCoord, 0.0, 1.0))
+                    //               ? 0.0
+                    //               : (shadowDepth + bias < shadowCoords.z ? 1.0 : 0.0);
+                }
             }
             shadowFactor /= 9.0;
-            shadowFactor *= shadowFactor > gate ? 1.0 : 0.0;
 
             float directSkylight = 1.0 - shadowFactor * 0.2;
             light.y = directSkylight * frx_skyLightTransitionFactor() + (1 - frx_skyLightTransitionFactor()) * light.y;

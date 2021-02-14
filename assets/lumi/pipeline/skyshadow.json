@@ -23,7 +23,7 @@
     {
       name: "shadow_depth",
       depth: 4,
-      size: 16384,
+      size: 4096,
       internalFormat: "DEPTH_COMPONENT32",
       pixelFormat: "DEPTH_COMPONENT",
       pixelDataType: "FLOAT",

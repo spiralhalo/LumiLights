@@ -48,7 +48,8 @@ void frx_writePipelineVertex(inout frx_VertexData data) {
     }
 
 #if defined(SHADOW_MAP_PRESENT) && !defined(DEFERRED_SHADOW)
-    pv_shadowpos = frx_shadowViewProjectionMatrix() * data.vertex;
+    vec4 shadowVertex = data.vertex;
+    pv_shadowpos = frx_shadowViewProjectionMatrix() * shadowVertex;
 #endif
 
 #ifdef VANILLA_LIGHTING
