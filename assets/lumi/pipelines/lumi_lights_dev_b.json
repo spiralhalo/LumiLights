@@ -18,8 +18,8 @@
 	// If you don't want to deal with localization, use literal strings -
 	// those will fail localization lookup and be used directly.
 
-	nameKey: "pipeline.lumi_lights_dev.name",
-	descriptionKey: "pipeline.lumi_lights_dev.desc",
+	nameKey: "pipeline.lumi_lights_dev_b.name",
+	descriptionKey: "pipeline.lumi_lights_dev_b.desc",
 	materialVertexShader: "lumi:shaders/forward/main.vert",
 	materialFragmentShader: "lumi:shaders/forward/main.frag",
 
@@ -33,7 +33,7 @@
 		"lumi:pipeline/main_passes.json",
 		"lumi:pipeline/common.json",
 		"lumi:pipeline/bloom.json",
-		"lumi:pipeline/skyshadow.json",
+		"lumi:pipeline/skyshadow_b.json",
 		"lumi:pipeline/config/lighting_config.json",
 		"lumi:pipeline/config/shadow_config.json",
 		"lumi:pipeline/config/reflection_config.json",

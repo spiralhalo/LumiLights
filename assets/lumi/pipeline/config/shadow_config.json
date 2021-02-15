@@ -1,0 +1,15 @@
+{
+    options: [
+        {
+            includeToken: "lumi:shadow_config",
+            categoryKey: "config.lumi_lights.category.shadow",
+            options: {
+                pcf_filtering: {
+                    default: false,
+                    nameKey: "config.lumi_lights.value.pcf_filtering",
+                    descriptionKey: "config.lumi_lights.help.pcf_filtering"
+                }
+            }
+        }
+    ]
+}

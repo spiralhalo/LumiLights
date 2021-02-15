@@ -2,8 +2,11 @@
     "pipeline.lumi_lights.name": "Lumi Lights",
     "pipeline.lumi_lights.desc": "Cool sunrise and shiny stuff methinks",
 
-    "pipeline.lumi_lights_dev.name": "Lumi Lights Dev",
-    "pipeline.lumi_lights_dev.desc": "Cool sunrise and buggy shadows",
+    "pipeline.lumi_lights_dev.name": "Lumi Shadow 2x",
+    "pipeline.lumi_lights_dev.desc": "Cool sunrise and ok shadows",
+
+    "pipeline.lumi_lights_dev_b.name": "Lumi Shadow 4x",
+    "pipeline.lumi_lights_dev_b.desc": "Cool sunrise and ok shadows",
 
     "pipeline.kaleidoskop.name": "KALEIDOSKOP",
     "pipeline.kaleidoskop.desc": "A trip to the moon",
@@ -33,6 +36,10 @@
     "config.lumi_lights.help.true_darkness_end": "True darkness in the End and custom dimensions without sky light",
     "config.lumi_lights.value.true_darkness_moonlight": "True nighttime darkness",
     "config.lumi_lights.help.true_darkness_moonlight": "Disable moonlight",
+
+    "config.lumi_lights.category.shadow": "Shadows",
+    "config.lumi_lights.value.pcf_filtering": "Shadow filtering",
+    "config.lumi_lights.help.pcf_filtering": "Enable for softer shadow (performance impact)",
 
     "config.lumi_lights.category.fog": "Fog",
     "config.lumi_lights.value.fog_near_chunks": "Near chunks",

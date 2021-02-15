@@ -319,19 +319,23 @@
         },
         {
             name: "custom_clouds",
+            lod: 0,
             internalFormat: "RGBA8",
             pixelFormat: "RGBA",
             pixelDataType: "UNSIGNED_BYTE",
+            target: "TEXTURE_2D",
             texParams: [
                 {name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
                 {name: "TEXTURE_WRAP_S", val: "CLAMP"}, {name: "TEXTURE_WRAP_T", val: "CLAMP"}
             ]
         }, {
             name: "custom_clouds_depth",
-            "internalFormat": "GL_R32F",
-            "pixelFormat": "GL_RED",
-            "pixelDataType": "FLOAT",
-            "texParams": [
+            lod: 0,
+            internalFormat: "GL_R32F",
+            pixelFormat: "GL_RED",
+            pixelDataType: "FLOAT",
+            target: "TEXTURE_2D",
+            texParams: [
                 { "name": "TEXTURE_MIN_FILTER", "val": "NEAREST" },
                 { "name": "TEXTURE_MAG_FILTER", "val": "NEAREST" },
                 { "name": "TEXTURE_WRAP_S", "val": "CLAMP" },
