@@ -23,7 +23,7 @@
     // depth attachment for shadow map
     {
       name: "shadow_depth",
-      size: 2048,
+      size: 1024,
       // DO NOT CHANGE ANY SETTINGS BELOW
       internalFormat: "DEPTH_COMPONENT32",
       pixelFormat: "DEPTH_COMPONENT",
