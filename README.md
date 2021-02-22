@@ -13,7 +13,8 @@ A shader pack for Canvas with PBR Forward Rendering Demo.
 
 ## Using
 
-- [Download the latest version of Canvas.](https://github.com/grondag/canvas/releases)
+- [Download version 1.0.1267 of Canvas.](https://github.com/grondag/canvas/releases/tag/1.0.1267-unstable)
+  - To use with latest version of Canvas, you need to use (unreleased) WIP version of Lumi Lights. Join the discord for instructions (link below) as any information released here will not always be up-to-date.
 - [Download the latest **unified** release of Lumi Lights.](https://github.com/spiralhalo/LumiLightsPBR/releases) If you have [Respackopts](https://modrinth.com/mod/TiF5QWZY/) installed you may use the **respackopts** edition instead.
 - Put Lumi Lights inside your resource pack folder.
 
