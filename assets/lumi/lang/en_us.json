@@ -83,8 +83,6 @@
     "config.lumi_lights.value.caustics_mode": "Water caustics mode",
     "config.lumi_lights.help.caustics_mode": "Emulate water caustics",
     "config.lumi_lights.help.volumetric_fog": "Only use with shadow-enabled pipeline",
-    "config.lumi_lights.value.enchantment_glint_fix": "Enchantment Glint 'Fix' Hack",
-    "config.lumi_lights.help.enchantment_glint_fix": "Fixes enchantment glint in the item slots, breaks it everywhere else",
     "config.lumi_lights.value.deferred_shadow": "/!\\ DO NOT TURN ON /!\\ Deferred shadow",
     "config.lumi_lights.help.deferred_shadow": "Perform shadowmap sampling in post",
 

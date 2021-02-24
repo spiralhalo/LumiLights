@@ -30,11 +30,6 @@ void frx_writePipelineVertex(inout frx_VertexData data) {
         if (!frx_isGui()) lightsource_setVars();
         vec4 viewCoord = gl_ModelViewMatrix * data.vertex;
         gl_FogFragCoord = length(viewCoord.xyz);
-        #ifdef ENCHANTMENT_GLINT_FIX
-        if (frx_isGui()) {
-            viewCoord.z -= 0.00006103516; //"fix" enchantment glint on flat item but may break glint on 3d item
-        }
-        #endif
         gl_Position = gl_ProjectionMatrix * viewCoord;
         l2_viewpos = viewCoord.xyz;
     } else {

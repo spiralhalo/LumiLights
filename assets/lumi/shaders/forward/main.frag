@@ -11,6 +11,7 @@
 #include lumi:shaders/lib/util.glsl
 #include lumi:shaders/lib/tonemap.glsl
 #include lumi:shaders/lib/pbr_shading.glsl
+#include lumi:shaders/lib/noise_glint.glsl
 
 /*******************************************************
  *  lumi:shaders/forward/main.frag                    *
@@ -73,6 +74,7 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
             diffuse = frx_isGui() ? diffuse : min(1.0, 1.5 - diffuse);
             diffuse = fragData.diffuse ? diffuse : 1.0;
             a.rgb *= diffuse;
+            noise_glint(a, frx_normalizeMappedUV(frx_texcoord), frx_matGlint());
         } else {
             float bloom_out = fragData.emissivity * a.a;
             vec3 normal = fragData.vertexNormal * frx_normalModelMatrix();
