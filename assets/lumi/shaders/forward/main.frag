@@ -74,7 +74,6 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
             diffuse = frx_isGui() ? diffuse : min(1.0, 1.5 - diffuse);
             diffuse = fragData.diffuse ? diffuse : 1.0;
             a.rgb *= diffuse;
-            noise_glint(a, frx_normalizeMappedUV(frx_texcoord), frx_matGlint());
         } else {
             float bloom_out = fragData.emissivity * a.a;
             vec3 normal = fragData.vertexNormal * frx_normalModelMatrix();
@@ -83,6 +82,7 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
             a = ldr_tonemap(a);
             gl_FragData[4] = vec4(bloom_out, 0.0, 0.0, 1.0);
         }
+        noise_glint(a, frx_normalizeMappedUV(frx_texcoord), frx_matGlint());
         gl_FragDepth = gl_FragCoord.z;
         gl_FragData[0] = a;
     } else {
