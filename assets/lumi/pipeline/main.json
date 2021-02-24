@@ -167,8 +167,8 @@
         }, {
             name: "light_solid",
             lod: 0,
-            internalFormat: "RGBA16F",
-            pixelFormat: "RGBA",
+            internalFormat: "RGB16F",
+            pixelFormat: "RGB",
             pixelDataType: "FLOAT",
             target: "TEXTURE_2D",
             texParams: [
@@ -178,8 +178,8 @@
         }, {
             name: "normal_solid",
             lod: 0,
-            internalFormat: "RGBA8",
-            pixelFormat: "RGBA",
+            internalFormat: "RGB8",
+            pixelFormat: "RGB",
             pixelDataType: "UNSIGNED_BYTE",
             target: "TEXTURE_2D",
             texParams: [
@@ -189,8 +189,8 @@
         }, {
             name: "material_solid",
             lod: 0,
-            internalFormat: "RGBA8",
-            pixelFormat: "RGBA",
+            internalFormat: "RGB8",
+            pixelFormat: "RGB",
             pixelDataType: "UNSIGNED_BYTE",
             target: "TEXTURE_2D",
             texParams: [
@@ -225,8 +225,8 @@
         }, {
             name: "light_translucent",
             lod: 0,
-            internalFormat: "RGBA8",
-            pixelFormat: "RGBA",
+            internalFormat: "RGB8",
+            pixelFormat: "RGB",
             pixelDataType: "UNSIGNED_BYTE",
             target: "TEXTURE_2D",
             texParams: [
@@ -236,8 +236,8 @@
         }, {
             name: "normal_translucent",
             lod: 0,
-            internalFormat: "RGBA32F",
-            pixelFormat: "RGBA",
+            internalFormat: "RGB32F",
+            pixelFormat: "RGB",
             pixelDataType: "FLOAT",
             target: "TEXTURE_2D",
             texParams: [
@@ -247,8 +247,8 @@
         }, {
             name: "material_translucent",
             lod: 0,
-            internalFormat: "RGBA8",
-            pixelFormat: "RGBA",
+            internalFormat: "RGB8",
+            pixelFormat: "RGB",
             pixelDataType: "UNSIGNED_BYTE",
             target: "TEXTURE_2D",
             texParams: [
@@ -271,8 +271,8 @@
         }, {
             name: "light_particles",
             lod: 0,
-            internalFormat: "RGBA8",
-            pixelFormat: "RGBA",
+            internalFormat: "RGB8",
+            pixelFormat: "RGB",
             pixelDataType: "UNSIGNED_BYTE",
             target: "TEXTURE_2D",
             texParams: [
