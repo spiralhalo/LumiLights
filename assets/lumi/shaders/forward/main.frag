@@ -74,15 +74,16 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
             diffuse = frx_isGui() ? diffuse : min(1.0, 1.5 - diffuse);
             diffuse = fragData.diffuse ? diffuse : 1.0;
             a.rgb *= diffuse;
+            a.rgb += noise_glint(frx_normalizeMappedUV(frx_texcoord), frx_matGlint());
         } else {
             float bloom_out = fragData.emissivity * a.a;
             vec3 normal = fragData.vertexNormal * frx_normalModelMatrix();
             //TODO: apply shadowmap perhaps
             pbr_shading(a, bloom_out, l2_viewpos, fragData.light.xyy, normal, pbr_roughness, pbr_metallic, pbr_f0, fragData.diffuse, true);
+            a.rgb += hdr_gammaAdjust(noise_glint(frx_normalizeMappedUV(frx_texcoord), frx_matGlint()));
             a = ldr_tonemap(a);
-            gl_FragData[4] = vec4(bloom_out, 0.0, 0.0, 1.0);
+            gl_FragData[5] = vec4(bloom_out, 0.0, 0.0, 1.0);
         }
-        noise_glint(a, frx_normalizeMappedUV(frx_texcoord), frx_matGlint());
         gl_FragDepth = gl_FragCoord.z;
         gl_FragData[0] = a;
     } else {
@@ -166,5 +167,6 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
         gl_FragData[1] = vec4(light.x, light.y, (frx_renderTarget() == TARGET_PARTICLES) ? bloom : normalizedBloom, 1.0);
         gl_FragData[2] = vec4(normalizedNormal, 1.0);
         gl_FragData[3] = vec4(roughness, pbr_metallic, pbr_f0, 1.0);
+        gl_FragData[4] = vec4(frx_normalizeMappedUV(frx_texcoord), frx_matGlint(), 1.0);
     }
 }

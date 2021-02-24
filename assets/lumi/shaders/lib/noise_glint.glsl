@@ -1,5 +1,6 @@
 #include frex:shaders/lib/math.glsl
 #include frex:shaders/lib/world.glsl
+#include lumi:shaders/lib/util.glsl
 
 /*******************************************************
  *  lumi:shaders/lib/noise_glint.glsl                  *
@@ -10,7 +11,9 @@
  *  published by the Free Software Foundation, Inc.    *
  *******************************************************/
 
-void noise_glint(inout vec4 a, in vec2 normalizedUV, in float glint)
+const vec3 GLINT_COLOR = vec3(0.655, 0.333, 1.0);
+
+vec3 noise_glint(vec2 normalizedUV, float glint)
 {
     const float zoom = 0.5;
     const vec2 skew = vec2(0.0, 0.4);
@@ -28,7 +31,8 @@ void noise_glint(inout vec4 a, in vec2 normalizedUV, in float glint)
         f = abs(f);
         f = 1.0 - 2.0 * f;
         float n = frx_noise2d(t.xx) * f.x + frx_noise2d(t.yy) * f.y;
-        a += n * vec4(0.655, 0.333, 1.0, 0.0);
-        a = clamp(a, 0.0, 1.0);
+        return n * GLINT_COLOR;
+    } else {
+        return vec3(0.0);
     }
 }

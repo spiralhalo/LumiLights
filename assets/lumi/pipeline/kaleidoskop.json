@@ -39,8 +39,8 @@
                 program: "shading",
                 framebuffer: "shading",
                 samplerImages: [
-                    "solid_main", "solid_depth", "light_solid", "normal_solid", "material_solid",
-                    "translucent_main", "translucent_depth", "light_translucent", "normal_translucent", "material_translucent",
+                    "solid_main", "solid_depth", "light_solid", "normal_solid", "material_solid", "misc_solid",
+                    "translucent_main", "translucent_depth", "light_translucent", "normal_translucent", "material_translucent", "misc_translucent",
                     "particles", "particles_depth", "light_particles",
                     "ao_filtered"]
             }, {

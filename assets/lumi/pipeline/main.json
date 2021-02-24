@@ -58,12 +58,14 @@
                 "u_light_solid",
                 "u_normal_solid",
                 "u_material_solid",
+                "u_misc_solid",
 
                 "u_translucent_color",
                 "u_translucent_depth",
                 "u_light_translucent",
                 "u_normal_translucent",
                 "u_material_translucent",
+                "u_misc_translucent",
 
                 "u_particles_color",
                 "u_particles_depth",
@@ -197,7 +199,18 @@
                 {name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
                 {name: "TEXTURE_WRAP_S", val: "CLAMP"}, {name: "TEXTURE_WRAP_T", val: "CLAMP"}
             ]
-        },
+        }, {
+            name: "misc_solid",
+            lod: 0,
+            internalFormat: "RGB8",
+            pixelFormat: "RGB",
+            pixelDataType: "UNSIGNED_BYTE",
+            target: "TEXTURE_2D",
+            texParams: [
+                {name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
+                {name: "TEXTURE_WRAP_S", val: "CLAMP"}, {name: "TEXTURE_WRAP_T", val: "CLAMP"}
+            ]
+        }
         /* TRANSLUCENT */
         {
             name: "translucent_main",
@@ -255,7 +268,18 @@
                 {name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
                 {name: "TEXTURE_WRAP_S", val: "CLAMP"}, {name: "TEXTURE_WRAP_T", val: "CLAMP"}
             ]
-        }, 
+        },  {
+            name: "misc_translucent",
+            lod: 0,
+            internalFormat: "RGB8",
+            pixelFormat: "RGB",
+            pixelDataType: "UNSIGNED_BYTE",
+            target: "TEXTURE_2D",
+            texParams: [
+                {name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
+                {name: "TEXTURE_WRAP_S", val: "CLAMP"}, {name: "TEXTURE_WRAP_T", val: "CLAMP"}
+            ]
+        }
         /* PARTICLES */
         {
             name: "particles",
@@ -477,6 +501,7 @@
                 {image: "light_solid", clearColor: 0x00000000},
                 {image: "normal_solid", clearColor: 0x00000000},
                 {image: "material_solid", clearColor: 0x00000000},
+                {image: "misc_solid", clearColor: 0x00000000},
                 {image: "emissive"}
             ]
         }, {
@@ -484,9 +509,10 @@
             depthAttachment: {image: "translucent_depth"},
             colorAttachments: [
                 {image: "translucent_main", clearColor: 0x00000000},
-                {image: "light_translucent"},
-                {image: "normal_translucent"},
-                {image: "material_translucent"}
+                {image: "light_translucent", clearColor: 0x00000000},
+                {image: "normal_translucent", clearColor: 0x00000000},
+                {image: "material_translucent", clearColor: 0x00000000},
+                {image: "misc_translucent", clearColor: 0x00000000},
             ]
         }, {
             name: "particles",
