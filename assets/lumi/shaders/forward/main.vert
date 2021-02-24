@@ -27,7 +27,7 @@ float p_diffuseGui(vec3 normal) {
 void frx_writePipelineVertex(inout frx_VertexData data) {
 
     if (frx_modelOriginType() == MODEL_ORIGIN_SCREEN) {
-        if (!frx_isGui()) lightsource_setVars();
+        lightsource_setVars();
         vec4 viewCoord = gl_ModelViewMatrix * data.vertex;
         gl_FogFragCoord = length(viewCoord.xyz);
         gl_Position = gl_ProjectionMatrix * viewCoord;
