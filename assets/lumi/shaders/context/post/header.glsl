@@ -7,7 +7,7 @@
 #include lumi:shaders/lib/tonemap.glsl
 #include lumi:shaders/context/global/lighting.glsl
 #include frex:shaders/api/world.glsl
-#include frex:shaders/api/player.glsl
+#include frex:shaders/api/view.glsl
 
 #define VERTEX_SHADER
 
@@ -30,7 +30,7 @@ vec3 hdr_skyColor()
     vec3 skyColor;
     bool customOverworldColor =
         frx_worldFlag(FRX_WORLD_IS_OVERWORLD)
-        && !frx_playerFlag(FRX_PLAYER_EYE_IN_WATER);
+        && !frx_viewFlag(FRX_CAMERA_IN_FLUID);
 
     if (customOverworldColor) {
         #ifdef TRUE_DARKNESS_MOONLIGHT
@@ -55,8 +55,8 @@ vec3 hdr_skyColor()
         skyColor = frx_vanillaClearColor();
     }
 
-    vec3 grayScale = vec3(frx_luminance(skyColor));
-    // skyColor = mix(skyColor, grayScale, frx_playerFlag(FRX_PLAYER_EYE_IN_WATER) ? 0.5 : 0.0);
+    // vec3 grayScale = vec3(frx_luminance(skyColor));
+    // skyColor = mix(skyColor, grayScale, frx_viewFlag(FRX_CAMERA_IN_WATER) ? 0.5 : 0.0);
     
     return hdr_gammaAdjust(skyColor);
 }

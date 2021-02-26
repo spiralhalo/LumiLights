@@ -98,15 +98,15 @@ float raymarched_fog_density(vec3 viewPos, vec3 worldPos, float fogFar)
 vec4 fog (float skylightFactor, vec4 a, vec3 viewPos, vec3 worldPos, inout float bloom)
 {
 
-    float fogDensity = frx_playerFlag(FRX_PLAYER_EYE_IN_FLUID) ? UNDERWATER_FOG_DENSITY : FOG_DENSITY;
-    float fogFar = frx_playerFlag(FRX_PLAYER_EYE_IN_FLUID) ? UNDERWATER_FOG_FAR : FOG_FAR;
-    float fogNear = frx_playerFlag(FRX_PLAYER_EYE_IN_FLUID) ? UNDERWATER_FOG_NEAR : FOG_NEAR;
+    float fogDensity = frx_viewFlag(FRX_CAMERA_IN_FLUID) ? UNDERWATER_FOG_DENSITY : FOG_DENSITY;
+    float fogFar = frx_viewFlag(FRX_CAMERA_IN_FLUID) ? UNDERWATER_FOG_FAR : FOG_FAR;
+    float fogNear = frx_viewFlag(FRX_CAMERA_IN_FLUID) ? UNDERWATER_FOG_NEAR : FOG_NEAR;
     fogFar = max(fogNear, fogFar);
 
     // float fog_noise = snoise(worldPos.xz * FOG_NOISE_SCALE + frx_renderSeconds() * FOG_NOISE_SPEED) * FOG_NOISE_HEIGHT;
     float fogTop = FOG_TOP /*+ fog_noise*/;
     
-    if (!frx_playerFlag(FRX_PLAYER_EYE_IN_FLUID) && frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT)) {
+    if (!frx_viewFlag(FRX_CAMERA_IN_FLUID) && frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT)) {
         float zigZagTime = abs(frx_worldTime()-0.5);
         float timeFactor = (l2_clampScale(0.45, 0.5, zigZagTime) + l2_clampScale(0.05, 0.0, zigZagTime));
         float thickener = 1.0;
@@ -120,7 +120,7 @@ vec4 fog (float skylightFactor, vec4 a, vec3 viewPos, vec3 worldPos, inout float
     }
     
     float heightFactor = l2_clampScale(fogTop, FOG_BOTTOM, worldPos.y);
-    heightFactor = frx_playerFlag(FRX_PLAYER_EYE_IN_FLUID) ? 1.0 : heightFactor;
+    heightFactor = frx_viewFlag(FRX_CAMERA_IN_FLUID) ? 1.0 : heightFactor;
 
     #if defined(VOLUMETRIC_FOG)
     float fogFactor = fogDensity * heightFactor;
@@ -135,7 +135,7 @@ vec4 fog (float skylightFactor, vec4 a, vec3 viewPos, vec3 worldPos, inout float
         fogFactor = mix(fogFactor, 1.0, blindnessModifier);
     }
 
-    if (frx_playerFlag(FRX_PLAYER_EYE_IN_LAVA)) {
+    if (frx_viewFlag(FRX_CAMERA_IN_LAVA)) {
         fogFar = frx_playerHasEffect(FRX_EFFECT_FIRE_RESISTANCE) ? 2.5 : 0.5;
         fogNear = 0.0;
         fogFactor = 1.0;
@@ -301,8 +301,8 @@ vec4 hdr_shaded_color(
 
     #if CAUSTICS_MODE == CAUSTICS_MODE_TEXTURE
         if (!translucent) {
-            if ((translucentDepth >= depth && frx_playerFlag(FRX_PLAYER_EYE_IN_FLUID))
-                || (translucentDepth < depth && !frx_playerFlag(FRX_PLAYER_EYE_IN_FLUID))) {
+            if ((translucentDepth >= depth && frx_viewFlag(FRX_CAMERA_IN_WATER))
+                || (translucentDepth < depth && !frx_viewFlag(FRX_CAMERA_IN_WATER))) {
                 #if defined(SHADOW_MAP_PRESENT)
                     light.z = mix(light.z, 0.0, min(1.0, 0.25 * caustics(worldPos)));
                 #else
@@ -336,7 +336,7 @@ vec4 hdr_shaded_color(
     a = fog(frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? light.y * frx_ambientIntensity() : 1.0, a, viewPos, worldPos, bloom_out);
 
     #if CAUSTICS_MODE == CAUSTICS_MODE_TEXTURE
-        if (frx_playerFlag(FRX_PLAYER_EYE_IN_FLUID) && translucentDepth >= depth) {
+        if (frx_viewFlag(FRX_CAMERA_IN_WATER) && translucentDepth >= depth) {
             a.rgb += light.y * light.y * 0.1 * v_sky_radiance * volumetric_caustics_beam(worldPos);
         }
     #endif

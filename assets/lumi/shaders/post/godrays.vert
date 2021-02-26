@@ -36,7 +36,7 @@ void main()
         * blindnessFactor
         * notInVoidFactor;
 
-    if (frx_playerFlag(FRX_PLAYER_EYE_IN_FLUID)) {
+    if (frx_viewFlag(FRX_CAMERA_IN_WATER)) {
         #if CAUSTICS_MODE == CAUSTICS_MODE_TEXTURE
             v_godray_intensity = 0.0;
         #else
