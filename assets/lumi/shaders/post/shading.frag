@@ -190,8 +190,8 @@ float volumetric_caustics_beam(vec3 worldPos)
     int stepCount = 0;
     float power = 0.0;
     while (stepCount < maxSteps) {
-        // power += smoothstep(0.5, 0.0, caustics(ray_world));
-        power += 1.0-1.5*caustics(ray_world);
+        power += smoothstep(0.3, 0.1, caustics(ray_world));
+        // power += 1.0-1.5*caustics(ray_world);
         stepCount ++;
         ray_world += stepMarch;
     }
