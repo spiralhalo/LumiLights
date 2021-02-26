@@ -34,8 +34,9 @@ varying vec3 v_fogcolor;
 
 void main()
 {
-    float brightnessMult = mix(1.0, BRIGHT_FINAL_MULT, frx_viewBrightness());
+    // float brightnessMult = mix(1.0, BRIGHT_FINAL_MULT, frx_viewBrightness());
     #ifdef CUSTOM_CLOUD_RENDERING
+        if (frx_worldFlag(FRX_WORLD_IS_OVERWORLD)) {
         float rainFactor = frx_rainGradient() * 0.67 + frx_thunderGradient() * 0.33;
         float cloud = 0.0;
 
@@ -66,6 +67,7 @@ void main()
         vec4 clouds = vec4(hdr_orangeSkyColor(vec3(cloudColor), -skyVec), 1.0) * cloud;
         gl_FragData[0] = clouds;
         gl_FragData[1] = vec4(cloud > 0.5 ? 0.99999 : 1.0);
+        }
     #else
         vec4 clouds = blur13(u_clouds, v_texcoord, frxu_size, vec2(1.0, 1.0));
         gl_FragData[0] = clouds;
