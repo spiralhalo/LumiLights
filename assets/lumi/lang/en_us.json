@@ -41,8 +41,8 @@
     "config.lumi_lights.help.true_darkness_moonlight": "Disable moonlight",
 
     "config.lumi_lights.category.shadow": "Shadows",
-    "config.lumi_lights.value.pcf_filtering": "Shadow filtering",
-    "config.lumi_lights.help.pcf_filtering": "Enable for softer shadow (performance impact)",
+    "config.lumi_lights.value.shadow_box_filtering": "Shadow filtering",
+    "config.lumi_lights.help.shadow_box_filtering": "Enable for softer shadow (performance impact)",
 
     "config.lumi_lights.category.fog": "Fog",
     "config.lumi_lights.value.fog_near_chunks": "Near chunks",
