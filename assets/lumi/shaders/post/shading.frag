@@ -274,8 +274,14 @@ vec4 hdr_shaded_color(
         return vec4(a.rgb * blindnessFactor, 0.0);
     }
 
-    vec3  normal    = texture2D(snormal, uv).xyz * 2.0 - 1.0;
     vec4  light     = texture2D(slight, uv);
+    if (translucent && light.x == 0.0) {
+        // unmanaged translucent draw (LITEMATICA WORKAROUND)
+        // rationale: light.x is always at least 0.03125 for managed draws
+        //            this might not always hold up in the future.
+        return a;
+    }
+    vec3  normal    = texture2D(snormal, uv).xyz * 2.0 - 1.0;
     vec3  material  = texture2D(smaterial, uv).xyz;
     float roughness = material.x == 0.0 ? 1.0 : min(1.0, 1.0203 * material.x - 0.01);
     float metallic  = material.y;
