@@ -45,6 +45,14 @@
                     nameKey: "config.lumi_lights.value.caustics_mode",
                     descriptionKey: "config.lumi_lights.help.caustics_mode"
                 },
+                overlay_debug: {
+                    default: "none",
+                    choices: ["none", "neon", "disco"],
+                    enum: true,
+                    prefix: "overlay_debug_",
+                    nameKey: "config.lumi_lights.value.overlay_debug",
+                    descriptionKey: "config.lumi_lights.help.overlay_debug"
+                },
                 deferred_shadow: {
                     default: false,
                     nameKey: "config.lumi_lights.value.deferred_shadow",

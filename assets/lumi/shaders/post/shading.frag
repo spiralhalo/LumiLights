@@ -280,6 +280,15 @@ vec4 hdr_shaded_color(
         // bypass unmanaged solid sky draw (fix debug rendering color)
         // rationale: light.x is always at least 0.03125 for managed draws
         //            this might not always hold up in the future.
+        #if OVERLAY_DEBUG == OVERLAY_DEBUG_NEON || OVERLAY_DEBUG == OVERLAY_DEBUG_DISCO
+            bloom_out = step(0.01, a.a);
+            a.r += a.g * 0.25;
+            a.b += a.g * 0.5;
+            a.g *= 0.25;
+        #endif
+        #if OVERLAY_DEBUG == OVERLAY_DEBUG_DISCO
+            a.rgb *= 0.25 + 0.75 * fract(frx_renderSeconds()*2.0);
+        #endif
         return a;
     }
     vec3  normal    = texture2D(snormal, uv).xyz * 2.0 - 1.0;
