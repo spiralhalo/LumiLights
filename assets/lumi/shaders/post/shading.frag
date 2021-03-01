@@ -275,8 +275,9 @@ vec4 hdr_shaded_color(
     }
 
     vec4  light     = texture2D(slight, uv);
-    if (translucent && light.x == 0.0) {
-        // unmanaged translucent draw (LITEMATICA WORKAROUND)
+    if (light.x == 0.0) {
+        // bypass unmanaged translucent draw (LITEMATICA WORKAROUND)
+        // bypass unmanaged solid sky draw (fix debug rendering color)
         // rationale: light.x is always at least 0.03125 for managed draws
         //            this might not always hold up in the future.
         return a;
