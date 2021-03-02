@@ -215,6 +215,8 @@ void custom_sky(in vec3 viewPos, in float blindnessFactor, inout vec4 a, inout f
             } else {
                 a.rgb += vec3(10.0) * celestialObject;
             }
+        #else
+            a.rgb = hdr_gammaAdjust(a.rgb) * 2.0;
         #endif
 
         float rainFactor = frx_rainGradient() * 0.67 + frx_thunderGradient() * 0.33;
