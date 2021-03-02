@@ -36,9 +36,9 @@ vec3 hdr_skyColor()
         #ifdef TRUE_DARKNESS_MOONLIGHT
             const vec3 ngtc = vec3(0.0);
         #else
-            const vec3 ngtc = NIGHT_SKY_COLOR;
+            const vec3 ngtc = hdr_gammaAdjust(NIGHT_SKY_COLOR);
         #endif
-        const vec3 dayc = DAY_SKY_COLOR;
+        const vec3 dayc = hdr_gammaAdjust(DAY_SKY_COLOR);
 
         const int len = 4;
         const vec3 colors[len] =  vec3[](dayc, ngtc, ngtc, dayc);
@@ -52,13 +52,13 @@ vec3 hdr_skyColor()
             skyColor = mix(colors[i-1], colors[i], l2_clampScale(times[i-1], times[i], frx_worldTime()));
         }
     } else {
-        skyColor = frx_vanillaClearColor();
+        skyColor = hdr_gammaAdjust(frx_vanillaClearColor());
     }
 
     // vec3 grayScale = vec3(frx_luminance(skyColor));
     // skyColor = mix(skyColor, grayScale, frx_viewFlag(FRX_CAMERA_IN_WATER) ? 0.5 : 0.0);
     
-    return hdr_gammaAdjust(skyColor);
+    return skyColor;
 }
 
 vec3 ldr_skyColor()
