@@ -105,6 +105,7 @@ rt_Result rt_reflection(
 {
     vec3 start_view = ray_view.xyz;
     float edge_z = start_view.z + 0.25;
+    // float hitbox_z = mix(HITBOX, 1.0, sqrt(start_view.z/512.0));
     float hitbox_z = HITBOX;
     vec3 ray = unit_march * hitbox_z;
 
@@ -125,6 +126,7 @@ rt_Result rt_reflection(
         delta_z = current_view.z - ray_view.z;
         reflectedNormal = normalize(normal_matrix * sample_worldNormal(current_uv, reflected_normal));
         backface = dot(unit_march, reflectedNormal) > 0;
+        // backface = backface || (unit_march.y != 0.0 && abs(current_view.y - start_view.y) < 1.0);
         if (delta_z > 0 && !backface && (current_view.z < edge_z || unit_march.z > 0.0)) {
             // Remove "occlusion factor" (result.hit > 1) because it doesn't work when looking down, i.e. where it is needed the most
             // if (current_uv.x >= 0.0 && current_uv.y >= 0.0
