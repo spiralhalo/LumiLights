@@ -10,10 +10,14 @@
 const float stretch = 1.2;
 
 void frx_startFragment(inout frx_FragmentData fragData) {
+
+    /* SWAMP WATER, BLOOD, OR MUSTARD ARE CONSIDERED MURKY */
+    float murky = 1.0 - fragData.vertexColor.b;
+
     #ifdef LUMI_PBRX
         /* PBR PARAMS */
         pbr_f0 = 0.02;
-        pbr_roughness = 0.05;
+        pbr_roughness = 0.05;// + murky * 0.5;
     #else
         /* HACK */
         fragData.light.y += 0.077 * smoothstep(1.0, 0.99, fragData.vertexNormal.y);
@@ -24,15 +28,12 @@ void frx_startFragment(inout frx_FragmentData fragData) {
     #endif
     
     /* WATER RECOLOR */
-    // vec3 desat = vec3(frx_luminance(fragData.vertexColor.rgb));
     #ifdef LUMI_NoWaterTexture
-        // fragData.vertexColor.rgb = mix(fragData.vertexColor.rgb, desat, 0.3);
         fragData.spriteColor.rgb = vec3(1.0);
-        fragData.spriteColor.a = 0.3;
+        fragData.spriteColor.a = 0.3 + 0.7 * fragData.spriteColor.a * murky;
     #else
-        // fragData.vertexColor.rgb = mix(fragData.vertexColor.rgb, desat, 0.6);
         fragData.spriteColor.rgb *= fragData.spriteColor.rgb;
-        fragData.spriteColor.a = 0.5;
+        fragData.spriteColor.a *= 0.5 + 0.5 * murky;
     #endif
     
     /* WAVY NORMALS */
