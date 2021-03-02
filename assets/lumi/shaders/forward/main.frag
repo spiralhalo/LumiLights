@@ -24,14 +24,6 @@
 
 #include lumi:shaders/forward/varying.glsl
 
-#if defined(SHADOW_MAP_PRESENT)
-vec3 shadowDist(int cascade)
-{
-    vec4 c = frx_shadowCenter(cascade);
-    return abs((c.xyz - pv_shadowpos.xyz) / c.w);
-}
-#endif
-
 frx_FragmentData frx_createPipelineFragment()
 {
 #ifdef VANILLA_LIGHTING
@@ -90,60 +82,7 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
         vec2 light = fragData.light.xy;
 
         #if defined(SHADOW_MAP_PRESENT) && !defined(DEFERRED_SHADOW)
-            vec3 d3 = shadowDist(3);
-            vec3 d2 = shadowDist(2);
-            vec3 d1 = shadowDist(1);
-            int cascade = 0;
-            float bias = 0.002; // biases are brute forced
-            if (d3.x < 1.0 && d3.y < 1.0 && d3.z < 1.0) {
-                cascade = 3;
-                #ifdef SHADOW_BOX_FILTERING
-                    bias = 0.00006;
-                #else
-                    bias = 0.0;
-                #endif
-            } else if (d2.x < 1.0 && d2.y < 1.0 && d2.z < 1.0) {
-                cascade = 2;
-                #ifdef SHADOW_BOX_FILTERING
-                    bias = 0.00008;
-                #else
-                    bias = 0.0;
-                #endif
-            } else if (d1.x < 1.0 && d1.y < 1.0 && d1.z < 1.0) {
-                cascade = 1;
-                #ifdef SHADOW_BOX_FILTERING
-                    bias = 0.0002;
-                #else
-                    bias = 0.0;
-                #endif
-            }
-
-            vec4 shadowCoords = frx_shadowProjectionMatrix(cascade) * pv_shadowpos;
-            shadowCoords.xyz = shadowCoords.xyz * 0.5 + 0.5; // Transform from screen coordinates to texture coordinates
-
-            #ifdef SHADOW_BOX_FILTERING
-                float inc = 1.0 / textureSize(frxs_shadowMap, 0).x;
-                float shadowDepth;
-                vec2 shadowTexCoord;
-                float shadowFactor = 0.0;
-                vec2 offset;
-                for(offset.x = -inc; offset.x <= inc; offset.x += inc)
-                {
-                    for(offset.y = -inc; offset.y <= inc; offset.y += inc)
-                    {
-                        shadowDepth = texture2DArray(frxs_shadowMap, vec3(shadowCoords.xy + offset, float(cascade))).r;
-                        shadowFactor += (shadowDepth + bias < shadowCoords.z ? 1.0 : 0.0);
-                        // shadowFactor += (shadowTexCoord != clamp(shadowTexCoord, 0.0, 1.0))
-                        //               ? 0.0
-                        //               : (shadowDepth + bias < shadowCoords.z ? 1.0 : 0.0);
-                    }
-                }
-                shadowFactor /= 9.0;
-            #else
-                float shadowDepth = texture2DArray(frxs_shadowMap, vec3(shadowCoords.xy, float(cascade))).r;
-                float shadowFactor = shadowDepth + bias < shadowCoords.z ? 1.0 : 0.0;
-            #endif
-
+            float shadowFactor = calcShadowFactor(pv_shadowpos);
             float directSkylight = mix(1.0 - shadowFactor, 1.0 - shadowFactor * 0.2, l2_clampScale(0.7, 0.9, light.y));
             // sunlight requires > 0.7 skylight (see lightsource.glsl) therefore the light.y is clamped to this 
             light.y = max(directSkylight * frx_skyLightTransitionFactor(), min(0.7, light.y));
