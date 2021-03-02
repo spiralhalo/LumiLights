@@ -15,30 +15,30 @@
  *******************************************************/
 
 #if REFLECTION_PROFILE == REFLECTION_PROFILE_EXTREME
-    const float HITBOX = 0.0375;
+    const float HITBOX = 0.0625;
     const int MAXSTEPS = 109;
-    const int PERIOD = 18;
+    const int PERIOD = 14;
     const int REFINE = 16;
 #endif
 
 #if REFLECTION_PROFILE == REFLECTION_PROFILE_HIGH
-    const float HITBOX = 0.125;
+    const float HITBOX = 0.25;
     const int MAXSTEPS = 50;
-    const int PERIOD = 9;
+    const int PERIOD = 8;
     const int REFINE = 16;
 #endif
 
 #if REFLECTION_PROFILE == REFLECTION_PROFILE_MEDIUM
-    const float HITBOX = 0.125;
-    const int MAXSTEPS = 36;
+    const float HITBOX = 0.25;
+    const int MAXSTEPS = 34;
     const int PERIOD = 5;
     const int REFINE = 8;
 #endif
 
 #if REFLECTION_PROFILE == REFLECTION_PROFILE_LOW
-    const float HITBOX = 0.25;
+    const float HITBOX = 0.125;
     const int MAXSTEPS = 19;
-    const int PERIOD = 3;
+    const int PERIOD = 2;
     const int REFINE = 8;
 #endif
 
