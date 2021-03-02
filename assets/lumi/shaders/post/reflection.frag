@@ -56,17 +56,17 @@ rt_color_depth work_on_pair(
 {
     rt_color_depth noreturn = rt_color_depth(vec4(0.0), 1.0);
     vec4 material = texture2D(reflector_material, v_texcoord);
-    vec3 worldNormal = coords_normal(v_texcoord, reflector_normal);
+    vec3 worldNormal = sample_worldNormal(v_texcoord, reflector_normal);
     float roughness = material.x == 0.0 ? 1.0 : min(1.0, 1.0203 * material.x - 0.01); //prevent gloss on unmanaged draw
-    vec3 ray_view  = coords_view(v_texcoord, frx_inverseProjectionMatrix(), reflector_depth);
-    vec3 ray_world = coords_world(ray_view, frx_inverseViewMatrix());
+    vec3 ray_view  = uv2view(v_texcoord, frx_inverseProjectionMatrix(), reflector_depth);
+    vec3 ray_world = view2world(ray_view, frx_inverseViewMatrix());
     // TODO: optimize puddle by NOT calling it twice in shading and in reflection
     vec2 light = texture2D(reflector_light, v_texcoord).xy;
     vec4 fake = vec4(0.0);
     #ifdef RAIN_PUDDLES
         ww_puddle_pbr(fake, roughness, light.y, worldNormal, ray_world);
     #endif
-    if (roughness <= REFLECTION_MAXIMUM_ROUGHNESS && material.a > 0.0) {
+    if (roughness <= REFLECTION_MAXIMUM_ROUGHNESS) {
         float gloss    = 1.0 - roughness;
         vec3 jitter    = 2.0 * tile_noise_3d(v_texcoord, frxu_size, 4) - 1.0;
         vec3 normal    = frx_normalModelMatrix() * normalize(worldNormal);
@@ -78,7 +78,7 @@ rt_color_depth work_on_pair(
         vec3 f0         = mix(reg_f0, albedo, material.y);
         rt_Result result = rt_reflection(ray_view, unit_view, normal, unit_march, frx_normalModelMatrix(), frx_projectionMatrix(), frx_inverseProjectionMatrix(), reflector_depth, reflector_normal, reflected_depth, reflected_normal);
         vec4 reflected;
-        float reflected_depth_value = coords_depth(result.reflected_uv, reflected_depth);
+        float reflected_depth_value = sample_depth(result.reflected_uv, reflected_depth);
         if (reflected_depth_value == 1.0 || !result.hit || result.reflected_uv.x < 0.0 || result.reflected_uv.y < 0.0 || result.reflected_uv.x > 1.0 || result.reflected_uv.y > 1.0) {
             float occlusionFactor = result.hits > 1 ? 0.1 : 1.0;
             float upFactor = frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? l2_clampScale(-0.1, 0.1, dot(unit_march, v_up)) : 1.0;
@@ -91,7 +91,7 @@ rt_color_depth work_on_pair(
         } else {
             vec4 reflectedShaded = texture2D(reflected_color, result.reflected_uv);
             vec4 reflectedCombine = texture2D(reflected_combine, result.reflected_uv);
-            vec3 reflectedNormal = coords_normal(result.reflected_uv, reflected_normal);
+            vec3 reflectedNormal = sample_worldNormal(result.reflected_uv, reflected_normal);
             reflected = mix(reflectedShaded, reflectedCombine, l2_clampScale(0.5, 1.0, -dot(worldNormal, reflectedNormal)));
         }
         // more useful in worldspace after rt computation is done

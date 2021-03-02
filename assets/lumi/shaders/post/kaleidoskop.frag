@@ -1,5 +1,5 @@
 #include lumi:shaders/context/post/header.glsl
-#include lumi:shaders/post/reflection_common.glsl
+#include lumi:shaders/context/post/reflection.glsl
 
 /*******************************************************
  *  lumi:shaders/post/kaleidoskop.frag        *
@@ -43,12 +43,11 @@ vec4 work_on_pair(
 {
     vec4 noreturn = vec4(0.0);
     vec4 material = texture2D(reflector_material, v_texcoord);
-    vec3 worldNormal = coords_normal(v_texcoord, reflector_normal);
+    vec3 worldNormal = sample_worldNormal(v_texcoord, reflector_normal);
     float roughness = material.x == 0.0 ? 1.0 : material.x; //prevent gloss on unmanaged draw
-    float gloss   = 1.0 - roughness;
-    if (gloss > 0.01 && material.a > 0.0) {
-        vec3 ray_view  = coords_view(v_texcoord, frx_inverseProjectionMatrix(), reflector_depth);
-        vec3 ray_world = coords_world(ray_view, frx_inverseViewMatrix());
+    if (roughness <= REFLECTION_MAXIMUM_ROUGHNESS) {
+        vec3 ray_view  = uv2view(v_texcoord, frx_inverseProjectionMatrix(), reflector_depth);
+        vec3 ray_world = view2world(ray_view, frx_inverseViewMatrix());
         vec3 jitter    = 2.0 * vec3(frx_noise2d(ray_world.yz), frx_noise2d(ray_world.zx), frx_noise2d(ray_world.xy)) - 1.0;
         vec3 normal    = frx_normalModelMatrix() * normalize(worldNormal);
         float roughness2 = roughness * roughness;
@@ -60,7 +59,7 @@ vec4 work_on_pair(
         vec3 f0         = mix(reg_f0, albedo, material.y);
         rt_Result result = rt_reflection(ray_view, unit_view, normal, unit_march, frx_normalModelMatrix(), frx_projectionMatrix(), frx_inverseProjectionMatrix(), reflector_depth, reflector_normal, reflected_depth, reflected_normal);
         vec4 reflected;
-        float reflected_depth_value = coords_depth(result.reflected_uv, reflected_depth);
+        float reflected_depth_value = sample_depth(result.reflected_uv, reflected_depth);
         if (reflected_depth_value == 1.0 || !result.hit || result.reflected_uv.x < 0.0 || result.reflected_uv.y < 0.0 || result.reflected_uv.x > 1.0 || result.reflected_uv.y > 1.0) {
             reflected.rgb = v_skycolor * frx_ambientIntensity() * l2_clampScale(-1.0, 1.0, dot(worldNormal, UP_VECTOR));
             reflected.rgb *= result.hits > 1 ? 0.1 : 1.0;
