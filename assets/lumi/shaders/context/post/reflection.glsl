@@ -45,7 +45,6 @@
 const float REFLECTION_MAXIMUM_ROUGHNESS = REFLECTION_MAXIMUM_ROUGHNESS_RELATIVE / 10.0;
 
 
-#if REFLECTION_PROFILE != REFLECTION_PROFILE_NONE
 vec2 view2uv(vec3 view, mat4 projection)
 {
     vec4 clip = projection * vec4(view, 1.0);
@@ -81,13 +80,6 @@ float skylight_adjust(float skyLight, float intensity)
     return l2_clampScale(0.03125, 1.0, skyLight) * intensity;
 }
 
-struct rt_Result
-{
-    vec2 reflected_uv;
-    bool hit;
-    int hits;
-};
-
 vec3 pbr_lightCalc(float roughness, vec3 f0, vec3 radiance, vec3 lightDir, vec3 viewDir)
 {
     vec3 halfway = normalize(viewDir + lightDir);
@@ -96,6 +88,14 @@ vec3 pbr_lightCalc(float roughness, vec3 f0, vec3 radiance, vec3 lightDir, vec3 
 
     return clamp(fresnel * radiance * roughnessFade * (1-roughness), 0.0, 1.0);
 }
+
+#if REFLECTION_PROFILE != REFLECTION_PROFILE_NONE
+struct rt_Result
+{
+    vec2 reflected_uv;
+    bool hit;
+    int hits;
+};
 
 rt_Result rt_reflection(
     vec3 ray_view, vec3 unit_view, vec3 normal, vec3 unit_march,
