@@ -18,6 +18,7 @@
 #include lumi:shaders/context/post/bloom.glsl
 #include lumi:shaders/context/post/fog.glsl
 #include lumi:shaders/context/global/lighting.glsl
+#include lumi:shaders/context/global/shadow.glsl
 #include lumi:shaders/context/global/experimental.glsl
 
 /*******************************************************
@@ -304,12 +305,8 @@ vec4 hdr_shaded_color(
     // return vec4(coords_view(uv, frx_inverseProjectionMatrix(), depth), 1.0);
 
     #if defined(SHADOW_MAP_PRESENT) && defined(DEFERRED_SHADOW)
-        vec4 shadowCoords = frx_shadowViewProjectionMatrix() * vec4(worldPos, 1.0);
-        shadowCoords.xyz /= shadowCoords.w;
-        shadowCoords.xyz = shadowCoords.xyz * 0.5 + 0.5;
-        float bias = 0.0;
-        float shadowDepth = texture2DArray(frxs_shadowMap, vec3(shadowCoords.xy, 0)).r; 
-        float shadowFactor = (shadowDepth + bias < shadowCoords.z) ? 1.0 : 0.0;      
+        vec4 shadowViewPos = frx_shadowViewMatrix() * vec4(worldPos, 1.0);
+        float shadowFactor = calcShadowFactor(shadowViewPos);  
         light.z = 1.0 - shadowFactor;
     #else
         light.z = light.y;
