@@ -87,6 +87,9 @@ void main()
             viewPos.xyz /= viewPos.w;
             vec3 skyVec = normalize(viewPos.xyz);
             vec3 worldSkyVec = skyVec * frx_normalModelMatrix();
+
+            if (worldSkyVec.y < 0) return;
+            
             float toMaxY = CLOUD_MAX_Y / worldSkyVec.y;
             float toMinY = CLOUD_MIN_Y / worldSkyVec.y;
             vec3 highestWorldPos = worldSkyVec * toMaxY;
