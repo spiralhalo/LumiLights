@@ -20,6 +20,7 @@
  *******************************************************/
 
 uniform sampler2D u_clouds;
+uniform sampler2D u_clouds_texture;
 uniform sampler2D u_clouds_depth;
 
 /*******************************************************
@@ -38,8 +39,6 @@ void main()
     #ifdef CUSTOM_CLOUD_RENDERING
         if (frx_worldFlag(FRX_WORLD_IS_OVERWORLD)) {
             float rainFactor = frx_rainGradient() * 0.67 + frx_thunderGradient() * 0.33;
-            float cloud = 0.0;
-
             vec4 viewPos = frx_inverseProjectionMatrix() * vec4(2.0 * v_texcoord - 1.0, 1.0, 1.0);
             viewPos.xyz /= viewPos.w;
             vec3 skyVec = normalize(viewPos.xyz);
@@ -47,20 +46,13 @@ void main()
             float skyDotUp = dot(skyVec, v_up);
             
             // convert hemisphere to plane centered around cameraPos
-            vec2 cloudPlane = worldSkyVec.xz / (0.1 + worldSkyVec.y) * 100.0
-                + frx_cameraPos().xz + vec2(4.0) * frx_renderSeconds();//(frx_worldDay() + frx_worldTime());
-            vec2 rotatedCloudPlane = (v_cloud_rotator * vec4(cloudPlane.x, 0.0, cloudPlane.y, 0.0)).xz;
-            cloudPlane *= 0.1;
+            vec2 cloudPlane = worldSkyVec.xz / (0.1 + worldSkyVec.y) * 30.0;
+            cloudPlane /= 512.0;
+            cloudPlane += 0.5;
 
-            float cloudBase = 1.0
-                * l2_clampScale(0.0, 0.1, skyDotUp)
-                * l2_clampScale(-0.5 - rainFactor * 0.5, 1.0 - rainFactor, snoise(rotatedCloudPlane * 0.005));
-            float cloud1 = cloudBase * l2_clampScale(-1.0, 1.0, snoise(rotatedCloudPlane * 0.015));
-            float cloud2 = cloud1 * l2_clampScale(-1.0, 1.0, snoise(rotatedCloudPlane * 0.04));
-            float cloud3 = cloud2 * l2_clampScale(-1.0, 1.0, snoise(rotatedCloudPlane * 0.1));
-
-            cloud = cloud1 * 0.5 + cloud2 * 0.75 + cloud3;
-            cloud = l2_clampScale(0.1, 0.4, cloud);
+            vec2 edgeFactor = smoothstep(0.5, 0.4, abs(cloudPlane - 0.5));
+            float e = edgeFactor.x * edgeFactor.y;
+            float cloud = e * l2_clampScale(0.0, 0.1, skyDotUp) * texture2D(u_clouds_texture, cloudPlane).r;
             
             float cloudColor = frx_ambientIntensity() * frx_ambientIntensity() * (1.0 - 0.3 * rainFactor);
 

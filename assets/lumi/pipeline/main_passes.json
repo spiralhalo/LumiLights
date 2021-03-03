@@ -78,7 +78,7 @@
                 program: "clouds",
                 framebuffer: "custom_clouds",
                 samplerImages: [
-                    "clouds", "clouds_depth"]
+                    "clouds", "clouds_texture", "clouds_depth"]
             }, {
                 name: "composite",
                 program: "composite",
