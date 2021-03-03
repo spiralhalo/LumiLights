@@ -83,9 +83,8 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
 
         #if defined(SHADOW_MAP_PRESENT) && !defined(DEFERRED_SHADOW)
             float shadowFactor = calcShadowFactor(pv_shadowpos);
-            float directSkylight = mix(1.0 - shadowFactor, 1.0 - shadowFactor * 0.2, l2_clampScale(0.7, 0.9, light.y));
-            // sunlight requires > 0.7 skylight (see lightsource.glsl) therefore the light.y is clamped to this 
-            light.y = max(directSkylight * frx_skyLightTransitionFactor(), min(0.7, light.y));
+            // sunlight requires > 0.7 skylight (see lightsource.glsl) therefore the light.y is clamped to this
+            light.y = mix(min(0.7, light.y), 1.0, shadowFactor);
         #endif
         
         // hijack f0 for matHurt and matflash because hurting things are not reflective I guess

@@ -307,7 +307,7 @@ vec4 hdr_shaded_color(
     #if defined(SHADOW_MAP_PRESENT) && defined(DEFERRED_SHADOW)
         vec4 shadowViewPos = frx_shadowViewMatrix() * vec4(worldPos, 1.0);
         float shadowFactor = calcShadowFactor(shadowViewPos);  
-        light.z = 1.0 - shadowFactor;
+        light.z = shadowFactor;
     #else
         light.z = light.y;
     #endif
