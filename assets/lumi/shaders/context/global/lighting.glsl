@@ -53,13 +53,14 @@ const vec3 NETHER_SKYLESS_LIGHT_COLOR = vec3(1.0, 0.5, 0.3);
 
 // SKY COLORS
 // const vec3 SUNRISE_SKY_COLOR = vec3(0.5, 0.3, 0.1);
-const vec3 ORANGE_SKY_COLOR = vec3(0.5, 0.2, 0.0);
+const vec3 ORANGE_SKY_COLOR = hdr_gammaAdjust(vec3(1.0, 0.7, 0.0));
 #ifdef CUSTOM_SKY
-const vec3 NIGHT_SKY_COLOR = vec3(0.2, 0.272, 0.4);
+const vec3 DAY_SKY_COLOR = hdr_gammaAdjust(vec3(0.52, 0.69, 0.9));
+const vec3 NIGHT_SKY_COLOR = hdr_gammaAdjust(vec3(0.2, 0.272, 0.4));
 #else
-const vec3 NIGHT_SKY_COLOR = vec3(0.01, 0.01, 0.01);
+const vec3 DAY_SKY_COLOR = hdr_gammaAdjust(vec3(0.52, 0.69, 1.0));
+const vec3 NIGHT_SKY_COLOR = hdr_gammaAdjust(vec3(0.01, 0.01, 0.01));
 #endif
-const vec3 DAY_SKY_COLOR = vec3(0.52, 0.69, 1.0);
 
 // GAMMA-ADJUSTED AMBIENT
 const vec3 HDR_NOON_AMBIENT = hdr_gammaAdjust(vec3(0.8550322));

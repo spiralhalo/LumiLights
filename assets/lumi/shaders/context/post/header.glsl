@@ -22,8 +22,8 @@ varying vec3 v_skycolor;
 varying vec3 v_up;
 
 #ifdef VERTEX_SHADER
-const vec3 day_sky = vec3(0.52, 0.69, 1.0);
-const vec3 day_fog = vec3(0.75, 0.84375, 1.0);
+// const vec3 day_sky = vec3(0.52, 0.69, 1.0);
+// const vec3 day_fog = vec3(0.75, 0.84375, 1.0);
 
 vec3 hdr_skyColor()
 {
@@ -36,9 +36,9 @@ vec3 hdr_skyColor()
         #ifdef TRUE_DARKNESS_MOONLIGHT
             const vec3 ngtc = vec3(0.0);
         #else
-            const vec3 ngtc = hdr_gammaAdjust(NIGHT_SKY_COLOR);
+            const vec3 ngtc = NIGHT_SKY_COLOR;
         #endif
-        const vec3 dayc = hdr_gammaAdjust(DAY_SKY_COLOR);
+        const vec3 dayc = DAY_SKY_COLOR;
 
         const int len = 4;
         const vec3 colors[len] =  vec3[](dayc, ngtc, ngtc, dayc);
