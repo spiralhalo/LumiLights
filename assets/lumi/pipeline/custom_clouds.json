@@ -28,7 +28,7 @@
         }, {
             name: "clouds_texture",
             lod: 0,
-            size: 512,
+            size: 1024,
             internalFormat: "GL_R8",
             pixelFormat: "GL_RED",
             pixelDataType: "UNSIGNED_BYTE",

@@ -10,11 +10,11 @@
 
 void main()
 {
-    #ifdef CUSTOM_CLOUD_RENDERING
+    #if CLOUD_RENDERING != CLOUD_RENDERING_VANILLA
     if (frx_worldFlag(FRX_WORLD_IS_OVERWORLD)) {
         float rainFactor = frx_rainGradient() * 0.67 + frx_thunderGradient() * 0.33;
-        vec2 cloudCoord = frx_cameraPos().xz + (v_texcoord * 2.0 - 1.0) * 128.0 + frx_renderSeconds();//(frx_worldDay() + frx_worldTime());
-        cloudCoord *= 15.0;
+        vec2 cloudCoord = frx_cameraPos().xz + (v_texcoord * 2.0 - 1.0) * 512.0 + (frx_worldDay() + frx_worldTime());
+        cloudCoord *= 2.0;
 
         float cloudBase = l2_clampScale(-0.5 - rainFactor * 0.5, 1.0 - rainFactor, snoise(cloudCoord * 0.005));
         float cloud1 = cloudBase * l2_clampScale(-1.0, 1.0, snoise(cloudCoord * 0.015));
