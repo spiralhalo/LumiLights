@@ -126,7 +126,7 @@ vec4 fog (float skylightFactor, vec4 a, vec3 viewPos, vec3 worldPos, inout float
     #if defined(VOLUMETRIC_FOG)
     float fogFactor = fogDensity * heightFactor;
     #else
-    float fogFactor = fogDensity * heightFactor * skylightFactor;
+    float fogFactor = fogDensity * heightFactor * (frx_viewFlag(FRX_CAMERA_IN_FLUID) ? 1.0 : skylightFactor);
     #endif
 
     if (frx_playerHasEffect(FRX_EFFECT_BLINDNESS)) {
