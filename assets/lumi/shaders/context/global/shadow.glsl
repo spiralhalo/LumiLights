@@ -1,10 +1,22 @@
 #include lumi:shadow_config
 
 /*******************************************************
- *  lumi:shaders/context/global/shadow.glsl      *
+ *  lumi:shaders/context/global/shadow.glsl            *
+ *******************************************************
+ *  Copyright (c) 2021 spiralhalo                      *
+ *  Released WITHOUT WARRANTY under the terms of the   *
+ *  GNU Lesser General Public License version 3 as     *
+ *  published by the Free Software Foundation, Inc.    *
  *******************************************************/
 
 #if defined(SHADOW_MAP_PRESENT)
+
+const mat3 wKernel = mat3(
+    0.07, 0.13, 0.07,
+    0.13, 0.20, 0.13,
+    0.07, 0.13, 0.07
+);
+
 vec3 shadowDist(int cascade, vec4 shadowViewPos)
 {
     vec4 c = frx_shadowCenter(cascade);
@@ -48,17 +60,20 @@ float calcShadowFactor(vec4 shadowViewPos) {
         vec2 shadowTexCoord;
         float shadowFactor = 0.0;
         vec2 offset;
-        for(offset.x = -inc; offset.x <= inc; offset.x += inc)
+        float w;
+        for(int i = 0; i < 3; i++)
         {
-            for(offset.y = -inc; offset.y <= inc; offset.y += inc)
+            for(int j = 0; j < 3; j++)
             {
-                shadowFactor += shadow2DArray(frxs_shadowMap, vec4(shadowCoords.xy + offset, float(cascade), shadowCoords.z - bias)).r;
+                offset.x = -inc + inc * j;
+                offset.y = -inc + inc * i;
+                w = wKernel[i][j];
+                shadowFactor += w * shadow2DArray(frxs_shadowMap, vec4(shadowCoords.xy + offset, float(cascade), shadowCoords.z - bias)).r;
                 // shadowFactor += (shadowCoords.xy != clamp(shadowCoords.xy, 0.0, 1.0))
                 //               ? 1.0
                 //               : shadow2DArray(frxs_shadowMap, vec4(shadowCoords.xy + offset, float(cascade), shadowCoords.z - bias)).r;
             }
         }
-        shadowFactor /= 9.0;
     #else
         float shadowFactor = shadow2DArray(frxs_shadowMap, vec4(shadowCoords.xy, float(cascade), shadowCoords.z - bias)).r;
     #endif
