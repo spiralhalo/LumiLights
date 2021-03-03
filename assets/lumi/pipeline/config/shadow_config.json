@@ -4,11 +4,14 @@
             includeToken: "lumi:shadow_config",
             categoryKey: "config.lumi_lights.category.shadow",
             options: {
-                shadow_box_filtering: {
-                    default: false,
-                    nameKey: "config.lumi_lights.value.shadow_box_filtering",
-                    descriptionKey: "config.lumi_lights.help.shadow_box_filtering"
-                }
+                shadow_filtering: {
+                    default: "none",
+                    choices: ["none", "box", "pcf_low", "pcf_medium", "pcf_high"],
+                    enum: true,
+                    prefix: "shadow_filtering_",
+                    nameKey: "config.lumi_lights.value.shadow_filtering",
+                    descriptionKey: "config.lumi_lights.help.shadow_filtering"
+                },
             }
         }
     ]
