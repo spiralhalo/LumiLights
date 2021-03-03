@@ -7,7 +7,7 @@
             samplers: ["u_clouds", "u_clouds_depth"]
         }, {
             name: "clouds_texture",
-            vertexSource: "lumi:shaders/post/clouds_texture.vert",
+            vertexSource: "lumi:shaders/post/simple.vert",
             fragmentSource: "lumi:shaders/post/clouds_texture.frag",
             samplers: []
         }, 
@@ -26,7 +26,7 @@
                 {name: "TEXTURE_WRAP_S", val: "CLAMP"}, {name: "TEXTURE_WRAP_T", val: "CLAMP"}
             ]
         }, {
-            name: "custom_clouds_texture",
+            name: "clouds_texture",
             lod: 0,
             size: 512,
             internalFormat: "GL_R8",
@@ -34,7 +34,7 @@
             pixelDataType: "UNSIGNED_BYTE",
             target: "TEXTURE_2D",
             texParams: [
-                {name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
+                {name: "TEXTURE_MIN_FILTER", val: "LINEAR"}, {name: "TEXTURE_MAG_FILTER", val: "LINEAR"},
                 {name: "TEXTURE_WRAP_S", val: "CLAMP"}, {name: "TEXTURE_WRAP_T", val: "CLAMP"}
             ]
         }, {
@@ -60,6 +60,10 @@
             colorAttachments: [
                 {image: "custom_clouds", clearColor: "0x00000000"},
                 {image: "custom_clouds_depth", clearColor: "0xFFFFFFFF"}]
+        }, {
+            name: "clouds_texture",
+            colorAttachments: [
+                {image: "clouds_texture", clearColor: "0x00000000"}]
         }, 
     ]
 }

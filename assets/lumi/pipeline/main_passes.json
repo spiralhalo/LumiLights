@@ -69,6 +69,11 @@
                     "solid_shaded", "solid_shaded_swap", "solid_depth",
                     "translucent_shaded", "translucent_shaded_swap", "translucent_depth",]
             }, {
+                name: "clouds_texture",
+                program: "clouds_texture",
+                framebuffer: "clouds_texture",
+                samplerImages: []
+            }, {
                 name: "clouds",
                 program: "clouds",
                 framebuffer: "custom_clouds",
