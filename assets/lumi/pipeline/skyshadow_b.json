@@ -16,7 +16,7 @@
     // These are automatically calculated for the largest (least-detail)
     // cascade to contain the entire visible scene. These correspond
     // to cascade indices 1, 2 and 3 in shader.
-    cascadeRadius: [48, 24, 12]
+    cascadeRadius: [96, 32, 8]
   },
 
   images: [
