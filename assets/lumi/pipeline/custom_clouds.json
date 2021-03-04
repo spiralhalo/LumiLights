@@ -4,7 +4,7 @@
             name: "clouds",
             vertexSource: "lumi:shaders/post/hdr.vert",
             fragmentSource: "lumi:shaders/post/clouds.frag",
-            samplers: ["u_clouds", "u_clouds_texture", "u_clouds_depth"]
+            samplers: ["u_clouds", "u_clouds_texture", "u_clouds_depth", "u_translucent_depth"]
         }, {
             name: "clouds_texture",
             vertexSource: "lumi:shaders/post/simple.vert",

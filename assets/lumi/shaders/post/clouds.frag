@@ -23,6 +23,7 @@
 uniform sampler2D u_clouds;
 uniform sampler2D u_clouds_texture;
 uniform sampler2D u_clouds_depth;
+uniform sampler2D u_translucent_depth;
 
 /*******************************************************
     vertexShader: lumi:shaders/post/hdr.vert
@@ -65,13 +66,14 @@ void main()
         }
     #elif CLOUD_RENDERING == CLOUD_RENDERING_VOLUMETRIC
         if (frx_worldFlag(FRX_WORLD_IS_OVERWORLD)) {
-            vec2 volumetric = rayMarchCloud(u_clouds_texture);
-            vec3 color = ldr_tonemap3(v_sky_radiance) * volumetric.x;
-            // vec3 reverseViewPos = worldPos - frx_cameraView();
-            // vec4 reverseClipPos = frx_viewProjectionMatrix() * vec4(reverseViewPos, 1.0);
-            float alpha = 1.0 - volumetric.y;
+            cloud_result volumetric = rayMarchCloud(u_clouds_texture, u_translucent_depth, v_texcoord);
+            vec3 color = ldr_tonemap3(v_sky_radiance) * volumetric.lightEnergy;
+            vec3 reverseModelPos = volumetric.lastWorldPos - frx_cameraView();
+            vec4 reverseClipPos = frx_viewProjectionMatrix() * vec4(reverseModelPos, 1.0);
+            reverseClipPos.xyz /= reverseClipPos.w;
+            float alpha = 1.0 - volumetric.transmittance;
             gl_FragData[0] = vec4(color, alpha);
-            gl_FragData[1] = vec4(alpha > 0.5 ? 0.99999 : 1.0);
+            gl_FragData[1] = vec4(alpha > 0.0 ? reverseClipPos.z : 1.0);
         }
     #else
         vec4 clouds = blur13(u_clouds, v_texcoord, frxu_size, vec2(1.0, 1.0));

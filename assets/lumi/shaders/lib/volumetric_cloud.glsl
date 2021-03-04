@@ -15,6 +15,12 @@
 
 #if CLOUD_RENDERING == CLOUD_RENDERING_VOLUMETRIC
 
+struct cloud_result {
+    float lightEnergy;
+    float transmittance;
+    vec3 lastWorldPos;
+};
+
 const float TEXTURE_RCP = 1.0 / 512.0;
 const int NUM_SAMPLE = 512;
 const float SAMPLE_SIZE = 1.0;
@@ -39,23 +45,36 @@ float sampleCloud(in vec3 worldPos, in sampler2D texture)
     return eF * yF * tF * 2.0;
 }
 
-vec2 rayMarchCloud(in sampler2D texture)
+cloud_result rayMarchCloud(in sampler2D texture, in sampler2D sdepth, in vec2 texcoord)
 {
     float rainFactor = frx_rainGradient() * 0.67 + frx_thunderGradient() * 0.33; // TODO: optimize
-    vec4 viewPos = frx_inverseProjectionMatrix() * vec4(2.0 * v_texcoord - 1.0, 1.0, 1.0);
-    viewPos.xyz /= viewPos.w;
-    viewPos.w = 1.0;
-    vec3 skyVec = normalize(viewPos.xyz);
-    vec3 worldSkyVec = skyVec * frx_normalModelMatrix();
-    vec3 worldPos = frx_cameraPos() + worldSkyVec * 512.0;/*frx_viewDistance()*///(frx_inverseViewMatrix() * viewPos).xyz;
+    float depth = texture2D(sdepth, texcoord).r;
+    vec3 worldPos;
+    vec3 worldVec;
+    float worldDist;
+    if (depth == 1.0) {
+        vec4 viewPos = frx_inverseProjectionMatrix() * vec4(2.0 * texcoord - 1.0, 1.0, 1.0);
+        viewPos.xyz /= viewPos.w;
+        vec3 viewVec = normalize(viewPos.xyz);
+        worldVec = viewVec * frx_normalModelMatrix();
+        worldDist = 512.0;
+        worldPos = frx_cameraPos() + worldVec * worldDist;
+    } else {
+        vec4 modelPos = frx_inverseViewProjectionMatrix() * vec4(2.0 * texcoord - 1.0, 2.0 * depth - 1.0, 1.0);
+        modelPos.xyz /= modelPos.w;
+        worldVec = normalize(modelPos.xyz);
+        worldDist = length(modelPos.xyz);
+        worldPos = frx_cameraPos() + modelPos.xyz;
+    }
 
-    vec3 sampleDir = -worldSkyVec * SAMPLE_SIZE;
+    vec3 sampleDir = -worldVec * SAMPLE_SIZE;
 
     // Adapted from Sebastian Lague's code (technically not the same, but just in case his code was MIT Licensed)
     vec3 currentWorldPos = worldPos;
+    vec3 lastWorldPos = worldPos;
     float lightEnergy = 0.0;
     float transmittance = 1.0;
-    float maxdist = min(512.0, NUM_SAMPLE * SAMPLE_SIZE);
+    float maxdist = min(worldDist, NUM_SAMPLE * SAMPLE_SIZE);
     float travelled = 0.0;
     while (travelled < maxdist) {
         travelled += SAMPLE_SIZE;
@@ -63,6 +82,7 @@ vec2 rayMarchCloud(in sampler2D texture)
         float sampledDensity = sampleCloud(currentWorldPos, texture);
         if (sampledDensity > 0) {
             vec3 occlusionWorldPos = currentWorldPos;
+            lastWorldPos = currentWorldPos;
             // vec3 lightPos = frx_skyLightVector() * 512.0 + frx_cameraPos();
             vec3 toLight = frx_skyLightVector() * LIGHT_SAMPLE_RCP;
             float occlusionDensity = 0.0;
@@ -79,6 +99,6 @@ vec2 rayMarchCloud(in sampler2D texture)
             if (transmittance < 0.01) break;
         }
     }
-    return vec2(lightEnergy, transmittance);
+    return cloud_result(lightEnergy, transmittance, lastWorldPos);
 }
 #endif
