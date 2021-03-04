@@ -75,7 +75,7 @@ float sampleCloud(in vec3 worldPos, in sampler2D texture)
     #else
         vec2 uv = worldXz2Uv(worldPos.xz);
     #endif
-    // vec2 edge = smoothstep(0.5, 0.4, abs(uv - 0.5));
+    // vec2 edge = smoothstep(0.5, 0.4, abs(uv - 0.5)); probably unecessary when texture radius <= max sample distance
     // float eF = edge.x * edge.y;
     float tF = texture2D(texture, uv).r;
     float yF = l2_clampScale(CLOUD_THICKNESS_H * tF, CLOUD_THICKNESS_H * tF * 0.5, abs(CLOUD_Y - worldPos.y));
@@ -93,33 +93,33 @@ cloud_result rayMarchCloud(in sampler2D texture, in sampler2D sdepth, in vec2 te
     float worldDist;
 
     cloud_result placeholder = cloud_result(0.0, 1.0, vec3(0.0));
-    #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
-        if (depth == 1.0) {
-            vec4 viewPos = frx_inverseProjectionMatrix() * vec4(2.0 * texcoord - 1.0, 1.0, 1.0);
-            viewPos.xyz /= viewPos.w;
-            vec3 viewVec = normalize(viewPos.xyz);
-            worldVec = viewVec * frx_normalModelMatrix();
-            worldDist = 256.0;
-            #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
-                worldPos = worldVec * worldDist;
-            #else
-                worldPos = frx_cameraPos() + worldVec * worldDist;
-            #endif
-        } else {
-            return placeholder; // Some sort of culling
-        }
-    #else
-        vec4 viewPos = frx_inverseProjectionMatrix() * vec4(2.0 * texcoord - 1.0, 2.0 * depth - 1.0, 1.0);
+    if (depth == 1.0) {
+        vec4 viewPos = frx_inverseProjectionMatrix() * vec4(2.0 * texcoord - 1.0, 1.0, 1.0);
         viewPos.xyz /= viewPos.w;
-        viewPos.w = 1.0;
-        worldPos  = frx_cameraPos() + (frx_inverseViewMatrix() * viewPos).xyz;
-        worldVec = normalize(viewPos.xyz) * frx_normalModelMatrix();
-        if ((worldPos.y < CLOUD_MIN_Y && worldVec.y > 0.0)
-        || (worldPos.y > CLOUD_MAX_Y && worldVec.y < 0.0)) {
+        vec3 viewVec = normalize(viewPos.xyz);
+        worldVec = viewVec * frx_normalModelMatrix();
+        worldDist = 256.0;
+        #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
+            worldPos = worldVec * worldDist;
+        #else
+            worldPos = frx_cameraPos() + worldVec * worldDist;
+        #endif
+    } else {
+        #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
             return placeholder; // Some sort of culling
-        }
-        worldDist = distance(worldPos, frx_cameraPos());
-    #endif
+        #else
+            vec4 viewPos = frx_inverseProjectionMatrix() * vec4(2.0 * texcoord - 1.0, 2.0 * depth - 1.0, 1.0);
+            viewPos.xyz /= viewPos.w;
+            viewPos.w = 1.0;
+            worldPos  = frx_cameraPos() + (frx_inverseViewMatrix() * viewPos).xyz;
+            worldVec = normalize(viewPos.xyz) * frx_normalModelMatrix();
+            if ((worldPos.y < CLOUD_MIN_Y && worldVec.y > 0.0)
+            || (worldPos.y > CLOUD_MAX_Y && worldVec.y < 0.0)) {
+                return placeholder; // Some sort of culling
+            }
+            worldDist = distance(worldPos, frx_cameraPos());
+        #endif
+    }
 
     vec3 sampleDir = worldVec * SAMPLE_SIZE;
     vec3 toLight = frx_skyLightVector() * LIGHT_SAMPLE_SIZE;
