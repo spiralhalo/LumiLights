@@ -30,14 +30,14 @@ const float LIGHT_ABSORPTION_SKYLIGHT = 1.8 * SAMPLE_SIZE;
 const float LIGHT_ABSORPTION_CLOUD = 0.9 * SAMPLE_SIZE;
 const float DARKNESS_THRESHOLD = 0.2;
 const float DARKNESS_THRESHOLD_INV = 1.0 - DARKNESS_THRESHOLD;
-const float CLOUD_MAX_Y = 130.0;
-const float CLOUD_MIN_Y = 125.0;
+const float CLOUD_MAX_Y = 20.0;
+const float CLOUD_MIN_Y = 15.0;
 const float CLOUD_Y = (CLOUD_MAX_Y + CLOUD_MIN_Y) * 0.5;
 const float CLOUD_THICKNESS_H = (CLOUD_MAX_Y - CLOUD_MIN_Y) * 0.5;
 
 float sampleCloud(in vec3 worldPos, in sampler2D texture)
 {
-    vec2 uv = (worldPos.xz - frx_cameraPos().xz) * TEXTURE_RCP + 0.5;
+    vec2 uv = (worldPos.xz/* - frx_cameraPos().xz*/) * TEXTURE_RCP + 0.5;
     vec2 edge = smoothstep(0.5, 0.4, abs(uv - 0.5));
     float eF = edge.x * edge.y;
     float tF = texture2D(texture, uv).r;
@@ -58,19 +58,19 @@ cloud_result rayMarchCloud(in sampler2D texture, in sampler2D sdepth, in vec2 te
         vec3 viewVec = normalize(viewPos.xyz);
         worldVec = viewVec * frx_normalModelMatrix();
         worldDist = 128.0;
-        worldPos = frx_cameraPos() + worldVec * worldDist;
+        worldPos = /*frx_cameraPos() +*/ worldVec * worldDist;
     } else {
         vec4 modelPos = frx_inverseViewProjectionMatrix() * vec4(2.0 * texcoord - 1.0, 2.0 * depth - 1.0, 1.0);
         modelPos.xyz /= modelPos.w;
         worldVec = normalize(modelPos.xyz);
         worldDist = length(modelPos.xyz);
-        worldPos = frx_cameraPos() + modelPos.xyz;
+        worldPos = /*frx_cameraPos() +*/ modelPos.xyz;
     }
 
     vec3 sampleDir = worldVec * SAMPLE_SIZE;
 
     // Adapted from Sebastian Lague's code (technically not the same, but just in case his code was MIT Licensed)
-    vec3 currentWorldPos = frx_cameraPos();
+    vec3 currentWorldPos = vec3(0.0)/*frx_cameraPos()*/;
     vec3 lastWorldPos = worldPos - worldVec;
     bool hit = false;
     float lightEnergy = 0.0;
