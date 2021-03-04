@@ -37,6 +37,7 @@
 		"lumi:pipeline/config/lighting_config.json",
 		"lumi:pipeline/config/shadow_config.json",
 		"lumi:pipeline/config/reflection_config.json",
+		"lumi:pipeline/config/clouds_config.json",
 		"lumi:pipeline/config/bloom_config.json",
 		"lumi:pipeline/config/fog_config.json",
 		"lumi:pipeline/config/experimental_config.json",

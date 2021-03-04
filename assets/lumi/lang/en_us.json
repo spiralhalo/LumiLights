@@ -44,6 +44,12 @@
     "config.lumi_lights.value.shadow_box_filtering": "Shadow filtering",
     "config.lumi_lights.help.shadow_box_filtering": "Enable for softer shadow (performance impact)",
 
+    "config.lumi_lights.category.clouds": "clouds",
+    "config.lumi_lights.value.cloud_rendering": "Cloud rendering mode",
+    "config.lumi_lights.help.cloud_rendering": "Choose to render vanilla or custom clouds",
+    "config.lumi_lights.value.volumetric_cloud_mode": "Volumetric cloud option",
+    "config.lumi_lights.help.volumetric_cloud_mode": "Skybox clouds are generally faster",
+
     "config.lumi_lights.category.fog": "Fog",
     "config.lumi_lights.value.fog_near_chunks": "Near chunks",
     "config.lumi_lights.help.fog_near_chunks": "Distance where fog starts in chunks",
@@ -71,8 +77,6 @@
     "config.lumi_lights.category.experimental": "Experimental",
     "config.lumi_lights.value.specular_method": "Specular method",
     "config.lumi_lights.help.specular_method": "Method to calculate specular reflection. Affects performance",
-    "config.lumi_lights.value.custom_cloud_rendering": "Custom cloud rendering",
-    "config.lumi_lights.help.custom_cloud_rendering": "Render procedurally generated clouds",
     "config.lumi_lights.value.custom_sky": "Stylized sky",
     "config.lumi_lights.help.custom_sky": "Custom stylized sky",
     "config.lumi_lights.value.high_contrast": "High contrast outdoors",
