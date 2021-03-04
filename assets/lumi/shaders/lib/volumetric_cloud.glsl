@@ -21,17 +21,17 @@ struct cloud_result {
     vec3 lastWorldPos;
 };
 
-const float TEXTURE_RCP = 1.0 / 512.0;
+const float TEXTURE_RCP = 1.0 / 128.0;
 const int NUM_SAMPLE = 512;
 const float SAMPLE_SIZE = 0.25;
 const int LIGHT_SAMPLE = 30;
 const float LIGHT_SAMPLE_RCP = 1.0 / float(LIGHT_SAMPLE);
-const float LIGHT_ABSORPTION_SKYLIGHT = 0.5;
-const float LIGHT_ABSORPTION_CLOUD = 0.25;
+const float LIGHT_ABSORPTION_SKYLIGHT = 1.8 * SAMPLE_SIZE;
+const float LIGHT_ABSORPTION_CLOUD = 0.9 * SAMPLE_SIZE;
 const float DARKNESS_THRESHOLD = 0.2;
 const float DARKNESS_THRESHOLD_INV = 1.0 - DARKNESS_THRESHOLD;
 const float CLOUD_MAX_Y = 130.0;
-const float CLOUD_MIN_Y = 120.0;
+const float CLOUD_MIN_Y = 125.0;
 const float CLOUD_Y = (CLOUD_MAX_Y + CLOUD_MIN_Y) * 0.5;
 const float CLOUD_THICKNESS_H = (CLOUD_MAX_Y - CLOUD_MIN_Y) * 0.5;
 
@@ -41,7 +41,7 @@ float sampleCloud(in vec3 worldPos, in sampler2D texture)
     vec2 edge = smoothstep(0.5, 0.4, abs(uv - 0.5));
     float eF = edge.x * edge.y;
     float tF = texture2D(texture, uv).r;
-    float yF = smoothstep(CLOUD_THICKNESS_H * tF, 0.0, abs(CLOUD_Y - worldPos.y));
+    float yF = l2_clampScale(CLOUD_THICKNESS_H * tF, CLOUD_THICKNESS_H * tF * 0.5, abs(CLOUD_Y - worldPos.y));
     return eF * yF * tF * 2.0;
 }
 
