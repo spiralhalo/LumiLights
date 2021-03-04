@@ -23,11 +23,11 @@ struct cloud_result {
 
 const float TEXTURE_RCP = 1.0 / 512.0;
 const int NUM_SAMPLE = 512;
-const float SAMPLE_SIZE = 1.0;
+const float SAMPLE_SIZE = 0.25;
 const int LIGHT_SAMPLE = 30;
 const float LIGHT_SAMPLE_RCP = 1.0 / float(LIGHT_SAMPLE);
-const float LIGHT_ABSORPTION_SKYLIGHT = 0.9;
-const float LIGHT_ABSORPTION_CLOUD = 0.9;
+const float LIGHT_ABSORPTION_SKYLIGHT = 0.5;
+const float LIGHT_ABSORPTION_CLOUD = 0.25;
 const float DARKNESS_THRESHOLD = 0.2;
 const float DARKNESS_THRESHOLD_INV = 1.0 - DARKNESS_THRESHOLD;
 const float CLOUD_MAX_Y = 130.0;
@@ -40,8 +40,8 @@ float sampleCloud(in vec3 worldPos, in sampler2D texture)
     vec2 uv = (worldPos.xz - frx_cameraPos().xz) * TEXTURE_RCP + 0.5;
     vec2 edge = smoothstep(0.5, 0.4, abs(uv - 0.5));
     float eF = edge.x * edge.y;
-    float yF = smoothstep(CLOUD_THICKNESS_H, 0.0, abs(CLOUD_Y - worldPos.y));
     float tF = texture2D(texture, uv).r;
+    float yF = smoothstep(CLOUD_THICKNESS_H * tF, 0.0, abs(CLOUD_Y - worldPos.y));
     return eF * yF * tF * 2.0;
 }
 
@@ -57,7 +57,7 @@ cloud_result rayMarchCloud(in sampler2D texture, in sampler2D sdepth, in vec2 te
         viewPos.xyz /= viewPos.w;
         vec3 viewVec = normalize(viewPos.xyz);
         worldVec = viewVec * frx_normalModelMatrix();
-        worldDist = 512.0;
+        worldDist = 128.0;
         worldPos = frx_cameraPos() + worldVec * worldDist;
     } else {
         vec4 modelPos = frx_inverseViewProjectionMatrix() * vec4(2.0 * texcoord - 1.0, 2.0 * depth - 1.0, 1.0);
@@ -71,7 +71,7 @@ cloud_result rayMarchCloud(in sampler2D texture, in sampler2D sdepth, in vec2 te
 
     // Adapted from Sebastian Lague's code (technically not the same, but just in case his code was MIT Licensed)
     vec3 currentWorldPos = frx_cameraPos();
-    vec3 lastWorldPos = worldPos;
+    vec3 lastWorldPos = worldPos - worldVec;
     bool hit = false;
     float lightEnergy = 0.0;
     float transmittance = 1.0;
@@ -83,10 +83,6 @@ cloud_result rayMarchCloud(in sampler2D texture, in sampler2D sdepth, in vec2 te
         float sampledDensity = sampleCloud(currentWorldPos, texture);
         if (sampledDensity > 0) {
             vec3 occlusionWorldPos = currentWorldPos;
-            if (!hit) {
-                lastWorldPos = currentWorldPos;
-                hit = true;
-            }
             // vec3 lightPos = frx_skyLightVector() * 512.0 + frx_cameraPos();
             vec3 toLight = frx_skyLightVector() * LIGHT_SAMPLE_RCP;
             float occlusionDensity = 0.0;
