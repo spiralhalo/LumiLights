@@ -26,8 +26,8 @@ struct cloud_result {
 const float TEXTURE_RCP = 1.0 / 256.0;
 const int NUM_SAMPLE = 512;
 const float SAMPLE_SIZE = 0.25;
-const int LIGHT_SAMPLE = 30;
-const float LIGHT_SAMPLE_RCP = 1.0 / float(LIGHT_SAMPLE);
+const int LIGHT_SAMPLE = 5;
+const float LIGHT_SAMPLE_SIZE = 0.25;
 const float LIGHT_ABSORPTION_SKYLIGHT = 0.9;
 const float LIGHT_ABSORPTION_CLOUD = 0.7;
 const float DARKNESS_THRESHOLD = 0.2;
@@ -75,7 +75,7 @@ cloud_result rayMarchCloud(in sampler2D texture, in sampler2D sdepth, in vec2 te
     }
 
     vec3 sampleDir = worldVec * SAMPLE_SIZE;
-    vec3 toLight = frx_skyLightVector() * LIGHT_SAMPLE_RCP;
+    vec3 toLight = frx_skyLightVector() * LIGHT_SAMPLE_SIZE;
 
     // Adapted from Sebastian Lague's code (technically not the same, but just in case his code was MIT Licensed)
     vec3 currentWorldPos = vec3(0.0)/*frx_cameraPos()*/;
@@ -104,12 +104,12 @@ cloud_result rayMarchCloud(in sampler2D texture, in sampler2D sdepth, in vec2 te
             // vec3 lightPos = frx_skyLightVector() * 512.0 + frx_cameraPos();
             float occlusionDensity = 0.0;
             int j = 0;
-            while (j < LIGHT_SAMPLE) {
+            while (j < LIGHT_SAMPLE && occlusionWorldPos.y < CLOUD_MAX_Y && occlusionWorldPos.y > CLOUD_MIN_Y) {
                 j ++;
                 occlusionWorldPos += toLight;
                 occlusionDensity += sampleCloud(occlusionWorldPos, texture);
             }
-            occlusionDensity *= LIGHT_SAMPLE_RCP; // this is what *stepSize means
+            occlusionDensity *= LIGHT_SAMPLE_SIZE; // this is what *stepSize means
             float lightTransmittance = DARKNESS_THRESHOLD + DARKNESS_THRESHOLD_INV * exp(-occlusionDensity * LIGHT_ABSORPTION_SKYLIGHT);
             lightEnergy += sampledDensity * transmittance * lightTransmittance * SAMPLE_SIZE; // * phaseVal;
             transmittance *= exp(-sampledDensity * LIGHT_ABSORPTION_CLOUD * SAMPLE_SIZE);
