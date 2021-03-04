@@ -56,6 +56,8 @@ cloud_result rayMarchCloud(in sampler2D texture, in sampler2D sdepth, in vec2 te
     vec3 worldPos;
     vec3 worldVec;
     float worldDist;
+
+    cloud_result placeholder = cloud_result(0.0, 1.0, vec3(0.0));
     if (depth == 1.0) {
         vec4 viewPos = frx_inverseProjectionMatrix() * vec4(2.0 * texcoord - 1.0, 1.0, 1.0);
         viewPos.xyz /= viewPos.w;
@@ -64,7 +66,7 @@ cloud_result rayMarchCloud(in sampler2D texture, in sampler2D sdepth, in vec2 te
         worldDist = 256.0;
         worldPos = /*frx_cameraPos() +*/ worldVec * worldDist;
     } else {
-        return cloud_result(0.0, 1.0, vec3(0.0)); //PLACEHOLDER TODO: Remove
+        return placeholder;
         vec4 modelPos = frx_inverseViewProjectionMatrix() * vec4(2.0 * texcoord - 1.0, 2.0 * depth - 1.0, 1.0);
         modelPos.xyz /= modelPos.w;
         worldVec = normalize(modelPos.xyz);
@@ -83,6 +85,16 @@ cloud_result rayMarchCloud(in sampler2D texture, in sampler2D sdepth, in vec2 te
     float transmittance = 1.0;
     float maxdist = min(worldDist, NUM_SAMPLE * SAMPLE_SIZE);
     float travelled = 0.0;
+
+    /* This performance saver only works with the fixed cloud position */
+    if (worldVec.y <= 0) return placeholder;
+    float gotoBottom = CLOUD_MIN_Y / worldVec.y;
+    float gotoTop = CLOUD_MAX_Y / worldVec.y;
+    travelled += gotoBottom;
+    currentWorldPos += worldVec * travelled;
+    maxdist = min(maxdist, gotoTop);
+    /**/
+
     while (travelled < maxdist) {
         travelled += SAMPLE_SIZE;
         currentWorldPos += sampleDir;
