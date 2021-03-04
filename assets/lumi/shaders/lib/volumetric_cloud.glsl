@@ -104,7 +104,7 @@ cloud_result rayMarchCloud(in sampler2D texture, in sampler2D sdepth, in vec2 te
             // vec3 lightPos = frx_skyLightVector() * 512.0 + frx_cameraPos();
             float occlusionDensity = 0.0;
             int j = 0;
-            while (j < LIGHT_SAMPLE && occlusionWorldPos.y < CLOUD_MAX_Y && occlusionWorldPos.y > CLOUD_MIN_Y) {
+            while (j < LIGHT_SAMPLE) {
                 j ++;
                 occlusionWorldPos += toLight;
                 occlusionDensity += sampleCloud(occlusionWorldPos, texture);
