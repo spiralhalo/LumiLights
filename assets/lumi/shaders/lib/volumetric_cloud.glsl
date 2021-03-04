@@ -77,23 +77,21 @@ cloud_result rayMarchCloud(in sampler2D texture, in sampler2D sdepth, in vec2 te
     vec3 sampleDir = worldVec * SAMPLE_SIZE;
     vec3 toLight = frx_skyLightVector() * LIGHT_SAMPLE_SIZE;
 
+    /* This performance saver only works with the fixed cloud position */
+    if (worldVec.y <= 0) return placeholder;
+    float gotoBottom = CLOUD_MIN_Y / worldVec.y;
+    float gotoTop = CLOUD_MAX_Y / worldVec.y;
+    /**/
+
     // Adapted from Sebastian Lague's code (technically not the same, but just in case his code was MIT Licensed)
-    vec3 currentWorldPos = vec3(0.0)/*frx_cameraPos()*/;
+    vec3 currentWorldPos = worldVec * gotoBottom;/*frx_cameraPos()*/;
     vec3 lastWorldPos = worldPos - worldVec;
     bool hit = false;
     float lightEnergy = 0.0;
     float transmittance = 1.0;
     float maxdist = min(worldDist, NUM_SAMPLE * SAMPLE_SIZE);
-    float travelled = 0.0;
-
-    /* This performance saver only works with the fixed cloud position */
-    if (worldVec.y <= 0) return placeholder;
-    float gotoBottom = CLOUD_MIN_Y / worldVec.y;
-    float gotoTop = CLOUD_MAX_Y / worldVec.y;
-    travelled += gotoBottom;
-    currentWorldPos += worldVec * travelled;
+    float travelled = gotoBottom;
     maxdist = min(maxdist, gotoTop);
-    /**/
 
     while (travelled < maxdist) {
         travelled += SAMPLE_SIZE;
