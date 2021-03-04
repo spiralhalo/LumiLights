@@ -4,6 +4,7 @@
 #include frex:shaders/lib/noise/noise2d.glsl
 #include frex:shaders/lib/noise/cellular2x2.glsl
 #include lumi:shaders/lib/util.glsl
+#include lumi:shaders/context/global/clouds.glsl
 
 /*******************************************************
  *  lumi:shaders/post/clouds_texture.frag              *

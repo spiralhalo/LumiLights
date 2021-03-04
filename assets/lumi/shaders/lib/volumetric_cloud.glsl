@@ -3,7 +3,7 @@
 #include frex:shaders/api/world.glsl
 #include lumi:shaders/lib/util.glsl
 #include lumi:shaders/lib/tile_noise.glsl
-#include lumi:shaders/context/global/experimental.glsl
+#include lumi:shaders/context/post/clouds.glsl
 
 /*******************************************************
  *  lumi:shaders/lib/volumetric_cloud.glsl             *
@@ -32,14 +32,24 @@ const float LIGHT_ABSORPTION_SKYLIGHT = 0.9;
 const float LIGHT_ABSORPTION_CLOUD = 0.7;
 const float DARKNESS_THRESHOLD = 0.2;
 const float DARKNESS_THRESHOLD_INV = 1.0 - DARKNESS_THRESHOLD;
-const float CLOUD_MAX_Y = 20.0;
-const float CLOUD_MIN_Y = 15.0;
+
+#if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
+    const float CLOUD_MAX_Y = 20.0;
+    const float CLOUD_MIN_Y = 15.0;
+#else
+    const float CLOUD_MAX_Y = 120.0;
+    const float CLOUD_MIN_Y = 115.0;
+#endif
 const float CLOUD_Y = (CLOUD_MAX_Y + CLOUD_MIN_Y) * 0.5;
 const float CLOUD_THICKNESS_H = (CLOUD_MAX_Y - CLOUD_MIN_Y) * 0.5;
 
 float sampleCloud(in vec3 worldPos, in sampler2D texture)
 {
-    vec2 uv = (worldPos.xz/* - frx_cameraPos().xz*/) * TEXTURE_RCP + 0.5;
+    #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
+        vec2 uv = worldPos.xz * TEXTURE_RCP + 0.5;
+    #else
+        vec2 uv = (worldPos.xz - frx_cameraPos().xz) * TEXTURE_RCP + 0.5;
+    #endif
     vec2 edge = smoothstep(0.5, 0.4, abs(uv - 0.5));
     float eF = edge.x * edge.y;
     float tF = texture2D(texture, uv).r;
@@ -64,24 +74,34 @@ cloud_result rayMarchCloud(in sampler2D texture, in sampler2D sdepth, in vec2 te
         vec3 viewVec = normalize(viewPos.xyz);
         worldVec = viewVec * frx_normalModelMatrix();
         worldDist = 256.0;
-        worldPos = /*frx_cameraPos() +*/ worldVec * worldDist;
+        #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
+            worldPos = worldVec * worldDist;
+        #else
+            worldPos = frx_cameraPos() + worldVec * worldDist;
+        #endif
     } else {
-        return placeholder;
-        vec4 modelPos = frx_inverseViewProjectionMatrix() * vec4(2.0 * texcoord - 1.0, 2.0 * depth - 1.0, 1.0);
-        modelPos.xyz /= modelPos.w;
-        worldVec = normalize(modelPos.xyz);
-        worldDist = length(modelPos.xyz);
-        worldPos = /*frx_cameraPos() +*/ modelPos.xyz;
+        #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
+            return placeholder; // Some sort of culling
+        #else
+            vec4 modelPos = frx_inverseViewProjectionMatrix() * vec4(2.0 * texcoord - 1.0, 2.0 * depth - 1.0, 1.0);
+            modelPos.xyz /= modelPos.w;
+            worldPos = frx_cameraPos() + modelPos.xyz;
+            worldVec = normalize(modelPos.xyz);
+            worldDist = length(modelPos.xyz);
+        #endif
     }
 
     vec3 sampleDir = worldVec * SAMPLE_SIZE;
     vec3 toLight = frx_skyLightVector() * LIGHT_SAMPLE_SIZE;
 
-    /* This performance saver only works with the fixed cloud position */
-    if (worldVec.y <= 0) return placeholder;
-    float gotoBottom = CLOUD_MIN_Y / worldVec.y;
-    float gotoTop = CLOUD_MAX_Y / worldVec.y;
-    /**/
+    #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
+        if (worldVec.y <= 0) return placeholder;
+        float gotoBottom = CLOUD_MIN_Y / worldVec.y;
+        float gotoTop = CLOUD_MAX_Y / worldVec.y;
+    #else
+        float gotoBottom = 0.0;
+        float gotoTop = worldDist;
+    #endif
 
     // Adapted from Sebastian Lague's code (technically not the same, but just in case his code was MIT Licensed)
     vec3 currentWorldPos = worldVec * gotoBottom;/*frx_cameraPos()*/;

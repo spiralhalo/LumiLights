@@ -9,7 +9,7 @@
 #include lumi:shaders/lib/fast_gaussian_blur.glsl
 #include lumi:shaders/lib/volumetric_cloud.glsl
 #include lumi:shaders/context/global/lighting.glsl
-#include lumi:shaders/context/global/experimental.glsl
+#include lumi:shaders/context/global/clouds.glsl
 
 /*******************************************************
  *  lumi:shaders/post/clouds.frag                      *
@@ -73,12 +73,16 @@ void main()
     #elif CLOUD_RENDERING == CLOUD_RENDERING_VOLUMETRIC
         cloud_result volumetric = rayMarchCloud(u_clouds_texture, u_translucent_depth, v_texcoord);
         vec3 color = ldr_tonemap3(v_sky_radiance) * volumetric.lightEnergy;
-        vec3 reverseModelPos = volumetric.lastWorldPos - frx_cameraView();
-        vec4 reverseClipPos = frx_viewProjectionMatrix() * vec4(reverseModelPos, 1.0);
-        reverseClipPos.xyz /= reverseClipPos.w;
         float alpha = 1.0 - volumetric.transmittance;
         gl_FragData[0] = vec4(color, alpha);
-        gl_FragData[1] = vec4(alpha > 0.0 ? 0.9999 : 1.0);
+        #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
+            gl_FragData[1] = vec4(alpha > 0.0 ? 0.9999 : 1.0);
+        #else
+            vec3 reverseModelPos = volumetric.lastWorldPos - frx_cameraView();
+            vec4 reverseClipPos = frx_viewProjectionMatrix() * vec4(reverseModelPos, 1.0);
+            reverseClipPos.z /= reverseClipPos.w;
+            gl_FragData[1] = vec4(alpha > 0.0 ? reverseClipPos.z : 1.0);
+        #endif
     #else
         vec4 clouds = blur13(u_clouds, v_texcoord, frxu_size, vec2(1.0, 1.0));
         gl_FragData[0] = clouds;

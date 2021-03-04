@@ -12,14 +12,6 @@
                     nameKey: "config.lumi_lights.value.specular_method",
                     descriptionKey: "config.lumi_lights.help.specular_method"
                 },
-                cloud_rendering: {
-                    default: "high",
-                    choices: ["vanilla", "flat", "volumetric"],
-                    enum: true,
-                    prefix: "cloud_rendering_",
-                    nameKey: "config.lumi_lights.value.cloud_rendering",
-                    descriptionKey: "config.lumi_lights.help.cloud_rendering"
-                },
                 custom_sky: {
                     default: false,
                     nameKey: "config.lumi_lights.value.custom_sky",
