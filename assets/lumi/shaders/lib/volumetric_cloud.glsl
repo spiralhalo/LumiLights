@@ -92,8 +92,9 @@ cloud_result rayMarchCloud(in sampler2D texture, in sampler2D sdepth, in vec2 te
     float maxdist = min(worldDist, NUM_SAMPLE * SAMPLE_SIZE);
     float travelled = gotoBottom;
     maxdist = min(maxdist, gotoTop);
-
-    while (travelled < maxdist) {
+    int i = 0;
+    while (travelled < maxdist && i < NUM_SAMPLE) {
+        i ++;
         travelled += SAMPLE_SIZE;
         currentWorldPos += sampleDir;
         float sampledDensity = sampleCloud(currentWorldPos, texture);
