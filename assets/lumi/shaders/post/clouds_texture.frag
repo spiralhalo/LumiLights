@@ -10,7 +10,7 @@
 
 void main()
 {
-    #if CLOUD_RENDERING != CLOUD_RENDERING_VANILLA
+    #if CLOUD_RENDERING == CLOUD_RENDERING_VOLUMETRIC
     if (frx_worldFlag(FRX_WORLD_IS_OVERWORLD)) {
         float rainFactor = frx_rainGradient() * 0.67 + frx_thunderGradient() * 0.33; // TODO: optimize
         vec2 cloudCoord = frx_cameraPos().xz + (v_texcoord * 2.0 - 1.0) * 128.0 + (frx_worldDay() + frx_worldTime());
