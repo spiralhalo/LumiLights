@@ -35,8 +35,6 @@ varying float v_night;
 varying vec3 v_sky_radiance;
 varying vec3 v_fogcolor;
 
-const float CLOUD_RCP = 1.0 / 128.0;
-
 void main()
 {
     if (!frx_worldFlag(FRX_WORLD_IS_OVERWORLD)) return;
