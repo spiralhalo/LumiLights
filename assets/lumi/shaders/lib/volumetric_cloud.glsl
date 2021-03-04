@@ -139,7 +139,7 @@ cloud_result rayMarchCloud(in sampler2D texture, in sampler2D sdepth, in vec2 te
     #else
         vec3 currentWorldPos = frx_cameraPos();
     #endif
-    vec3 lastWorldPos = worldPos - worldVec;
+    vec3 lastWorldPos = worldPos - worldVec * 0.1;
     bool hit = false;
     float lightEnergy = 0.0;
     float transmittance = 1.0;
