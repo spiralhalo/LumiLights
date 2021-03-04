@@ -81,7 +81,8 @@ void main()
             vec3 reverseModelPos = volumetric.lastWorldPos - frx_cameraView();
             vec4 reverseClipPos = frx_viewProjectionMatrix() * vec4(reverseModelPos, 1.0);
             reverseClipPos.z /= reverseClipPos.w;
-            gl_FragData[1] = vec4(alpha > 0.0 ? reverseClipPos.z : 1.0);
+            gl_FragData[1] = vec4(alpha > 0.0 ? 0.0 : 1.0);
+            // gl_FragData[1] = vec4(alpha > 0.0 ? reverseClipPos.z : 1.0);
         #endif
     #else
         vec4 clouds = blur13(u_clouds, v_texcoord, frxu_size, vec2(1.0, 1.0));

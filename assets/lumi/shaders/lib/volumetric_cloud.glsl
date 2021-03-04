@@ -3,6 +3,8 @@
 #include frex:shaders/api/world.glsl
 #include lumi:shaders/lib/util.glsl
 #include lumi:shaders/lib/tile_noise.glsl
+#include frex:shaders/lib/noise/noise2d.glsl
+#include frex:shaders/lib/noise/cellular2x2.glsl
 #include lumi:shaders/context/post/clouds.glsl
 
 /*******************************************************
@@ -15,6 +17,7 @@
  *******************************************************/
 
 #if CLOUD_RENDERING == CLOUD_RENDERING_VOLUMETRIC
+#define wnoise2(a) cellular2x2(a).x
 
 struct cloud_result {
     float lightEnergy;
@@ -23,7 +26,8 @@ struct cloud_result {
 };
 
 // const float CLOUD_MARCH_JITTER_STRENGTH = 0.01;
-const float TEXTURE_RCP = 1.0 / 256.0;
+const float TEXTURE_RADIUS = 128.0;
+const float TEXTURE_RADIUS_RCP = 1.0 / TEXTURE_RADIUS;
 const int NUM_SAMPLE = 512;
 const float SAMPLE_SIZE = 0.25;
 const int LIGHT_SAMPLE = 5;
@@ -32,6 +36,27 @@ const float LIGHT_ABSORPTION_SKYLIGHT = 0.9;
 const float LIGHT_ABSORPTION_CLOUD = 0.7;
 const float DARKNESS_THRESHOLD = 0.2;
 const float DARKNESS_THRESHOLD_INV = 1.0 - DARKNESS_THRESHOLD;
+
+// coordinate helper functions because it won't work properly
+vec2 uv2worldXz(vec2 uv)
+{
+    vec2 ndc = uv * 2.0 - 1.0;
+    return frx_cameraPos().xz + ndc * TEXTURE_RADIUS;
+}
+
+vec2 worldXz2Uv(vec2 worldXz)
+{
+    vec2 modelXz = worldXz - frx_cameraPos().xz;
+    vec2 ndc = modelXz * TEXTURE_RADIUS_RCP;
+    return ndc * 0.5 + 0.5;
+}
+
+// model means relative to camera not world origin in this context
+vec2 modelXz2Uv(vec2 modelXz)
+{
+    vec2 ndc = modelXz * TEXTURE_RADIUS_RCP;
+    return ndc * 0.5 + 0.5;
+}
 
 #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
     const float CLOUD_MAX_Y = 20.0;
@@ -46,15 +71,15 @@ const float CLOUD_THICKNESS_H = (CLOUD_MAX_Y - CLOUD_MIN_Y) * 0.5;
 float sampleCloud(in vec3 worldPos, in sampler2D texture)
 {
     #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
-        vec2 uv = worldPos.xz * TEXTURE_RCP + 0.5;
+        vec2 uv = modelXz2Uv(worldPos.xz);
     #else
-        vec2 uv = (worldPos.xz - frx_cameraPos().xz) * TEXTURE_RCP + 0.5;
+        vec2 uv = worldXz2Uv(worldPos.xz);
     #endif
-    vec2 edge = smoothstep(0.5, 0.4, abs(uv - 0.5));
-    float eF = edge.x * edge.y;
+    // vec2 edge = smoothstep(0.5, 0.4, abs(uv - 0.5));
+    // float eF = edge.x * edge.y;
     float tF = texture2D(texture, uv).r;
     float yF = l2_clampScale(CLOUD_THICKNESS_H * tF, CLOUD_THICKNESS_H * tF * 0.5, abs(CLOUD_Y - worldPos.y));
-    return eF * yF * tF * 2.0;
+    return yF * tF * 2.0;
 }
 
 cloud_result rayMarchCloud(in sampler2D texture, in sampler2D sdepth, in vec2 texcoord)
@@ -68,28 +93,33 @@ cloud_result rayMarchCloud(in sampler2D texture, in sampler2D sdepth, in vec2 te
     float worldDist;
 
     cloud_result placeholder = cloud_result(0.0, 1.0, vec3(0.0));
-    if (depth == 1.0) {
-        vec4 viewPos = frx_inverseProjectionMatrix() * vec4(2.0 * texcoord - 1.0, 1.0, 1.0);
-        viewPos.xyz /= viewPos.w;
-        vec3 viewVec = normalize(viewPos.xyz);
-        worldVec = viewVec * frx_normalModelMatrix();
-        worldDist = 256.0;
-        #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
-            worldPos = worldVec * worldDist;
-        #else
-            worldPos = frx_cameraPos() + worldVec * worldDist;
-        #endif
-    } else {
-        #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
+    #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
+        if (depth == 1.0) {
+            vec4 viewPos = frx_inverseProjectionMatrix() * vec4(2.0 * texcoord - 1.0, 1.0, 1.0);
+            viewPos.xyz /= viewPos.w;
+            vec3 viewVec = normalize(viewPos.xyz);
+            worldVec = viewVec * frx_normalModelMatrix();
+            worldDist = 256.0;
+            #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
+                worldPos = worldVec * worldDist;
+            #else
+                worldPos = frx_cameraPos() + worldVec * worldDist;
+            #endif
+        } else {
             return placeholder; // Some sort of culling
-        #else
-            vec4 modelPos = frx_inverseViewProjectionMatrix() * vec4(2.0 * texcoord - 1.0, 2.0 * depth - 1.0, 1.0);
-            modelPos.xyz /= modelPos.w;
-            worldPos = frx_cameraPos() + modelPos.xyz;
-            worldVec = normalize(modelPos.xyz);
-            worldDist = length(modelPos.xyz);
-        #endif
-    }
+        }
+    #else
+        vec4 viewPos = frx_inverseProjectionMatrix() * vec4(2.0 * texcoord - 1.0, 2.0 * depth - 1.0, 1.0);
+        viewPos.xyz /= viewPos.w;
+        viewPos.w = 1.0;
+        worldPos  = frx_cameraPos() + (frx_inverseViewMatrix() * viewPos).xyz;
+        worldVec = normalize(viewPos.xyz) * frx_normalModelMatrix();
+        if ((worldPos.y < CLOUD_MIN_Y && worldVec.y > 0.0)
+        || (worldPos.y > CLOUD_MAX_Y && worldVec.y < 0.0)) {
+            return placeholder; // Some sort of culling
+        }
+        worldDist = distance(worldPos, frx_cameraPos());
+    #endif
 
     vec3 sampleDir = worldVec * SAMPLE_SIZE;
     vec3 toLight = frx_skyLightVector() * LIGHT_SAMPLE_SIZE;
@@ -104,7 +134,11 @@ cloud_result rayMarchCloud(in sampler2D texture, in sampler2D sdepth, in vec2 te
     #endif
 
     // Adapted from Sebastian Lague's code (technically not the same, but just in case his code was MIT Licensed)
-    vec3 currentWorldPos = worldVec * gotoBottom;/*frx_cameraPos()*/;
+    #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
+        vec3 currentWorldPos = worldVec * gotoBottom;/*frx_cameraPos()*/;
+    #else
+        vec3 currentWorldPos = frx_cameraPos();
+    #endif
     vec3 lastWorldPos = worldPos - worldVec;
     bool hit = false;
     float lightEnergy = 0.0;
@@ -136,5 +170,20 @@ cloud_result rayMarchCloud(in sampler2D texture, in sampler2D sdepth, in vec2 te
         }
     }
     return cloud_result(lightEnergy, transmittance, lastWorldPos);
+}
+
+vec4 generateCloudTexture(vec2 texcoord) {
+    float rainFactor = frx_rainGradient() * 0.67 + frx_thunderGradient() * 0.33; // TODO: optimize
+    vec2 cloudCoord = uv2worldXz(texcoord) + (frx_worldDay() + frx_worldTime()) * 800.0;
+    cloudCoord *= 2.0;
+
+    float cloudBase = l2_clampScale(-0.3, 1.0 - rainFactor, snoise(cloudCoord * 0.005));
+    float cloud1 = cloudBase * l2_clampScale(-1.0, 1.0, wnoise2(cloudCoord * 0.015));
+    float cloud2 = cloud1 * l2_clampScale(-1.0, 1.0, snoise(cloudCoord * 0.04));
+    float cloud3 = cloud2 * l2_clampScale(-1.0, 1.0, snoise(cloudCoord * 0.1));
+
+    float cloud = cloud1 * 0.5 + cloud2 * 0.75 + cloud3;
+    cloud = l2_clampScale(0.1, 1.0, cloud);
+    return vec4(cloud, 0.0, 0.0, 1.0);
 }
 #endif
