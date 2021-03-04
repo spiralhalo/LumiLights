@@ -22,7 +22,7 @@
 struct cloud_result {
     float lightEnergy;
     float transmittance;
-    vec3 lastWorldPos;
+    vec3 worldPos;
 };
 
 // const float CLOUD_MARCH_JITTER_STRENGTH = 0.01;
@@ -139,13 +139,17 @@ cloud_result rayMarchCloud(in sampler2D texture, in sampler2D sdepth, in vec2 te
     #else
         vec3 currentWorldPos = frx_cameraPos();
     #endif
-    vec3 lastWorldPos = worldPos - worldVec * 0.1;
-    bool hit = false;
     float lightEnergy = 0.0;
     float transmittance = 1.0;
     float maxdist = min(worldDist, NUM_SAMPLE * SAMPLE_SIZE);
     float travelled = gotoBottom;
     maxdist = min(maxdist, gotoTop);
+    // ATTEMPT 1
+    // bool first = true;
+    // vec3 firstHitPos = worldPos - worldVec * 0.1;
+    // ATTEMPT 2
+    // float maxDensity = 0.0;
+    // vec3 firstDensePos = worldPos - worldVec * 0.1;
     int i = 0;
     while (travelled < maxdist && i < NUM_SAMPLE) {
         i ++;
@@ -153,6 +157,16 @@ cloud_result rayMarchCloud(in sampler2D texture, in sampler2D sdepth, in vec2 te
         currentWorldPos += sampleDir;
         float sampledDensity = sampleCloud(currentWorldPos, texture);
         if (sampledDensity > 0) {
+            // ATTEMPT 1
+            // if (first) {
+            //     first = false;
+            //     firstHitPos = currentWorldPos;
+            // }
+            // ATTEMPT 2
+            // if (sampledDensity > maxDensity) {
+            //     maxDensity = sampledDensity;
+            //     firstDensePos = currentWorldPos;
+            // }
             vec3 occlusionWorldPos = currentWorldPos;
             // vec3 lightPos = frx_skyLightVector() * 512.0 + frx_cameraPos();
             float occlusionDensity = 0.0;
@@ -169,7 +183,7 @@ cloud_result rayMarchCloud(in sampler2D texture, in sampler2D sdepth, in vec2 te
             if (transmittance < 0.01) break;
         }
     }
-    return cloud_result(lightEnergy, transmittance, lastWorldPos);
+    return cloud_result(lightEnergy, transmittance, worldPos);
 }
 
 vec4 generateCloudTexture(vec2 texcoord) {
