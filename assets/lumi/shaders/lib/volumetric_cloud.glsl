@@ -29,7 +29,7 @@ struct cloud_result {
 const float TEXTURE_RADIUS = 128.0;
 const float TEXTURE_RADIUS_RCP = 1.0 / TEXTURE_RADIUS;
 const int NUM_SAMPLE = 512;
-const float SAMPLE_SIZE = 0.25;
+const float SAMPLE_SIZE = TEXTURE_RADIUS / float(NUM_SAMPLE);
 const int LIGHT_SAMPLE = 5;
 const float LIGHT_SAMPLE_SIZE = 0.2;
 const float LIGHT_ABSORPTION_SKYLIGHT = 0.9;
