@@ -27,6 +27,11 @@
                     prefix: "volumetric_cloud_shape_",
                     nameKey: "config.lumi_lights.value.volumetric_cloud_shape",
                     descriptionKey: "config.lumi_lights.help.volumetric_cloud_shape"
+                },
+                volumetric_cloud_denoising: {
+                    default: false,
+                    nameKey: "config.lumi_lights.value.volumetric_cloud_denoising",
+                    descriptionKey: "config.lumi_lights.help.volumetric_cloud_denoising"
                 }
             }
         }

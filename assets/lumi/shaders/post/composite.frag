@@ -85,7 +85,7 @@ void main()
     vec4 particles = texture2D(u_particles, v_texcoord);
 
     float depth_clouds = texture2D(u_clouds_depth, v_texcoord).r;
-    #if CLOUD_RENDERING == CLOUD_RENDERING_VOLUMETRIC
+    #if CLOUD_RENDERING == CLOUD_RENDERING_VOLUMETRIC && defined(VOLUMETRIC_CLOUD_DENOISING)
         vec4 clouds = tile_denoise(v_texcoord, u_clouds, 1.0/frxu_size, 3);
     #else
         vec4 clouds = texture2D(u_clouds, v_texcoord);
