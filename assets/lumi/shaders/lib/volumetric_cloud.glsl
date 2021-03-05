@@ -62,8 +62,8 @@ vec2 modelXz2Uv(vec2 modelXz)
     const float CLOUD_MAX_Y = 20.0;
     const float CLOUD_MIN_Y = 15.0;
 #else
-    const float CLOUD_MAX_Y = 120.0;
-    const float CLOUD_MIN_Y = 115.0;
+    const float CLOUD_MAX_Y = 120.5;
+    const float CLOUD_MIN_Y = 115.5;
 #endif
 const float CLOUD_Y = (CLOUD_MAX_Y + CLOUD_MIN_Y) * 0.5;
 const float CLOUD_THICKNESS_H = (CLOUD_MAX_Y - CLOUD_MIN_Y) * 0.5;
