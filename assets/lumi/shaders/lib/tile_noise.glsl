@@ -24,6 +24,23 @@ float tile_noise_1d(vec2 uv, vec2 tex_size, int noise_size)
     return frx_noise2d(seed);
 }
 
+vec4 tile_denoise(vec2 uv, sampler2D scolor, vec2 inv_size, int noise_size)
+{
+    vec4 accum = vec4(0.0);
+
+    vec2 target_uv;
+
+    int count = 0;
+    for (int i = -noise_size; i <= noise_size; i++) {
+        for (int j = -noise_size; j <= noise_size; j++) {
+            target_uv = uv + vec2(i, j) * inv_size;
+            accum += texture2D(scolor, target_uv);
+            count ++;
+        }
+    }
+    return accum / float(count);
+}
+
 const float depth_threshold = 0.0001;
 vec4 tile_denoise_depth_alpha(vec2 uv, sampler2D scolor, sampler2D sdepth, vec2 inv_size, int noise_size)
 {

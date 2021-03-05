@@ -151,7 +151,7 @@ cloud_result rayMarchCloud(in sampler2D texture, in sampler2D sdepth, in vec2 te
     float maxdist = min(worldDist, NUM_SAMPLE * SAMPLE_SIZE);
     float travelled = gotoBottom;
     maxdist = min(maxdist, gotoTop);
-    float tileJitter = tile_noise_1d(v_texcoord, frxu_size, 4); //CLOUD_MARCH_JITTER_STRENGTH;
+    float tileJitter = tile_noise_1d(v_texcoord, frxu_size, 3); //CLOUD_MARCH_JITTER_STRENGTH;
     currentWorldPos += sampleDir * tileJitter;
     travelled += tileJitter * SAMPLE_SIZE;
     // ATTEMPT 1

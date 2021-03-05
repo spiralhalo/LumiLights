@@ -6,8 +6,10 @@
 #include lumi:shaders/lib/tonemap.glsl
 #include lumi:shaders/lib/fast_gaussian_blur.glsl
 #include lumi:shaders/lib/godrays.glsl
+#include lumi:shaders/lib/tile_noise.glsl
 #include lumi:shaders/context/global/lighting.glsl
 #include lumi:shaders/context/global/experimental.glsl
+#include lumi:shaders/context/post/clouds.glsl
 
 /******************************************************
   lumi:shaders/post/composite.frag
@@ -83,7 +85,11 @@ void main()
     vec4 particles = texture2D(u_particles, v_texcoord);
 
     float depth_clouds = texture2D(u_clouds_depth, v_texcoord).r;
-    vec4 clouds = texture2D(u_clouds, v_texcoord);
+    #if CLOUD_RENDERING == CLOUD_RENDERING_VOLUMETRIC
+        vec4 clouds = tile_denoise(v_texcoord, u_clouds, 1.0/frxu_size, 3);
+    #else
+        vec4 clouds = texture2D(u_clouds, v_texcoord);
+    #endif
 
     float depth_weather = texture2D(u_weather_depth, v_texcoord).r;
     vec4 weather = texture2D(u_weather, v_texcoord);
