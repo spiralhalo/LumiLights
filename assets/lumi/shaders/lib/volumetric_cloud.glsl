@@ -75,10 +75,19 @@ float sampleCloud(in vec3 worldPos, in sampler2D texture)
     #else
         vec2 uv = worldXz2Uv(worldPos.xz);
     #endif
+
     // vec2 edge = smoothstep(0.5, 0.4, abs(uv - 0.5)); probably unecessary when texture radius <= max sample distance
     // float eF = edge.x * edge.y;
+
     float tF = texture2D(texture, uv).r;
-    float yF = l2_clampScale(CLOUD_THICKNESS_H * tF, CLOUD_THICKNESS_H * tF * 0.5, abs(CLOUD_Y - worldPos.y));
+    #if VOLUMETRIC_CLOUD_SHAPE == VOLUMETRIC_CLOUD_SHAPE_MARSHMALLOW
+        tF = sqrt(1.0 - pow(1.0 - tF, 2.0));
+        float yF = l2_clampScale(CLOUD_THICKNESS_H * tF, 0.0, abs(CLOUD_Y - worldPos.y));
+        yF = sqrt(1.0 - pow(1.0 - yF, 2.0));
+    #else // cotton clouds
+        float yF = l2_clampScale(CLOUD_THICKNESS_H * tF, CLOUD_THICKNESS_H * tF * 0.5, abs(CLOUD_Y - worldPos.y));
+    #endif
+
     return yF * tF * 2.0;
 }
 
@@ -197,7 +206,13 @@ vec4 generateCloudTexture(vec2 texcoord) {
     float cloud3 = cloud2 * l2_clampScale(-1.0, 1.0, snoise(cloudCoord * 0.1));
 
     float cloud = cloud1 * 0.5 + cloud2 * 0.75 + cloud3;
-    cloud = l2_clampScale(0.1, 1.0, cloud);
+
+    #if VOLUMETRIC_CLOUD_SHAPE == VOLUMETRIC_CLOUD_SHAPE_MARSHMALLOW
+        cloud = l2_clampScale(0.4, 0.5, cloud);
+    #else // cotton clouds
+        cloud = l2_clampScale(0.1, 1.0, cloud);
+    #endif
+
     return vec4(cloud, 0.0, 0.0, 1.0);
 }
 #endif
