@@ -33,8 +33,8 @@ const float NIGHT_VISION_STR = 3.0;
 
 // MULTIPLIERS
 const float BRIGHT_FINAL_MULT = 2.0;
-const float SKY_LIGHT_RAINING_MULT = 0.85;
-const float SKY_LIGHT_THUNDERING_MULT = 0.7;
+const float SKY_LIGHT_RAINING_MULT = 0.1;
+const float SKY_LIGHT_THUNDERING_MULT = 0.01;
 
 // ADJUSTERS
 const float BLOCK_LIGHT_ADJUSTER = 6.0;

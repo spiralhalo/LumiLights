@@ -34,8 +34,8 @@ void main()
     v_not_in_void = l2_clampScale(-1.0, 0.0, frx_cameraPos().y);
     v_near_void_core = l2_clampScale(10.0, -90.0, frx_cameraPos().y) * 1.8;
     v_sky_radiance = frx_worldFlag(FRX_WORLD_IS_MOONLIT)
-        ? l2_moonRadiance(1.0, frx_worldTime(), frx_skyLightTransitionFactor())
-        : l2_sunRadiance(1.0, frx_worldTime(), frx_skyLightTransitionFactor(), frx_rainGradient());
+        ? l2_moonRadiance(1.0, frx_worldTime(), frx_skyLightTransitionFactor(), frx_rainGradient(), frx_thunderGradient())
+        : l2_sunRadiance(1.0, frx_worldTime(), frx_skyLightTransitionFactor(), frx_rainGradient(), frx_thunderGradient());
 
     vec4 screen = gl_ProjectionMatrix * vec4(gl_Vertex.xy * frxu_size, 0.0, 1.0);
     gl_Position = vec4(screen.xy, 0.2, 1.0);

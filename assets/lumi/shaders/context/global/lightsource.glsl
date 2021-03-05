@@ -191,23 +191,27 @@ vec3 l2_skyAmbientRadiance(float skyLight, float time, float intensity)
     return sa * hdr_ambientColor(time);
 }
 
-vec3 l2_sunRadiance(float skyLight, in float time, float transitionFactor, float rainGradient)
+vec3 l2_sunRadiance(float skyLight, in float time, float transitionFactor, float rainGradient, float thunderGradient)
 {
-    // todo: rainGradient should affect something or is it already done somewhere else ?
-    float sl = l2_skyLight(skyLight, transitionFactor);
-    // direct sun light doesn't reach into dark spot as much as sky ambient
+    // PERF: single weather factor everywhere
+    float weatherFactor = min(mix(1.0, SKY_LIGHT_RAINING_MULT, rainGradient), mix(1.0, SKY_LIGHT_THUNDERING_MULT, thunderGradient));
+    float sl = l2_skyLight(skyLight, 1.0);
+    // direct sun light doesn't reach into dark spot as much as sky ambient // TODO: WAT
     sl = l2_clampScale(0.7, 0.97, sl);
-    return sl * SUNLIGHT_STR * hdr_gammaAdjust(ldr_sunColor(time));
+    return sl * SUNLIGHT_STR * hdr_gammaAdjust(ldr_sunColor(time)) * transitionFactor * weatherFactor;
 }
 
-vec3 l2_moonRadiance(float skyLight, float time, float transitionFactor)
+vec3 l2_moonRadiance(float skyLight, float time, float transitionFactor, float rainGradient, float thunderGradient)
 {
     #ifdef TRUE_DARKNESS_MOONLIGHT
         return vec3(0.0);
     #else
-    float ml = l2_skyLight(skyLight, transitionFactor) * frx_moonSize() * MOONLIGHT_STR;
-    if(time < 0.58) ml *= l2_clampScale(0.54, 0.58, time);
-    else if(time > 0.92) ml *= l2_clampScale(0.96, 0.92, time);
+    // PERF: single weather factor everywhere
+    float weatherFactor = min(mix(1.0, SKY_LIGHT_RAINING_MULT, rainGradient), mix(1.0, SKY_LIGHT_THUNDERING_MULT, thunderGradient));
+    float ml = l2_skyLight(skyLight, 1.0) * transitionFactor * weatherFactor * frx_moonSize() * MOONLIGHT_STR;
+    // aren't these code just the transition factor ?
+    // if(time < 0.58) ml *= l2_clampScale(0.54, 0.58, time);
+    // else if(time > 0.92) ml *= l2_clampScale(0.96, 0.92, time);
     return vec3(ml);
     #endif
 }
