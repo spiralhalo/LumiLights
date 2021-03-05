@@ -17,6 +17,13 @@ vec3 tile_noise_3d(vec2 uv, vec2 tex_size, int noise_size)
     return vec3(frx_noise2d(seed.xx * seed.yy), frx_noise2d(seed.xy), frx_noise2d(seed.yx));
 }
 
+float tile_noise_1d(vec2 uv, vec2 tex_size, int noise_size)
+{
+    float tile_size = noise_size * 2.0 + 1.0;
+    vec2 seed = fract(uv * (tex_size / tile_size));
+    return frx_noise2d(seed);
+}
+
 const float depth_threshold = 0.0001;
 vec4 tile_denoise_depth_alpha(vec2 uv, sampler2D scolor, sampler2D sdepth, vec2 inv_size, int noise_size)
 {

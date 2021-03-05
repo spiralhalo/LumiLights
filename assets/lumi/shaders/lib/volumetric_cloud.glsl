@@ -93,8 +93,6 @@ float sampleCloud(in vec3 worldPos, in sampler2D texture)
 
 cloud_result rayMarchCloud(in sampler2D texture, in sampler2D sdepth, in vec2 texcoord)
 {
-    // vec3 tileJitter = 2.0 * tile_noise_3d(v_texcoord, frxu_size, 4) - 1.0;
-    // tileJitter *= CLOUD_MARCH_JITTER_STRENGTH;
     float rainFactor = frx_rainGradient() * 0.67 + frx_thunderGradient() * 0.33; // TODO: optimize
     float depth = texture2D(sdepth, texcoord).r;
     vec3 worldPos;
@@ -153,6 +151,9 @@ cloud_result rayMarchCloud(in sampler2D texture, in sampler2D sdepth, in vec2 te
     float maxdist = min(worldDist, NUM_SAMPLE * SAMPLE_SIZE);
     float travelled = gotoBottom;
     maxdist = min(maxdist, gotoTop);
+    float tileJitter = tile_noise_1d(v_texcoord, frxu_size, 4); //CLOUD_MARCH_JITTER_STRENGTH;
+    currentWorldPos += sampleDir * tileJitter;
+    travelled += tileJitter * SAMPLE_SIZE;
     // ATTEMPT 1
     // bool first = true;
     // vec3 firstHitPos = worldPos - worldVec * 0.1;
