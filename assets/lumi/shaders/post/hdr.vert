@@ -10,7 +10,9 @@
  *******************************************************/
 
 varying mat4 v_star_rotator;
+#if CLOUD_RENDERING == CLOUD_RENDERING_FLAT
 varying mat4 v_cloud_rotator;
+#endif
 varying float v_fov;
 varying float v_night;
 varying float v_not_in_void;
@@ -22,8 +24,11 @@ attribute vec2 in_uv;
 
 void main()
 {
+    #if CLOUD_RENDERING == CLOUD_RENDERING_FLAT
+        v_cloud_rotator = l2_rotationMatrix(vec3(0.0, 1.0, 0.0), PI * 0.25);
+    #endif
+    
     v_star_rotator = l2_rotationMatrix(vec3(1.0, 0.0, 1.0), frx_worldTime() * PI);
-    v_cloud_rotator = l2_rotationMatrix(vec3(0.0, 1.0, 0.0), PI * 0.25);
     v_fov = 2.0 * atan(1.0/frx_projectionMatrix()[1][1]) * 180.0 / PI;
     v_night = min(smoothstep(0.50, 0.54, frx_worldTime()), smoothstep(1.0, 0.96, frx_worldTime()));
     v_not_in_void = l2_clampScale(-1.0, 0.0, frx_cameraPos().y);

@@ -29,7 +29,9 @@ uniform sampler2D u_solid_depth;
     vertexShader: lumi:shaders/post/hdr.vert
  *******************************************************/
 
+#if CLOUD_RENDERING == CLOUD_RENDERING_FLAT
 varying mat4 v_cloud_rotator;
+#endif
 varying float v_fov;
 varying float v_night;
 varying vec3 v_sky_radiance;

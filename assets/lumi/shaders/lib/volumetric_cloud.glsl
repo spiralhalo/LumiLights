@@ -80,8 +80,8 @@ float sampleCloud(in vec3 worldPos, in sampler2D texture)
     // float eF = edge.x * edge.y;
 
     float tF = texture2D(texture, uv).r;
+    tF = sqrt(1.0 - pow(1.0 - tF, 2.0));
     #if VOLUMETRIC_CLOUD_SHAPE == VOLUMETRIC_CLOUD_SHAPE_MARSHMALLOW
-        tF = sqrt(1.0 - pow(1.0 - tF, 2.0));
         float yF = l2_clampScale(CLOUD_THICKNESS_H * tF, 0.0, abs(CLOUD_Y - worldPos.y));
         yF = sqrt(1.0 - pow(1.0 - yF, 2.0));
     #else // cotton clouds
@@ -199,17 +199,21 @@ cloud_result rayMarchCloud(in sampler2D texture, in sampler2D sdepth, in vec2 te
 vec4 generateCloudTexture(vec2 texcoord) {
     float rainFactor = frx_rainGradient() * 0.67 + frx_thunderGradient() * 0.33; // TODO: optimize
     vec2 cloudCoord = uv2worldXz(texcoord) + (frx_worldDay() + frx_worldTime()) * 800.0;
-    cloudCoord *= 2.0;
+    #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
+        cloudCoord *= 8.0;
+    #else
+        cloudCoord *= 4.0;
+    #endif
 
-    float cloudBase = l2_clampScale(-0.3, 1.0 - rainFactor, snoise(cloudCoord * 0.005));
-    float cloud1 = cloudBase * l2_clampScale(-1.0, 1.0, wnoise2(cloudCoord * 0.015));
+    float cloudBase = l2_clampScale(0.0, 1.0 - rainFactor, snoise(cloudCoord * 0.005));
+    float cloud1 = cloudBase * l2_clampScale(0.0, 1.0, wnoise2(cloudCoord * 0.015));
     float cloud2 = cloud1 * l2_clampScale(-1.0, 1.0, snoise(cloudCoord * 0.04));
     float cloud3 = cloud2 * l2_clampScale(-1.0, 1.0, snoise(cloudCoord * 0.1));
 
     float cloud = cloud1 * 0.5 + cloud2 * 0.75 + cloud3;
 
     #if VOLUMETRIC_CLOUD_SHAPE == VOLUMETRIC_CLOUD_SHAPE_MARSHMALLOW
-        cloud = l2_clampScale(0.4, 0.5, cloud);
+        cloud = l2_clampScale(0.3, 0.5, cloud);
     #else // cotton clouds
         cloud = l2_clampScale(0.1, 1.0, cloud);
     #endif
