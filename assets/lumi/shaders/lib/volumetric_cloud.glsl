@@ -155,8 +155,8 @@ cloud_result rayMarchCloud(in sampler2D texture, in sampler2D sdepth, in vec2 te
     currentWorldPos += sampleDir * tileJitter;
     travelled += tileJitter * SAMPLE_SIZE;
     // ATTEMPT 1
-    // bool first = true;
-    // vec3 firstHitPos = worldPos - worldVec * 0.1;
+    bool first = true;
+    vec3 firstHitPos = worldPos - worldVec * 0.1;
     // ATTEMPT 2
     // float maxDensity = 0.0;
     // vec3 firstDensePos = worldPos - worldVec * 0.1;
@@ -168,10 +168,10 @@ cloud_result rayMarchCloud(in sampler2D texture, in sampler2D sdepth, in vec2 te
         float sampledDensity = sampleCloud(currentWorldPos, texture);
         if (sampledDensity > 0) {
             // ATTEMPT 1
-            // if (first) {
-            //     first = false;
-            //     firstHitPos = currentWorldPos;
-            // }
+            if (first) {
+                first = false;
+                firstHitPos = currentWorldPos;
+            }
             // ATTEMPT 2
             // if (sampledDensity > maxDensity) {
             //     maxDensity = sampledDensity;
@@ -193,7 +193,7 @@ cloud_result rayMarchCloud(in sampler2D texture, in sampler2D sdepth, in vec2 te
             if (transmittance < 0.01) break;
         }
     }
-    return cloud_result(lightEnergy, transmittance, worldPos);
+    return cloud_result(lightEnergy, transmittance, firstHitPos);
 }
 
 vec4 generateCloudTexture(vec2 texcoord) {
