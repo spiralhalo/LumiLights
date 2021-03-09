@@ -74,7 +74,7 @@ void main()
         gl_FragData[1] = vec4(cloud > 0.5 ? 0.99999 : 1.0);
     #elif CLOUD_RENDERING == CLOUD_RENDERING_VOLUMETRIC
         cloud_result volumetric = rayMarchCloud(u_clouds_texture, u_solid_depth, v_texcoord);
-        vec3 color = ldr_tonemap3(v_sky_radiance * hdr_gammaAdjustf(min(1.0,volumetric.lightEnergy)));
+        vec3 color = ldr_tonemap3(v_sky_radiance) * volumetric.lightEnergy;
         float alpha = 1.0 - volumetric.transmittance;
         gl_FragData[0] = vec4(color, alpha);
         #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX

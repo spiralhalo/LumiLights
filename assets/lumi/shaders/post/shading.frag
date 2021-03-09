@@ -344,7 +344,7 @@ vec4 hdr_shaded_color(
     vec3 misc = texture2D(smisc, uv).xyz;
     a.rgb += hdr_gammaAdjust(noise_glint(misc.xy, misc.z));
 
-    if (translucent || translucentDepth >= depth) {
+    if (a.a != 0.0 && (translucent || translucentDepth >= depth) && depth != 1.0) {
         a = fog(frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? light.y * frx_ambientIntensity() : 1.0, a, viewPos, worldPos, bloom_out);
     }
 
@@ -372,7 +372,9 @@ vec4 ldr_shaded_particle(vec2 uv, sampler2D scolor, sampler2D sdepth, sampler2D 
 
     a.a = min(1.0, a.a);
 
-    a = fog(frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? light.y * frx_ambientIntensity() : 1.0, a, viewPos, worldPos, bloom_out);
+    if (a.a != 0.0 && depth != 1.0) {
+        a = fog(frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? light.y * frx_ambientIntensity() : 1.0, a, viewPos, worldPos, bloom_out);
+    }
 
     return ldr_tonemap(a);
 }
