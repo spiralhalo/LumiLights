@@ -61,7 +61,6 @@ varying float v_night;
 varying float v_not_in_void;
 varying float v_near_void_core;
 varying vec3 v_sky_radiance;
-varying vec3 v_fogcolor;
 
 const vec3 VOID_CORE_COLOR = hdr_gammaAdjust(vec3(1.0, 0.7, 0.5));
 
@@ -154,7 +153,7 @@ vec4 fog (float skylightFactor, vec4 a, vec3 viewPos, vec3 worldPos, inout float
 
     fogFactor = clamp(fogFactor * distFactor, 0.0, 1.0);
     
-    vec4 fogColor = vec4(hdr_orangeSkyColor(v_fogcolor, normalize(-viewPos)), 1.0);
+    vec4 fogColor = vec4(hdr_orangeSkyColor(v_skycolor, normalize(-viewPos)), 1.0);
     bloom = mix(bloom, 0.0, fogFactor);
     return mix(a, fogColor, fogFactor);
 }
@@ -210,7 +209,7 @@ void custom_sky(in vec3 viewPos, in float blindnessFactor, inout vec4 a, inout f
     if (frx_worldFlag(FRX_WORLD_IS_OVERWORLD) && v_not_in_void > 0.0) {
         float celestialObject = l2_clampScale(0.999, 0.9992, dot(worldSkyVec, frx_skyLightVector())) * frx_skyLightTransitionFactor();
         #ifdef CUSTOM_SKY
-            a.rgb = hdr_orangeSkyColor(v_fogcolor, -skyVec) * 2.0;
+            a.rgb = hdr_orangeSkyColor(v_skycolor, -skyVec) * 2.0;
             if (frx_worldFlag(FRX_WORLD_IS_MOONLIT)) {
                 a.rgb = mix(a.rgb, vec3(0.25 + frx_moonSize()), celestialObject);
             } else {

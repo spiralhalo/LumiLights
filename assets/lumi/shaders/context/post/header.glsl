@@ -51,6 +51,11 @@ vec3 hdr_skyColor()
             while (frx_worldTime() > times[i] && i < len) i++;
             skyColor = mix(colors[i-1], colors[i], l2_clampScale(times[i-1], times[i], frx_worldTime()));
         }
+
+        float thunderFactor = frx_rainGradient() *0.5 + frx_thunderGradient() *0.5;
+        skyColor *= (1.0 - thunderFactor * 0.9);
+        vec3 grayScale = vec3(frx_luminance(skyColor));
+        skyColor = mix(skyColor, grayScale, thunderFactor);
     } else {
         skyColor = hdr_gammaAdjust(frx_vanillaClearColor());
     }
