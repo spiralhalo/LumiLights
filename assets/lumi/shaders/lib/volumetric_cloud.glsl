@@ -26,7 +26,7 @@ struct cloud_result {
 };
 
 // const float CLOUD_MARCH_JITTER_STRENGTH = 0.01;
-const float TEXTURE_RADIUS = 128.0;
+const float TEXTURE_RADIUS = 256.0;
 const float TEXTURE_RADIUS_RCP = 1.0 / TEXTURE_RADIUS;
 const int NUM_SAMPLE = 512;
 const float SAMPLE_SIZE = TEXTURE_RADIUS / float(NUM_SAMPLE);
@@ -59,8 +59,8 @@ vec2 modelXz2Uv(vec2 modelXz)
 }
 
 #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
-    const float CLOUD_MAX_Y = 20.0;
-    const float CLOUD_MIN_Y = 15.0;
+    const float CLOUD_MAX_Y = 60.0;
+    const float CLOUD_MIN_Y = 55.0;
 #else
     const float CLOUD_MAX_Y = 120.5;
     const float CLOUD_MIN_Y = 115.5;
@@ -135,9 +135,6 @@ cloud_result rayMarchCloud(in sampler2D texture, in sampler2D sdepth, in vec2 te
         if (worldVec.y <= 0) return placeholder;
         float gotoBottom = CLOUD_MIN_Y / worldVec.y;
         float gotoTop = CLOUD_MAX_Y / worldVec.y;
-    #else
-        float gotoBottom = 0.0;
-        float gotoTop = worldDist;
     #endif
 
     // Adapted from Sebastian Lague's code (technically not the same, but just in case his code was MIT Licensed)
@@ -149,8 +146,12 @@ cloud_result rayMarchCloud(in sampler2D texture, in sampler2D sdepth, in vec2 te
     float lightEnergy = 0.0;
     float transmittance = 1.0;
     float maxdist = min(worldDist, NUM_SAMPLE * SAMPLE_SIZE);
-    float travelled = gotoBottom;
-    maxdist = min(maxdist, gotoTop);
+    #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
+        float travelled = gotoBottom;
+        maxdist = min(maxdist, gotoTop);
+    #else
+        float travelled = 0.0;
+    #endif
     float tileJitter = tile_noise_1d(v_texcoord, frxu_size, 3); //CLOUD_MARCH_JITTER_STRENGTH;
     currentWorldPos += sampleDir * tileJitter;
     travelled += tileJitter * SAMPLE_SIZE;
@@ -199,11 +200,7 @@ cloud_result rayMarchCloud(in sampler2D texture, in sampler2D sdepth, in vec2 te
 vec4 generateCloudTexture(vec2 texcoord) {
     float rainFactor = frx_rainGradient() * 0.67 + frx_thunderGradient() * 0.33; // TODO: optimize
     vec2 cloudCoord = uv2worldXz(texcoord) + (frx_worldDay() + frx_worldTime()) * 800.0;
-    #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
-        cloudCoord *= 8.0;
-    #else
-        cloudCoord *= 4.0;
-    #endif
+    cloudCoord *= 2.0;
 
     float cloudBase = l2_clampScale(0.0, 1.0 - rainFactor, snoise(cloudCoord * 0.005));
     float cloud1 = cloudBase * l2_clampScale(0.0, 1.0, wnoise2(cloudCoord * 0.015));
