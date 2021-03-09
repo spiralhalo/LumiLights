@@ -81,18 +81,17 @@ vec2 coords_uv(vec3 view, mat4 projection)
     return clip.xy * 0.5 + 0.5;
 }
 
-float raymarched_fog_density(vec3 viewPos, vec3 worldPos, float fogFar)
+float raymarched_fog_density(vec3 viewPos, vec3 worldPos, /*float fogNear,*/ float fogFar)
 {
     vec3 unitMarch = normalize(-viewPos);
-    // unitMarch = normalize(unitMarch + tileJitter);
     vec3 ray_view = viewPos + tileJitter * unitMarch;
     float distToCamera = distance(worldPos, frx_cameraPos());
     int stepCount = 0;
-    while (ray_view.z < 0 && stepCount < 128) {
+    while (ray_view.z < /*-fogNear*/ 0.0 && stepCount < 128) {
         stepCount ++;
         ray_view += unitMarch;
     }
-    return float(stepCount) / fogFar;
+    return float(stepCount) / max(1.0, fogFar/* - fogNear*/);
 }
 
 vec4 fog (float skylightFactor, vec4 a, vec3 viewPos, vec3 worldPos, inout float bloom)
@@ -145,7 +144,7 @@ vec4 fog (float skylightFactor, vec4 a, vec3 viewPos, vec3 worldPos, inout float
     // PERF: use projection z (linear depth) instead of length(viewPos)
 
     #if defined(VOLUMETRIC_FOG)
-    float distFactor = raymarched_fog_density(viewPos, worldPos, fogFar);
+    float distFactor = raymarched_fog_density(viewPos, worldPos, /*fogNear,*/ fogFar);
     #else
     float distFactor = l2_clampScale(fogNear, fogFar, length(viewPos));
     distFactor *= distFactor;
