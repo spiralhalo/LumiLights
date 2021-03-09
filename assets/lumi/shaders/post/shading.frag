@@ -120,7 +120,7 @@ vec4 fog (float skylightFactor, vec4 a, vec3 viewPos, vec3 worldPos, inout float
     }
     
     float heightFactor = l2_clampScale(fogTop, FOG_BOTTOM, worldPos.y);
-    heightFactor = frx_viewFlag(FRX_CAMERA_IN_FLUID) ? 1.0 : heightFactor;
+    heightFactor = frx_viewFlag(FRX_CAMERA_IN_FLUID) ? 1.0 : (heightFactor * heightFactor);
 
     #if defined(VOLUMETRIC_FOG)
     float fogFactor = fogDensity * heightFactor;
