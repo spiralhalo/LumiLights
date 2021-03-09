@@ -61,6 +61,7 @@ varying float v_night;
 varying float v_not_in_void;
 varying float v_near_void_core;
 varying vec3 v_sky_radiance;
+varying vec3 v_fogcolor;
 
 const vec3 VOID_CORE_COLOR = hdr_gammaAdjust(vec3(1.0, 0.7, 0.5));
 
@@ -79,6 +80,83 @@ vec2 coords_uv(vec3 view, mat4 projection)
     vec4 clip = projection * vec4(view, 1.0);
     clip.xyz /= clip.w;
     return clip.xy * 0.5 + 0.5;
+}
+
+float raymarched_fog_density(vec3 viewPos, vec3 worldPos, float fogFar)
+{
+    vec3 unitMarch = normalize(-viewPos);
+    // unitMarch = normalize(unitMarch + tileJitter);
+    vec3 ray_view = viewPos;
+    float distToCamera = distance(worldPos, frx_cameraPos());
+    int stepCount = 0;
+    while (ray_view.z < 0 && stepCount < 128) {
+        stepCount ++;
+        ray_view += unitMarch;
+    }
+    return float(stepCount) / fogFar;
+}
+
+vec4 fog (float skylightFactor, vec4 a, vec3 viewPos, vec3 worldPos, inout float bloom)
+{
+
+    float fogDensity = frx_viewFlag(FRX_CAMERA_IN_FLUID) ? UNDERWATER_FOG_DENSITY : FOG_DENSITY;
+    float fogFar = frx_viewFlag(FRX_CAMERA_IN_FLUID) ? UNDERWATER_FOG_FAR : FOG_FAR;
+    float fogNear = frx_viewFlag(FRX_CAMERA_IN_FLUID) ? UNDERWATER_FOG_NEAR : FOG_NEAR;
+    fogFar = max(fogNear, fogFar);
+
+    // float fog_noise = snoise(worldPos.xz * FOG_NOISE_SCALE + frx_renderSeconds() * FOG_NOISE_SPEED) * FOG_NOISE_HEIGHT;
+    float fogTop = FOG_TOP /*+ fog_noise*/;
+    
+    if (!frx_viewFlag(FRX_CAMERA_IN_FLUID) && frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT)) {
+        float zigZagTime = abs(frx_worldTime()-0.5);
+        float timeFactor = (l2_clampScale(0.45, 0.5, zigZagTime) + l2_clampScale(0.05, 0.0, zigZagTime));
+        float thickener = 1.0;
+        thickener -= 0.25 * timeFactor;
+        thickener -= 0.5 * thickener * frx_rainGradient();
+        thickener -= 0.5 * thickener * frx_thunderGradient();
+        fogNear *= thickener;
+        fogFar *= thickener;
+        fogTop = mix(fogTop, max(FOG_TOP, 128.0), (1.0 - thickener));
+        fogDensity = mix(fogDensity, 1.0, (1.0 - thickener));
+    }
+    
+    float heightFactor = l2_clampScale(fogTop, FOG_BOTTOM, worldPos.y);
+    heightFactor = frx_viewFlag(FRX_CAMERA_IN_FLUID) ? 1.0 : heightFactor;
+
+    #if defined(VOLUMETRIC_FOG)
+    float fogFactor = fogDensity * heightFactor;
+    #else
+    float fogFactor = fogDensity * heightFactor * (frx_viewFlag(FRX_CAMERA_IN_FLUID) ? 1.0 : skylightFactor);
+    #endif
+
+    if (frx_playerHasEffect(FRX_EFFECT_BLINDNESS)) {
+        float blindnessModifier = l2_clampScale(0.5, 1.0, 1.0 - frx_luminance(v_skycolor));
+        fogFar = mix(fogFar, 3.0, blindnessModifier);
+        fogNear = mix(fogNear, 0.0, blindnessModifier);
+        fogFactor = mix(fogFactor, 1.0, blindnessModifier);
+    }
+
+    if (frx_viewFlag(FRX_CAMERA_IN_LAVA)) {
+        fogFar = frx_playerHasEffect(FRX_EFFECT_FIRE_RESISTANCE) ? 2.5 : 0.5;
+        fogNear = 0.0;
+        fogFactor = 1.0;
+    }
+
+    // TODO: retrieve fog distance from render distance ?
+    // PERF: use projection z (linear depth) instead of length(viewPos)
+
+    #if defined(VOLUMETRIC_FOG)
+    float distFactor = raymarched_fog_density(viewPos, worldPos, fogFar);
+    #else
+    float distFactor = l2_clampScale(fogNear, fogFar, length(viewPos));
+    distFactor *= distFactor;
+    #endif
+
+    fogFactor = clamp(fogFactor * distFactor, 0.0, 1.0);
+    
+    vec4 fogColor = vec4(hdr_orangeSkyColor(v_fogcolor, normalize(-viewPos)), 1.0);
+    bloom = mix(bloom, 0.0, fogFactor);
+    return mix(a, fogColor, fogFactor);
 }
 
 float caustics(vec3 worldPos)
@@ -132,7 +210,7 @@ void custom_sky(in vec3 viewPos, in float blindnessFactor, inout vec4 a, inout f
     if (frx_worldFlag(FRX_WORLD_IS_OVERWORLD) && v_not_in_void > 0.0) {
         float celestialObject = l2_clampScale(0.999, 0.9992, dot(worldSkyVec, frx_skyLightVector())) * frx_skyLightTransitionFactor();
         #ifdef CUSTOM_SKY
-            a.rgb = hdr_orangeSkyColor(v_skycolor, -skyVec) * 2.0;
+            a.rgb = hdr_orangeSkyColor(v_fogcolor, -skyVec) * 2.0;
             if (frx_worldFlag(FRX_WORLD_IS_MOONLIT)) {
                 a.rgb = mix(a.rgb, vec3(0.25 + frx_moonSize()), celestialObject);
             } else {
@@ -267,6 +345,9 @@ vec4 hdr_shaded_color(
     vec3 misc = texture2D(smisc, uv).xyz;
     a.rgb += hdr_gammaAdjust(noise_glint(misc.xy, misc.z));
 
+    // PERF: don't shade past max fog distance
+    a = fog(frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? light.y * frx_ambientIntensity() : 1.0, a, viewPos, worldPos, bloom_out);
+
     #if CAUSTICS_MODE == CAUSTICS_MODE_TEXTURE
         if (frx_viewFlag(FRX_CAMERA_IN_WATER) && translucentDepth >= depth) {
             a.rgb += light.y * light.y * 0.1 * v_sky_radiance * volumetric_caustics_beam(worldPos);
@@ -291,11 +372,15 @@ vec4 ldr_shaded_particle(vec2 uv, sampler2D scolor, sampler2D sdepth, sampler2D 
 
     a.a = min(1.0, a.a);
 
+    a = fog(frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? light.y * frx_ambientIntensity() : 1.0, a, viewPos, worldPos, bloom_out);
+
     return ldr_tonemap(a);
 }
 
 void main()
 {
+    // tileJitter = 2.0 * tile_noise_3d(v_texcoord, frxu_size, 4) - 1.0;
+    // tileJitter *= JITTER_STRENGTH;
     float bloom1;
     float bloom2;
     float bloom3;
