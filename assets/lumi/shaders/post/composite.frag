@@ -32,7 +32,7 @@ varying vec2 v_skylightpos;
 varying float v_godray_intensity;
 varying float v_aspect_adjuster;
 
-#define NUM_LAYERS 4
+#define NUM_LAYERS 5
 
 vec4 color_layers[NUM_LAYERS];
 float depth_layers[NUM_LAYERS];
