@@ -7,6 +7,7 @@
 #include lumi:shaders/lib/fast_gaussian_blur.glsl
 #include lumi:shaders/lib/godrays.glsl
 #include lumi:shaders/lib/tile_noise.glsl
+#include lumi:shaders/lib/fog2.glsl
 #include lumi:shaders/context/global/lighting.glsl
 #include lumi:shaders/context/global/experimental.glsl
 #include lumi:shaders/context/post/clouds.glsl
@@ -115,6 +116,10 @@ void main()
 
     for (int i = 1; i < active_layers; ++i) {
         c = blend(c, color_layers[i]);
+    }
+
+    if (depth_layers[0] != 1.0) {
+        fog (c, v_texcoord, depth_layers[0]);
     }
 
     if (frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) && v_godray_intensity > 0.0) {
