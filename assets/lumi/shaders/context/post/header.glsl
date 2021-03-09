@@ -67,7 +67,11 @@ vec3 ldr_skyColor()
 }
 #else
 vec3 hdr_orangeSkyColor(vec3 original, vec3 viewDir) {
-    if (frx_worldFlag(FRX_WORLD_IS_OVERWORLD) && !frx_worldFlag(FRX_WORLD_IS_MOONLIT)) {
+    bool customOverworldOrange =
+        frx_worldFlag(FRX_WORLD_IS_OVERWORLD)
+        && !frx_viewFlag(FRX_CAMERA_IN_FLUID)
+        && !frx_worldFlag(FRX_WORLD_IS_MOONLIT);
+    if (customOverworldOrange) {
         float vDotSun = l2_clampScale(0.0, -1.0, dot(viewDir, frx_normalModelMatrix()*frx_skyLightVector()));
         float sunHorizonFactor = l2_clampScale(0.5 /*BRUTE FORCED NUMBER*/, 0.0, frx_skyLightVector().y);
         return mix(original, ORANGE_SKY_COLOR, sunHorizonFactor * vDotSun * frx_skyLightTransitionFactor());
