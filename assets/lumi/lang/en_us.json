@@ -91,6 +91,8 @@
     "config.lumi_lights.help.deferred_shadow": "Perform shadowmap sampling in post",
 
     "respackopts.title.LUMI": "Lumi Lights",
+    "respackopts.field.LUMI.NoWaterColor": "Colorless water",
+    "respackopts.tooltip.LUMI.NoWaterColor": "Enable colorless water",
     "respackopts.field.LUMI.NoWaterTexture": "Textureless water",
     "respackopts.tooltip.LUMI.NoWaterTexture": "Enable textureless water",
     "respackopts.field.LUMI.WavyWaterModel": "Wavy water animation",

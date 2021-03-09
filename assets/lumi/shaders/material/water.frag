@@ -35,6 +35,10 @@ void frx_startFragment(inout frx_FragmentData fragData) {
         fragData.spriteColor.rgb *= fragData.spriteColor.rgb;
         fragData.spriteColor.a *= 0.5 + 0.5 * murky;
     #endif
+    #ifdef LUMI_NoWaterColor
+        fragData.vertexColor.rgb = vec3(0.0);
+        fragData.spriteColor.a = 0.1;
+    #endif
     
     /* WAVY NORMALS */
     // wave movement doesn't necessarily follow flow direction for the time being

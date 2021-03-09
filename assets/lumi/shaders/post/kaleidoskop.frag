@@ -55,7 +55,7 @@ vec4 work_on_pair(
         vec3 unit_view  = normalize(-ray_view);
         vec3 unit_march = normalize(reflect(-unit_view, normal) + mix(vec3(0.0, 0.0, 0.0), jitter * JITTER_STRENGTH, roughness2));
         float sky_light = texture2D(reflector_light, v_texcoord).y;
-        vec3 reg_f0     = vec3(material.y < 0.7 ? material.y : 0.0);
+        vec3 reg_f0     = vec3(material.z <= 0.8 ? material.z : 0.0);
         vec3 f0         = mix(reg_f0, albedo, material.y);
         rt_Result result = rt_reflection(ray_view, unit_view, normal, unit_march, frx_normalModelMatrix(), frx_projectionMatrix(), frx_inverseProjectionMatrix(), reflector_depth, reflector_normal, reflected_depth, reflected_normal);
         vec4 reflected;
