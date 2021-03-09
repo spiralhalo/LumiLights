@@ -344,8 +344,9 @@ vec4 hdr_shaded_color(
     vec3 misc = texture2D(smisc, uv).xyz;
     a.rgb += hdr_gammaAdjust(noise_glint(misc.xy, misc.z));
 
-    // PERF: don't shade past max fog distance
-    a = fog(frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? light.y * frx_ambientIntensity() : 1.0, a, viewPos, worldPos, bloom_out);
+    if (translucent || translucentDepth >= depth) {
+        a = fog(frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? light.y * frx_ambientIntensity() : 1.0, a, viewPos, worldPos, bloom_out);
+    }
 
     #if CAUSTICS_MODE == CAUSTICS_MODE_TEXTURE
         if (frx_viewFlag(FRX_CAMERA_IN_WATER) && translucentDepth >= depth) {
