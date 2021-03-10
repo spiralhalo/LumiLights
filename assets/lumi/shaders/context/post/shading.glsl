@@ -78,8 +78,7 @@ float raymarched_fog_density(vec3 viewPos, vec3 worldPos, /*float fogNear,*/ flo
     while (/*ray_view.z < /-fogNear/ 0.0 &&*/ distTraveled < maxDist) {
         #if defined(SHADOW_MAP_PRESENT) && defined(DEFERRED_SHADOW)
             // todo: proper cascade?
-            vec4 shadowViewPos = frx_shadowViewMatrix() * vec4(ray_model, 1.0);
-            shadowCoords = frx_shadowProjectionMatrix(0) * shadowViewPos;
+            shadowCoords = frx_shadowViewProjectionMatrix(0) * vec4(ray_model, 1.0);
             shadowCoords.xyz = shadowCoords.xyz * 0.5 + 0.5; // Transform from screen coordinates to texture coordinates
             if (shadowCoords.z < texture2DArray(u_shadow, vec3(shadowCoords.xy, 0.0)).r) {
                 illuminated += 1.0;
