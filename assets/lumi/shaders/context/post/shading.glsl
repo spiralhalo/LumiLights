@@ -61,15 +61,38 @@ vec2 coords_uv(vec3 view, mat4 projection)
 
 float raymarched_fog_density(vec3 viewPos, vec3 worldPos, /*float fogNear,*/ float fogFar)
 {
-    vec3 unitMarch = normalize(-viewPos);
-    vec3 ray_view = viewPos + tileJitter * unitMarch;
-    float distToCamera = distance(worldPos, frx_cameraPos());
-    int stepCount = 0;
-    while (ray_view.z < /*-fogNear*/ 0.0 && stepCount < 128) {
-        stepCount ++;
-        ray_view += unitMarch;
+    // vec3 unitMarch_view = normalize(-viewPos);
+    // vec3 ray_view = viewPos + tileJitter * unitMarch_view;
+
+    vec3 modelPos = worldPos - frx_cameraPos();
+    vec3 unitMarch_model = normalize(-modelPos);
+    vec3 ray_model = modelPos + tileJitter * unitMarch_model;
+
+    float distToCamera = length(modelPos);
+    float distTraveled = 0.0;
+    float maxDist = min(distToCamera, 128.0); // why 128 again ?
+
+    float illuminated = 0.0;
+    vec4 shadowCoords;
+
+    while (/*ray_view.z < /-fogNear/ 0.0 &&*/ distTraveled < maxDist) {
+        #if defined(SHADOW_MAP_PRESENT) && defined(DEFERRED_SHADOW)
+            // todo: proper cascade?
+            vec4 shadowViewPos = frx_shadowViewMatrix() * vec4(ray_model, 1.0);
+            shadowCoords = frx_shadowProjectionMatrix(0) * shadowViewPos;
+            shadowCoords.xyz = shadowCoords.xyz * 0.5 + 0.5; // Transform from screen coordinates to texture coordinates
+            if (shadowCoords.z < texture2DArray(u_shadow, vec3(shadowCoords.xy, 0.0)).r) {
+                illuminated += 1.0;
+            }
+        #else
+            illuminated += 1.0;
+        #endif
+        distTraveled += 1.0;
+        ray_model += unitMarch_model;
+        // ray_view += unitMarch_view;
     }
-    return float(stepCount) / max(1.0, fogFar/* - fogNear*/);
+
+    return illuminated / max(1.0, fogFar/* - fogNear*/);
 }
 
 vec4 fog (float skylightFactor, vec4 a, vec3 viewPos, vec3 worldPos, inout float bloom)
