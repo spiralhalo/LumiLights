@@ -72,7 +72,7 @@ float calcShadowFactorx(in sampler2DArray shadowMap, vec4 shadowViewPos) {
                 offset.x = -inc + inc * j;
                 offset.y = -inc + inc * i;
                 w = wKernel[i][j];
-                shadowFactor += w * (shadowCoords.z + bias < texture2DArray(shadowMap, vec3(shadowCoords.xy + offset, c)).r ? 1.0 : 0.0);
+                shadowFactor += shadowCoords.z + bias < texture2DArray(shadowMap, vec3(shadowCoords.xy + offset, c)).r ? (1.0-w) : 0.0;
                 // shadowFactor += (shadowCoords.xy != clamp(shadowCoords.xy, 0.0, 1.0))
                 //               ? 1.0
                 //               : shadow2DArray(shadowMap, vec4(shadowCoords.xy + offset, float(cascade), shadowCoords.z - bias)).r;
