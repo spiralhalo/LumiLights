@@ -58,7 +58,7 @@ float calcShadowFactorx(in sampler2DArray shadowMap, vec4 shadowViewPos) {
     shadowCoords.xyz = shadowCoords.xyz * 0.5 + 0.5; // Transform from screen coordinates to texture coordinates
 
     #if SHADOW_FILTERING == SHADOW_FILTERING_NONE
-        float shadowFactor = shadowCoords.z + bias < texture2DArray(shadowMap, vec3(shadowCoords.xy, float(cascade))).r ? 1.0 : 0.0;
+        float shadowFactor = shadowCoords.z - bias < texture2DArray(shadowMap, vec3(shadowCoords.xy, float(cascade))).r ? 1.0 : 0.0;
     #else
         vec2 shadowTexCoord;
         float shadowFactor = 0.0;
@@ -72,7 +72,7 @@ float calcShadowFactorx(in sampler2DArray shadowMap, vec4 shadowViewPos) {
                 offset.x = -inc + inc * j;
                 offset.y = -inc + inc * i;
                 w = wKernel[i][j];
-                shadowFactor += shadowCoords.z + bias < texture2DArray(shadowMap, vec3(shadowCoords.xy + offset, c)).r ? (1.0-w) : 0.0;
+                shadowFactor += shadowCoords.z - bias < texture2DArray(shadowMap, vec3(shadowCoords.xy + offset, c)).r ? (1.0-w) : 0.0;
                 // shadowFactor += (shadowCoords.xy != clamp(shadowCoords.xy, 0.0, 1.0))
                 //               ? 1.0
                 //               : shadow2DArray(shadowMap, vec4(shadowCoords.xy + offset, float(cascade), shadowCoords.z - bias)).r;
