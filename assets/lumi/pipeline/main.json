@@ -42,6 +42,15 @@
         translucent: "fab_translucent"
     },
 
+    materialProgram: {
+		vertexSource: "lumi:shaders/forward/main.vert",
+		fragmentSource: "lumi:shaders/forward/main.frag",
+		// glsl names for samplers additive to the FREX pre-defined samplers
+		samplers: [],
+		// image names for samplers additive to the FREX pre-defined samplers
+		samplerImages: []
+	},
+
     include: [
         "lumi:pipeline/reflection.json",
         "lumi:pipeline/custom_clouds.json",
@@ -50,9 +59,9 @@
 
     programs: [
         {
-            name: "shading",
+            name: "shading_solid",
             vertexSource: "lumi:shaders/post/hdr.vert",
-            fragmentSource: "lumi:shaders/post/shading.frag",
+            fragmentSource: "lumi:shaders/post/shading_solid.frag",
             samplers: [
                 "u_solid_color",
                 "u_solid_depth",
@@ -61,6 +70,16 @@
                 "u_material_solid",
                 "u_misc_solid",
 
+                "u_translucent_depth",
+
+                "u_ao",
+                "u_shadow",
+            ]
+        }, {
+            name: "shading_translucent",
+            vertexSource: "lumi:shaders/post/hdr.vert",
+            fragmentSource: "lumi:shaders/post/shading_translucent.frag",
+            samplers: [
                 "u_translucent_color",
                 "u_translucent_depth",
                 "u_light_translucent",
@@ -72,7 +91,7 @@
                 "u_particles_depth",
                 "u_light_particles",
 
-                "u_ao"
+                "u_shadow",
             ]
         }, {
             name: "refraction",
@@ -499,12 +518,17 @@
         },
         /* DEFERRED SHADING */
         {
-            name: "shading",
+            name: "shading_solid",
             colorAttachments: [
                 {image: "solid_shaded", clearColor: 0x00000000},
-                {image: "translucent_shaded", clearColor: 0x00000000},
-                {image: "particles_final", clearColor: 0x00000000}
                 {image: "emissive", clearColor: 0x00000000},
+            ]
+        }, {
+            name: "shading_translucent",
+            colorAttachments: [
+                {image: "translucent_shaded", clearColor: 0x00000000},
+                {image: "particles_final", clearColor: 0x00000000},
+                {image: "emissive"},
             ]
         }, {
             name: "refraction",

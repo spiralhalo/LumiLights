@@ -4,8 +4,8 @@
     allowEntities: true,
     allowParticles: true,
     supportForwardRender: true,
-    vertexShader: "lumi:shaders/forward/shadow.vert",
-    fragmentShader: "lumi:shaders/forward/shadow.frag",
+    vertexSource: "lumi:shaders/forward/shadow.vert",
+    fragmentSource: "lumi:shaders/forward/shadow.frag",
     // first parameter to glPolygonOffset - variable slope factor
     offsetSlopeFactor: 1.1,
     // second parameter to glPolygonOffset - constant offset bias
@@ -22,7 +22,7 @@
   images: [
     // depth attachment for shadow map
     {
-      name: "shadow_depth",
+      name: "shadow_map",
       size: 1024,
       // DO NOT CHANGE ANY SETTINGS BELOW
       internalFormat: "DEPTH_COMPONENT32",
@@ -44,7 +44,7 @@
   framebuffers: [
     {
       name: "shadow",
-      depthAttachment: {image: "shadow_depth", clearDepth: 1.0}
+      depthAttachment: {image: "shadow_map", clearDepth: 1.0}
     }
   ]
 }

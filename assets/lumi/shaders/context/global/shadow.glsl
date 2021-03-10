@@ -25,7 +25,7 @@ vec3 shadowDist(int cascade, vec4 shadowViewPos)
     return abs((c.xyz - shadowViewPos.xyz) / c.w);
 }
 
-float calcShadowFactor(vec4 shadowViewPos) {
+float calcShadowFactor(in sampler2DArrayShadow shadowMap, vec4 shadowViewPos) {
     vec3 d3 = shadowDist(3, shadowViewPos);
     vec3 d2 = shadowDist(2, shadowViewPos);
     vec3 d1 = shadowDist(1, shadowViewPos);
@@ -70,14 +70,14 @@ float calcShadowFactor(vec4 shadowViewPos) {
                 offset.x = -inc + inc * j;
                 offset.y = -inc + inc * i;
                 w = wKernel[i][j];
-                shadowFactor += w * shadow2DArray(frxs_shadowMap, vec4(shadowCoords.xy + offset, c, shadowCoords.z - bias)).r;
+                shadowFactor += w * shadow2DArray(shadowMap, vec4(shadowCoords.xy + offset, c, shadowCoords.z - bias)).r;
                 // shadowFactor += (shadowCoords.xy != clamp(shadowCoords.xy, 0.0, 1.0))
                 //               ? 1.0
-                //               : shadow2DArray(frxs_shadowMap, vec4(shadowCoords.xy + offset, float(cascade), shadowCoords.z - bias)).r;
+                //               : shadow2DArray(shadowMap, vec4(shadowCoords.xy + offset, float(cascade), shadowCoords.z - bias)).r;
             }
         }
     #elif SHADOW_FILTERING == SHADOW_FILTERING_NONE
-        float shadowFactor = shadow2DArray(frxs_shadowMap, vec4(shadowCoords.xy, float(cascade), shadowCoords.z - bias)).r;
+        float shadowFactor = shadow2DArray(shadowMap, vec4(shadowCoords.xy, float(cascade), shadowCoords.z - bias)).r;
     #else
         float shadowFactor = sampleShadowPCF(shadowCoords.xyz, float(cascade));
     #endif
@@ -101,12 +101,12 @@ vec2 computeReceiverPlaneDepthBias(vec3 texCoordDX, vec3 texCoordDY) {
 // Helper function for pcfSampleOptimizedPCF
 // Adapted from https://github.com/TheRealMJP/Shadows - MIT License
 //-------------------------------------------------------------------------------------------------
-float pcfSample(in vec2 base_uv, in float u, in float v, in vec2 shadowMapSizeInv, in float cascade,  in float depth, in vec2 receiverPlaneDepthBias) {
+float pcfSample(in sampler2DArrayShadow shadowMap, in vec2 base_uv, in float u, in float v, in vec2 shadowMapSizeInv, in float cascade,  in float depth, in vec2 receiverPlaneDepthBias) {
 
     vec2 uv = base_uv + vec2(u, v) * shadowMapSizeInv;
     float z = depth + dot(vec2(u, v) * shadowMapSizeInv, receiverPlaneDepthBias);
 
-	return shadow2DArray(frxs_shadowMap, vec4(uv, cascade, z)).x;
+	return shadow2DArray(shadowMap, vec4(uv, cascade, z)).x;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -114,7 +114,7 @@ float pcfSample(in vec2 base_uv, in float u, in float v, in vec2 shadowMapSizeIn
 // Adapted from https://github.com/TheRealMJP/Shadows - MIT License
 // Returns 0 for fully shaded, 1 for full exposure.
 //-------------------------------------------------------------------------------------------------
-float sampleShadowPCF(in vec3 shadowPos, in float cascade) {
+float sampleShadowPCF(in sampler2DArrayShadow shadowMap, in vec3 shadowPos, in float cascade) {
 	vec3 shadowPosDX = dFdx(shadowPos);
 	vec3 shadowPosDY = dFdy(shadowPos);
 
@@ -157,10 +157,10 @@ float sampleShadowPCF(in vec3 shadowPos, in float cascade) {
         float v0 = (2 - t) / vw0 - 1;
         float v1 = t / vw1 + 1;
 
-        sum += uw0 * vw0 * pcfSample(base_uv, u0, v0, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
-        sum += uw1 * vw0 * pcfSample(base_uv, u1, v0, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
-        sum += uw0 * vw1 * pcfSample(base_uv, u0, v1, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
-        sum += uw1 * vw1 * pcfSample(base_uv, u1, v1, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
+        sum += uw0 * vw0 * pcfSample(shadowMap, base_uv, u0, v0, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
+        sum += uw1 * vw0 * pcfSample(shadowMap, base_uv, u1, v0, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
+        sum += uw0 * vw1 * pcfSample(shadowMap, base_uv, u0, v1, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
+        sum += uw1 * vw1 * pcfSample(shadowMap, base_uv, u1, v1, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
 
         return sum * 1.0f / 16;
 
@@ -182,17 +182,17 @@ float sampleShadowPCF(in vec3 shadowPos, in float cascade) {
         float v1 = (3 + t) / vw1;
         float v2 = t / vw2 + 2;
 
-        sum += uw0 * vw0 * pcfSample(base_uv, u0, v0, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
-        sum += uw1 * vw0 * pcfSample(base_uv, u1, v0, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
-        sum += uw2 * vw0 * pcfSample(base_uv, u2, v0, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
+        sum += uw0 * vw0 * pcfSample(shadowMap, base_uv, u0, v0, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
+        sum += uw1 * vw0 * pcfSample(shadowMap, base_uv, u1, v0, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
+        sum += uw2 * vw0 * pcfSample(shadowMap, base_uv, u2, v0, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
 
-        sum += uw0 * vw1 * pcfSample(base_uv, u0, v1, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
-        sum += uw1 * vw1 * pcfSample(base_uv, u1, v1, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
-        sum += uw2 * vw1 * pcfSample(base_uv, u2, v1, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
+        sum += uw0 * vw1 * pcfSample(shadowMap, base_uv, u0, v1, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
+        sum += uw1 * vw1 * pcfSample(shadowMap, base_uv, u1, v1, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
+        sum += uw2 * vw1 * pcfSample(shadowMap, base_uv, u2, v1, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
 
-        sum += uw0 * vw2 * pcfSample(base_uv, u0, v2, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
-        sum += uw1 * vw2 * pcfSample(base_uv, u1, v2, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
-        sum += uw2 * vw2 * pcfSample(base_uv, u2, v2, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
+        sum += uw0 * vw2 * pcfSample(shadowMap, base_uv, u0, v2, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
+        sum += uw1 * vw2 * pcfSample(shadowMap, base_uv, u1, v2, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
+        sum += uw2 * vw2 * pcfSample(shadowMap, base_uv, u2, v2, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
 
         return sum * 1.0f / 144;
 
@@ -218,25 +218,25 @@ float sampleShadowPCF(in vec3 shadowPos, in float cascade) {
         float v2 = -(7 * t + 5) / vw2 + 1;
         float v3 = -t / vw3 + 3;
 
-        sum += uw0 * vw0 * pcfSample(base_uv, u0, v0, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
-        sum += uw1 * vw0 * pcfSample(base_uv, u1, v0, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
-        sum += uw2 * vw0 * pcfSample(base_uv, u2, v0, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
-        sum += uw3 * vw0 * pcfSample(base_uv, u3, v0, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
+        sum += uw0 * vw0 * pcfSample(shadowMap, base_uv, u0, v0, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
+        sum += uw1 * vw0 * pcfSample(shadowMap, base_uv, u1, v0, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
+        sum += uw2 * vw0 * pcfSample(shadowMap, base_uv, u2, v0, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
+        sum += uw3 * vw0 * pcfSample(shadowMap, base_uv, u3, v0, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
 
-        sum += uw0 * vw1 * pcfSample(base_uv, u0, v1, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
-        sum += uw1 * vw1 * pcfSample(base_uv, u1, v1, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
-        sum += uw2 * vw1 * pcfSample(base_uv, u2, v1, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
-        sum += uw3 * vw1 * pcfSample(base_uv, u3, v1, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
+        sum += uw0 * vw1 * pcfSample(shadowMap, base_uv, u0, v1, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
+        sum += uw1 * vw1 * pcfSample(shadowMap, base_uv, u1, v1, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
+        sum += uw2 * vw1 * pcfSample(shadowMap, base_uv, u2, v1, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
+        sum += uw3 * vw1 * pcfSample(shadowMap, base_uv, u3, v1, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
 
-        sum += uw0 * vw2 * pcfSample(base_uv, u0, v2, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
-        sum += uw1 * vw2 * pcfSample(base_uv, u1, v2, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
-        sum += uw2 * vw2 * pcfSample(base_uv, u2, v2, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
-        sum += uw3 * vw2 * pcfSample(base_uv, u3, v2, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
+        sum += uw0 * vw2 * pcfSample(shadowMap, base_uv, u0, v2, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
+        sum += uw1 * vw2 * pcfSample(shadowMap, base_uv, u1, v2, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
+        sum += uw2 * vw2 * pcfSample(shadowMap, base_uv, u2, v2, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
+        sum += uw3 * vw2 * pcfSample(shadowMap, base_uv, u3, v2, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
 
-        sum += uw0 * vw3 * pcfSample(base_uv, u0, v3, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
-        sum += uw1 * vw3 * pcfSample(base_uv, u1, v3, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
-        sum += uw2 * vw3 * pcfSample(base_uv, u2, v3, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
-        sum += uw3 * vw3 * pcfSample(base_uv, u3, v3, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
+        sum += uw0 * vw3 * pcfSample(shadowMap, base_uv, u0, v3, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
+        sum += uw1 * vw3 * pcfSample(shadowMap, base_uv, u1, v3, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
+        sum += uw2 * vw3 * pcfSample(shadowMap, base_uv, u2, v3, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
+        sum += uw3 * vw3 * pcfSample(shadowMap, base_uv, u3, v3, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
 
         return sum * 1.0f / 2704;
 

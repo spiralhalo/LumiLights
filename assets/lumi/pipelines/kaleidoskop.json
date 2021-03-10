@@ -20,8 +20,6 @@
 
 	nameKey: "pipeline.kaleidoskop.name",
 	descriptionKey: "pipeline.kaleidoskop.desc",
-	materialVertexShader: "lumi:shaders/forward/main.vert",
-	materialFragmentShader: "lumi:shaders/forward/main.frag",
 
 	include: [
 		"lumi:pipeline/main.json",

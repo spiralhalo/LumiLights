@@ -20,8 +20,6 @@
 
 	nameKey: "pipeline.lumi_lights_dev.name",
 	descriptionKey: "pipeline.lumi_lights_dev.desc",
-	materialVertexShader: "lumi:shaders/forward/main.vert",
-	materialFragmentShader: "lumi:shaders/forward/main.frag",
 
 	sky: {
 		// Used when dimension/celestial object does not specify

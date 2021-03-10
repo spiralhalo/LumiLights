@@ -20,8 +20,6 @@
 
 	nameKey: "pipeline.lumi_lights.name",
 	descriptionKey: "pipeline.lumi_lights.desc",
-	materialVertexShader: "lumi:shaders/forward/main.vert",
-	materialFragmentShader: "lumi:shaders/forward/main.frag",
 
 	include: [
 		"lumi:pipeline/main.json",

@@ -28,7 +28,7 @@ frx_FragmentData frx_createPipelineFragment()
 {
 #ifdef VANILLA_LIGHTING
     return frx_FragmentData (
-        texture2D(frxs_spriteAltas, frx_texcoord, frx_matUnmippedFactor() * -4.0),
+        texture2D(frxs_baseColor, frx_texcoord, frx_matUnmippedFactor() * -4.0),
         frx_color,
         frx_matEmissive() ? 1.0 : 0.0,
         !frx_matDisableDiffuse(),
@@ -39,7 +39,7 @@ frx_FragmentData frx_createPipelineFragment()
     );
 #else
     return frx_FragmentData (
-        texture2D(frxs_spriteAltas, frx_texcoord, frx_matUnmippedFactor() * -4.0),
+        texture2D(frxs_baseColor, frx_texcoord, frx_matUnmippedFactor() * -4.0),
         frx_color,
         frx_matEmissive() ? 1.0 : 0.0,
         !frx_matDisableDiffuse(),
@@ -82,7 +82,7 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
         vec2 light = fragData.light.xy;
 
         #if defined(SHADOW_MAP_PRESENT) && !defined(DEFERRED_SHADOW)
-            float shadowFactor = calcShadowFactor(pv_shadowpos);
+            float shadowFactor = calcShadowFactor(frxs_shadowMap, pv_shadowpos);
             // sunlight requires > 0.7 skylight (see lightsource.glsl) therefore the light.y is clamped to this
             light.y = mix(min(0.7, light.y), 1.0, shadowFactor);
         #endif

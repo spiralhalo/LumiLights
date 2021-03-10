@@ -1,9 +1,7 @@
-#include lumi:shaders/context/post/header.glsl
 #include frex:shaders/lib/math.glsl
 #include frex:shaders/lib/noise/noise2d.glsl
 #include frex:shaders/lib/noise/noise3d.glsl
 #include frex:shaders/lib/noise/cellular2x2x2.glsl
-#include frex:shaders/api/sampler.glsl
 #include frex:shaders/api/view.glsl
 #include frex:shaders/api/world.glsl
 #include frex:shaders/api/player.glsl
@@ -22,33 +20,13 @@
 #include lumi:shaders/context/global/experimental.glsl
 
 /*******************************************************
- *  lumi:shaders/post/shading.frag                     *
+ *  lumi:shaders/context/post/shading.frag             *
  *******************************************************
  *  Copyright (c) 2020-2021 spiralhalo                 *
  *  Released WITHOUT WARRANTY under the terms of the   *
  *  GNU Lesser General Public License version 3 as     *
  *  published by the Free Software Foundation, Inc.    *
  *******************************************************/
-
-uniform sampler2D u_solid_color;
-uniform sampler2D u_solid_depth;
-uniform sampler2D u_light_solid;
-uniform sampler2D u_normal_solid;
-uniform sampler2D u_material_solid;
-uniform sampler2D u_misc_solid;
-
-uniform sampler2D u_translucent_color;
-uniform sampler2D u_translucent_depth;
-uniform sampler2D u_light_translucent;
-uniform sampler2D u_normal_translucent;
-uniform sampler2D u_material_translucent;
-uniform sampler2D u_misc_translucent;
-
-uniform sampler2D u_particles_color;
-uniform sampler2D u_particles_depth;
-uniform sampler2D u_light_particles;
-
-uniform sampler2D u_ao;
 
 /*******************************************************
     vertexShader: lumi:shaders/post/hdr.vert
@@ -304,7 +282,7 @@ vec4 hdr_shaded_color(
 
     #if defined(SHADOW_MAP_PRESENT) && defined(DEFERRED_SHADOW)
         vec4 shadowViewPos = frx_shadowViewMatrix() * vec4(worldPos, 1.0);
-        float shadowFactor = calcShadowFactor(shadowViewPos);  
+        float shadowFactor = calcShadowFactor(u_shadow, shadowViewPos);  
         light.z = shadowFactor;
     #else
         light.z = light.y;
@@ -355,44 +333,3 @@ vec4 hdr_shaded_color(
 
     return a;
 }
-
-vec4 ldr_shaded_particle(vec2 uv, sampler2D scolor, sampler2D sdepth, sampler2D slight, out float bloom_out)
-{
-    vec4 a = texture2D(scolor, uv);
-
-    float depth     = texture2D(sdepth, uv).r;
-    vec3  viewPos   = coords_view(uv, frx_inverseProjectionMatrix(), depth);
-    vec3  normal    = normalize(-viewPos) * frx_normalModelMatrix();
-    vec4  light     = texture2D(slight, uv);
-    vec3  worldPos  = frx_cameraPos() + (frx_inverseViewMatrix() * vec4(viewPos, 1.0)).xyz;
-
-    bloom_out = light.z;
-    pbr_shading(a, bloom_out, viewPos, light.xyy, normal, 1.0, 0.0, 0.0, false, false);
-
-    a.a = min(1.0, a.a);
-
-    if (a.a != 0.0 && depth != 1.0) {
-        a = fog(frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? light.y * frx_ambientIntensity() : 1.0, a, viewPos, worldPos, bloom_out);
-    }
-
-    return ldr_tonemap(a);
-}
-
-void main()
-{
-    tileJitter = tile_noise_1d(v_texcoord, frxu_size, 3); //CLOUD_MARCH_JITTER_STRENGTH;
-    float bloom1;
-    float bloom2;
-    float bloom3;
-    float ssao = texture2D(u_ao, v_texcoord).r;
-    float translucentDepth = texture2D(u_translucent_depth, v_texcoord).r;
-    vec4 a1 = hdr_shaded_color(v_texcoord, u_solid_color, u_solid_depth, u_light_solid, u_normal_solid, u_material_solid, u_misc_solid, ssao, false, translucentDepth, bloom1);
-    vec4 a2 = hdr_shaded_color(v_texcoord, u_translucent_color, u_translucent_depth, u_light_translucent, u_normal_translucent, u_material_translucent, u_misc_translucent, 1.0, true, 1.0, bloom2);
-    vec4 a3 = ldr_shaded_particle(v_texcoord, u_particles_color, u_particles_depth, u_light_particles, bloom3);
-    gl_FragData[0] = a1;
-    gl_FragData[1] = a2;
-    gl_FragData[2] = a3;
-    gl_FragData[3] = vec4(bloom1 + bloom2 + bloom3, 0.0, 0.0, 1.0);
-}
-
-

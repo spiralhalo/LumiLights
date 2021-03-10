@@ -12,14 +12,21 @@
                 framebuffer: "ao_filtered",
                 samplerImages: ["ao_values", "solid_depth"]
             }, {
-                name: "shading",
-                program: "shading",
-                framebuffer: "shading",
+                name: "shading_solid",
+                program: "shading_solid",
+                framebuffer: "shading_solid",
                 samplerImages: [
                     "solid_main", "solid_depth", "light_solid", "normal_solid", "material_solid", "misc_solid",
+                    "translucent_depth",
+                    "ao_filtered", "shadow_map", ]
+            }, {
+                name: "shading_translucent",
+                program: "shading_translucent",
+                framebuffer: "shading_translucent",
+                samplerImages: [
                     "translucent_main", "translucent_depth", "light_translucent", "normal_translucent", "material_translucent", "misc_translucent",
                     "particles", "particles_depth", "light_particles",
-                    "ao_filtered"]
+                    "shadow_map", ]
             }, {
                 name: "reflection_solid",
                 program: "reflection",
