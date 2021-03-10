@@ -74,7 +74,7 @@ float raymarched_fog_density(vec3 viewPos, vec3 worldPos, /*float fogNear,*/ flo
 
     // March in shadow space for performance boost
     // todo: proper cascade?
-    vec3 shadowPos = (frx_shadowViewProjectionMatrix(0) * vec4(ray_model, 1.0)).xyz;
+    vec3 shadowPos = (frx_shadowViewProjectionMatrix(0) * vec4(modelPos, 1.0)).xyz;
     vec3 cameraPos_shadow = (frx_shadowViewProjectionMatrix(0) * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
     vec3 unitMarch_shadow = (cameraPos_shadow - shadowPos) / distToCamera;
     shadowPos = shadowPos * 0.5 + 0.5; // Transform from screen coordinates to texture coordinates
