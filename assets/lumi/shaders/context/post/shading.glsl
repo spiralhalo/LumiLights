@@ -281,8 +281,8 @@ vec4 hdr_shaded_color(
     // return vec4(coords_view(uv, frx_inverseProjectionMatrix(), depth), 1.0);
 
     #if defined(SHADOW_MAP_PRESENT) && defined(DEFERRED_SHADOW)
-        vec4 shadowViewPos = frx_shadowViewMatrix() * vec4(worldPos, 1.0);
-        float shadowFactor = calcShadowFactor(u_shadow, shadowViewPos);  
+        vec4 shadowViewPos = frx_shadowViewMatrix() * vec4(worldPos - frx_cameraPos(), 1.0);
+        float shadowFactor = calcShadowFactorx(u_shadow, shadowViewPos);  
         light.z = shadowFactor;
     #else
         light.z = light.y;
