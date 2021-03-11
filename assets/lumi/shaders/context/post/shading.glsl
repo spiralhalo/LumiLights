@@ -144,13 +144,20 @@ vec4 fog (float skylightFactor, vec4 a, vec3 viewPos, vec3 worldPos, inout float
     }
 
     // TODO: retrieve fog distance from render distance ?
-    // PERF: use projection z (linear depth) instead of length(viewPos)
+    float distFactor;
+    #if defined(VOLUMETRIC_FOG)
+        bool useVolumetric = !frx_playerHasEffect(FRX_EFFECT_BLINDNESS)
+            && !frx_viewFlag(FRX_CAMERA_IN_LAVA);
+        if (useVolumetric) {
+            distFactor = raymarched_fog_density(viewPos, worldPos, /*fogNear,*/ fogFar);
+        } else {
+    #endif
+
+    distFactor = l2_clampScale(fogNear, fogFar, length(viewPos));
+    distFactor *= distFactor;
 
     #if defined(VOLUMETRIC_FOG)
-    float distFactor = raymarched_fog_density(viewPos, worldPos, /*fogNear,*/ fogFar);
-    #else
-    float distFactor = l2_clampScale(fogNear, fogFar, length(viewPos));
-    distFactor *= distFactor;
+        }
     #endif
 
     fogFactor = clamp(fogFactor * distFactor, 0.0, 1.0);
