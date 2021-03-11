@@ -69,7 +69,7 @@ float raymarched_fog_density(vec3 viewPos, vec3 worldPos, /*float fogNear,*/ flo
     vec3 unitMarch_model = (-modelPos) / distToCamera;
     vec3 ray_model = modelPos + tileJitter * unitMarch_model;
 
-    float distTraveled = 0.0;
+    float distTraveled = tileJitter;
     float maxDist = min(distToCamera, 128.0); // why 128 again ?
 
     // March in shadow space for performance boost
