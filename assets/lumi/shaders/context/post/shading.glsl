@@ -73,21 +73,23 @@ float raymarched_fog_density(vec3 viewPos, vec3 worldPos, /*float fogNear,*/ flo
     float maxDist = min(distToCamera, 128.0); // why 128 again ?
 
     // March in shadow space for performance boost
-    vec3 shadowPos = (frx_shadowViewMatrix() * vec4(modelPos, 1.0)).xyz;
-    vec3 cameraPos_shadow = (frx_shadowViewMatrix() * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
-    vec3 unitMarch_shadow = (cameraPos_shadow - shadowPos) / distToCamera;
-    shadowPos = shadowPos * 0.5 + 0.5; // Transform from screen coordinates to texture coordinates
-    vec4 ray_shadow = vec4(shadowPos + tileJitter * unitMarch_shadow, 1.0);
+    // vec3 shadowPos = (frx_shadowViewMatrix() * vec4(modelPos, 1.0)).xyz;
+    //nb: camera pos in shadow view space is zero, but is non-zero in shadow view-projection space
+    // vec3 cameraPos_shadow = (frx_shadowViewMatrix() * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
+    // vec3 unitMarch_shadow = (/*cameraPos_shadow*/ - shadowPos) / distToCamera;
+    // shadowPos = shadowPos * 0.5 + 0.5; // Transform from screen coordinates to texture coordinates
+    vec4 ray_shadow;// = vec4(shadowPos + tileJitter * unitMarch_shadow, 1.0);
 
     float illuminated = 0.0;
     while (distTraveled < maxDist) {
         #if defined(SHADOW_MAP_PRESENT) && defined(DEFERRED_SHADOW)
+            ray_shadow = (frx_shadowViewMatrix() * vec4(ray_model, 1.0));
             illuminated += simpleShadowFactor(u_shadow, ray_shadow);
         #else
             illuminated += 1.0;
         #endif
         distTraveled += 1.0;
-        ray_shadow.xyz += unitMarch_shadow;
+        // ray_shadow.xyz += unitMarch_shadow;
         ray_model += unitMarch_model;
         // ray_view += unitMarch_view;
     }
