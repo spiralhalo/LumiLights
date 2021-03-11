@@ -38,6 +38,7 @@ varying float v_fov;
 varying float v_night;
 varying float v_not_in_void;
 varying float v_near_void_core;
+varying float v_blindness;
 varying vec3 v_sky_radiance;
 
 const vec3 VOID_CORE_COLOR = hdr_gammaAdjust(vec3(1.0, 0.7, 0.5));
@@ -131,10 +132,9 @@ vec4 fog (float skylightFactor, vec4 a, vec3 viewPos, vec3 worldPos, inout float
     #endif
 
     if (frx_playerHasEffect(FRX_EFFECT_BLINDNESS)) {
-        float blindnessModifier = l2_clampScale(0.5, 1.0, 1.0 - frx_luminance(v_skycolor));
-        fogFar = mix(fogFar, 3.0, blindnessModifier);
-        fogNear = mix(fogNear, 0.0, blindnessModifier);
-        fogFactor = mix(fogFactor, 1.0, blindnessModifier);
+        fogFar = mix(fogFar, 3.0, v_blindness);
+        fogNear = mix(fogNear, 0.0, v_blindness);
+        fogFactor = mix(fogFactor, 1.0, v_blindness);
     }
 
     if (frx_viewFlag(FRX_CAMERA_IN_LAVA)) {
@@ -148,7 +148,7 @@ vec4 fog (float skylightFactor, vec4 a, vec3 viewPos, vec3 worldPos, inout float
     #if defined(VOLUMETRIC_FOG)
         bool useVolumetric = !frx_playerHasEffect(FRX_EFFECT_BLINDNESS)
             && !frx_viewFlag(FRX_CAMERA_IN_LAVA);
-        if (useVolumetric) {
+        if (useVolumetric) { //TODO: blindness transition still broken
             distFactor = raymarched_fog_density(viewPos, worldPos, /*fogNear,*/ fogFar);
         } else {
     #endif
@@ -280,10 +280,9 @@ vec4 hdr_shaded_color(
 
     if (depth == 1.0 && !translucent) {
         // the sky
-        float blindnessFactor = frx_playerHasEffect(FRX_EFFECT_BLINDNESS) ? 0.0 : 1.0;
-        if (blindnessFactor == 0.0) return vec4(0.0);
-        custom_sky(viewPos, blindnessFactor, a, bloom_out);
-        return vec4(a.rgb * blindnessFactor, 0.0);
+        if (v_blindness == 1.0) return vec4(0.0);
+        custom_sky(viewPos, 1.0 - v_blindness, a, bloom_out);
+        return vec4(a.rgb * 1.0 - v_blindness, 0.0);
         // vec3 worldPos = (128.0 / length(modelPos)) * modelPos + frx_cameraPos(); // doesn't help
         // return a + fog(frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? frx_ambientIntensity() : 1.0, vec4(0.0), viewPos, worldPos, bloom_out);
     }

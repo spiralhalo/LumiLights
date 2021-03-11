@@ -17,6 +17,7 @@ varying float v_fov;
 varying float v_night;
 varying float v_not_in_void;
 varying float v_near_void_core;
+varying float v_blindness;
 varying vec3 v_sky_radiance;
 
 attribute vec2 in_uv;
@@ -43,4 +44,7 @@ void main()
     lightsource_setVars();
 
     v_skycolor = hdr_skyColor();
+    v_blindness = frx_playerHasEffect(FRX_EFFECT_BLINDNESS)
+        ? l2_clampScale(0.5, 1.0, 1.0 - frx_luminance(v_skycolor))
+        : 0.0;
 }

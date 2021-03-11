@@ -29,6 +29,7 @@ varying vec3 v_up;
 vec3 hdr_skyColor()
 {
     vec3 skyColor;
+     //TODO: blindness transition still broken with custom sky / orange
     bool customOverworldColor =
         frx_worldFlag(FRX_WORLD_IS_OVERWORLD)
         && !frx_viewFlag(FRX_CAMERA_IN_FLUID)

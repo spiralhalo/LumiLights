@@ -34,12 +34,14 @@ varying mat4 v_cloud_rotator;
 #endif
 varying float v_fov;
 varying float v_night;
+varying float v_blindness;
 varying vec3 v_sky_radiance;
 varying vec3 v_fogcolor;
 
 void main()
 {
     if (!frx_worldFlag(FRX_WORLD_IS_OVERWORLD)) return;
+    if (v_blindness == 1.0) return;
     // float brightnessMult = mix(1.0, BRIGHT_FINAL_MULT, frx_viewBrightness());
     #if CLOUD_RENDERING == CLOUD_RENDERING_FLAT
         float rainFactor = frx_rainGradient() * 0.67 + frx_thunderGradient() * 0.33;
@@ -70,13 +72,13 @@ void main()
         float cloudColor = frx_ambientIntensity() * frx_ambientIntensity() * (1.0 - 0.3 * rainFactor);
 
         vec4 clouds = vec4(hdr_orangeSkyColor(vec3(cloudColor), -skyVec), 1.0) * cloud;
-        gl_FragData[0] = clouds;
+        gl_FragData[0] = mix(clouds, vec4(0.0), v_blindness);
         gl_FragData[1] = vec4(cloud > 0.5 ? 0.99999 : 1.0);
     #elif CLOUD_RENDERING == CLOUD_RENDERING_VOLUMETRIC
         cloud_result volumetric = rayMarchCloud(u_clouds_texture, u_solid_depth, v_texcoord);
         vec3 color = ldr_tonemap3(v_sky_radiance) * volumetric.lightEnergy;
         float alpha = 1.0 - volumetric.transmittance;
-        gl_FragData[0] = vec4(color, alpha);
+        gl_FragData[0] = mix(vec4(color, alpha), vec4(0.0), v_blindness);
         #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
             gl_FragData[1] = vec4(alpha > 0.0 ? 0.9999 : 1.0);
         #else
