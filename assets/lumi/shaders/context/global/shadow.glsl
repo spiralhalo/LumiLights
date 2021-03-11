@@ -100,6 +100,7 @@ float simpleShadowFactor(in sampler2DArray shadowMap, in vec4 shadowViewPos) {
         bias = 0.0;
     }
     vec4 shadowCoords = frx_shadowProjectionMatrix(cascade) * shadowViewPos;
+    if (shadowCoords.xy != clamp(shadowCoords.xy, -1.0, 1.0)) return 1.0; // clamp to border
     shadowCoords.xyz = shadowCoords.xyz * 0.5 + 0.5; // Transform from screen coordinates to texture coordinates
     return shadowCoords.z - bias < texture2DArray(shadowMap, vec3(shadowCoords.xy, float(cascade))).r ? 1.0 : 0.0;
 }
@@ -134,6 +135,7 @@ float calcShadowFactor(in sampler2DArrayShadow shadowMap, vec4 shadowViewPos) {
     }
 
     vec4 shadowCoords = frx_shadowProjectionMatrix(cascade) * shadowViewPos;
+    if (shadowCoords.xy != clamp(shadowCoords.xy, -1.0, 1.0)) return 1.0; // clamp to border
     shadowCoords.xyz = shadowCoords.xyz * 0.5 + 0.5; // Transform from screen coordinates to texture coordinates
 
     #if SHADOW_FILTERING == SHADOW_FILTERING_BOX
