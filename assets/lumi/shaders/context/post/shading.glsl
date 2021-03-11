@@ -217,6 +217,7 @@ void custom_sky(in vec3 viewPos, in float blindnessFactor, inout vec4 a, inout f
             } else {
                 a.rgb += vec3(10.0) * celestialObject;
             }
+            a.rgb *= 1 + pow(l2_clampScale(0.5, -0.1, skyDotUp), 2.0);
         #else
             a.rgb = hdr_gammaAdjust(a.rgb) * 2.0;
         #endif
@@ -266,14 +267,18 @@ vec4 hdr_shaded_color(
     sampler2D scolor, sampler2D sdepth, sampler2D slight, sampler2D snormal, sampler2D smaterial, sampler2D smisc,
     float aoval, bool translucent, float translucentDepth, out float bloom_out)
 {
-    vec4 a = texture2D(scolor, uv);
-    float depth = texture2D(sdepth, uv).r;
-    vec3 viewPos = coords_view(uv, frx_inverseProjectionMatrix(), depth);
+    vec4  a       = texture2D(scolor, uv);
+    float depth   = texture2D(sdepth, uv).r;
+    vec3  viewPos = coords_view(uv, frx_inverseProjectionMatrix(), depth);
+
     if (depth == 1.0 && !translucent) {
         // the sky
         float blindnessFactor = frx_playerHasEffect(FRX_EFFECT_BLINDNESS) ? 0.0 : 1.0;
+        if (blindnessFactor == 0.0) return vec4(0.0);
         custom_sky(viewPos, blindnessFactor, a, bloom_out);
         return vec4(a.rgb * blindnessFactor, 0.0);
+        // vec3 worldPos = (128.0 / length(modelPos)) * modelPos + frx_cameraPos(); // doesn't help
+        // return a + fog(frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? frx_ambientIntensity() : 1.0, vec4(0.0), viewPos, worldPos, bloom_out);
     }
 
     vec4  light     = texture2D(slight, uv);
