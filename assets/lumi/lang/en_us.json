@@ -87,7 +87,7 @@
     "config.lumi_lights.value.caustics_mode": "Water caustics mode",
     "config.lumi_lights.help.caustics_mode": "Emulate water caustics",
     "config.lumi_lights.help.volumetric_fog": "Only use with shadow-enabled pipeline",
-    "config.lumi_lights.value.deferred_shadow": "/!\\ DO NOT TURN ON /!\\ Deferred shadow",
+    "config.lumi_lights.value.deferred_shadow": "Deferred shadow",
     "config.lumi_lights.help.deferred_shadow": "Perform shadowmap sampling in post",
 
     "respackopts.title.LUMI": "Lumi Lights",
