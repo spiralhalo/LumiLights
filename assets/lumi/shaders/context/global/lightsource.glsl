@@ -195,9 +195,13 @@ vec3 l2_sunRadiance(float skyLight, in float time, float transitionFactor, float
 {
     // PERF: single weather factor everywhere
     float weatherFactor = min(mix(1.0, SKY_LIGHT_RAINING_MULT, rainGradient), mix(1.0, SKY_LIGHT_THUNDERING_MULT, thunderGradient));
-    float sl = l2_skyLight(skyLight, 1.0);
-    // direct sun light doesn't reach into dark spot as much as sky ambient // TODO: WAT
-    sl = l2_clampScale(0.7, 0.97, sl);
+    #ifdef SHADOW_MAP_PRESENT
+        float sl = skyLight;
+    #else
+        float sl = l2_skyLight(skyLight, 1.0);
+        // direct sun light doesn't reach into dark spot as much as sky ambient // TODO: WAT
+        sl = l2_clampScale(0.7, 0.97, sl);
+    #endif
     return sl * SUNLIGHT_STR * hdr_gammaAdjust(ldr_sunColor(time)) * transitionFactor * weatherFactor;
 }
 
@@ -208,11 +212,15 @@ vec3 l2_moonRadiance(float skyLight, float time, float transitionFactor, float r
     #else
     // PERF: single weather factor everywhere
     float weatherFactor = min(mix(1.0, SKY_LIGHT_RAINING_MULT, rainGradient), mix(1.0, SKY_LIGHT_THUNDERING_MULT, thunderGradient));
-    float ml = l2_skyLight(skyLight, 1.0) * transitionFactor * weatherFactor * frx_moonSize() * MOONLIGHT_STR;
+    #ifdef SHADOW_MAP_PRESENT
+        float ml = skyLight;
+    #else
+        float ml = l2_skyLight(skyLight, 1.0);
+    #endif
     // aren't these code just the transition factor ?
     // if(time < 0.58) ml *= l2_clampScale(0.54, 0.58, time);
     // else if(time > 0.92) ml *= l2_clampScale(0.96, 0.92, time);
-    return vec3(ml);
+    return vec3(ml * transitionFactor * weatherFactor * frx_moonSize() * MOONLIGHT_STR);
     #endif
 }
 

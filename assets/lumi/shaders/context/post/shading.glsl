@@ -83,7 +83,7 @@ float raymarched_fog_density(vec3 viewPos, vec3 worldPos, /*float fogNear,*/ flo
 
     float illuminated = 0.0;
     while (distTraveled < maxDist) {
-        #if defined(SHADOW_MAP_PRESENT) && defined(DEFERRED_SHADOW)
+        #if defined(SHADOW_MAP_PRESENT)
             ray_shadow = (frx_shadowViewMatrix() * vec4(ray_model, 1.0));
             illuminated += simpleShadowFactor(u_shadow, ray_shadow);
         #else
@@ -316,7 +316,7 @@ vec4 hdr_shaded_color(
     bool  mathurt   = f0 > 0.85 && !matflash;
     // return vec4(coords_view(uv, frx_inverseProjectionMatrix(), depth), 1.0);
 
-    #if defined(SHADOW_MAP_PRESENT) && defined(DEFERRED_SHADOW)
+    #if defined(SHADOW_MAP_PRESENT)
         vec4 shadowViewPos = frx_shadowViewMatrix() * vec4(worldPos - frx_cameraPos(), 1.0);
         float shadowFactor = calcShadowFactor(u_shadow, shadowViewPos);  
         light.z = shadowFactor;

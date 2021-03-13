@@ -40,10 +40,6 @@ void frx_writePipelineVertex(inout frx_VertexData data) {
         l2_viewpos = viewCoord.xyz;
     }
 
-#if defined(SHADOW_MAP_PRESENT) && !defined(DEFERRED_SHADOW)
-    pv_shadowpos = frx_shadowViewMatrix() * data.vertex;
-#endif
-
 #ifdef VANILLA_LIGHTING
     pv_lightcoord = data.light;
     pv_ao = data.aoShade;

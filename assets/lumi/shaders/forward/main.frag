@@ -6,7 +6,6 @@
 #include frex:shaders/lib/math.glsl
 #include lumi:shaders/context/forward/common.glsl
 #include lumi:shaders/context/global/experimental.glsl
-#include lumi:shaders/context/global/shadow.glsl
 #include lumi:shaders/api/param_frag.glsl
 #include lumi:shaders/lib/util.glsl
 #include lumi:shaders/lib/tonemap.glsl
@@ -70,7 +69,7 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
         } else {
             float bloom_out = fragData.emissivity * a.a;
             vec3 normal = fragData.vertexNormal * frx_normalModelMatrix();
-            //TODO: apply shadowmap perhaps
+            //TODO: apply shadowmap perhaps (is the hand even included in depth pass ??)
             pbr_shading(a, bloom_out, l2_viewpos, fragData.light.xyy, normal, pbr_roughness, pbr_metallic, pbr_f0, fragData.diffuse, true);
             a.rgb += hdr_gammaAdjust(noise_glint(frx_normalizeMappedUV(frx_texcoord), frx_matGlint()));
             a = ldr_tonemap(a);
@@ -80,13 +79,6 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
         gl_FragData[0] = a;
     } else {
         vec2 light = fragData.light.xy;
-
-        #if defined(SHADOW_MAP_PRESENT) && !defined(DEFERRED_SHADOW)
-            float shadowFactor = calcShadowFactor(frxs_shadowMap, pv_shadowpos);
-            // sunlight requires > 0.7 skylight (see lightsource.glsl) therefore the light.y is clamped to this
-            light.y = mix(min(0.7, light.y), 1.0, shadowFactor);
-        #endif
-        
         // hijack f0 for matHurt and matflash because hurting things are not reflective I guess
         if (frx_matFlash()) pbr_f0 = 1.0;
         else if (frx_matHurt()) pbr_f0 = 0.9;

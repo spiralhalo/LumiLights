@@ -47,12 +47,7 @@
                     prefix: "overlay_debug_",
                     nameKey: "config.lumi_lights.value.overlay_debug",
                     descriptionKey: "config.lumi_lights.help.overlay_debug"
-                },
-                deferred_shadow: {
-                    default: false,
-                    nameKey: "config.lumi_lights.value.deferred_shadow",
-                    descriptionKey: "config.lumi_lights.help.deferred_shadow"
-                },
+                }
             }
         }
     ]
