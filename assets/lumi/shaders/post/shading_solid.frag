@@ -19,7 +19,7 @@ uniform sampler2D u_misc_solid;
 uniform sampler2D u_translucent_depth;
 
 uniform sampler2D u_ao;
-uniform sampler2DArray u_shadow;
+uniform sampler2DArrayShadow u_shadow;
 
 #include lumi:shaders/context/post/shading.glsl
 
