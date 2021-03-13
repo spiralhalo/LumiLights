@@ -5,8 +5,8 @@
             categoryKey: "config.lumi_lights.category.shadow",
             options: {
                 shadow_filtering: {
-                    default: "none",
-                    choices: ["none", "box", "pcf_low", "pcf_medium", "pcf_high"],
+                    default: "pcf_low",
+                    choices: ["none", "pcf_low", "pcf_medium", "pcf_high"],
                     enum: true,
                     prefix: "shadow_filtering_",
                     nameKey: "config.lumi_lights.value.shadow_filtering",
