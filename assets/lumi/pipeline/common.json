@@ -6,6 +6,12 @@
             vertexSource: "lumi:shaders/post/simple.vert",
             fragmentSource: "lumi:shaders/post/copy.frag",
             samplers: ["u_input"]
+        }, {
+            // utility, does what it says on the tin
+            name: "average",
+            vertexSource: "lumi:shaders/post/simple.vert",
+            fragmentSource: "lumi:shaders/post/average.frag",
+            samplers: ["u_input_one", "u_input_two"]
         }
     ],
     

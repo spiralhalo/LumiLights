@@ -113,6 +113,16 @@
                     "particles_final", "particles_depth",
                     "custom_clouds", "custom_clouds_depth",
                     "weather", "weather_depth"]
+            }, {
+                name: "merge_history",
+                program: "average",
+                framebuffer: "merge_history",
+                samplerImages: ["composite_result", "history"]
+            }, {
+                name: "history_copy",
+                program: "copy",
+                framebuffer: "history_copy",
+                samplerImages: ["composite_result"]
             }
         ]
     },
