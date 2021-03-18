@@ -4,13 +4,14 @@
   lumi:shaders/post/merge_history.frag
 ******************************************************/
 uniform sampler2D u_current;
-uniform sampler2DArray u_history;
+uniform sampler2D u_history0;
+uniform sampler2D u_history1;
+uniform sampler2D u_history2;
 
 void main()
 {
-  vec4 color = 0.2 * texture2D(u_current, v_texcoord);
-  for (int i = 0; i < 4; i++) {
-    color += 0.2 * texture2DArray(u_history, vec3(v_texcoord, float(i)));
-  }
-  gl_FragData[0] = color;
+  gl_FragData[0] = 0.25 * texture2D(u_current, v_texcoord)
+                  + 0.25 * texture2D(u_history0, v_texcoord)
+                  + 0.25 * texture2D(u_history1, v_texcoord)
+                  + 0.25 * texture2D(u_history2, v_texcoord);
 }

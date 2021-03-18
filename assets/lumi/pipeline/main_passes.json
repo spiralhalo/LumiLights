@@ -117,7 +117,7 @@
                 name: "merge_history",
                 program: "merge_history",
                 framebuffer: "merge_history",
-                samplerImages: ["composite_result", "history"]
+                samplerImages: ["composite_result", "history0", "history1", "history2"]
             }
         ]
     },
