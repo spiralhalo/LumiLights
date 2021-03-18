@@ -55,7 +55,7 @@ void main()
     vec4 a2 = ldr_shaded_particle(v_texcoord, u_particles_color, u_particles_depth, u_light_particles, bloom2);
     gl_FragData[0] = a1;
     gl_FragData[1] = a2;
-    gl_FragData[3] = vec4(bloom1 + bloom2, 0.0, 0.0, 1.0);
+    gl_FragData[2] = vec4(bloom1 + bloom2, 0.0, 0.0, 1.0);
 }
 
 
