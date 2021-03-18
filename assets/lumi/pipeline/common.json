@@ -14,7 +14,22 @@
         {
                 name: "emissive",
                 lod: 0,
-                internalFormat: "RGBA8",
+                internalFormat: "GL_R8",
+                pixelFormat: "GL_RED",
+                pixelDataType: "UNSIGNED_BYTE",
+                target: "TEXTURE_2D",
+                texParams: [
+                        {name: "TEXTURE_MIN_FILTER", val: "LINEAR"},
+                        {name: "TEXTURE_MAG_FILTER", val: "LINEAR"},
+                        {name: "TEXTURE_WRAP_S", val: "CLAMP"},
+                        {name: "TEXTURE_WRAP_T", val: "CLAMP"}
+                ]
+        }, {
+                name: "emissive_translucent",
+                lod: 0,
+                internalFormat: "GL_R8",
+                pixelFormat: "GL_RED",
+                pixelDataType: "UNSIGNED_BYTE",
                 target: "TEXTURE_2D",
                 texParams: [
                         {name: "TEXTURE_MIN_FILTER", val: "LINEAR"},

@@ -528,7 +528,7 @@
             colorAttachments: [
                 {image: "translucent_shaded", clearColor: 0x00000000},
                 {image: "particles_final", clearColor: 0x00000000},
-                {image: "emissive"},
+                {image: "emissive_translucent", clearColor: 0x00000000},
             ]
         }, {
             name: "refraction",

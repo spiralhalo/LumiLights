@@ -5,7 +5,7 @@
             name: "emissive_color",
             vertexSource: "lumi:shaders/post/simple.vert",
             fragmentSource: "lumi:shaders/post/emissive_color.frag",
-            samplers: ["u_base", "u_emissive"]
+            samplers: ["u_base", "u_emissive", "u_emissive_translucent"]
         }, {
             // combines final bloom image and main color buffer
             name: "bloom",
@@ -46,7 +46,7 @@
                 name: "emissive_color",
                 program: "emissive_color",
                 framebuffer: "emissive_color",
-                samplerImages: ["solid_main", "emissive"]
+                samplerImages: ["solid_main", "emissive", "emissive_translucent"]
             }, {
                 // build bloom mipmaps, blurring as part of downscale
                 name: "bloom_downsample_0",

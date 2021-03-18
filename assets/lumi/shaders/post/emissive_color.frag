@@ -9,10 +9,12 @@
 ******************************************************/
 uniform sampler2D u_base;
 uniform sampler2D u_emissive;
+uniform sampler2D u_emissive_translucent;
 
 void main()
 {
-    vec4 e = texture2D(u_emissive, v_texcoord);
+    float s = texture2D(u_emissive, v_texcoord).r;
+    float e = max(s, texture2D(u_emissive_translucent, v_texcoord).r);
     vec4 c = frx_fromGamma(texture2D(u_base, v_texcoord));
-    gl_FragData[0] = vec4(c.rgb * e.rrr, e.r);
+    gl_FragData[0] = vec4(c.rgb * e, e);
 }
