@@ -24,6 +24,10 @@ float p_diffuseGui(vec3 normal) {
     return min(light, 1.0);
 }
 
+vec2 jitter(float n) {
+    return vec2(fract(sin(n) * 43758.5453123), fract(sin(n + 1.0) * 43758.5453123));
+}
+
 void frx_writePipelineVertex(inout frx_VertexData data) {
 
     if (frx_modelOriginType() == MODEL_ORIGIN_SCREEN) {
@@ -37,6 +41,7 @@ void frx_writePipelineVertex(inout frx_VertexData data) {
         vec4 viewCoord = frx_viewMatrix() * data.vertex;
         gl_FogFragCoord = length(viewCoord.xyz);
         gl_Position = frx_projectionMatrix() * viewCoord;
+        gl_Position.st += jitter(mod(frx_renderSeconds(), 0.2666)) * gl_Position.w / vec2(frx_viewWidth(), frx_viewHeight());
         l2_viewpos = viewCoord.xyz;
     }
 
