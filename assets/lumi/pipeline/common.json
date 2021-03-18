@@ -7,11 +7,11 @@
             fragmentSource: "lumi:shaders/post/copy.frag",
             samplers: ["u_input"]
         }, {
-            // utility, does what it says on the tin
-            name: "average",
+            // copy from array source
+            name: "copy_array",
             vertexSource: "lumi:shaders/post/simple.vert",
-            fragmentSource: "lumi:shaders/post/average.frag",
-            samplers: ["u_input_one", "u_input_two"]
+            fragmentSource: "lumi:shaders/post/copy_array.frag",
+            samplers: ["u_input"]
         }
     ],
     

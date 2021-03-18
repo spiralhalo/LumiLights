@@ -1,0 +1,68 @@
+{
+    programs: [
+        {
+            name: "merge_history",
+            vertexSource: "lumi:shaders/post/simple.vert",
+            fragmentSource: "lumi:shaders/post/merge_history.frag",
+            samplers: ["u_current", "u_history"]
+        }
+    ],
+
+    images: [
+        {
+            name: "history",
+            internalFormat: "RGBA8",
+            target: "TEXTURE_2D_ARRAY",
+            depth: 4,
+            texParams: [
+                {name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
+                {name: "TEXTURE_WRAP_S", val: "CLAMP"}, {name: "TEXTURE_WRAP_T", val: "CLAMP"}
+            ]
+        },
+    ],
+
+    framebuffers: [
+        {
+            name: "history_copy_0",
+            colorAttachments: [{image: "history", lod: 0}]
+        }, {
+            name: "history_copy_1",
+            colorAttachments: [{image: "history", lod: 1}]
+        }, {
+            name: "history_copy_2",
+            colorAttachments: [{image: "history", lod: 2}]
+        }, {
+            name: "history_copy_3",
+            colorAttachments: [{image: "history", lod: 3}]
+        }, 
+    ],
+    
+    fabulous: {
+        passes: [
+            {
+                name: "history_copy_3",
+                program: "copy_array",
+                framebuffer: "history_copy_3",
+                samplerImages: ["history"],
+                layer: 2
+            }, {
+                name: "history_copy_2",
+                program: "copy_array",
+                framebuffer: "history_copy_2",
+                samplerImages: ["history"],
+                layer: 1
+            }, {
+                name: "history_copy_1",
+                program: "copy_array",
+                framebuffer: "history_copy_1",
+                samplerImages: ["history"],
+                layer: 0
+            }, {
+                name: "history_copy_0",
+                program: "copy",
+                framebuffer: "history_copy_0",
+                samplerImages: ["composite_result"]
+            }
+        ]
+    }
+}

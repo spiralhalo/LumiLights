@@ -451,16 +451,6 @@
                 {name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
                 {name: "TEXTURE_WRAP_S", val: "CLAMP"}, {name: "TEXTURE_WRAP_T", val: "CLAMP"}
             ]
-        }, {
-            name: "history",
-            lod: 0,
-            internalFormat: "RGBA8",
-            target: "TEXTURE_2D",
-            texParams: [
-                // nearest because don't want filtering when copy back to main
-                {name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
-                {name: "TEXTURE_WRAP_S", val: "CLAMP"}, {name: "TEXTURE_WRAP_T", val: "CLAMP"}
-            ]
         },
     ],
 
@@ -552,9 +542,6 @@
         }, {
             name: "composite",
             colorAttachments: [{image: "composite_result"}]
-        }, {
-            name: "history_copy",
-            colorAttachments: [{image: "history"}]
         }, {
             name: "merge_history",
             colorAttachments: [{image: "solid_main"}]

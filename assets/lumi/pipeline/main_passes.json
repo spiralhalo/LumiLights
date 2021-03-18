@@ -115,14 +115,9 @@
                     "weather", "weather_depth"]
             }, {
                 name: "merge_history",
-                program: "average",
+                program: "merge_history",
                 framebuffer: "merge_history",
                 samplerImages: ["composite_result", "history"]
-            }, {
-                name: "history_copy",
-                program: "copy",
-                framebuffer: "history_copy",
-                samplerImages: ["composite_result"]
             }
         ]
     },

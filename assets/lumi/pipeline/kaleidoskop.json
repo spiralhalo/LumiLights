@@ -81,6 +81,11 @@
                     "particles_final", "particles_depth",
                     "clouds", "clouds_depth",
                     "weather", "weather_depth"]
+            }, {
+                name: "merge_history",
+                program: "merge_history",
+                framebuffer: "merge_history",
+                samplerImages: ["composite_result", "history"]
             }
         ]
     },
