@@ -2,7 +2,7 @@
     programs: [
         {
             name: "merge_history",
-            vertexSource: "lumi:shaders/post/simple.vert",
+            vertexSource: "lumi:shaders/post/merge_history.vert",
             fragmentSource: "lumi:shaders/post/merge_history.frag",
             samplers: ["u_current", "u_history0"]
         }
