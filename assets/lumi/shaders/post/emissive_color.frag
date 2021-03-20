@@ -10,11 +10,15 @@
 uniform sampler2D u_base;
 uniform sampler2D u_emissive;
 uniform sampler2D u_emissive_translucent;
+uniform sampler2D u_solid_depth;
 
 void main()
 {
-    float s = texture2D(u_emissive, v_texcoord).r;
-    float e = max(s, texture2D(u_emissive_translucent, v_texcoord).r);
+    // TODO: elaborate hand bloom blending? (requires more image = more vram)
+    float t = texture2D(u_solid_depth, v_texcoord).r == 1.0
+        ? texture2D(u_emissive_translucent, v_texcoord).r
+        : 0.0;
+    float e = max(texture2D(u_emissive, v_texcoord).r, t);
     vec4 c = frx_fromGamma(texture2D(u_base, v_texcoord));
     gl_FragData[0] = vec4(c.rgb * e, e);
 }
