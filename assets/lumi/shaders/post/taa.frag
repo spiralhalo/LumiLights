@@ -29,10 +29,10 @@ void main()
     // gl_FragData[0] = texture2D(u_velocity, v_texcoord);
 
     // PROGRESS:
-    // - velocity buffer works fine
-    // - camera motion rejection (velocity reprojection) is decent
-    // - motion rejection is NO GOOD
-    // - there was a weird distortion while moving (??)
+    // [o] velocity buffer works fine
+    // [o] camera motion rejection (velocity reprojection) is decent
+    // [o] ghosting reduction is decent
+    // [x] there was a weird distortion while moving (??)
 
     gl_FragData[0] = TAA();
 }
