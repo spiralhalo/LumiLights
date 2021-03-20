@@ -504,6 +504,7 @@
                 {image: "normal_solid", clearColor: 0x00000000},
                 {image: "material_solid", clearColor: 0x00000000},
                 {image: "misc_solid", clearColor: 0x00000000},
+                {image: "velocity", clearColor: 0x00000000}
                 {image: "emissive"}
             ]
         }, {
@@ -515,6 +516,7 @@
                 {image: "normal_translucent", clearColor: 0x00000000},
                 {image: "material_translucent", clearColor: 0x00000000},
                 {image: "misc_translucent", clearColor: 0x00000000},
+                {image: "velocity"}
             ]
         }, {
             name: "particles",
@@ -554,9 +556,14 @@
                 {image: "solid_combine", clearColor: 0x00000000},
                 {image: "translucent_combine", clearColor: 0x00000000}
             ]
-        }, {
+        },
+        /* COMPOSITE FRAMEBUFFERS */
+        {
             name: "composite",
-            colorAttachments: [{image: "composite_result"}]
+            colorAttachments: [
+                {image: "composite_result"},
+                {image: "composite_depth"},
+            ]
         }, {
             name: "merge_history",
             colorAttachments: [{image: "solid_main"}]

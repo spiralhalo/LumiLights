@@ -130,6 +130,7 @@ void main()
     }
     
     gl_FragData[0] = vec4(c, 1.0); //frx_luminance(c.rgb)); // FXAA 3 would need this
+    gl_FragData[1] = vec4(depth_layers[NUM_LAYERS - 1], 0., 0., 1.);
 }
 
 

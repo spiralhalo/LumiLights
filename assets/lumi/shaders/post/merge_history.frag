@@ -1,19 +1,30 @@
 #include lumi:shaders/context/post/header.glsl
 
 /******************************************************
-  lumi:shaders/post/merge_history.frag
+    lumi:shaders/post/merge_history.frag
 ******************************************************/
+
 uniform sampler2D u_current;
 uniform sampler2D u_history0;
+uniform sampler2D u_depthCurrent;
+uniform sampler2D u_depthHistory0;
+uniform sampler2D u_velocity;
 
-varying float v_cameraStatic;
+#define currentColorTex u_current
+#define previousColorTex u_history0
+#define currentDepthTex u_depthCurrent
+#define previousDepthTex u_depthHistory0
+#define velocityTex u_velocity
+#define resolution frxu_size
+
+#define feedbackFactor 0.9
+#define velocityScale 1.0
+#define maxDepthFalloff 1.0
+
+#include lumi:shaders/lib/taa.glsl
 
 void main()
 {
-  if (v_cameraStatic > 0.0) {
-    gl_FragData[0] = 0.5 * texture2D(u_current, v_texcoord)
-                  + 0.5 * texture2D(u_history0, v_texcoord);
-  } else {
-    gl_FragData[0] = texture2D(u_current, v_texcoord);
-  }
+    // gl_FragData[0] = texture2D(u_velocity, v_texcoord);
+    gl_FragData[0] = TAA();
 }

@@ -146,6 +146,9 @@
                 samplerImages: [
                     "composite_result",
                     "history0",
+                    "composite_depth",
+                    "history_depth0",
+                    "velocity",
                 ]
             }
         ]
