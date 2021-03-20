@@ -52,55 +52,20 @@ float calcShadowFactor(in sampler2DArrayShadow shadowMap, vec4 shadowViewPos) {
     vec3 d2 = shadowDist(2, shadowViewPos);
     vec3 d1 = shadowDist(1, shadowViewPos);
     int cascade = 0;
-    float bias = 0.002;
     if (d3.x < 1.0 && d3.y < 1.0 && d3.z < 1.0) {
         cascade = 3;
-        // #if SHADOW_FILTERING == SHADOW_FILTERING_BOX
-        //     bias = 0.00006;
-        // #else
-        //     bias = 0.0;
-        // #endif
     } else if (d2.x < 1.0 && d2.y < 1.0 && d2.z < 1.0) {
         cascade = 2;
-        // #if SHADOW_FILTERING == SHADOW_FILTERING_BOX
-        //     bias = 0.00008;
-        // #else
-        //     bias = 0.0;
-        // #endif
     } else if (d1.x < 1.0 && d1.y < 1.0 && d1.z < 1.0) {
         cascade = 1;
-        // #if SHADOW_FILTERING == SHADOW_FILTERING_BOX
-        //     bias = 0.0002;
-        // #else
-        //     bias = 0.0;
-        // #endif
     }
 
     vec4 shadowCoords = frx_shadowProjectionMatrix(cascade) * shadowViewPos;
     if (shadowCoords.xy != clamp(shadowCoords.xy, -1.0, 1.0)) return 1.0; // clamp to border
     shadowCoords.xyz = shadowCoords.xyz * 0.5 + 0.5; // Transform from screen coordinates to texture coordinates
 
-    // #if SHADOW_FILTERING == SHADOW_FILTERING_BOX
-    //     vec2 shadowTexCoord;
-    //     float shadowFactor = 0.0;
-    //     vec2 offset;
-    //     float w;
-    //     float c = float(cascade);
-    //     for(int i = 0; i < 3; i++)
-    //     {
-    //         for(int j = 0; j < 3; j++)
-    //         {
-    //             offset.x = -inc + inc * j;
-    //             offset.y = -inc + inc * i;
-    //             w = wKernel[i][j];
-    //             shadowFactor += w * shadow2DArray(shadowMap, vec4(shadowCoords.xy + offset, c, shadowCoords.z - bias)).r;
-    //             // shadowFactor += (shadowCoords.xy != clamp(shadowCoords.xy, 0.0, 1.0))
-    //             //               ? 1.0
-    //             //               : shadow2DArray(shadowMap, vec4(shadowCoords.xy + offset, float(cascade), shadowCoords.z - bias)).r;
-    //         }
-    //     }
     #if SHADOW_FILTERING == SHADOW_FILTERING_NONE
-        float shadowFactor = shadow2DArray(shadowMap, vec4(shadowCoords.xy, float(cascade), shadowCoords.z - bias)).r;
+        float shadowFactor = shadow2DArray(shadowMap, vec4(shadowCoords.xy, float(cascade), shadowCoords.z)).r;
     #else
         float shadowFactor = sampleShadowPCF(shadowMap, shadowCoords.xyz, float(cascade));
     #endif
