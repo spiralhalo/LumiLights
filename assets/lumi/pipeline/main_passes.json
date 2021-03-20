@@ -146,8 +146,6 @@
                 samplerImages: [
                     "composite_result",
                     "history0",
-                    "history1",
-                    "history2"
                 ]
             }
         ]
