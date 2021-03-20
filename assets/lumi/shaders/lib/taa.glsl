@@ -208,21 +208,16 @@ vec4 Custom2Resolve(in float preNeighborDepths[kNeighborsCount], in float curNei
     vec4 res = vec4(0);
 
     //float testVel = feedbackFactor - (length(velocity) * velocityScale);
-    vec4 taa = Inside2Resolve(currentColorTex, previousColorTex, velocity);
+    // vec4 taa = Inside2Resolve(currentColorTex, previousColorTex, velocity);
 
-    float averageDepth = 0;
-    for(int iter = 0; iter < kNeighborsCount; iter++)
-    {
-        averageDepth += curNeighborDepths[iter];
-    }
-
-    averageDepth /= kNeighborsCount;
+    float previousDepth = preNeighborDepths[4];
+    float currentDepth = curNeighborDepths[4];
 
     //for dithered edges, detect if the adge has been dithered? 
     //use a 3x3 grid to see if anyhting around it has high enough depth?
-    if(averageDepth < maxDepthFalloff)
+    if(abs(previousDepth - currentDepth) < maxDepthFalloff)
     {
-        res = taa;//vec4(1, 0, 0, 1);
+        res = Inside2Resolve(currentColorTex, previousColorTex, velocity);//vec4(1, 0, 0, 1);
     }
 
     else
