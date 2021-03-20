@@ -40,7 +40,7 @@
                 framebuffer: "shading_solid",
                 samplerImages: [
                     "solid_main", "solid_depth", "light_solid", "normal_solid", "material_solid", "misc_solid",
-                    "translucent_depth",
+                    "translucent_depth", "translucent_main",
                     "ao_filtered", "shadow_map", ]
             }, {
                 name: "shading_translucent",

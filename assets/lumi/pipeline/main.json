@@ -71,6 +71,7 @@
                 "u_misc_solid",
 
                 "u_translucent_depth",
+                "u_translucent_color",
 
                 "u_ao",
                 "u_shadow",
@@ -111,19 +112,33 @@
             vertexSource: "lumi:shaders/post/simple.vert",
             fragmentSource: "lumi:shaders/post/shading_combine.frag",
             samplers: [
-                "u_hdr_solid", "u_hdr_solid_swap", "u_solid_depth",
-                "u_hdr_translucent", "u_hdr_translucent_swap", "u_translucent_depth",
+                "u_hdr_solid",
+                "u_hdr_solid_swap",
+                "u_solid_depth",
+
+                "u_hdr_translucent",
+                "u_hdr_translucent_swap",
+                "u_translucent_depth",
             ]
         }, {
             name: "composite",
             vertexSource: "lumi:shaders/post/godrays.vert",
             fragmentSource: "lumi:shaders/post/composite.frag",
             samplers: [
-                "u_combine_solid", "u_solid_depth",
-                "u_combine_translucent", "u_translucent_depth",
-                "u_particles", "u_particles_depth",
-                "u_clouds", "u_clouds_depth",
-                "u_weather", "u_weather_depth",
+                "u_combine_solid",
+                "u_solid_depth",
+
+                "u_combine_translucent",
+                "u_translucent_depth",
+
+                "u_particles",
+                "u_particles_depth",
+
+                "u_clouds",
+                "u_clouds_depth",
+
+                "u_weather",
+                "u_weather_depth",
             ]
         }
     ],
