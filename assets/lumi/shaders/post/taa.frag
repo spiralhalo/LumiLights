@@ -2,8 +2,8 @@
 #include lumi:shaders/lib/util.glsl
 
 /******************************************************
-    lumi:shaders/post/merge_history.frag
-******************************************************/
+ *    lumi:shaders/post/taa.frag                      *
+ ******************************************************/
 
 uniform sampler2D u_current;
 uniform sampler2D u_history0;
@@ -27,10 +27,12 @@ uniform sampler2D u_velocity;
 void main()
 {
     // gl_FragData[0] = texture2D(u_velocity, v_texcoord);
-    // gl_FragData[0] = vec4(ldepth(texture2D(u_depthCurrent, v_texcoord).r));
-    // if (texture2D(u_depthCurrent, v_texcoord).r == 1.0) {
-    //     gl_FragData[0] = texture2D(u_current, v_texcoord);
-    // } else {
-    // }
+
+    // PROGRESS:
+    // - velocity buffer works fine
+    // - camera motion rejection (velocity reprojection) is decent
+    // - motion rejection is NO GOOD
+    // - there was a weird distortion while moving (??)
+
     gl_FragData[0] = TAA();
 }

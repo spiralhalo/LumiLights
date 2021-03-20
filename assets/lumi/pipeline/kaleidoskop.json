@@ -82,9 +82,9 @@
                     "clouds", "clouds_depth",
                     "weather", "weather_depth"]
             }, {
-                name: "merge_history",
-                program: "merge_history",
-                framebuffer: "merge_history",
+                name: "taa_pass",
+                program: "taa_program",
+                framebuffer: "taa_fb",
                 samplerImages: [
                     "composite_result",
                     "history0",

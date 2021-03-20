@@ -1,9 +1,9 @@
 {
     programs: [
         {
-            name: "merge_history",
-            vertexSource: "lumi:shaders/post/merge_history.vert",
-            fragmentSource: "lumi:shaders/post/merge_history.frag",
+            name: "taa_program",
+            vertexSource: "lumi:shaders/post/basic.vert",
+            fragmentSource: "lumi:shaders/post/taa.frag",
             samplers: [
                 "u_current",
                 "u_history0",
