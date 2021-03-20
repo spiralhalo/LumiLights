@@ -185,15 +185,17 @@ vec4 Inside2Resolve(sampler2D currColorTex, sampler2D prevColorTex, vec2 velocit
     vec4 min2 = MinColors(current2x2Colors);
     vec4 max2 = MaxColors(previous2x2Colors);
 
-    //mix the 3x3 and 2x2 min maxes together
+    //mix the 3x3 and 2x2 min maxes together (BUT WHY ????)
     vec4 mixedMin = mix(rounded3x3Min, min2, 0.5);
     vec4 mixedMax = mix(rounded3x3Max, max2, 0.5);
 
+    // vec4 constrainedHistory = ConstrainHistory(previous2x2Colors);
+    vec4 constrainedHistory = clamp(previous2x2Colors[2], rounded3x3Min, MaxColors2(current3x3Colors));
     float testVel = feedbackFactor - (length(velocity) * velocityScale);
-    return mix(current2x2Colors[2], clip_aabb(mixedMin.rgb, mixedMax.rgb, current2x2Colors[2], ConstrainHistory(previous2x2Colors)), testVel);
+    return mix(current2x2Colors[2], clip_aabb(mixedMin.rgb, mixedMax.rgb, current2x2Colors[2], constrainedHistory), testVel);
 }
 
-vec4 Custom2Resolve(in float preNeighborDepths[kNeighborsCount], in float curNeighborDepths[kNeighborsCount], vec2 velocity)
+vec4 Custom2Resolve(/*in float preNeighborDepths[kNeighborsCount],*/ in float curNeighborDepths[kNeighborsCount], vec2 velocity)
 {
     // what exactly is this code for
     //use the closest depth instead?
@@ -217,7 +219,7 @@ vec4 Custom2Resolve(in float preNeighborDepths[kNeighborsCount], in float curNei
 
     averageDepth /= kNeighborsCount;
 
-    // Ignore the comments, this code prevent glitch in the sky ¯\_(ツ)_/¯
+    // Ignore the comments, this branch prevent glitch in the sky ¯\_(ツ)_/¯
     //for dithered edges, detect if the adge has been dithered? 
     //use a 3x3 grid to see if anyhting around it has high enough depth?
     if(averageDepth < maxDepthFalloff) {
@@ -232,7 +234,7 @@ vec4 Custom2Resolve(in float preNeighborDepths[kNeighborsCount], in float curNei
 vec4 TAA()
 {
     float currentDepths[kNeighborsCount];
-    float previousDepths[kNeighborsCount];
+    // float previousDepths[kNeighborsCount];
 
     vec2 deltaRes = vec2(1.0 / resolution.x, 1.0 / resolution.y);
 
@@ -243,8 +245,8 @@ vec4 TAA()
         vec2 newUV = v_texcoord + (kOffsets3x3[iter] * deltaRes);
 
         currentDepths[iter] = texture2D(currentDepthTex, newUV).x;
-        previousDepths[iter] = texture2D(previousDepthTex, newUV + closestVec).x;
+        // previousDepths[iter] = texture2D(previousDepthTex, newUV + closestVec).x;
     }
 
-    return Custom2Resolve(previousDepths, currentDepths, closestVec);
+    return Custom2Resolve(/*previousDepths,*/ currentDepths, closestVec);
 }
