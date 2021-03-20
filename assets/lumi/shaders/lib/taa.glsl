@@ -117,14 +117,7 @@ vec4 MaxColors2(in vec4 neighborColors[neighborCount3x3])
     return maxColor;
 }
 
-// vec4 ConstrainHistory(vec4 neighborColors[neighborCount2x2])
-// {
-//     vec4 previousColorMin = MinColors(neighborColors);
-//     vec4 previousColorMax = MaxColors(neighborColors);
-//     return clamp(neighborColors[2], previousColorMin, previousColorMax);
-// }
-
-// note: clips towards aabb center + p.w
+// like clamping but advanced
 vec4 clip_aabb(vec3 colorMin, vec3 colorMax, vec4 currentColor, vec4 previousColor)
 {
     vec3 p_clip = 0.5 * (colorMax + colorMin);
@@ -147,37 +140,27 @@ vec2 deltaRes = 1.0 / resolution;
 vec4 Inside2Resolve(sampler2D currColorTex, sampler2D prevColorTex, vec2 velocity)
 {
     vec4 current3x3Colors[neighborCount3x3];
-    vec4 previous3x3Colors[neighborCount3x3];
-
     for(int iter = 0; iter < neighborCount3x3; iter++)
     {
-        vec2 newUV = v_texcoord + (kOffsets3x3[iter] * deltaRes);
-        current3x3Colors[iter] = texture2D(currColorTex, newUV);
-        previous3x3Colors[iter] = texture2D(prevColorTex, newUV + velocity);
+        current3x3Colors[iter] = texture2D(currColorTex, v_texcoord + (kOffsets3x3[iter] * deltaRes));
     }
-
     vec4 rounded3x3Min = MinColors2(current3x3Colors);
-    vec4 rounded3x3Max = MaxColors2(previous3x3Colors);
+    vec4 rounded3x3Max = MaxColors2(current3x3Colors);
 
     vec4 current2x2Colors[neighborCount2x2];
-    vec4 previous2x2Colors[neighborCount2x2];
     for(int iter = 0; iter < neighborCount2x2; iter++)
     {
-        vec2 newUV = v_texcoord + (kOffsets2x2[iter] * deltaRes);
-        current2x2Colors[iter] = texture2D(currColorTex, newUV);
-        previous2x2Colors[iter] = texture2D(prevColorTex, newUV + velocity);
+        current2x2Colors[iter] = texture2D(currColorTex, v_texcoord + (kOffsets2x2[iter] * deltaRes));
     }
-
     vec4 min2 = MinColors(current2x2Colors);
-    vec4 max2 = MaxColors(previous2x2Colors);
+    vec4 max2 = MaxColors(current2x2Colors);
 
     //mix the 3x3 and 2x2 min maxes together -> Rounded ?
     vec4 mixedMin = mix(rounded3x3Min, min2, 0.5);
     vec4 mixedMax = mix(rounded3x3Max, max2, 0.5);
 
-    vec4 constrainedHistory = clamp(previous2x2Colors[2], rounded3x3Min, MaxColors2(current3x3Colors));
     float testVel = feedbackFactor - (length(velocity) * velocityScale);
-    return mix(current2x2Colors[2], clip_aabb(mixedMin.rgb, mixedMax.rgb, current2x2Colors[2], constrainedHistory), testVel);
+    return mix(current2x2Colors[2], clip_aabb(mixedMin.rgb, mixedMax.rgb, current2x2Colors[2], texture2D(prevColorTex, v_texcoord)), testVel);
 }
 
 vec4 TAA()
