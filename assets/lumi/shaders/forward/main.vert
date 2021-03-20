@@ -52,7 +52,7 @@ void frx_writePipelineVertex(inout frx_VertexData data) {
         l2_viewpos = viewCoord.xyz;
     } else {
         data.vertex += frx_modelToCamera();
-        vec4 cameraToLastCamera = vec4(frx_lastCameraPos() - frx_cameraPos(), 0.0);
+        vec4 cameraToLastCamera = vec4(frx_cameraPos() - frx_lastCameraPos(), 0.0);
         vec4 viewCoord = frx_viewMatrix() * data.vertex;
         pv_prevPos = _cvu_matrix[_CV_MAT_VIEW_PROJ_LAST] * (data.vertex + cameraToLastCamera);
         pv_nextPos = frx_projectionMatrix() * viewCoord;
