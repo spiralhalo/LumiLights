@@ -24,6 +24,7 @@
                     "misc_solid",
 
                     "translucent_depth",
+                    "translucent_main",
 
                     "ao_filtered",
                     "shadow_map", ]

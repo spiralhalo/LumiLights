@@ -71,6 +71,7 @@
                 "u_misc_solid",
 
                 "u_translucent_depth",
+                "u_translucent_color",
 
                 "u_ao",
                 "u_shadow",
