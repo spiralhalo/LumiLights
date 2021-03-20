@@ -219,7 +219,7 @@ vec4 Custom2Resolve(in float preNeighborDepths[kNeighborsCount], in float curNei
 
     //for dithered edges, detect if the adge has been dithered? 
     //use a 3x3 grid to see if anyhting around it has high enough depth?
-    if(averageDepth < maxDepthFalloff)
+    if(averageDepth - lowestDepth < depthFalloff)
     {
         res = taa;//vec4(1, 0, 0, 1);
     }
