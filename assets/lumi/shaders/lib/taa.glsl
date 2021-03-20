@@ -195,14 +195,15 @@ vec4 Inside2Resolve(sampler2D currColorTex, sampler2D prevColorTex, vec2 velocit
 
 vec4 Custom2Resolve(in float preNeighborDepths[kNeighborsCount], in float curNeighborDepths[kNeighborsCount], vec2 velocity)
 {
+    // what exactly is this code for
     //use the closest depth instead?
-    vec2 preMinMaxDepths = MinMaxDepths(preNeighborDepths);
-    vec2 curMinMaxDepths = MinMaxDepths(curNeighborDepths);
+    // vec2 preMinMaxDepths = MinMaxDepths(preNeighborDepths);
+    // vec2 curMinMaxDepths = MinMaxDepths(curNeighborDepths);
 
-    float highestDepth = min(preMinMaxDepths.x, curMinMaxDepths.x); //get the furthest
-    float lowestDepth = max(preMinMaxDepths.x, curMinMaxDepths.x); //get the closest
+    // float highestDepth = min(preMinMaxDepths.x, curMinMaxDepths.x); //get the furthest
+    // float lowestDepth = max(preMinMaxDepths.x, curMinMaxDepths.x); //get the closest
 
-    float depthFalloff = abs(highestDepth - lowestDepth);
+    // float depthFalloff = abs(highestDepth - lowestDepth);
 
     vec4 res = vec4(0);
 
