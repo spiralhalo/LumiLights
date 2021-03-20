@@ -160,7 +160,7 @@ vec4 Inside2Resolve(sampler2D currColorTex, sampler2D prevColorTex, vec2 velocit
     vec4 mixedMax = mix(rounded3x3Max, max2, 0.5);
 
     float testVel = feedbackFactor - (length(velocity) * velocityScale);
-    return mix(current2x2Colors[2], clip_aabb(mixedMin.rgb, mixedMax.rgb, current2x2Colors[2], texture2D(prevColorTex, v_texcoord)), testVel);
+    return mix(current2x2Colors[2], clip_aabb(mixedMin.rgb, mixedMax.rgb, current2x2Colors[2], texture2D(prevColorTex, v_texcoord + velocity)), testVel);
 }
 
 vec4 TAA()
