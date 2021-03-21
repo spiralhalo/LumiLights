@@ -457,7 +457,7 @@
                 {name: "TEXTURE_WRAP_S", val: "CLAMP"}, {name: "TEXTURE_WRAP_T", val: "CLAMP"}
             ]
         }, {
-            name: "composite",
+            name: "composite_result",
             lod: 0,
             internalFormat: "RGBA8",
             target: "TEXTURE_2D",
@@ -504,6 +504,7 @@
                 {image: "normal_solid", clearColor: 0x00000000},
                 {image: "material_solid", clearColor: 0x00000000},
                 {image: "misc_solid", clearColor: 0x00000000},
+                {image: "velocity", clearColor: 0x00000000}
                 {image: "emissive"}
             ]
         }, {
@@ -515,13 +516,16 @@
                 {image: "normal_translucent", clearColor: 0x00000000},
                 {image: "material_translucent", clearColor: 0x00000000},
                 {image: "misc_translucent", clearColor: 0x00000000},
+                {image: "velocity"}
             ]
         }, {
             name: "particles",
             depthAttachment: {image: "particles_depth", clearDepth: 1.0},
             colorAttachments: [
                 {image: "particles", clearColor: 0x00000000},
-                {image: "light_particles", clearColor: 0x00000000}]
+                {image: "light_particles", clearColor: 0x00000000},
+                {image: "velocity"},
+            ]
         }, {
             name: "clouds",
             depthAttachment: {image: "clouds_depth", clearDepth: 1.0},
@@ -554,8 +558,16 @@
                 {image: "solid_combine", clearColor: 0x00000000},
                 {image: "translucent_combine", clearColor: 0x00000000}
             ]
-        }, {
+        },
+        /* COMPOSITE FRAMEBUFFERS */
+        {
             name: "composite",
+            colorAttachments: [
+                {image: "composite_result"},
+                {image: "composite_depth"},
+            ]
+        }, {
+            name: "taa_fb",
             colorAttachments: [{image: "solid_main"}]
         }
     ],

@@ -81,6 +81,17 @@
                     "particles_final", "particles_depth",
                     "clouds", "clouds_depth",
                     "weather", "weather_depth"]
+            }, {
+                name: "taa_pass",
+                program: "taa_program",
+                framebuffer: "taa_fb",
+                samplerImages: [
+                    "composite_result",
+                    "history0",
+                    "composite_depth",
+                    "history_depth0",
+                    "velocity",
+                ]
             }
         ]
     },

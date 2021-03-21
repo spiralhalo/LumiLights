@@ -6,6 +6,12 @@
             vertexSource: "lumi:shaders/post/simple.vert",
             fragmentSource: "lumi:shaders/post/copy.frag",
             samplers: ["u_input"]
+        }, {
+            // copy from array source
+            name: "copy_array",
+            vertexSource: "lumi:shaders/post/simple.vert",
+            fragmentSource: "lumi:shaders/post/copy_array.frag",
+            samplers: ["u_input"]
         }
     ],
     
