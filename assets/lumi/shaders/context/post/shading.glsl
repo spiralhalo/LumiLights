@@ -316,24 +316,30 @@ vec4 hdr_shaded_color(
     bool  mathurt   = f0 > 0.85 && !matflash;
     // return vec4(coords_view(uv, frx_inverseProjectionMatrix(), depth), 1.0);
 
+    bool maybeUnderwater = !translucent && (
+        (translucentDepth >= depth && frx_viewFlag(FRX_CAMERA_IN_WATER))
+        || (translucentDepth < depth && !frx_viewFlag(FRX_CAMERA_IN_WATER))
+    );
+
     #if defined(SHADOW_MAP_PRESENT)
         vec4 shadowViewPos = frx_shadowViewMatrix() * vec4(worldPos - frx_cameraPos(), 1.0);
         float shadowFactor = calcShadowFactor(u_shadow, shadowViewPos);  
         light.z = shadowFactor;
+        // This can be improved with translucent layer shadow when it's available
+        if (maybeUnderwater) {
+            light.z *= pow(light.y, 6.0);
+        }
     #else
         light.z = light.y;
     #endif
 
     #if CAUSTICS_MODE == CAUSTICS_MODE_TEXTURE
-        if (!translucent) {
-            if ((translucentDepth >= depth && frx_viewFlag(FRX_CAMERA_IN_WATER))
-                || (translucentDepth < depth && !frx_viewFlag(FRX_CAMERA_IN_WATER))) {
-                #if defined(SHADOW_MAP_PRESENT)
-                    light.z = mix(light.z, 0.0, min(1.0, 0.25 * caustics(worldPos)));
-                #else
-                    light.z = mix(1.0, light.z, (1.0-light.z) * min(1.0, 1.5 * caustics(worldPos)));
-                #endif
-            }
+        if (maybeUnderwater) {
+            #if defined(SHADOW_MAP_PRESENT)
+                light.z = mix(light.z, 0.0, min(1.0, 0.25 * caustics(worldPos)));
+            #else
+                light.z = mix(1.0, light.z, (1.0-light.z) * min(1.0, 1.5 * caustics(worldPos)));
+            #endif
         }
     #endif
 
