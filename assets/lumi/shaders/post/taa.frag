@@ -1,5 +1,6 @@
 #include lumi:shaders/context/post/header.glsl
 #include lumi:shaders/lib/util.glsl
+#include lumi:shaders/context/global/experimental.glsl
 
 /******************************************************
  *    lumi:shaders/post/taa.frag                      *
@@ -34,5 +35,9 @@ void main()
     // [o] ghosting reduction is decent
     // [x] there was a weird distortion while moving (??)
 
-    gl_FragData[0] = TAA();
+    #if ANTIALIASING == ANTIALIASING_TAA
+        gl_FragData[0] = TAA();
+    #else
+        gl_FragData[0] = texture2D(u_current, v_texcoord);
+    #endif
 }

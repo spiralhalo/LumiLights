@@ -52,14 +52,19 @@ void frx_writePipelineVertex(inout frx_VertexData data) {
         l2_viewpos = viewCoord.xyz;
     } else {
         data.vertex += frx_modelToCamera();
-        // This produces correct velocity
-        vec4 cameraToLastCamera = vec4(frx_cameraPos() - frx_lastCameraPos(), 0.0);
         vec4 viewCoord = frx_viewMatrix() * data.vertex;
-        pv_prevPos = _cvu_matrix[_CV_MAT_VIEW_PROJ_LAST] * (data.vertex + cameraToLastCamera);
-        pv_nextPos = frx_projectionMatrix() * viewCoord;
-        gl_Position = pv_nextPos;
-        gl_Position.st += halton[int(mod(frx_renderSeconds() * 60.0, 4.0))] * gl_Position.w / vec2(frx_viewWidth(), frx_viewHeight());
+        vec4 deviceCoord = frx_projectionMatrix() * viewCoord;
         l2_viewpos = viewCoord.xyz;
+        gl_Position = deviceCoord;
+
+        #if ANTIALIASING == ANTIALIASING_TAA
+            // This produces correct velocity
+            vec4 cameraToLastCamera = vec4(frx_cameraPos() - frx_lastCameraPos(), 0.0);
+            pv_prevPos = _cvu_matrix[_CV_MAT_VIEW_PROJ_LAST] * (data.vertex + cameraToLastCamera);
+            pv_nextPos = deviceCoord;
+            // Require canvas feature: frame number
+            gl_Position.st += halton[int(mod(frx_renderSeconds() * 60.0, 4.0))] * gl_Position.w / vec2(frx_viewWidth(), frx_viewHeight());
+        #endif
     }
 
 #ifdef VANILLA_LIGHTING

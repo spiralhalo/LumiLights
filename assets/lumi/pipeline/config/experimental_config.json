@@ -4,13 +4,13 @@
             includeToken: "lumi:experimental_config",
             categoryKey: "config.lumi_lights.category.experimental",
             options: {
-                specular_method: {
-                    default: "cook_torrance",
-                    choices: ["blinn", "cook_torrance"],
+                antialiasing: {
+                    default: "none",
+                    choices: ["none", "taa"],
                     enum: true,
-                    prefix: "specular_method_",
-                    nameKey: "config.lumi_lights.value.specular_method",
-                    descriptionKey: "config.lumi_lights.help.specular_method"
+                    prefix: "antialiasing_",
+                    nameKey: "config.lumi_lights.value.antialiasing",
+                    descriptionKey: "config.lumi_lights.help.antialiasing"
                 },
                 custom_sky: {
                     default: false,
@@ -47,7 +47,15 @@
                     prefix: "overlay_debug_",
                     nameKey: "config.lumi_lights.value.overlay_debug",
                     descriptionKey: "config.lumi_lights.help.overlay_debug"
-                }
+                },
+                specular_method: {
+                    default: "cook_torrance",
+                    choices: ["blinn", "cook_torrance"],
+                    enum: true,
+                    prefix: "specular_method_",
+                    nameKey: "config.lumi_lights.value.specular_method",
+                    descriptionKey: "config.lumi_lights.help.specular_method"
+                },
             }
         }
     ]
