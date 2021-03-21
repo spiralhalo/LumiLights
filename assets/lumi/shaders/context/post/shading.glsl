@@ -316,10 +316,8 @@ vec4 hdr_shaded_color(
     bool  mathurt   = f0 > 0.85 && !matflash;
     // return vec4(coords_view(uv, frx_inverseProjectionMatrix(), depth), 1.0);
 
-    bool maybeUnderwater = !translucent && (
-        (translucentDepth >= depth && frx_viewFlag(FRX_CAMERA_IN_WATER))
-        || (translucentDepth < depth && !frx_viewFlag(FRX_CAMERA_IN_WATER))
-    );
+    bool maybeUnderwater = (!translucent && translucentDepth >= depth && frx_viewFlag(FRX_CAMERA_IN_WATER))
+        || (translucentDepth < depth && !frx_viewFlag(FRX_CAMERA_IN_WATER));
 
     #if defined(SHADOW_MAP_PRESENT)
         vec4 shadowViewPos = frx_shadowViewMatrix() * vec4(worldPos - frx_cameraPos(), 1.0);
