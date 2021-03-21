@@ -19,7 +19,7 @@ uniform sampler2D u_velocity;
 #define velocityTex u_velocity
 #define resolution frxu_size
 
-#define feedbackFactor 0.5
+#define feedbackFactor 0.9
 #define velocityScale 1.0
 #define maxDepthFalloff 1.0
 
