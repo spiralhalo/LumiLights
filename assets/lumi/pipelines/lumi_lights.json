@@ -24,8 +24,8 @@
 	include: [
 		"lumi:pipeline/main.json",
 		"lumi:pipeline/main_passes.json",
-		"lumi:pipeline/taa.json",
 		"lumi:pipeline/common.json",
+		"lumi:pipeline/taa.json",
 		"lumi:pipeline/bloom.json",
 		"lumi:pipeline/config.json",
 	],

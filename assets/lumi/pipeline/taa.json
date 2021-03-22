@@ -11,6 +11,13 @@
                 "u_depthHistory0",
                 "u_velocity",
             ]
+        }, {
+            name: "taa_hand_merge",
+            vertexSource: "lumi:shaders/post/basic.vert",
+            fragmentSource: "lumi:shaders/post/taa_hand_merge.frag",
+            samplers: [
+                "u_depth"
+            ]
         }
     ],
 
@@ -71,16 +78,43 @@
         }, {
             name: "history_depth_copy_0",
             colorAttachments: [{image: "history_depth0"}]
+        }, {
+            name: "taa_hand_merge",
+            colorAttachments: [
+                {image: "composite_depth"},
+                {image: "velocity"}
+            ]
+        }, {
+            name: "taa_fb",
+            colorAttachments: [{image: "main_copy"}]
         }
     ],
     
-    fabulous: {
+    afterRenderHand: {
         passes: [
             {
+                name: "taa_hand_merge",
+                program: "taa_hand_merge",
+                framebuffer: "taa_hand_merge",
+                samplerImages: [
+                    "solid_depth"
+                ]
+            }, {
+                name: "taa_pass",
+                program: "taa_program",
+                framebuffer: "taa_fb",
+                samplerImages: [
+                    "solid_main",
+                    "history0",
+                    "composite_depth",
+                    "history_depth0",
+                    "velocity",
+                ]
+            }, {
                 name: "history_copy_0",
                 program: "copy",
                 framebuffer: "history_copy_0",
-                samplerImages: ["solid_main"]
+                samplerImages: ["main_copy"]
             }, {
                 name: "history_depth_copy_0",
                 program: "copy",

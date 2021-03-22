@@ -41,17 +41,12 @@
     afterRenderHand: {
         passes: [
             {
-                // copy MC fbo color attachment - need it at end for combine step
-                name: "main_copy",
-                program: "copy",
-                framebuffer: "main_copy",
-                samplerImages: ["solid_main"]
-            }, {
                 // select emissive portions for blur
                 name: "emissive_color",
                 program: "emissive_color",
                 framebuffer: "emissive_color",
                 samplerImages: [
+                    // solid_main = from hand render without taa
                     "solid_main",
                     "emissive",
                     "emissive_translucent",
@@ -148,6 +143,7 @@
                 name: "bloom",
                 program: "bloom",
                 framebuffer: "bloom",
+                // main_copy = from taa
                 samplerImages: ["main_copy", "bloom_upsample"]
             }
         ]
@@ -164,21 +160,6 @@
             texParams: [
                 {name: "TEXTURE_MIN_FILTER", val: "LINEAR"},
                 {name: "TEXTURE_MAG_FILTER", val: "LINEAR"},
-                {name: "TEXTURE_WRAP_S", val: "CLAMP"},
-                {name: "TEXTURE_WRAP_T", val: "CLAMP"}
-            ]
-        },
-
-        // needed to combine bloom result with main - attachment can't read/write self in same pass
-        {
-            name: "main_copy",
-            lod: 0,
-            internalFormat: "RGBA8",
-            target: "TEXTURE_2D",
-            texParams: [
-                // nearest because don't want filtering when copy back from main
-                {name: "TEXTURE_MIN_FILTER", val: "NEAREST"},
-                {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
                 {name: "TEXTURE_WRAP_S", val: "CLAMP"},
                 {name: "TEXTURE_WRAP_T", val: "CLAMP"}
             ]
@@ -217,9 +198,6 @@
             // TODO: should be able to remove this now
             name: "emissive",
             colorAttachments: [{image: "emissive", clearColor: 0x00000000}]
-        }, {
-            name: "main_copy",
-            colorAttachments: [{image: "main_copy"}]
         }, {
             name: "emissive_color",
             colorAttachments: [{image: "emissive_color"}]

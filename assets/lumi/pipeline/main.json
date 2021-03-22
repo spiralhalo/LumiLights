@@ -456,17 +456,21 @@
                 {name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
                 {name: "TEXTURE_WRAP_S", val: "CLAMP"}, {name: "TEXTURE_WRAP_T", val: "CLAMP"}
             ]
-        }, {
-            name: "composite_result",
+        },
+        /* AFTER-HAND */
+        {
+            name: "main_copy",
             lod: 0,
             internalFormat: "RGBA8",
             target: "TEXTURE_2D",
             texParams: [
-                // nearest because don't want filtering when copy back to main
-                {name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
-                {name: "TEXTURE_WRAP_S", val: "CLAMP"}, {name: "TEXTURE_WRAP_T", val: "CLAMP"}
+                // nearest because don't want filtering when copy back from main
+                {name: "TEXTURE_MIN_FILTER", val: "NEAREST"},
+                {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
+                {name: "TEXTURE_WRAP_S", val: "CLAMP"},
+                {name: "TEXTURE_WRAP_T", val: "CLAMP"}
             ]
-        },
+        }
     ],
 
     framebuffers: [
@@ -563,13 +567,11 @@
         {
             name: "composite",
             colorAttachments: [
-                {image: "composite_result"},
+                {image: "solid_main"},
                 {image: "composite_depth"},
             ]
-        }, {
-            name: "taa_fb",
-            colorAttachments: [{image: "solid_main"}]
-        }
+        },
+        /* AFTER-HAND FRAMEBUFFERS */
     ],
 
     // Framebuffer that will be visible to the game and to mods as the primary framebuffer.
