@@ -9,7 +9,7 @@
 uniform sampler2D u_current;
 uniform sampler2D u_history0;
 uniform sampler2D u_depthCurrent;
-uniform sampler2D u_depthHistory0;
+uniform sampler2D u_depthHistory0; //unused, can be removed
 uniform sampler2D u_velocity;
 
 #define currentColorTex u_current

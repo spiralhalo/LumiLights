@@ -165,18 +165,6 @@ vec4 Inside2Resolve(sampler2D currColorTex, sampler2D prevColorTex, vec2 velocit
 
 vec4 TAA()
 {
-    float averageDepth = 0.0;
-    for(int iter = 0; iter < neighborCount3x3; iter++)
-    {
-        averageDepth += texture2D(currentDepthTex, v_texcoord + (kOffsets3x3[iter] * deltaRes)).x;
-    }
-    averageDepth /= float(neighborCount3x3);
-
-    // this branch prevent glitch in the sky
-    if(averageDepth < maxDepthFalloff) {
-        vec2 velocity = -texture2D(velocityTex, GetClosestUV(currentDepthTex)).rg;
-        return Inside2Resolve(currentColorTex, previousColorTex, velocity);//vec4(1, 0, 0, 1);
-    } else {
-        return texture2D(currentColorTex, v_texcoord);
-    }
+    vec2 velocity = -texture2D(velocityTex, GetClosestUV(currentDepthTex)).rg;
+    return Inside2Resolve(currentColorTex, previousColorTex, velocity);//vec4(1, 0, 0, 1);
 }
