@@ -60,7 +60,7 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
     pbr_metallic = clamp(pbr_metallic, 0.0, 1.0);
 
     if (frx_modelOriginType() == MODEL_ORIGIN_SCREEN) {
-        if (gl_FragCoord.z <= 0.88) { // hack to exclude hand
+        if (gl_FragCoord.z <= 0.6) { // hack to exclude hand but include bedrockify doll
             float diffuse = mix(pv_diffuse, 1, fragData.emissivity);
             diffuse = frx_isGui() ? diffuse : min(1.0, 1.5 - diffuse);
             diffuse = fragData.diffuse ? diffuse : 1.0;
