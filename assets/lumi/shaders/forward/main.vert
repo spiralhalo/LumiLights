@@ -39,10 +39,14 @@ void frx_writePipelineVertex(inout frx_VertexData data) {
         gl_Position = frx_projectionMatrix() * viewCoord;
         l2_viewpos = viewCoord.xyz;
 
-        #if ANTIALIASING == ANTIALIASING_TAA
-            // This produces correct velocity
-            vec4 cameraToLastCamera = vec4(frx_cameraPos() - frx_lastCameraPos(), 0.0);
-            pv_prevPos = _cvu_matrix[_CV_MAT_CLEAN_VIEW_PROJ_LAST] * (data.vertex + cameraToLastCamera);
+        #ifdef TAA_ENABLED
+            #if ANTIALIASING == ANTIALIASING_TAA_BLURRY
+                pv_prevPos = _cvu_matrix[_CV_MAT_CLEAN_VIEW_PROJ_LAST] * data.vertex;
+            #else
+                // This produces correct velocity
+                vec4 cameraToLastCamera = vec4(frx_cameraPos() - frx_lastCameraPos(), 0.0);
+                pv_prevPos = _cvu_matrix[_CV_MAT_CLEAN_VIEW_PROJ_LAST] * (data.vertex + cameraToLastCamera);
+            #endif
             pv_nextPos = _cvu_matrix[_CV_MAT_CLEAN_VIEW_PROJ] * data.vertex;
             // Require canvas feature: frame number
             gl_Position.st += taa_jitter(inv_size) * gl_Position.w;

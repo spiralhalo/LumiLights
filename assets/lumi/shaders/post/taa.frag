@@ -27,7 +27,9 @@ uniform sampler2D u_velocity;
 
 void main()
 {
-    // gl_FragData[0] = texture2D(u_velocity, v_texcoord);
+    #if ANTIALIASING == ANTIALIASING_TAA_DEBUG
+        gl_FragData[0] = 0.5 + texture2D(u_velocity, v_texcoord) * 50.0;
+    #else
 
     // PROGRESS:
     // [o] velocity buffer works fine
@@ -35,9 +37,10 @@ void main()
     // [o] ghosting reduction is decent
     // [~] terrain distortion is reduced by using clean matrices and can be controlled with velocityRejectionScale
 
-    #if ANTIALIASING == ANTIALIASING_TAA
+    #ifdef TAA_ENABLED
         gl_FragData[0] = TAA();
     #else
         gl_FragData[0] = texture2D(u_current, v_texcoord);
+    #endif
     #endif
 }

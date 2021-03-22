@@ -6,7 +6,7 @@
             options: {
                 antialiasing: {
                     default: "none",
-                    choices: ["none", "taa", "taa_blurry"],
+                    choices: ["none", "taa", "taa_blurry", "taa_debug"],
                     enum: true,
                     prefix: "antialiasing_",
                     nameKey: "config.lumi_lights.value.antialiasing",

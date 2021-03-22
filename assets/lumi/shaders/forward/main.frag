@@ -97,7 +97,7 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
         gl_FragData[1] = vec4(light.x, light.y, (frx_renderTarget() == TARGET_PARTICLES) ? bloom : normalizedBloom, 1.0);
 
         vec2 velocity = vec2(0.0);
-        #if ANTIALIASING == ANTIALIASING_TAA
+        #ifdef TAA_ENABLED
             //velocity in UV space
             vec2 nextPos = ((pv_nextPos.xy / pv_nextPos.w) * 0.5 + 0.5);
             vec2 prevPos = ((pv_prevPos.xy / pv_prevPos.w) * 0.5 + 0.5);
