@@ -95,7 +95,7 @@ cloud_result rayMarchCloud(in sampler2D texture, in sampler2D sdepth, in vec2 te
 {
     float rainFactor = frx_rainGradient() * 0.67 + frx_thunderGradient() * 0.33; // TODO: optimize
     float depth = texture2D(sdepth, texcoord).r;
-    vec3 worldPos;
+    float maxDist;
     vec3 worldVec;
 
     cloud_result placeholder = cloud_result(0.0, 1.0, vec3(0.0));
@@ -104,11 +104,7 @@ cloud_result rayMarchCloud(in sampler2D texture, in sampler2D sdepth, in vec2 te
         viewPos.xyz /= viewPos.w;
         vec3 viewVec = normalize(viewPos.xyz);
         worldVec = viewVec * frx_normalModelMatrix();
-        #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
-            worldPos = worldVec * 256.0;
-        #else
-            worldPos = frx_cameraPos() + worldVec * 256.0;
-        #endif
+        maxDist = 1024.0;
     } else {
         #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
             return placeholder; // Some sort of culling
@@ -116,12 +112,8 @@ cloud_result rayMarchCloud(in sampler2D texture, in sampler2D sdepth, in vec2 te
             vec4 viewPos = frx_inverseProjectionMatrix() * vec4(2.0 * texcoord - 1.0, 2.0 * depth - 1.0, 1.0);
             viewPos.xyz /= viewPos.w;
             viewPos.w = 1.0;
-            worldPos  = frx_cameraPos() + (frx_inverseViewMatrix() * viewPos).xyz;
+            maxDist = length(viewPos.xyz);
             worldVec = normalize(viewPos.xyz) * frx_normalModelMatrix();
-            if ((worldPos.y < CLOUD_MIN_Y && worldVec.y > 0.0)
-            || (worldPos.y > CLOUD_MAX_Y && worldVec.y < 0.0)) {
-                return placeholder; // Some sort of culling
-            }
         #endif
     }
 
@@ -153,15 +145,19 @@ cloud_result rayMarchCloud(in sampler2D texture, in sampler2D sdepth, in vec2 te
     float transmittance = 1.0;
     float tileJitter = tile_noise_1d(v_texcoord, frxu_size, 3); //CLOUD_MARCH_JITTER_STRENGTH;
     currentWorldPos += sampleDir * tileJitter;
+
     // ATTEMPT 1
     bool first = true;
-    vec3 firstHitPos = worldPos - worldVec * 0.1;
+    vec3 firstHitPos = frx_cameraPos() + worldVec * maxDist;
     // ATTEMPT 2
     // float maxDensity = 0.0;
     // vec3 firstDensePos = worldPos - worldVec * 0.1;
+
     int i = 0;
-    while (currentWorldPos.y >= CLOUD_MIN_Y && currentWorldPos.y <= CLOUD_MAX_Y && i < NUM_SAMPLE) {
+    float traveled = SAMPLE_SIZE * tileJitter;
+    while (traveled < maxDist && currentWorldPos.y >= CLOUD_MIN_Y && currentWorldPos.y <= CLOUD_MAX_Y && i < NUM_SAMPLE) {
         i ++;
+        traveled += SAMPLE_SIZE;
         currentWorldPos += sampleDir;
         float sampledDensity = sampleCloud(currentWorldPos, texture);
         if (sampledDensity > 0) {
