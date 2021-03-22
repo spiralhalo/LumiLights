@@ -59,14 +59,14 @@ vec2 modelXz2Uv(vec2 modelXz)
 }
 
 #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
-    const float CLOUD_MAX_Y = 60.0;
-    const float CLOUD_MIN_Y = 55.0;
+    const float CLOUD_ALTITUDE = 55.0;
 #else
-    const float CLOUD_MAX_Y = 120.5;
-    const float CLOUD_MIN_Y = 115.5;
+    const float CLOUD_ALTITUDE = 115.5;
 #endif
-const float CLOUD_Y = (CLOUD_MAX_Y + CLOUD_MIN_Y) * 0.5;
-const float CLOUD_THICKNESS_H = (CLOUD_MAX_Y - CLOUD_MIN_Y) * 0.5;
+const float CLOUD_HEIGHT = 30.0;
+const float CLOUD_MID_ALTITUDE = CLOUD_ALTITUDE + 5.0;
+const float CLOUD_MIN_Y = CLOUD_ALTITUDE;
+const float CLOUD_MAX_Y = CLOUD_ALTITUDE + CLOUD_HEIGHT;
 
 float sampleCloud(in vec3 worldPos, in sampler2D texture)
 {
@@ -97,7 +97,6 @@ cloud_result rayMarchCloud(in sampler2D texture, in sampler2D sdepth, in vec2 te
     float depth = texture2D(sdepth, texcoord).r;
     vec3 worldPos;
     vec3 worldVec;
-    float worldDist;
 
     cloud_result placeholder = cloud_result(0.0, 1.0, vec3(0.0));
     if (depth == 1.0) {
@@ -105,11 +104,10 @@ cloud_result rayMarchCloud(in sampler2D texture, in sampler2D sdepth, in vec2 te
         viewPos.xyz /= viewPos.w;
         vec3 viewVec = normalize(viewPos.xyz);
         worldVec = viewVec * frx_normalModelMatrix();
-        worldDist = 256.0;
         #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
-            worldPos = worldVec * worldDist;
+            worldPos = worldVec * 256.0;
         #else
-            worldPos = frx_cameraPos() + worldVec * worldDist;
+            worldPos = frx_cameraPos() + worldVec * 256.0;
         #endif
     } else {
         #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
@@ -124,37 +122,37 @@ cloud_result rayMarchCloud(in sampler2D texture, in sampler2D sdepth, in vec2 te
             || (worldPos.y > CLOUD_MAX_Y && worldVec.y < 0.0)) {
                 return placeholder; // Some sort of culling
             }
-            worldDist = distance(worldPos, frx_cameraPos());
         #endif
     }
 
     vec3 sampleDir = worldVec * SAMPLE_SIZE;
     vec3 toLight = frx_skyLightVector() * LIGHT_SAMPLE_SIZE;
 
+    // Adapted from Sebastian Lague's code (technically not the same, but just in case his code was MIT Licensed)
+
+    // Optimization block
     #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
         if (worldVec.y <= 0) return placeholder;
         float gotoBottom = CLOUD_MIN_Y / worldVec.y;
         float gotoTop = CLOUD_MAX_Y / worldVec.y;
-    #endif
-
-    // Adapted from Sebastian Lague's code (technically not the same, but just in case his code was MIT Licensed)
-    #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
-        vec3 currentWorldPos = worldVec * gotoBottom;/*frx_cameraPos()*/;
+        vec3 currentWorldPos = worldVec * gotoBottom;/*frx_cameraPos()*/
     #else
         vec3 currentWorldPos = frx_cameraPos();
+        float gotoBorder = 0.0;
+        if (currentWorldPos.y >= CLOUD_MAX_Y) {
+            if (worldVec.y >= 0) return placeholder;
+            gotoBorder = (currentWorldPos.y - CLOUD_MAX_Y) / -worldVec.y;
+        } else if (currentWorldPos.y <= CLOUD_MIN_Y) {
+            if (worldVec.y <= 0) return placeholder;
+            gotoBorder = (CLOUD_MIN_Y - currentWorldPos.y) / worldVec.y;
+        }
+        currentWorldPos += worldVec * gotoBorder;
     #endif
+
     float lightEnergy = 0.0;
     float transmittance = 1.0;
-    float maxdist = min(worldDist, NUM_SAMPLE * SAMPLE_SIZE);
-    #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
-        float travelled = gotoBottom;
-        maxdist = min(maxdist, gotoTop);
-    #else
-        float travelled = 0.0;
-    #endif
     float tileJitter = tile_noise_1d(v_texcoord, frxu_size, 3); //CLOUD_MARCH_JITTER_STRENGTH;
     currentWorldPos += sampleDir * tileJitter;
-    travelled += tileJitter * SAMPLE_SIZE;
     // ATTEMPT 1
     bool first = true;
     vec3 firstHitPos = worldPos - worldVec * 0.1;
@@ -162,9 +160,8 @@ cloud_result rayMarchCloud(in sampler2D texture, in sampler2D sdepth, in vec2 te
     // float maxDensity = 0.0;
     // vec3 firstDensePos = worldPos - worldVec * 0.1;
     int i = 0;
-    while (travelled < maxdist && i < NUM_SAMPLE) {
+    while (currentWorldPos.y >= CLOUD_MIN_Y && currentWorldPos.y <= CLOUD_MAX_Y && i < NUM_SAMPLE) {
         i ++;
-        travelled += SAMPLE_SIZE;
         currentWorldPos += sampleDir;
         float sampledDensity = sampleCloud(currentWorldPos, texture);
         if (sampledDensity > 0) {
