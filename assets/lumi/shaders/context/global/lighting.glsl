@@ -1,5 +1,5 @@
 #include lumi:shaders/lib/util.glsl
-#include lumi:shaders/context/global/experimental.glsl
+#include lumi:shaders/context/global/userconfig.glsl
 #include lumi:lighting_config
 
 /*******************************************************

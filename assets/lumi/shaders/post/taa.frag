@@ -1,6 +1,6 @@
 #include lumi:shaders/context/post/header.glsl
 #include lumi:shaders/lib/util.glsl
-#include lumi:shaders/context/global/experimental.glsl
+#include lumi:shaders/context/global/userconfig.glsl
 
 /******************************************************
  *    lumi:shaders/post/taa.frag                      *

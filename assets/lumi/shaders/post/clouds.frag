@@ -9,7 +9,7 @@
 #include lumi:shaders/lib/fast_gaussian_blur.glsl
 #include lumi:shaders/lib/volumetric_cloud.glsl
 #include lumi:shaders/context/global/lighting.glsl
-#include lumi:shaders/context/global/clouds.glsl
+#include lumi:shaders/context/global/userconfig.glsl
 
 /*******************************************************
  *  lumi:shaders/post/clouds.frag                      *

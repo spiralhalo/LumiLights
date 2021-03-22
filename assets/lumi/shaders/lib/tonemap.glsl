@@ -1,6 +1,6 @@
 #include frex:shaders/lib/math.glsl
 #include frex:shaders/lib/color.glsl
-#include lumi:shaders/context/global/experimental.glsl
+#include lumi:shaders/context/global/userconfig.glsl
 #include lumi:shaders/lib/util.glsl
 
 /***********************************************************

@@ -1,4 +1,4 @@
-#include lumi:shaders/context/global/experimental.glsl
+#include lumi:shaders/context/global/userconfig.glsl
 
 /***********************************************************
  *  lumi:shaders/forward/varying.glsl                     *

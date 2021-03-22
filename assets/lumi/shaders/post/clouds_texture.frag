@@ -3,7 +3,7 @@
 #include frex:shaders/api/world.glsl
 #include lumi:shaders/lib/util.glsl
 #include lumi:shaders/lib/volumetric_cloud.glsl
-#include lumi:shaders/context/global/clouds.glsl
+#include lumi:shaders/context/global/userconfig.glsl
 
 /*******************************************************
  *  lumi:shaders/post/clouds_texture.frag              *

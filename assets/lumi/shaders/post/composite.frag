@@ -8,7 +8,7 @@
 #include lumi:shaders/lib/godrays.glsl
 #include lumi:shaders/lib/tile_noise.glsl
 #include lumi:shaders/context/global/lighting.glsl
-#include lumi:shaders/context/global/experimental.glsl
+#include lumi:shaders/context/global/userconfig.glsl
 #include lumi:shaders/context/post/clouds.glsl
 
 /******************************************************

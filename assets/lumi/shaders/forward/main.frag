@@ -5,7 +5,7 @@
 #include frex:shaders/api/view.glsl
 #include frex:shaders/lib/math.glsl
 #include lumi:shaders/context/forward/common.glsl
-#include lumi:shaders/context/global/experimental.glsl
+#include lumi:shaders/context/global/userconfig.glsl
 #include lumi:shaders/api/param_frag.glsl
 #include lumi:shaders/lib/util.glsl
 #include lumi:shaders/lib/tonemap.glsl

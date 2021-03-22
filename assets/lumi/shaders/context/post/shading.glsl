@@ -17,7 +17,7 @@
 #include lumi:shaders/context/post/fog.glsl
 #include lumi:shaders/context/global/lighting.glsl
 #include lumi:shaders/context/global/shadow.glsl
-#include lumi:shaders/context/global/experimental.glsl
+#include lumi:shaders/context/global/userconfig.glsl
 
 /*******************************************************
  *  lumi:shaders/context/post/shading.frag             *
