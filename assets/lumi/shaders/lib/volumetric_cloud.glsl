@@ -54,6 +54,7 @@ vec2 worldXz2Uv(vec2 worldXz)
 // model means relative to camera not world origin in this context
 vec2 modelXz2Uv(vec2 modelXz)
 {
+    modelXz = floor(modelXz);
     vec2 ndc = modelXz * TEXTURE_RADIUS_RCP;
     return ndc * 0.5 + 0.5;
 }
@@ -63,8 +64,10 @@ vec2 modelXz2Uv(vec2 modelXz)
 #else
     const float CLOUD_ALTITUDE = 115.5;
 #endif
-const float CLOUD_HEIGHT = 30.0;
-const float CLOUD_MID_ALTITUDE = CLOUD_ALTITUDE + 5.0;
+const float CLOUD_HEIGHT = 20.0;
+const float CLOUD_MID_HEIGHT = 5.0;
+const float CLOUD_TOP_HEIGHT = CLOUD_HEIGHT - CLOUD_MID_HEIGHT;
+const float CLOUD_MID_ALTITUDE = CLOUD_ALTITUDE + CLOUD_MID_HEIGHT;
 const float CLOUD_MIN_Y = CLOUD_ALTITUDE;
 const float CLOUD_MAX_Y = CLOUD_ALTITUDE + CLOUD_HEIGHT;
 
@@ -76,19 +79,16 @@ float sampleCloud(in vec3 worldPos, in sampler2D texture)
         vec2 uv = worldXz2Uv(worldPos.xz);
     #endif
 
-    // vec2 edge = smoothstep(0.5, 0.4, abs(uv - 0.5)); probably unecessary when texture radius <= max sample distance
-    // float eF = edge.x * edge.y;
+    vec2 edge = smoothstep(0.5, 0.4, abs(uv - 0.5));
+    float eF = edge.x * edge.y;
 
-    float tF = texture2D(texture, uv).r;
-    tF = sqrt(1.0 - pow(1.0 - tF, 2.0));
-    #if VOLUMETRIC_CLOUD_SHAPE == VOLUMETRIC_CLOUD_SHAPE_MARSHMALLOW
-        float yF = l2_clampScale(CLOUD_THICKNESS_H * tF, 0.0, abs(CLOUD_Y - worldPos.y));
-        yF = sqrt(1.0 - pow(1.0 - yF, 2.0));
-    #else // cotton clouds
-        float yF = l2_clampScale(CLOUD_THICKNESS_H * tF, CLOUD_THICKNESS_H * tF * 0.5, abs(CLOUD_Y - worldPos.y));
-    #endif
+    vec2 tex = texture2D(texture, uv).rg; 
+    float tF = tex.r;
+    float hF = tex.g;
+    float yF = smoothstep(CLOUD_MID_ALTITUDE + CLOUD_TOP_HEIGHT * hF, CLOUD_MID_ALTITUDE, worldPos.y) * smoothstep(CLOUD_ALTITUDE, CLOUD_MID_ALTITUDE, worldPos.y);
 
-    return yF * tF * 2.0;
+    return smoothstep(0.1, 0.2, yF * tF * eF);
+    // return smoothstep(0.1, 0.11, yF * tF * eF);
 }
 
 cloud_result rayMarchCloud(in sampler2D texture, in sampler2D sdepth, in vec2 texcoord)
@@ -206,12 +206,9 @@ vec4 generateCloudTexture(vec2 texcoord) {
 
     float cloud = cloud1 * 0.5 + cloud2 * 0.75 + cloud3;
 
-    #if VOLUMETRIC_CLOUD_SHAPE == VOLUMETRIC_CLOUD_SHAPE_MARSHMALLOW
-        cloud = l2_clampScale(0.3, 0.5, cloud);
-    #else // cotton clouds
-        cloud = l2_clampScale(0.1, 1.0, cloud);
-    #endif
+    cloud = l2_clampScale(0.1, 1.0, cloud);
 
-    return vec4(cloud, 0.0, 0.0, 1.0);
+    // cloud = sqrt(1.0 - pow(1.0 - cloud, 2.0));
+    return vec4(cloud, sqrt(1.0 - pow(1.0 - cloud1 * cloud2, 2.0)), 0.0, 1.0);
 }
 #endif
