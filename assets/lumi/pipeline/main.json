@@ -46,9 +46,9 @@
 		vertexSource: "lumi:shaders/forward/main.vert",
 		fragmentSource: "lumi:shaders/forward/main.frag",
 		// glsl names for samplers additive to the FREX pre-defined samplers
-		samplers: [],
+		samplers: ["u_glint"],
 		// image names for samplers additive to the FREX pre-defined samplers
-		samplerImages: []
+		samplerImages: ["minecraft:textures/misc/enchanted_item_glint.png"]
 	},
 
     include: [
@@ -74,6 +74,7 @@
                 "u_translucent_color",
 
                 "u_ao",
+                "u_glint",
                 "u_shadow",
             ]
         }, {
@@ -92,6 +93,7 @@
                 "u_particles_depth",
                 "u_light_particles",
 
+                "u_glint",
                 "u_shadow",
             ]
         }, {

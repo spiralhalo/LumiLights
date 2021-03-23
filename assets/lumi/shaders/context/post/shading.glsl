@@ -11,7 +11,7 @@
 #include lumi:shaders/lib/tonemap.glsl
 #include lumi:shaders/lib/pbr_shading.glsl
 #include lumi:shaders/lib/puddle.glsl
-#include lumi:shaders/lib/noise_glint.glsl
+#include lumi:shaders/lib/glintify.glsl
 #include lumi:shaders/lib/tile_noise.glsl
 #include lumi:shaders/context/post/bloom.glsl
 #include lumi:shaders/context/post/fog.glsl
@@ -359,7 +359,11 @@ vec4 hdr_shaded_color(
     a.a = min(1.0, a.a);
 
     vec3 misc = texture2D(smisc, uv).xyz;
-    a.rgb += hdr_gammaAdjust(noise_glint(misc.xy, misc.z));
+    #if GLINT_MODE == GLINT_MODE_SHADER
+        a.rgb += hdr_gammaAdjust(noise_glint(misc.xy, misc.z));
+    #else
+        a.rgb += hdr_gammaAdjust(texture_glint(u_glint, misc.xy, misc.z));
+    #endif
 
     if (a.a != 0.0 && (translucent || translucentDepth >= depth) && depth != 1.0) {
         a = fog(frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? light.y * frx_ambientIntensity() : 1.0, a, viewPos, worldPos, bloom_out);

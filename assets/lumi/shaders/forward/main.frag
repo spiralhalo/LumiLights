@@ -10,7 +10,7 @@
 #include lumi:shaders/lib/util.glsl
 #include lumi:shaders/lib/tonemap.glsl
 #include lumi:shaders/lib/pbr_shading.glsl
-#include lumi:shaders/lib/noise_glint.glsl
+#include lumi:shaders/lib/glintify.glsl
 
 /*******************************************************
  *  lumi:shaders/forward/main.frag                    *
@@ -21,6 +21,7 @@
  *  published by the Free Software Foundation, Inc.    *
  *******************************************************/
 
+uniform sampler2D u_glint;
 #include lumi:shaders/forward/varying.glsl
 
 frx_FragmentData frx_createPipelineFragment()
@@ -65,13 +66,21 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
             diffuse = frx_isGui() ? diffuse : min(1.0, 1.5 - diffuse);
             diffuse = fragData.diffuse ? diffuse : 1.0;
             a.rgb *= diffuse;
-            a.rgb += noise_glint(frx_normalizeMappedUV(frx_texcoord), frx_matGlint());
+            #if GLINT_MODE == GLINT_MODE_SHADER
+                a.rgb += noise_glint(frx_normalizeMappedUV(frx_texcoord), frx_matGlint());
+            #else
+                a.rgb += texture_glint(u_glint, frx_normalizeMappedUV(frx_texcoord), frx_matGlint());
+            #endif
         } else {
             float bloom_out = fragData.emissivity * a.a;
             vec3 normal = fragData.vertexNormal * frx_normalModelMatrix();
             //TODO: apply shadowmap perhaps (is the hand even included in depth pass ??)
             pbr_shading(a, bloom_out, l2_viewpos, fragData.light.xyy, normal, pbr_roughness, pbr_metallic, pbr_f0, fragData.diffuse, true);
-            a.rgb += hdr_gammaAdjust(noise_glint(frx_normalizeMappedUV(frx_texcoord), frx_matGlint()));
+            #if GLINT_MODE == GLINT_MODE_SHADER
+                a.rgb += hdr_gammaAdjust(noise_glint(frx_normalizeMappedUV(frx_texcoord), frx_matGlint()));
+            #else
+                a.rgb += hdr_gammaAdjust(texture_glint(u_glint, frx_normalizeMappedUV(frx_texcoord), frx_matGlint()));
+            #endif
             a = ldr_tonemap(a);
             gl_FragData[6] = vec4(bloom_out, 0.0, 0.0, 1.0);
         }

@@ -27,6 +27,7 @@
                     "translucent_main",
 
                     "ao_filtered",
+                    "minecraft:textures/misc/enchanted_item_glint.png",
                     "shadow_map",
                 ]
             }, {
@@ -45,6 +46,7 @@
                     "particles_depth",
                     "light_particles",
                     
+                    "minecraft:textures/misc/enchanted_item_glint.png",
                     "shadow_map",
                 ]
             }, {

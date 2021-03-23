@@ -3,7 +3,7 @@
 #include lumi:shaders/lib/util.glsl
 
 /*******************************************************
- *  lumi:shaders/lib/noise_glint.glsl                  *
+ *  lumi:shaders/lib/glintify.glsl                     *
  *******************************************************
  *  Copyright (c) 2021 spiralhalo                      *
  *  Released WITHOUT WARRANTY under the terms of the   *
@@ -32,6 +32,16 @@ vec3 noise_glint(vec2 normalizedUV, float glint)
         f = 1.0 - 2.0 * f;
         float n = frx_noise2d(t.xx) * f.x + frx_noise2d(t.yy) * f.y;
         return n * GLINT_COLOR;
+    } else {
+        return vec3(0.0);
+    }
+}
+
+vec3 texture_glint(sampler2D glint_sampler, vec2 normalizedUV, float glint)
+{
+    if (glint == 1.0) {
+        vec4 glint_tex_c = texture2D(glint_sampler, mod(normalizedUV * 0.5 + frx_renderSeconds() * 0.4, 1.0));
+        return glint_tex_c.rgb * glint_tex_c.a;
     } else {
         return vec3(0.0);
     }
