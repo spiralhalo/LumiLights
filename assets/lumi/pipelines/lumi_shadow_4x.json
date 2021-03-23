@@ -18,8 +18,8 @@
 	// If you don't want to deal with localization, use literal strings -
 	// those will fail localization lookup and be used directly.
 
-	nameKey: "pipeline.lumi_lights_dev_b.name",
-	descriptionKey: "pipeline.lumi_lights_dev_b.desc",
+	nameKey: "pipeline.lumi_shadow_4x.name",
+	descriptionKey: "pipeline.lumi_shadow_4x.desc",
 
 	sky: {
 		// Used when dimension/celestial object does not specify
@@ -32,7 +32,7 @@
 		"lumi:pipeline/taa.json",
 		"lumi:pipeline/common.json",
 		"lumi:pipeline/bloom.json",
-		"lumi:pipeline/skyshadow_b.json",
+		"lumi:pipeline/skyshadow_4x.json",
 		"lumi:pipeline/config/lighting_config.json",
 		"lumi:pipeline/config/shadow_config.json",
 		"lumi:pipeline/config/reflection_config.json",

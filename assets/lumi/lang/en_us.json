@@ -2,14 +2,14 @@
     "pipeline.lumi_lights.name": "Lumi Lights",
     "pipeline.lumi_lights.desc": "Cool sunrise and shiny stuff methinks",
 
-    "pipeline.lumi_lights_dev.name": "Lumi Shadow 1x",
-    "pipeline.lumi_lights_dev.desc": "Cool sunrise and ok shadows",
+    "pipeline.lumi_shadow_1x.name": "Lumi Shadow 1x",
+    "pipeline.lumi_shadow_1x.desc": "Cool sunrise and ok shadows",
 
-    "pipeline.lumi_lights_dev_b.name": "Lumi Shadow 2x",
-    "pipeline.lumi_lights_dev_b.desc": "Cool sunrise and ok shadows",
+    "pipeline.lumi_shadow_2x.name": "Lumi Shadow 2x",
+    "pipeline.lumi_shadow_2x.desc": "Cool sunrise and ok shadows",
 
-    "pipeline.lumi_lights_dev_c.name": "Lumi Shadow 4x",
-    "pipeline.lumi_lights_dev_c.desc": "Cool sunrise and ok shadows",
+    "pipeline.lumi_shadow_4x.name": "Lumi Shadow 4x",
+    "pipeline.lumi_shadow_4x.desc": "Cool sunrise and ok shadows",
 
     "pipeline.kaleidoskop.name": "KALEIDOSKOP",
     "pipeline.kaleidoskop.desc": "A trip to the moon",
