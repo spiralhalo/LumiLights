@@ -43,8 +43,8 @@
     "config.lumi_lights.help.volumetric_fog": "Apply shadow volume to fog",
 
     "config.lumi_lights.category.shadow": "Shadows",
-    "config.lumi_lights.value.shadow_box_filtering": "Shadow filtering",
-    "config.lumi_lights.help.shadow_box_filtering": "Enable for softer shadow (performance impact)",
+    "config.lumi_lights.value.shadow_filtering": "Shadow filtering",
+    "config.lumi_lights.help.shadow_filtering": "Shadow filtering mode affects softness and performance",
 
     "config.lumi_lights.category.gameplay": "Gameplay",
     "config.lumi_lights.value.handheld_light_radius": "Held light radius",
