@@ -64,14 +64,6 @@
                     nameKey: "config.lumi_lights.value.overlay_debug",
                     descriptionKey: "config.lumi_lights.help.overlay_debug"
                 },
-                specular_method: {
-                    default: "cook_torrance",
-                    choices: ["blinn", "cook_torrance"],
-                    enum: true,
-                    prefix: "specular_method_",
-                    nameKey: "config.lumi_lights.value.specular_method",
-                    descriptionKey: "config.lumi_lights.help.specular_method"
-                },
             }
         }
     ]
