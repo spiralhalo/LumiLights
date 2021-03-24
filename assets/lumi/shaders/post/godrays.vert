@@ -44,7 +44,13 @@ void main()
         #endif
     }
     
-    vec4 skylight_clip = frx_projectionMatrix() * vec4(frx_normalModelMatrix() * frx_skyLightVector() * 1000, 1.0);
+    #if SKY_MODE == SKY_MODE_LUMI
+        vec3 skyLightVector = frx_skyLightVector();
+    #else
+        // Remove zenith angle tilt until Canvas implements it on vanilla celestial object
+        vec3 skyLightVector = normalize(vec3(frx_skyLightVector().xy, 0.0));
+    #endif
+    vec4 skylight_clip = frx_projectionMatrix() * vec4(frx_normalModelMatrix() * skyLightVector * 1000, 1.0);
     v_skylightpos = (skylight_clip.xy / skylight_clip.w) * 0.5 + 0.5;
     v_aspect_adjuster = float(frxu_size.x)/float(frxu_size.y);
     v_godray_color = frx_worldFlag(FRX_WORLD_IS_MOONLIT) ? vec3(0.5) : ldr_sunColor(frx_worldTime());
