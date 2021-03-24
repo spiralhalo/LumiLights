@@ -1,4 +1,4 @@
-#include lumi:fog_config
+#include lumi:shaders/context/global/userconfig.glsl
 
 /*******************************************************
  *  lumi:shaders/context/post/fog.glsl                 *

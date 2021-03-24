@@ -1,0 +1,53 @@
+{
+  options: [
+    {
+      includeToken: "lumi:aesthetics_config",
+      categoryKey: "config.lumi_lights.category.aesthetics",
+      options: {
+        bloom_intensity: {
+          default: 20,
+          min: 1,
+          max: 40,
+          nameKey: "config.lumi_lights.value.bloom_intensity",
+          descriptionKey: "config.lumi_lights.help.bloom_intensity"
+        },
+        sky_bloom_intensity: {
+          default: 5,
+          min: 0,
+          max: 10,
+          nameKey: "config.lumi_lights.value.sky_bloom_intensity",
+          descriptionKey: "config.lumi_lights.help.sky_bloom_intensity"
+        },
+        bloom_scale: {
+          default: 25,
+          min: 3,
+          max: 50,
+          nameKey: "config.lumi_lights.value.bloom_scale",
+          descriptionKey: "config.lumi_lights.help.bloom_scale"
+        },
+        sky_mode: {
+          default: "lumi",
+          choices: ["vanilla", "vanilla_starry", "lumi"],
+          enum: true,
+          prefix: "sky_mode_",
+          nameKey: "config.lumi_lights.value.sky_mode",
+          descriptionKey: "config.lumi_lights.help.sky_mode"
+        },
+        // bloom_upsample_dist: {
+        //   default: 5,
+        //   min: 1,
+        //   max: 50,
+        //   nameKey: "config.lumi_lights.value.bloom_upsample_scale",
+        //   descriptionKey: "config.lumi_lights.help.bloom_upsample_scale"
+        // },
+        // bloom_cutoff: {
+        //   default: 10,
+        //   min: 3,
+        //   max: 50,
+        //   nameKey: "config.lumi_lights.value.bloom_cutoff",
+        //   descriptionKey: "config.lumi_lights.help.bloom_cutoff"
+        // },
+      }
+    }
+  ],
+}

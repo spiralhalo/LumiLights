@@ -27,13 +27,13 @@ uniform sampler2D u_velocity;
 
 void main()
 {
-    #if ANTIALIASING == ANTIALIASING_TAA_DEBUG
-        #if TAA_DEBUG_MODE == TAA_DEBUG_MODE_DEPTH
-            gl_FragData[0] = vec4(ldepth(texture2D(u_depthCurrent, v_texcoord).r));
-        #else
-            gl_FragData[0] = 0.5 + texture2D(u_velocity, v_texcoord) * 50.0;
-        #endif
+#if TAA_DEBUG_MODE != TAA_DEBUG_MODE_OFF
+    #if TAA_DEBUG_MODE == TAA_DEBUG_MODE_DEPTH
+        gl_FragData[0] = vec4(ldepth(texture2D(u_depthCurrent, v_texcoord).r));
     #else
+        gl_FragData[0] = 0.5 + texture2D(u_velocity, v_texcoord) * 50.0;
+    #endif
+#else
 
     // PROGRESS:
     // [o] velocity buffer works fine
@@ -46,5 +46,5 @@ void main()
     #else
         gl_FragData[0] = texture2D(u_current, v_texcoord);
     #endif
-    #endif
+#endif
 }

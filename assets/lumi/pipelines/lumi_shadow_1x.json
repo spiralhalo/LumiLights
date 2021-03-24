@@ -33,13 +33,8 @@
 		"lumi:pipeline/common.json",
 		"lumi:pipeline/bloom.json",
 		"lumi:pipeline/skyshadow_1x.json",
-		"lumi:pipeline/config/lighting_config.json",
 		"lumi:pipeline/config/shadow_config.json",
-		"lumi:pipeline/config/reflection_config.json",
-		"lumi:pipeline/config/clouds_config.json",
-		"lumi:pipeline/config/bloom_config.json",
-		"lumi:pipeline/config/fog_config.json",
-		"lumi:pipeline/config/experimental_config.json",
+		"lumi:pipeline/config.json",
 	],
 
 	// pixelFormat and pixelDataType should not matter because the textures

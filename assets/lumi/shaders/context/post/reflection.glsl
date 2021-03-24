@@ -3,7 +3,7 @@
 #include frex:shaders/lib/math.glsl
 #include lumi:shaders/lib/util.glsl
 #include lumi:shaders/lib/pbr.glsl
-#include lumi:reflection_config
+#include lumi:shaders/context/global/userconfig.glsl
 
 /*******************************************************
  *  lumi:shaders/context/post/reflection.glsl          *

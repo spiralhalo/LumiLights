@@ -217,7 +217,7 @@ void custom_sky(in vec3 viewPos, in float blindnessFactor, inout vec4 a, inout f
 
     if (frx_worldFlag(FRX_WORLD_IS_OVERWORLD) && v_not_in_void > 0.0) {
         float celestialObject = l2_clampScale(0.999, 0.9992, dot(worldSkyVec, frx_skyLightVector())) * frx_skyLightTransitionFactor();
-        #ifdef CUSTOM_SKY
+        #if SKY_MODE == SKY_MODE_LUMI
             a.rgb = hdr_orangeSkyColor(v_skycolor, -skyVec) * 2.0;
             if (frx_worldFlag(FRX_WORLD_IS_MOONLIT)) {
                 a.rgb = mix(a.rgb, vec3(0.25 + frx_moonSize()), celestialObject);
@@ -229,24 +229,25 @@ void custom_sky(in vec3 viewPos, in float blindnessFactor, inout vec4 a, inout f
             a.rgb = hdr_gammaAdjust(a.rgb) * 2.0;
         #endif
 
-        float rainFactor = frx_rainGradient() * 0.67 + frx_thunderGradient() * 0.33;
-
-        // stars
-        float starry = l2_clampScale(0.4, 0.0, frx_luminance(a.rgb)) * v_night;
-        starry *= l2_clampScale(-0.6, -0.5, skyDotUp); //prevent star near the void core
-        float occlusion = (1.0 - rainFactor);
-        vec4 starVec = v_star_rotator * vec4(worldSkyVec, 0.0);
-        vec3 nonMilkyAxis = vec3(-0.598964, 0.531492, 0.598964);
-        float milkyness = l2_clampScale(0.5, 0.0, abs(dot(nonMilkyAxis, worldSkyVec.xyz)));
-        float star = starry * smoothstep(0.75 - milkyness * 0.3, 0.9, snoise(starVec.xyz * 100));
-        // zoom sharpening
-        float zoomFactor = l2_clampScale(90, 30, v_fov);
-        star = l2_clampScale(0.3 * zoomFactor, 1.0 - 0.6 * zoomFactor, star) * occlusion;
-        star = max(0.0, star - celestialObject);
-        float milkyHaze = starry * occlusion * (1.0-frx_ambientIntensity()) * milkyness * 0.4 * l2_clampScale(-1.0, 1.0, snoise(starVec.xyz * 2.0));
-        vec3 starRadiance = vec3(star) + vec3(0.9, 0.75, 1.0) * milkyHaze;
-        a.rgb += starRadiance;
-        bloom_out += (star + milkyHaze);
+        #if SKY_MODE == SKY_MODE_LUMI || SKY_MODE == SKY_MODE_VANILLA_STARRY
+            float rainFactor = frx_rainGradient() * 0.67 + frx_thunderGradient() * 0.33;
+            // stars
+            float starry = l2_clampScale(0.4, 0.0, frx_luminance(a.rgb)) * v_night;
+            starry *= l2_clampScale(-0.6, -0.5, skyDotUp); //prevent star near the void core
+            float occlusion = (1.0 - rainFactor);
+            vec4 starVec = v_star_rotator * vec4(worldSkyVec, 0.0);
+            vec3 nonMilkyAxis = vec3(-0.598964, 0.531492, 0.598964);
+            float milkyness = l2_clampScale(0.5, 0.0, abs(dot(nonMilkyAxis, worldSkyVec.xyz)));
+            float star = starry * smoothstep(0.75 - milkyness * 0.3, 0.9, snoise(starVec.xyz * 100));
+            // zoom sharpening
+            float zoomFactor = l2_clampScale(90, 30, v_fov);
+            star = l2_clampScale(0.3 * zoomFactor, 1.0 - 0.6 * zoomFactor, star) * occlusion;
+            star = max(0.0, star - celestialObject);
+            float milkyHaze = starry * occlusion * (1.0-frx_ambientIntensity()) * milkyness * 0.4 * l2_clampScale(-1.0, 1.0, snoise(starVec.xyz * 2.0));
+            vec3 starRadiance = vec3(star) + vec3(0.9, 0.75, 1.0) * milkyHaze;
+            a.rgb += starRadiance;
+            bloom_out += (star + milkyHaze);
+        #endif
     }
 
     //prevent sky in the void for extra immersion

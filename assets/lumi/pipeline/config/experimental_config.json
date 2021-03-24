@@ -12,26 +12,13 @@
                     nameKey: "config.lumi_lights.value.glint_mode",
                     descriptionKey: "config.lumi_lights.help.glint_mode"
                 },
-                antialiasing: {
-                    default: "none",
-                    choices: ["none", "taa", "taa_blurry", "taa_debug"],
-                    enum: true,
-                    prefix: "antialiasing_",
-                    nameKey: "config.lumi_lights.value.antialiasing",
-                    descriptionKey: "config.lumi_lights.help.antialiasing"
-                },
                 taa_debug_mode: {
-                    default: "velocity",
-                    choices: ["velocity", "depth"],
+                    default: "off",
+                    choices: ["off", "velocity", "depth"],
                     enum: true,
                     prefix: "taa_debug_mode_",
                     nameKey: "config.lumi_lights.value.taa_debug_mode",
                     descriptionKey: "config.lumi_lights.help.taa_debug_mode"
-                },
-                custom_sky: {
-                    default: false,
-                    nameKey: "config.lumi_lights.value.custom_sky",
-                    descriptionKey: "config.lumi_lights.help.custom_sky"
                 },
                 high_contrast: {
                     default: false,
@@ -42,11 +29,6 @@
                     default: false,
                     nameKey: "config.lumi_lights.value.rain_puddles",
                     descriptionKey: "config.lumi_lights.help.rain_puddles"
-                },
-                volumetric_fog: {
-                    default: false,
-                    nameKey: "config.lumi_lights.value.volumetric_fog",
-                    descriptionKey: "config.lumi_lights.help.volumetric_fog"
                 },
                 caustics_mode: {
                     default: "none",

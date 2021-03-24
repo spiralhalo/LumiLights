@@ -1,6 +1,5 @@
 #include lumi:shaders/lib/util.glsl
 #include lumi:shaders/context/global/userconfig.glsl
-#include lumi:lighting_config
 
 /*******************************************************
  *  lumi:shaders/context/global/lighting.glsl          *
@@ -54,7 +53,7 @@ const vec3 NETHER_SKYLESS_LIGHT_COLOR = vec3(1.0, 0.5, 0.3);
 // SKY COLORS
 // const vec3 SUNRISE_SKY_COLOR = vec3(0.5, 0.3, 0.1);
 const vec3 ORANGE_SKY_COLOR = hdr_gammaAdjust(vec3(1.0, 0.7, 0.0));
-#ifdef CUSTOM_SKY
+#if SKY_MODE == SKY_MODE_LUMI
 const vec3 DAY_SKY_COLOR = hdr_gammaAdjust(vec3(0.52, 0.69, 0.9));
 const vec3 NIGHT_SKY_COLOR = hdr_gammaAdjust(vec3(0.2, 0.272, 0.4));
 #else
