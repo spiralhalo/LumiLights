@@ -37,8 +37,7 @@ void main()
     vec3 sunRadiance = l2_sunRadiance(1.0, frx_worldTime(), frx_rainGradient(), frx_thunderGradient());
     vec3 moonRadiance = l2_moonRadiance(1.0, frx_worldTime(), frx_rainGradient(), frx_thunderGradient());
     v_sky_radiance = frx_worldFlag(FRX_WORLD_IS_MOONLIT)
-        ? mix(sunRadiance, moonRadiance, frx_skyLightTransitionFactor())
-        : mix(moonRadiance, sunRadiance, frx_skyLightTransitionFactor());
+        ? moonRadiance : mix(moonRadiance, sunRadiance, frx_skyLightTransitionFactor());
 
     vec4 screen = gl_ProjectionMatrix * vec4(gl_Vertex.xy * frxu_size, 0.0, 1.0);
     gl_Position = vec4(screen.xy, 0.2, 1.0);

@@ -25,8 +25,7 @@ void main()
     v_up = frx_normalModelMatrix() * vec3(0.0, 1.0, 0.0);
 
     float moonFactor = frx_worldFlag(FRX_WORLD_IS_MOONLIT)
-        ? mix(1.0, frx_moonSize(), frx_skyLightTransitionFactor())
-        : mix(frx_moonSize(), 1.0, frx_skyLightTransitionFactor());
+        ? frx_moonSize() : mix(frx_moonSize(), 1.0, frx_skyLightTransitionFactor());
     float dimensionFactor = frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? 1.0 : 0.0;
     float blindnessFactor = frx_playerHasEffect(FRX_EFFECT_BLINDNESS) ? 0.0 : 1.0;
     float cameraViewFactor = frx_smootherstep(0.0, 0.1, dot(frx_skyLightVector(), frx_cameraView()));

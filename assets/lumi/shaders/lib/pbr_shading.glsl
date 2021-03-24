@@ -90,8 +90,7 @@ vec3 hdr_calcSkyLight(inout light_data data)
         vec3 sunRadiance = l2_sunRadiance(data.light.z, frx_worldTime(), frx_rainGradient(), frx_thunderGradient());
         vec3 moonRadiance = l2_moonRadiance(data.light.z, frx_worldTime(), frx_rainGradient(), frx_thunderGradient());
         vec3 skyLightRadiance = frx_worldFlag(FRX_WORLD_IS_MOONLIT)
-            ? mix(sunRadiance, moonRadiance, frx_skyLightTransitionFactor())
-            : mix(moonRadiance, sunRadiance, frx_skyLightTransitionFactor());
+            ? moonRadiance : mix(moonRadiance, sunRadiance, frx_skyLightTransitionFactor());
         return pbr_lightCalc(data.albedo, data.roughness, data.metallic, data.f0, skyLightRadiance, frx_skyLightVector(), data.viewDir, data.normal, data.diffuse, data.specularAccu);
     } else {
         vec3 skylessRadiance = l2_skylessRadiance();
