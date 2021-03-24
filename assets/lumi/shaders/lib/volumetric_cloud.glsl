@@ -54,7 +54,6 @@ vec2 worldXz2Uv(vec2 worldXz)
 // model means relative to camera not world origin in this context
 vec2 modelXz2Uv(vec2 modelXz)
 {
-    modelXz = floor(modelXz);
     vec2 ndc = modelXz * TEXTURE_RADIUS_RCP;
     return ndc * 0.5 + 0.5;
 }
@@ -128,7 +127,6 @@ cloud_result rayMarchCloud(in sampler2D texture, in sampler2D sdepth, in vec2 te
     #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
         if (worldVec.y <= 0) return placeholder;
         float gotoBottom = CLOUD_MIN_Y / worldVec.y;
-        float gotoTop = CLOUD_MAX_Y / worldVec.y;
         vec3 currentWorldPos = worldVec * gotoBottom;/*frx_cameraPos()*/
         traveled += gotoBottom;
     #else
