@@ -1,5 +1,5 @@
 #include frex:shaders/lib/math.glsl
-#include frex:shaders/lib/world.glsl
+#include frex:shaders/api/world.glsl
 
 /*******************************************************
  *  lumi:shaders/lib/glintify.glsl                     *
