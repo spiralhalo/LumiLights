@@ -324,6 +324,8 @@ vec4 hdr_shaded_color(
         vec4 shadowViewPos = frx_shadowViewMatrix() * vec4(worldPos - frx_cameraPos(), 1.0);
         float shadowFactor = calcShadowFactor(u_shadow, shadowViewPos);  
         light.z = shadowFactor;
+        // Workaround before shadow occlusion culling to make caves playable
+        light.z *= l2_clampScale(0.03125, 0.04, light.y);
         // This can be improved with translucent layer shadow when it's available
         if (maybeUnderwater) {
             light.z *= pow(light.y, 6.0);
