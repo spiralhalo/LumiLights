@@ -40,7 +40,6 @@ void frx_writePipelineVertex(inout frx_VertexData data) {
         l2_viewpos = viewCoord.xyz;
 
         #ifdef TAA_ENABLED
-            // Require canvas feature: frame number
             gl_Position.st += taa_jitter(inv_size) * gl_Position.w;
         #endif
     }
