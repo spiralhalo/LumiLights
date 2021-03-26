@@ -195,7 +195,6 @@
                 {image: "normal_solid", clearColor: 0x00000000},
                 {image: "material_solid", clearColor: 0x00000000},
                 {image: "misc_solid", clearColor: 0x00000000},
-                {image: "velocity", clearColor: 0x00000000}
                 {image: "emissive"}
             ]
         },

@@ -104,23 +104,9 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
         gl_FragDepth = gl_FragCoord.z;
         gl_FragData[0] = a;
         gl_FragData[1] = vec4(light.x, light.y, (frx_renderTarget() == TARGET_PARTICLES) ? bloom : normalizedBloom, 1.0);
-
-        vec2 velocity = vec2(0.0);
-        #ifdef TAA_ENABLED
-            //velocity in UV space
-            vec2 nextPos = ((pv_nextPos.xy / pv_nextPos.w) * 0.5 + 0.5);
-            vec2 prevPos = ((pv_prevPos.xy / pv_prevPos.w) * 0.5 + 0.5);
-            velocity = nextPos - prevPos;
-        #endif
-
-        if (frx_renderTarget() == TARGET_PARTICLES) {
-            gl_FragData[2] = vec4(velocity, 0.0, 1.0);
-        } else {
-            gl_FragData[2] = vec4(normalizedNormal, 1.0);
-            gl_FragData[3] = vec4(roughness, pbr_metallic, pbr_f0, 1.0);
-            gl_FragData[4] = vec4(frx_normalizeMappedUV(frx_texcoord), frx_matGlint(), 1.0);
-            gl_FragData[5] = vec4(velocity, 0.0, 1.0);
-        }
+        gl_FragData[2] = vec4(normalizedNormal, 1.0);
+        gl_FragData[3] = vec4(roughness, pbr_metallic, pbr_f0, 1.0);
+        gl_FragData[4] = vec4(frx_normalizeMappedUV(frx_texcoord), frx_matGlint(), 1.0);
 
     }
 }

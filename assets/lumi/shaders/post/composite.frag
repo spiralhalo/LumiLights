@@ -128,9 +128,29 @@ void main()
             c += godlightfactor * godlight * godhack;
         }
     }
+
+    float min_depth = min(depth_translucent, depth_particles);
     
     gl_FragData[0] = vec4(c, 1.0); //frx_luminance(c.rgb)); // FXAA 3 would need this
-    gl_FragData[1] = vec4(min(depth_translucent, depth_particles), 0., 0., 1.);
+    gl_FragData[1] = vec4(min_depth, 0., 0., 1.);
+    
+    vec4 currentModelPos = frx_inverseViewProjectionMatrix() * vec4(v_texcoord * 2.0 - 1.0, min_depth * 2.0 - 1.0, 1.0);
+    currentModelPos.xyz /= currentModelPos.w;
+    currentModelPos.w = 1.0;
+
+    #if ANTIALIASING == ANTIALIASING_TAA_BLURRY
+        vec4 prevModelPos = currentModelPos;
+    #else
+        // This produces correct velocity?
+        vec4 cameraToLastCamera = vec4(frx_cameraPos() - frx_lastCameraPos(), 0.0);
+        vec4 prevModelPos = currentModelPos + cameraToLastCamera;
+    #endif
+
+    prevModelPos = frx_lastViewProjectionMatrix() * prevModelPos;
+    prevModelPos.xy /= prevModelPos.w;
+    vec2 prevPos = (prevModelPos.xy * 0.5 + 0.5);
+    
+    gl_FragData[2] = vec4(v_texcoord - prevPos, 0., 1.);
 }
 
 

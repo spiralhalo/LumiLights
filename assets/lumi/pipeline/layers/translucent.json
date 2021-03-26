@@ -69,7 +69,7 @@
             ]
         }
     ],
-    
+
     framebuffers: [
         {
             name: "fab_translucent",
@@ -85,7 +85,6 @@
                 {image: "normal_translucent", clearColor: 0x00000000},
                 {image: "material_translucent", clearColor: 0x00000000},
                 {image: "misc_translucent", clearColor: 0x00000000},
-                {image: "velocity"}
             ]
         }
     ],

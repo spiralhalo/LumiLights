@@ -49,7 +49,6 @@
             colorAttachments: [
                 {image: "particles", clearColor: 0x00000000},
                 {image: "light_particles", clearColor: 0x00000000},
-                {image: "velocity"},
             ]
         }
     ],
