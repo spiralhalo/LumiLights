@@ -5,7 +5,7 @@
       categoryKey: "config.lumi_lights.category.performance",
       options: {
         antialiasing: {
-            default: "none",
+            default: "taa",
             choices: ["none", "taa", "taa_blurry", "taa_debug"],
             enum: true,
             prefix: "antialiasing_",
@@ -21,7 +21,7 @@
           descriptionKey: "config.lumi_lights.help.ambient_occlusion"
         },
         reflection_profile: {
-          default: "high",
+          default: "medium",
           choices: ["none", "low", "medium", "high", "extreme"],
           enum: true,
           prefix: "reflection_profile_",
@@ -36,7 +36,7 @@
           descriptionKey: "config.lumi_lights.help.reflection_maximum_roughness_relative"
         },
         cloud_rendering: {
-          default: "high",
+          default: "volumetric",
           choices: ["vanilla", "flat", "volumetric"],
           enum: true,
           prefix: "cloud_rendering_",
@@ -57,7 +57,7 @@
           descriptionKey: "config.lumi_lights.help.volumetric_cloud_denoising"
         },
         volumetric_fog: {
-            default: false,
+            default: true,
             nameKey: "config.lumi_lights.value.volumetric_fog",
             descriptionKey: "config.lumi_lights.help.volumetric_fog"
         },
