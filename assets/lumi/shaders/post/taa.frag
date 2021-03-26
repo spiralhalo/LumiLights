@@ -27,8 +27,8 @@ uniform sampler2D u_velocity;
 
 void main()
 {
-#if defined(TAA_ENABLED) && TAA_DEBUG_MODE != TAA_DEBUG_MODE_OFF
-    #if TAA_DEBUG_MODE == TAA_DEBUG_MODE_DEPTH
+#if defined(TAA_ENABLED) && TAA_DEBUG_RENDER != TAA_DEBUG_RENDER_OFF
+    #if TAA_DEBUG_RENDER == TAA_DEBUG_RENDER_DEPTH
         gl_FragData[0] = vec4(ldepth(texture2D(u_depthCurrent, v_texcoord).r));
     #else
         gl_FragData[0] = 0.5 + texture2D(u_velocity, v_texcoord) * 50.0;

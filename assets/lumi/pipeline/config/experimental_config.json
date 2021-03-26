@@ -12,13 +12,13 @@
                     nameKey: "config.lumi_lights.value.glint_mode",
                     descriptionKey: "config.lumi_lights.help.glint_mode"
                 },
-                taa_debug_mode: {
+                taa_debug_render: {
                     default: "off",
                     choices: ["off", "velocity", "depth"],
                     enum: true,
-                    prefix: "taa_debug_mode_",
-                    nameKey: "config.lumi_lights.value.taa_debug_mode",
-                    descriptionKey: "config.lumi_lights.help.taa_debug_mode"
+                    prefix: "taa_debug_render_",
+                    nameKey: "config.lumi_lights.value.taa_debug_render",
+                    descriptionKey: "config.lumi_lights.help.taa_debug_render"
                 },
                 high_contrast: {
                     default: false,

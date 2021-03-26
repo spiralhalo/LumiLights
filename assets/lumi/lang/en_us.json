@@ -77,6 +77,8 @@
     "config.lumi_lights.help.underwater_fog_density_relative": "Overall density of underwater fog",
 
     "config.lumi_lights.category.experimental": "Experimental",
+    "config.lumi_lights.value.taa_debug_render": "TAA Debug Render (Caution!)",
+    "config.lumi_lights.help.taa_debug_render": "Render TAA debug layer",
     "config.lumi_lights.value.high_contrast": "High contrast outdoors",
     "config.lumi_lights.help.high_contrast": "Experimental brighter sun",
     "config.lumi_lights.value.rain_puddles": "Rain puddles effect",
