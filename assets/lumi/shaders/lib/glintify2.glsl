@@ -1,5 +1,6 @@
 #include frex:shaders/lib/math.glsl
 #include frex:shaders/api/world.glsl
+#include lumi:shaders/context/global/userconfig.glsl
 
 /*******************************************************
  *  lumi:shaders/lib/glintify.glsl                     *
@@ -10,14 +11,25 @@
  *  published by the Free Software Foundation, Inc.    *
  *******************************************************/
 
-const vec3 GLINT_COLOR = vec3(0.655, 0.333, 1.0);
+const vec3 GLINT_COLOR = vec3(GLINT_RED, GLINT_GREEN, GLINT_BLUE);
+
 
 vec3 noise_glint(vec2 normalizedUV, float glint)
 {
+#if GLINT_STYLE == GLINT_STYLE_GLINT_A
     const float zoom = 0.5;
     const vec2 skew = vec2(0.0, 0.4);
     const vec2 speed = vec2(0.4, -1.0);
     const vec2 detail = vec2(5.0, 4.0);
+    const vec2 taper = vec2(0.4, 0.9);
+#else
+    const float zoom = 2.0;
+    const vec2 skew = vec2(0.4, 0.0);
+    const vec2 speed = vec2(0.8, 0.8);
+    const vec2 detail = vec2(4.0, 5.0);
+    const vec2 taper = vec2(0.5, 0.9);
+    normalizedUV.x = normalizedUV.x * 2.0;
+#endif
     if (glint == 1.0) {
         normalizedUV += normalizedUV.yx * skew;
         normalizedUV *= zoom;
@@ -29,7 +41,7 @@ vec3 noise_glint(vec2 normalizedUV, float glint)
         f -= 0.5;
         f = abs(f);
         f = 1.0 - 2.0 * f;
-        float n = smoothstep(0.5, 1.0, frx_noise2d(t.xx) * f.x) + smoothstep(0.5, 1.0, frx_noise2d(t.yy) * f.y);
+        float n = smoothstep(taper.x, taper.y, frx_noise2d(t.xx) * f.x) + smoothstep(taper.x, taper.y, frx_noise2d(t.yy) * f.y);
         return n * GLINT_COLOR;
     } else {
         return vec3(0.0);

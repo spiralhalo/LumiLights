@@ -10,7 +10,7 @@
 #include lumi:shaders/lib/util.glsl
 #include lumi:shaders/lib/tonemap.glsl
 #include lumi:shaders/lib/pbr_shading.glsl
-#include lumi:shaders/lib/glintify.glsl
+#include lumi:shaders/lib/glintify2.glsl
 
 /*******************************************************
  *  lumi:shaders/forward/main.frag                    *

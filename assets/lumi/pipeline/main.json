@@ -151,7 +151,7 @@
         }, {
             name: "misc_solid",
             lod: 0,
-            internalFormat: "RGB8",
+            internalFormat: "RGB16",
             pixelFormat: "RGB",
             pixelDataType: "UNSIGNED_BYTE",
             target: "TEXTURE_2D",

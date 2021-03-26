@@ -11,7 +11,7 @@
 #include lumi:shaders/lib/tonemap.glsl
 #include lumi:shaders/lib/pbr_shading.glsl
 #include lumi:shaders/lib/puddle.glsl
-#include lumi:shaders/lib/glintify.glsl
+#include lumi:shaders/lib/glintify2.glsl
 #include lumi:shaders/lib/tile_noise.glsl
 #include lumi:shaders/context/post/bloom.glsl
 #include lumi:shaders/context/post/fog.glsl
