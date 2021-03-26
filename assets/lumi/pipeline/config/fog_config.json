@@ -26,9 +26,9 @@
                     descriptionKey: "config.lumi_lights.help.fog_below_water_level_chunks"
                 },
                 fog_above_water_level_chunks: {
-                    default: 2,
-                    min: 1,
-                    max: 8,
+                    default: 8,
+                    min: 4,
+                    max: 16,
                     nameKey: "config.lumi_lights.value.fog_above_water_level_chunks",
                     descriptionKey: "config.lumi_lights.help.fog_above_water_level_chunks"
                 },

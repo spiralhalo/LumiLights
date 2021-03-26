@@ -12,7 +12,7 @@
           descriptionKey: "config.lumi_lights.help.bloom_intensity"
         },
         sky_bloom_intensity: {
-          default: 5,
+          default: 2,
           min: 0,
           max: 10,
           nameKey: "config.lumi_lights.value.sky_bloom_intensity",
