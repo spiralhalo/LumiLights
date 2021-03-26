@@ -1,0 +1,149 @@
+{
+    programs: [
+        {
+            name: "shading_solid",
+            vertexSource: "lumi:shaders/post/hdr.vert",
+            fragmentSource: "lumi:shaders/post/shading_solid.frag",
+            samplers: [
+                "u_solid_color",
+                "u_solid_depth",
+                "u_light_solid",
+                "u_normal_solid",
+                "u_material_solid",
+                "u_misc_solid",
+
+                "u_translucent_depth",
+                "u_translucent_color",
+
+                "u_ao",
+                "u_glint",
+                "u_shadow",
+            ]
+        }, {
+            name: "shading_translucent",
+            vertexSource: "lumi:shaders/post/hdr.vert",
+            fragmentSource: "lumi:shaders/post/shading_translucent.frag",
+            samplers: [
+                "u_translucent_color",
+                "u_translucent_depth",
+                "u_light_translucent",
+                "u_normal_translucent",
+                "u_material_translucent",
+                "u_misc_translucent",
+
+                "u_particles_color",
+                "u_particles_depth",
+                "u_light_particles",
+
+                "u_glint",
+                "u_shadow",
+            ]
+        }, {
+            name: "shading_combine",
+            vertexSource: "lumi:shaders/post/simple.vert",
+            fragmentSource: "lumi:shaders/post/shading_combine.frag",
+            samplers: [
+                "u_hdr_solid",
+                "u_hdr_solid_swap",
+                "u_solid_depth",
+
+                "u_hdr_translucent",
+                "u_hdr_translucent_swap",
+                "u_translucent_depth",
+            ]
+        },
+    ],
+
+    framebuffers: [
+        {
+            name: "shading_solid",
+            colorAttachments: [
+                {image: "solid_shaded", clearColor: 0x00000000},
+                {image: "emissive", clearColor: 0x00000000},
+            ]
+        },
+        
+        {
+            name: "shading_translucent",
+            colorAttachments: [
+                {image: "translucent_shaded", clearColor: 0x00000000},
+                {image: "particles_final", clearColor: 0x00000000},
+                {image: "emissive_translucent", clearColor: 0x00000000},
+            ]
+        },
+
+        {
+            name: "shading_combine",
+            colorAttachments: [
+                {image: "solid_combine", clearColor: 0x00000000},
+                {image: "translucent_combine", clearColor: 0x00000000}
+            ]
+        },
+    ],
+
+    images: [
+        /* SHADING SOLID */
+        {
+            name: "solid_shaded",
+            lod: 0,
+            internalFormat: "RGBA16F",
+            pixelFormat: "RGBA",
+            pixelDataType: "FLOAT",
+            target: "TEXTURE_2D",
+            texParams: [
+                {name: "TEXTURE_MIN_FILTER", val: "LINEAR"}, {name: "TEXTURE_MAG_FILTER", val: "LINEAR"},
+                {name: "TEXTURE_WRAP_S", val: "CLAMP"}, {name: "TEXTURE_WRAP_T", val: "CLAMP"}
+            ]
+        },
+        /* SHADING TRANSLUCENT */
+        {
+            name: "translucent_shaded",
+            lod: 0,
+            internalFormat: "RGBA16F",
+            pixelFormat: "RGBA",
+            pixelDataType: "FLOAT",
+            target: "TEXTURE_2D",
+            texParams: [
+                {name: "TEXTURE_MIN_FILTER", val: "LINEAR"}, {name: "TEXTURE_MAG_FILTER", val: "LINEAR"},
+                {name: "TEXTURE_WRAP_S", val: "CLAMP"}, {name: "TEXTURE_WRAP_T", val: "CLAMP"}
+            ]
+        },
+        /* SHADING PARTICLES */
+        {
+            name: "particles_final",
+            lod: 0,
+            internalFormat: "RGBA16F",
+            pixelFormat: "RGBA",
+            pixelDataType: "FLOAT",
+            target: "TEXTURE_2D",
+            texParams: [
+                {name: "TEXTURE_MIN_FILTER", val: "LINEAR"}, {name: "TEXTURE_MAG_FILTER", val: "LINEAR"},
+                {name: "TEXTURE_WRAP_S", val: "CLAMP"}, {name: "TEXTURE_WRAP_T", val: "CLAMP"}
+            ]
+        },
+        /* COMBINE */
+        {
+            name: "solid_combine",
+            lod: 0,
+            internalFormat: "RGBA16F",
+            pixelFormat: "RGBA",
+            pixelDataType: "FLOAT",
+            target: "TEXTURE_2D",
+            texParams: [
+                {name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
+                {name: "TEXTURE_WRAP_S", val: "CLAMP"}, {name: "TEXTURE_WRAP_T", val: "CLAMP"}
+            ]
+        }, {
+            name: "translucent_combine",
+            lod: 0,
+            internalFormat: "RGBA16F",
+            pixelFormat: "RGBA",
+            pixelDataType: "FLOAT",
+            target: "TEXTURE_2D",
+            texParams: [
+                {name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
+                {name: "TEXTURE_WRAP_S", val: "CLAMP"}, {name: "TEXTURE_WRAP_T", val: "CLAMP"}
+            ]
+        },
+    ]
+}
