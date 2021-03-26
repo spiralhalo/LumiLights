@@ -36,7 +36,6 @@ varying float v_fov;
 varying float v_night;
 varying float v_blindness;
 varying vec3 v_sky_radiance;
-varying vec3 v_fogcolor;
 
 void main()
 {

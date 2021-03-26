@@ -192,7 +192,8 @@ cloud_result rayMarchCloud(in sampler2D texture, in sampler2D sdepth, in vec2 te
 }
 
 vec4 generateCloudTexture(vec2 texcoord) {
-    float rainFactor = frx_rainGradient() * 0.67 + frx_thunderGradient() * 0.33; // TODO: optimize
+     // TODO: optimize?
+    float rainFactor = frx_rainGradient() * 0.67;// + frx_thunderGradient() * 0.33;
     vec2 cloudCoord = uv2worldXz(texcoord) + (frx_worldDay() + frx_worldTime()) * 800.0;
     cloudCoord *= 2.0;
 

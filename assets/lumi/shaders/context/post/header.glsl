@@ -55,10 +55,9 @@ vec3 hdr_skyColor()
             skyColor = mix(colors[i-1], colors[i], l2_clampScale(times[i-1], times[i], frx_worldTime()));
         }
 
-        float thunderFactor = frx_rainGradient() *0.5 + frx_thunderGradient() *0.5;
-        skyColor *= (1.0 - thunderFactor * 0.9);
         vec3 grayScale = vec3(frx_luminance(skyColor));
-        skyColor = mix(skyColor, grayScale, thunderFactor);
+        skyColor = mix(skyColor, grayScale, frx_rainGradient());
+        skyColor *= 1.0 - frx_thunderGradient() * 0.5;
     } else {
         skyColor = hdr_gammaAdjust(frx_vanillaClearColor());
     }
@@ -83,7 +82,8 @@ vec3 hdr_orangeSkyColor(vec3 original, vec3 viewDir) {
     if (customOverworldOrange) {
         float vDotSun = l2_clampScale(0.0, -1.0, dot(viewDir, frx_normalModelMatrix()*frx_skyLightVector()));
         float sunHorizonFactor = l2_clampScale(0.5 /*BRUTE FORCED NUMBER*/, 0.0, frx_skyLightVector().y);
-        return mix(original, ORANGE_SKY_COLOR, sunHorizonFactor * vDotSun * frx_skyLightTransitionFactor());
+        float rainUnFactor = 1.0 - frx_rainGradient();
+        return mix(original, ORANGE_SKY_COLOR, sunHorizonFactor * vDotSun * frx_skyLightTransitionFactor() * rainUnFactor);
     } else {
         return original;
     }
