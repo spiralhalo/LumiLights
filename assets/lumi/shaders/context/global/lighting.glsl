@@ -55,10 +55,12 @@ const vec3 NETHER_SKYLESS_LIGHT_COLOR = vec3(1.0, 0.5, 0.3);
 const vec3 ORANGE_SKY_COLOR = hdr_gammaAdjust(vec3(1.0, 0.7, 0.0));
 #if SKY_MODE == SKY_MODE_LUMI
 const vec3 DAY_SKY_COLOR = hdr_gammaAdjust(vec3(0.32, 0.6, 1.0));
-const vec3 NIGHT_SKY_COLOR = hdr_gammaAdjust(vec3(0.2, 0.272, 0.4));
+const vec3 NIGHT_SKY_COLOR = hdr_gammaAdjust(vec3(0.03, 0.05, 0.15));
+const vec3 NEBULAE_COLOR = hdr_gammaAdjust(vec3(0.8, 0.3, 0.6));
 #else
 const vec3 DAY_SKY_COLOR = hdr_gammaAdjust(vec3(0.52, 0.69, 1.0));
 const vec3 NIGHT_SKY_COLOR = hdr_gammaAdjust(vec3(0.01, 0.01, 0.01));
+const vec3 NEBULAE_COLOR = vec3(0.9, 0.75, 1.0);
 #endif
 
 // GAMMA-ADJUSTED AMBIENT
@@ -66,4 +68,4 @@ const vec3 HDR_NOON_AMBIENT = hdr_gammaAdjust(vec3(0.8550322));
 const vec3 HDR_BLUE_AMBIENT = hdr_gammaAdjust(vec3(0.6, 0.9, 1.0));
 const vec3 HDR_SUNRISE_AMBIENT = hdr_gammaAdjust(vec3(0.5, 0.3, 0.1));
 const vec3 HDR_SUNSET_AMBIENT = hdr_gammaAdjust(vec3(0.5, 0.2, 0.0));
-const vec3 HDR_NIGHT_AMBIENT = hdr_gammaAdjust(vec3(0.74, 0.4, 1.0));
+const vec3 HDR_NIGHT_AMBIENT = hdr_gammaAdjust(vec3(0.4, 0.7, 1.0));

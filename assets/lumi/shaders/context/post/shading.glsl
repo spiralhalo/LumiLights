@@ -217,6 +217,9 @@ void custom_sky(in vec3 viewPos, in float blindnessFactor, inout vec4 a, inout f
 
     if (frx_worldFlag(FRX_WORLD_IS_OVERWORLD) && v_not_in_void > 0.0) {
         float celestialObject = l2_clampScale(0.999, 0.9992, dot(worldSkyVec, frx_skyLightVector()));
+        if (!frx_worldFlag(FRX_WORLD_IS_MOONLIT)) {
+            celestialObject *= frx_skyLightTransitionFactor();
+        }
         #if SKY_MODE == SKY_MODE_LUMI
             a.rgb = hdr_orangeSkyColor(v_skycolor, -skyVec) * 2.0;
             if (frx_worldFlag(FRX_WORLD_IS_MOONLIT)) {
@@ -243,8 +246,11 @@ void custom_sky(in vec3 viewPos, in float blindnessFactor, inout vec4 a, inout f
             float zoomFactor = l2_clampScale(90, 30, v_fov);
             star = l2_clampScale(0.3 * zoomFactor, 1.0 - 0.6 * zoomFactor, star) * occlusion;
             star = max(0.0, star - celestialObject);
-            float milkyHaze = starry * occlusion * (1.0-frx_ambientIntensity()) * milkyness * 0.4 * l2_clampScale(-1.0, 1.0, snoise(starVec.xyz * 2.0));
-            vec3 starRadiance = vec3(star) + vec3(0.9, 0.75, 1.0) * milkyHaze;
+            float milkyHaze = starry * occlusion * milkyness * 0.4 * l2_clampScale(-1.0, 1.0, snoise(starVec.xyz * 2.0));
+            #if SKY_MODE == SKY_MODE_LUMI
+            milkyHaze *= milkyHaze;
+            #endif
+            vec3 starRadiance = vec3(star) + NEBULAE_COLOR * milkyHaze;
             a.rgb += starRadiance;
             bloom_out += (star + milkyHaze);
         #endif
