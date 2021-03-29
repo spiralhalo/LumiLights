@@ -26,7 +26,7 @@ vec4 hdr_combine(sampler2D a, sampler2D b, sampler2D sdepth, vec2 uv, bool enabl
 {
     vec4 a1 = texture2D(a, uv);
     float roughness = texture2D(b, uv).a;
-    if (roughness == 0.0) return vec4(hdr_gammaAdjust(a1.rgb), a1.a); // unmanaged draw
+    if (roughness == 0.0) return vec4(a1.rgb, a1.a); // unmanaged draw (don't gamma adjust)
     vec4 b1;
     if (enableBlur && roughness <= REFLECTION_MAXIMUM_ROUGHNESS) {
         float depth = texture2D(sdepth, uv).r;
