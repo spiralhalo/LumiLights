@@ -82,7 +82,7 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
                 a.rgb += hdr_gammaAdjust(texture_glint(u_glint, frx_normalizeMappedUV(frx_texcoord), frx_matGlint()));
             #endif
             a = ldr_tonemap(a);
-            gl_FragData[6] = vec4(bloom_out, 0.0, 0.0, 1.0);
+            gl_FragData[5] = vec4(bloom_out, 0.0, 0.0, 1.0);
         }
         gl_FragDepth = gl_FragCoord.z;
         gl_FragData[0] = a;
