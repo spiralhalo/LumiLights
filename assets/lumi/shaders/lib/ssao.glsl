@@ -11,18 +11,9 @@
 #define NUM_SAMPLE_DIRECTIONS 5
 #define NUM_SAMPLE_STEPS      5
 
-#define coords_depth(uv, target) texture2D(target, uv).r
-vec3 coords_world(vec2 uv, mat4 inv_view_projection, in sampler2D target)
-{
-    float depth = coords_depth(uv, target);
-    vec3 clip = vec3(2.0 * uv - 1.0, 2.0 * depth - 1.0);
-    vec4 world = inv_view_projection * vec4(clip, 1.0);
-    return world.xyz / world.w;
-}
-
 vec3 coords_view(vec2 uv, mat4 inv_projection, in sampler2D target)
 {
-    float depth = coords_depth(uv, target);
+    float depth = texture2D(target, uv).r;
     vec3 clip = vec3(2.0 * uv - 1.0, 2.0 * depth - 1.0);
     vec4 view = inv_projection * vec4(clip, 1.0);
     return view.xyz / view.w;
@@ -43,16 +34,12 @@ const mat2 deltaRotationMatrix = mat2(
 );
 
 float calc_ssao(
-    in sampler2D snormal, in sampler2D sdepth, mat3 normal_mat, mat4 inv_projection, mat4 inv_view_projection, vec2 tex_size, int noise_size,
-    vec2 uv, float sample_radius, float angle_bias, float intensity)
+    in sampler2D snormal, in sampler2D sdepth, mat3 normal_mat, mat4 inv_projection, vec2 tex_size, int noise_size,
+    vec2 uv, float radius_screen, float angle_bias, float intensity)
 {
     vec3 origin_view = coords_view(uv, inv_projection, sdepth);
     vec3 normal_view = coords_normal(uv, normal_mat, snormal);
 
-    float radius_screen = sample_radius;
-    vec3 out0 = (inv_view_projection * vec4(0.0, 0.0, -1.0, 1.0)).xyz;
-    vec3 out1 = (inv_view_projection * vec4(radius_screen, 0.0, -1.0, 1.0)).xyz;
-    float radius_world = length(out1 - out0);
     vec2 deltaUV = vec2(1.0, 0.0) * (radius_screen / (float(NUM_SAMPLE_DIRECTIONS * NUM_SAMPLE_STEPS) + 1.0));
 
     // PERF: Use noise texture?
@@ -80,7 +67,7 @@ float calc_ssao(
             float gamma = (PI / 2.0) - acos(dot(normal_view, normalize(sampleDir_view)));
             if (gamma > oldAngle) {
                 float value = sin(gamma) - sin(oldAngle);
-                float attenuation = clamp(1.0 - pow(length(sampleDir_view) / radius_world, 2.0), 0.0, 1.0);
+                float attenuation = clamp(1.0 - pow(length(sampleDir_view) / radius_screen, 2.0), 0.0, 1.0);
                 occlusion += attenuation * value;
                 oldAngle = gamma;
             }

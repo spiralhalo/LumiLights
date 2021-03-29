@@ -3,6 +3,7 @@
 #include frex:shaders/api/view.glsl
 #include frex:shaders/api/world.glsl
 #include lumi:shaders/context/global/lighting.glsl
+#include lumi:shaders/context/global/userconfig.glsl
 
 /*******************************************************
  *  lumi:shaders/post/ssao.frag               *
@@ -29,7 +30,7 @@ void main()
     } else {
         float random = v_texcoord.x*v_texcoord.y;
         float ssao = calc_ssao(
-            u_normal, u_depth, frx_normalModelMatrix(), frx_inverseProjectionMatrix(), frx_inverseViewProjectionMatrix(), frxu_size, 4,
+            u_normal, u_depth, frx_normalModelMatrix(), frx_inverseProjectionMatrix(), frxu_size, 4,
             v_texcoord, RADIUS, BIAS, INTENSITY);
         gl_FragData[0] = vec4(ssao, 0.0, 0.0, 1.0);
     }
