@@ -226,8 +226,7 @@ void custom_sky(in vec3 viewPos, in float blindnessFactor, inout vec4 a, inout f
             }
             a.rgb *= 1 + pow(l2_clampScale(0.5, -0.1, skyDotUp), 2.0);
         #else
-            // a.rgb = hdr_gammaAdjust(a.rgb) * 2.0;
-            a.rgb = a.rgb;
+            // a.rgb = hdr_gammaAdjust(a.rgb) * 2.0; // Don't gamma-correct vanilla sky
         #endif
 
         #if SKY_MODE == SKY_MODE_LUMI || SKY_MODE == SKY_MODE_VANILLA_STARRY
