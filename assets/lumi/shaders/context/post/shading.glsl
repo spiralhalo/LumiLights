@@ -227,17 +227,17 @@ void custom_sky(in vec3 viewPos, in float blindnessFactor, inout vec4 a, inout f
             } else {
                 a.rgb += vec3(10.0) * celestialObject;
             }
-            a.rgb *= 1 + 5 * pow(l2_clampScale(0.5, -0.1, skyDotUp), 2.0);
+            a.rgb *= 1 + 5 * pow(l2_clampScale(0.5, -0.1, skyDotUp), 2.0) * (1.0 - frx_rainGradient() * 0.6);
         #else
             // a.rgb = hdr_gammaAdjust(a.rgb) * 2.0; // Don't gamma-correct vanilla sky
         #endif
 
         #if SKY_MODE == SKY_MODE_LUMI || SKY_MODE == SKY_MODE_VANILLA_STARRY
-            float rainFactor = frx_rainGradient() * 0.67 + frx_thunderGradient() * 0.33;
+            // float rainFactor = frx_rainGradient() * 0.67 + frx_thunderGradient() * 0.33;
             // stars
             float starry = l2_clampScale(0.4, 0.0, frx_luminance(a.rgb)) * v_night;
             starry *= l2_clampScale(-0.6, -0.5, skyDotUp); //prevent star near the void core
-            float occlusion = (1.0 - rainFactor);
+            float occlusion = (1.0 - frx_rainGradient());
             vec4 starVec = v_star_rotator * vec4(worldSkyVec, 0.0);
             vec3 nonMilkyAxis = vec3(-0.598964, 0.531492, 0.598964);
             float milkyness = l2_clampScale(0.5, 0.0, abs(dot(nonMilkyAxis, worldSkyVec.xyz)));
