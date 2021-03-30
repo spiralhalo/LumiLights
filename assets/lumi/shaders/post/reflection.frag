@@ -31,12 +31,20 @@ uniform sampler2D u_target_depth;
 uniform sampler2D u_normal_target;
 
 const float JITTER_STRENGTH = 0.2;
+const float SKYLESS_FACTOR = 0.5;
 
 struct rt_color_depth
 {
     vec4 color;
     float depth;
 };
+
+vec3 calcFallbackColor(vec3 unit_view, vec3 unit_march, vec2 light)
+{
+    float upFactor = frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? l2_clampScale(-0.1, 0.1, dot(unit_march, v_up)) : 1.0;
+    float skyLightFactor = frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? hdr_gammaAdjustf(light.y * frx_ambientIntensity()) : SKYLESS_FACTOR;
+    return hdr_orangeSkyColor(v_skycolor, unit_view) * skyLightFactor * upFactor * 2.0;
+}
 
 rt_color_depth work_on_pair(
     in vec4 base_color,
@@ -82,28 +90,33 @@ rt_color_depth work_on_pair(
         vec4 reflected;
         float reflected_depth_value;
 
+        vec4 fallbackColor;
+        if (fallback > 0.0) {
+            fallbackColor = vec4(calcFallbackColor(unit_view, unit_march, light), fallback);
+        } else {
+            fallbackColor = vec4(0.0);
+        }
+
         #if REFLECTION_PROFILE != REFLECTION_PROFILE_NONE
-        if (reflected_depth_value == 1.0 || !result.hit || result.reflected_uv.x < 0.0 || result.reflected_uv.y < 0.0 || result.reflected_uv.x > 1.0 || result.reflected_uv.y > 1.0) {
+        reflected_depth_value = sample_depth(result.reflected_uv, reflected_depth);
+        if (reflected_depth_value == 1.0 || !result.hit || result.reflected_uv != clamp(result.reflected_uv, 0.0, 1.0)) {
             float occlusionFactor = result.hits > 1 ? 0.1 : 1.0;
         #else
             float occlusionFactor = 1.0;
         #endif
-
-            float upFactor = frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? l2_clampScale(-0.1, 0.1, dot(unit_march, v_up)) : 1.0;
-            float skyLightFactor = frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? hdr_gammaAdjustf(light.y * frx_ambientIntensity()) : 0.5; // 0.5 = arbitrary skyless factor. TODO: make constant
             // reflected.rgb = mix(vec3(0.0), hdr_gammaAdjust(BLOCK_LIGHT_COLOR), pow(light.x, 6.0) * material.y);
-            reflected.rgb = hdr_orangeSkyColor(v_skycolor, unit_view) * skyLightFactor * occlusionFactor * upFactor * 2.0;
-            reflected.rgb *= fallback;
-            reflected.a = fallback;
+            reflected = fallbackColor * occlusionFactor;
             reflected_depth_value = 1.0;
 
         #if REFLECTION_PROFILE != REFLECTION_PROFILE_NONE
         } else {
-            reflected_depth_value = sample_depth(result.reflected_uv, reflected_depth);
             vec4 reflectedShaded = texture2D(reflected_color, result.reflected_uv);
             vec4 reflectedCombine = texture2D(reflected_combine, result.reflected_uv);
             vec3 reflectedNormal = sample_worldNormal(result.reflected_uv, reflected_normal);
             reflected = mix(reflectedShaded, reflectedCombine, l2_clampScale(0.5, 1.0, -dot(worldNormal, reflectedNormal)));
+            // fade to fallback on edges
+            vec2 uvFade = smoothstep(0.5, 0.45, abs(result.reflected_uv - 0.5));
+            reflected = mix(fallbackColor, reflected, min(uvFade.x, uvFade.y));
         }
         #endif
 
@@ -123,9 +136,10 @@ void main()
     rt_color_depth source_source = work_on_pair(source_base, source_albedo, u_source_depth, u_light_source, u_normal_source, u_material_source, u_source_color, u_source_combine, u_source_depth, u_normal_source, 1.0);
     #if REFLECTION_PROFILE != REFLECTION_PROFILE_NONE
         rt_color_depth source_target = work_on_pair(source_base, source_albedo, u_source_depth, u_light_source, u_normal_source, u_material_source, u_target_color, u_target_combine, u_target_depth, u_normal_target, 0.0);
+        // blend
         vec3 reflection_color = (source_source.depth < source_target.depth)
-            ? source_source.color.rgb
-            : (source_source.color.rgb * (1.0 - source_target.color.a) + source_target.color.rgb);
+            ? source_source.color.rgb * source_source.color.a
+            : (source_source.color.rgb * (1.0 - source_target.color.a) + source_target.color.rgb * source_target.color.a);
         gl_FragData[0] = vec4(reflection_color, source_roughness);
     #else
         gl_FragData[0] = vec4(source_source.color.rgb, source_roughness);
