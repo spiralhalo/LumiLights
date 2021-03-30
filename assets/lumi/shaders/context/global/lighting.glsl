@@ -54,7 +54,7 @@ const vec3 NETHER_SKYLESS_LIGHT_COLOR = vec3(1.0, 0.5, 0.3);
 // const vec3 SUNRISE_SKY_COLOR = vec3(0.5, 0.3, 0.1);
 const vec3 ORANGE_SKY_COLOR = hdr_gammaAdjust(vec3(1.0, 0.7, 0.0));
 #if SKY_MODE == SKY_MODE_LUMI
-const vec3 DAY_SKY_COLOR = hdr_gammaAdjust(vec3(0.32, 0.6, 1.0));
+const vec3 DAY_SKY_COLOR = hdr_gammaAdjust(vec3(0.4, 0.7, 1.0));
 const vec3 NIGHT_SKY_COLOR = hdr_gammaAdjust(vec3(0.03, 0.05, 0.15));
 const vec3 NEBULAE_COLOR = hdr_gammaAdjust(vec3(0.8, 0.3, 0.6));
 #else
