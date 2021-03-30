@@ -15,7 +15,7 @@ const float smol_scale = 1.5;
 const float smol_amplitude = 0.01;
 const float beeg_waveSpeed = 0.8;
 const float beeg_scale = 6.0;
-const float beeg_amplitude = 0.1;
+const float beeg_amplitude = 0.25;
 
 void frx_startVertex(inout frx_VertexData data) {
     set_l2_tangent(data.normal);
