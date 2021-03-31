@@ -39,7 +39,7 @@ void main()
     // [o] velocity buffer works fine
     // [o] camera motion rejection (velocity reprojection) is decent
     // [o] ghosting reduction is decent
-    // [~] terrain distortion is reduced by using clean matrices and can be controlled with velocityRejectionScale
+    // [o] terrain distortion is reduced by reducing feedback factor when camera moves
 
     #ifdef TAA_ENABLED
         gl_FragData[0] = TAA();
