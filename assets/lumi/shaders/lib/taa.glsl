@@ -160,7 +160,7 @@ vec4 Inside2Resolve(sampler2D currColorTex, sampler2D prevColorTex, vec2 velocit
     vec4 mixedMin = mix(rounded3x3Min, min2, 0.5);
     vec4 mixedMax = mix(rounded3x3Max, max2, 0.5);
 
-    float adjustedFeedback = cameraMove == 0.0 ? feedbackFactor : 0.5;
+    float adjustedFeedback = cameraMove == 0.0 ? feedbackFactor : minimumFeedbackFactor;
     vec4 clippedHistoryColor = clip_aabb(mixedMin.rgb, mixedMax.rgb, current2x2Colors[2], texture2D(prevColorTex, v_texcoord + velocity));
     return mix(current2x2Colors[2], clippedHistoryColor, adjustedFeedback);
 }

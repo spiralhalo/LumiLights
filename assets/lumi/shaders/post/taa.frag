@@ -20,6 +20,7 @@ uniform sampler2D u_velocity;
 #define resolution frxu_size
 
 #define feedbackFactor 0.9
+#define minimumFeedbackFactor 0.5
 #define maxDepthFalloff 1.0
 
 #include lumi:shaders/lib/taa.glsl
