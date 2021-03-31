@@ -137,6 +137,7 @@ vec4 clip_aabb(vec3 colorMin, vec3 colorMax, vec4 currentColor, vec4 previousCol
 }
 
 vec2 deltaRes = 1.0 / resolution;
+float cameraMove = length(frx_cameraPos() - frx_lastCameraPos());
 vec4 Inside2Resolve(sampler2D currColorTex, sampler2D prevColorTex, vec2 velocity)
 {
     vec4 current3x3Colors[neighborCount3x3];
@@ -159,8 +160,9 @@ vec4 Inside2Resolve(sampler2D currColorTex, sampler2D prevColorTex, vec2 velocit
     vec4 mixedMin = mix(rounded3x3Min, min2, 0.5);
     vec4 mixedMax = mix(rounded3x3Max, max2, 0.5);
 
-    float testVel = feedbackFactor - min(length(velocity) * velocityRejectionScale, 1.0) * feedbackFactor;
-    return mix(current2x2Colors[2], clip_aabb(mixedMin.rgb, mixedMax.rgb, current2x2Colors[2], texture2D(prevColorTex, v_texcoord + velocity)), testVel);
+    float adjustedFeedback = cameraMove == 0.0 ? feedbackFactor : 0.5;
+    vec4 clippedHistoryColor = clip_aabb(mixedMin.rgb, mixedMax.rgb, current2x2Colors[2], texture2D(prevColorTex, v_texcoord + velocity));
+    return mix(current2x2Colors[2], clippedHistoryColor, adjustedFeedback);
 }
 
 vec4 TAA()

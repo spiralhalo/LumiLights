@@ -20,7 +20,6 @@ uniform sampler2D u_velocity;
 #define resolution frxu_size
 
 #define feedbackFactor 0.9
-#define velocityRejectionScale 100.0
 #define maxDepthFalloff 1.0
 
 #include lumi:shaders/lib/taa.glsl
