@@ -61,7 +61,9 @@ vec4 blur13withDepth(sampler2D image, sampler2D depth, float depthThreshold, vec
     return color;
 }
 
-#define blur13sameAlpha(x, original_a, original_color) (x.a == original_a ? x : original_color)
+vec4 blur13sameAlpha(in vec4 x, in float original_a, in vec4 original_color) {
+    return x.a == original_a ? x : original_color;
+}
 vec4 blur13withDepthSameAlpha(sampler2D image, sampler2D depth, float depthThreshold, vec2 uv, vec2 resolution, vec2 direction)
 {
     vec4 origin = texture2D(image, uv);
