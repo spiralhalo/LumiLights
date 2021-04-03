@@ -212,6 +212,7 @@ vec3 l2_moonRadiance(float skyLight, float time, float rainGradient, float thund
     #else
     // PERF: single weather factor everywhere
     float weatherFactor = min(mix(1.0, SKY_LIGHT_RAINING_MULT, rainGradient), mix(1.0, SKY_LIGHT_THUNDERING_MULT, thunderGradient));
+    float moonsizeFactor = 0.5 + 0.5 * frx_moonSize();
     #ifdef SHADOW_MAP_PRESENT
         float ml = skyLight;
     #else
@@ -220,7 +221,7 @@ vec3 l2_moonRadiance(float skyLight, float time, float rainGradient, float thund
     // aren't these code just the transition factor ?
     // if(time < 0.58) ml *= l2_clampScale(0.54, 0.58, time);
     // else if(time > 0.92) ml *= l2_clampScale(0.96, 0.92, time);
-    return vec3(ml * weatherFactor * frx_moonSize() * MOONLIGHT_STR);
+    return vec3(ml * weatherFactor * moonsizeFactor * MOONLIGHT_STR);
     #endif
 }
 
