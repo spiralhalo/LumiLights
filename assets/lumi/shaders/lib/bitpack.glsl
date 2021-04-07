@@ -21,5 +21,5 @@ float bit_pack(float a, float b, float c, float d, float e, float f, float g, fl
 }
 
 float bit_unpack(float source, int index) {
-    return float((uint(source * 255.) >> bitIndex) & 1u);
+    return float((uint(source * 255.) >> index) & 1u);
 }

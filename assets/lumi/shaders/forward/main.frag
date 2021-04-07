@@ -101,7 +101,7 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
         //pad with 0.01 to prevent conflation with unmanaged draw
         float roughness = fragData.diffuse ? 0.01 + pbr_roughness * 0.98 : 1.0;
 
-        float bitFlags = bit_pack(frx_matFlash(), frx_matHurt(), frx_matGlint(), 0., 0., 0., 0., 0.);
+        float bitFlags = bit_pack(frx_matFlash()?1.:0., frx_matHurt()?1.:0., frx_matGlint(), 0., 0., 0., 0., 0.);
 
         // PERF: view normal, more useful than world normal
         gl_FragDepth = gl_FragCoord.z;
