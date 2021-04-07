@@ -34,7 +34,10 @@ void frx_writePipelineVertex(inout frx_VertexData data) {
         gl_Position = gl_ProjectionMatrix * viewCoord;
         l2_viewpos = viewCoord.xyz;
         #ifdef TAA_ENABLED
-            gl_Position.st += taa_jitter(inv_size) * gl_Position.w;
+            float fragZ = gl_Position.z / gl_Position.w;
+            if (fragZ > 0.6) { // hack to include only hand
+                gl_Position.st += taa_jitter(inv_size) * gl_Position.w;
+            }
         #endif
     } else {
         data.vertex += frx_modelToCamera();
