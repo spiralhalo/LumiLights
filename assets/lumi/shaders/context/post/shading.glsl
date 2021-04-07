@@ -18,6 +18,7 @@
 #include lumi:shaders/context/global/lighting.glsl
 #include lumi:shaders/context/global/shadow.glsl
 #include lumi:shaders/context/global/userconfig.glsl
+#include lumi:shaders/lib/bitpack.glsl
 
 /*******************************************************
  *  lumi:shaders/context/post/shading.frag             *
@@ -369,9 +370,9 @@ vec4 hdr_shaded_color(
 
     vec3 misc = texture2D(smisc, uv).xyz;
     #if GLINT_MODE == GLINT_MODE_SHADER
-        a.rgb += hdr_gammaAdjust(noise_glint(misc.xy, misc.z));
+        a.rgb += hdr_gammaAdjust(noise_glint(misc.xy, bit_unpack(misc.z, 2)));
     #else
-        a.rgb += hdr_gammaAdjust(texture_glint(u_glint, misc.xy, misc.z));
+        a.rgb += hdr_gammaAdjust(texture_glint(u_glint, misc.xy, bit_unpack(misc.z, 2)));
     #endif
 
     if (a.a != 0.0 && (translucent || translucentDepth >= depth) && depth != 1.0) {

@@ -11,6 +11,7 @@
 #include lumi:shaders/lib/tonemap.glsl
 #include lumi:shaders/lib/pbr_shading.glsl
 #include lumi:shaders/lib/glintify2.glsl
+#include lumi:shaders/lib/bitpack.glsl
 
 /*******************************************************
  *  lumi:shaders/forward/main.frag                    *
@@ -100,13 +101,15 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
         //pad with 0.01 to prevent conflation with unmanaged draw
         float roughness = fragData.diffuse ? 0.01 + pbr_roughness * 0.98 : 1.0;
 
+        float bitFlags = bit_pack(frx_matFlash(), frx_matHurt(), frx_matGlint(), 0., 0., 0., 0., 0.);
+
         // PERF: view normal, more useful than world normal
         gl_FragDepth = gl_FragCoord.z;
         gl_FragData[0] = a;
         gl_FragData[1] = vec4(light.x, light.y, (frx_renderTarget() == TARGET_PARTICLES) ? bloom : normalizedBloom, 1.0);
         gl_FragData[2] = vec4(normalizedNormal, 1.0);
         gl_FragData[3] = vec4(roughness, pbr_metallic, pbr_f0, 1.0);
-        gl_FragData[4] = vec4(frx_normalizeMappedUV(frx_texcoord), frx_matGlint(), 1.0);
+        gl_FragData[4] = vec4(frx_normalizeMappedUV(frx_texcoord), bitFlags, 1.0);
 
     }
 }
