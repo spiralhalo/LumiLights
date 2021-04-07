@@ -110,10 +110,15 @@ rt_color_depth work_on_pair(
 
         #if REFLECTION_PROFILE != REFLECTION_PROFILE_NONE
         } else {
-            vec4 reflectedShaded = texture2D(reflected_color, result.reflected_uv);
-            vec4 reflectedCombine = texture2D(reflected_combine, result.reflected_uv);
-            vec3 reflectedNormal = sample_worldNormal(result.reflected_uv, reflected_normal);
-            reflected = mix(reflectedShaded, reflectedCombine, l2_clampScale(0.5, 1.0, -dot(worldNormal, reflectedNormal)));
+            #ifdef MULTI_BOUNCE_REFLECTION
+                // TODO: velocity reprojection. this method creates reflection that lags behind and somehow I overlooked this :/
+                vec4 reflectedShaded = texture2D(reflected_color, result.reflected_uv);
+                vec4 reflectedCombine = texture2D(reflected_combine, result.reflected_uv);
+                vec3 reflectedNormal = sample_worldNormal(result.reflected_uv, reflected_normal);
+                reflected = mix(reflectedShaded, reflectedCombine, l2_clampScale(0.5, 1.0, -dot(worldNormal, reflectedNormal)));
+            #else
+                reflected = texture2D(reflected_color, result.reflected_uv);
+            #endif
             // fade to fallback on edges
             vec2 uvFade = smoothstep(0.5, 0.45, abs(result.reflected_uv - 0.5));
             reflected = mix(fallbackColor, reflected, min(uvFade.x, uvFade.y));

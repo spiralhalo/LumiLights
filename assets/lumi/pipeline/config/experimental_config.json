@@ -20,6 +20,11 @@
                     nameKey: "config.lumi_lights.value.taa_debug_render",
                     descriptionKey: "config.lumi_lights.help.taa_debug_render"
                 },
+                multi_bounce_reflection: {
+                    default: false,
+                    nameKey: "config.lumi_lights.value.multi_bounce_reflection",
+                    descriptionKey: "config.lumi_lights.help.multi_bounce_reflection"
+                },
                 high_contrast: {
                     default: false,
                     nameKey: "config.lumi_lights.value.high_contrast",
