@@ -89,11 +89,6 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
         gl_FragData[0] = a;
     } else {
         vec2 light = fragData.light.xy;
-        // hijack f0 for matHurt and matflash because hurting things are not reflective I guess
-        if (frx_matFlash()) pbr_f0 = 1.0;
-        else if (frx_matHurt()) pbr_f0 = 0.9;
-        else pbr_f0 = min(0.8, pbr_f0);
-
         vec3 normalizedNormal = normalize(fragData.vertexNormal) * 0.5 + 0.5;
         float bloom = fragData.emissivity * a.a;
         float ao = fragData.ao ? (1.0 - fragData.aoShade) * a.a : 0.0;

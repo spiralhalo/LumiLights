@@ -320,8 +320,9 @@ vec4 hdr_shaded_color(
     float f0        = material.z;
     float bloom_raw = light.z * 2.0 - 1.0;
     bool  diffuse   = material.x < 1.0;
-    bool  matflash  = f0 > 0.95;
-    bool  mathurt   = f0 > 0.85 && !matflash;
+    vec3  misc      = texture2D(smisc, uv).xyz;
+    float matflash  = bit_unpack(misc.z, 0);
+    float mathurt   = bit_unpack(misc.z, 1);
     // return vec4(coords_view(uv, frx_inverseProjectionMatrix(), depth), 1.0);
 
     bool maybeUnderwater = (!translucent && translucentDepth >= depth && frx_viewFlag(FRX_CAMERA_IN_WATER))
@@ -355,7 +356,7 @@ vec4 hdr_shaded_color(
     #ifdef RAIN_PUDDLES
         ww_puddle_pbr(a, roughness, light.y, normal, worldPos);
     #endif
-    pbr_shading(a, bloom_out, viewPos, light.xyz, normal, roughness, metallic, f0 > 0.7 ? 0.0 : material.z, diffuse, translucent);
+    pbr_shading(a, bloom_out, viewPos, light.xyz, normal, roughness, metallic, f0, diffuse, translucent);
 
 
 #if AMBIENT_OCCLUSION != AMBIENT_OCCLUSION_NONE
@@ -363,12 +364,11 @@ vec4 hdr_shaded_color(
     float ssao = mix(aoval, 1.0, min(bloom_out, 1.0));
     a.rgb *= ao_shaded * ssao;
 #endif
-    if (matflash) a.rgb += 1.0;
-    if (mathurt) a.r += 0.5;
+    if (matflash == 1.0) a.rgb += 1.0;
+    if (mathurt == 1.0) a.r += 0.5;
 
     a.a = min(1.0, a.a);
 
-    vec3 misc = texture2D(smisc, uv).xyz;
     #if GLINT_MODE == GLINT_MODE_SHADER
         a.rgb += hdr_gammaAdjust(noise_glint(misc.xy, bit_unpack(misc.z, 2)));
     #else

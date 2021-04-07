@@ -80,7 +80,7 @@ rt_color_depth work_on_pair(
         // if (ray_view.y < normal.y) return noreturn;
         vec3 unit_view  = normalize(-ray_view);
         vec3 unit_march = normalize(reflect(-unit_view, normal) + mix(vec3(0.0, 0.0, 0.0), jitter * JITTER_STRENGTH, roughness2));
-        vec3 reg_f0     = vec3(material.z <= 0.8 ? material.z : 0.0);
+        vec3 reg_f0     = vec3(material.z);
         vec3 f0         = mix(reg_f0, albedo, material.y);
 
         #if REFLECTION_PROFILE != REFLECTION_PROFILE_NONE
