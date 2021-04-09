@@ -1,12 +1,10 @@
+#include frex:shaders/api/view.glsl
+
 /*******************************************************
  *  lumi:shaders/lib/taa.glsl                          *
  *******************************************************
- *  Original Work:                                     *
+ *  Original Work (MIT License):                       *
  *  https://github.com/ziacko/Temporal-AA              *
- *                                                     *
- *  Original Work is licensed under the MIT License.   *
- *  See file `MIT_LICENSE` for license terms of the    *
- *  Original Work.                                     *
  *                                                     *
  *  The following code is a derivative work licensed   *
  *  under the LGPL-3.0.                                *
@@ -18,6 +16,10 @@
  *  GNU Lesser General Public License version 3 as     *
  *  published by the Free Software Foundation, Inc.    *
  *******************************************************/
+
+#define feedbackFactor 0.9
+#define minimumFeedbackFactor 0.5
+#define maxDepthFalloff 1.0
 
 const vec2 kOffsets3x3[9] =
 vec2[](
@@ -47,14 +49,13 @@ vec2[](
 
 const int neighborCount2x2 = 5;
 
-vec2 GetClosestUV(in sampler2D depths)
+vec2 GetClosestUV(in sampler2D depths, vec2 texcoord, vec2 deltaRes)
 {
-    vec2 deltaRes = vec2(1.0 / resolution.x, 1.0 / resolution.y);
-    vec2 closestUV = v_texcoord;
+    vec2 closestUV = texcoord;
     float closestDepth = 1.0f;
     for(int iter = 0; iter < neighborCount3x3; iter++)
     {
-        vec2 newUV = v_texcoord + (kOffsets3x3[iter] * deltaRes);
+        vec2 newUV = texcoord + (kOffsets3x3[iter] * deltaRes);
         float depth = texture2D(depths, newUV).x;
         if(depth < closestDepth)
         {
@@ -136,14 +137,12 @@ vec4 clip_aabb(vec3 colorMin, vec3 colorMax, vec4 currentColor, vec4 previousCol
     }
 }
 
-vec2 deltaRes = 1.0 / resolution;
-float cameraMove = length(frx_cameraPos() - frx_lastCameraPos());
-vec4 Inside2Resolve(sampler2D currColorTex, sampler2D prevColorTex, vec2 velocity)
+vec4 Inside2Resolve(sampler2D currColorTex, sampler2D prevColorTex, vec2 texcoord, vec2 velocity, vec2 deltaRes, float cameraMove)
 {
     vec4 current3x3Colors[neighborCount3x3];
     for(int iter = 0; iter < neighborCount3x3; iter++)
     {
-        current3x3Colors[iter] = texture2D(currColorTex, v_texcoord + (kOffsets3x3[iter] * deltaRes));
+        current3x3Colors[iter] = texture2D(currColorTex, texcoord + (kOffsets3x3[iter] * deltaRes));
     }
     vec4 rounded3x3Min = MinColors2(current3x3Colors);
     vec4 rounded3x3Max = MaxColors2(current3x3Colors);
@@ -151,7 +150,7 @@ vec4 Inside2Resolve(sampler2D currColorTex, sampler2D prevColorTex, vec2 velocit
     vec4 current2x2Colors[neighborCount2x2];
     for(int iter = 0; iter < neighborCount2x2; iter++)
     {
-        current2x2Colors[iter] = texture2D(currColorTex, v_texcoord + (kOffsets2x2[iter] * deltaRes));
+        current2x2Colors[iter] = texture2D(currColorTex, texcoord + (kOffsets2x2[iter] * deltaRes));
     }
     vec4 min2 = MinColors(current2x2Colors);
     vec4 max2 = MaxColors(current2x2Colors);
@@ -161,12 +160,11 @@ vec4 Inside2Resolve(sampler2D currColorTex, sampler2D prevColorTex, vec2 velocit
     vec4 mixedMax = mix(rounded3x3Max, max2, 0.5);
 
     float adjustedFeedback = cameraMove == 0.0 ? feedbackFactor : minimumFeedbackFactor;
-    vec4 clippedHistoryColor = clip_aabb(mixedMin.rgb, mixedMax.rgb, current2x2Colors[2], texture2D(prevColorTex, v_texcoord + velocity));
+    vec4 clippedHistoryColor = clip_aabb(mixedMin.rgb, mixedMax.rgb, current2x2Colors[2], texture2D(prevColorTex, texcoord + velocity));
     return mix(current2x2Colors[2], clippedHistoryColor, adjustedFeedback);
 }
 
-vec4 TAA()
+vec4 TAA(in sampler2D currentColorTex, in sampler2D previousColorTex, in sampler2D currentDepthTex, vec2 texcoord, vec2 velocity, vec2 invRes, float cameraMove)
 {
-    vec2 velocity = -texture2D(velocityTex, GetClosestUV(currentDepthTex)).rg;
-    return Inside2Resolve(currentColorTex, previousColorTex, velocity);//vec4(1, 0, 0, 1);
+    return Inside2Resolve(currentColorTex, previousColorTex, texcoord, -velocity, invRes, cameraMove);//vec4(1, 0, 0, 1);
 }

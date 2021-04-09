@@ -1,8 +1,8 @@
-#include lumi:shaders/context/post/header.glsl
+#include lumi:shaders/post/common/header.glsl
 #include lumi:shaders/post/reflection_common.glsl
-#include lumi:shaders/context/post/reflection.glsl
-#include lumi:shaders/context/global/lighting.glsl
-#include lumi:shaders/context/global/userconfig.glsl
+#include lumi:shaders/post/common/reflection.glsl
+#include lumi:shaders/common/lighting.glsl
+#include lumi:shaders/common/userconfig.glsl
 #include lumi:shaders/lib/tile_noise.glsl
 #include frex:shaders/lib/noise/noise2d.glsl
 #include frex:shaders/lib/noise/noise3d.glsl

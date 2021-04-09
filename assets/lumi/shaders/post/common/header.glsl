@@ -4,9 +4,9 @@
 #define POST_SHADER
 
 #include lumi:shaders/lib/util.glsl
-#include lumi:shaders/lib/tonemap.glsl
-#include lumi:shaders/context/global/lighting.glsl
-#include lumi:shaders/context/global/userconfig.glsl
+#include lumi:shaders/func/tonemap.glsl
+#include lumi:shaders/common/lighting.glsl
+#include lumi:shaders/common/userconfig.glsl
 #include frex:shaders/api/world.glsl
 #include frex:shaders/api/player.glsl
 #include frex:shaders/api/view.glsl
@@ -14,7 +14,7 @@
 #define VERTEX_SHADER
 
 /*******************************************************
- *  lumi:shaders/context/post/header.glsl              *
+ *  lumi:shaders/post/common/header.glsl               *
  *******************************************************/
 
 uniform ivec2 frxu_size;

@@ -30,7 +30,7 @@
             colorAttachments: [
                 {image: "solid_main"},
                 {image: "composite_depth"},
-                {image: "velocity"},
+                // {image: "velocity"},
             ]
         },
     ]

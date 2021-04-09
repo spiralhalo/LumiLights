@@ -1,5 +1,3 @@
-#include lumi:shaders/context/global/userconfig.glsl
-
 /*******************************************************
  *  lumi:shaders/lib/pbr.glsl                          *
  *******************************************************/

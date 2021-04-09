@@ -1,3 +1,5 @@
+#include frex:shaders/api/view.glsl
+
 /*******************************************************
 *  lumi:shaders/lib/shadow_distort.glsl               *
 *******************************************************

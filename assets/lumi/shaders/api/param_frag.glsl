@@ -1,4 +1,4 @@
-#include lumi:shaders/context/forward/common.glsl
+#include lumi:shaders/forward/common.glsl
 // load the contexts as soon as the params are requested
 
 /*******************************************************

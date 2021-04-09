@@ -1,4 +1,4 @@
-#include lumi:shaders/context/post/header.glsl
+#include lumi:shaders/post/common/header.glsl
 
 /******************************************************
   lumi:shaders/post/copy.frag

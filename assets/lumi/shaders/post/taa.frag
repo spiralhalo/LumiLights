@@ -1,6 +1,7 @@
-#include lumi:shaders/context/post/header.glsl
+#include lumi:shaders/post/common/header.glsl
 #include lumi:shaders/lib/util.glsl
-#include lumi:shaders/context/global/userconfig.glsl
+#include lumi:shaders/common/userconfig.glsl
+#include lumi:shaders/lib/taa.glsl
 
 /******************************************************
  *    lumi:shaders/post/taa.frag                      *
@@ -9,21 +10,29 @@
 uniform sampler2D u_current;
 uniform sampler2D u_history0;
 uniform sampler2D u_depthCurrent;
-uniform sampler2D u_depthHistory0; //unused, can be removed
-uniform sampler2D u_velocity;
 
-#define currentColorTex u_current
-#define previousColorTex u_history0
-#define currentDepthTex u_depthCurrent
-#define previousDepthTex u_depthHistory0
-#define velocityTex u_velocity
-#define resolution frxu_size
+varying vec2 v_invSize;
 
-#define feedbackFactor 0.9
-#define minimumFeedbackFactor 0.5
-#define maxDepthFalloff 1.0
+vec2 calc_velocity() {
+    float closestDepth = texture2D(u_depthCurrent, GetClosestUV(u_depthCurrent, v_texcoord, v_invSize)).r;
+    vec4 currentModelPos = frx_inverseViewProjectionMatrix() * vec4(v_texcoord * 2.0 - 1.0, closestDepth * 2.0 - 1.0, 1.0);
+    currentModelPos.xyz /= currentModelPos.w;
+    currentModelPos.w = 1.0;
 
-#include lumi:shaders/lib/taa.glsl
+    #if ANTIALIASING == ANTIALIASING_TAA_BLURRY
+        vec4 prevModelPos = currentModelPos;
+    #else
+        // This produces correct velocity?
+        vec4 cameraToLastCamera = vec4(frx_cameraPos() - frx_lastCameraPos(), 0.0);
+        vec4 prevModelPos = currentModelPos + cameraToLastCamera;
+    #endif
+
+    prevModelPos = frx_lastViewProjectionMatrix() * prevModelPos;
+    prevModelPos.xy /= prevModelPos.w;
+    vec2 prevPos = (prevModelPos.xy * 0.5 + 0.5);
+
+    return vec2(v_texcoord - prevPos);
+}
 
 void main()
 {
@@ -31,7 +40,8 @@ void main()
     #if TAA_DEBUG_RENDER == TAA_DEBUG_RENDER_DEPTH
         gl_FragData[0] = vec4(ldepth(texture2D(u_depthCurrent, v_texcoord).r));
     #else
-        gl_FragData[0] = 0.5 + texture2D(u_velocity, v_texcoord) * 50.0;
+        vec2 velocity = 0.5 + calc_velocity() * 50.0;
+        gl_FragData[0] = vec4(velocity, 0.0, 1.0);
     #endif
 #else
 
@@ -42,7 +52,8 @@ void main()
     // [o] terrain distortion is reduced by reducing feedback factor when camera moves
 
     #ifdef TAA_ENABLED
-        gl_FragData[0] = TAA();
+        float cameraMove = length(frx_cameraPos() - frx_lastCameraPos());
+        gl_FragData[0] = TAA(u_current, u_history0, u_depthCurrent, v_texcoord, calc_velocity(), v_invSize, cameraMove);
     #else
         gl_FragData[0] = texture2D(u_current, v_texcoord);
     #endif

@@ -1,4 +1,4 @@
-#include lumi:shaders/context/post/header.glsl
+#include lumi:shaders/post/common/header.glsl
 
 /******************************************************
  * lumi:shaders/post/taa_hand_merge.frag              *
@@ -13,5 +13,4 @@ void main()
         discard;
     }
     gl_FragData[0] = vec4(depth, 0.0, 0.0, 1.0);
-    gl_FragData[1] = vec4(0.0, 0.0, 0.0, 1.0);
 }

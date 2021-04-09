@@ -8,21 +8,21 @@
 #include frex:shaders/api/material.glsl
 #include lumi:shaders/lib/util.glsl
 #include lumi:shaders/lib/fog.glsl
-#include lumi:shaders/lib/tonemap.glsl
-#include lumi:shaders/lib/pbr_shading.glsl
+#include lumi:shaders/func/tonemap.glsl
+#include lumi:shaders/func/pbr_shading.glsl
 #include lumi:shaders/lib/puddle.glsl
-#include lumi:shaders/lib/glintify2.glsl
+#include lumi:shaders/func/glintify2.glsl
 #include lumi:shaders/lib/tile_noise.glsl
-#include lumi:shaders/context/post/bloom.glsl
-#include lumi:shaders/context/post/fog.glsl
-#include lumi:shaders/context/global/lighting.glsl
-#include lumi:shaders/context/global/shadow.glsl
-#include lumi:shaders/context/global/userconfig.glsl
+#include lumi:shaders/post/common/bloom.glsl
+#include lumi:shaders/post/common/fog.glsl
+#include lumi:shaders/common/lighting.glsl
+#include lumi:shaders/common/shadow.glsl
+#include lumi:shaders/common/userconfig.glsl
 #include lumi:shaders/lib/bitpack.glsl
 #include lumi:shaders/lib/block_dir.glsl
 
 /*******************************************************
- *  lumi:shaders/context/post/shading.frag             *
+ *  lumi:shaders/post/common/shading.frag              *
  *******************************************************
  *  Copyright (c) 2020-2021 spiralhalo                 *
  *  Released WITHOUT WARRANTY under the terms of the   *

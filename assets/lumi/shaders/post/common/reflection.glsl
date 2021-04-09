@@ -3,10 +3,10 @@
 #include frex:shaders/lib/math.glsl
 #include lumi:shaders/lib/util.glsl
 #include lumi:shaders/lib/pbr.glsl
-#include lumi:shaders/context/global/userconfig.glsl
+#include lumi:shaders/common/userconfig.glsl
 
 /*******************************************************
- *  lumi:shaders/context/post/reflection.glsl          *
+ *  lumi:shaders/post/common/reflection.glsl           *
  *******************************************************
  *  Copyright (c) 2020-2021 spiralhalo                 *
  *  Released WITHOUT WARRANTY under the terms of the   *

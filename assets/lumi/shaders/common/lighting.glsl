@@ -1,8 +1,8 @@
 #include lumi:shaders/lib/util.glsl
-#include lumi:shaders/context/global/userconfig.glsl
+#include lumi:shaders/common/userconfig.glsl
 
 /*******************************************************
- *  lumi:shaders/context/global/lighting.glsl          *
+ *  lumi:shaders/common/lighting.glsl                  *
  *******************************************************
  *  Copyright (c) 2020-2021 spiralhalo, Contributors   *
  *  Released WITHOUT WARRANTY under the terms of the   *

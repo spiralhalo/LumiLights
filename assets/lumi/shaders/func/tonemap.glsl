@@ -1,10 +1,10 @@
 #include frex:shaders/lib/math.glsl
 #include frex:shaders/lib/color.glsl
-#include lumi:shaders/context/global/userconfig.glsl
+#include lumi:shaders/common/userconfig.glsl
 #include lumi:shaders/lib/util.glsl
 
 /***********************************************************
- *  lumi:shaders/forward/tonemap.glsl                     *
+ *  lumi:shaders/func/tonemap.glsl                         *
  ***********************************************************/
 
 vec3 ldr_reinhardJodieTonemap(in vec3 v) {

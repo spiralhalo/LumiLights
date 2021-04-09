@@ -3,7 +3,7 @@
 #include frex:shaders/lib/noise/noise3d.glsl
 #include frex:shaders/lib/color.glsl
 #include frex:shaders/lib/math.glsl
-#include lumi:shaders/context/forward/common.glsl
+#include lumi:shaders/forward/common.glsl
 #include lumi:shaders/api/param_frag.glsl
 #include lumi:shaders/lib/water.glsl
 

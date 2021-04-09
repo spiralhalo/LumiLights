@@ -1,7 +1,7 @@
 #include lumi:shadow_config
 
 /*******************************************************
- *  lumi:shaders/context/global/shadow.glsl            *
+ *  lumi:shaders/common/shadow.glsl                    *
  *******************************************************
  *  Copyright (c) 2021 spiralhalo                      *
  *  Released WITHOUT WARRANTY under the terms of the   *

@@ -1,7 +1,7 @@
-#include lumi:shaders/context/global/userconfig.glsl
+#include lumi:shaders/common/userconfig.glsl
 
 /*******************************************************
- *  lumi:shaders/context/post/fog.glsl                 *
+ *  lumi:shaders/post/common/fog.glsl                  *
  *******************************************************
  *  Copyright (c) 2020-2021 spiralhalo                 *
  *  Released WITHOUT WARRANTY under the terms of the   *

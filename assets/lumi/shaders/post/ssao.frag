@@ -1,9 +1,9 @@
-#include lumi:shaders/context/post/header.glsl
+#include lumi:shaders/post/common/header.glsl
 #include lumi:shaders/lib/ssao.glsl
 #include frex:shaders/api/view.glsl
 #include frex:shaders/api/world.glsl
-#include lumi:shaders/context/global/lighting.glsl
-#include lumi:shaders/context/global/userconfig.glsl
+#include lumi:shaders/common/lighting.glsl
+#include lumi:shaders/common/userconfig.glsl
 
 /*******************************************************
  *  lumi:shaders/post/ssao.frag               *

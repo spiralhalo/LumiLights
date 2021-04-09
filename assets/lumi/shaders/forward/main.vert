@@ -1,9 +1,9 @@
 #include frex:shaders/api/context.glsl
 #include frex:shaders/api/vertex.glsl
 #include frex:shaders/api/sampler.glsl
-#include lumi:shaders/context/global/lightsource.glsl
-#include lumi:shaders/context/global/userconfig.glsl
-#include lumi:shaders/context/forward/common.glsl
+#include lumi:shaders/common/lightsource.glsl
+#include lumi:shaders/common/userconfig.glsl
+#include lumi:shaders/forward/common.glsl
 #include lumi:shaders/forward/varying.glsl
 #include lumi:shaders/lib/taa_jitter.glsl
 

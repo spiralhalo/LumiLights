@@ -1,11 +1,11 @@
-#include lumi:shaders/context/post/header.glsl
-#include lumi:shaders/lib/tonemap.glsl
+#include lumi:shaders/post/common/header.glsl
+#include lumi:shaders/func/tonemap.glsl
 #include lumi:shaders/lib/util.glsl
 #include lumi:shaders/lib/tile_noise.glsl
-#include lumi:shaders/context/post/reflection.glsl
+#include lumi:shaders/post/common/reflection.glsl
 
 /*******************************************************
- *  lumi:shaders/post/shading_combine.frag    *
+ *  lumi:shaders/post/shading_combine.frag             *
  *******************************************************
  *  Copyright (c) 2020-2021 spiralhalo                 *
  *  Released WITHOUT WARRANTY under the terms of the   *

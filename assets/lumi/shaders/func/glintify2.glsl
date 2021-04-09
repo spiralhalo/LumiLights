@@ -1,10 +1,10 @@
 #include frex:shaders/lib/math.glsl
 #include frex:shaders/api/world.glsl
-#include lumi:shaders/context/global/userconfig.glsl
+#include lumi:shaders/common/userconfig.glsl
 #include lumi:shaders/lib/util.glsl
 
 /*******************************************************
- *  lumi:shaders/lib/glintify.glsl                     *
+ *  lumi:shaders/func/glintify2.glsl                   *
  *******************************************************
  *  Copyright (c) 2021 spiralhalo                      *
  *  Released WITHOUT WARRANTY under the terms of the   *

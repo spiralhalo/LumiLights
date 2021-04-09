@@ -1,5 +1,5 @@
-#include lumi:shaders/context/post/header.glsl
-#include lumi:shaders/context/global/lightsource.glsl
+#include lumi:shaders/post/common/header.glsl
+#include lumi:shaders/common/lightsource.glsl
 #include frex:shaders/api/view.glsl
 #include frex:shaders/api/world.glsl
 #include frex:shaders/lib/math.glsl

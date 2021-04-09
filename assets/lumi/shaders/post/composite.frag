@@ -1,15 +1,15 @@
-#include lumi:shaders/context/post/header.glsl
+#include lumi:shaders/post/common/header.glsl
 #include frex:shaders/lib/math.glsl
 #include frex:shaders/lib/color.glsl
 #include frex:shaders/api/world.glsl
 #include lumi:shaders/lib/util.glsl
-#include lumi:shaders/lib/tonemap.glsl
+#include lumi:shaders/func/tonemap.glsl
 #include lumi:shaders/lib/fast_gaussian_blur.glsl
 #include lumi:shaders/lib/godrays.glsl
 #include lumi:shaders/lib/tile_noise.glsl
-#include lumi:shaders/context/global/lighting.glsl
-#include lumi:shaders/context/global/userconfig.glsl
-#include lumi:shaders/context/post/clouds.glsl
+#include lumi:shaders/common/lighting.glsl
+#include lumi:shaders/common/userconfig.glsl
+#include lumi:shaders/post/common/clouds.glsl
 
 /******************************************************
   lumi:shaders/post/composite.frag
@@ -139,24 +139,6 @@ void main()
     
     gl_FragData[0] = vec4(c, 1.0); //frx_luminance(c.rgb)); // FXAA 3 would need this
     gl_FragData[1] = vec4(min_depth, 0., 0., 1.);
-    
-    vec4 currentModelPos = frx_inverseViewProjectionMatrix() * vec4(v_texcoord * 2.0 - 1.0, min_depth * 2.0 - 1.0, 1.0);
-    currentModelPos.xyz /= currentModelPos.w;
-    currentModelPos.w = 1.0;
-
-    #if ANTIALIASING == ANTIALIASING_TAA_BLURRY
-        vec4 prevModelPos = currentModelPos;
-    #else
-        // This produces correct velocity?
-        vec4 cameraToLastCamera = vec4(frx_cameraPos() - frx_lastCameraPos(), 0.0);
-        vec4 prevModelPos = currentModelPos + cameraToLastCamera;
-    #endif
-
-    prevModelPos = frx_lastViewProjectionMatrix() * prevModelPos;
-    prevModelPos.xy /= prevModelPos.w;
-    vec2 prevPos = (prevModelPos.xy * 0.5 + 0.5);
-    
-    gl_FragData[2] = vec4(v_texcoord - prevPos, 0., 1.);
 }
 
 

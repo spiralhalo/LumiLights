@@ -1,4 +1,4 @@
-#include lumi:shaders/context/global/userconfig.glsl
+#include lumi:shaders/common/userconfig.glsl
 
 /***********************************************************
  *  lumi:shaders/forward/varying.glsl                     *

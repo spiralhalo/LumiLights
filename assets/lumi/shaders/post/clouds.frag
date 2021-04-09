@@ -1,15 +1,15 @@
-#include lumi:shaders/context/post/header.glsl
+#include lumi:shaders/post/common/header.glsl
 #include frex:shaders/lib/math.glsl
 #include frex:shaders/lib/noise/noise2d.glsl
 #include frex:shaders/lib/noise/noise3d.glsl
 #include frex:shaders/api/view.glsl
 #include frex:shaders/api/world.glsl
 #include lumi:shaders/lib/util.glsl
-#include lumi:shaders/lib/tonemap.glsl
+#include lumi:shaders/func/tonemap.glsl
 #include lumi:shaders/lib/fast_gaussian_blur.glsl
 #include lumi:shaders/lib/volumetric_cloud.glsl
-#include lumi:shaders/context/global/lighting.glsl
-#include lumi:shaders/context/global/userconfig.glsl
+#include lumi:shaders/common/lighting.glsl
+#include lumi:shaders/common/userconfig.glsl
 
 /*******************************************************
  *  lumi:shaders/post/clouds.frag                      *

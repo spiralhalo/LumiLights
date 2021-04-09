@@ -1,7 +1,7 @@
 #include lumi:config.glsl
 
 /*******************************************************
- *  lumi:shaders/context/forward/common.glsl           *
+ *  lumi:shaders/forward/common.glsl           *
  *******************************************************
  *  This routine bridges between internal user config  *
  *  variables and externalized context variables.      *

@@ -5,7 +5,7 @@
 #include lumi:shaders/lib/tile_noise.glsl
 #include frex:shaders/lib/noise/noise2d.glsl
 #include frex:shaders/lib/noise/cellular2x2.glsl
-#include lumi:shaders/context/post/clouds.glsl
+#include lumi:shaders/post/common/clouds.glsl
 
 /*******************************************************
  *  lumi:shaders/lib/volumetric_cloud.glsl             *

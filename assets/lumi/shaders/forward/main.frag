@@ -4,13 +4,13 @@
 #include frex:shaders/api/world.glsl
 #include frex:shaders/api/view.glsl
 #include frex:shaders/lib/math.glsl
-#include lumi:shaders/context/forward/common.glsl
-#include lumi:shaders/context/global/userconfig.glsl
+#include lumi:shaders/forward/common.glsl
+#include lumi:shaders/common/userconfig.glsl
 #include lumi:shaders/api/param_frag.glsl
 #include lumi:shaders/lib/util.glsl
-#include lumi:shaders/lib/tonemap.glsl
-#include lumi:shaders/lib/pbr_shading.glsl
-#include lumi:shaders/lib/glintify2.glsl
+#include lumi:shaders/func/tonemap.glsl
+#include lumi:shaders/func/pbr_shading.glsl
+#include lumi:shaders/func/glintify2.glsl
 #include lumi:shaders/lib/bitpack.glsl
 
 /*******************************************************

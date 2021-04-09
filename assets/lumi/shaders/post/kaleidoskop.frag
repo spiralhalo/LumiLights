@@ -1,5 +1,5 @@
-#include lumi:shaders/context/post/header.glsl
-#include lumi:shaders/context/post/reflection.glsl
+#include lumi:shaders/post/common/header.glsl
+#include lumi:shaders/post/common/reflection.glsl
 
 /*******************************************************
  *  lumi:shaders/post/kaleidoskop.frag        *

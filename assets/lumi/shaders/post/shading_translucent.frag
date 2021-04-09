@@ -1,4 +1,4 @@
-#include lumi:shaders/context/post/header.glsl
+#include lumi:shaders/post/common/header.glsl
 
 /*******************************************************
  *  lumi:shaders/post/shading_translucent.frag         *
@@ -23,7 +23,7 @@ uniform sampler2D u_light_particles;
 uniform sampler2D u_glint;
 uniform sampler2DArrayShadow u_shadow;
 
-#include lumi:shaders/context/post/shading.glsl
+#include lumi:shaders/post/common/shading.glsl
 
 vec4 ldr_shaded_particle(vec2 uv, sampler2D scolor, sampler2D sdepth, sampler2D slight, out float bloom_out)
 {

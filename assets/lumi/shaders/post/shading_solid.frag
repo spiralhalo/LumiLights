@@ -1,4 +1,4 @@
-#include lumi:shaders/context/post/header.glsl
+#include lumi:shaders/post/common/header.glsl
 
 /*******************************************************
  *  lumi:shaders/post/shading.frag                     *
@@ -23,7 +23,7 @@ uniform sampler2D u_ao;
 uniform sampler2D u_glint;
 uniform sampler2DArrayShadow u_shadow;
 
-#include lumi:shaders/context/post/shading.glsl
+#include lumi:shaders/post/common/shading.glsl
 
 void main()
 {

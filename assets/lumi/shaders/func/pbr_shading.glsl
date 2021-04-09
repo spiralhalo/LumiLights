@@ -1,15 +1,15 @@
 #include frex:shaders/lib/math.glsl
 #include frex:shaders/api/world.glsl
 #include frex:shaders/api/view.glsl
-#include lumi:shaders/context/global/userconfig.glsl
-#include lumi:shaders/context/global/lighting.glsl
-#include lumi:shaders/context/global/lightsource.glsl
+#include lumi:shaders/common/userconfig.glsl
+#include lumi:shaders/common/lighting.glsl
+#include lumi:shaders/common/lightsource.glsl
 #include lumi:shaders/lib/pbr.glsl
 #include lumi:shaders/lib/util.glsl
 #include lumi:shaders/lib/block_dir.glsl
 
 /*******************************************************
- *  lumi:shaders/lib/pbr_shading.glsl                  *
+ *  lumi:shaders/func/pbr_shading.glsl                  *
  *******************************************************
  *  Copyright (c) 2020-2021 spiralhalo                 *
  *  Released WITHOUT WARRANTY under the terms of the   *

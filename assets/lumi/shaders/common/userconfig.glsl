@@ -5,7 +5,7 @@
 #include lumi:fog_config
 
 /*******************************************************
- *  lumi:shaders/context/global/userconfig.glsl        *
+ *  lumi:shaders/common/userconfig.glsl                *
  *******************************************************
  *  One context for "pure" userconfigs defines.        *
  *  No const allowed here.                             *
