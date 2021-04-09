@@ -6,6 +6,7 @@
 #include lumi:shaders/lib/util.glsl
 #include lumi:shaders/lib/tonemap.glsl
 #include lumi:shaders/context/global/lighting.glsl
+#include lumi:shaders/context/global/userconfig.glsl
 #include frex:shaders/api/world.glsl
 #include frex:shaders/api/player.glsl
 #include frex:shaders/api/view.glsl
@@ -44,15 +45,17 @@ vec3 hdr_skyColor()
         const vec3 dayc = DAY_SKY_COLOR;
 
         const int len = 4;
-        const vec3 colors[len] =  vec3[](dayc, ngtc, ngtc, dayc);
-        const float times[len] = float[](0.50, 0.54, 0.96, 1.0);
+        const vec3 colors[len] =  vec3[]( ngtc, dayc, dayc, ngtc);
+        const float times[len] = float[](-0.03, 0.01, 0.49, 0.53);
 
-        if (frx_worldTime() <= times[0]) {
+        float horizonTime = frx_worldTime() < 0.75 ? frx_worldTime():frx_worldTime() - 1.0; // [-0.25, 0.75]
+
+        if (horizonTime <= times[0]) {
             skyColor = colors[0];
         } else {
             int i = 1;
-            while (frx_worldTime() > times[i] && i < len) i++;
-            skyColor = mix(colors[i-1], colors[i], l2_clampScale(times[i-1], times[i], frx_worldTime()));
+            while (horizonTime > times[i] && i < len) i++;
+            skyColor = mix(colors[i-1], colors[i], l2_clampScale(times[i-1], times[i], horizonTime));
         }
 
         vec3 grayScale = vec3(frx_luminance(skyColor));
@@ -80,11 +83,16 @@ vec3 hdr_orangeSkyColor(vec3 original, vec3 viewDir) {
         && !frx_worldFlag(FRX_WORLD_IS_MOONLIT)
         && !frx_playerHasEffect(FRX_EFFECT_BLINDNESS);
     if (customOverworldOrange) {
-        float vDotSun = l2_clampScale(0.0, -1.0, dot(viewDir, frx_normalModelMatrix()*frx_skyLightVector()));
-        float sunHorizonFactor = l2_clampScale(0.5 /*BRUTE FORCED NUMBER*/, 0.0, frx_skyLightVector().y);
+
+        //NB: only works if sun always rise from dead east instead of north/southeast etc.
+        float vDotHorizon = max(0.0, dot(-viewDir, frx_normalModelMatrix()*vec3(sign(frx_skyLightVector().x), 0.0, 0.0)));
+
+        float sunHorizonFactor = sqrt(l2_clampScale(0.25 /*BRUTE FORCED NUMBER*/, 0.0, frx_skyLightVector().y));
         sunHorizonFactor *= frx_skyLightTransitionFactor();
+
         float rainUnFactor = 1.0 - frx_rainGradient();
-        return mix(original, ORANGE_SKY_COLOR, sunHorizonFactor * vDotSun * vDotSun * rainUnFactor);
+
+        return mix(original, ORANGE_SKY_COLOR, sunHorizonFactor * vDotHorizon * vDotHorizon * rainUnFactor);
     } else {
         return original;
     }

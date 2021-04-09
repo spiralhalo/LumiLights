@@ -19,6 +19,13 @@
           nameKey: "config.lumi_lights.value.bloom_intensity",
           descriptionKey: "config.lumi_lights.help.bloom_intensity"
         },
+        bloom_scale: {
+          default: 25,
+          min: 3,
+          max: 50,
+          nameKey: "config.lumi_lights.value.bloom_scale",
+          descriptionKey: "config.lumi_lights.help.bloom_scale"
+        },
         sky_bloom_intensity: {
           default: 2,
           min: 0,
@@ -26,12 +33,12 @@
           nameKey: "config.lumi_lights.value.sky_bloom_intensity",
           descriptionKey: "config.lumi_lights.help.sky_bloom_intensity"
         },
-        bloom_scale: {
-          default: 25,
-          min: 3,
-          max: 50,
-          nameKey: "config.lumi_lights.value.bloom_scale",
-          descriptionKey: "config.lumi_lights.help.bloom_scale"
+        godrays_intensity: {
+          default: 5,
+          min: 0,
+          max: 10,
+          nameKey: "config.lumi_lights.value.godrays_intensity",
+          descriptionKey: "config.lumi_lights.help.godrays_intensity"
         },
         sky_mode: {
           default: "lumi",
@@ -41,9 +48,17 @@
           nameKey: "config.lumi_lights.value.sky_mode",
           descriptionKey: "config.lumi_lights.help.sky_mode"
         },
+        lumi_sky_color: {
+          default: "bright_cyan",
+          choices: ["bright_cyan", "deep_cerulean"],
+          enum: true,
+          prefix: "lumi_sky_color_",
+          nameKey: "config.lumi_lights.value.lumi_sky_color",
+          descriptionKey: "config.lumi_lights.help.lumi_sky_color"
+        },
         glint_style: {
           default: "glint_a",
-          choices: ["glint_a", "glint_d"],
+          choices: ["glint_a", "glint_b", "glint_d"],
           enum: true,
           prefix: "glint_style_",
           nameKey: "config.lumi_lights.value.glint_style",

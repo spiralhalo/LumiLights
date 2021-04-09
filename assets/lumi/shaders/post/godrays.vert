@@ -34,7 +34,8 @@ void main()
         * moonFactor
         * dimensionFactor
         * blindnessFactor
-        * notInVoidFactor;
+        * notInVoidFactor
+        * USER_GODRAYS_INTENSITY;
 
     if (frx_viewFlag(FRX_CAMERA_IN_WATER)) {
         #if CAUSTICS_MODE == CAUSTICS_MODE_TEXTURE

@@ -1,6 +1,7 @@
 #include frex:shaders/lib/math.glsl
 #include frex:shaders/api/world.glsl
 #include lumi:shaders/context/global/userconfig.glsl
+#include lumi:shaders/lib/util.glsl
 
 /*******************************************************
  *  lumi:shaders/lib/glintify.glsl                     *
@@ -13,6 +14,23 @@
 
 const vec3 GLINT_COLOR = vec3(GLINT_RED, GLINT_GREEN, GLINT_BLUE);
 
+float generate_noise(vec2 uv, float zoom, vec2 skew, vec2 speed, vec2 detail, vec2 taper) {
+    uv += uv.yx * skew;
+    uv *= zoom;
+    vec2 t = mod(uv + speed * frx_renderSeconds(), 1.0);
+    t *= detail;
+    vec2 f = fract(t);
+    t -= f;
+    t /= detail;
+    f -= 0.5;
+    f = abs(f);
+    f = 1.0 - 2.0 * f;
+    float x = smoothstep(taper.x, taper.y, frx_noise2d(t.xx) * f.x);
+    float y = smoothstep(taper.x, taper.y, frx_noise2d(t.yy) * f.y);
+    // float x = sqrt(l2_clampScale(taper.x, taper.y, frx_noise2d(t.xx) * f.x));
+    // float y = sqrt(l2_clampScale(taper.x, taper.y, frx_noise2d(t.yy) * f.y));
+    return x * (1.0-y*0.5) + y * (1.0-x*0.5);
+}
 
 vec3 noise_glint(vec2 normalizedUV, float glint)
 {
@@ -20,28 +38,29 @@ vec3 noise_glint(vec2 normalizedUV, float glint)
     const float zoom = 0.5;
     const vec2 skew = vec2(0.0, 0.4);
     const vec2 speed = vec2(0.4, -1.0);
-    const vec2 detail = vec2(5.0, 4.0);
+    const vec2 detail = vec2(10.0, 8.0);
     const vec2 taper = vec2(0.4, 0.9);
+#elif GLINT_STYLE == GLINT_STYLE_GLINT_B
+    const float zoom = 0.5;
+    const vec2 skew = vec2(0.0, 0.4);
+    const vec2 speed = vec2(0.2, -0.5);
+    const vec2 detail = vec2(5.0, 4.0);
+    const vec2 taper = vec2(0.0, 0.9);
 #else
     const float zoom = 2.0;
     const vec2 skew = vec2(0.4, 0.0);
     const vec2 speed = vec2(0.8, 0.8);
-    const vec2 detail = vec2(4.0, 5.0);
-    const vec2 taper = vec2(0.5, 0.9);
+    const vec2 detail = vec2(10.0, 8.0);
+    const vec2 taper = vec2(0.3, 0.9);
     normalizedUV.x = normalizedUV.x * 2.0;
 #endif
     if (glint == 1.0) {
-        normalizedUV += normalizedUV.yx * skew;
-        normalizedUV *= zoom;
-        vec2 t = mod(normalizedUV + speed * frx_renderSeconds(), 1.0);
-        t *= detail;
-        vec2 f = fract(t);
-        t -= f;
-        t /= detail;
-        f -= 0.5;
-        f = abs(f);
-        f = 1.0 - 2.0 * f;
-        float n = smoothstep(taper.x, taper.y, frx_noise2d(t.xx) * f.x) + smoothstep(taper.x, taper.y, frx_noise2d(t.yy) * f.y);
+        float n = generate_noise(normalizedUV, zoom, skew, speed, detail, taper);
+        #if GLINT_STYLE == GLINT_STYLE_GLINT_B
+        float o = 0.5 - n * 0.2;
+        o *= generate_noise(normalizedUV + 0.5, zoom, skew, speed * 0.5, detail * 10.0, vec2(0.2, 0.7));
+        n += o;
+        #endif
         return n * GLINT_COLOR;
     } else {
         return vec3(0.0);
