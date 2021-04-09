@@ -19,6 +19,7 @@
 #include lumi:shaders/context/global/shadow.glsl
 #include lumi:shaders/context/global/userconfig.glsl
 #include lumi:shaders/lib/bitpack.glsl
+#include lumi:shaders/lib/block_dir.glsl
 
 /*******************************************************
  *  lumi:shaders/context/post/shading.frag             *
@@ -33,6 +34,7 @@
     vertexShader: lumi:shaders/post/hdr.vert
  *******************************************************/
 
+varying vec2 v_invSize;
 varying mat4 v_star_rotator;
 varying mat4 v_cloud_rotator;
 varying float v_fov;
@@ -355,6 +357,9 @@ vec4 hdr_shaded_color(
     bloom_out = max(0.0, bloom_raw);
     #ifdef RAIN_PUDDLES
         ww_puddle_pbr(a, roughness, light.y, normal, worldPos);
+    #endif
+    #if BLOCKLIGHT_SPECULAR_MODE == BLOCKLIGHT_SPECULAR_MODE_FANTASTIC
+        preCalc_blockDir = calcBlockDir(slight, uv, v_invSize, normal, viewPos, sdepth);
     #endif
     pbr_shading(a, bloom_out, viewPos, light.xyz, normal, roughness, metallic, f0, diffuse, translucent);
 

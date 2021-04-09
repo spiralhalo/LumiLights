@@ -1,10 +1,12 @@
 #include frex:shaders/lib/math.glsl
 #include frex:shaders/api/world.glsl
 #include frex:shaders/api/view.glsl
+#include lumi:shaders/context/global/userconfig.glsl
 #include lumi:shaders/context/global/lighting.glsl
 #include lumi:shaders/context/global/lightsource.glsl
 #include lumi:shaders/lib/pbr.glsl
 #include lumi:shaders/lib/util.glsl
+#include lumi:shaders/lib/block_dir.glsl
 
 /*******************************************************
  *  lumi:shaders/lib/pbr_shading.glsl                  *
@@ -60,11 +62,19 @@ struct light_data{
 
 vec3 hdr_calcBlockLight(inout light_data data, vec3 radiance)
 {
-    if (data.diffuse) {
-        return pbr_lightCalc(data.albedo, max(data.roughness, 0.4), data.metallic, data.f0, radiance, data.normal, data.viewDir, data.normal, true, data.specularAccu);
-    } else {
+    #if BLOCKLIGHT_SPECULAR_MODE == BLOCKLIGHT_SPECULAR_MODE_FAST
         return pbr_nonDirectional(data.albedo, data.metallic, radiance);
-    }
+    #else
+        if (!data.diffuse) return pbr_nonDirectional(data.albedo, data.metallic, radiance);
+        
+        #if BLOCKLIGHT_SPECULAR_MODE == BLOCKLIGHT_SPECULAR_MODE_FANTASTIC
+            vec3 lightDir = preCalc_blockDir;
+        #else
+            vec3 lightDir = data.normal;
+        #endif
+        
+        return pbr_lightCalc(data.albedo, max(data.roughness, 0.4), data.metallic, data.f0, radiance, lightDir, data.viewDir, data.normal, true, data.specularAccu);
+    #endif
 }
 
 vec3 hdr_calcHeldLight(inout light_data data)

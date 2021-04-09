@@ -20,6 +20,14 @@
           nameKey: "config.lumi_lights.value.ambient_occlusion",
           descriptionKey: "config.lumi_lights.help.ambient_occlusion"
         },
+        blocklight_specular_mode: {
+          default: "fancy",
+          choices: ["fast", "fancy"],
+          enum: true,
+          prefix: "blocklight_specular_mode_",
+          nameKey: "config.lumi_lights.value.blocklight_specular_mode",
+          descriptionKey: "config.lumi_lights.help.blocklight_specular_mode"
+        },
         reflection_profile: {
           default: "medium",
           choices: ["none", "low", "medium", "high", "extreme"],
