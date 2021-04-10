@@ -32,7 +32,7 @@ void main()
     } else {
         float random = v_texcoord.x*v_texcoord.y;
         float ssao = calc_ssao(
-            u_normal, u_depth, frx_normalModelMatrix(), frx_inverseProjectionMatrix(), frxu_size, 4,
+            u_normal, u_depth, frx_normalModelMatrix(), frx_inverseProjectionMatrix(), frxu_size, 
             v_texcoord, RADIUS, BIAS, INTENSITY);
         fragColor = vec4(ssao, 0.0, 0.0, 1.0);
     }

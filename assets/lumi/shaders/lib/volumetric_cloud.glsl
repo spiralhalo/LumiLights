@@ -120,7 +120,7 @@ cloud_result rayMarchCloud(in sampler2D scloudTex, in sampler2D sdepth, in vec2 
 
     // Adapted from Sebastian Lague's code (technically not the same, but just in case his code was MIT Licensed)
 
-    float tileJitter = tile_noise_1d(v_texcoord, frxu_size, 3); //CLOUD_MARCH_JITTER_STRENGTH;
+    float tileJitter = getRandomFloat(v_texcoord, frxu_size); //CLOUD_MARCH_JITTER_STRENGTH;
     float traveled = SAMPLE_SIZE * tileJitter;
 
     // Optimization block

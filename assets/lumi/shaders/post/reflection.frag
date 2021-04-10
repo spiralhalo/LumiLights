@@ -76,7 +76,7 @@ rt_color_depth work_on_pair(
         ww_puddle_pbr(fake, roughness, light.y, worldNormal, ray_world);
     #endif
     if (roughness <= REFLECTION_MAXIMUM_ROUGHNESS) {
-        vec3 jitter    = 2.0 * tile_noise_3d(v_texcoord, frxu_size, 4) - 1.0;
+        vec3 jitter    = 2.0 * getRandomVec(v_texcoord, frxu_size) - 1.0;
         vec3 normal    = frx_normalModelMatrix() * normalize(worldNormal);
         float roughness2 = roughness * roughness;
         // if (ray_view.y < normal.y) return noreturn;

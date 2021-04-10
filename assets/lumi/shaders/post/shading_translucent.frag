@@ -51,7 +51,7 @@ vec4 ldr_shaded_particle(vec2 uv, sampler2D scolor, sampler2D sdepth, sampler2D 
 
 void main()
 {
-    tileJitter = tile_noise_1d(v_texcoord, frxu_size, 3);
+    tileJitter = getRandomFloat(v_texcoord, frxu_size);
     float bloom1;
     float bloom2;
     vec4 a1 = hdr_shaded_color(v_texcoord, u_translucent_color, u_translucent_depth, u_light_translucent, u_normal_translucent, u_material_translucent, u_misc_translucent, 1.0, true, 1.0, bloom1);

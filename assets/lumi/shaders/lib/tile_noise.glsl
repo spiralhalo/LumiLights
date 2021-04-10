@@ -10,18 +10,33 @@
  *  published by the Free Software Foundation, Inc.    *
  *******************************************************/
 
-vec3 tile_noise_3d(vec2 uv, vec2 tex_size, int noise_size)
-{
-    float tile_size = noise_size * 2.0 + 1.0;
-    vec2 seed = fract(uv * (tex_size / tile_size));
-    return vec3(frx_noise2d(seed.xx * seed.yy), frx_noise2d(seed.xy), frx_noise2d(seed.yx));
+const vec3 tile_randomVec[16] = vec3[16](
+    vec3(0.5, 0.3333333333333333, 0.25), 
+    vec3(0.25, 0.6666666666666666, 0.5), 
+    vec3(0.75, 0.1111111111111111, 0.75),
+    vec3(0.125, 0.4444444444444444, 0.0625),
+    vec3(0.625, 0.7777777777777777, 0.3125),
+    vec3(0.375, 0.2222222222222222, 0.5625),
+    vec3(0.875, 0.5555555555555556, 0.8125),
+    vec3(0.0625, 0.8888888888888888, 0.125),
+    vec3(0.5625, 0.037037037037037035, 0.375),
+    vec3(0.3125, 0.37037037037037035, 0.625),
+    vec3(0.8125, 0.7037037037037037, 0.875),
+    vec3(0.1875, 0.14814814814814814, 0.1875),
+    vec3(0.6875, 0.48148148148148145, 0.4375),
+    vec3(0.4375, 0.8148148148148147, 0.6875),
+    vec3(0.9375, 0.25925925925925924, 0.9375),
+    vec3(0.03125, 0.5925925925925926, 0.015625)
+);
+
+vec3 getRandomVec(vec2 uv, vec2 texSize) {
+    ivec2 texelPos = ivec2(mod(uv * texSize, 4.0));
+    return tile_randomVec[texelPos.x + texelPos.y * 4];
 }
 
-float tile_noise_1d(vec2 uv, vec2 tex_size, int noise_size)
-{
-    float tile_size = noise_size * 2.0 + 1.0;
-    vec2 seed = fract(uv * (tex_size / tile_size));
-    return frx_noise2d(seed);
+float getRandomFloat(vec2 uv, vec2 texSize) {
+    ivec2 texelPos = ivec2(mod(uv * texSize, 4.0));
+    return tile_randomVec[texelPos.x + texelPos.y * 4].x;
 }
 
 vec4 tile_denoise(vec2 uv, sampler2D scolor, vec2 inv_size, int noise_size)
