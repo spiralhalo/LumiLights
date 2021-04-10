@@ -29,7 +29,7 @@
         //     target: "TEXTURE_2D",
         //     texParams: [
         //         {name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
-        //         {name: "TEXTURE_WRAP_S", val: "CLAMP"}, {name: "TEXTURE_WRAP_T", val: "CLAMP"}
+        //         {name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
         //     ]
         // },
         {
@@ -42,8 +42,8 @@
             texParams: [
                 { "name": "TEXTURE_MIN_FILTER", "val": "NEAREST" },
                 { "name": "TEXTURE_MAG_FILTER", "val": "NEAREST" },
-                { "name": "TEXTURE_WRAP_S", "val": "CLAMP" },
-                { "name": "TEXTURE_WRAP_T", "val": "CLAMP" },
+                { "name": "TEXTURE_WRAP_S", "val": "CLAMP_TO_EDGE" },
+                { "name": "TEXTURE_WRAP_T", "val": "CLAMP_TO_EDGE" },
                 { "name": "TEXTURE_COMPARE_MODE", "val": "NONE" }
             ]
         },
@@ -54,7 +54,7 @@
             target: "TEXTURE_2D",
             texParams: [
                 {name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
-                {name: "TEXTURE_WRAP_S", val: "CLAMP"}, {name: "TEXTURE_WRAP_T", val: "CLAMP"}
+                {name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
             ]
         },
         
@@ -68,8 +68,8 @@
         //     texParams: [
         //         { "name": "TEXTURE_MIN_FILTER", "val": "NEAREST" },
         //         { "name": "TEXTURE_MAG_FILTER", "val": "NEAREST" },
-        //         { "name": "TEXTURE_WRAP_S", "val": "CLAMP" },
-        //         { "name": "TEXTURE_WRAP_T", "val": "CLAMP" },
+        //         { "name": "TEXTURE_WRAP_S", "val": "CLAMP_TO_EDGE" },
+        //         { "name": "TEXTURE_WRAP_T", "val": "CLAMP_TO_EDGE" },
         //         { "name": "TEXTURE_COMPARE_MODE", "val": "NONE" }
         //     ]
         // },
