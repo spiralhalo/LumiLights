@@ -29,7 +29,7 @@ in vec2 pv_lightcoord;
 in float pv_ao;
 in float pv_diffuse;
 
-out vec4[6] fragColor;
+out vec4[7] fragColor;
 
 frx_FragmentData frx_createPipelineFragment()
 {
@@ -89,13 +89,14 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
                 a.rgb += hdr_gammaAdjust(texture_glint(u_glint, frx_normalizeMappedUV(frx_texcoord), frx_matGlint()));
             #endif
             a = ldr_tonemap(a);
-            fragColor[5] = vec4(bloom_out, 0.0, 0.0, 1.0);
+            fragColor[6] = vec4(bloom_out, 0.0, 0.0, 1.0);
         }
         gl_FragDepth = gl_FragCoord.z;
         fragColor[0] = a;
     } else {
         vec2 light = fragData.light.xy;
-        vec3 normalizedNormal = normalize(fragData.vertexNormal) * 0.5 + 0.5;
+        vec3 normal = normalize(fragData.vertexNormal) * 0.5 + 0.5;
+        vec3 normal_micro = pbr_normalMicro.x > 90. ? normal : normalize(pbr_normalMicro) * 0.5 + 0.5;
         float bloom = fragData.emissivity * a.a;
         float ao = fragData.ao ? (1.0 - fragData.aoShade) * a.a : 0.0;
         float normalizedBloom = (bloom - ao) * 0.5 + 0.5;
@@ -108,9 +109,10 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
         gl_FragDepth = gl_FragCoord.z;
         fragColor[0] = a;
         fragColor[1] = vec4(light.x, light.y, (frx_renderTarget() == TARGET_PARTICLES) ? bloom : normalizedBloom, 1.0);
-        fragColor[2] = vec4(normalizedNormal, 1.0);
-        fragColor[3] = vec4(roughness, pbr_metallic, pbr_f0, 1.0);
-        fragColor[4] = vec4(frx_normalizeMappedUV(frx_texcoord), bitFlags, 1.0);
+        fragColor[2] = vec4(normal, 1.0);
+        fragColor[3] = vec4(normal_micro, 1.0);
+        fragColor[4] = vec4(roughness, pbr_metallic, pbr_f0, 1.0);
+        fragColor[5] = vec4(frx_normalizeMappedUV(frx_texcoord), bitFlags, 1.0);
 
     }
 }

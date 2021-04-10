@@ -48,5 +48,5 @@ void frx_startFragment(inout frx_FragmentData fragData) {
     vec3 up = fragData.vertexNormal.xyz;
     vec3 samplePos = frx_var0.xyz;
     vec3 noisyNormal = ww_normals(up, l2_tangent, cross(up, l2_tangent), samplePos, waveSpeed, scale, amplitude, stretch, moveSpeed);
-    fragData.vertexNormal = mix(noisyNormal, fragData.vertexNormal, pow(gl_FragCoord.z, 500.0));
+    pbr_normalMicro = mix(noisyNormal, fragData.vertexNormal, pow(gl_FragCoord.z, 500.0));
 }

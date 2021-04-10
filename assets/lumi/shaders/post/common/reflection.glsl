@@ -113,7 +113,8 @@ rt_Result rt_reflection(
     float hitbox_mult;
     vec2 current_uv;
     vec3 current_view;
-    float delta_z;
+    float delta_z; 
+    bool frontface;
     vec3 reflectedNormal;
     
     int hits = 0;
@@ -123,10 +124,11 @@ rt_Result rt_reflection(
         ray_view += ray;
         current_uv = view2uv(ray_view, projection);
         current_view = uv2view(current_uv, inv_projection, reflected_depth);
-        delta_z = current_view.z - ray_view.z;
-        if (delta_z > 0 && (current_view.z < edge_z || unit_march.z > 0.0)) {
+        delta_z = current_view.z - ray_view.z; 
+        reflectedNormal = normalize(normal_matrix * sample_worldNormal(current_uv, reflected_normal));
+        frontface = dot(unit_march, reflectedNormal) < 0;
+        if (delta_z > 0 && frontface && (current_view.z < edge_z || unit_march.z > 0.0)) {
             // Pad hitbox to reduce "stripes" artifact when surface is almost perpendicular to 
-            reflectedNormal = normalize(normal_matrix * sample_worldNormal(current_uv, reflected_normal));
             hitbox_mult = 1.0 + 3.0 * (1.0 - dot(vec3(0.0, 0.0, 1.0), reflectedNormal)); // dot is unclamped intentionally
 
             if (delta_z < hitbox_z * hitbox_mult) {

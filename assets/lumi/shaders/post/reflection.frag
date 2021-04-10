@@ -23,6 +23,7 @@ uniform sampler2D u_source_albedo;
 uniform sampler2D u_source_depth;
 uniform sampler2D u_light_source;
 uniform sampler2D u_normal_source;
+uniform sampler2D u_normal_micro_source;
 uniform sampler2D u_material_source;
 
 uniform sampler2D u_target_color;
@@ -140,9 +141,9 @@ void main()
     vec4 source_base = texture(u_source_color, v_texcoord);
     vec3 source_albedo = texture(u_source_albedo, v_texcoord).rgb;
     float source_roughness = texture(u_material_source, v_texcoord).x;
-    rt_color_depth source_source = work_on_pair(source_base, source_albedo, u_source_depth, u_light_source, u_normal_source, u_material_source, u_source_color, u_source_combine, u_source_depth, u_normal_source, 1.0);
+    rt_color_depth source_source = work_on_pair(source_base, source_albedo, u_source_depth, u_light_source, u_normal_micro_source, u_material_source, u_source_color, u_source_combine, u_source_depth, u_normal_source, 1.0);
     #if REFLECTION_PROFILE != REFLECTION_PROFILE_NONE
-        rt_color_depth source_target = work_on_pair(source_base, source_albedo, u_source_depth, u_light_source, u_normal_source, u_material_source, u_target_color, u_target_combine, u_target_depth, u_normal_target, 0.0);
+        rt_color_depth source_target = work_on_pair(source_base, source_albedo, u_source_depth, u_light_source, u_normal_micro_source, u_material_source, u_target_color, u_target_combine, u_target_depth, u_normal_target, 0.0);
         // blend
         vec3 reflection_color = (source_source.depth < source_target.depth)
             ? source_source.color.rgb * source_source.color.a

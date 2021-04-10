@@ -11,6 +11,7 @@
                 "u_source_depth",
                 "u_light_source",
                 "u_normal_source",
+                "u_normal_micro_source",
                 "u_material_source",
 
                 "u_target_color",

@@ -19,7 +19,7 @@
                     "solid_main",
                     "solid_depth",
                     "light_solid",
-                    "normal_solid",
+                    "normal_micro_solid",
                     "material_solid",
                     "misc_solid",
 
@@ -38,7 +38,7 @@
                     "translucent_main",
                     "translucent_depth",
                     "light_translucent",
-                    "normal_translucent",
+                    "normal_micro_translucent",
                     "material_translucent",
                     "misc_translucent",
 
@@ -60,6 +60,7 @@
                     "solid_depth",
                     "light_solid",
                     "normal_solid",
+                    "normal_micro_solid",
                     "material_solid",
 
                     "translucent_shaded",
@@ -78,6 +79,7 @@
                     "translucent_depth",
                     "light_translucent",
                     "normal_translucent",
+                    "normal_micro_translucent",
                     "material_translucent",
 
                     "solid_shaded",

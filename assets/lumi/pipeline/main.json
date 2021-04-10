@@ -126,7 +126,8 @@
                 {name: "TEXTURE_MIN_FILTER", val: "LINEAR"}, {name: "TEXTURE_MAG_FILTER", val: "LINEAR"},
                 {name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
             ]
-        }, {
+        },
+        {
             name: "normal_solid",
             lod: 0,
             internalFormat: "RGB8",
@@ -137,7 +138,20 @@
                 {name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
                 {name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
             ]
-        }, {
+        },
+        {
+            name: "normal_micro_solid",
+            lod: 0,
+            internalFormat: "RGB16",
+            pixelFormat: "RGB",
+            pixelDataType: "UNSIGNED_SHORT",
+            target: "TEXTURE_2D",
+            texParams: [
+                {name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
+                {name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
+            ]
+        },
+        {
             name: "material_solid",
             lod: 0,
             internalFormat: "RGB8",
@@ -193,6 +207,7 @@
                 {image: "solid_main", clearColor: 0x00000000},
                 {image: "light_solid", clearColor: 0x00000000},
                 {image: "normal_solid", clearColor: 0x00000000},
+                {image: "normal_micro_solid", clearColor: 0x00000000},
                 {image: "material_solid", clearColor: 0x00000000},
                 {image: "misc_solid", clearColor: 0x00000000},
                 {image: "emissive"}
