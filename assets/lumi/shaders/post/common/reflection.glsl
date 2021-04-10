@@ -103,6 +103,7 @@ rt_Result rt_reflection(
     in sampler2D reflector_depth, in sampler2D reflector_normal, in sampler2D reflected_depth, in sampler2D reflected_normal
 )
 {
+    ray_view.xyz += unit_march * -ray_view.z / 50; // magic
     vec3 start_view = ray_view.xyz;
     float edge_z = start_view.z + 0.25;
     // float hitbox_z = mix(HITBOX, 1.0, sqrt(start_view.z/512.0));
@@ -113,7 +114,6 @@ rt_Result rt_reflection(
     vec2 current_uv;
     vec3 current_view;
     float delta_z;
-    bool backface;
     vec3 reflectedNormal;
     
     int hits = 0;
@@ -124,17 +124,9 @@ rt_Result rt_reflection(
         current_uv = view2uv(ray_view, projection);
         current_view = uv2view(current_uv, inv_projection, reflected_depth);
         delta_z = current_view.z - ray_view.z;
-        reflectedNormal = normalize(normal_matrix * sample_worldNormal(current_uv, reflected_normal));
-        backface = dot(unit_march, reflectedNormal) > 0;
-        // backface = backface || (unit_march.y != 0.0 && abs(current_view.y - start_view.y) < 1.0);
-        if (delta_z > 0 && !backface && (current_view.z < edge_z || unit_march.z > 0.0)) {
-            // Remove "occlusion factor" (result.hit > 1) because it doesn't work when looking down, i.e. where it is needed the most
-            // if (current_uv.x >= 0.0 && current_uv.y >= 0.0
-            //     && current_uv.x <= 1.0 && current_uv.y <= 1.0) {
-            //     hits ++;
-            // }
-
-            // Pad hitbox to reduce "stripes" artifact when surface is almost perpendicular to camera
+        if (delta_z > 0 && (current_view.z < edge_z || unit_march.z > 0.0)) {
+            // Pad hitbox to reduce "stripes" artifact when surface is almost perpendicular to 
+            reflectedNormal = normalize(normal_matrix * sample_worldNormal(current_uv, reflected_normal));
             hitbox_mult = 1.0 + 3.0 * (1.0 - dot(vec3(0.0, 0.0, 1.0), reflectedNormal)); // dot is unclamped intentionally
 
             if (delta_z < hitbox_z * hitbox_mult) {
