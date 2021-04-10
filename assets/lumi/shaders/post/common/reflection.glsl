@@ -100,7 +100,7 @@ struct rt_Result
 rt_Result rt_reflection(
     vec3 ray_view, vec3 unit_view, vec3 normal, vec3 unit_march,
     mat3 normal_matrix, mat4 projection, mat4 inv_projection,
-    in sampler2D reflector_depth, in sampler2D reflector_normal, in sampler2D reflected_depth, in sampler2D reflected_normal
+    in sampler2D reflected_depth, in sampler2D reflected_normal
 )
 {
     ray_view.xyz += unit_march * -ray_view.z / 50; // magic

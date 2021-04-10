@@ -55,6 +55,7 @@ rt_color_depth work_on_pair(
     in sampler2D reflector_depth,
     in sampler2D reflector_light,
     in sampler2D reflector_normal,
+    in sampler2D reflector_micro_normal,
     in sampler2D reflector_material,
 
     in sampler2D reflected_color,
@@ -66,7 +67,7 @@ rt_color_depth work_on_pair(
 {
     rt_color_depth noreturn = rt_color_depth(vec4(0.0), 1.0);
     vec4 material = texture(reflector_material, v_texcoord);
-    vec3 worldNormal = sample_worldNormal(v_texcoord, reflector_normal);
+    vec3 worldNormal = sample_worldNormal(v_texcoord, reflector_micro_normal);
     float roughness = material.x == 0.0 ? 1.0 : min(1.0, 1.0203 * material.x - 0.01); //prevent gloss on unmanaged draw
     vec3 ray_view  = uv2view(v_texcoord, frx_inverseProjectionMatrix(), reflector_depth);
     vec3 ray_world = view2world(ray_view, frx_inverseViewMatrix());
@@ -77,17 +78,30 @@ rt_color_depth work_on_pair(
         ww_puddle_pbr(fake, roughness, light.y, worldNormal, ray_world);
     #endif
     if (roughness <= REFLECTION_MAXIMUM_ROUGHNESS) {
+        vec3 unit_view  = normalize(-ray_view);
+        // bad
+        // vec3 origNormal = sample_worldNormal(v_texcoord, reflector_normal);
+        // if (dot(origNormal, unit_view) > dot(worldNormal, unit_view)) {
+        //     worldNormal = origNormal;
+        // }
         vec3 jitter    = 2.0 * getRandomVec(v_texcoord, frxu_size) - 1.0;
         vec3 normal    = frx_normalModelMatrix() * normalize(worldNormal);
         float roughness2 = roughness * roughness;
         // if (ray_view.y < normal.y) return noreturn;
-        vec3 unit_view  = normalize(-ray_view);
-        vec3 unit_march = normalize(reflect(-unit_view, normal) + mix(vec3(0.0, 0.0, 0.0), jitter * JITTER_STRENGTH, roughness2));
         vec3 reg_f0     = vec3(material.z);
         vec3 f0         = mix(reg_f0, albedo, material.y);
 
+        vec3 unit_march = normalize(reflect(-unit_view, normal) + mix(vec3(0.0, 0.0, 0.0), jitter * JITTER_STRENGTH, roughness2));
+
         #if REFLECTION_PROFILE != REFLECTION_PROFILE_NONE
-        rt_Result result = rt_reflection(ray_view, unit_view, normal, unit_march, frx_normalModelMatrix(), frx_projectionMatrix(), frx_inverseProjectionMatrix(), reflector_depth, reflector_normal, reflected_depth, reflected_normal);
+        rt_Result result;
+        vec3 origNormal_view = frx_normalModelMatrix() * sample_worldNormal(v_texcoord, reflector_normal);
+        if (dot(origNormal_view, unit_march) < 0) {
+            // Eliminate impossible rays
+            result.hit = false;
+        } else {
+            result = rt_reflection(ray_view, unit_view, normal, unit_march, frx_normalModelMatrix(), frx_projectionMatrix(), frx_inverseProjectionMatrix(), reflected_depth, reflected_normal);
+        }
         #endif
 
         vec4 reflected;
@@ -141,9 +155,9 @@ void main()
     vec4 source_base = texture(u_source_color, v_texcoord);
     vec3 source_albedo = texture(u_source_albedo, v_texcoord).rgb;
     float source_roughness = texture(u_material_source, v_texcoord).x;
-    rt_color_depth source_source = work_on_pair(source_base, source_albedo, u_source_depth, u_light_source, u_normal_micro_source, u_material_source, u_source_color, u_source_combine, u_source_depth, u_normal_source, 1.0);
+    rt_color_depth source_source = work_on_pair(source_base, source_albedo, u_source_depth, u_light_source, u_normal_source, u_normal_micro_source, u_material_source, u_source_color, u_source_combine, u_source_depth, u_normal_source, 1.0);
     #if REFLECTION_PROFILE != REFLECTION_PROFILE_NONE
-        rt_color_depth source_target = work_on_pair(source_base, source_albedo, u_source_depth, u_light_source, u_normal_micro_source, u_material_source, u_target_color, u_target_combine, u_target_depth, u_normal_target, 0.0);
+        rt_color_depth source_target = work_on_pair(source_base, source_albedo, u_source_depth, u_light_source, u_normal_source, u_normal_micro_source, u_material_source, u_target_color, u_target_combine, u_target_depth, u_normal_target, 0.0);
         // blend
         vec3 reflection_color = (source_source.depth < source_target.depth)
             ? source_source.color.rgb * source_source.color.a
