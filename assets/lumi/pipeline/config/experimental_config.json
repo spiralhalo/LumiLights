@@ -14,7 +14,7 @@
                 },
                 taa_debug_render: {
                     default: "off",
-                    choices: ["off", "velocity", "depth"],
+                    choices: ["off", "velocity", "depth", "frames"],
                     enum: true,
                     prefix: "taa_debug_render_",
                     nameKey: "config.lumi_lights.value.taa_debug_render",

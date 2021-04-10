@@ -39,6 +39,11 @@ void main()
 #if defined(TAA_ENABLED) && TAA_DEBUG_RENDER != TAA_DEBUG_RENDER_OFF
     #if TAA_DEBUG_RENDER == TAA_DEBUG_RENDER_DEPTH
         gl_FragData[0] = vec4(ldepth(texture2D(u_depthCurrent, v_texcoord).r));
+    #elif TAA_DEBUG_RENDER == TAA_DEBUG_RENDER_FRAMES
+        float d = ldepth(texture2D(u_depthCurrent, v_texcoord).r);
+        int frames = int(mod(frx_renderFrames(), frxu_size.x)); 
+        float on = frames == int(frxu_size.x * v_texcoord.x) ? 1.0 : 0.0;
+        gl_FragData[0] = vec4(on, 0.0, 0.25 + d * 0.5, 1.0);
     #else
         vec2 velocity = 0.5 + calc_velocity() * 50.0;
         gl_FragData[0] = vec4(velocity, 0.0, 1.0);
