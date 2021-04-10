@@ -46,9 +46,9 @@ const vec2[BLOCK_DIR_N] BLOCK_DIR_TEST = vec2[](
 vec3 calcBlockDir(in sampler2D slight, in vec2 uv, vec2 inv_size, in vec3 normal, in vec3 viewPos, in sampler2D sdepth) {
     int m = -1;
     vec2 pixel_size = inv_size * 4.0;
-    float brightest = texture2D(slight, uv).x;
+    float brightest = texture(slight, uv).x;
     for(int i = 0; i < BLOCK_DIR_N; i++) {
-        float current = texture2D(slight, uv + BLOCK_DIR_TEST[i] * pixel_size).x;
+        float current = texture(slight, uv + BLOCK_DIR_TEST[i] * pixel_size).x;
         if (current > brightest) {
             m = i;
             brightest = current;
@@ -58,7 +58,7 @@ vec3 calcBlockDir(in sampler2D slight, in vec2 uv, vec2 inv_size, in vec3 normal
         return normal;
     } else {
         vec2 mUV = uv + BLOCK_DIR_TEST[m] * pixel_size;
-        vec4 mViewPos = frx_inverseProjectionMatrix() * vec4(2.0 * mUV - 1.0, 2.0 * texture2D(sdepth, mUV).r - 1.0, 1.0);
+        vec4 mViewPos = frx_inverseProjectionMatrix() * vec4(2.0 * mUV - 1.0, 2.0 * texture(sdepth, mUV).r - 1.0, 1.0);
         mViewPos.xyz /= mViewPos.w;
         vec3 mDir = normalize(mViewPos.xyz - viewPos) * frx_normalModelMatrix();
         return normalize(normal+mDir);

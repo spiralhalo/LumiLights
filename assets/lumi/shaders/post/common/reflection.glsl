@@ -54,7 +54,7 @@ vec2 view2uv(vec3 view, mat4 projection)
 
 float sample_depth(vec2 uv, in sampler2D sdepth)
 {
-    return texture2D(sdepth, uv).r;
+    return texture(sdepth, uv).r;
 }
 
 vec3 uv2view(vec2 uv, mat4 inv_projection, in sampler2D sdepth)
@@ -72,7 +72,7 @@ vec3 view2world(vec3 view, mat4 inv_view)
 
 vec3 sample_worldNormal(vec2 uv, in sampler2D snormal)
 {
-    return 2.0 * texture2D(snormal, uv).xyz - 1.0;
+    return 2.0 * texture(snormal, uv).xyz - 1.0;
 }
 
 float skylight_adjust(float skyLight, float intensity)

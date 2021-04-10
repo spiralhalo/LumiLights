@@ -40,9 +40,15 @@ float l2_sunHorizonScale(float time)
 /*  COLOR VARYINGS
  *******************************************************/
 
-varying vec3 vhdr_ambientColor;
-varying vec3 vhdr_dimensionColor;
-varying vec3 vldr_sunColor;
+#ifdef VERTEX_SHADER
+out vec3 vhdr_ambientColor;
+out vec3 vhdr_dimensionColor;
+out vec3 vldr_sunColor;
+#else
+in vec3 vhdr_ambientColor;
+in vec3 vhdr_dimensionColor;
+in vec3 vldr_sunColor;
+#endif
 
 /*  COLORS
  *******************************************************/
@@ -90,11 +96,11 @@ vec3 hdr_dimensionColor()
 {
     // THE NETHER
     if (frx_isWorldTheNether()) {
-        float min_col = l2_min3(gl_Fog.color.rgb);
-        float max_col = l2_max3(gl_Fog.color.rgb);
+        float min_col = l2_min3(frx_vanillaClearColor());
+        float max_col = l2_max3(frx_vanillaClearColor());
         float sat = 0.0;
         if (max_col != 0.0) sat = (max_col-min_col)/max_col;
-        return hdr_gammaAdjust(clamp((gl_Fog.color.rgb*(1/max_col))+pow(sat,2)/2, 0.0, 1.0));
+        return hdr_gammaAdjust(clamp((frx_vanillaClearColor()*(1/max_col))+pow(sat,2)/2, 0.0, 1.0));
     }
     // THE END
     return hdr_gammaAdjust(vec3(0.8, 0.7, 1.0));

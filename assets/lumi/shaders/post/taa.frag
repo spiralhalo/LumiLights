@@ -11,10 +11,12 @@ uniform sampler2D u_current;
 uniform sampler2D u_history0;
 uniform sampler2D u_depthCurrent;
 
-varying vec2 v_invSize;
+in vec2 v_invSize;
+
+out vec4 fragColor;
 
 vec2 calc_velocity() {
-    float closestDepth = texture2D(u_depthCurrent, GetClosestUV(u_depthCurrent, v_texcoord, v_invSize)).r;
+    float closestDepth = texture(u_depthCurrent, GetClosestUV(u_depthCurrent, v_texcoord, v_invSize)).r;
     vec4 currentModelPos = frx_inverseViewProjectionMatrix() * vec4(v_texcoord * 2.0 - 1.0, closestDepth * 2.0 - 1.0, 1.0);
     currentModelPos.xyz /= currentModelPos.w;
     currentModelPos.w = 1.0;
@@ -38,15 +40,15 @@ void main()
 {
 #if defined(TAA_ENABLED) && TAA_DEBUG_RENDER != TAA_DEBUG_RENDER_OFF
     #if TAA_DEBUG_RENDER == TAA_DEBUG_RENDER_DEPTH
-        gl_FragData[0] = vec4(ldepth(texture2D(u_depthCurrent, v_texcoord).r));
+        fragColor = vec4(ldepth(texture(u_depthCurrent, v_texcoord).r));
     #elif TAA_DEBUG_RENDER == TAA_DEBUG_RENDER_FRAMES
-        float d = ldepth(texture2D(u_depthCurrent, v_texcoord).r);
+        float d = ldepth(texture(u_depthCurrent, v_texcoord).r);
         int frames = int(mod(frx_renderFrames(), frxu_size.x)); 
         float on = frames == int(frxu_size.x * v_texcoord.x) ? 1.0 : 0.0;
-        gl_FragData[0] = vec4(on, 0.0, 0.25 + d * 0.5, 1.0);
+        fragColor = vec4(on, 0.0, 0.25 + d * 0.5, 1.0);
     #else
         vec2 velocity = 0.5 + calc_velocity() * 50.0;
-        gl_FragData[0] = vec4(velocity, 0.0, 1.0);
+        fragColor = vec4(velocity, 0.0, 1.0);
     #endif
 #else
 
@@ -58,9 +60,9 @@ void main()
 
     #ifdef TAA_ENABLED
         float cameraMove = length(frx_cameraPos() - frx_lastCameraPos());
-        gl_FragData[0] = TAA(u_current, u_history0, u_depthCurrent, v_texcoord, calc_velocity(), v_invSize, cameraMove);
+        fragColor = TAA(u_current, u_history0, u_depthCurrent, v_texcoord, calc_velocity(), v_invSize, cameraMove);
     #else
-        gl_FragData[0] = texture2D(u_current, v_texcoord);
+        fragColor = texture(u_current, v_texcoord);
     #endif
 #endif
 }

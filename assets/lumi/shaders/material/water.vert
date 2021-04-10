@@ -1,8 +1,7 @@
 #include frex:shaders/api/vertex.glsl
 #include frex:shaders/api/world.glsl
 #include frex:shaders/lib/noise/noise3d.glsl
-#include lumi:shaders/forward/common.glsl
-#include lumi:shaders/api/water_param.glsl
+#include lumi:shaders/api/pbr_ext.glsl
 
 #ifndef LUMI_WavyWaterIntensity
     #define LUMI_WavyWaterIntensity 1
@@ -18,7 +17,7 @@ const float beeg_scale = 6.0;
 const float beeg_amplitude = 0.25;
 
 void frx_startVertex(inout frx_VertexData data) {
-    set_l2_tangent(data.normal);
+    pbrExt_tangentSetup(data.normal);
     float waveSpeed = mix(smol_waveSpeed, beeg_waveSpeed, abs(data.normal.y));
     float scale = mix(smol_scale, beeg_scale, abs(data.normal.y));
     float amplitude = mix(smol_amplitude, beeg_amplitude, abs(data.normal.y));

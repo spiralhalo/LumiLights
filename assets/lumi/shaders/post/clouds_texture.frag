@@ -9,11 +9,13 @@
  *  lumi:shaders/post/clouds_texture.frag              *
  *******************************************************/
 
+out vec4 fragColor;
+
 void main()
 {
     #if CLOUD_RENDERING == CLOUD_RENDERING_VOLUMETRIC
     if (frx_worldFlag(FRX_WORLD_IS_OVERWORLD)) {
-        gl_FragData[0] = generateCloudTexture(v_texcoord);
+        fragColor = generateCloudTexture(v_texcoord);
     }
     #endif
 }

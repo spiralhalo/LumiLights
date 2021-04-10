@@ -56,7 +56,7 @@ vec2 GetClosestUV(in sampler2D depths, vec2 texcoord, vec2 deltaRes)
     for(int iter = 0; iter < neighborCount3x3; iter++)
     {
         vec2 newUV = texcoord + (kOffsets3x3[iter] * deltaRes);
-        float depth = texture2D(depths, newUV).x;
+        float depth = texture(depths, newUV).x;
         if(depth < closestDepth)
         {
             closestDepth = depth;
@@ -142,7 +142,7 @@ vec4 Inside2Resolve(sampler2D currColorTex, sampler2D prevColorTex, vec2 texcoor
     vec4 current3x3Colors[neighborCount3x3];
     for(int iter = 0; iter < neighborCount3x3; iter++)
     {
-        current3x3Colors[iter] = texture2D(currColorTex, texcoord + (kOffsets3x3[iter] * deltaRes));
+        current3x3Colors[iter] = texture(currColorTex, texcoord + (kOffsets3x3[iter] * deltaRes));
     }
     vec4 rounded3x3Min = MinColors2(current3x3Colors);
     vec4 rounded3x3Max = MaxColors2(current3x3Colors);
@@ -150,7 +150,7 @@ vec4 Inside2Resolve(sampler2D currColorTex, sampler2D prevColorTex, vec2 texcoor
     vec4 current2x2Colors[neighborCount2x2];
     for(int iter = 0; iter < neighborCount2x2; iter++)
     {
-        current2x2Colors[iter] = texture2D(currColorTex, texcoord + (kOffsets2x2[iter] * deltaRes));
+        current2x2Colors[iter] = texture(currColorTex, texcoord + (kOffsets2x2[iter] * deltaRes));
     }
     vec4 min2 = MinColors(current2x2Colors);
     vec4 max2 = MaxColors(current2x2Colors);
@@ -160,7 +160,7 @@ vec4 Inside2Resolve(sampler2D currColorTex, sampler2D prevColorTex, vec2 texcoor
     vec4 mixedMax = mix(rounded3x3Max, max2, 0.5);
 
     float adjustedFeedback = cameraMove == 0.0 ? feedbackFactor : minimumFeedbackFactor;
-    vec4 clippedHistoryColor = clip_aabb(mixedMin.rgb, mixedMax.rgb, current2x2Colors[2], texture2D(prevColorTex, texcoord + velocity));
+    vec4 clippedHistoryColor = clip_aabb(mixedMin.rgb, mixedMax.rgb, current2x2Colors[2], texture(prevColorTex, texcoord + velocity));
     return mix(current2x2Colors[2], clippedHistoryColor, adjustedFeedback);
 }
 

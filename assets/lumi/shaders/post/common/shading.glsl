@@ -7,7 +7,6 @@
 #include frex:shaders/api/player.glsl
 #include frex:shaders/api/material.glsl
 #include lumi:shaders/lib/util.glsl
-#include lumi:shaders/lib/fog.glsl
 #include lumi:shaders/func/tonemap.glsl
 #include lumi:shaders/func/pbr_shading.glsl
 #include lumi:shaders/lib/puddle.glsl
@@ -34,15 +33,15 @@
     vertexShader: lumi:shaders/post/hdr.vert
  *******************************************************/
 
-varying vec2 v_invSize;
-varying mat4 v_star_rotator;
-varying mat4 v_cloud_rotator;
-varying float v_fov;
-varying float v_night;
-varying float v_not_in_void;
-varying float v_near_void_core;
-varying float v_blindness;
-varying vec3 v_sky_radiance;
+in vec2 v_invSize;
+in mat4 v_star_rotator;
+in mat4 v_cloud_rotator;
+in float v_fov;
+in float v_night;
+in float v_not_in_void;
+in float v_near_void_core;
+in float v_blindness;
+in vec3 v_sky_radiance;
 
 const vec3 VOID_CORE_COLOR = hdr_gammaAdjust(vec3(1.0, 0.7, 0.5));
 
@@ -284,8 +283,8 @@ vec4 hdr_shaded_color(
     sampler2D scolor, sampler2D sdepth, sampler2D slight, sampler2D snormal, sampler2D smaterial, sampler2D smisc,
     float aoval, bool translucent, float translucentDepth, out float bloom_out)
 {
-    vec4  a       = texture2D(scolor, uv);
-    float depth   = texture2D(sdepth, uv).r;
+    vec4  a       = texture(scolor, uv);
+    float depth   = texture(sdepth, uv).r;
     vec3  viewPos = coords_view(uv, frx_inverseProjectionMatrix(), depth);
 
     if (depth == 1.0 && !translucent) {
@@ -297,7 +296,7 @@ vec4 hdr_shaded_color(
         // return a + fog(frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? frx_ambientIntensity() : 1.0, vec4(0.0), viewPos, worldPos, bloom_out);
     }
 
-    vec4  light     = texture2D(slight, uv);
+    vec4  light     = texture(slight, uv);
     if (light.x == 0.0) {
         // bypass unmanaged translucent draw (LITEMATICA WORKAROUND)
         // bypass unmanaged solid sky draw (fix debug rendering color)
@@ -314,15 +313,15 @@ vec4 hdr_shaded_color(
         #endif
         return a;
     }
-    vec3  normal    = texture2D(snormal, uv).xyz * 2.0 - 1.0;
-    vec3  material  = texture2D(smaterial, uv).xyz;
+    vec3  normal    = texture(snormal, uv).xyz * 2.0 - 1.0;
+    vec3  material  = texture(smaterial, uv).xyz;
     float roughness = material.x == 0.0 ? 1.0 : min(1.0, 1.0203 * material.x - 0.01);
     float metallic  = material.y;
     vec3  worldPos  = frx_cameraPos() + (frx_inverseViewMatrix() * vec4(viewPos, 1.0)).xyz;
     float f0        = material.z;
     float bloom_raw = light.z * 2.0 - 1.0;
     bool  diffuse   = material.x < 1.0;
-    vec3  misc      = texture2D(smisc, uv).xyz;
+    vec3  misc      = texture(smisc, uv).xyz;
     float matflash  = bit_unpack(misc.z, 0);
     float mathurt   = bit_unpack(misc.z, 1);
     // return vec4(coords_view(uv, frx_inverseProjectionMatrix(), depth), 1.0);

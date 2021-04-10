@@ -7,7 +7,9 @@
 ******************************************************/
 uniform sampler2D u_input;
 
+out vec4 fragColor;
+
 void main()
 {
-    gl_FragData[0] = frx_sample13(u_input, v_texcoord, BLOOM_DOWNSAMPLE_DIST_VEC / frxu_size, max(0, frxu_lod - 1));
+    fragColor = frx_sample13(u_input, v_texcoord, BLOOM_DOWNSAMPLE_DIST_VEC / frxu_size, max(0, frxu_lod - 1));
 }

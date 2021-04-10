@@ -70,7 +70,7 @@ const float CLOUD_MID_ALTITUDE = CLOUD_ALTITUDE + CLOUD_MID_HEIGHT;
 const float CLOUD_MIN_Y = CLOUD_ALTITUDE;
 const float CLOUD_MAX_Y = CLOUD_ALTITUDE + CLOUD_HEIGHT;
 
-float sampleCloud(in vec3 worldPos, in sampler2D texture)
+float sampleCloud(in vec3 worldPos, in sampler2D scloudTex)
 {
     #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
         vec2 uv = modelXz2Uv(worldPos.xz);
@@ -81,7 +81,7 @@ float sampleCloud(in vec3 worldPos, in sampler2D texture)
     vec2 edge = smoothstep(0.5, 0.4, abs(uv - 0.5));
     float eF = edge.x * edge.y;
 
-    vec2 tex = texture2D(texture, uv).rg; 
+    vec2 tex = texture(scloudTex, uv).rg; 
     float tF = tex.r;
     float hF = tex.g;
     float yF = smoothstep(CLOUD_MID_ALTITUDE + CLOUD_TOP_HEIGHT * hF, CLOUD_MID_ALTITUDE, worldPos.y) * smoothstep(CLOUD_ALTITUDE, CLOUD_MID_ALTITUDE, worldPos.y);
@@ -90,10 +90,10 @@ float sampleCloud(in vec3 worldPos, in sampler2D texture)
     // return smoothstep(0.1, 0.11, yF * tF * eF);
 }
 
-cloud_result rayMarchCloud(in sampler2D texture, in sampler2D sdepth, in vec2 texcoord)
+cloud_result rayMarchCloud(in sampler2D scloudTex, in sampler2D sdepth, in vec2 texcoord)
 {
     float rainFactor = frx_rainGradient() * 0.67 + frx_thunderGradient() * 0.33; // TODO: optimize
-    float depth = texture2D(sdepth, texcoord).r;
+    float depth = texture(sdepth, texcoord).r;
     float maxDist;
     vec3 worldVec;
 
@@ -160,7 +160,7 @@ cloud_result rayMarchCloud(in sampler2D texture, in sampler2D sdepth, in vec2 te
         i ++;
         traveled += SAMPLE_SIZE;
         currentWorldPos += unitSample;
-        float sampledDensity = sampleCloud(currentWorldPos, texture);
+        float sampledDensity = sampleCloud(currentWorldPos, scloudTex);
         if (sampledDensity > 0) {
             // ATTEMPT 1
             if (first) {
@@ -179,7 +179,7 @@ cloud_result rayMarchCloud(in sampler2D texture, in sampler2D sdepth, in vec2 te
             while (j < LIGHT_SAMPLE) {
                 j ++;
                 occlusionWorldPos += toLight;
-                occlusionDensity += sampleCloud(occlusionWorldPos, texture);
+                occlusionDensity += sampleCloud(occlusionWorldPos, scloudTex);
             }
             occlusionDensity *= LIGHT_SAMPLE_SIZE; // this is what *stepSize means
             float lightTransmittance = DARKNESS_THRESHOLD + DARKNESS_THRESHOLD_INV * exp(-occlusionDensity * LIGHT_ABSORPTION_SKYLIGHT);

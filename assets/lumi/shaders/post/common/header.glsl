@@ -1,8 +1,8 @@
-#version 130
-#extension GL_EXT_gpu_shader4 : enable
+#include frex:shaders/api/header.glsl
 
 #define POST_SHADER
 
+#include lumi:shaders/common/compat.glsl
 #include lumi:shaders/lib/util.glsl
 #include lumi:shaders/func/tonemap.glsl
 #include lumi:shaders/common/lighting.glsl
@@ -11,19 +11,18 @@
 #include frex:shaders/api/player.glsl
 #include frex:shaders/api/view.glsl
 
-#define VERTEX_SHADER
-
 /*******************************************************
  *  lumi:shaders/post/common/header.glsl               *
  *******************************************************/
 
 uniform ivec2 frxu_size;
 uniform int frxu_lod;
-varying vec2 v_texcoord;
-varying vec3 v_skycolor;
-varying vec3 v_up;
+uniform mat4 frxu_frameProjectionMatrix;
 
 #ifdef VERTEX_SHADER
+out vec2 v_texcoord;
+out vec3 v_skycolor;
+out vec3 v_up;
 // const vec3 day_sky = vec3(0.52, 0.69, 1.0);
 // const vec3 day_fog = vec3(0.75, 0.84375, 1.0);
 
@@ -76,6 +75,9 @@ vec3 ldr_skyColor()
     return ldr_tonemap3(hdr_skyColor());
 }
 #else
+in vec2 v_texcoord;
+in vec3 v_skycolor;
+in vec3 v_up;
 vec3 hdr_orangeSkyColor(vec3 original, vec3 viewDir) {
     bool customOverworldOrange =
         frx_worldFlag(FRX_WORLD_IS_OVERWORLD)

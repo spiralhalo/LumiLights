@@ -30,6 +30,8 @@ uniform sampler2D u_target_combine;
 uniform sampler2D u_target_depth;
 uniform sampler2D u_normal_target;
 
+out vec4 fragColor;
+
 const float JITTER_STRENGTH = 0.2;
 const float SKYLESS_FACTOR = 0.5;
 
@@ -62,13 +64,13 @@ rt_color_depth work_on_pair(
 )
 {
     rt_color_depth noreturn = rt_color_depth(vec4(0.0), 1.0);
-    vec4 material = texture2D(reflector_material, v_texcoord);
+    vec4 material = texture(reflector_material, v_texcoord);
     vec3 worldNormal = sample_worldNormal(v_texcoord, reflector_normal);
     float roughness = material.x == 0.0 ? 1.0 : min(1.0, 1.0203 * material.x - 0.01); //prevent gloss on unmanaged draw
     vec3 ray_view  = uv2view(v_texcoord, frx_inverseProjectionMatrix(), reflector_depth);
     vec3 ray_world = view2world(ray_view, frx_inverseViewMatrix());
     // TODO: optimize puddle by NOT calling it twice in shading and in reflection
-    vec2 light = texture2D(reflector_light, v_texcoord).xy;
+    vec2 light = texture(reflector_light, v_texcoord).xy;
     vec4 fake = vec4(0.0);
     #ifdef RAIN_PUDDLES
         ww_puddle_pbr(fake, roughness, light.y, worldNormal, ray_world);
@@ -112,12 +114,12 @@ rt_color_depth work_on_pair(
         } else {
             #ifdef MULTI_BOUNCE_REFLECTION
                 // TODO: velocity reprojection. this method creates reflection that lags behind and somehow I overlooked this :/
-                vec4 reflectedShaded = texture2D(reflected_color, result.reflected_uv);
-                vec4 reflectedCombine = texture2D(reflected_combine, result.reflected_uv);
+                vec4 reflectedShaded = texture(reflected_color, result.reflected_uv);
+                vec4 reflectedCombine = texture(reflected_combine, result.reflected_uv);
                 vec3 reflectedNormal = sample_worldNormal(result.reflected_uv, reflected_normal);
                 reflected = mix(reflectedShaded, reflectedCombine, l2_clampScale(0.5, 1.0, -dot(worldNormal, reflectedNormal)));
             #else
-                reflected = texture2D(reflected_color, result.reflected_uv);
+                reflected = texture(reflected_color, result.reflected_uv);
             #endif
             // fade to fallback on edges
             vec2 uvFade = smoothstep(0.5, 0.45, abs(result.reflected_uv - 0.5));
@@ -135,9 +137,9 @@ rt_color_depth work_on_pair(
 
 void main()
 {
-    vec4 source_base = texture2D(u_source_color, v_texcoord);
-    vec3 source_albedo = texture2D(u_source_albedo, v_texcoord).rgb;
-    float source_roughness = texture2D(u_material_source, v_texcoord).x;
+    vec4 source_base = texture(u_source_color, v_texcoord);
+    vec3 source_albedo = texture(u_source_albedo, v_texcoord).rgb;
+    float source_roughness = texture(u_material_source, v_texcoord).x;
     rt_color_depth source_source = work_on_pair(source_base, source_albedo, u_source_depth, u_light_source, u_normal_source, u_material_source, u_source_color, u_source_combine, u_source_depth, u_normal_source, 1.0);
     #if REFLECTION_PROFILE != REFLECTION_PROFILE_NONE
         rt_color_depth source_target = work_on_pair(source_base, source_albedo, u_source_depth, u_light_source, u_normal_source, u_material_source, u_target_color, u_target_combine, u_target_depth, u_normal_target, 0.0);
@@ -145,8 +147,8 @@ void main()
         vec3 reflection_color = (source_source.depth < source_target.depth)
             ? source_source.color.rgb * source_source.color.a
             : (source_source.color.rgb * (1.0 - source_target.color.a) + source_target.color.rgb * source_target.color.a);
-        gl_FragData[0] = vec4(reflection_color, source_roughness);
+        fragColor = vec4(reflection_color, source_roughness);
     #else
-        gl_FragData[0] = vec4(source_source.color.rgb, source_roughness);
+        fragColor = vec4(source_source.color.rgb, source_roughness);
     #endif
 }

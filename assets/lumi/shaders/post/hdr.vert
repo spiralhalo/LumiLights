@@ -9,19 +9,17 @@
  *  lumi:shaders/post/hdr.vert                *
  *******************************************************/
 
-varying mat4 v_star_rotator;
+out mat4 v_star_rotator;
 #if CLOUD_RENDERING == CLOUD_RENDERING_FLAT
-varying mat4 v_cloud_rotator;
+out mat4 v_cloud_rotator;
 #endif
-varying vec2 v_invSize;
-varying float v_fov;
-varying float v_night;
-varying float v_not_in_void;
-varying float v_near_void_core;
-varying float v_blindness;
-varying vec3 v_sky_radiance;
-
-attribute vec2 in_uv;
+out vec2 v_invSize;
+out float v_fov;
+out float v_night;
+out float v_not_in_void;
+out float v_near_void_core;
+out float v_blindness;
+out vec3 v_sky_radiance;
 
 void main()
 {
@@ -41,7 +39,7 @@ void main()
     v_sky_radiance = frx_worldFlag(FRX_WORLD_IS_MOONLIT)
         ? moonRadiance : mix(moonRadiance, sunRadiance, frx_skyLightTransitionFactor());
 
-    vec4 screen = gl_ProjectionMatrix * vec4(gl_Vertex.xy * frxu_size, 0.0, 1.0);
+    vec4 screen = frxu_frameProjectionMatrix * vec4(in_vertex.xy * frxu_size, 0.0, 1.0);
     gl_Position = vec4(screen.xy, 0.2, 1.0);
     v_texcoord = in_uv;
     v_up = frx_normalModelMatrix() * vec3(0.0, 1.0, 0.0);

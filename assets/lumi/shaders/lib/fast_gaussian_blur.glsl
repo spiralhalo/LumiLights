@@ -19,13 +19,13 @@ vec4 blur13(sampler2D image, vec2 uv, vec2 resolution, vec2 direction)
     vec2 off1 = vec2(1.411764705882353) * direction;
     vec2 off2 = vec2(3.2941176470588234) * direction;
     vec2 off3 = vec2(5.176470588235294) * direction;
-    color += texture2D(image, uv) * 0.1964825501511404;
-    color += texture2D(image, uv + (off1 / resolution)) * 0.2969069646728344;
-    color += texture2D(image, uv - (off1 / resolution)) * 0.2969069646728344;
-    color += texture2D(image, uv + (off2 / resolution)) * 0.09447039785044732;
-    color += texture2D(image, uv - (off2 / resolution)) * 0.09447039785044732;
-    color += texture2D(image, uv + (off3 / resolution)) * 0.010381362401148057;
-    color += texture2D(image, uv - (off3 / resolution)) * 0.010381362401148057;
+    color += texture(image, uv) * 0.1964825501511404;
+    color += texture(image, uv + (off1 / resolution)) * 0.2969069646728344;
+    color += texture(image, uv - (off1 / resolution)) * 0.2969069646728344;
+    color += texture(image, uv + (off2 / resolution)) * 0.09447039785044732;
+    color += texture(image, uv - (off2 / resolution)) * 0.09447039785044732;
+    color += texture(image, uv + (off3 / resolution)) * 0.010381362401148057;
+    color += texture(image, uv - (off3 / resolution)) * 0.010381362401148057;
     return color;
 }
 
@@ -41,7 +41,7 @@ vec4 blur13(sampler2D image, vec2 uv, vec2 resolution, vec2 direction)
  *  published by the Free Software Foundation, Inc.    *
  *******************************************************/
 
-#define blur13depthOf(s, uv) ldepth(texture2D(s, uv).r)
+#define blur13depthOf(s, uv) ldepth(texture(s, uv).r)
 #define blur13depthDiffFac(f, s, uv, t) (abs(blur13depthOf(s, uv) - f) < t ? 1.0 : 0.0)
 vec4 blur13withDepth(sampler2D image, sampler2D depth, float depthThreshold, vec2 uv, vec2 resolution, vec2 direction)
 {
@@ -51,13 +51,13 @@ vec4 blur13withDepth(sampler2D image, sampler2D depth, float depthThreshold, vec
     vec2 off1 = vec2(1.411764705882353) * direction;
     vec2 off2 = vec2(3.2941176470588234) * direction;
     vec2 off3 = vec2(5.176470588235294) * direction;
-    color += texture2D(image, uv) * 0.1964825501511404;
-    color += texture2D(image, uv + (off1 * invRes)) * 0.2969069646728344 * blur13depthDiffFac(d, depth, uv + (off1 * invRes), depthThreshold);
-    color += texture2D(image, uv - (off1 * invRes)) * 0.2969069646728344 * blur13depthDiffFac(d, depth, uv - (off1 * invRes), depthThreshold);
-    color += texture2D(image, uv + (off2 * invRes)) * 0.09447039785044732 * blur13depthDiffFac(d, depth, uv + (off2 * invRes), depthThreshold);
-    color += texture2D(image, uv - (off2 * invRes)) * 0.09447039785044732 * blur13depthDiffFac(d, depth, uv - (off2 * invRes), depthThreshold);
-    color += texture2D(image, uv + (off3 * invRes)) * 0.010381362401148057 * blur13depthDiffFac(d, depth, uv + (off3 * invRes), depthThreshold);
-    color += texture2D(image, uv - (off3 * invRes)) * 0.010381362401148057 * blur13depthDiffFac(d, depth, uv - (off3 * invRes), depthThreshold);
+    color += texture(image, uv) * 0.1964825501511404;
+    color += texture(image, uv + (off1 * invRes)) * 0.2969069646728344 * blur13depthDiffFac(d, depth, uv + (off1 * invRes), depthThreshold);
+    color += texture(image, uv - (off1 * invRes)) * 0.2969069646728344 * blur13depthDiffFac(d, depth, uv - (off1 * invRes), depthThreshold);
+    color += texture(image, uv + (off2 * invRes)) * 0.09447039785044732 * blur13depthDiffFac(d, depth, uv + (off2 * invRes), depthThreshold);
+    color += texture(image, uv - (off2 * invRes)) * 0.09447039785044732 * blur13depthDiffFac(d, depth, uv - (off2 * invRes), depthThreshold);
+    color += texture(image, uv + (off3 * invRes)) * 0.010381362401148057 * blur13depthDiffFac(d, depth, uv + (off3 * invRes), depthThreshold);
+    color += texture(image, uv - (off3 * invRes)) * 0.010381362401148057 * blur13depthDiffFac(d, depth, uv - (off3 * invRes), depthThreshold);
     return color;
 }
 
@@ -66,7 +66,7 @@ vec4 blur13sameAlpha(in vec4 x, in float original_a, in vec4 original_color) {
 }
 vec4 blur13withDepthSameAlpha(sampler2D image, sampler2D depth, float depthThreshold, vec2 uv, vec2 resolution, vec2 direction)
 {
-    vec4 origin = texture2D(image, uv);
+    vec4 origin = texture(image, uv);
     float alpha = origin.a;
     float d = blur13depthOf(depth, uv);
     vec2 invRes = 1/resolution;
@@ -74,12 +74,12 @@ vec4 blur13withDepthSameAlpha(sampler2D image, sampler2D depth, float depthThres
     vec2 off1 = vec2(1.411764705882353) * direction;
     vec2 off2 = vec2(3.2941176470588234) * direction;
     vec2 off3 = vec2(5.176470588235294) * direction;
-    color += blur13sameAlpha(texture2D(image, uv), alpha, origin) * 0.1964825501511404;
-    color += blur13sameAlpha(texture2D(image, uv + (off1 * invRes)), alpha, origin) * 0.2969069646728344 * blur13depthDiffFac(d, depth, uv + (off1 * invRes), depthThreshold);
-    color += blur13sameAlpha(texture2D(image, uv - (off1 * invRes)), alpha, origin) * 0.2969069646728344 * blur13depthDiffFac(d, depth, uv - (off1 * invRes), depthThreshold);
-    color += blur13sameAlpha(texture2D(image, uv + (off2 * invRes)), alpha, origin) * 0.09447039785044732 * blur13depthDiffFac(d, depth, uv + (off2 * invRes), depthThreshold);
-    color += blur13sameAlpha(texture2D(image, uv - (off2 * invRes)), alpha, origin) * 0.09447039785044732 * blur13depthDiffFac(d, depth, uv - (off2 * invRes), depthThreshold);
-    color += blur13sameAlpha(texture2D(image, uv + (off3 * invRes)), alpha, origin) * 0.010381362401148057 * blur13depthDiffFac(d, depth, uv + (off3 * invRes), depthThreshold);
-    color += blur13sameAlpha(texture2D(image, uv - (off3 * invRes)), alpha, origin) * 0.010381362401148057 * blur13depthDiffFac(d, depth, uv - (off3 * invRes), depthThreshold);
+    color += blur13sameAlpha(texture(image, uv), alpha, origin) * 0.1964825501511404;
+    color += blur13sameAlpha(texture(image, uv + (off1 * invRes)), alpha, origin) * 0.2969069646728344 * blur13depthDiffFac(d, depth, uv + (off1 * invRes), depthThreshold);
+    color += blur13sameAlpha(texture(image, uv - (off1 * invRes)), alpha, origin) * 0.2969069646728344 * blur13depthDiffFac(d, depth, uv - (off1 * invRes), depthThreshold);
+    color += blur13sameAlpha(texture(image, uv + (off2 * invRes)), alpha, origin) * 0.09447039785044732 * blur13depthDiffFac(d, depth, uv + (off2 * invRes), depthThreshold);
+    color += blur13sameAlpha(texture(image, uv - (off2 * invRes)), alpha, origin) * 0.09447039785044732 * blur13depthDiffFac(d, depth, uv - (off2 * invRes), depthThreshold);
+    color += blur13sameAlpha(texture(image, uv + (off3 * invRes)), alpha, origin) * 0.010381362401148057 * blur13depthDiffFac(d, depth, uv + (off3 * invRes), depthThreshold);
+    color += blur13sameAlpha(texture(image, uv - (off3 * invRes)), alpha, origin) * 0.010381362401148057 * blur13depthDiffFac(d, depth, uv - (off3 * invRes), depthThreshold);
     return color;
 }

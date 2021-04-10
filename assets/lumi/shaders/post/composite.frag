@@ -26,10 +26,12 @@ uniform sampler2D u_clouds_depth;
 uniform sampler2D u_weather;
 uniform sampler2D u_weather_depth;
 
-varying vec3 v_godray_color;
-varying vec2 v_skylightpos;
-varying float v_godray_intensity;
-varying float v_aspect_adjuster;
+in vec3 v_godray_color;
+in vec2 v_skylightpos;
+in float v_godray_intensity;
+in float v_aspect_adjuster;
+
+out vec4[2] fragColor;
 
 #define NUM_LAYERS 5
 
@@ -73,8 +75,8 @@ void main()
 {
     float brightnessMult = mix(1.0, BRIGHT_FINAL_MULT, frx_viewBrightness());
 
-    float depth_solid = texture2D(u_solid_depth, v_texcoord).r;
-    vec4 solid = texture2D(u_combine_solid, v_texcoord);
+    float depth_solid = texture(u_solid_depth, v_texcoord).r;
+    vec4 solid = texture(u_combine_solid, v_texcoord);
     #if SKY_MODE != SKY_MODE_LUMI
     if (depth_solid != 1.0) {
     #endif
@@ -83,29 +85,29 @@ void main()
     }
     #endif
     
-    float depth_translucent = texture2D(u_translucent_depth, v_texcoord).r;
-    vec4 translucent = texture2D(u_combine_translucent, v_texcoord);
+    float depth_translucent = texture(u_translucent_depth, v_texcoord).r;
+    vec4 translucent = texture(u_combine_translucent, v_texcoord);
     translucent.rgb = ldr_tonemap3(translucent.rgb * brightnessMult);
 
-    float depth_particles = texture2D(u_particles_depth, v_texcoord).r;
-    vec4 particles = texture2D(u_particles, v_texcoord);
+    float depth_particles = texture(u_particles_depth, v_texcoord).r;
+    vec4 particles = texture(u_particles, v_texcoord);
 
-    float depth_clouds = texture2D(u_clouds_depth, v_texcoord).r;
+    float depth_clouds = texture(u_clouds_depth, v_texcoord).r;
     #if CLOUD_RENDERING == CLOUD_RENDERING_VOLUMETRIC && defined(VOLUMETRIC_CLOUD_DENOISING)
         float ldepth_clouds = ldepth(depth_clouds);
         vec4 clouds;
         if (ldepth_clouds < 0.01){
             vec4 clouds_blur = tile_denoise(v_texcoord, u_clouds, 1.0/frxu_size, 3);
-            clouds = mix(clouds_blur, texture2D(u_clouds, v_texcoord), l2_clampScale(0.0, 0.01, ldepth_clouds));
+            clouds = mix(clouds_blur, texture(u_clouds, v_texcoord), l2_clampScale(0.0, 0.01, ldepth_clouds));
         } else {
-            clouds = texture2D(u_clouds, v_texcoord);;
+            clouds = texture(u_clouds, v_texcoord);;
         }
     #else
-        vec4 clouds = texture2D(u_clouds, v_texcoord);
+        vec4 clouds = texture(u_clouds, v_texcoord);
     #endif
 
-    float depth_weather = texture2D(u_weather_depth, v_texcoord).r;
-    vec4 weather = texture2D(u_weather, v_texcoord);
+    float depth_weather = texture(u_weather_depth, v_texcoord).r;
+    vec4 weather = texture(u_weather, v_texcoord);
     weather.rgb = ldr_tonemap3(hdr_gammaAdjust(weather.rgb) * brightnessMult);
 
     color_layers[0] = vec4(solid. rgb, 1.0);
@@ -137,8 +139,8 @@ void main()
 
     float min_depth = min(depth_translucent, depth_particles);
     
-    gl_FragData[0] = vec4(c, 1.0); //frx_luminance(c.rgb)); // FXAA 3 would need this
-    gl_FragData[1] = vec4(min_depth, 0., 0., 1.);
+    fragColor[0] = vec4(c, 1.0); //frx_luminance(c.rgb)); // FXAA 3 would need this
+    fragColor[1] = vec4(min_depth, 0., 0., 1.);
 }
 
 

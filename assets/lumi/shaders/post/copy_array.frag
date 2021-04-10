@@ -5,7 +5,9 @@
 ******************************************************/
 uniform sampler2DArray u_input;
 
+out vec4 fragColor;
+
 void main()
 {
-    gl_FragData[0] = texture2DArray(u_input, vec3(v_texcoord, frxu_layer));
+    fragColor = textureArray(u_input, vec3(v_texcoord, frxu_layer));
 }

@@ -34,7 +34,7 @@ vec4 tile_denoise(vec2 uv, sampler2D scolor, vec2 inv_size, int noise_size)
     for (int i = -noise_size; i <= noise_size; i++) {
         for (int j = -noise_size; j <= noise_size; j++) {
             target_uv = uv + vec2(i, j) * inv_size;
-            accum += texture2D(scolor, target_uv);
+            accum += texture(scolor, target_uv);
             count ++;
         }
     }
@@ -45,8 +45,8 @@ const float depth_threshold = 0.0001;
 vec4 tile_denoise_depth_alpha(vec2 uv, sampler2D scolor, sampler2D sdepth, vec2 inv_size, int noise_size)
 {
     vec4 accum = vec4(0.0);
-    float origin_depth = ldepth(texture2D(sdepth, uv).r);
-    float origin_a = texture2D(scolor, uv).a;
+    float origin_depth = ldepth(texture(sdepth, uv).r);
+    float origin_a = texture(scolor, uv).a;
 
     float target_depth;
     vec4 target_color;
@@ -57,8 +57,8 @@ vec4 tile_denoise_depth_alpha(vec2 uv, sampler2D scolor, sampler2D sdepth, vec2 
     for (int i = -noise_size; i <= noise_size; i++) {
         for (int j = -noise_size; j <= noise_size; j++) {
             target_uv = uv + vec2(i, j) * inv_size;
-            target_depth = ldepth(texture2D(sdepth, target_uv).r);
-            target_color = texture2D(scolor, target_uv);
+            target_depth = ldepth(texture(sdepth, target_uv).r);
+            target_color = texture(scolor, target_uv);
             delta_depth = abs(target_depth - origin_depth);
             if (delta_depth <= depth_threshold && origin_a == target_color.a) {
                 accum += target_color;
@@ -72,7 +72,7 @@ vec4 tile_denoise_depth_alpha(vec2 uv, sampler2D scolor, sampler2D sdepth, vec2 
 float tile_denoise1_depth(vec2 uv, sampler2D scolor, sampler2D sdepth, vec2 inv_size, int noise_size)
 {
     float accum = 0.0;
-    float origin_depth = ldepth(texture2D(sdepth, uv).r);
+    float origin_depth = ldepth(texture(sdepth, uv).r);
 
     float target_depth;
     float delta_depth;
@@ -82,10 +82,10 @@ float tile_denoise1_depth(vec2 uv, sampler2D scolor, sampler2D sdepth, vec2 inv_
     for (int i = -noise_size; i <= noise_size; i++) {
         for (int j = -noise_size; j <= noise_size; j++) {
             target_uv = uv + vec2(i, j) * inv_size;
-            target_depth = ldepth(texture2D(sdepth, target_uv).r);
+            target_depth = ldepth(texture(sdepth, target_uv).r);
             delta_depth = abs(target_depth - origin_depth);
             if (delta_depth <= depth_threshold) {
-                accum += texture2D(scolor, target_uv).r;
+                accum += texture(scolor, target_uv).r;
                 count ++;
             }
         }

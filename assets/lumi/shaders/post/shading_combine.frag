@@ -20,20 +20,22 @@ uniform sampler2D u_hdr_translucent;
 uniform sampler2D u_hdr_translucent_swap;
 uniform sampler2D u_translucent_depth;
 
+out vec4[2] fragColor;
+
 // arbitrary chosen depth threshold
 #define blurDepthThreshold 0.01
 vec4 hdr_combine(sampler2D a, sampler2D b, sampler2D sdepth, vec2 uv, bool enableBlur)
 {
-    vec4 a1 = texture2D(a, uv);
-    float roughness = texture2D(b, uv).a;
+    vec4 a1 = texture(a, uv);
+    float roughness = texture(b, uv).a;
     if (roughness == 0.0) return vec4(a1.rgb, a1.a); // unmanaged draw (don't gamma adjust)
     vec4 b1;
     if (enableBlur && roughness <= REFLECTION_MAXIMUM_ROUGHNESS) {
-        float depth = texture2D(sdepth, uv).r;
+        float depth = texture(sdepth, uv).r;
         vec2 variable_blur = vec2(roughness) * (1.0 - ldepth(depth));
         b1 = tile_denoise_depth_alpha(uv, b, sdepth, 1.0/frxu_size, int(8*roughness));
     } else {
-        b1 = texture2D(b, uv);
+        b1 = texture(b, uv);
     }
     return vec4(a1.rgb + b1.rgb, a1.a);
 }
@@ -41,10 +43,10 @@ vec4 hdr_combine(sampler2D a, sampler2D b, sampler2D sdepth, vec2 uv, bool enabl
 void main()
 {
 #if REFLECTION_PROFILE != REFLECTION_PROFILE_NONE
-    gl_FragData[0] = hdr_combine(u_hdr_solid, u_hdr_solid_swap, u_solid_depth, v_texcoord, true);
-    gl_FragData[1] = hdr_combine(u_hdr_translucent, u_hdr_translucent_swap, u_translucent_depth, v_texcoord, true);
+    fragColor[0] = hdr_combine(u_hdr_solid, u_hdr_solid_swap, u_solid_depth, v_texcoord, true);
+    fragColor[1] = hdr_combine(u_hdr_translucent, u_hdr_translucent_swap, u_translucent_depth, v_texcoord, true);
 #else
-    gl_FragData[0] = hdr_combine(u_hdr_solid, u_hdr_solid_swap, u_solid_depth, v_texcoord, false);
-    gl_FragData[1] = hdr_combine(u_hdr_translucent, u_hdr_translucent_swap, u_translucent_depth, v_texcoord, false);
+    fragColor[0] = hdr_combine(u_hdr_solid, u_hdr_solid_swap, u_solid_depth, v_texcoord, false);
+    fragColor[1] = hdr_combine(u_hdr_translucent, u_hdr_translucent_swap, u_translucent_depth, v_texcoord, false);
 #endif
 }

@@ -4,7 +4,7 @@
 #include frex:shaders/api/world.glsl
 #include frex:shaders/api/view.glsl
 #include frex:shaders/lib/math.glsl
-#include lumi:shaders/forward/common.glsl
+#include lumi:shaders/api/pbr_ext.glsl
 #include lumi:shaders/common/userconfig.glsl
 #include lumi:shaders/api/param_frag.glsl
 #include lumi:shaders/lib/util.glsl
@@ -23,13 +23,19 @@
  *******************************************************/
 
 uniform sampler2D u_glint;
-#include lumi:shaders/forward/varying.glsl
+
+in vec3 l2_viewpos;
+in vec2 pv_lightcoord;
+in float pv_ao;
+in float pv_diffuse;
+
+out vec4[6] fragColor;
 
 frx_FragmentData frx_createPipelineFragment()
 {
 #ifdef VANILLA_LIGHTING
     return frx_FragmentData (
-        texture2D(frxs_baseColor, frx_texcoord, frx_matUnmippedFactor() * -4.0),
+        texture(frxs_baseColor, frx_texcoord, frx_matUnmippedFactor() * -4.0),
         frx_color,
         frx_matEmissive() ? 1.0 : 0.0,
         !frx_matDisableDiffuse(),
@@ -40,7 +46,7 @@ frx_FragmentData frx_createPipelineFragment()
     );
 #else
     return frx_FragmentData (
-        texture2D(frxs_baseColor, frx_texcoord, frx_matUnmippedFactor() * -4.0),
+        texture(frxs_baseColor, frx_texcoord, frx_matUnmippedFactor() * -4.0),
         frx_color,
         frx_matEmissive() ? 1.0 : 0.0,
         !frx_matDisableDiffuse(),
@@ -83,10 +89,10 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
                 a.rgb += hdr_gammaAdjust(texture_glint(u_glint, frx_normalizeMappedUV(frx_texcoord), frx_matGlint()));
             #endif
             a = ldr_tonemap(a);
-            gl_FragData[5] = vec4(bloom_out, 0.0, 0.0, 1.0);
+            fragColor[5] = vec4(bloom_out, 0.0, 0.0, 1.0);
         }
         gl_FragDepth = gl_FragCoord.z;
-        gl_FragData[0] = a;
+        fragColor[0] = a;
     } else {
         vec2 light = fragData.light.xy;
         vec3 normalizedNormal = normalize(fragData.vertexNormal) * 0.5 + 0.5;
@@ -100,11 +106,11 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
 
         // PERF: view normal, more useful than world normal
         gl_FragDepth = gl_FragCoord.z;
-        gl_FragData[0] = a;
-        gl_FragData[1] = vec4(light.x, light.y, (frx_renderTarget() == TARGET_PARTICLES) ? bloom : normalizedBloom, 1.0);
-        gl_FragData[2] = vec4(normalizedNormal, 1.0);
-        gl_FragData[3] = vec4(roughness, pbr_metallic, pbr_f0, 1.0);
-        gl_FragData[4] = vec4(frx_normalizeMappedUV(frx_texcoord), bitFlags, 1.0);
+        fragColor[0] = a;
+        fragColor[1] = vec4(light.x, light.y, (frx_renderTarget() == TARGET_PARTICLES) ? bloom : normalizedBloom, 1.0);
+        fragColor[2] = vec4(normalizedNormal, 1.0);
+        fragColor[3] = vec4(roughness, pbr_metallic, pbr_f0, 1.0);
+        fragColor[4] = vec4(frx_normalizeMappedUV(frx_texcoord), bitFlags, 1.0);
 
     }
 }

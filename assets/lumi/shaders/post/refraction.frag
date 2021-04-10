@@ -21,6 +21,8 @@ uniform sampler2D u_translucent_depth;
 uniform sampler2D u_light_translucent;
 uniform sampler2D u_normal_translucent;
 
+out vec4 fragColor;
+
 vec2 coords_uv(vec3 view, mat4 projection)
 {
     vec4 clip = projection * vec4(view, 1.0);
@@ -30,7 +32,7 @@ vec2 coords_uv(vec3 view, mat4 projection)
 
 vec3 coords_view_source(vec2 uv, mat4 inv_projection)
 {
-    float depth = texture2D(u_translucent_depth, uv).r;
+    float depth = texture(u_translucent_depth, uv).r;
     vec3 clip = vec3(2.0 * uv - 1.0, 2.0 * depth - 1.0);
     vec4 view = inv_projection * vec4(clip, 1.0);
     return view.xyz / view.w;
@@ -38,7 +40,7 @@ vec3 coords_view_source(vec2 uv, mat4 inv_projection)
 
 vec3 coords_view(vec2 uv, mat4 inv_projection)
 {
-    float depth = texture2D(u_solid_depth, uv).r;
+    float depth = texture(u_solid_depth, uv).r;
     vec3 clip = vec3(2.0 * uv - 1.0, 2.0 * depth - 1.0);
     vec4 view = inv_projection * vec4(clip, 1.0);
     return view.xyz / view.w;
@@ -46,12 +48,12 @@ vec3 coords_view(vec2 uv, mat4 inv_projection)
 
 vec3 coords_normal_source(vec2 uv)
 {
-    return frx_normalModelMatrix() * (2.0 * texture2D(u_normal_translucent, uv).xyz - 1.0);
+    return frx_normalModelMatrix() * (2.0 * texture(u_normal_translucent, uv).xyz - 1.0);
 }
 
 vec3 coords_normal(vec2 uv)
 {
-    return frx_normalModelMatrix() * (2.0 * texture2D(u_normal_solid, uv).xyz - 1.0);
+    return frx_normalModelMatrix() * (2.0 * texture(u_normal_solid, uv).xyz - 1.0);
 }
 
 float skylight_adjust(float skyLight, float intensity)
@@ -80,25 +82,25 @@ vec3 blendScreen(vec3 base, vec3 blend) {
 
 void main()
 {
-    float solid_depth = texture2D(u_solid_depth, v_texcoord).r;
-    float translucent_depth = texture2D(u_translucent_depth, v_texcoord).r;
-    float sky_light = texture2D(u_light_translucent, v_texcoord).z;
+    float solid_depth = texture(u_solid_depth, v_texcoord).r;
+    float translucent_depth = texture(u_translucent_depth, v_texcoord).r;
+    float sky_light = texture(u_light_translucent, v_texcoord).z;
     if (translucent_depth < solid_depth) {
         rt_Result result = rt_refraction(v_texcoord, 0.25, 256.0, 2.0, 20, frx_projectionMatrix(), frx_inverseProjectionMatrix());
         if (result.refracted_uv.x < 0.0 || result.refracted_uv.y < 0.0 || result.refracted_uv.x > 1.0 || result.refracted_uv.y > 1.0) {
-            gl_FragData[0] = texture2D(u_solid_color, v_texcoord);
+            fragColor = texture(u_solid_color, v_texcoord);
         } else if (!result.hit) {
-            vec4 refracted = texture2D(u_solid_color, result.refracted_uv);
+            vec4 refracted = texture(u_solid_color, result.refracted_uv);
             if (refracted.a == 0.0) {
-                gl_FragData[0] = refracted;
+                fragColor = refracted;
             } else {
-                gl_FragData[0] = texture2D(u_solid_color, v_texcoord);
+                fragColor = texture(u_solid_color, v_texcoord);
             }
         } else {
-            gl_FragData[0] = texture2D(u_solid_color, result.refracted_uv);
+            fragColor = texture(u_solid_color, result.refracted_uv);
         }
     } else {
-        gl_FragData[0] = texture2D(u_solid_color, v_texcoord);
+        fragColor = texture(u_solid_color, v_texcoord);
     }
 }
 

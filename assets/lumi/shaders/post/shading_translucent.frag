@@ -23,16 +23,18 @@ uniform sampler2D u_light_particles;
 uniform sampler2D u_glint;
 uniform sampler2DArrayShadow u_shadow;
 
+out vec4[3] fragColor;
+
 #include lumi:shaders/post/common/shading.glsl
 
 vec4 ldr_shaded_particle(vec2 uv, sampler2D scolor, sampler2D sdepth, sampler2D slight, out float bloom_out)
 {
-    vec4 a = texture2D(scolor, uv);
+    vec4 a = texture(scolor, uv);
 
-    float depth     = texture2D(sdepth, uv).r;
+    float depth     = texture(sdepth, uv).r;
     vec3  viewPos   = coords_view(uv, frx_inverseProjectionMatrix(), depth);
     vec3  normal    = normalize(-viewPos) * frx_normalModelMatrix();
-    vec4  light     = texture2D(slight, uv);
+    vec4  light     = texture(slight, uv);
     vec3  worldPos  = frx_cameraPos() + (frx_inverseViewMatrix() * vec4(viewPos, 1.0)).xyz;
 
     bloom_out = light.z;
@@ -54,9 +56,9 @@ void main()
     float bloom2;
     vec4 a1 = hdr_shaded_color(v_texcoord, u_translucent_color, u_translucent_depth, u_light_translucent, u_normal_translucent, u_material_translucent, u_misc_translucent, 1.0, true, 1.0, bloom1);
     vec4 a2 = ldr_shaded_particle(v_texcoord, u_particles_color, u_particles_depth, u_light_particles, bloom2);
-    gl_FragData[0] = a1;
-    gl_FragData[1] = a2;
-    gl_FragData[2] = vec4(bloom1 + bloom2, 0.0, 0.0, 1.0);
+    fragColor[0] = a1;
+    fragColor[1] = a2;
+    fragColor[2] = vec4(bloom1 + bloom2, 0.0, 0.0, 1.0);
 }
 
 

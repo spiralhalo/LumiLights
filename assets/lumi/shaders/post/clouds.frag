@@ -30,12 +30,14 @@ uniform sampler2D u_solid_depth;
  *******************************************************/
 
 #if CLOUD_RENDERING == CLOUD_RENDERING_FLAT
-varying mat4 v_cloud_rotator;
+in mat4 v_cloud_rotator;
 #endif
-varying float v_fov;
-varying float v_night;
-varying float v_blindness;
-varying vec3 v_sky_radiance;
+in float v_fov;
+in float v_night;
+in float v_blindness;
+in vec3 v_sky_radiance;
+
+out vec4[2] fragColor;
 
 void main()
 {
@@ -71,26 +73,26 @@ void main()
         float cloudColor = frx_ambientIntensity() * frx_ambientIntensity() * (1.0 - 0.3 * rainFactor);
 
         vec4 clouds = vec4(hdr_orangeSkyColor(vec3(cloudColor), -skyVec), 1.0) * cloud;
-        gl_FragData[0] = mix(clouds, vec4(0.0), v_blindness);
-        gl_FragData[1] = vec4(cloud > 0.5 ? 0.99999 : 1.0);
+        fragColor[0] = mix(clouds, vec4(0.0), v_blindness);
+        fragColor[1] = vec4(cloud > 0.5 ? 0.99999 : 1.0);
     #elif CLOUD_RENDERING == CLOUD_RENDERING_VOLUMETRIC
         cloud_result volumetric = rayMarchCloud(u_clouds_texture, u_solid_depth, v_texcoord);
         float alpha = 1.0 - volumetric.transmittance;
         vec3 color = ldr_tonemap3(v_sky_radiance * 0.2) * volumetric.lightEnergy + ldr_tonemap3(v_skycolor) * 0.4 * alpha;
-        gl_FragData[0] = mix(vec4(color, alpha), vec4(0.0), v_blindness);
+        fragColor[0] = mix(vec4(color, alpha), vec4(0.0), v_blindness);
         #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
-            gl_FragData[1] = vec4(alpha > 0.0 ? 0.9999 : 1.0);
+            fragColor[1] = vec4(alpha > 0.0 ? 0.9999 : 1.0);
         #else
             vec3 reverseModelPos = volumetric.worldPos - frx_cameraPos();
             vec4 reverseClipPos = frx_viewProjectionMatrix() * vec4(reverseModelPos, 1.0);
             reverseClipPos.z /= reverseClipPos.w;
-            // gl_FragData[1] = vec4(alpha > 0.0 ? 0.0 : 1.0);
-            gl_FragData[1] = vec4(alpha > 0.0 ? reverseClipPos.z : 1.0);
+            // fragColor[1] = vec4(alpha > 0.0 ? 0.0 : 1.0);
+            fragColor[1] = vec4(alpha > 0.0 ? reverseClipPos.z : 1.0);
         #endif
     #else
         vec4 clouds = blur13(u_clouds, v_texcoord, frxu_size, vec2(1.0, 1.0));
-        gl_FragData[0] = clouds;
-        gl_FragData[1] = texture2D(u_clouds_depth, v_texcoord);
+        fragColor[0] = clouds;
+        fragColor[1] = texture(u_clouds_depth, v_texcoord);
         // Thanks to Lomo for the inspiration on depth copying
     #endif
 }

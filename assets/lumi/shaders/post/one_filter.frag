@@ -16,17 +16,19 @@
 uniform sampler2D u_source;
 uniform sampler2D u_depth;
 
-varying vec2 v_invSize;
+in vec2 v_invSize;
+
+out vec4 fragColor;
 
 #if AMBIENT_OCCLUSION == AMBIENT_OCCLUSION_SSAO
 const int size = 4;
 void main()
 {
-    gl_FragData[0] = vec4(tile_denoise1_depth(v_texcoord, u_source, u_depth, v_invSize, size), 0.0, 0.0, 1.0);
+    fragColor = vec4(tile_denoise1_depth(v_texcoord, u_source, u_depth, v_invSize, size), 0.0, 0.0, 1.0);
 }
 #else
 void main()
 {
-    gl_FragData[0] = texture2D(u_source, v_texcoord);
+    fragColor = texture(u_source, v_texcoord);
 }
 #endif
