@@ -37,6 +37,7 @@ Lumi Lights PBR Extension brings its own spin of roughness/metalness material mo
 - [Volumetric lights by Alexandre Pestana](https://www.alexandre-pestana.com/volumetric-lights/) Opened my eye about dithering
 - [Temporal Reprojection Anti-Aliasing in INSIDE](https://www.youtube.com/watch?v=2XXS5UyNjjU) Inspiration and explanation for TAA
 - [Temporal Anti Aliasing – Step by Step](https://ziyadbarakat.wordpress.com/2020/07/28/temporal-anti-aliasing-step-by-step/) Another inspiration for TAA and introduced me to Halton sequences
+- Lumi Lights discord members - testing and reporting countless bugs!
 
 ## Source Credits
 
