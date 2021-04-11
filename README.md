@@ -33,7 +33,7 @@ Lumi Lights PBR Extension brings its own spin of roughness/metalness material mo
 
 - [Antonio Hernández Bejarano's LWJGL Game Dev Gitbook](https://ahbejarano.gitbook.io/lwjglgamedev/) Helping me learn OpenGL
 - [LearnOpenGL.com](https://learnopengl.com/) Taught me about PBR
-- [Sebastian Lague's Coding Adventure](https://www.youtube.com/watch?v=4QOcCGI6xOU) The method used for volumetric clouds
+- [Sebastian Lague's Coding Adventure](https://www.youtube.com/watch?v=4QOcCGI6xOU) Amazing exploration and explanation for volumetric clouds
 - [Volumetric lights by Alexandre Pestana](https://www.alexandre-pestana.com/volumetric-lights/) Opened my eye about dithering
 - [Temporal Reprojection Anti-Aliasing in INSIDE](https://www.youtube.com/watch?v=2XXS5UyNjjU) Inspiration and explanation for TAA
 - [Temporal Anti Aliasing – Step by Step](https://ziyadbarakat.wordpress.com/2020/07/28/temporal-anti-aliasing-step-by-step/) Another inspiration for TAA and introduced me to Halton sequences
@@ -41,7 +41,7 @@ Lumi Lights PBR Extension brings its own spin of roughness/metalness material mo
 ## Source Credits
 
 - [Erkaman/glsl-godrays](https://github.com/Erkaman/glsl-godrays) for Godrays
-- [ziacko/Temporal-AA](https://github.com/ziacko/Temporal-AA) for 
+- [ziacko/Temporal-AA](https://github.com/ziacko/Temporal-AA) for TAA (based on Playdead's implementation)
 - [WebGL GLSL HBAO](https://gist.github.com/transitive-bullshit/6770346) for SSAO
 
 ## License
