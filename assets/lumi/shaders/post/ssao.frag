@@ -14,18 +14,20 @@
  *  published by the Free Software Foundation, Inc.    *
  *******************************************************/
 
-#if AMBIENT_OCCLUSION == AMBIENT_OCCLUSION_SSAO
 uniform sampler2D u_normal;
 uniform sampler2D u_depth;
 
 out vec4 fragColor;
 
+#if AMBIENT_OCCLUSION == AMBIENT_OCCLUSION_SSAO
 const float RADIUS = 1.0;
 const float BIAS = 0.5;
 const float INTENSITY = 5.0;
+#endif
 
 void main()
 {
+#if AMBIENT_OCCLUSION == AMBIENT_OCCLUSION_SSAO
     // Modest performance saving by skipping the sky
     if (texture(u_depth, v_texcoord).r == 1.0) {
         fragColor = vec4(1.0, 0.0, 0.0, 1.0);
@@ -36,10 +38,7 @@ void main()
             v_texcoord, RADIUS, BIAS, INTENSITY);
         fragColor = vec4(ssao, 0.0, 0.0, 1.0);
     }
-}
 #else
-void main()
-{
     fragColor = vec4(1.0, 0.0, 0.0, 1.0);
-}
 #endif
+}
