@@ -114,6 +114,8 @@ vec3 ldr_sunColor(float time)
     else if(time > 0.48) sunColor = mix(DAY_SUNLIGHT_COLOR, SUNSET_LIGHT_COLOR, l2_clampScale(0.48, 0.5, time));
     else if(time < 0.02) sunColor = mix(DAY_SUNLIGHT_COLOR, SUNRISE_LIGHT_COLOR, l2_clampScale(0.02, 0, time));
     else sunColor = DAY_SUNLIGHT_COLOR;
+    vec3 graySunColor = vec3(frx_luminance(sunColor));
+    sunColor = mix(sunColor, graySunColor, frx_rainGradient());
     return sunColor;
 }
 
