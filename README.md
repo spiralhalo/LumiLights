@@ -1,38 +1,48 @@
 # Lumi Lights 
-A shader pack for Canvas with PBR Forward Rendering Demo.
+![Lumi Lights](https://github.com/spiralhalo/spiralhalo.github.io/raw/main/img/screen0.png)
 
-### Features list
-- Bluish ambiance during the day in the overworld, purplish in the End, and fog-colored in the nether.
-- Brighter sun with directional light.
-- Clearer and shinier water.
-- Bloom on the sky.
+A custom rendering pipeline for Canvas for improved visual fidelity.
 
-### PBR Demo features list
-- Bump generation
-- Roughness / Metallic material params
+## Features
 
-## Using
+- Bloom
+- Canvas features support
+- Enchantment glint shader
+- Improved lighting
+- Realistic water
+- Screenspace AO
+- Screenspace godrays
+- Screenspace reflections
+- Temporal AA
+- True darkness option
+- Volumetric fog
+- Volumetric clouds
 
-- [Download the latest version of Canvas.](https://github.com/grondag/canvas/releases)
-- [Download the latest **unified** release of Lumi Lights.](https://github.com/spiralhalo/LumiLightsPBR/releases) If you have [Respackopts](https://modrinth.com/mod/TiF5QWZY/) installed you may use the **respackopts** edition instead.
-- Put Lumi Lights inside your resource pack folder.
+## Downloads
 
-\*Please [open an issue](https://github.com/spiralhalo/LumiLightsPBR/issues) if Lumi Lights does not work with the latest version of Canvas.
+Soon.
 
-## PBR Packs
+## PBR Extension
 
-- [Lumi PBR Ext](https://github.com/spiralhalo/LumiPBRExt) adds vanilla PBR materials.
-- [Lumi PBR Compat](https://github.com/spiralhalo/LumiPBRCompat) adds PBR materials for third party modded objects.
+- [Lumi PBR Ext](https://github.com/spiralhalo/LumiPBRExt) vanilla PBR materials.
+- [Lumi PBR Compat](https://github.com/spiralhalo/LumiPBRCompat) materials for modded objects.
 
-**PBR packs requires PBR shading mode.** PBR shading mode is enabled by default and requires higher performance machine. See instructions below to enable or disable PBR shading mode.
+Lumi Lights PBR Extension brings its own spin of roughness/metalness material models to life.
 
-## Configuring
+## Acknowledgement & Special Thanks
 
-- To personalize your installation of Lumi Lights, extract it into a `Lumi Lights` folder inside your resource pack folder.
-- Open the `Lumi Lights` folder and navigate to `/assets/lumi/`. Open `config.glsl` in a text editor.
-- Other configuration options are version dependent and instructions to configure them are included within the config file.
+- [Antonio Hernández Bejarano's LWJGL Game Dev Gitbook](https://ahbejarano.gitbook.io/lwjglgamedev/) Helping me learn OpenGL
+- [LearnOpenGL.com](https://learnopengl.com/) Taught me about PBR
+- [Sebastian Lague's Coding Adventure](https://www.youtube.com/watch?v=4QOcCGI6xOU) The method used for volumetric clouds
+- [Volumetric lights by Alexandre Pestana](https://www.alexandre-pestana.com/volumetric-lights/) Opened my eye about dithering
+- [Temporal Reprojection Anti-Aliasing in INSIDE](https://www.youtube.com/watch?v=2XXS5UyNjjU) Inspiration and explanation for TAA
+- [Temporal Anti Aliasing – Step by Step](https://ziyadbarakat.wordpress.com/2020/07/28/temporal-anti-aliasing-step-by-step/) Another inspiration for TAA and introduced me to Halton sequences
 
-\*If you have [Respackopts](https://modrinth.com/mod/TiF5QWZY/) installed you may use the **respackopts** edition (available in all releases since v0.5) which comes with a config screen that lets you change the configurations on the fly.
+## Source Credits
+
+- [Erkaman/glsl-godrays](https://github.com/Erkaman/glsl-godrays) for Godrays
+- [ziacko/Temporal-AA](https://github.com/ziacko/Temporal-AA) for 
+- [WebGL GLSL HBAO](https://gist.github.com/transitive-bullshit/6770346) for SSAO
 
 ## License
 
