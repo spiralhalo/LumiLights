@@ -1,0 +1,53 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Create ZIP release
+
+# Controls when the action will run. 
+on:
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (add prefix/suffix MANUALLY)'
+        required: true
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+      - name: Bump version and push tag
+        id: tag_version
+        uses: mathieudutour/github-tag-action@v5.4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          custom_tag: ${{ github.event.inputs.version }}
+
+      - name: Bump pack.mcmeta version
+        uses: jacobtomlinson/gha-find-replace@0.1.2
+        with:
+          include: pack.mcmeta
+          find: '{VERSION_TAG}'
+          replace: '${{ steps.tag_version.outputs.new_tag }}'
+
+      - name: Archive Release
+        uses: thedoctor0/zip-release@master
+        with:
+          filename: 'GG-${{ steps.tag_version.outputs.new_tag }}.zip'
+          exclusions: '*.git* *.yml'
+
+      - name: Upload Release
+        uses: ncipollo/release-action@v1
+        with:
+            name: THIS IS A TEST Release ${{ steps.tag_version.outputs.new_tag }}
+            body: ${{ steps.tag_version.outputs.changelog }}
+            tag: ${{ steps.tag_version.outputs.new_tag }}
+            artifacts: "GG-${{ steps.tag_version.outputs.new_tag }}.zip"
+            token: ${{ secrets.GITHUB_TOKEN }}
