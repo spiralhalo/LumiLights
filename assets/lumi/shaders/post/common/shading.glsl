@@ -147,9 +147,10 @@ vec4 fog (float skylightFactor, vec4 a, vec3 viewPos, vec3 worldPos, inout float
 
     // TODO: retrieve fog distance from render distance ?
     float distFactor;
-    #if defined(VOLUMETRIC_FOG)
+    #if defined(VOLUMETRIC_FOG) && defined(SHADOW_MAP_PRESENT)
         bool useVolumetric = !frx_playerHasEffect(FRX_EFFECT_BLINDNESS)
-            && !frx_viewFlag(FRX_CAMERA_IN_LAVA);
+            && !frx_viewFlag(FRX_CAMERA_IN_LAVA)
+            && !frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT);
         if (useVolumetric) { //TODO: blindness transition still broken
             distFactor = raymarched_fog_density(viewPos, worldPos, /*fogNear,*/ fogFar);
         } else {
@@ -158,7 +159,7 @@ vec4 fog (float skylightFactor, vec4 a, vec3 viewPos, vec3 worldPos, inout float
     distFactor = l2_clampScale(fogNear, fogFar, length(viewPos));
     distFactor *= distFactor;
 
-    #if defined(VOLUMETRIC_FOG)
+    #if defined(VOLUMETRIC_FOG) && defined(SHADOW_MAP_PRESENT)
         }
     #endif
 
@@ -380,7 +381,7 @@ vec4 hdr_shaded_color(
     #endif
 
     if (a.a != 0.0 && (translucent || translucentDepth >= depth) && depth != 1.0) {
-        a = fog(frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? light.y * frx_ambientIntensity() : 1.0, a, viewPos, worldPos, bloom_out);
+        a = fog(frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? light.y : 1.0, a, viewPos, worldPos, bloom_out);
     }
 
     #if CAUSTICS_MODE == CAUSTICS_MODE_TEXTURE

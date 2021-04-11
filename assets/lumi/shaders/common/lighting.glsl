@@ -13,11 +13,11 @@
 // STRENGTHS
 #ifdef HIGH_CONTRAST
 const float SUNLIGHT_STR = 12.0;
-const float MOONLIGHT_STR = 0.8;
+const float MOONLIGHT_STR = 0.4;
 const float SKY_AMBIENT_STR = 1.2;
 #else
 const float SUNLIGHT_STR = 6.0;
-const float MOONLIGHT_STR = 0.4;
+const float MOONLIGHT_STR = 0.2;
 const float SKY_AMBIENT_STR = 0.6;
 #endif
 const float SKYLESS_AMBIENT_STR = 0.8;
@@ -62,7 +62,7 @@ const vec3 DAY_SKY_COLOR = hdr_gammaAdjust(vec3(0.33, 0.7, 1.0));
 #else
 const vec3 DAY_SKY_COLOR = hdr_gammaAdjust(vec3(0.3, 0.5, 1.0));
 #endif
-const vec3 NIGHT_SKY_COLOR = hdr_gammaAdjust(vec3(0.03, 0.05, 0.15));
+const vec3 NIGHT_SKY_COLOR = hdr_gammaAdjust(vec3(0.015, 0.025, 0.075));
 const vec3 NEBULAE_COLOR = hdr_gammaAdjust(vec3(0.8, 0.3, 0.6));
 #else
 const vec3 DAY_SKY_COLOR = hdr_gammaAdjust(vec3(0.52, 0.69, 1.0));
@@ -75,4 +75,4 @@ const vec3 HDR_NOON_AMBIENT = hdr_gammaAdjust(vec3(0.8550322));
 const vec3 HDR_BLUE_AMBIENT = hdr_gammaAdjust(vec3(0.6, 0.9, 1.0));
 const vec3 HDR_SUNRISE_AMBIENT = hdr_gammaAdjust(vec3(0.5, 0.3, 0.1));
 const vec3 HDR_SUNSET_AMBIENT = hdr_gammaAdjust(vec3(0.5, 0.2, 0.0));
-const vec3 HDR_NIGHT_AMBIENT = hdr_gammaAdjust(vec3(0.4, 0.7, 1.0));
+const vec3 HDR_NIGHT_AMBIENT = hdr_gammaAdjust(vec3(0.15, 0.2675, 0.375));

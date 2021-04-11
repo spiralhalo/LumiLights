@@ -22,10 +22,10 @@
 /*  MULTIPLIERS
  *******************************************************/
 
-float l2_skyLight(float skyLight, float intensity)
+float l2_skyLightRemap(float skyLight)
 {
     float sl = l2_clampScale(0.03125, 1.0, skyLight);
-    return hdr_gammaAdjustf(sl) * intensity;
+    return hdr_gammaAdjustf(sl);
 }
 
 float l2_sunHorizonScale(float time)
@@ -191,7 +191,7 @@ vec3 l2_baseAmbientRadiance()
 
 vec3 l2_skyAmbientRadiance(float skyLight, float time, float intensity)
 {
-    float sl = l2_skyLight(skyLight, intensity);
+    float sl = l2_skyLightRemap(skyLight);
     sl = smoothstep(0.1, 0.9, sl); // STEEP SKY LIGHT (PSEUDO SHADOW)
     float sa = sl * 2.5;
     return sa * hdr_ambientColor(time);
@@ -204,7 +204,7 @@ vec3 l2_sunRadiance(float skyLight, in float time, float rainGradient, float thu
     #ifdef SHADOW_MAP_PRESENT
         float sl = skyLight;
     #else
-        float sl = l2_skyLight(skyLight, 1.0);
+        float sl = l2_skyLightRemap(skyLight);
         // direct sun light doesn't reach into dark spot as much as sky ambient // TODO: WAT
         sl = l2_clampScale(0.7, 0.97, sl);
     #endif
@@ -222,7 +222,7 @@ vec3 l2_moonRadiance(float skyLight, float time, float rainGradient, float thund
     #ifdef SHADOW_MAP_PRESENT
         float ml = skyLight;
     #else
-        float ml = l2_skyLight(skyLight, 1.0);
+        float ml = l2_skyLightRemap(skyLight);
     #endif
     // aren't these code just the transition factor ?
     // if(time < 0.58) ml *= l2_clampScale(0.54, 0.58, time);
