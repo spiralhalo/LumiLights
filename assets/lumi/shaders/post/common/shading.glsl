@@ -109,7 +109,7 @@ vec4 fog (float skylightFactor, vec4 a, vec3 viewPos, vec3 worldPos, inout float
     fogFar = max(fogNear, fogFar);
 
     // float fog_noise = snoise(worldPos.xz * FOG_NOISE_SCALE + frx_renderSeconds() * FOG_NOISE_SPEED) * FOG_NOISE_HEIGHT;
-    float overworldHeightFactor = 1.0;
+    float dimensionHeightFactor = 1.0;
     if (!frx_viewFlag(FRX_CAMERA_IN_FLUID) && frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT)) {
         float fogTop = FOG_TOP /*+ fog_noise*/;
         float zigZagTime = abs(frx_worldTime()-0.5);
@@ -123,16 +123,21 @@ vec4 fog (float skylightFactor, vec4 a, vec3 viewPos, vec3 worldPos, inout float
         fogTop = mix(fogTop, max(FOG_TOP, 128.0), (1.0 - thickener));
         fogDensity = mix(fogDensity, 1.0, (1.0 - thickener));
         if (frx_worldFlag(FRX_WORLD_IS_OVERWORLD)) {
-            overworldHeightFactor = l2_clampScale(fogTop, FOG_BOTTOM, worldPos.y);
-            overworldHeightFactor = overworldHeightFactor * overworldHeightFactor;
+            dimensionHeightFactor = l2_clampScale(fogTop, FOG_BOTTOM, worldPos.y);
+            dimensionHeightFactor *= dimensionHeightFactor;
         }
     }
 
+    bool useVolumetricFog = false;
     #ifdef USE_VOLUMETRIC_FOG
-        float fogFactor = fogDensity * overworldHeightFactor;
-    #else
-        float fogFactor = fogDensity * overworldHeightFactor * (frx_viewFlag(FRX_CAMERA_IN_FLUID) ? 1.0 : skylightFactor);
+    useVolumetricFog = !frx_playerHasEffect(FRX_EFFECT_BLINDNESS)
+        && !frx_viewFlag(FRX_CAMERA_IN_LAVA)
+        && frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT);
     #endif
+
+    float fogFactor = fogDensity * dimensionHeightFactor
+        * ( (frx_viewFlag(FRX_CAMERA_IN_FLUID) || !useVolumetricFog) ? 1.0 : skylightFactor);
+
 
     if (frx_playerHasEffect(FRX_EFFECT_BLINDNESS)) {
         fogFar = mix(fogFar, 3.0, v_blindness);
@@ -148,25 +153,29 @@ vec4 fog (float skylightFactor, vec4 a, vec3 viewPos, vec3 worldPos, inout float
 
     // TODO: retrieve fog distance from render distance ?
     float distFactor;
-    #ifdef USE_VOLUMETRIC_FOG
-        bool useVolumetric = !frx_playerHasEffect(FRX_EFFECT_BLINDNESS)
-            && !frx_viewFlag(FRX_CAMERA_IN_LAVA)
-            && !frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT);
-        if (useVolumetric) { //TODO: blindness transition still broken
-            distFactor = raymarched_fog_density(viewPos, worldPos, /*fogNear,*/ fogFar);
-        } else {
-    #endif
-
-    distFactor = l2_clampScale(fogNear, fogFar, length(viewPos));
-    distFactor *= distFactor;
-
-    #ifdef USE_VOLUMETRIC_FOG
-        }
-    #endif
+    if (useVolumetricFog) { //TODO: blindness transition still broken
+        distFactor = raymarched_fog_density(viewPos, worldPos, /*fogNear,*/ fogFar);
+    } else {
+        distFactor = l2_clampScale(fogNear, fogFar, length(viewPos));
+        distFactor *= distFactor;
+    }
 
     fogFactor = clamp(fogFactor * distFactor, 0.0, 1.0);
     
     vec4 fogColor = vec4(hdr_orangeSkyColor(v_skycolor, normalize(-viewPos)), 1.0);
+    if (frx_worldFlag(FRX_WORLD_IS_NETHER)) {
+        //todo: make lava color a constant
+        // float nearLavaPool = l2_clampScale(64.0, 0.0, worldPos.y);
+        // nearLavaPool = pow(nearLavaPool, 4.0);
+        // fogColor.rgb = mix(fogColor.rgb, vec3(10.0, 1.0, 0.0), nearLavaPool);
+        // additive fog in the nether
+        // TODO: is it also good in other dimensions?
+        // if so, just ditch the fogColor.a and make it triplet
+        // and also make it handle translucency properly (apply to both solid and translucent)
+        return vec4(a.rgb + fogColor.rgb * fogFactor, a.a);
+    }
+
+    // no need to reduce bloom in the nether with its additive blending
     bloom = mix(bloom, 0.0, fogFactor);
     return mix(a, fogColor, fogFactor);
 }
