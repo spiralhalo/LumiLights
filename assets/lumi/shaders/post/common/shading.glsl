@@ -139,13 +139,18 @@ vec4 fog (float skylightFactor, vec4 a, vec3 viewPos, vec3 worldPos, inout float
         * ( (frx_viewFlag(FRX_CAMERA_IN_FLUID) || !useVolumetricFog) ? 1.0 : skylightFactor);
 
 
+    // additive fog when it's not blindness or lava related
+    bool useAdditive = true;
+
     if (frx_playerHasEffect(FRX_EFFECT_BLINDNESS)) {
+        useAdditive = false;
         fogFar = mix(fogFar, 3.0, v_blindness);
         fogNear = mix(fogNear, 0.0, v_blindness);
         fogFactor = mix(fogFactor, 1.0, v_blindness);
     }
 
     if (frx_viewFlag(FRX_CAMERA_IN_LAVA)) {
+        useAdditive = false;
         fogFar = frx_playerHasEffect(FRX_EFFECT_FIRE_RESISTANCE) ? 2.5 : 0.5;
         fogNear = 0.0;
         fogFactor = 1.0;
@@ -163,19 +168,12 @@ vec4 fog (float skylightFactor, vec4 a, vec3 viewPos, vec3 worldPos, inout float
     fogFactor = clamp(fogFactor * distFactor, 0.0, 1.0);
     
     vec4 fogColor = vec4(hdr_orangeSkyColor(v_skycolor, normalize(-viewPos)), 1.0);
-    if (frx_worldFlag(FRX_WORLD_IS_NETHER)) {
-        //todo: make lava color a constant
-        // float nearLavaPool = l2_clampScale(64.0, 0.0, worldPos.y);
-        // nearLavaPool = pow(nearLavaPool, 4.0);
-        // fogColor.rgb = mix(fogColor.rgb, vec3(10.0, 1.0, 0.0), nearLavaPool);
-        // additive fog in the nether
-        // TODO: is it also good in other dimensions?
-        // if so, just ditch the fogColor.a and make it triplet
-        // and also make it handle translucency properly (apply to both solid and translucent)
+
+    if (useAdditive) {
         return vec4(a.rgb + fogColor.rgb * fogFactor, a.a);
     }
 
-    // no need to reduce bloom in the nether with its additive blending
+    // no need to reduce bloom with additive blending
     bloom = mix(bloom, 0.0, fogFactor);
     return mix(a, fogColor, fogFactor);
 }
