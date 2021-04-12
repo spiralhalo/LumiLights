@@ -109,9 +109,9 @@ vec4 fog (float skylightFactor, vec4 a, vec3 viewPos, vec3 worldPos, inout float
     fogFar = max(fogNear, fogFar);
 
     // float fog_noise = snoise(worldPos.xz * FOG_NOISE_SCALE + frx_renderSeconds() * FOG_NOISE_SPEED) * FOG_NOISE_HEIGHT;
-    float fogTop = FOG_TOP /*+ fog_noise*/;
-    
+    float overworldHeightFactor = 1.0;
     if (!frx_viewFlag(FRX_CAMERA_IN_FLUID) && frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT)) {
+        float fogTop = FOG_TOP /*+ fog_noise*/;
         float zigZagTime = abs(frx_worldTime()-0.5);
         float timeFactor = (l2_clampScale(0.45, 0.5, zigZagTime) + l2_clampScale(0.05, 0.0, zigZagTime));
         float thickener = 1.0;
@@ -122,15 +122,16 @@ vec4 fog (float skylightFactor, vec4 a, vec3 viewPos, vec3 worldPos, inout float
         fogFar *= thickener;
         fogTop = mix(fogTop, max(FOG_TOP, 128.0), (1.0 - thickener));
         fogDensity = mix(fogDensity, 1.0, (1.0 - thickener));
+        if (frx_worldFlag(FRX_WORLD_IS_OVERWORLD)) {
+            overworldHeightFactor = l2_clampScale(fogTop, FOG_BOTTOM, worldPos.y);
+            overworldHeightFactor = overworldHeightFactor * overworldHeightFactor;
+        }
     }
-    
-    float heightFactor = l2_clampScale(fogTop, FOG_BOTTOM, worldPos.y);
-    heightFactor = frx_viewFlag(FRX_CAMERA_IN_FLUID) ? 1.0 : (heightFactor * heightFactor);
 
-    #if defined(VOLUMETRIC_FOG)
-    float fogFactor = fogDensity * heightFactor;
+    #ifdef USE_VOLUMETRIC_FOG
+        float fogFactor = fogDensity * overworldHeightFactor;
     #else
-    float fogFactor = fogDensity * heightFactor * (frx_viewFlag(FRX_CAMERA_IN_FLUID) ? 1.0 : skylightFactor);
+        float fogFactor = fogDensity * overworldHeightFactor * (frx_viewFlag(FRX_CAMERA_IN_FLUID) ? 1.0 : skylightFactor);
     #endif
 
     if (frx_playerHasEffect(FRX_EFFECT_BLINDNESS)) {
@@ -147,7 +148,7 @@ vec4 fog (float skylightFactor, vec4 a, vec3 viewPos, vec3 worldPos, inout float
 
     // TODO: retrieve fog distance from render distance ?
     float distFactor;
-    #if defined(VOLUMETRIC_FOG) && defined(SHADOW_MAP_PRESENT)
+    #ifdef USE_VOLUMETRIC_FOG
         bool useVolumetric = !frx_playerHasEffect(FRX_EFFECT_BLINDNESS)
             && !frx_viewFlag(FRX_CAMERA_IN_LAVA)
             && !frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT);
@@ -159,7 +160,7 @@ vec4 fog (float skylightFactor, vec4 a, vec3 viewPos, vec3 worldPos, inout float
     distFactor = l2_clampScale(fogNear, fogFar, length(viewPos));
     distFactor *= distFactor;
 
-    #if defined(VOLUMETRIC_FOG) && defined(SHADOW_MAP_PRESENT)
+    #ifdef USE_VOLUMETRIC_FOG
         }
     #endif
 
