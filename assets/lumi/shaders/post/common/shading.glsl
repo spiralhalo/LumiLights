@@ -1,24 +1,25 @@
 #include frex:shaders/lib/math.glsl
+#include frex:shaders/lib/noise/cellular2x2x2.glsl
 #include frex:shaders/lib/noise/noise2d.glsl
 #include frex:shaders/lib/noise/noise3d.glsl
-#include frex:shaders/lib/noise/cellular2x2x2.glsl
+#include frex:shaders/api/material.glsl
+#include frex:shaders/api/player.glsl
 #include frex:shaders/api/view.glsl
 #include frex:shaders/api/world.glsl
-#include frex:shaders/api/player.glsl
-#include frex:shaders/api/material.glsl
-#include lumi:shaders/lib/util.glsl
-#include lumi:shaders/func/tonemap.glsl
-#include lumi:shaders/func/pbr_shading.glsl
-#include lumi:shaders/lib/puddle.glsl
-#include lumi:shaders/func/glintify2.glsl
-#include lumi:shaders/lib/tile_noise.glsl
-#include lumi:shaders/post/common/bloom.glsl
-#include lumi:shaders/post/common/fog.glsl
 #include lumi:shaders/common/lighting.glsl
 #include lumi:shaders/common/shadow.glsl
 #include lumi:shaders/common/userconfig.glsl
+#include lumi:shaders/func/glintify2.glsl
+#include lumi:shaders/func/tonemap.glsl
+#include lumi:shaders/func/pbr_shading.glsl
 #include lumi:shaders/lib/bitpack.glsl
 #include lumi:shaders/lib/block_dir.glsl
+#include lumi:shaders/lib/puddle.glsl
+#include lumi:shaders/lib/taa_jitter.glsl
+#include lumi:shaders/lib/tile_noise.glsl
+#include lumi:shaders/lib/util.glsl
+#include lumi:shaders/post/common/bloom.glsl
+#include lumi:shaders/post/common/fog.glsl
 
 /*******************************************************
  *  lumi:shaders/post/common/shading.frag              *
@@ -50,8 +51,7 @@ float tileJitter;
 
 vec3 coords_view(vec2 uv, mat4 inv_projection, float depth)
 {
-    vec3 clip = vec3(2.0 * uv - 1.0, 2.0 * depth - 1.0);
-    vec4 view = inv_projection * vec4(clip, 1.0);
+    vec4 view = inv_projection * vec4(2.0 * uv - 1.0, 2.0 * depth - 1.0, 1.0);
     return view.xyz / view.w;
 }
 
@@ -336,7 +336,13 @@ vec4 hdr_shaded_color(
         || (translucentDepth < depth && !frx_viewFlag(FRX_CAMERA_IN_WATER));
 
     #if defined(SHADOW_MAP_PRESENT)
-        vec4 shadowViewPos = frx_shadowViewMatrix() * vec4(worldPos - frx_cameraPos(), 1.0);
+        #ifdef TAA_ENABLED
+            vec2 uvJitter = taa_jitter(v_invSize);
+            vec4 unjitteredModelPos = frx_inverseViewProjectionMatrix() * vec4(2.0 * (uv - uvJitter) - 1.0, 2.0 * depth - 1.0, 1.0);
+            vec4 shadowViewPos = frx_shadowViewMatrix() * vec4(unjitteredModelPos.xyz/unjitteredModelPos.w, 1.0);
+        #else
+            vec4 shadowViewPos = frx_shadowViewMatrix() * vec4(worldPos - frx_cameraPos(), 1.0);
+        #endif
         float shadowFactor = calcShadowFactor(u_shadow, shadowViewPos);  
         light.z = shadowFactor;
         // Workaround before shadow occlusion culling to make caves playable
