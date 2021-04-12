@@ -62,7 +62,7 @@ vec2 coords_uv(vec3 view, mat4 projection)
     return clip.xy * 0.5 + 0.5;
 }
 
-float raymarched_fog_density(vec3 viewPos, vec3 worldPos, /*float fogNear,*/ float fogFar)
+float raymarched_fog_density(vec3 viewPos, vec3 worldPos, float fogFar)
 {
     // vec3 unitMarch_view = normalize(-viewPos);
     // vec3 ray_view = viewPos + tileJitter * unitMarch_view;
@@ -97,7 +97,7 @@ float raymarched_fog_density(vec3 viewPos, vec3 worldPos, /*float fogNear,*/ flo
         // ray_view += unitMarch_view;
     }
 
-    return illuminated / max(1.0, fogFar/* - fogNear*/);
+    return illuminated / max(1.0, fogFar);
 }
 
 vec4 fog (float skylightFactor, vec4 a, vec3 viewPos, vec3 worldPos, inout float bloom)
@@ -105,27 +105,26 @@ vec4 fog (float skylightFactor, vec4 a, vec3 viewPos, vec3 worldPos, inout float
 
     float fogDensity = frx_viewFlag(FRX_CAMERA_IN_FLUID) ? UNDERWATER_FOG_DENSITY : FOG_DENSITY;
     float fogFar = frx_viewFlag(FRX_CAMERA_IN_FLUID) ? UNDERWATER_FOG_FAR : FOG_FAR;
-    float fogNear = frx_viewFlag(FRX_CAMERA_IN_FLUID) ? UNDERWATER_FOG_NEAR : FOG_NEAR;
-    fogFar = max(fogNear, fogFar);
-
     // float fog_noise = snoise(worldPos.xz * FOG_NOISE_SCALE + frx_renderSeconds() * FOG_NOISE_SPEED) * FOG_NOISE_HEIGHT;
-    float dimensionHeightFactor = 1.0;
+
+    float altitudeFactor = 1.0;
     if (!frx_viewFlag(FRX_CAMERA_IN_FLUID) && frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT)) {
-        float fogTop = FOG_TOP /*+ fog_noise*/;
         float zigZagTime = abs(frx_worldTime()-0.5);
         float timeFactor = (l2_clampScale(0.45, 0.5, zigZagTime) + l2_clampScale(0.05, 0.0, zigZagTime));
-        float thickener = 1.0;
-        thickener -= 0.25 * timeFactor;
-        thickener -= 0.5 * thickener * frx_rainGradient();
-        thickener -= 0.5 * thickener * frx_thunderGradient();
-        fogNear *= thickener;
-        fogFar *= thickener;
-        fogTop = mix(fogTop, max(FOG_TOP, 128.0), (1.0 - thickener));
-        fogDensity = mix(fogDensity, 1.0, (1.0 - thickener));
-        if (frx_worldFlag(FRX_WORLD_IS_OVERWORLD)) {
-            dimensionHeightFactor = l2_clampScale(fogTop, FOG_BOTTOM, worldPos.y);
-            dimensionHeightFactor *= dimensionHeightFactor;
-        }
+        float inverseThickener = 1.0;
+        inverseThickener -= 0.25 * timeFactor;
+        inverseThickener -= 0.5 * inverseThickener * frx_rainGradient();
+        inverseThickener -= 0.5 * inverseThickener * frx_thunderGradient();
+        fogFar *= inverseThickener;
+        fogDensity = mix(1.0, max(0.8, fogDensity), inverseThickener);
+        #ifdef OVERWORLD_FOG_USE_ALTITUDE
+            // altitude fog in the overworld :) valley fog is better than mountain-engulfing fog
+            if (frx_worldFlag(FRX_WORLD_IS_OVERWORLD)) {
+                float fogTop = mix(FOG_TOP_THICK, FOG_TOP, inverseThickener);
+                altitudeFactor = l2_clampScale(fogTop, SEA_LEVEL, worldPos.y);
+                altitudeFactor *= altitudeFactor;
+            }
+        #endif
     }
 
     bool useVolumetricFog = false;
@@ -135,7 +134,7 @@ vec4 fog (float skylightFactor, vec4 a, vec3 viewPos, vec3 worldPos, inout float
         && frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT);
     #endif
 
-    float fogFactor = fogDensity * dimensionHeightFactor
+    float fogFactor = fogDensity * altitudeFactor
         * ( (frx_viewFlag(FRX_CAMERA_IN_FLUID) || !useVolumetricFog) ? 1.0 : skylightFactor);
 
 
@@ -145,23 +144,21 @@ vec4 fog (float skylightFactor, vec4 a, vec3 viewPos, vec3 worldPos, inout float
     if (frx_playerHasEffect(FRX_EFFECT_BLINDNESS)) {
         useAdditive = false;
         fogFar = mix(fogFar, 3.0, v_blindness);
-        fogNear = mix(fogNear, 0.0, v_blindness);
         fogFactor = mix(fogFactor, 1.0, v_blindness);
     }
 
     if (frx_viewFlag(FRX_CAMERA_IN_LAVA)) {
         useAdditive = false;
         fogFar = frx_playerHasEffect(FRX_EFFECT_FIRE_RESISTANCE) ? 2.5 : 0.5;
-        fogNear = 0.0;
         fogFactor = 1.0;
     }
 
     // TODO: retrieve fog distance from render distance ?
     float distFactor;
     if (useVolumetricFog) { //TODO: blindness transition still broken
-        distFactor = raymarched_fog_density(viewPos, worldPos, /*fogNear,*/ fogFar);
+        distFactor = raymarched_fog_density(viewPos, worldPos, fogFar);
     } else {
-        distFactor = l2_clampScale(fogNear, fogFar, length(viewPos));
+        distFactor = l2_clampScale(0.0, fogFar, length(viewPos));
         distFactor *= distFactor;
     }
 
