@@ -338,7 +338,7 @@ vec4 hdr_shaded_color(
     #if defined(SHADOW_MAP_PRESENT)
         #ifdef TAA_ENABLED
             vec2 uvJitter = taa_jitter(v_invSize);
-            vec4 unjitteredModelPos = frx_inverseViewProjectionMatrix() * vec4(2.0 * (uv - uvJitter) - 1.0, 2.0 * depth - 1.0, 1.0);
+            vec4 unjitteredModelPos = frx_inverseViewProjectionMatrix() * vec4(2.0 * uv - uvJitter - 1.0, 2.0 * depth - 1.0, 1.0);
             vec4 shadowViewPos = frx_shadowViewMatrix() * vec4(unjitteredModelPos.xyz/unjitteredModelPos.w, 1.0);
         #else
             vec4 shadowViewPos = frx_shadowViewMatrix() * vec4(worldPos - frx_cameraPos(), 1.0);
