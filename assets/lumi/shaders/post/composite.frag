@@ -77,13 +77,13 @@ void main()
 
     float depth_solid = texture(u_solid_depth, v_texcoord).r;
     vec4 solid = texture(u_combine_solid, v_texcoord);
-    #if SKY_MODE != SKY_MODE_LUMI
-    if (depth_solid != 1.0) {
+    bool overworldLumiSky = false;
+    #if SKY_MODE == SKY_MODE_LUMI
+        overworldLumiSky = frx_worldFlag(FRX_WORLD_IS_OVERWORLD);
     #endif
-    solid.rgb = ldr_tonemap3(solid.rgb * brightnessMult);
-    #if SKY_MODE != SKY_MODE_LUMI
+    if (depth_solid != 1.0 || overworldLumiSky) {
+        solid.rgb = ldr_tonemap3(solid.rgb * brightnessMult);
     }
-    #endif
     
     float depth_translucent = texture(u_translucent_depth, v_texcoord).r;
     vec4 translucent = texture(u_combine_translucent, v_texcoord);
