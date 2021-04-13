@@ -72,7 +72,7 @@ const vec3 NEBULAE_COLOR = vec3(0.9, 0.75, 1.0);
 
 // GAMMA-ADJUSTED AMBIENT
 const vec3 HDR_NOON_AMBIENT = hdr_gammaAdjust(vec3(0.8550322));
-const vec3 HDR_BLUE_AMBIENT = hdr_gammaAdjust(vec3(0.6, 0.9, 1.0));
+const vec3 HDR_BLUE_AMBIENT = hdr_gammaAdjust(vec3(0.6, 0.6, 1.0));
 const vec3 HDR_SUNRISE_AMBIENT = hdr_gammaAdjust(vec3(0.5, 0.3, 0.1));
 const vec3 HDR_SUNSET_AMBIENT = hdr_gammaAdjust(vec3(0.5, 0.2, 0.0));
-const vec3 HDR_NIGHT_AMBIENT = hdr_gammaAdjust(vec3(0.15, 0.2675, 0.375));
+const vec3 HDR_NIGHT_AMBIENT = hdr_gammaAdjust(vec3(0.15, 0.15, 0.3));
