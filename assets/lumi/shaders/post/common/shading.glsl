@@ -135,20 +135,21 @@ vec4 fog (float skylightFactor, vec4 a, vec3 viewPos, vec3 worldPos, inout float
     #endif
 
     float fogFactor = fogDensity * altitudeFactor
-        * ( (frx_viewFlag(FRX_CAMERA_IN_FLUID) || !useVolumetricFog) ? 1.0 : skylightFactor);
-
+        * ((frx_viewFlag(FRX_CAMERA_IN_FLUID) || useVolumetricFog) ? 1.0 : (0.1 + 0.9 * skylightFactor));
 
     // additive fog when it's not blindness or lava related
     bool useAdditive = true;
 
     if (frx_playerHasEffect(FRX_EFFECT_BLINDNESS)) {
         useAdditive = false;
+        useVolumetricFog = false;
         fogFar = mix(fogFar, 3.0, v_blindness);
         fogFactor = mix(fogFactor, 1.0, v_blindness);
     }
 
     if (frx_viewFlag(FRX_CAMERA_IN_LAVA)) {
         useAdditive = false;
+        useVolumetricFog = false;
         fogFar = frx_playerHasEffect(FRX_EFFECT_FIRE_RESISTANCE) ? 2.5 : 0.5;
         fogFactor = 1.0;
     }
