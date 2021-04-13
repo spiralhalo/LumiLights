@@ -26,7 +26,7 @@ struct cloud_result {
 };
 
 // const float CLOUD_MARCH_JITTER_STRENGTH = 0.01;
-const float TEXTURE_RADIUS = 256.0;
+const float TEXTURE_RADIUS = 512.0;
 const float TEXTURE_RADIUS_RCP = 1.0 / TEXTURE_RADIUS;
 const int NUM_SAMPLE = 512;
 const float SAMPLE_SIZE = TEXTURE_RADIUS / float(NUM_SAMPLE);
