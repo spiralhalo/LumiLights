@@ -44,6 +44,7 @@ in float v_not_in_void;
 in float v_near_void_core;
 in float v_blindness;
 
+const float CAVE_FOG_STR = 0.1;
 const vec3 VOID_CORE_COLOR = hdr_gammaAdjust(vec3(1.0, 0.7, 0.5));
 
 // const float JITTER_STRENGTH = 0.4;
@@ -97,7 +98,7 @@ float raymarched_fog_density(vec3 viewPos, vec3 worldPos, float fogFar)
         // ray_view += unitMarch_view;
     }
 
-    return illuminated / max(1.0, fogFar);
+    return CAVE_FOG_STR + (1.0 - CAVE_FOG_STR) * illuminated / max(1.0, fogFar);
 }
 
 vec4 fog (float skylightFactor, vec4 a, vec3 viewPos, vec3 worldPos, inout float bloom)
@@ -135,7 +136,7 @@ vec4 fog (float skylightFactor, vec4 a, vec3 viewPos, vec3 worldPos, inout float
     #endif
 
     float fogFactor = fogDensity * altitudeFactor
-        * ((frx_viewFlag(FRX_CAMERA_IN_FLUID) || useVolumetricFog) ? 1.0 : (0.1 + 0.9 * skylightFactor));
+        * ((frx_viewFlag(FRX_CAMERA_IN_FLUID) || useVolumetricFog) ? 1.0 : (CAVE_FOG_STR + (1.0 - CAVE_FOG_STR) * skylightFactor));
 
     // additive fog when it's not blindness or lava related
     bool useAdditive = true;
