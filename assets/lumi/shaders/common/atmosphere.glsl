@@ -195,6 +195,7 @@ void atmos_generateAtmosphereModel()
     }
 
     float isTwilightTime = l2_clampScale(1.0, 0.0, currentToSunrise) * (customOWFog && !frx_worldFlag(FRX_WORLD_IS_MOONLIT) ? 1.0 : 0.0);
+    isTwilightTime = sqrt(isTwilightTime);
 
     atmosv_hdrOWTwilightSkyRadiance = mix(atmosv_hdrSkyColorRadiance, atmosv_hdrCelestialRadiance * SKY_STR / SUNLIGHT_STR, isTwilightTime);
     #endif

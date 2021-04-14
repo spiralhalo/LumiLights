@@ -1,0 +1,7 @@
+{
+    "transparency": "none",
+    "vertexSource": "lumi:shaders/material/noop.vert",
+    "fragmentSource": "lumi:shaders/material/glowsquid.frag",
+    "emissive": false,
+    "transform": true
+}
