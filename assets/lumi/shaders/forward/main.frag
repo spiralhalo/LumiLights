@@ -1,17 +1,17 @@
-#include frex:shaders/api/sampler.glsl
 #include frex:shaders/api/fragment.glsl
 #include frex:shaders/api/material.glsl
+#include frex:shaders/api/sampler.glsl
 #include frex:shaders/api/world.glsl
 #include frex:shaders/api/view.glsl
 #include frex:shaders/lib/math.glsl
 #include lumi:shaders/api/pbr_ext.glsl
+#include lumi:shaders/common/atmosphere.glsl
 #include lumi:shaders/common/userconfig.glsl
-#include lumi:shaders/api/param_frag.glsl
-#include lumi:shaders/lib/util.glsl
 #include lumi:shaders/func/tonemap.glsl
 #include lumi:shaders/func/pbr_shading.glsl
 #include lumi:shaders/func/glintify2.glsl
 #include lumi:shaders/lib/bitpack.glsl
+#include lumi:shaders/lib/util.glsl
 
 /*******************************************************
  *  lumi:shaders/forward/main.frag                    *

@@ -4,6 +4,7 @@
 
 #define hdr_gamma 2.2
 #define hdr_gammaAdjust(x) pow(x, vec3(hdr_gamma))
+#define hdr_toSRGB(x) pow(x, vec3(1.0 / hdr_gamma))
 #define hdr_gammaAdjustf(x) pow(x, hdr_gamma)
 
 float l2_min3(vec3 vec) {

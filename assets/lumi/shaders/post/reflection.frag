@@ -34,20 +34,12 @@ uniform sampler2D u_normal_target;
 out vec4 fragColor;
 
 const float JITTER_STRENGTH = 0.2;
-const float SKYLESS_FACTOR = 0.5;
 
 struct rt_color_depth
 {
     vec4 color;
     float depth;
 };
-
-vec3 calcFallbackColor(vec3 unit_view, vec3 unit_march, vec2 light)
-{
-    float upFactor = frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? l2_clampScale(-0.1, 0.1, dot(unit_march, v_up)) : 1.0;
-    float skyLightFactor = frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? hdr_gammaAdjustf(light.y * frx_ambientIntensity()) : SKYLESS_FACTOR;
-    return hdr_orangeSkyColor(v_skycolor, unit_view) * skyLightFactor * upFactor * 2.0;
-}
 
 rt_color_depth work_on_pair(
     in vec4 base_color,

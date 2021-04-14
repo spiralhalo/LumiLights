@@ -1,15 +1,16 @@
 #include lumi:shaders/post/common/header.glsl
+#include frex:shaders/api/view.glsl
+#include frex:shaders/api/world.glsl
 #include frex:shaders/lib/math.glsl
 #include frex:shaders/lib/noise/noise2d.glsl
 #include frex:shaders/lib/noise/noise3d.glsl
-#include frex:shaders/api/view.glsl
-#include frex:shaders/api/world.glsl
-#include lumi:shaders/lib/util.glsl
-#include lumi:shaders/func/tonemap.glsl
-#include lumi:shaders/lib/fast_gaussian_blur.glsl
-#include lumi:shaders/lib/volumetric_cloud.glsl
+#include lumi:shaders/common/atmosphere.glsl
 #include lumi:shaders/common/lighting.glsl
 #include lumi:shaders/common/userconfig.glsl
+#include lumi:shaders/func/tonemap.glsl
+#include lumi:shaders/lib/fast_gaussian_blur.glsl
+#include lumi:shaders/lib/util.glsl
+#include lumi:shaders/lib/volumetric_cloud.glsl
 
 /*******************************************************
  *  lumi:shaders/post/clouds.frag                      *
@@ -35,7 +36,6 @@ in mat4 v_cloud_rotator;
 in float v_fov;
 in float v_night;
 in float v_blindness;
-in vec3 v_sky_radiance;
 
 out vec4[2] fragColor;
 
@@ -77,8 +77,14 @@ void main()
         fragColor[1] = vec4(cloud > 0.5 ? 0.99999 : 1.0);
     #elif CLOUD_RENDERING == CLOUD_RENDERING_VOLUMETRIC
         cloud_result volumetric = rayMarchCloud(u_clouds_texture, u_solid_depth, v_texcoord);
+        
+        vec4 worldPos = frx_inverseViewProjectionMatrix() * vec4(2.0 * v_texcoord - 1.0, 1.0, 1.0);
+        worldPos.xyz /= worldPos.w;
+        vec3 skyVec = normalize(worldPos.xyz);
+
         float alpha = 1.0 - volumetric.transmittance;
-        vec3 color = ldr_tonemap3(v_sky_radiance * 0.2) * volumetric.lightEnergy + ldr_tonemap3(v_skycolor) * 0.4 * alpha;
+        //  * l2_clampScale(-2.0, 1.0, dot(skyVec, frx_skyLightVector()))
+        vec3 color = ldr_tonemap3(atmos_hdrCelestialRadiance() * 0.2) * volumetric.lightEnergy + ldr_tonemap3(atmos_hdrSkyColorRadiance(skyVec) * 0.1) * alpha;
         fragColor[0] = mix(vec4(color, alpha), vec4(0.0), v_blindness);
         #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
             fragColor[1] = vec4(alpha > 0.0 ? 0.9999 : 1.0);

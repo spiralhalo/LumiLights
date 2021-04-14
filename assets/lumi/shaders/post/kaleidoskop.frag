@@ -27,7 +27,6 @@ uniform sampler2D u_material_translucent;
 out vec4[2] fragColor;
 
 const float JITTER_STRENGTH = 0.2;
-const vec3 UP_VECTOR = vec3(0.0, 1.0, 0.0);
 
 vec4 work_on_pair(
     in vec4 base_color,
@@ -56,14 +55,14 @@ vec4 work_on_pair(
         // if (ray_view.y < normal.y) return noreturn;
         vec3 unit_view  = normalize(-ray_view);
         vec3 unit_march = normalize(reflect(-unit_view, normal) + mix(vec3(0.0, 0.0, 0.0), jitter * JITTER_STRENGTH, roughness2));
-        float sky_light = texture(reflector_light, v_texcoord).y;
+        vec2 light      = texture(reflector_light, v_texcoord).y;
         vec3 reg_f0     = vec3(material.z);
         vec3 f0         = mix(reg_f0, albedo, material.y);
         rt_Result result = rt_reflection(ray_view, unit_view, normal, unit_march, frx_normalModelMatrix(), frx_projectionMatrix(), frx_inverseProjectionMatrix(), reflector_depth, reflector_normal, reflected_depth, reflected_normal);
         vec4 reflected;
         float reflected_depth_value = sample_depth(result.reflected_uv, reflected_depth);
         if (reflected_depth_value == 1.0 || !result.hit || result.reflected_uv.x < 0.0 || result.reflected_uv.y < 0.0 || result.reflected_uv.x > 1.0 || result.reflected_uv.y > 1.0) {
-            reflected.rgb = v_skycolor * frx_ambientIntensity() * l2_clampScale(-1.0, 1.0, dot(worldNormal, UP_VECTOR)) * 2.0;
+            reflected.rgb = calcFallbackColor(unit_view, unit_march, light);
             reflected.rgb *= result.hits > 1 ? 0.1 : 1.0;
             reflected.rgb *= fallback;
             reflected.a = fallback;

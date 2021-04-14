@@ -64,3 +64,15 @@ vec3 ldr_tonemap3(vec3 a)
     c = pow(clamp(c, 0.0, 1.0), vec3(1.0 / hdr_gamma));
     return c;
 }
+
+vec3 ldr_tonemap3noGamma(vec3 a)
+{
+    vec3 c = a.rgb;
+    #ifdef HIGH_CONTRAST
+        c = frx_toneMap(c);
+    #else
+        c = hable_filmic(c);
+    #endif
+    c = clamp(c, 0.0, 1.0);
+    return c;
+}

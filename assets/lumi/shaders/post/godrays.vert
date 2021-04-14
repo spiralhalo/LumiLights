@@ -3,6 +3,7 @@
 #include frex:shaders/api/world.glsl
 #include frex:shaders/lib/math.glsl
 #include lumi:shaders/lib/util.glsl
+#include lumi:shaders/common/atmosphere.glsl
 #include lumi:shaders/common/lightsource.glsl
 
 /*******************************************************
@@ -19,8 +20,9 @@ void main()
     vec4 screen = frxu_frameProjectionMatrix * vec4(in_vertex.xy * frxu_size, 0.0, 1.0);
     gl_Position = vec4(screen.xy, 0.2, 1.0);
     v_texcoord = in_uv;
-    v_skycolor = ldr_skyColor();
     v_up = frx_normalModelMatrix() * vec3(0.0, 1.0, 0.0);
+
+    atmos_generateAtmosphereModel();
 
     float moonFactor = frx_worldFlag(FRX_WORLD_IS_MOONLIT)
         ? frx_moonSize() : mix(frx_moonSize(), 1.0, frx_skyLightTransitionFactor());
@@ -52,5 +54,5 @@ void main()
     vec4 skylight_clip = frx_projectionMatrix() * vec4(frx_normalModelMatrix() * skyLightVector * 1000, 1.0);
     v_skylightpos = (skylight_clip.xy / skylight_clip.w) * 0.5 + 0.5;
     v_aspect_adjuster = float(frxu_size.x)/float(frxu_size.y);
-    v_godray_color = frx_worldFlag(FRX_WORLD_IS_MOONLIT) ? vec3(0.5) : ldr_sunColor(frx_worldTime());
+    v_godray_color = frx_worldFlag(FRX_WORLD_IS_MOONLIT) ? vec3(0.5) : ldr_tonemap3(atmos_hdrCelestialRadiance());
 }

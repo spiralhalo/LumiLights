@@ -1,9 +1,11 @@
 #include frex:shaders/api/context.glsl
-#include frex:shaders/api/vertex.glsl
 #include frex:shaders/api/sampler.glsl
+#include frex:shaders/api/vertex.glsl
+#include frex:shaders/api/view.glsl
+#include lumi:shaders/common/atmosphere.glsl
+#include lumi:shaders/common/compat.glsl
 #include lumi:shaders/common/lightsource.glsl
 #include lumi:shaders/common/userconfig.glsl
-#include lumi:shaders/common/compat.glsl
 #include lumi:shaders/api/pbr_ext.glsl
 #include lumi:shaders/lib/taa_jitter.glsl
 
@@ -33,7 +35,7 @@ vec2 inv_size = 1.0 / vec2(frx_viewWidth(), frx_viewHeight());
 void frx_writePipelineVertex(inout frx_VertexData data) {
 
     if (frx_modelOriginType() == MODEL_ORIGIN_SCREEN) {
-        lightsource_setVars();
+        atmos_generateAtmosphereModel();
         gl_Position = frx_guiViewProjectionMatrix() * data.vertex;
         l2_viewpos = data.vertex.xyz; // ??????
 

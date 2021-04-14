@@ -6,6 +6,7 @@
 #include frex:shaders/api/player.glsl
 #include frex:shaders/api/view.glsl
 #include frex:shaders/api/world.glsl
+#include lumi:shaders/common/atmosphere.glsl
 #include lumi:shaders/common/lighting.glsl
 #include lumi:shaders/common/shadow.glsl
 #include lumi:shaders/common/userconfig.glsl
@@ -42,7 +43,6 @@ in float v_night;
 in float v_not_in_void;
 in float v_near_void_core;
 in float v_blindness;
-in vec3 v_sky_radiance;
 
 const vec3 VOID_CORE_COLOR = hdr_gammaAdjust(vec3(1.0, 0.7, 0.5));
 
@@ -154,7 +154,7 @@ vec4 fog (float skylightFactor, vec4 a, vec3 viewPos, vec3 worldPos, inout float
         fogFactor = 1.0;
     }
 
-    // TODO: retrieve fog distance from render distance ?
+    // TODO: retrieve fog distance from render distance as an option especially for the nether
     float distFactor;
     if (useVolumetricFog) { //TODO: blindness transition still broken
         distFactor = raymarched_fog_density(viewPos, worldPos, fogFar);
@@ -165,7 +165,8 @@ vec4 fog (float skylightFactor, vec4 a, vec3 viewPos, vec3 worldPos, inout float
 
     fogFactor = clamp(fogFactor * distFactor, 0.0, 1.0);
     
-    vec4 fogColor = vec4(hdr_orangeSkyColor(v_skycolor, normalize(-viewPos)), 1.0);
+    // TODO: separate fog from sky color
+    vec4 fogColor = vec4(atmos_hdrSkyColorRadiance(normalize(worldPos-frx_cameraPos())), 1.0);
 
     if (useAdditive) {
         return vec4(a.rgb + fogColor.rgb * fogFactor, a.a);
@@ -230,13 +231,14 @@ void custom_sky(in vec3 viewPos, in float blindnessFactor, inout vec4 a, inout f
             celestialObject *= frx_skyLightTransitionFactor();
         }
         #if SKY_MODE == SKY_MODE_LUMI
-            a.rgb = hdr_orangeSkyColor(v_skycolor, -skyVec) * 2.0;
+            // horizonBrightening can't be used on reflections yet due to clamping I think
+            float horizonBrightening = 1 + 3 * pow(l2_clampScale(0.5, -0.1, skyDotUp), 2.0) * (1.0 - frx_rainGradient() * 0.6);
+            a.rgb = atmos_hdrSkyColorRadiance(worldSkyVec) * horizonBrightening;
             if (frx_worldFlag(FRX_WORLD_IS_MOONLIT)) {
                 a.rgb = mix(a.rgb, vec3(0.25 + frx_moonSize()), celestialObject);
             } else {
                 a.rgb += vec3(10.0) * celestialObject;
             }
-            a.rgb *= 1 + 5 * pow(l2_clampScale(0.5, -0.1, skyDotUp), 2.0) * (1.0 - frx_rainGradient() * 0.6);
         #else
             // a.rgb = hdr_gammaAdjust(a.rgb) * 2.0; // Don't gamma-correct vanilla sky
         #endif
@@ -276,9 +278,6 @@ void custom_sky(in vec3 viewPos, in float blindnessFactor, inout vec4 a, inout f
 
     bloom_out += l2_skyBloom();
     bloom_out *= blindnessFactor;
-
-    // vec3 skyDownColor = vec3(frx_ambientIntensity());
-    // starRadiance + mix(skyDownColor, v_skycolor, l2_clampScale(-1.0, 1.0, dot(skyVec, v_up)))
 }
 
 const float RADIUS = 0.4;
@@ -398,7 +397,7 @@ vec4 hdr_shaded_color(
 
     #if CAUSTICS_MODE == CAUSTICS_MODE_TEXTURE
         if (frx_viewFlag(FRX_CAMERA_IN_WATER) && translucentDepth >= depth) {
-            a.rgb += light.y * light.y * 0.1 * v_sky_radiance * volumetric_caustics_beam(worldPos);
+            a.rgb += light.y * light.y * 0.1 * atmos_hdrCelestialRadiance() * volumetric_caustics_beam(worldPos);
         }
     #endif
 
