@@ -20,7 +20,6 @@ out float v_night;
 out float v_not_in_void;
 out float v_near_void_core;
 out float v_blindness;
-out vec3 v_sky_radiance;
 
 void main()
 {
@@ -29,7 +28,7 @@ void main()
     #endif
     
     atmos_generateAtmosphereModel();
-    
+
     v_invSize = 1.0/frxu_size;
     v_star_rotator = l2_rotationMatrix(vec3(1.0, 0.0, 1.0), frx_worldTime() * PI);
     v_fov = 2.0 * atan(1.0/frx_projectionMatrix()[1][1]) * 180.0 / PI;

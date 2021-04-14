@@ -354,6 +354,10 @@ vec4 hdr_shaded_color(
         }
     #else
         light.z = light.y;
+        // Prevent full direct light underwater
+        if (maybeUnderwater) {
+            light.z *= pow(light.y, 6.0);
+        }
     #endif
 
     #if CAUSTICS_MODE == CAUSTICS_MODE_TEXTURE
