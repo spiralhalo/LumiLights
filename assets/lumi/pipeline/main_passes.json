@@ -143,6 +143,14 @@
                     "weather",
                     "weather_depth",
                 ]
+            }, {
+                name: "outline",
+                program: "outline",
+                framebuffer: "outline",
+                samplerImages: [
+                    "main_copy",
+                    "composite_depth",
+                ]
             }
         ]
     },
