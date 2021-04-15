@@ -85,6 +85,11 @@
           nameKey: "config.lumi_lights.value.glint_blue",
           descriptionKey: "config.lumi_lights.help.glint_blue"
         },
+        toon_outline: {
+          default: false,
+          nameKey: "config.lumi_lights.value.toon_outline",
+          descriptionKey: "config.lumi_lights.help.toon_outline"
+        },
         // bloom_upsample_dist: {
         //   default: 5,
         //   min: 1,

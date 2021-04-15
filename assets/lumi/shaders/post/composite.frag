@@ -30,6 +30,7 @@ in vec3 v_godray_color;
 in vec2 v_skylightpos;
 in float v_godray_intensity;
 in float v_aspect_adjuster;
+in vec2 v_invSize;
 
 out vec4[2] fragColor;
 
@@ -141,6 +142,26 @@ void main()
     
     fragColor[0] = vec4(c, 1.0); //frx_luminance(c.rgb)); // FXAA 3 would need this
     fragColor[1] = vec4(min_depth, 0., 0., 1.);
+    
+    #ifdef TOON_OUTLINE
+        float d1 = ldepth(min_depth);
+        float maxDiff = 0.;
+        float maxD = 0;
+        const vec2[4] check = vec2[](vec2( 1.,  1.), vec2( 1., -1.), vec2(-1.,  1.), vec2(-1., -1.));
+        for (int i = 0; i < 4; i++) {
+            vec2 coord = v_texcoord + v_invSize * check[i];
+            float minD = ldepth(min(texture(u_translucent_depth, coord).x, texture(u_particles_depth, coord).x));
+            float diff = d1 - minD;
+            if (diff > maxDiff) {
+                maxDiff = diff;
+                maxD = minD;
+            }
+        }
+        float threshold = mix(.0, .3, d1);
+        float lineness = l2_clampScale(threshold, threshold * .5, maxDiff);
+        lineness += (1.0 - lineness) * maxD * 2.0;
+        fragColor[0] *= min(1.0, lineness);
+    #endif
 }
 
 

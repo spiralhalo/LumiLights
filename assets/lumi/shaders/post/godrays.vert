@@ -14,6 +14,7 @@ out vec3 v_godray_color;
 out vec2 v_skylightpos;
 out float v_godray_intensity;
 out float v_aspect_adjuster;
+out vec2 v_invSize;
 
 void main()
 {
@@ -21,6 +22,7 @@ void main()
     gl_Position = vec4(screen.xy, 0.2, 1.0);
     v_texcoord = in_uv;
     v_up = frx_normalModelMatrix() * vec3(0.0, 1.0, 0.0);
+    v_invSize = 1. / frxu_size;
 
     atmos_generateAtmosphereModel();
 

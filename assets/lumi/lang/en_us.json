@@ -37,6 +37,8 @@
     "config.lumi_lights.help.glint_green": "Enchantment glint color (green value)",
     "config.lumi_lights.value.glint_blue": "Enchantment glint blue",
     "config.lumi_lights.help.glint_blue": "Enchantment glint color (blue value)",
+    "config.lumi_lights.value.toon_outline": "Toon outline",
+    "config.lumi_lights.help.toon_outline": "Render \"toon\" style object outline",
 
     "config.lumi_lights.category.performance": "Performance",
     "config.lumi_lights.value.antialiasing": "Anti-aliasing",

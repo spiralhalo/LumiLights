@@ -21,15 +21,6 @@
                 "u_weather_depth",
             ]
         },
-        {
-            name: "outline",
-            vertexSource: "lumi:shaders/post/basic.vert",
-            fragmentSource: "lumi:shaders/post/outline.frag",
-            samplers: [
-                "u_color",
-                "u_depth",
-            ]
-        }
     ],
 
     framebuffers: [
@@ -37,15 +28,8 @@
         {
             name: "composite",
             colorAttachments: [
-                {image: "main_copy"},
-                {image: "composite_depth"},
-                // {image: "velocity"},
-            ]
-        },
-        {
-            name: "outline",
-            colorAttachments: [
                 {image: "solid_main"},
+                {image: "composite_depth"},
                 // {image: "velocity"},
             ]
         },
