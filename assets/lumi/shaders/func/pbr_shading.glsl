@@ -65,7 +65,7 @@ vec3 hdr_calcBlockLight(inout light_data data, vec3 radiance)
     #if BLOCKLIGHT_SPECULAR_MODE == BLOCKLIGHT_SPECULAR_MODE_FAST
         return pbr_nonDirectional(data.albedo, data.metallic, radiance);
     #else
-        if (!data.diffuse) return pbr_nonDirectional(data.albedo, data.metallic, radiance);
+        if (!data.diffuse || data.metallic == 0.0) return pbr_nonDirectional(data.albedo, data.metallic, radiance);
         
         #if BLOCKLIGHT_SPECULAR_MODE == BLOCKLIGHT_SPECULAR_MODE_FANTASTIC
             vec3 lightDir = preCalc_blockDir;
@@ -73,7 +73,7 @@ vec3 hdr_calcBlockLight(inout light_data data, vec3 radiance)
             vec3 lightDir = data.normal;
         #endif
         
-        return pbr_lightCalc(data.albedo, max(data.roughness, 0.4), data.metallic, data.f0, radiance, lightDir, data.viewDir, data.normal, true, data.specularAccu);
+        return pbr_lightCalc(data.albedo, max(data.roughness, 1.0-0.6*data.metallic), data.metallic, data.f0, radiance, lightDir, data.viewDir, data.normal, true, data.specularAccu);
     #endif
 }
 
