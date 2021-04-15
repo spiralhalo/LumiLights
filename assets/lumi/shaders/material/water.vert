@@ -1,6 +1,7 @@
 #include frex:shaders/api/vertex.glsl
 #include frex:shaders/api/world.glsl
 #include frex:shaders/lib/noise/noise3d.glsl
+#include lumi:config.glsl
 #include lumi:shaders/api/pbr_ext.glsl
 
 #ifndef LUMI_WavyWaterIntensity
