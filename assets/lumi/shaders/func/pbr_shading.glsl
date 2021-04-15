@@ -78,7 +78,7 @@ vec3 hdr_calcBlockLight(inout light_data data, vec3 radiance)
     // low fancy specular smoothness for metals
     float roughness = mix(data.roughness, max(0.4, data.roughness), data.metallic);
     // harshly lower f0 the further away from light source for non-metal
-    vec3 f0 *= mix(l2_clampScale(0.5, 0.96875, data.light.x), 1.0, data.metallic);
+    vec3 f0 = data.f0 * mix(l2_clampScale(0.5, 0.96875, data.light.x), 1.0, data.metallic);
     
     return pbr_lightCalc(data.albedo, roughness, data.metallic, f0, radiance, lightDir, data.viewDir, data.normal, true, data.specularAccu);
 }
