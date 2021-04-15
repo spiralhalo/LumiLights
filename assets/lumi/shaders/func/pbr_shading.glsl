@@ -62,19 +62,25 @@ struct light_data{
 
 vec3 hdr_calcBlockLight(inout light_data data, vec3 radiance)
 {
+    bool useFancySpecular = data.diffuse;
     #if BLOCKLIGHT_SPECULAR_MODE == BLOCKLIGHT_SPECULAR_MODE_FAST
-        return pbr_nonDirectional(data.albedo, data.metallic, radiance);
-    #else
-        if (!data.diffuse || data.metallic == 0.0) return pbr_nonDirectional(data.albedo, data.metallic, radiance);
-        
-        #if BLOCKLIGHT_SPECULAR_MODE == BLOCKLIGHT_SPECULAR_MODE_FANTASTIC
-            vec3 lightDir = preCalc_blockDir;
-        #else
-            vec3 lightDir = data.normal;
-        #endif
-        
-        return pbr_lightCalc(data.albedo, max(data.roughness, 1.0-0.6*data.metallic), data.metallic, data.f0, radiance, lightDir, data.viewDir, data.normal, true, data.specularAccu);
+        useFancySpecular = useFancySpecular && data.metallic > 0.0;
     #endif
+    
+    if (!useFancySpecular) return pbr_nonDirectional(data.albedo, data.metallic, radiance);
+    
+    #if BLOCKLIGHT_SPECULAR_MODE == BLOCKLIGHT_SPECULAR_MODE_FANTASTIC
+        vec3 lightDir = preCalc_blockDir;
+    #else
+        vec3 lightDir = data.normal;
+    #endif
+
+    // low fancy specular smoothness for metals
+    float roughness = mix(data.roughness, max(0.4, data.roughness), data.metallic);
+    // harshly lower f0 the further away from light source for non-metal
+    vec3 f0 *= mix(l2_clampScale(0.5, 0.96875, data.light.x), 1.0, data.metallic);
+    
+    return pbr_lightCalc(data.albedo, roughness, data.metallic, f0, radiance, lightDir, data.viewDir, data.normal, true, data.specularAccu);
 }
 
 vec3 hdr_calcHeldLight(inout light_data data)
@@ -96,7 +102,7 @@ vec3 hdr_calcSkyAmbientLight(inout light_data data)
 {
     if (frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT))
     {
-        return pbr_nonDirectional(data.albedo, data.metallic, atmos_hdrSkyAmbientRadiance() * l2_skyLightRemap(data.light.y));
+        return pbr_nonDirectional(data.albedo, data.metallic, atmos_hdrSkyAmbientRadiance() * l2_lightmapRemap(data.light.y));
     }
     return vec3(0.0);
 }

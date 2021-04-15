@@ -22,10 +22,9 @@
 /*  MULTIPLIERS
  *******************************************************/
 
-float l2_skyLightRemap(float skyLight)
+float l2_lightmapRemap(float lightMapCoords)
 {
-    float sl = l2_clampScale(0.03125, 1.0, skyLight);
-    return hdr_gammaAdjustf(sl);
+    return hdr_gammaAdjustf(l2_clampScale(0.03125, 0.96875, lightMapCoords));
 }
 
 /*  RADIANCE
@@ -33,7 +32,7 @@ float l2_skyLightRemap(float skyLight)
 
 vec3 l2_blockRadiance(float blockLight)
 {
-    float dist = (1.001 - min(l2_clampScale(0.03125, 0.95, blockLight), 0.93)) * 15;
+    float dist = (1.001 - min(l2_clampScale(0.03125, 0.96875, blockLight), 0.93)) * 15;
     float bl = BLOCK_LIGHT_ADJUSTER / (dist * dist);
     // CLAMP DOWN TO ZERO
     if (bl <= 0.01 * BLOCK_LIGHT_ADJUSTER) {
