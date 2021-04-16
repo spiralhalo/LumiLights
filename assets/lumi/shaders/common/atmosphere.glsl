@@ -184,7 +184,7 @@ void atmos_generateAtmosphereModel()
         && frx_worldFlag(FRX_WORLD_IS_OVERWORLD)
         && !frx_playerHasEffect(FRX_EFFECT_BLINDNESS);
 
-    atmosv_hdrSkyColorRadiance = customOWFog ? atmosv_hdrSkyColorRadiance : frx_vanillaClearColor();
+    atmosv_hdrSkyColorRadiance = customOWFog ? atmosv_hdrSkyColorRadiance : hdr_gammaAdjust(frx_vanillaClearColor());
 
 
     float currentToSunrise;
