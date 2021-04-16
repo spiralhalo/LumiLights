@@ -2,7 +2,7 @@
     programs: [
         {
             name: "taa_program",
-            vertexSource: "lumi:shaders/post/basic.vert",
+            vertexSource: "lumi:shaders/post/simple.vert",
             fragmentSource: "lumi:shaders/post/taa.frag",
             samplers: [
                 "u_current",
@@ -11,7 +11,7 @@
             ]
         }, {
             name: "taa_hand_merge",
-            vertexSource: "lumi:shaders/post/basic.vert",
+            vertexSource: "lumi:shaders/post/simple.vert",
             fragmentSource: "lumi:shaders/post/taa_hand_merge.frag",
             samplers: [
                 "u_depth"

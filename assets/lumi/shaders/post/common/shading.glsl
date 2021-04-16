@@ -16,6 +16,7 @@
 #include lumi:shaders/lib/bitpack.glsl
 #include lumi:shaders/lib/block_dir.glsl
 #include lumi:shaders/lib/puddle.glsl
+#include lumi:shaders/lib/rectangle.glsl
 #include lumi:shaders/lib/taa_jitter.glsl
 #include lumi:shaders/lib/tile_noise.glsl
 #include lumi:shaders/lib/util.glsl
@@ -31,13 +32,18 @@
  *  published by the Free Software Foundation, Inc.    *
  *******************************************************/
 
+uniform sampler2D u_sun;
+uniform sampler2D u_moon;
+
 /*******************************************************
     vertexShader: lumi:shaders/post/hdr.vert
  *******************************************************/
 
+in vec3 v_celest1;
+in vec3 v_celest2;
+in vec3 v_celest3;
 in vec2 v_invSize;
 in mat4 v_star_rotator;
-in mat4 v_cloud_rotator;
 in float v_fov;
 in float v_night;
 in float v_not_in_void;
@@ -227,19 +233,26 @@ void custom_sky(in vec3 viewPos, in float blindnessFactor, inout vec4 a, inout f
     bloom_out = 0.0;
 
     if (frx_worldFlag(FRX_WORLD_IS_OVERWORLD) && v_not_in_void > 0.0) {
-        float celestialObject = l2_clampScale(0.999, 0.9992, dot(worldSkyVec, frx_skyLightVector()));
-        if (!frx_worldFlag(FRX_WORLD_IS_MOONLIT)) {
-            celestialObject *= frx_skyLightTransitionFactor();
+        vec2 celestUV = rect_innerUV(Rect(v_celest1, v_celest2, v_celest3), worldSkyVec * 1024.);
+        float celestialObject = l2_clampScale(.95, 1., dot(worldSkyVec, frx_skyLightVector()));
+        vec3 celestialObjectColor = vec3(0.);
+        if (celestUV == clamp(celestUV, 0.0, 1.0) && dot(worldSkyVec, frx_skyLightVector())>0.) 
+        {
+            if (frx_worldFlag(FRX_WORLD_IS_MOONLIT)){
+                celestUV.x *= 0.25;
+                celestUV.y *= 0.5;
+                celestUV.x += mod(frx_worldDay(), 4.) * 0.25;
+                celestUV.y += (mod(frx_worldDay(), 8.) >= 4.) ? 0.5 : 0.0;
+                celestialObjectColor = hdr_gammaAdjust(texture(u_moon, celestUV).rgb) * 2.0;
+            } else {
+                celestialObjectColor = hdr_gammaAdjust(texture(u_sun, celestUV).rgb) * 2.0;
+            }
         }
         #if SKY_MODE == SKY_MODE_LUMI
             // horizonBrightening can't be used on reflections yet due to clamping I think
-            float horizonBrightening = 1 + 3 * pow(l2_clampScale(0.5, -0.1, skyDotUp), 2.0) * (1.0 - frx_rainGradient() * 0.6);
+            float horizonBrightening = 1. + 3. * pow(l2_clampScale(.5, -.1, skyDotUp), 2.) * (1. - frx_rainGradient() * .6);
             a.rgb = atmos_hdrSkyColorRadiance(worldSkyVec) * horizonBrightening;
-            if (frx_worldFlag(FRX_WORLD_IS_MOONLIT)) {
-                a.rgb = mix(a.rgb, vec3(0.25 + frx_moonSize()), celestialObject);
-            } else {
-                a.rgb += vec3(10.0) * celestialObject;
-            }
+            a.rgb += celestialObjectColor * (1. - frx_rainGradient());
         #else
             // a.rgb = hdr_gammaAdjust(a.rgb) * 2.0; // Don't gamma-correct vanilla sky
         #endif

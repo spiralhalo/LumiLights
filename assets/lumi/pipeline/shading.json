@@ -2,7 +2,7 @@
     programs: [
         {
             name: "shading_solid",
-            vertexSource: "lumi:shaders/post/hdr.vert",
+            vertexSource: "lumi:shaders/post/shading.vert",
             fragmentSource: "lumi:shaders/post/shading_solid.frag",
             samplers: [
                 "u_solid_color",
@@ -18,10 +18,12 @@
                 "u_ao",
                 "u_glint",
                 "u_shadow",
+                "u_sun",
+                "u_moon",
             ]
         }, {
             name: "shading_translucent",
-            vertexSource: "lumi:shaders/post/hdr.vert",
+            vertexSource: "lumi:shaders/post/shading.vert",
             fragmentSource: "lumi:shaders/post/shading_translucent.frag",
             samplers: [
                 "u_translucent_color",

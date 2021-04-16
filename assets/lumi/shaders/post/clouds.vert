@@ -7,10 +7,12 @@
 #include lumi:shaders/lib/util.glsl
 
 /*******************************************************
- *  lumi:shaders/post/hdr.vert                         *
+ *  lumi:shaders/post/clouds.vert                      *
  *******************************************************/
 
-out vec2 v_invSize;
+#if CLOUD_RENDERING == CLOUD_RENDERING_FLAT
+out mat4 v_cloud_rotator;
+#endif
 out float v_blindness;
 
 void main()
@@ -18,7 +20,10 @@ void main()
     basicFrameSetup();
     atmos_generateAtmosphereModel();
 
-    v_invSize = 1.0/frxu_size;
+    #if CLOUD_RENDERING == CLOUD_RENDERING_FLAT
+        v_cloud_rotator = l2_rotationMatrix(vec3(0.0, 1.0, 0.0), PI * 0.25);
+    #endif
+
     v_blindness = frx_playerHasEffect(FRX_EFFECT_BLINDNESS)
         ? l2_clampScale(0.5, 1.0, 1.0 - frx_luminance(frx_vanillaClearColor()))
         : 0.0;

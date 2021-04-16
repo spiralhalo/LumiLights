@@ -4,13 +4,13 @@
 #include lumi:shaders/lib/util.glsl
 
 /*******************************************************
- *  lumi:shaders/post/simple.vert             *
+ *  lumi:shaders/post/simple.vert                      *
  *******************************************************/
+
+out vec2 v_invSize;
 
 void main()
 {
-    vec4 screen = frxu_frameProjectionMatrix * vec4(in_vertex.xy * frxu_size, 0.0, 1.0);
-    gl_Position = vec4(screen.xy, 0.2, 1.0);
-    v_texcoord = in_uv;
-    v_up = frx_normalModelMatrix() * vec3(0.0, 1.0, 0.0);
+    v_invSize = 1.0 / frxu_size;
+    basicFrameSetup();
 }

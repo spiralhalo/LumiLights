@@ -2,7 +2,7 @@
     programs: [
          {
             name: "clouds",
-            vertexSource: "lumi:shaders/post/hdr.vert",
+            vertexSource: "lumi:shaders/post/clouds.vert",
             fragmentSource: "lumi:shaders/post/clouds.frag",
             samplers: ["u_clouds", "u_clouds_texture", "u_clouds_depth", "u_solid_depth"]
         }, {

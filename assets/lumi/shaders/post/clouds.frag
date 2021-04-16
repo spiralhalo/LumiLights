@@ -27,14 +27,12 @@ uniform sampler2D u_clouds_depth;
 uniform sampler2D u_solid_depth;
 
 /*******************************************************
-    vertexShader: lumi:shaders/post/hdr.vert
+    vertexShader: lumi:shaders/post/clouds.vert
  *******************************************************/
 
 #if CLOUD_RENDERING == CLOUD_RENDERING_FLAT
 in mat4 v_cloud_rotator;
 #endif
-in float v_fov;
-in float v_night;
 in float v_blindness;
 
 out vec4[2] fragColor;
