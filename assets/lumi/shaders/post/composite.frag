@@ -160,7 +160,7 @@ void main()
         float threshold = mix(.0, .3, d1);
         float lineness = l2_clampScale(threshold, threshold * .5, maxDiff);
         lineness += (1.0 - lineness) * min(1.0, maxD * 2.0);
-        lineness += (1.0 - lineness) * (min_depth > depth_layers[active_layers-1] ? color_layers[active_layers-1].a : 0.0);
+        lineness += (1.0 - lineness) * (maxD > ldepth(depth_layers[active_layers-1]) ? color_layers[active_layers-1].a : 0.0);
         fragColor[0] *= lineness;
     #endif
 }
