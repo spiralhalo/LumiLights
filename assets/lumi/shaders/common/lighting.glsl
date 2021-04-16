@@ -37,7 +37,7 @@ const vec3 BLOCK_LIGHT_COLOR = vec3(1.0, 0.7, 0.4);
 #endif
 const vec3 NIGHT_VISION_COLOR = vec3(0.63, 0.55, 0.64);
 const vec3 SKYLESS_LIGHT_COLOR = vec3(1.0, 1.0, 1.0);
-const vec3 NETHER_SKYLESS_LIGHT_COLOR = vec3(1.0, 0.5, 0.3);
+const vec3 NETHER_SKYLESS_LIGHT_COLOR = vec3(1.0, 0.6, 0.5);
 
 #if SKY_MODE == SKY_MODE_LUMI
 const vec3 NEBULAE_COLOR = hdr_gammaAdjust(vec3(0.8, 0.3, 0.6));

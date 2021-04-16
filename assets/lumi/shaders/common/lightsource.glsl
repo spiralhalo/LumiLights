@@ -113,7 +113,7 @@ vec3 l2_skylessRadiance()
     if (frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT)) return vec3(0);
     else {
         vec3 color = frx_worldFlag(FRX_WORLD_IS_NETHER) ? NETHER_SKYLESS_LIGHT_COLOR : SKYLESS_LIGHT_COLOR;
-        float darkenedFactor = frx_isSkyDarkened() ? 0.5 : 1.0;
+        float darkenedFactor = frx_isSkyDarkened() ? 0.6 : 1.0;
         return darkenedFactor * SKYLESS_LIGHT_STR * hdr_gammaAdjust(color);
     }
 }
