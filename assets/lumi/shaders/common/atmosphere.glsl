@@ -138,7 +138,8 @@ void atmos_generateAtmosphereModel()
     /*******************/
 
 
-    CELEST_STR[SMONC] *= 0.5 + 0.5 * frx_moonSize();
+    CELEST_STR[SMONC] *= 0.4 + 0.6 * frx_moonSize();
+    SKY_AMBIENT[NGTC] *= 0.4 + 0.6 * frx_moonSize();
     
 
     float horizonTime = frx_worldTime() < 0.75 ? frx_worldTime():frx_worldTime() - 1.0; // [-0.25, 0.75)
