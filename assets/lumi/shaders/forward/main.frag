@@ -70,7 +70,7 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
     if (frx_modelOriginType() == MODEL_ORIGIN_SCREEN) {
         if (gl_FragCoord.z <= 0.6) { // hack to exclude hand but include bedrockify doll
             float diffuse = mix(pv_diffuse, 1, fragData.emissivity);
-            diffuse = frx_isGui() ? diffuse : min(1.0, 1.5 - diffuse);
+            // diffuse = frx_isGui() ? diffuse : min(1.0, 1.5 - diffuse);
             diffuse = fragData.diffuse ? diffuse : 1.0;
             a.rgb *= diffuse;
             #if GLINT_MODE == GLINT_MODE_SHADER
@@ -79,8 +79,9 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
                 a.rgb += texture_glint(u_glint, frx_normalizeMappedUV(frx_texcoord), frx_matGlint());
             #endif
         } else {
+            fragData.diffuse = true; // what could go wrong?
             float bloom_out = fragData.emissivity * a.a;
-            vec3 normal = fragData.vertexNormal * frx_normalModelMatrix();
+            vec3 normal = (pbr_normalMicro.x > 90. ? fragData.vertexNormal : pbr_normalMicro) * frx_normalModelMatrix();
             //TODO: apply shadowmap perhaps (is the hand even included in depth pass ??)
             pbr_shading(a, bloom_out, l2_viewpos, fragData.light.xyy, normal, pbr_roughness, pbr_metallic, pbr_f0, fragData.diffuse, true);
             #if GLINT_MODE == GLINT_MODE_SHADER
