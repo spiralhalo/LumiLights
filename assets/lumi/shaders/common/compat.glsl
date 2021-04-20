@@ -1,5 +1,7 @@
 /*******************************************************
  *  lumi:shaders/common/compat.glsl                    *
+ *******************************************************
+ *  This file isn't supposed to exist.                 *
  *******************************************************/
 
 // Compatibility with 1.16 / GLSL 1.3
@@ -12,3 +14,13 @@
 #define in_vertex gl_Vertex
 #define USE_LEGACY_FREX_COMPAT
 #endif
+
+// LIST OF INCOMPATIBLE CHANGES
+// (in case I want to expand compatibility in the future)
+
+// [see defines above]
+// varying -> in/out
+// texture2D -> texture
+// texture2DLod -> textureLod
+// shadow2DArray(...).x -> texture(...)
+// gl_FragData[] -> out vec4 fragColor, out vec4[] fragColor
