@@ -120,8 +120,10 @@ const float[CELEST_LEN] CELEST_TIMES = float[](-0.04, -0.03, -0.01,  0.02,  0.48
 
 const int DAYC = 0;
 const int NGTC = 1;
+const int TWGC = 2;
 #ifdef POST_SHADER
-const vec3[2] SKY_COLOR   = vec3[](DAY_SKY_COLOR, NIGHT_SKY_COLOR);
+const vec3[3] SKY_COLOR   = vec3[](DAY_SKY_COLOR, NIGHT_SKY_COLOR, SUNRISE_LIGHT_COLOR);
+const int[3] TWG_MAPPER   = int[] (TWGC, DAYC, NGTC); // maps celest color to sky color
 #endif
       vec3[2] SKY_AMBIENT = vec3[](NOON_AMBIENT,  NIGHT_AMBIENT  );
 const int SKY_LEN = 4;
@@ -145,15 +147,32 @@ void atmos_generateAtmosphereModel()
     float horizonTime = frx_worldTime() < 0.75 ? frx_worldTime():frx_worldTime() - 1.0; // [-0.25, 0.75)
 
 
+    #ifdef POST_SHADER
+        int twgMappedA;
+        int twgMappedB;
+        float twgTransition;
+    #endif
+
     if (horizonTime <= CELEST_TIMES[0]) {
         atmosv_hdrCelestialRadiance = CELEST_COLOR[CELEST_INDICES[0]] * CELEST_STR[CELEST_INDICES[0]];
+        #ifdef POST_SHADER
+            twgMappedA = twgMappedB = TWG_MAPPER[CELEST_INDICES[0]];
+            twgTransition = 0.;
+        #endif
     } else {
         int sunI = 1;
         while (horizonTime > CELEST_TIMES[sunI] && sunI < CELEST_LEN) sunI++;
+        float celestTransition = l2_clampScale(CELEST_TIMES[sunI-1], CELEST_TIMES[sunI], horizonTime);
         atmosv_hdrCelestialRadiance = mix(
             CELEST_COLOR[CELEST_INDICES[sunI-1]] * CELEST_STR[CELEST_INDICES[sunI-1]],
             CELEST_COLOR[CELEST_INDICES[sunI]] * CELEST_STR[CELEST_INDICES[sunI]],
-            l2_clampScale(CELEST_TIMES[sunI-1], CELEST_TIMES[sunI], horizonTime));
+            celestTransition);
+            
+        #ifdef POST_SHADER
+            twgMappedA = TWG_MAPPER[CELEST_INDICES[sunI-1]];
+            twgMappedB = TWG_MAPPER[CELEST_INDICES[sunI]];
+            twgTransition = celestTransition;
+        #endif
     }
 
 
@@ -168,10 +187,10 @@ void atmos_generateAtmosphereModel()
         while (horizonTime > SKY_TIMES[skyI] && skyI < SKY_LEN) skyI++;
         float skyTransition = l2_clampScale(SKY_TIMES[skyI-1], SKY_TIMES[skyI], horizonTime);
 
-        atmosv_hdrSkyAmbientRadiance = mix(SKY_AMBIENT[SKY_INDICES[skyI-1]], SKY_AMBIENT[SKY_INDICES[skyI]], skyTransition)
-                                        * SKY_AMBIENT_STR * (frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? 1.0 : 0.0);
+        atmosv_hdrSkyAmbientRadiance    = mix(SKY_AMBIENT[SKY_INDICES[skyI-1]], SKY_AMBIENT[SKY_INDICES[skyI]], skyTransition)
+                                              * SKY_AMBIENT_STR * (frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? 1.0 : 0.0);
         #ifdef POST_SHADER
-        atmosv_hdrSkyColorRadiance   = mix(SKY_COLOR[SKY_INDICES[skyI-1]], SKY_COLOR[SKY_INDICES[skyI]], skyTransition) * SKY_STR;
+        atmosv_hdrSkyColorRadiance      = mix(SKY_COLOR[SKY_INDICES[skyI-1]], SKY_COLOR[SKY_INDICES[skyI]], skyTransition) * SKY_STR;
         #endif
     }
 
@@ -185,20 +204,9 @@ void atmos_generateAtmosphereModel()
         && !frx_playerHasEffect(FRX_EFFECT_BLINDNESS);
 
     atmosv_hdrSkyColorRadiance = customOWFog ? atmosv_hdrSkyColorRadiance : hdr_gammaAdjust(frx_vanillaClearColor());
-
-
-    float currentToSunrise;
-    float distCurrent = distance(atmosv_hdrCelestialRadiance, CELEST_COLOR[SRISC] * CELEST_STR[SRISC]);
-    if (distance(atmosv_hdrCelestialRadiance, CELEST_COLOR[SMONC] * CELEST_STR[SMONC]) < distance(atmosv_hdrCelestialRadiance, CELEST_COLOR[SNONC] * CELEST_STR[SNONC])){
-        currentToSunrise = distCurrent / distance(CELEST_COLOR[SMONC] * CELEST_STR[SMONC], CELEST_COLOR[SRISC] * CELEST_STR[SRISC]);
-    } else {
-        currentToSunrise = distCurrent / distance(CELEST_COLOR[SNONC] * CELEST_STR[SNONC], CELEST_COLOR[SRISC] * CELEST_STR[SRISC]);
-    }
-
-    float isTwilightTime = l2_clampScale(1.0, 0.0, currentToSunrise) * (customOWFog && !frx_worldFlag(FRX_WORLD_IS_MOONLIT) ? 1.0 : 0.0);
-    isTwilightTime = sqrt(isTwilightTime);
-
-    atmosv_hdrOWTwilightSkyRadiance = mix(atmosv_hdrSkyColorRadiance, atmosv_hdrCelestialRadiance * SKY_STR / SUNLIGHT_STR, isTwilightTime);
+    atmosv_hdrOWTwilightSkyRadiance = customOWFog
+                                    ? mix(SKY_COLOR[twgMappedA], SKY_COLOR[twgMappedB], twgTransition) * SKY_STR
+                                    : atmosv_hdrSkyColorRadiance;
     #endif
 
 
