@@ -90,8 +90,8 @@ vec3 atmos_hdrSkyColorRadiance(vec3 world_toSky)
 
 
 
-const float SKY_LIGHT_RAINING_MULT = 0.1;
-const float SKY_LIGHT_THUNDERING_MULT = 0.01;
+const float SKY_LIGHT_RAINING_MULT = 0.3;
+const float SKY_LIGHT_THUNDERING_MULT = 0.1;
 
 const float SUNLIGHT_STR = DEF_SUNLIGHT_STR;
 const float MOONLIGHT_STR = DEF_MOONLIGHT_STR;
