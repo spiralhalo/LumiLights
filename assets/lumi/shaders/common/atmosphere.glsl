@@ -206,19 +206,21 @@ void atmos_generateAtmosphereModel()
     /** RAIN **/
     float rainBrightness = min(mix(1.0, SKY_LIGHT_RAINING_MULT, frx_rainGradient()), mix(1.0, SKY_LIGHT_THUNDERING_MULT, frx_thunderGradient()));
 
-    vec3 grayDarkCelestial  = vec3(frx_luminance(atmosv_hdrCelestialRadiance)) * rainBrightness;
-    vec3 grayDarkSkyAmbient = vec3(frx_luminance(atmosv_hdrSkyAmbientRadiance)) * rainBrightness;
+    vec3 grayCelestial  = vec3(frx_luminance(atmosv_hdrCelestialRadiance));
+    vec3 graySkyAmbient = vec3(frx_luminance(atmosv_hdrSkyAmbientRadiance));
     #ifdef POST_SHADER
-    vec3 grayDarkSky        = vec3(frx_luminance(atmosv_hdrSkyColorRadiance)) * rainBrightness;
+    vec3 graySky        = vec3(frx_luminance(atmosv_hdrSkyColorRadiance));
     #endif
 
-    float toGrayDark = frx_rainGradient() * 0.6 + frx_thunderGradient() * 0.35;
+    float toGray = frx_rainGradient() * 0.6 + frx_thunderGradient() * 0.35;
 
-    atmosv_hdrCelestialRadiance     = mix(atmosv_hdrCelestialRadiance, grayDarkCelestial, toGrayDark); 
-    atmosv_hdrSkyAmbientRadiance    = mix(atmosv_hdrSkyAmbientRadiance, grayDarkSkyAmbient, toGrayDark);
+    atmosv_hdrCelestialRadiance     = mix(atmosv_hdrCelestialRadiance, grayCelestial, toGray) * rainBrightness; 
+    atmosv_hdrSkyAmbientRadiance    = mix(atmosv_hdrSkyAmbientRadiance, graySkyAmbient, toGray)* rainBrightness;
     #ifdef POST_SHADER
-    atmosv_hdrSkyColorRadiance      = mix(atmosv_hdrSkyColorRadiance, grayDarkSky, toGrayDark);
-    atmosv_hdrOWTwilightSkyRadiance = mix(atmosv_hdrOWTwilightSkyRadiance, grayDarkSky, toGrayDark);
+    if (customOWFog) {
+        atmosv_hdrSkyColorRadiance      = mix(atmosv_hdrSkyColorRadiance, graySky, toGray) * rainBrightness;
+        atmosv_hdrOWTwilightSkyRadiance = mix(atmosv_hdrOWTwilightSkyRadiance, graySky, toGray) * rainBrightness;
+    }
     #endif
     /**********/
 }
