@@ -17,7 +17,10 @@
 
 uniform ivec2 frxu_size;
 uniform int frxu_lod;
+
+#ifndef USE_LEGACY_FREX_COMPAT
 uniform mat4 frxu_frameProjectionMatrix;
+#endif
 
 #ifdef VERTEX_SHADER
 out vec2 v_texcoord;
