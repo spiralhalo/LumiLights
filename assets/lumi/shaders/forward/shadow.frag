@@ -3,6 +3,7 @@
 #include frex:shaders/api/world.glsl
 #include frex:shaders/api/player.glsl
 #include frex:shaders/api/material.glsl
+#include lumi:shaders/common/compat.glsl
 
 /******************************************************
   lumi:shaders/forward/shadow.frag

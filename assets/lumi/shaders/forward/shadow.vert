@@ -1,4 +1,5 @@
 #include frex:shaders/api/view.glsl
+#include lumi:shaders/common/compat.glsl
 #include lumi:shaders/lib/util.glsl
 
 /******************************************************
