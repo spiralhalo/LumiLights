@@ -36,7 +36,7 @@ frx_FragmentData frx_createPipelineFragment()
 {
 #ifdef VANILLA_LIGHTING
     return frx_FragmentData (
-        texture3(frxs_baseColor, frx_texcoord, frx_matUnmippedFactor() * -4.0),
+        texture(frxs_baseColor, frx_texcoord, frx_matUnmippedFactor() * -4.0),
         frx_color,
         frx_matEmissive() ? 1.0 : 0.0,
         !frx_matDisableDiffuse(),
@@ -47,7 +47,7 @@ frx_FragmentData frx_createPipelineFragment()
     );
 #else
     return frx_FragmentData (
-        texture3(frxs_baseColor, frx_texcoord, frx_matUnmippedFactor() * -4.0),
+        texture(frxs_baseColor, frx_texcoord, frx_matUnmippedFactor() * -4.0),
         frx_color,
         frx_matEmissive() ? 1.0 : 0.0,
         !frx_matDisableDiffuse(),

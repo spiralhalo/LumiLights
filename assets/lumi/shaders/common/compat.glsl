@@ -31,8 +31,8 @@
 #define frag_in varying
 #define fragColor gl_FragData
 #define sample_shadow(y,z) shadow2DArray(y,z).x
-#define texture(y,z) texture2D(y,z)
-#define texture3(y,z,w) texture2D(y,z,w)
+vec4 texture(sampler2D x, vec2 y)          { return texture2D(x, y); }
+vec4 texture(sampler2D x, vec2 y, float z) { return texture2D(x, y, z); }
 #define textureLod(y,z,w) texture2DLod(y,z,w)
 #define USING_OLD_OPENGL
 #else
@@ -40,5 +40,4 @@
 #define vert_out out
 #define frag_in in
 #define sample_shadow(y,z) shadow2DArray(y,z).x
-#define texture3(y,z,w) texture2D(y,z,w)
 #endif
