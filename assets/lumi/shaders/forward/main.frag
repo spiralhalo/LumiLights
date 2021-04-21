@@ -30,7 +30,9 @@ frag_in vec2 pv_lightcoord;
 frag_in float pv_ao;
 frag_in float pv_diffuse;
 
+#ifndef USING_OLD_OPENGL
 out vec4[7] fragColor;
+#endif
 
 frx_FragmentData frx_createPipelineFragment()
 {
