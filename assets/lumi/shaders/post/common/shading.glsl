@@ -234,7 +234,7 @@ void custom_sky(in vec3 viewPos, in float blindnessFactor, inout vec4 a, inout f
 
     if (frx_worldFlag(FRX_WORLD_IS_OVERWORLD) && v_not_in_void > 0.0) {
         vec2 celestUV = rect_innerUV(Rect(v_celest1, v_celest2, v_celest3), skyVec * 1024.);
-        float celestialObject = l2_clampScale(.98, .99, dot(worldSkyVec, frx_skyLightVector()));
+        float starEraser = l2_clampScale(.99, .999, dot(worldSkyVec, frx_skyLightVector()));
         vec3 celestialObjectColor = vec3(0.);
         if (celestUV == clamp(celestUV, 0.0, 1.0) && dot(worldSkyVec, frx_skyLightVector())>0.) 
         {
@@ -270,7 +270,7 @@ void custom_sky(in vec3 viewPos, in float blindnessFactor, inout vec4 a, inout f
             // zoom sharpening
             float zoomFactor = l2_clampScale(90, 30, v_fov);
             star = l2_clampScale(0.3 * zoomFactor, 1.0 - 0.6 * zoomFactor, star) * occlusion;
-            star = max(0.0, star - celestialObject);
+            star = max(0.0, star - starEraser);
             float milkyHaze = starry * occlusion * milkyness * 0.4 * l2_clampScale(-1.0, 1.0, snoise(starVec.xyz * 2.0));
             #if SKY_MODE == SKY_MODE_LUMI
             milkyHaze *= milkyHaze;
