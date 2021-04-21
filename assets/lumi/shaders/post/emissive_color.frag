@@ -12,7 +12,7 @@ uniform sampler2D u_emissive;
 uniform sampler2D u_emissive_translucent;
 uniform sampler2D u_solid_depth;
 
-#ifndef USE_LEGACY_FREX_COMPAT
+#ifndef USING_OLD_OPENGL
 out vec4[1] fragColor;
 #endif
 

@@ -23,7 +23,7 @@ uniform sampler2D u_light_particles;
 uniform sampler2D u_glint;
 uniform sampler2DArrayShadow u_shadow;
 
-#ifndef USE_LEGACY_FREX_COMPAT
+#ifndef USING_OLD_OPENGL
 out vec4[3] fragColor;
 #endif
 

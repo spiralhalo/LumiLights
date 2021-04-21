@@ -35,7 +35,7 @@ frag_in mat4 v_cloud_rotator;
 #endif
 frag_in float v_blindness;
 
-#ifndef USE_LEGACY_FREX_COMPAT
+#ifndef USING_OLD_OPENGL
 out vec4[2] fragColor;
 #endif
 

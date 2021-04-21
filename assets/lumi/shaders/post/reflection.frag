@@ -31,7 +31,7 @@ uniform sampler2D u_target_combine;
 uniform sampler2D u_target_depth;
 uniform sampler2D u_normal_target;
 
-#ifndef USE_LEGACY_FREX_COMPAT
+#ifndef USING_OLD_OPENGL
 out vec4[1] fragColor;
 #endif
 

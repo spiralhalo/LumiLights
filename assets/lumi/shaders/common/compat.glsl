@@ -26,16 +26,17 @@
 // gl_FragData[] -> out vec4 fragColor, out vec4[] fragColor
 
 #if __VERSION__ <= 120
-#define vertex_in attribute
-#define vertex_out varying
+#define vert_in attribute
+#define vert_out varying
 #define frag_in varying
 #define fragColor gl_FragData
-#define sample_shadow(y) shadow2DArray(y).x
-#define texture(y) texture2D(y)
-#define textureLod(y) texture2DLod(y)
+#define sample_shadow(y,z) shadow2DArray(y,z).x
+#define texture(y,z) texture2D(y,z)
+#define textureLod(y,z) texture2DLod(y,z)
+#define USING_OLD_OPENGL
 #else
-#define vertex_in in
-#define vertex_out out
+#define vert_in in
+#define vert_out out
 #define frag_in in
-#define sample_shadow(y) texture(y)
+#define sample_shadow(y,z) shadow2DArray(y,z).x
 #endif

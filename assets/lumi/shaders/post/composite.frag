@@ -32,7 +32,7 @@ frag_in float v_godray_intensity;
 frag_in float v_aspect_adjuster;
 frag_in vec2 v_invSize;
 
-#ifndef USE_LEGACY_FREX_COMPAT
+#ifndef USING_OLD_OPENGL
 out vec4[2] fragColor;
 #endif
 

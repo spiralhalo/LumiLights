@@ -20,7 +20,7 @@ uniform sampler2D u_hdr_translucent;
 uniform sampler2D u_hdr_translucent_swap;
 uniform sampler2D u_translucent_depth;
 
-#ifndef USE_LEGACY_FREX_COMPAT
+#ifndef USING_OLD_OPENGL
 out vec4[2] fragColor;
 #endif
 

@@ -8,7 +8,7 @@
 uniform sampler2D u_input;
 uniform sampler2D u_prior;
 
-#ifndef USE_LEGACY_FREX_COMPAT
+#ifndef USING_OLD_OPENGL
 out vec4[1] fragColor;
 #endif
 
