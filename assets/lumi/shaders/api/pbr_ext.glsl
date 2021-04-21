@@ -7,7 +7,7 @@
 
 #ifdef VERTEX_SHADER
 
-out vec3 l2_tangent;
+vert_out vec3 l2_tangent;
 
 const mat4 _pbrExt_rotm = mat4(
 0,  0, -1,  0,
@@ -24,7 +24,7 @@ void pbrExt_tangentSetup(vec3 normal)
 
 #else
 
-in vec3 l2_tangent;
+frag_in vec3 l2_tangent;
 
 float pbr_roughness = 1.0;
 float pbr_metallic = 0.0;

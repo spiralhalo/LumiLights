@@ -11,9 +11,9 @@
  *******************************************************/
 
 #if CLOUD_RENDERING == CLOUD_RENDERING_FLAT
-out mat4 v_cloud_rotator;
+vert_out mat4 v_cloud_rotator;
 #endif
-out float v_blindness;
+vert_out float v_blindness;
 
 void main()
 {

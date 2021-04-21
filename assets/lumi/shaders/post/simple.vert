@@ -7,7 +7,7 @@
  *  lumi:shaders/post/simple.vert                      *
  *******************************************************/
 
-out vec2 v_invSize;
+vert_out vec2 v_invSize;
 
 void main()
 {

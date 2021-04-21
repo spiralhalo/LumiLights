@@ -23,8 +23,8 @@ uniform mat4 frxu_frameProjectionMatrix;
 #endif
 
 #ifdef VERTEX_SHADER
-out vec2 v_texcoord;
-out vec3 v_up;
+vert_out vec2 v_texcoord;
+vert_out vec3 v_up;
 
 void basicFrameSetup()
 {
@@ -34,6 +34,6 @@ void basicFrameSetup()
     v_up = frx_normalModelMatrix() * vec3(0.0, 1.0, 0.0);
 }
 #else
-in vec2 v_texcoord;
-in vec3 v_up;
+frag_in vec2 v_texcoord;
+frag_in vec3 v_up;
 #endif

@@ -39,16 +39,16 @@ uniform sampler2D u_moon;
     vertexShader: lumi:shaders/post/hdr.vert
  *******************************************************/
 
-in vec3 v_celest1;
-in vec3 v_celest2;
-in vec3 v_celest3;
-in vec2 v_invSize;
-in mat4 v_star_rotator;
-in float v_fov;
-in float v_night;
-in float v_not_in_void;
-in float v_near_void_core;
-in float v_blindness;
+frag_in vec3 v_celest1;
+frag_in vec3 v_celest2;
+frag_in vec3 v_celest3;
+frag_in vec2 v_invSize;
+frag_in mat4 v_star_rotator;
+frag_in float v_fov;
+frag_in float v_night;
+frag_in float v_not_in_void;
+frag_in float v_near_void_core;
+frag_in float v_blindness;
 
 const float CAVE_FOG_STR = 0.1;
 const vec3 VOID_CORE_COLOR = hdr_gammaAdjust(vec3(1.0, 0.7, 0.5));

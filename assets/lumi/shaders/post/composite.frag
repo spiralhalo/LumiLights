@@ -26,11 +26,11 @@ uniform sampler2D u_clouds_depth;
 uniform sampler2D u_weather;
 uniform sampler2D u_weather_depth;
 
-in vec3 v_godray_color;
-in vec2 v_skylightpos;
-in float v_godray_intensity;
-in float v_aspect_adjuster;
-in vec2 v_invSize;
+frag_in vec3 v_godray_color;
+frag_in vec2 v_skylightpos;
+frag_in float v_godray_intensity;
+frag_in float v_aspect_adjuster;
+frag_in vec2 v_invSize;
 
 #ifndef USE_LEGACY_FREX_COMPAT
 out vec4[2] fragColor;

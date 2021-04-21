@@ -15,24 +15,24 @@
 
 #ifdef VERTEX_SHADER
 
-    out vec3 atmosv_hdrCelestialRadiance;
-    out vec3 atmosv_hdrSkyAmbientRadiance;
+    vert_out vec3 atmosv_hdrCelestialRadiance;
+    vert_out vec3 atmosv_hdrSkyAmbientRadiance;
 
     #ifdef POST_SHADER
-    out vec3 atmosv_hdrSkyColorRadiance;
-    out vec3 atmosv_hdrOWTwilightSkyRadiance;
+    vert_out vec3 atmosv_hdrSkyColorRadiance;
+    vert_out vec3 atmosv_hdrOWTwilightSkyRadiance;
     #endif
 
     void atmos_generateAtmosphereModel();
 
 #else
 
-    in vec3 atmosv_hdrCelestialRadiance;
-    in vec3 atmosv_hdrSkyAmbientRadiance;
+    frag_in vec3 atmosv_hdrCelestialRadiance;
+    frag_in vec3 atmosv_hdrSkyAmbientRadiance;
 
     #ifdef POST_SHADER
-    in vec3 atmosv_hdrSkyColorRadiance;
-    in vec3 atmosv_hdrOWTwilightSkyRadiance;
+    frag_in vec3 atmosv_hdrSkyColorRadiance;
+    frag_in vec3 atmosv_hdrOWTwilightSkyRadiance;
     #endif
 
 #endif

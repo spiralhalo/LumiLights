@@ -31,9 +31,9 @@ uniform sampler2D u_solid_depth;
  *******************************************************/
 
 #if CLOUD_RENDERING == CLOUD_RENDERING_FLAT
-in mat4 v_cloud_rotator;
+frag_in mat4 v_cloud_rotator;
 #endif
-in float v_blindness;
+frag_in float v_blindness;
 
 #ifndef USE_LEGACY_FREX_COMPAT
 out vec4[2] fragColor;

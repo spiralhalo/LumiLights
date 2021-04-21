@@ -10,11 +10,11 @@
  *  lumi:shaders/post/godrays.vert            *
  *******************************************************/
 
-out vec3 v_godray_color;
-out vec2 v_skylightpos;
-out float v_godray_intensity;
-out float v_aspect_adjuster;
-out vec2 v_invSize;
+vert_out vec3 v_godray_color;
+vert_out vec2 v_skylightpos;
+vert_out float v_godray_intensity;
+vert_out float v_aspect_adjuster;
+vert_out vec2 v_invSize;
 
 void main()
 {

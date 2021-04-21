@@ -11,7 +11,7 @@ uniform sampler2D u_current;
 uniform sampler2D u_history0;
 uniform sampler2D u_depthCurrent;
 
-in vec2 v_invSize;
+frag_in vec2 v_invSize;
 
 #ifndef USE_LEGACY_FREX_COMPAT
 out vec4[1] fragColor;

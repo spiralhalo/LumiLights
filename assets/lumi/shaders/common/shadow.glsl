@@ -44,7 +44,7 @@ float simpleShadowFactor(in sampler2DArrayShadow shadowMap, in vec4 shadowViewPo
     vec4 shadowCoords = frx_shadowProjectionMatrix(cascade) * shadowViewPos;
     if (shadowCoords.xy != clamp(shadowCoords.xy, -1.0, 1.0)) return 1.0; // clamp to border
     shadowCoords.xyz = shadowCoords.xyz * 0.5 + 0.5; // Transform from screen coordinates to texture coordinates
-    return texture(shadowMap, vec4(shadowCoords.xy, float(cascade), shadowCoords.z - bias));
+    return sample_shadow(shadowMap, vec4(shadowCoords.xy, float(cascade), shadowCoords.z - bias));
 }
 
 float calcShadowFactor(in sampler2DArrayShadow shadowMap, vec4 shadowViewPos) {
@@ -65,7 +65,7 @@ float calcShadowFactor(in sampler2DArrayShadow shadowMap, vec4 shadowViewPos) {
     shadowCoords.xyz = shadowCoords.xyz * 0.5 + 0.5; // Transform from screen coordinates to texture coordinates
 
     #if SHADOW_FILTERING == SHADOW_FILTERING_NONE
-        float shadowFactor = texture(shadowMap, vec4(shadowCoords.xy, float(cascade), shadowCoords.z));
+        float shadowFactor = sample_shadow(shadowMap, vec4(shadowCoords.xy, float(cascade), shadowCoords.z));
     #else
         float shadowFactor = sampleShadowPCF(shadowMap, shadowCoords.xyz, float(cascade));
     #endif
@@ -94,7 +94,7 @@ float pcfSample(in sampler2DArrayShadow shadowMap, in vec2 base_uv, in float u, 
     vec2 uv = base_uv + vec2(u, v) * shadowMapSizeInv;
     float z = depth + dot(vec2(u, v) * shadowMapSizeInv, receiverPlaneDepthBias);
 
-	return texture(shadowMap, vec4(uv, cascade, z));
+	return sample_shadow(shadowMap, vec4(uv, cascade, z));
 }
 
 //-------------------------------------------------------------------------------------------------

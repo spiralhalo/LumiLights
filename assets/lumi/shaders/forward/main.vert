@@ -2,8 +2,8 @@
 #include frex:shaders/api/sampler.glsl
 #include frex:shaders/api/vertex.glsl
 #include frex:shaders/api/view.glsl
-#include lumi:shaders/common/atmosphere.glsl
 #include lumi:shaders/common/compat.glsl
+#include lumi:shaders/common/atmosphere.glsl
 #include lumi:shaders/common/lightsource.glsl
 #include lumi:shaders/common/userconfig.glsl
 #include lumi:shaders/api/pbr_ext.glsl
@@ -18,10 +18,10 @@
  *  published by the Free Software Foundation, Inc.    *
  *******************************************************/
 
-out vec3 l2_viewpos;
-out vec2 pv_lightcoord;
-out float pv_ao;
-out float pv_diffuse;
+vert_out vec3 l2_viewpos;
+vert_out vec2 pv_lightcoord;
+vert_out float pv_ao;
+vert_out float pv_diffuse;
 
 // Grondag's vanilla diffuse but different
 float p_diffuseGui(vec3 normal) {

@@ -4,6 +4,7 @@
 #include frex:shaders/api/world.glsl
 #include frex:shaders/api/view.glsl
 #include frex:shaders/lib/math.glsl
+#include lumi:shaders/common/compat.glsl
 #include lumi:shaders/api/pbr_ext.glsl
 #include lumi:shaders/common/atmosphere.glsl
 #include lumi:shaders/common/userconfig.glsl
@@ -24,10 +25,10 @@
 
 uniform sampler2D u_glint;
 
-in vec3 l2_viewpos;
-in vec2 pv_lightcoord;
-in float pv_ao;
-in float pv_diffuse;
+frag_in vec3 l2_viewpos;
+frag_in vec2 pv_lightcoord;
+frag_in float pv_ao;
+frag_in float pv_diffuse;
 
 out vec4[7] fragColor;
 

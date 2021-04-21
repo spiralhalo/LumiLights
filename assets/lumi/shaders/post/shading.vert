@@ -11,16 +11,16 @@
  *  lumi:shaders/post/shading.vert                     *
  *******************************************************/
 
-out vec3 v_celest1;
-out vec3 v_celest2;
-out vec3 v_celest3;
-out vec2 v_invSize;
-out mat4 v_star_rotator;
-out float v_fov;
-out float v_night;
-out float v_not_in_void;
-out float v_near_void_core;
-out float v_blindness;
+vert_out vec3 v_celest1;
+vert_out vec3 v_celest2;
+vert_out vec3 v_celest3;
+vert_out vec2 v_invSize;
+vert_out mat4 v_star_rotator;
+vert_out float v_fov;
+vert_out float v_night;
+vert_out float v_not_in_void;
+vert_out float v_near_void_core;
+vert_out float v_blindness;
 
 void main()
 {
