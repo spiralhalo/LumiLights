@@ -5,9 +5,11 @@
 ******************************************************/
 uniform sampler2DArray u_input;
 
-out vec4 fragColor;
+#ifndef USE_LEGACY_FREX_COMPAT
+out vec4[1] fragColor;
+#endif
 
 void main()
 {
-    fragColor = textureArray(u_input, vec3(v_texcoord, frxu_layer));
+    fragColor[0] = textureArray(u_input, vec3(v_texcoord, frxu_layer));
 }

@@ -21,7 +21,9 @@ uniform sampler2D u_translucent_depth;
 uniform sampler2D u_light_translucent;
 uniform sampler2D u_normal_translucent;
 
-out vec4 fragColor;
+#ifndef USE_LEGACY_FREX_COMPAT
+out vec4[1] fragColor;
+#endif
 
 vec2 coords_uv(vec3 view, mat4 projection)
 {
@@ -88,19 +90,19 @@ void main()
     if (translucent_depth < solid_depth) {
         rt_Result result = rt_refraction(v_texcoord, 0.25, 256.0, 2.0, 20, frx_projectionMatrix(), frx_inverseProjectionMatrix());
         if (result.refracted_uv.x < 0.0 || result.refracted_uv.y < 0.0 || result.refracted_uv.x > 1.0 || result.refracted_uv.y > 1.0) {
-            fragColor = texture(u_solid_color, v_texcoord);
+            fragColor[0] = texture(u_solid_color, v_texcoord);
         } else if (!result.hit) {
             vec4 refracted = texture(u_solid_color, result.refracted_uv);
             if (refracted.a == 0.0) {
-                fragColor = refracted;
+                fragColor[0] = refracted;
             } else {
-                fragColor = texture(u_solid_color, v_texcoord);
+                fragColor[0] = texture(u_solid_color, v_texcoord);
             }
         } else {
-            fragColor = texture(u_solid_color, result.refracted_uv);
+            fragColor[0] = texture(u_solid_color, result.refracted_uv);
         }
     } else {
-        fragColor = texture(u_solid_color, v_texcoord);
+        fragColor[0] = texture(u_solid_color, v_texcoord);
     }
 }
 

@@ -12,7 +12,9 @@
 uniform sampler2D u_base;
 uniform sampler2D u_bloom;
 
-out vec4 fragColor;
+#ifndef USE_LEGACY_FREX_COMPAT
+out vec4[1] fragColor;
+#endif
 
 // Based on approach described by Jorge Jiminez, 2014
 // http://www.iryoku.com/next-generation-post-processing-in-call-of-duty-advanced-warfare
@@ -27,5 +29,5 @@ void main()
     ramp = ramp * ramp * BLOOM_CUTOFF_FLOAT;
     vec3 color = base.rgb + bloom.rgb - cutoff + ramp;
 
-    fragColor = clamp(frx_toGamma(vec4(color, 1.0)), 0.0, 1.0);
+    fragColor[0] = clamp(frx_toGamma(vec4(color, 1.0)), 0.0, 1.0);
 }

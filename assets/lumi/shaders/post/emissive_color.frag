@@ -12,7 +12,9 @@ uniform sampler2D u_emissive;
 uniform sampler2D u_emissive_translucent;
 uniform sampler2D u_solid_depth;
 
-out vec4 fragColor;
+#ifndef USE_LEGACY_FREX_COMPAT
+out vec4[1] fragColor;
+#endif
 
 void main()
 {
@@ -22,5 +24,5 @@ void main()
         : 0.0;
     float e = max(texture(u_emissive, v_texcoord).r, t);
     vec4 c = frx_fromGamma(texture(u_base, v_texcoord));
-    fragColor = vec4(c.rgb * e, e);
+    fragColor[0] = vec4(c.rgb * e, e);
 }

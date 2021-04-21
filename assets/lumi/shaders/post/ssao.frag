@@ -17,7 +17,9 @@
 uniform sampler2D u_normal;
 uniform sampler2D u_depth;
 
-out vec4 fragColor;
+#ifndef USE_LEGACY_FREX_COMPAT
+out vec4[1] fragColor;
+#endif
 
 #if AMBIENT_OCCLUSION == AMBIENT_OCCLUSION_SSAO
 const float RADIUS = 1.0;
@@ -30,15 +32,15 @@ void main()
 #if AMBIENT_OCCLUSION == AMBIENT_OCCLUSION_SSAO
     // Modest performance saving by skipping the sky
     if (texture(u_depth, v_texcoord).r == 1.0) {
-        fragColor = vec4(1.0, 0.0, 0.0, 1.0);
+        fragColor[0] = vec4(1.0, 0.0, 0.0, 1.0);
     } else {
         float random = v_texcoord.x*v_texcoord.y;
         float ssao = calc_ssao(
             u_normal, u_depth, frx_normalModelMatrix(), frx_inverseProjectionMatrix(), frxu_size, 
             v_texcoord, RADIUS, BIAS, INTENSITY);
-        fragColor = vec4(ssao, 0.0, 0.0, 1.0);
+        fragColor[0] = vec4(ssao, 0.0, 0.0, 1.0);
     }
 #else
-    fragColor = vec4(1.0, 0.0, 0.0, 1.0);
+    fragColor[0] = vec4(1.0, 0.0, 0.0, 1.0);
 #endif
 }

@@ -35,7 +35,9 @@ in mat4 v_cloud_rotator;
 #endif
 in float v_blindness;
 
+#ifndef USE_LEGACY_FREX_COMPAT
 out vec4[2] fragColor;
+#endif
 
 void main()
 {

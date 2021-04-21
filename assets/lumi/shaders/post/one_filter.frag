@@ -18,17 +18,19 @@ uniform sampler2D u_depth;
 
 in vec2 v_invSize;
 
-out vec4 fragColor;
+#ifndef USE_LEGACY_FREX_COMPAT
+out vec4[1] fragColor;
+#endif
 
 #if AMBIENT_OCCLUSION == AMBIENT_OCCLUSION_SSAO
 const int size = 4;
 void main()
 {
-    fragColor = vec4(tile_denoise1_depth(v_texcoord, u_source, u_depth, v_invSize, size), 0.0, 0.0, 1.0);
+    fragColor[0] = vec4(tile_denoise1_depth(v_texcoord, u_source, u_depth, v_invSize, size), 0.0, 0.0, 1.0);
 }
 #else
 void main()
 {
-    fragColor = texture(u_source, v_texcoord);
+    fragColor[0] = texture(u_source, v_texcoord);
 }
 #endif

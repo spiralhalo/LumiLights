@@ -24,3 +24,18 @@
 // texture2DLod -> textureLod
 // shadow2DArray(...).x -> texture(...)
 // gl_FragData[] -> out vec4 fragColor, out vec4[] fragColor
+
+#if __VERSION__ <= 120
+#define vertex_in attribute
+#define vertex_out varying
+#define frag_in varying
+#define fragColor gl_FragData
+#define sample_shadow(y) shadow2DArray(y).x
+#define texture(y) texture2D(y)
+#define textureLod(y) texture2DLod(y)
+#else
+#define vertex_in in
+#define vertex_out out
+#define frag_in in
+#define sample_shadow(y) texture(y)
+#endif

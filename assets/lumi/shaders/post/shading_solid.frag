@@ -23,7 +23,9 @@ uniform sampler2D u_ao;
 uniform sampler2D u_glint;
 uniform sampler2DArrayShadow u_shadow;
 
+#ifndef USE_LEGACY_FREX_COMPAT
 out vec4[2] fragColor;
+#endif
 
 #include lumi:shaders/post/common/shading.glsl
 

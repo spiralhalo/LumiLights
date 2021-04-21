@@ -20,7 +20,9 @@ uniform sampler2D u_hdr_translucent;
 uniform sampler2D u_hdr_translucent_swap;
 uniform sampler2D u_translucent_depth;
 
+#ifndef USE_LEGACY_FREX_COMPAT
 out vec4[2] fragColor;
+#endif
 
 // arbitrary chosen depth threshold
 #define blurDepthThreshold 0.01

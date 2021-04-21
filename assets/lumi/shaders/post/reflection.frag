@@ -31,7 +31,9 @@ uniform sampler2D u_target_combine;
 uniform sampler2D u_target_depth;
 uniform sampler2D u_normal_target;
 
-out vec4 fragColor;
+#ifndef USE_LEGACY_FREX_COMPAT
+out vec4[1] fragColor;
+#endif
 
 const float JITTER_STRENGTH = 0.2;
 
@@ -154,8 +156,8 @@ void main()
         vec3 reflection_color = (source_source.depth < source_target.depth)
             ? source_source.color.rgb * source_source.color.a
             : (source_source.color.rgb * (1.0 - source_target.color.a) + source_target.color.rgb * source_target.color.a);
-        fragColor = vec4(reflection_color, source_roughness);
+        fragColor[0] = vec4(reflection_color, source_roughness);
     #else
-        fragColor = vec4(source_source.color.rgb, source_roughness);
+        fragColor[0] = vec4(source_source.color.rgb, source_roughness);
     #endif
 }

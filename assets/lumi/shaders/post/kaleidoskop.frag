@@ -24,7 +24,9 @@ uniform sampler2D u_light_translucent;
 uniform sampler2D u_normal_translucent;
 uniform sampler2D u_material_translucent;
 
+#ifndef USE_LEGACY_FREX_COMPAT
 out vec4[2] fragColor;
+#endif
 
 const float JITTER_STRENGTH = 0.2;
 

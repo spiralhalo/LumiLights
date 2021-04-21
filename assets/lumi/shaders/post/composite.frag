@@ -32,7 +32,9 @@ in float v_godray_intensity;
 in float v_aspect_adjuster;
 in vec2 v_invSize;
 
+#ifndef USE_LEGACY_FREX_COMPAT
 out vec4[2] fragColor;
+#endif
 
 #define NUM_LAYERS 5
 

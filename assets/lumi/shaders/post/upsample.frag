@@ -8,10 +8,12 @@
 uniform sampler2D u_input;
 uniform sampler2D u_prior;
 
-out vec4 fragColor;
+#ifndef USE_LEGACY_FREX_COMPAT
+out vec4[1] fragColor;
+#endif
 
 void main()
 {
     vec4 prior = frx_sampleTent(u_prior, v_texcoord, BLOOM_UPSAMPLE_DIST_VEC / frxu_size, frxu_lod + 1);
-    fragColor = textureLod(u_input, v_texcoord, frxu_lod) + prior;
+    fragColor[0] = textureLod(u_input, v_texcoord, frxu_lod) + prior;
 }
