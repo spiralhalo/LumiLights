@@ -233,7 +233,7 @@ void custom_sky(in vec3 viewPos, in float blindnessFactor, inout vec4 a, inout f
     bloom_out = 0.0;
 
     if (frx_worldFlag(FRX_WORLD_IS_OVERWORLD) && v_not_in_void > 0.0) {
-        vec2 celestUV = rect_innerUV(Rect(v_celest1, v_celest2, v_celest3), worldSkyVec * 1024.);
+        vec2 celestUV = rect_innerUV(Rect(v_celest1, v_celest2, v_celest3), skyVec * 1024.);
         float celestialObject = l2_clampScale(.98, .99, dot(worldSkyVec, frx_skyLightVector()));
         vec3 celestialObjectColor = vec3(0.);
         if (celestUV == clamp(celestUV, 0.0, 1.0) && dot(worldSkyVec, frx_skyLightVector())>0.) 

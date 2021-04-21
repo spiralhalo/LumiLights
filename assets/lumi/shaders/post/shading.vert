@@ -5,6 +5,7 @@
 #include lumi:shaders/common/atmosphere.glsl
 #include lumi:shaders/common/lightsource.glsl
 #include lumi:shaders/lib/rectangle.glsl
+#include lumi:shaders/lib/taa_jitter.glsl
 #include lumi:shaders/lib/util.glsl
 
 /*******************************************************
@@ -33,7 +34,8 @@ void main()
                           celestOrigin + vec3(.0, -celestSize,  celestSize),
                           celestOrigin + vec3(.0,  celestSize, -celestSize));
     rect_applyMatrix(
-        l2_rotationMatrix(vec3( 1.,  0.,  0.), atan(frx_skyLightVector().z, -frx_skyLightVector().y))
+        frx_viewMatrix()
+        * l2_rotationMatrix(vec3( 1.,  0.,  0.), atan(frx_skyLightVector().z, -frx_skyLightVector().y))
         * l2_rotationMatrix(vec3( 0.,  0., 1.), atan(frx_skyLightVector().y, frx_skyLightVector().x * sign(frx_skyLightVector().y)))
         , theCelest, 1.0);
     v_celest1 = theCelest.bottomLeft;
@@ -49,4 +51,13 @@ void main()
     v_blindness = frx_playerHasEffect(FRX_EFFECT_BLINDNESS)
         ? l2_clampScale(0.5, 1.0, 1.0 - frx_luminance(frx_vanillaClearColor()))
         : 0.0;
+
+    // jitter celest
+    #ifdef TAA_ENABLED
+        vec2 taa_jitterValue = taa_jitter(v_invSize);
+        vec4 celest_clip = frx_projectionMatrix() * vec4(v_celest1, 1.0);
+        v_celest1.xy += taa_jitterValue * celest_clip.w;
+        v_celest2.xy += taa_jitterValue * celest_clip.w;
+        v_celest3.xy += taa_jitterValue * celest_clip.w;
+    #endif
 }
