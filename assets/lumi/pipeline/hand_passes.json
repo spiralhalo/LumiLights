@@ -1,0 +1,34 @@
+{
+    programs: [
+        {
+            name: "taa_hand_merge",
+            vertexSource: "lumi:shaders/post/simple.vert",
+            fragmentSource: "lumi:shaders/post/taa_hand_merge.frag",
+            samplers: [
+                "u_depth"
+            ]
+        }
+    ],
+
+    framebuffers: [
+        {
+            name: "taa_hand_merge",
+            colorAttachments: [
+                {image: "composite_depth"},
+            ]
+        }
+    ],
+    
+    afterRenderHand: {
+        passes: [
+            {
+                name: "taa_hand_merge",
+                program: "taa_hand_merge",
+                framebuffer: "taa_hand_merge",
+                samplerImages: [
+                    "solid_depth"
+                ]
+            },
+        ]
+    }
+}
