@@ -1,10 +1,13 @@
 #include lumi:shaders/post/common/header.glsl
 
 #include lumi:shaders/common/atmosphere.glsl
+#include lumi:shaders/common/shadow.glsl
 #include lumi:shaders/func/glintify2.glsl
 #include lumi:shaders/func/pbr_shading.glsl
 #include lumi:shaders/func/tonemap.glsl
 #include lumi:shaders/lib/bitpack.glsl
+#include lumi:shaders/lib/taa_jitter.glsl
+#include lumi:shaders/lib/util.glsl
 
 /******************************************************
  * lumi:shaders/post/hand_process.frag                *
@@ -20,7 +23,9 @@ uniform sampler2D u_misc;
 uniform sampler2D u_translucent_depth;
 
 uniform sampler2D u_glint;
-uniform sampler2D u_shadow;
+uniform sampler2DArrayShadow u_shadow;
+
+in vec2 v_invSize;
 
 out vec4 fragColor[3];
 
@@ -42,8 +47,25 @@ void main()
     
     float roughness = mat.x == 0.0 ? 1.0 : min(1.0, 1.0203 * mat.x - 0.01);
     float bloom_out = light.z;
-    //TODO: apply shadowmap perhaps
-    pbr_shading(a, bloom_out, viewPos, light.xyy, normal, roughness, mat.y, mat.z, /*diffuse=*/true, true);
+    
+    #if defined(SHADOW_MAP_PRESENT)
+        #ifdef TAA_ENABLED
+            vec2 uvJitter = taa_jitter(v_invSize);
+            vec4 unjitteredModelPos = frx_inverseViewProjectionMatrix() * vec4(2.0 * v_texcoord - uvJitter - 1.0, 2.0 * depth - 1.0, 1.0);
+            vec4 shadowViewPos = frx_shadowViewMatrix() * vec4(unjitteredModelPos.xyz / unjitteredModelPos.w, 1.0);
+        #else
+            vec4 worldPos = frx_inverseViewMatrix() * vec4(viewPos, 1.0);
+            vec4 shadowViewPos = frx_shadowViewMatrix() * vec4(worldPos.xyz / worldPos.w, 1.0);
+        #endif
+        float shadowFactor = calcShadowFactor(u_shadow, shadowViewPos);  
+        light.z = shadowFactor;
+        // Workaround before shadow occlusion culling to make caves playable
+        light.z *= l2_clampScale(0.03125, 0.04, light.y);
+    #else
+        light.z = l2_lightmapRemap(light.y);
+    #endif
+
+    pbr_shading(a, bloom_out, viewPos, light, normal, roughness, mat.y, mat.z, /*diffuse=*/true, true);
 
     vec3 misc = texture(u_misc, v_texcoord).xyz;
 
