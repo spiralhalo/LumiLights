@@ -79,12 +79,13 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
             #endif
         } else {
             // TODO: merge with others
-            vec3 normal = (pbr_normalMicro.x > 90. ? fragData.vertexNormal : pbr_normalMicro) * frx_normalModelMatrix();
-            normal = normalize(normal) * 0.5 + 0.5;
+            // NB: diffuse is forced true
+            vec3 normal = normalize(fragData.vertexNormal) * frx_normalModelMatrix() * 0.5 + 0.5;
+            vec3 normal_micro = pbr_normalMicro.x > 90. ? normal : normalize(pbr_normalMicro) * frx_normalModelMatrix() * 0.5 + 0.5;
             float bitFlags = bit_pack(frx_matFlash()?1.:0., frx_matHurt()?1.:0., frx_matGlint(), 0., 0., 0., 0., 0.);
             fragColor[1] = vec4(fragData.light.xy, fragData.emissivity * a.a, 1.0);
             fragColor[2] = vec4(normal, 1.0);
-            fragColor[3] = vec4(normal, 1.0);
+            fragColor[3] = vec4(normal_micro, 1.0);
             fragColor[4] = vec4(0.01 + pbr_roughness * 0.98, pbr_metallic, pbr_f0, 1.0);
             fragColor[5] = vec4(frx_normalizeMappedUV(frx_texcoord), bitFlags, 1.0);
         }
