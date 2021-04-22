@@ -233,22 +233,21 @@ void custom_sky(in vec3 viewPos, in float blindnessFactor, inout vec4 a, inout f
     bloom_out = 0.0;
 
     if (frx_worldFlag(FRX_WORLD_IS_OVERWORLD) && v_not_in_void > 0.0) {
-        vec2 celestUV = rect_innerUV(Rect(v_celest1, v_celest2, v_celest3), skyVec * 1024.);
-        float starEraser = l2_clampScale(.997, .998, dot(worldSkyVec, frx_skyLightVector()));
-        vec3 celestialObjectColor = vec3(0.);
-        if (celestUV == clamp(celestUV, 0.0, 1.0) && dot(worldSkyVec, frx_skyLightVector())>0.) 
-        {
-            if (frx_worldFlag(FRX_WORLD_IS_MOONLIT)){
-                celestUV.x *= 0.25;
-                celestUV.y *= 0.5;
-                celestUV.x += mod(frx_worldDay(), 4.) * 0.25;
-                celestUV.y += (mod(frx_worldDay(), 8.) >= 4.) ? 0.5 : 0.0;
-                celestialObjectColor = hdr_gammaAdjust(texture(u_moon, celestUV).rgb) * 2.0;
-            } else {
-                celestialObjectColor = hdr_gammaAdjust(texture(u_sun, celestUV).rgb) * 2.0;
-            }
-        }
         #if SKY_MODE == SKY_MODE_LUMI
+            // float starEraser = l2_clampScale(.997, .998, dot(worldSkyVec, frx_skyLightVector()));
+            vec2 celestUV = rect_innerUV(Rect(v_celest1, v_celest2, v_celest3), skyVec * 1024.);
+            vec3 celestialObjectColor = vec3(0.);
+            if (celestUV == clamp(celestUV, 0.0, 1.0) && dot(worldSkyVec, frx_skyLightVector()) >0.) {
+                if (frx_worldFlag(FRX_WORLD_IS_MOONLIT)){
+                    celestUV.x *= 0.25;
+                    celestUV.y *= 0.5;
+                    celestUV.x += mod(frx_worldDay(), 4.) * 0.25;
+                    celestUV.y += (mod(frx_worldDay(), 8.) >= 4.) ? 0.5 : 0.0;
+                    celestialObjectColor = hdr_gammaAdjust(texture(u_moon, celestUV).rgb) * 2.0;
+                } else {
+                    celestialObjectColor = hdr_gammaAdjust(texture(u_sun, celestUV).rgb) * 2.0;
+                }
+            }
             // horizonBrightening can't be used on reflections yet due to clamping I think
             float horizonBrightening = 1. + 3. * pow(l2_clampScale(.5, -.1, skyDotUp), 2.) * (1. - frx_rainGradient() * .6);
             a.rgb = atmos_hdrSkyColorRadiance(worldSkyVec) * horizonBrightening;
@@ -258,24 +257,32 @@ void custom_sky(in vec3 viewPos, in float blindnessFactor, inout vec4 a, inout f
         #endif
 
         #if SKY_MODE == SKY_MODE_LUMI || SKY_MODE == SKY_MODE_VANILLA_STARRY
-            // float rainFactor = frx_rainGradient() * 0.67 + frx_thunderGradient() * 0.33;
             // stars
-            float starry = l2_clampScale(0.4, 0.0, frx_luminance(a.rgb)) * v_night;
+            const vec3  nonMilkyAxis  = vec3(-0.598964, 0.531492, 0.598964);
+            
+            float starry;
+            starry = l2_clampScale(0.4, 0.0, frx_luminance(a.rgb)) * v_night;
             starry *= l2_clampScale(-0.6, -0.5, skyDotUp); //prevent star near the void core
-            float occlusion = (1.0 - frx_rainGradient());
-            vec4 starVec = v_star_rotator * vec4(worldSkyVec, 0.0);
-            vec3 nonMilkyAxis = vec3(-0.598964, 0.531492, 0.598964);
+
             float milkyness = l2_clampScale(0.5, 0.0, abs(dot(nonMilkyAxis, worldSkyVec.xyz)));
-            float star = starry * smoothstep(0.75 - milkyness * 0.3, 0.9, snoise(starVec.xyz * 100));
-            // zoom sharpening
-            float zoomFactor = l2_clampScale(90, 30, v_fov);
-            star = l2_clampScale(0.3 * zoomFactor, 1.0 - 0.6 * zoomFactor, star) * occlusion;
-            star = max(0.0, star - starEraser);
-            float milkyHaze = starry * occlusion * milkyness * 0.4 * l2_clampScale(-1.0, 1.0, snoise(starVec.xyz * 2.0));
+
+            float rainOcclusion = (1.0 - frx_rainGradient());
+            vec4  starVec       = v_star_rotator * vec4(worldSkyVec, 0.0);
+            float zoomFactor    = l2_clampScale(90, 30, v_fov); // zoom sharpening
+            float star;
+            star = starry * smoothstep(0.75 - milkyness * 0.3, 0.9, snoise(starVec.xyz * 100));
+            star = l2_clampScale(0.3 * zoomFactor, 1.0 - 0.6 * zoomFactor, star) * rainOcclusion;
+
+            float milkyHaze = starry * rainOcclusion * milkyness * 0.4 * l2_clampScale(-1.0, 1.0, snoise(starVec.xyz * 2.0));
+
             #if SKY_MODE == SKY_MODE_LUMI
-            milkyHaze *= milkyHaze;
+                // star -= star * starEraser;
+                // milkyHaze -= milkyHaze * starEraser;
+                milkyHaze *= milkyHaze;
             #endif
+
             vec3 starRadiance = vec3(star) + NEBULAE_COLOR * milkyHaze;
+
             a.rgb += starRadiance;
             bloom_out += (star + milkyHaze);
         #endif
