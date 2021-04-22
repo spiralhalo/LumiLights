@@ -161,7 +161,7 @@ void atmos_generateAtmosphereModel()
         #endif
     } else {
         int sunI = 1;
-        while (horizonTime > CELEST_TIMES[sunI] && sunI < CELEST_LEN) sunI++;
+        while (horizonTime > CELEST_TIMES[sunI] && sunI < CELEST_LEN - 1) sunI++;
         float celestTransition = l2_clampScale(CELEST_TIMES[sunI-1], CELEST_TIMES[sunI], horizonTime);
         atmosv_hdrCelestialRadiance = mix(
             CELEST_COLOR[CELEST_INDICES[sunI-1]] * CELEST_STR[CELEST_INDICES[sunI-1]],
@@ -184,7 +184,7 @@ void atmos_generateAtmosphereModel()
         #endif
     } else {
         int skyI = 1;
-        while (horizonTime > SKY_TIMES[skyI] && skyI < SKY_LEN) skyI++;
+        while (horizonTime > SKY_TIMES[skyI] && skyI < SKY_LEN - 1) skyI++;
         float skyTransition = l2_clampScale(SKY_TIMES[skyI-1], SKY_TIMES[skyI], horizonTime);
 
         atmosv_hdrSkyAmbientRadiance    = mix(SKY_AMBIENT[SKY_INDICES[skyI-1]], SKY_AMBIENT[SKY_INDICES[skyI]], skyTransition)
