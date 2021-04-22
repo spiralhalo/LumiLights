@@ -18,7 +18,6 @@
  *  published by the Free Software Foundation, Inc.    *
  *******************************************************/
 
-out vec3 l2_viewpos;
 out vec2 pv_lightcoord;
 out float pv_ao;
 out float pv_diffuse;
@@ -37,7 +36,6 @@ void frx_writePipelineVertex(inout frx_VertexData data) {
     if (frx_modelOriginType() == MODEL_ORIGIN_SCREEN) {
         atmos_generateAtmosphereModel();
         gl_Position = frx_guiViewProjectionMatrix() * data.vertex;
-        l2_viewpos = data.vertex.xyz; // ??????
 
         #ifdef TAA_ENABLED
             float fragZ = gl_Position.z / gl_Position.w;
@@ -47,9 +45,7 @@ void frx_writePipelineVertex(inout frx_VertexData data) {
         #endif
     } else {
         data.vertex += frx_modelToCamera();
-        vec4 viewCoord = frx_viewMatrix() * data.vertex;
-        gl_Position = frx_projectionMatrix() * viewCoord;
-        l2_viewpos = viewCoord.xyz;
+        gl_Position = frx_viewProjectionMatrix() * data.vertex;
 
         #ifdef TAA_ENABLED
             gl_Position.st += taa_jitter(inv_size) * gl_Position.w;

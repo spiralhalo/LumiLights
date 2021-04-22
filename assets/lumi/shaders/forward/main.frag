@@ -24,12 +24,11 @@
 
 uniform sampler2D u_glint;
 
-in vec3 l2_viewpos;
 in vec2 pv_lightcoord;
 in float pv_ao;
 in float pv_diffuse;
 
-out vec4[7] fragColor;
+out vec4[6] fragColor;
 
 frx_FragmentData frx_createPipelineFragment()
 {
@@ -79,23 +78,19 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
                 a.rgb += texture_glint(u_glint, frx_normalizeMappedUV(frx_texcoord), frx_matGlint());
             #endif
         } else {
-            fragData.diffuse = true; // what could go wrong?
-            float bloom_out = fragData.emissivity * a.a;
+            // TODO: merge with others
             vec3 normal = (pbr_normalMicro.x > 90. ? fragData.vertexNormal : pbr_normalMicro) * frx_normalModelMatrix();
-            //TODO: apply shadowmap perhaps (is the hand even included in depth pass ??)
-            pbr_shading(a, bloom_out, l2_viewpos, fragData.light.xyy, normal, pbr_roughness, pbr_metallic, pbr_f0, fragData.diffuse, true);
-            #if GLINT_MODE == GLINT_MODE_SHADER
-                a.rgb += hdr_gammaAdjust(noise_glint(frx_normalizeMappedUV(frx_texcoord), frx_matGlint()));
-            #else
-                a.rgb += hdr_gammaAdjust(texture_glint(u_glint, frx_normalizeMappedUV(frx_texcoord), frx_matGlint()));
-            #endif
-            a = ldr_tonemap(a);
-            fragColor[6] = vec4(bloom_out, 0.0, 0.0, 1.0);
+            normal = normalize(normal) * 0.5 + 0.5;
+            float bitFlags = bit_pack(frx_matFlash()?1.:0., frx_matHurt()?1.:0., frx_matGlint(), 0., 0., 0., 0., 0.);
+            fragColor[1] = vec4(fragData.light.xy, fragData.emissivity * a.a, 1.0);
+            fragColor[2] = vec4(normal, 1.0);
+            fragColor[3] = vec4(normal, 1.0);
+            fragColor[4] = vec4(0.01 + pbr_roughness * 0.98, pbr_metallic, pbr_f0, 1.0);
+            fragColor[5] = vec4(frx_normalizeMappedUV(frx_texcoord), bitFlags, 1.0);
         }
         gl_FragDepth = gl_FragCoord.z;
         fragColor[0] = a;
     } else {
-        vec2 light = fragData.light.xy;
         vec3 normal = normalize(fragData.vertexNormal) * 0.5 + 0.5;
         vec3 normal_micro = pbr_normalMicro.x > 90. ? normal : normalize(pbr_normalMicro) * 0.5 + 0.5;
         float bloom = fragData.emissivity * a.a;
@@ -109,7 +104,7 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
         // PERF: view normal, more useful than world normal
         gl_FragDepth = gl_FragCoord.z;
         fragColor[0] = a;
-        fragColor[1] = vec4(light.x, light.y, (frx_renderTarget() == TARGET_PARTICLES) ? bloom : normalizedBloom, 1.0);
+        fragColor[1] = vec4(fragData.light.xy, (frx_renderTarget() == TARGET_PARTICLES) ? bloom : normalizedBloom, 1.0);
         fragColor[2] = vec4(normal, 1.0);
         fragColor[3] = vec4(normal_micro, 1.0);
         fragColor[4] = vec4(roughness, pbr_metallic, pbr_f0, 1.0);
