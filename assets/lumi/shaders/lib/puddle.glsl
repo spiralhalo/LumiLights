@@ -1,4 +1,6 @@
 #include frex:shaders/api/world.glsl
+#include frex:shaders/lib/noise/noise2d.glsl
+#include frex:shaders/lib/noise/noise3d.glsl
 
 /*******************************************************
  *  lumi:shaders/lib/puddle.glsl                       *

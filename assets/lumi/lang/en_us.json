@@ -11,9 +11,6 @@
     "pipeline.lumi_shadow_4x.name": "Lumi Shadow 4x",
     "pipeline.lumi_shadow_4x.desc": "Cool sunrise and ok shadows",
 
-    "pipeline.kaleidoskop.name": "KALEIDOSKOP",
-    "pipeline.kaleidoskop.desc": "A trip to the moon",
-
     "config.lumi_lights.category.aesthetics": "Aesthetics",
     "config.lumi_lights.value.block_light_mode": "Block light color",
     "config.lumi_lights.help.block_light_mode": "Color of block light",
