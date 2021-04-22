@@ -92,6 +92,8 @@
     "config.lumi_lights.help.taa_debug_render": "Render TAA debug layer",
     "config.lumi_lights.value.multi_bounce_reflection": "Multi bounce reflection",
     "config.lumi_lights.help.multi_bounce_reflection": "Use temporal data to simulate;multi-bounce reflection.",
+    "config.lumi_lights.value.kaleidoskop": "Kaleidoskop",
+    "config.lumi_lights.help.kaleidoskop": "K a l e i d o s k o p i k    r e f l e k t i f    m e t a l i k    b l o k.",
     "config.lumi_lights.value.high_contrast": "High contrast outdoors",
     "config.lumi_lights.help.high_contrast": "Experimental brighter sun",
     "config.lumi_lights.value.rain_puddles": "Rain puddles effect",

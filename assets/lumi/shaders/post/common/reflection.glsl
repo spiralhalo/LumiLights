@@ -264,12 +264,15 @@ rt_color_depth work_on_pair(
 
         #if REFLECTION_PROFILE != REFLECTION_PROFILE_NONE
         } else {
-            #ifdef MULTI_BOUNCE_REFLECTION
+            #ifdef KALEIDOSKOP
+                reflected = texture(reflected_combine, result.reflected_uv);
+            #elif defined(MULTI_BOUNCE_REFLECTION)
                 // TODO: velocity reprojection. this method creates reflection that lags behind and somehow I overlooked this :/
                 vec4 reflectedShaded = texture(reflected_color, result.reflected_uv);
                 vec4 reflectedCombine = texture(reflected_combine, result.reflected_uv);
                 vec3 reflectedNormal = sample_worldNormal(result.reflected_uv, reflected_normal);
-                reflected = mix(reflectedShaded, reflectedCombine, l2_clampScale(0.5, 1.0, -dot(worldNormal, reflectedNormal)));
+                float combineFactor = l2_clampScale(0.5, 1.0, -dot(worldNormal, reflectedNormal));
+                reflected = mix(reflectedShaded, reflectedCombine, combineFactor);
             #else
                 reflected = texture(reflected_color, result.reflected_uv);
             #endif

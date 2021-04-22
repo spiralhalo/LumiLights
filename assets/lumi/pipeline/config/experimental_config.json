@@ -25,6 +25,11 @@
                     nameKey: "config.lumi_lights.value.multi_bounce_reflection",
                     descriptionKey: "config.lumi_lights.help.multi_bounce_reflection"
                 },
+                kaleidoskop: {
+                    default: false,
+                    nameKey: "config.lumi_lights.value.kaleidoskop",
+                    descriptionKey: "config.lumi_lights.help.kaleidoskop"
+                },
                 high_contrast: {
                     default: false,
                     nameKey: "config.lumi_lights.value.high_contrast",
