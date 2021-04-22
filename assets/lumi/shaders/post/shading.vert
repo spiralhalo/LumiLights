@@ -1,4 +1,5 @@
 #include lumi:shaders/post/common/header.glsl
+
 #include frex:shaders/api/world.glsl
 #include frex:shaders/api/view.glsl
 #include frex:shaders/lib/math.glsl
@@ -27,7 +28,8 @@ Rect celestSetup()
 {
     const vec3 o       = vec3(-1024., 0.,  0.);
     const vec3 dayAxis = vec3(    0., 0., -1.);
-    float size   = frx_worldFlag(FRX_WORLD_IS_MOONLIT) ? 200. : 300.;
+
+    float size = frx_worldFlag(FRX_WORLD_IS_MOONLIT) ? 200. : 300.;
 
     Rect result = Rect(o + vec3(.0, -size, -size), o + vec3(.0, -size,  size), o + vec3(.0,  size, -size));
     
@@ -44,15 +46,6 @@ Rect celestSetup()
     rect_applyMatrix(transformation, result, 1.0);
 
     return result;
-
-    // Smooth brain
-    // vec3 celestOrigin = vec3(0., 0., 0.);
-    // vec3 celestN = vec3(-1., 0., 0.);
-    // vec3 celestA = cross(normalize(frx_skyLightVector()), celestN);
-    // vec3 celestB = cross(celestA, celestN);
-    // rect_applyMatrix(l2_rotationMatrix(celestA, atan(dot(frx_skyLightVector(), celestB), dot(frx_skyLightVector(), celestN))), theCelest, 1.0);
-    // rect_translate(theCelest, frx_skyLightVector() * 1024.);
-    // rect_applyMatrix(frx_viewMatrix(), theCelest, 1.0);
 }
 
 void main()
@@ -65,15 +58,18 @@ void main()
     v_celest2 = theCelest.bottomRight;
     v_celest3 = theCelest.topLeft;
 
-    v_invSize = 1.0/frxu_size;
+    v_invSize = 1.0 / frxu_size;
+
     v_star_rotator = l2_rotationMatrix(vec3(1.0, 0.0, 1.0), frx_worldTime() * PI);
-    v_fov = 2.0 * atan(1.0/frx_projectionMatrix()[1][1]) * 180.0 / PI;
-    v_night = min(smoothstep(0.50, 0.54, frx_worldTime()), smoothstep(1.0, 0.96, frx_worldTime()));
-    v_not_in_void = l2_clampScale(-1.0, 0.0, frx_cameraPos().y);
+    v_fov          = 2.0 * atan(1.0 / frx_projectionMatrix()[1][1]) * 180.0 / PI;
+    v_night        = min(smoothstep(0.50, 0.54, frx_worldTime()), smoothstep(1.0, 0.96, frx_worldTime()));
+
+    v_not_in_void    = l2_clampScale(-1.0,   0.0, frx_cameraPos().y);
     v_near_void_core = l2_clampScale(10.0, -90.0, frx_cameraPos().y) * 1.8;
+
     v_blindness = frx_playerHasEffect(FRX_EFFECT_BLINDNESS)
-        ? l2_clampScale(0.5, 1.0, 1.0 - frx_luminance(frx_vanillaClearColor()))
-        : 0.0;
+                  ? l2_clampScale(0.5, 1.0, 1.0 - frx_luminance(frx_vanillaClearColor()))
+                  : 0.0;
 
     // jitter celest
     #ifdef TAA_ENABLED
