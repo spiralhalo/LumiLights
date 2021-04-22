@@ -21,6 +21,7 @@
 out vec2 pv_lightcoord;
 out float pv_ao;
 out float pv_diffuse;
+out float pv_ortho;
 
 // Grondag's vanilla diffuse but different
 float p_diffuseGui(vec3 normal) {
@@ -34,6 +35,8 @@ vec2 inv_size = 1.0 / vec2(frx_viewWidth(), frx_viewHeight());
 void frx_writePipelineVertex(inout frx_VertexData data) {
 
     if (frx_modelOriginType() == MODEL_ORIGIN_SCREEN) {
+        mat4 t = frx_guiViewProjectionMatrix();
+        pv_ortho = t[3][3];
         atmos_generateAtmosphereModel();
         gl_Position = frx_guiViewProjectionMatrix() * data.vertex;
 

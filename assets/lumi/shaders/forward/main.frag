@@ -27,6 +27,7 @@ uniform sampler2D u_glint;
 in vec2 pv_lightcoord;
 in float pv_ao;
 in float pv_diffuse;
+in float pv_ortho;
 
 out vec4[6] fragColor;
 
@@ -67,7 +68,7 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
     pbr_metallic = clamp(pbr_metallic, 0.0, 1.0);
 
     if (frx_modelOriginType() == MODEL_ORIGIN_SCREEN) {
-        if (gl_FragCoord.z <= 0.6) { // hack to exclude hand but include bedrockify doll
+        if (pv_ortho == 1.) {
             float diffuse = mix(pv_diffuse, 1, fragData.emissivity);
             // diffuse = frx_isGui() ? diffuse : min(1.0, 1.5 - diffuse);
             diffuse = fragData.diffuse ? diffuse : 1.0;
