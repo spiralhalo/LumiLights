@@ -67,50 +67,55 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
     pbr_roughness = clamp(pbr_roughness, 0.0, 1.0);
     pbr_metallic = clamp(pbr_metallic, 0.0, 1.0);
 
-    if (frx_modelOriginType() == MODEL_ORIGIN_SCREEN) {
-        if (pv_ortho == 1.) {
-            float diffuse = mix(pv_diffuse, 1, fragData.emissivity);
-            // diffuse = frx_isGui() ? diffuse : min(1.0, 1.5 - diffuse);
-            diffuse = fragData.diffuse ? diffuse : 1.0;
-            a.rgb *= diffuse;
-            #if GLINT_MODE == GLINT_MODE_SHADER
-                a.rgb += noise_glint(frx_normalizeMappedUV(frx_texcoord), frx_matGlint());
-            #else
-                a.rgb += texture_glint(u_glint, frx_normalizeMappedUV(frx_texcoord), frx_matGlint());
-            #endif
-        } else {
-            // TODO: merge with others
-            // NB: diffuse is forced true
-            vec3 normal = normalize(fragData.vertexNormal) * frx_normalModelMatrix() * 0.5 + 0.5;
-            vec3 normal_micro = pbr_normalMicro.x > 90. ? normal : normalize(pbr_normalMicro) * frx_normalModelMatrix() * 0.5 + 0.5;
-            float bitFlags = bit_pack(frx_matFlash()?1.:0., frx_matHurt()?1.:0., frx_matGlint(), 0., 0., 0., 0., 0.);
-            fragColor[1] = vec4(fragData.light.xy, fragData.emissivity * a.a, 1.0);
-            fragColor[2] = vec4(normal, 1.0);
-            fragColor[3] = vec4(normal_micro, 1.0);
-            fragColor[4] = vec4(0.01 + pbr_roughness * 0.98, pbr_metallic, pbr_f0, 1.0);
-            fragColor[5] = vec4(frx_normalizeMappedUV(frx_texcoord), bitFlags, 1.0);
-        }
-        gl_FragDepth = gl_FragCoord.z;
-        fragColor[0] = a;
-    } else {
-        vec3 normal = normalize(fragData.vertexNormal) * 0.5 + 0.5;
-        vec3 normal_micro = pbr_normalMicro.x > 90. ? normal : normalize(pbr_normalMicro) * 0.5 + 0.5;
-        float bloom = fragData.emissivity * a.a;
-        float ao = fragData.ao ? (1.0 - fragData.aoShade) * a.a : 0.0;
-        float normalizedBloom = (bloom - ao) * 0.5 + 0.5;
-        //pad with 0.01 to prevent conflation with unmanaged draw
-        float roughness = fragData.diffuse ? 0.01 + pbr_roughness * 0.98 : 1.0;
+    bool maybeGUI = frx_modelOriginType() == MODEL_ORIGIN_SCREEN && pv_ortho == 1.;
 
-        float bitFlags = bit_pack(frx_matFlash()?1.:0., frx_matHurt()?1.:0., frx_matGlint(), 0., 0., 0., 0., 0.);
+    if (maybeGUI) {
+
+        float diffuse = mix(pv_diffuse, 1, fragData.emissivity);
+        // diffuse = frx_isGui() ? diffuse : min(1.0, 1.5 - diffuse);
+        diffuse = fragData.diffuse ? diffuse : 1.0;
+        a.rgb *= diffuse;
+        #if GLINT_MODE == GLINT_MODE_SHADER
+            a.rgb += noise_glint(frx_normalizeMappedUV(frx_texcoord), frx_matGlint());
+        #else
+            a.rgb += texture_glint(u_glint, frx_normalizeMappedUV(frx_texcoord), frx_matGlint());
+        #endif
+
+    } else {
+
+        bool maybeHand = frx_modelOriginType() == MODEL_ORIGIN_SCREEN;
+        bool isParticle = (frx_renderTarget() == TARGET_PARTICLES);
+
+        vec3 normal;
+        vec3 normal_micro;
+        float bloom = fragData.emissivity * a.a;
+        float ao;
+        float normalizedBloom;
+
+        if (maybeHand) {
+            normal = normalize(fragData.vertexNormal) * frx_normalModelMatrix() * 0.5 + 0.5;
+            normal_micro = pbr_normalMicro.x > 90. ? normal : normalize(pbr_normalMicro) * frx_normalModelMatrix() * 0.5 + 0.5;
+        } else {
+            normal = normalize(fragData.vertexNormal) * 0.5 + 0.5;
+            normal_micro = pbr_normalMicro.x > 90. ? normal : normalize(pbr_normalMicro) * 0.5 + 0.5;
+            ao = fragData.ao ? (1.0 - fragData.aoShade) * a.a : 0.0;
+            normalizedBloom = (bloom - ao) * 0.5 + 0.5;
+        }
+
+        //pad with 0.01 to prevent conflation with unmanaged draw
+        // NB: diffuse is forced true for hand
+        float roughness = (fragData.diffuse || maybeHand) ? 0.01 + pbr_roughness * 0.98 : 1.0;
+
+        float bitFlags = bit_pack(frx_matFlash() ? 1. : 0., frx_matHurt() ? 1. : 0., frx_matGlint(), 0., 0., 0., 0., 0.);
 
         // PERF: view normal, more useful than world normal
-        gl_FragDepth = gl_FragCoord.z;
-        fragColor[0] = a;
-        fragColor[1] = vec4(fragData.light.xy, (frx_renderTarget() == TARGET_PARTICLES) ? bloom : normalizedBloom, 1.0);
+        fragColor[1] = vec4(fragData.light.xy, (isParticle || maybeHand) ? bloom : normalizedBloom, 1.0);
         fragColor[2] = vec4(normal, 1.0);
         fragColor[3] = vec4(normal_micro, 1.0);
         fragColor[4] = vec4(roughness, pbr_metallic, pbr_f0, 1.0);
         fragColor[5] = vec4(frx_normalizeMappedUV(frx_texcoord), bitFlags, 1.0);
-
     }
+    
+    gl_FragDepth = gl_FragCoord.z;
+    fragColor[0] = a;
 }
