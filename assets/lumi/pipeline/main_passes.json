@@ -122,7 +122,7 @@
                     "clouds",
                     "clouds_texture",
                     "clouds_depth",
-
+                    "solid_depth",
                     "translucent_depth",
                 ]
             }, {

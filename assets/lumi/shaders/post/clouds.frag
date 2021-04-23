@@ -25,6 +25,7 @@ uniform sampler2D u_clouds;
 uniform sampler2D u_clouds_texture;
 uniform sampler2D u_clouds_depth;
 uniform sampler2D u_solid_depth;
+uniform sampler2D u_translucent_depth;
 
 /*******************************************************
     vertexShader: lumi:shaders/post/clouds.vert
@@ -74,7 +75,11 @@ void main()
         fragColor[0] = mix(clouds, vec4(0.0), v_blindness);
         fragColor[1] = vec4(cloud > 0.5 ? 0.99999 : 1.0);
     #elif CLOUD_RENDERING == CLOUD_RENDERING_VOLUMETRIC
-        cloud_result volumetric = rayMarchCloud(u_clouds_texture, u_solid_depth, v_texcoord);
+        #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
+          cloud_result volumetric = rayMarchCloud(u_clouds_texture, u_solid_depth, v_texcoord);
+        #else
+          cloud_result volumetric = rayMarchCloud(u_clouds_texture, u_translucent_depth, v_texcoord);
+        #endif
         
         vec4 worldPos = frx_inverseViewProjectionMatrix() * vec4(2.0 * v_texcoord - 1.0, 1.0, 1.0);
         worldPos.xyz /= worldPos.w;
