@@ -50,7 +50,6 @@ in float v_not_in_void;
 in float v_near_void_core;
 in float v_blindness;
 
-const float CAVE_FOG_STR = 0.1;
 const vec3 VOID_CORE_COLOR = hdr_gammaAdjust(vec3(1.0, 0.7, 0.5));
 
 // const float JITTER_STRENGTH = 0.4;
@@ -76,11 +75,12 @@ float raymarched_fog_density(vec3 viewPos, vec3 worldPos, float fogFar)
 
     vec3 modelPos = worldPos - frx_cameraPos();
     float distToCamera = length(modelPos);
-    vec3 unitMarch_model = (-modelPos) / distToCamera;
+    float sampleSize = max(1.0, fogFar / 128.0); // why 128 again ?
+    vec3 unitMarch_model = sampleSize * ((-modelPos) / distToCamera);
     vec3 ray_model = modelPos + tileJitter * unitMarch_model;
 
     float distTraveled = tileJitter;
-    float maxDist = min(distToCamera, 128.0); // why 128 again ?
+    float maxDist = min(distToCamera, fogFar);
 
     // March in shadow space for performance boost
     // vec3 shadowPos = (frx_shadowViewMatrix() * vec4(modelPos, 1.0)).xyz;
@@ -92,19 +92,15 @@ float raymarched_fog_density(vec3 viewPos, vec3 worldPos, float fogFar)
 
     float illuminated = 0.0;
     while (distTraveled < maxDist) {
-        #if defined(SHADOW_MAP_PRESENT)
-            ray_shadow = (frx_shadowViewMatrix() * vec4(ray_model, 1.0));
-            illuminated += simpleShadowFactor(u_shadow, ray_shadow);
-        #else
-            illuminated += 1.0;
-        #endif
-        distTraveled += 1.0;
+        ray_shadow = (frx_shadowViewMatrix() * vec4(ray_model, 1.0));
+        illuminated += simpleShadowFactor(u_shadow, ray_shadow) * sampleSize;
+        distTraveled += sampleSize;
         // ray_shadow.xyz += unitMarch_shadow;
         ray_model += unitMarch_model;
         // ray_view += unitMarch_view;
     }
 
-    return (CAVE_FOG_STR + (1.0 - CAVE_FOG_STR) * illuminated) / max(1.0, fogFar);
+    return illuminated / max(1.0, fogFar);
 }
 
 vec4 fog (float skylightFactor, vec4 a, vec3 viewPos, vec3 worldPos, inout float bloom)
@@ -142,7 +138,7 @@ vec4 fog (float skylightFactor, vec4 a, vec3 viewPos, vec3 worldPos, inout float
     #endif
 
     float fogFactor = fogDensity * altitudeFactor
-        * ((frx_viewFlag(FRX_CAMERA_IN_FLUID) || useVolumetricFog) ? 1.0 : (CAVE_FOG_STR + (1.0 - CAVE_FOG_STR) * skylightFactor));
+        * ((frx_viewFlag(FRX_CAMERA_IN_FLUID) || useVolumetricFog) ? 1.0 : skylightFactor);
 
     // additive fog when it's not blindness or lava related
     bool useAdditive = true;
@@ -163,20 +159,24 @@ vec4 fog (float skylightFactor, vec4 a, vec3 viewPos, vec3 worldPos, inout float
 
     // TODO: retrieve fog distance from render distance as an option especially for the nether
     float distFactor;
+    float distToCamera = length(viewPos);
     if (useVolumetricFog) { //TODO: blindness transition still broken
         distFactor = raymarched_fog_density(viewPos, worldPos, fogFar);
     } else {
-        distFactor = l2_clampScale(0.0, fogFar, length(viewPos));
+        distFactor = min(1.0, distToCamera / fogFar);
         distFactor *= distFactor;
     }
 
     fogFactor = clamp(fogFactor * distFactor, 0.0, 1.0);
-    
+
     // TODO: separate fog from sky color
     vec4 fogColor = vec4(atmos_hdrSkyColorRadiance(normalize(worldPos-frx_cameraPos())), 1.0);
 
     if (useAdditive) {
-        return vec4(a.rgb + fogColor.rgb * fogFactor, a.a);
+        float caveFogDistFactor = min(1.0, distToCamera / fogFar);
+        caveFogDistFactor *= caveFogDistFactor;
+        vec3 caveFog = atmos_hdrCaveFogRadiance() * caveFogDistFactor;
+        return vec4(a.rgb + fogColor.rgb * fogFactor + caveFog, a.a);
     }
 
     // no need to reduce bloom with additive blending
@@ -422,7 +422,7 @@ vec4 hdr_shaded_color(
     #endif
 
     if (a.a != 0.0 && (translucent || translucentDepth >= depth) && depth != 1.0) {
-        a = fog(frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? light.y : 1.0, a, viewPos, worldPos, bloom_out);
+        a = fog(frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? l2_lightmapRemap(light.y) : 1.0, a, viewPos, worldPos, bloom_out);
     }
 
     #if CAUSTICS_MODE == CAUSTICS_MODE_TEXTURE

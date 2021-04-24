@@ -19,6 +19,7 @@
     out vec3 atmosv_hdrSkyAmbientRadiance;
 
     #ifdef POST_SHADER
+    out vec3 atmosv_hdrCaveFogRadiance;
     out vec3 atmosv_hdrSkyColorRadiance;
     out vec3 atmosv_hdrOWTwilightSkyRadiance;
     #endif
@@ -31,6 +32,7 @@
     in vec3 atmosv_hdrSkyAmbientRadiance;
 
     #ifdef POST_SHADER
+    in vec3 atmosv_hdrCaveFogRadiance;
     in vec3 atmosv_hdrSkyColorRadiance;
     in vec3 atmosv_hdrOWTwilightSkyRadiance;
     #endif
@@ -48,6 +50,11 @@ vec3 atmos_hdrSkyAmbientRadiance()
 }
 
 #ifdef POST_SHADER
+vec3 atmos_hdrCaveFogRadiance()
+{
+    return atmosv_hdrCaveFogRadiance;
+}
+
 vec3 atmos_hdrSkyColorRadiance(vec3 world_toSky)
 {
     //TODO: test non-overworld has_sky_light custom dimension and broaden if fits
@@ -107,6 +114,11 @@ const vec3 SUNRISE_LIGHT_COLOR = vec3(1.0, 0.7, 0.4);
 const vec3 NOON_AMBIENT  = hdr_gammaAdjust(vec3(1.0));
 const vec3 NIGHT_AMBIENT = hdr_gammaAdjust(vec3(0.3, 0.3, 0.45));
 
+const vec3 CAVEFOG_C = DEF_DAY_SKY_COLOR;
+const vec3 CAVEFOG_DEEPC = hdr_gammaAdjust(SUNRISE_LIGHT_COLOR);
+const float CAVEFOG_MAXY = 16.0;
+const float CAVEFOG_MINY = 0.0;
+const float CAVEFOG_STR = 0.1;
 
 
 const int SRISC = 0;
@@ -205,8 +217,11 @@ void atmos_generateAtmosphereModel()
 
     atmosv_hdrSkyColorRadiance = customOWFog ? atmosv_hdrSkyColorRadiance : hdr_gammaAdjust(frx_vanillaClearColor());
     atmosv_hdrOWTwilightSkyRadiance = customOWFog
-                                    ? mix(SKY_COLOR[twgMappedA], SKY_COLOR[twgMappedB], twgTransition) * SKY_STR
-                                    : atmosv_hdrSkyColorRadiance;
+                                      ? mix(SKY_COLOR[twgMappedA], SKY_COLOR[twgMappedB], twgTransition) * SKY_STR
+                                      : atmosv_hdrSkyColorRadiance;
+    atmosv_hdrCaveFogRadiance       = customOWFog
+                                      ? mix(CAVEFOG_C, CAVEFOG_DEEPC, l2_clampScale(CAVEFOG_MAXY, CAVEFOG_MINY, frx_cameraPos().y)) * CAVEFOG_STR
+                                      : vec3(0.0);
     #endif
 
 
