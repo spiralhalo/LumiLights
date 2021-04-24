@@ -68,6 +68,7 @@ vec2 coords_uv(vec3 view, mat4 projection)
     return clip.xy * 0.5 + 0.5;
 }
 
+#if USE_VOLUMETRIC_FOG
 float raymarched_fog_density(vec3 viewPos, vec3 worldPos, float pFogFar)
 {
     // vec3 unitMarch_view = normalize(-viewPos);
@@ -102,6 +103,7 @@ float raymarched_fog_density(vec3 viewPos, vec3 worldPos, float pFogFar)
 
     return illuminated / max(1.0, pFogFar);
 }
+#endif
 
 vec4 fog (float skyLight, vec4 a, vec3 viewPos, vec3 worldPos, inout float bloom)
 {
@@ -165,9 +167,11 @@ vec4 fog (float skyLight, vec4 a, vec3 viewPos, vec3 worldPos, inout float bloom
     float distFactor;
     float distToCamera = length(viewPos);
     distFactor = min(1.0, distToCamera / pFogFar);
+    #if USE_VOLUMETRIC_FOG
     if (useVolFog) { //TODO: blindness transition still broken?
         distFactor = distFactor * 0.6 + 0.4 * raymarched_fog_density(viewPos, worldPos, pFogFar);
     }
+    #endif
     distFactor *= distFactor;
 
     fogFactor = clamp(fogFactor * distFactor, 0.0, 1.0);

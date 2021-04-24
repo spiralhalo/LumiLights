@@ -95,9 +95,8 @@ vec3 pbr_lightCalc(float roughness, vec3 f0, vec3 radiance, vec3 lightDir, vec3 
 {
     vec3 halfway = normalize(viewDir + lightDir);
     vec3 fresnel = pbr_fresnelSchlick(pbr_dot(viewDir, halfway), f0);
-    float roughnessFade = smoothstep(REFLECTION_MAXIMUM_ROUGHNESS, REFLECTION_MAXIMUM_ROUGHNESS - 0.05, roughness);
 
-    return clamp(fresnel * radiance * roughnessFade * (1-roughness), 0.0, 1.0);
+    return clamp(fresnel * radiance * (1-roughness), 0.0, 1.0);
 }
 
 #if REFLECTION_PROFILE != REFLECTION_PROFILE_NONE
@@ -202,90 +201,89 @@ rt_color_depth work_on_pair(
     float fallback
 )
 {
-    rt_color_depth noreturn = rt_color_depth(vec4(0.0), 1.0);
-    vec4 material = texture(reflector_material, v_texcoord);
+    vec4 material   = texture(reflector_material, v_texcoord);
+    float roughness = material.x == 0.0 ? 1.0 : min(1.0, 1.0203 * material.x - 0.01);
+    if (roughness == 1.0) return rt_color_depth(vec4(0.0), 1.0); // unmanaged draw
+
     vec3 worldNormal = sample_worldNormal(v_texcoord, reflector_micro_normal);
-    float roughness = material.x == 0.0 ? 1.0 : min(1.0, 1.0203 * material.x - 0.01); //prevent gloss on unmanaged draw
-    vec3 ray_view  = uv2view(v_texcoord, frx_inverseProjectionMatrix(), reflector_depth);
-    vec3 ray_world = view2world(ray_view, frx_inverseViewMatrix());
+    vec3 ray_view    = uv2view(v_texcoord, frx_inverseProjectionMatrix(), reflector_depth);
+    vec3 ray_world   = view2world(ray_view, frx_inverseViewMatrix());
     // TODO: optimize puddle by NOT calling it twice in shading and in reflection
-    vec2 light = texture(reflector_light, v_texcoord).xy;
+    vec2 light       = texture(reflector_light, v_texcoord).xy;
     vec4 fake = vec4(0.0);
     #ifdef RAIN_PUDDLES
         ww_puddle_pbr(fake, roughness, light.y, worldNormal, ray_world);
     #endif
-    if (roughness <= REFLECTION_MAXIMUM_ROUGHNESS) {
-        vec3 unit_view  = normalize(-ray_view);
-        // bad
-        // vec3 origNormal = sample_worldNormal(v_texcoord, reflector_normal);
-        // if (dot(origNormal, unit_view) > dot(worldNormal, unit_view)) {
-        //     worldNormal = origNormal;
-        // }
-        vec3 jitter    = 2.0 * getRandomVec(v_texcoord, frxu_size) - 1.0;
-        vec3 normal    = frx_normalModelMatrix() * normalize(worldNormal);
-        float roughness2 = roughness * roughness;
-        // if (ray_view.y < normal.y) return noreturn;
-        vec3 reg_f0     = vec3(material.z);
-        vec3 f0         = mix(reg_f0, albedo, material.y);
 
-        vec3 unit_march = normalize(reflect(-unit_view, normal) + mix(vec3(0.0, 0.0, 0.0), jitter * JITTER_STRENGTH, roughness2));
+    vec3 unit_view = normalize(-ray_view);
+    
+    vec3 jitter    = 2.0 * getRandomVec(v_texcoord, frxu_size) - 1.0;
+    vec3 normal    = frx_normalModelMatrix() * normalize(worldNormal);
+    float roughness2 = roughness * roughness;
+    // if (ray_view.y < normal.y) return noreturn;
+    vec3 reg_f0     = vec3(material.z);
+    vec3 f0         = mix(reg_f0, albedo, material.y);
 
-        #if REFLECTION_PROFILE != REFLECTION_PROFILE_NONE
-        rt_Result result;
-        vec3 origNormal_view = frx_normalModelMatrix() * sample_worldNormal(v_texcoord, reflector_normal);
-        if (dot(origNormal_view, unit_march) < 0) {
-            // Eliminate impossible rays
-            result.hit = false;
-        } else {
-            result = rt_reflection(ray_view, unit_view, normal, unit_march, frx_normalModelMatrix(), frx_projectionMatrix(), frx_inverseProjectionMatrix(), reflected_depth, reflected_normal);
-        }
-        #endif
+    vec3 unit_march = normalize(reflect(-unit_view, normal) + mix(vec3(0.0, 0.0, 0.0), jitter * JITTER_STRENGTH, roughness2));
 
-        vec4 reflected;
-        float reflected_depth_value;
+    #if REFLECTION_PROFILE != REFLECTION_PROFILE_NONE
+    rt_Result result;
 
-        vec4 fallbackColor;
-        if (fallback > 0.0) {
-            fallbackColor = vec4(calcFallbackColor(unit_view, unit_march, light), fallback);
-        } else {
-            fallbackColor = vec4(0.0);
-        }
+    vec3 rawNormal_view   = frx_normalModelMatrix() * sample_worldNormal(v_texcoord, reflector_normal);
+    bool impossibleRay    = dot(rawNormal_view, unit_march) < 0;
+    bool exceedsThreshold = roughness > REFLECTION_MAXIMUM_ROUGHNESS;
 
-        #if REFLECTION_PROFILE != REFLECTION_PROFILE_NONE
-        reflected_depth_value = sample_depth(result.reflected_uv, reflected_depth);
-        if (reflected_depth_value == 1.0 || !result.hit || result.reflected_uv != clamp(result.reflected_uv, 0.0, 1.0)) {
-            float occlusionFactor = result.hits > 1 ? 0.1 : 1.0;
+    if (impossibleRay || exceedsThreshold) {
+        result.hit = false;
+    } else {
+        result = rt_reflection(ray_view, unit_view, normal, unit_march, frx_normalModelMatrix(), frx_projectionMatrix(), frx_inverseProjectionMatrix(), reflected_depth, reflected_normal);
+    }
+    #endif
+
+    vec4 reflected;
+    float reflected_depth_value;
+
+    vec4 fallbackColor;
+    if (fallback > 0.0) {
+        fallbackColor = vec4(calcFallbackColor(unit_view, unit_march, light), fallback);
+    } else {
+        fallbackColor = vec4(0.0);
+    }
+
+    #if REFLECTION_PROFILE != REFLECTION_PROFILE_NONE
+    reflected_depth_value = sample_depth(result.reflected_uv, reflected_depth);
+    if (reflected_depth_value == 1.0 || !result.hit || result.reflected_uv != clamp(result.reflected_uv, 0.0, 1.0)) {
+        float occlusionFactor = result.hits > 1 ? 0.1 : 1.0;
+    #else
+        float occlusionFactor = 1.0;
+    #endif
+        // reflected.rgb = mix(vec3(0.0), hdr_gammaAdjust(BLOCK_LIGHT_COLOR), pow(light.x, 6.0) * material.y);
+        reflected = fallbackColor * occlusionFactor;
+        reflected_depth_value = 1.0;
+
+    #if REFLECTION_PROFILE != REFLECTION_PROFILE_NONE
+    } else {
+        #ifdef KALEIDOSKOP
+            reflected = texture(reflected_combine, result.reflected_uv);
+        #elif defined(MULTI_BOUNCE_REFLECTION)
+            // TODO: velocity reprojection. this method creates reflection that lags behind and somehow I overlooked this :/
+            vec4 reflectedShaded = texture(reflected_color, result.reflected_uv);
+            vec4 reflectedCombine = texture(reflected_combine, result.reflected_uv);
+            vec3 reflectedNormal = sample_worldNormal(result.reflected_uv, reflected_normal);
+            float combineFactor = l2_clampScale(0.5, 1.0, -dot(worldNormal, reflectedNormal));
+            reflected = mix(reflectedShaded, reflectedCombine, combineFactor);
         #else
-            float occlusionFactor = 1.0;
+            reflected = texture(reflected_color, result.reflected_uv);
         #endif
-            // reflected.rgb = mix(vec3(0.0), hdr_gammaAdjust(BLOCK_LIGHT_COLOR), pow(light.x, 6.0) * material.y);
-            reflected = fallbackColor * occlusionFactor;
-            reflected_depth_value = 1.0;
+        // fade to fallback on edges
+        vec2 uvFade = smoothstep(0.5, 0.45, abs(result.reflected_uv - 0.5));
+        reflected = mix(fallbackColor, reflected, min(uvFade.x, uvFade.y));
+    }
+    #endif
 
-        #if REFLECTION_PROFILE != REFLECTION_PROFILE_NONE
-        } else {
-            #ifdef KALEIDOSKOP
-                reflected = texture(reflected_combine, result.reflected_uv);
-            #elif defined(MULTI_BOUNCE_REFLECTION)
-                // TODO: velocity reprojection. this method creates reflection that lags behind and somehow I overlooked this :/
-                vec4 reflectedShaded = texture(reflected_color, result.reflected_uv);
-                vec4 reflectedCombine = texture(reflected_combine, result.reflected_uv);
-                vec3 reflectedNormal = sample_worldNormal(result.reflected_uv, reflected_normal);
-                float combineFactor = l2_clampScale(0.5, 1.0, -dot(worldNormal, reflectedNormal));
-                reflected = mix(reflectedShaded, reflectedCombine, combineFactor);
-            #else
-                reflected = texture(reflected_color, result.reflected_uv);
-            #endif
-            // fade to fallback on edges
-            vec2 uvFade = smoothstep(0.5, 0.45, abs(result.reflected_uv - 0.5));
-            reflected = mix(fallbackColor, reflected, min(uvFade.x, uvFade.y));
-        }
-        #endif
-
-        // more useful in worldspace after rt computation is done
-        unit_view *= frx_normalModelMatrix();
-        unit_march *= frx_normalModelMatrix();
-        vec4 pbr_color = vec4(pbr_lightCalc(roughness, f0, reflected.rgb * base_color.a, unit_march, unit_view), reflected.a);
-        return rt_color_depth(pbr_color, reflected_depth_value);
-    } else return noreturn;
+    // more useful in worldspace after rt computation is done
+    unit_view  *= frx_normalModelMatrix();
+    unit_march *= frx_normalModelMatrix();
+    vec4 pbr_color = vec4(pbr_lightCalc(roughness, f0, reflected.rgb * base_color.a, unit_march, unit_view), reflected.a);
+    return rt_color_depth(pbr_color, reflected_depth_value);
 }
