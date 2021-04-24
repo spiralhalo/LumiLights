@@ -20,7 +20,7 @@ A custom rendering pipeline for Canvas for improved visual fidelity.
 
 ## Downloads
 
-Soon.
+**[=> View Latest Releases <=](https://github.com/spiralhalo/LumiLights/releases)**
 
 ## PBR Extension
 
