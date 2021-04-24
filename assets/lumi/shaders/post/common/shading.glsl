@@ -164,8 +164,8 @@ vec4 fog (float skylightFactor, vec4 a, vec3 viewPos, vec3 worldPos, inout float
         distFactor = raymarched_fog_density(viewPos, worldPos, fogFar);
     } else {
         distFactor = min(1.0, distToCamera / fogFar);
-        distFactor *= distFactor;
     }
+    distFactor *= distFactor;
 
     fogFactor = clamp(fogFactor * distFactor, 0.0, 1.0);
 
