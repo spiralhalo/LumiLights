@@ -41,7 +41,9 @@ Lumi Lights PBR Extension brings its own spin of roughness/metalness material mo
 
 ## Source Credits
 
+- [Canvas Standard by Grondag](https://github.com/grondag/canvas) for Bloom
 - [Erkaman/glsl-godrays](https://github.com/Erkaman/glsl-godrays) for Godrays
+- [TheRealMJP/Shadows](https://github.com/TheRealMJP/Shadows) for Shadow PCF (thanks to Grondag for isolating the code)
 - [ziacko/Temporal-AA](https://github.com/ziacko/Temporal-AA) for TAA (based on Playdead's implementation)
 - [WebGL GLSL HBAO](https://gist.github.com/transitive-bullshit/6770346) for SSAO
 
