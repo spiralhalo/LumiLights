@@ -60,7 +60,7 @@ struct light_data{
     vec3 specularAccu;
 };
 
-vec3 hdr_calcBlockLight(inout light_data data, vec3 radiance)
+vec3 hdr_calcFancySpecularLight(inout light_data data, vec3 radiance)
 {
     bool useFancySpecular = data.diffuse;
     #if BLOCKLIGHT_SPECULAR_MODE == BLOCKLIGHT_SPECULAR_MODE_FAST
@@ -77,8 +77,8 @@ vec3 hdr_calcBlockLight(inout light_data data, vec3 radiance)
 
     // low fancy specular smoothness for metals
     float roughness = mix(data.roughness, max(0.4, data.roughness), data.metallic);
-    // harshly lower f0 the further away from light source for non-metal
-    vec3 f0 = data.f0 * mix(l2_clampScale(0.5, 0.96875, data.light.x), 1.0, data.metallic);
+    // harshly lower f0 the further away from light source for non-metal (nb: for both block and sky light)
+    vec3 f0 = data.f0 * mix(l2_clampScale(0.5, 0.96875, max(data.light.x, data.light.y)), 1.0, data.metallic);
     
     return pbr_lightCalc(data.albedo, roughness, data.metallic, f0, radiance, lightDir, data.viewDir, data.normal, true, data.specularAccu);
 }
@@ -140,14 +140,16 @@ void pbr_shading(inout vec4 a, inout float bloom, vec3 viewPos, vec3 light, vec3
         vec3(0.0)
     );
 
+    vec3 fancySpecularRadiance = l2_blockRadiance(data.light.x);
+    fancySpecularRadiance += atmos_hdrSkyAmbientRadiance() * l2_lightmapRemap(data.light.y);
+    fancySpecularRadiance += l2_baseAmbientRadiance();
+
     vec3 held_light = hdr_calcHeldLight(data);
-    vec3 block_light = hdr_calcBlockLight(data, l2_blockRadiance(data.light.x));
-    vec3 base_ambient_light = pbr_nonDirectional(data.albedo, data.metallic, l2_baseAmbientRadiance());
-    vec3 sky_ambient_light = hdr_calcSkyAmbientLight(data);
+    vec3 fancySpecular_light = hdr_calcFancySpecularLight(data, fancySpecularRadiance);
     vec3 sky_light = hdr_calcSkyLight(data);
     vec3 emissive_light = pbr_nonDirectional(data.albedo, data.metallic, l2_emissiveRadiance(data.albedo, bloom));
     
-    a.rgb = held_light + block_light + base_ambient_light + sky_ambient_light + sky_light + emissive_light;
+    a.rgb = held_light + fancySpecular_light + sky_light + emissive_light;
 
     float specularLuminance = frx_luminance(data.specularAccu);
     float smoothness = 1 - data.roughness;
