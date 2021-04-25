@@ -166,10 +166,13 @@ vec4 fog (float skyLight, vec4 a, vec3 viewPos, vec3 worldPos, inout float bloom
     // TODO: retrieve fog distance from render distance as an option especially for the nether
     float distFactor;
     float distToCamera = length(viewPos);
+    float pfCave = 1.0;
     distFactor = min(1.0, distToCamera / pFogFar);
     #ifdef USE_VOLUMETRIC_FOG
     if (useVolFog) { //TODO: blindness transition still broken?
-        distFactor = distFactor * 0.6 + 0.4 * raymarched_fog_density(viewPos, worldPos, pFogFar);
+        float fRaymarch = raymarched_fog_density(viewPos, worldPos, pFogFar);
+        distFactor = distFactor * 0.6 + 0.4 * fRaymarch;
+        pfCave -= fRaymarch;
     }
     #endif
     distFactor *= distFactor;
@@ -185,7 +188,7 @@ vec4 fog (float skyLight, vec4 a, vec3 viewPos, vec3 worldPos, inout float bloom
         #else
             float darkness = l2_clampScale(0.1, 0.0, skyLight);
         #endif
-        float pfCave = min(1.0, distToCamera / FOG_FAR) * darkness;
+        pfCave *= min(1.0, distToCamera / FOG_FAR) * darkness;
         pfCave *= pfCave;
         vec3 caveFog = atmos_hdrCaveFogRadiance() * pfCave;
         return vec4(a.rgb + fogColor.rgb * fogFactor + caveFog, a.a);
