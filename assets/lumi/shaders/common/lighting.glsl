@@ -24,14 +24,14 @@ const float SKYLESS_AMBIENT_STR = 0.1;
 const float SKYLESS_LIGHT_STR = 0.25;
 const float BLOCK_LIGHT_STR = 0.375;
 const float NIGHT_VISION_STR = 1.0;
+const float EMISSIVE_LIGHT_STR = 1.0;
 #else
 const float SKYLESS_AMBIENT_STR = 0.8;
 const float SKYLESS_LIGHT_STR = 2.0;
 const float BLOCK_LIGHT_STR = 3.0;
 const float NIGHT_VISION_STR = 3.0;
+const float EMISSIVE_LIGHT_STR = 2.0;
 #endif
-
-const float EMISSIVE_LIGHT_STR = 1.0;
 
 // MULTIPLIERS
 const float BRIGHT_FINAL_MULT = 2.0;
