@@ -18,11 +18,9 @@ vec3 ldr_reinhardJodieTonemap(in vec3 v) {
     return mix(v / (1.0f + l), tv, tv);
 }
 
-#if LUMI_Tonemap == LUMI_Tonemap_Vibrant
 vec3 ldr_vibrantTonemap(in vec3 hdrColor){
     return hdrColor / (frx_luminance(hdrColor) + vec3(1.0));
 }
-#endif
 
 vec3 exposure_tonemap(vec3 x)
 {

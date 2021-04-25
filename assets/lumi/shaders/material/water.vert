@@ -4,9 +4,6 @@
 #include lumi:config.glsl
 #include lumi:shaders/api/pbr_ext.glsl
 
-#ifndef LUMI_WavyWaterIntensity
-    #define LUMI_WavyWaterIntensity 1
-#endif
 const vec4 wavyWater_loParams = vec4(2.0, 0.5, 2.0, 0.03);
 const vec4 wavyWater_hiParams = vec4(1.0, 1.0, 1.0, 0.05);
 
