@@ -35,9 +35,7 @@ Rect celestSetup()
     
     vec3  zenithAxis  = cross(frx_skyLightVector(), vec3( 0.,  0., -1.));
     float zenithAngle = asin(frx_skyLightVector().z);
-
-    vec2  dayTilt     = vec2(frx_skyLightVector().x, frx_skyLightVector().y);
-    float dayAngle    = dayTilt.x == 0. ? 0. : atan(dayTilt.y, dayTilt.x);
+    float dayAngle    = frx_skyAngleRadians() + PI * 0.5;
 
     mat4 transformation = frx_viewMatrix();
         transformation *= l2_rotationMatrix(zenithAxis, zenithAngle);
