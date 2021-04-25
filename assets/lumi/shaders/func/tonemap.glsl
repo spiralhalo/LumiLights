@@ -1,4 +1,5 @@
 #include frex:shaders/api/player.glsl
+#include frex:shaders/api/world.glsl
 #include frex:shaders/lib/math.glsl
 #include frex:shaders/lib/color.glsl
 #include lumi:shaders/common/userconfig.glsl
@@ -22,10 +23,15 @@ vec3 ldr_vibrantTonemap(in vec3 hdrColor){
 
 vec3 exposure_tonemap(vec3 x)
 {
-    float exposure = 1.0 - frx_smoothedEyeBrightness().y;
+    #if TONE_PROFILE == TONE_PROFILE_AUTO_EXPOSURE
+    // todo: adjust by atmos celest time
+    float exposure = 1.0 - frx_smoothedEyeBrightness().y; /* * (0.5 + frx_ambientIntensity() * 0.5); // BAD */
     // exposure *= exposure;
     exposure *= 4.5;
     exposure += 0.25;
+    #else
+    float exposure = 0.25;
+    #endif
     return vec3(1.0) - exp(-x * exposure);
 }
 
@@ -53,9 +59,9 @@ vec3 hable_filmic(vec3 v)
 vec4 ldr_tonemap(vec4 a)
 {
     vec3 c = a.rgb;
-    #if TONE_PROFILE == TONE_PROFILE_HIGH_CONTRAST
+    #if TONE_PROFILE == TONE_PROFILE_HIGH_CONTRAST_OLD
         c = frx_toneMap(c);
-    #elif TONE_PROFILE == TONE_PROFILE_AUTO_EXPOSURE
+    #elif defined(HIGH_CONTRAST_ENABLED)
         c = exposure_tonemap(c);
     #else
         c = hable_filmic(c);
@@ -68,9 +74,9 @@ vec4 ldr_tonemap(vec4 a)
 vec3 ldr_tonemap3(vec3 a)
 {
     vec3 c = a.rgb;
-    #if TONE_PROFILE == TONE_PROFILE_HIGH_CONTRAST
+    #if TONE_PROFILE == TONE_PROFILE_HIGH_CONTRAST_OLD
         c = frx_toneMap(c);
-    #elif TONE_PROFILE == TONE_PROFILE_AUTO_EXPOSURE
+    #elif defined(HIGH_CONTRAST_ENABLED)
         c = exposure_tonemap(c);
     #else
         c = hable_filmic(c);
@@ -82,9 +88,9 @@ vec3 ldr_tonemap3(vec3 a)
 vec3 ldr_tonemap3noGamma(vec3 a)
 {
     vec3 c = a.rgb;
-    #if TONE_PROFILE == TONE_PROFILE_HIGH_CONTRAST
+    #if TONE_PROFILE == TONE_PROFILE_HIGH_CONTRAST_OLD
         c = frx_toneMap(c);
-    #elif TONE_PROFILE == TONE_PROFILE_AUTO_EXPOSURE
+    #elif defined(HIGH_CONTRAST_ENABLED)
         c = exposure_tonemap(c);
     #else
         c = hable_filmic(c);

@@ -85,11 +85,11 @@ vec3 atmos_hdrSkyColorRadiance(vec3 world_toSky)
 #define DEF_DAY_SKY_COLOR hdr_gammaAdjust(vec3(0.52, 0.69, 1.0))
 #define DEF_NIGHT_SKY_COLOR hdr_gammaAdjust(vec3(0.01, 0.01, 0.01))
 #endif
-#if TONE_PROFILE == TONE_PROFILE_HIGH_CONTRAST
+#if TONE_PROFILE == TONE_PROFILE_HIGH_CONTRAST_OLD
 #define DEF_SUNLIGHT_STR 12.0
 #define DEF_MOONLIGHT_STR 0.2
 #define DEF_SKY_STR 1.0;
-#elif TONE_PROFILE == TONE_PROFILE_AUTO_EXPOSURE
+#elif defined(HIGH_CONTRAST_ENABLED)
 #define DEF_SUNLIGHT_STR 24.0
 #define DEF_MOONLIGHT_STR 0.4
 #define DEF_SKY_STR 2.0;

@@ -37,7 +37,7 @@
                 },
                 tone_profile: {
                     default: "auto_exposure",
-                    choices: ["standard", "high_contrast", "auto_exposure"],
+                    choices: ["standard", "fixed_exposure", "auto_exposure", "high_contrast_old"],
                     enum: true,
                     prefix: "tone_profile_",
                     nameKey: "config.lumi_lights.value.tone_profile",
