@@ -198,7 +198,13 @@ vec4 generateCloudTexture(vec2 texcoord) {
     #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
         worldXz -= frx_cameraPos().xz * 0.8;
     #endif
-    vec2 cloudCoord = worldXz + frx_renderSeconds(); //worldXz + (frx_worldDay() + frx_worldTime()) * 800.0;
+    #if CLOUD_TIME == CLOUD_TIME_WORLD
+    vec2 cloudCoord = worldXz + (frx_worldDay() + frx_worldTime()) * 1200.0;
+    #elif CLOUD_TIME == CLOUD_TIME_CLIENT
+    vec2 cloudCoord = worldXz + frx_renderSeconds();
+    #else
+    vec2 cloudCoord = worldXz;
+    #endif
     cloudCoord *= 2.0;
 
     float cloudBase = l2_clampScale(0.0, 1.0 - rainFactor, snoise(cloudCoord * 0.005));

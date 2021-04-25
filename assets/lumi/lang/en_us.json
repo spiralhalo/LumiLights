@@ -102,6 +102,8 @@
     "config.lumi_lights.help.rain_puddles": "Wet ground during rain",
     "config.lumi_lights.value.caustics_mode": "Water caustics mode",
     "config.lumi_lights.help.caustics_mode": "Emulate water caustics",
+    "config.lumi_lights.value.cloud_time": "Cloud movement sync",
+    "config.lumi_lights.help.cloud_time": "Whether volumetric cloud synchronizes with client;time or in-game world time.",
     "config.lumi_lights.value.overlay_debug": "Overlay debug",
     "config.lumi_lights.help.overlay_debug": "Separate overlays by rendering them differently",
 
