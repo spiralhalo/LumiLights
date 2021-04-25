@@ -50,7 +50,6 @@ frag_in float v_not_in_void;
 frag_in float v_near_void_core;
 frag_in float v_blindness;
 
-const float CAVE_FOG_STR = 0.1;
 const vec3 VOID_CORE_COLOR = hdr_gammaAdjust(vec3(1.0, 0.7, 0.5));
 
 // const float JITTER_STRENGTH = 0.4;
@@ -69,18 +68,20 @@ vec2 coords_uv(vec3 view, mat4 projection)
     return clip.xy * 0.5 + 0.5;
 }
 
-float raymarched_fog_density(vec3 viewPos, vec3 worldPos, float fogFar)
+#ifdef USE_VOLUMETRIC_FOG
+float raymarched_fog_density(vec3 viewPos, vec3 worldPos, float pFogFar)
 {
     // vec3 unitMarch_view = normalize(-viewPos);
     // vec3 ray_view = viewPos + tileJitter * unitMarch_view;
 
     vec3 modelPos = worldPos - frx_cameraPos();
     float distToCamera = length(modelPos);
-    vec3 unitMarch_model = (-modelPos) / distToCamera;
+    float sampleSize = max(2.0, pFogFar / 64.0);
+    vec3 unitMarch_model = sampleSize * ((-modelPos) / distToCamera);
     vec3 ray_model = modelPos + tileJitter * unitMarch_model;
 
-    float distTraveled = tileJitter;
-    float maxDist = min(distToCamera, 128.0); // why 128 again ?
+    float distTraveled = tileJitter * sampleSize;
+    float maxDist = min(distToCamera, pFogFar);
 
     // March in shadow space for performance boost
     // vec3 shadowPos = (frx_shadowViewMatrix() * vec4(modelPos, 1.0)).xyz;
@@ -92,29 +93,31 @@ float raymarched_fog_density(vec3 viewPos, vec3 worldPos, float fogFar)
 
     float illuminated = 0.0;
     while (distTraveled < maxDist) {
-        #if defined(SHADOW_MAP_PRESENT)
-            ray_shadow = (frx_shadowViewMatrix() * vec4(ray_model, 1.0));
-            illuminated += simpleShadowFactor(u_shadow, ray_shadow);
-        #else
-            illuminated += 1.0;
-        #endif
-        distTraveled += 1.0;
+        ray_shadow = (frx_shadowViewMatrix() * vec4(ray_model, 1.0));
+        illuminated += simpleShadowFactor(u_shadow, ray_shadow) * sampleSize;
+        distTraveled += sampleSize;
         // ray_shadow.xyz += unitMarch_shadow;
         ray_model += unitMarch_model;
         // ray_view += unitMarch_view;
     }
 
-    return (CAVE_FOG_STR + (1.0 - CAVE_FOG_STR) * illuminated) / max(1.0, fogFar);
+    return illuminated / max(1.0, pFogFar);
 }
+#endif
 
-vec4 fog (float skylightFactor, vec4 a, vec3 viewPos, vec3 worldPos, inout float bloom)
+vec4 fog (float skyLight, vec4 a, vec3 viewPos, vec3 worldPos, inout float bloom)
 {
+    float pfSkyLight = 1.0;
+    if (frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT)) {
+        pfSkyLight = mix(skyLight, 1.0, l2_clampScale(0., SEA_LEVEL, frx_cameraPos().y));
+        pfSkyLight *= pfSkyLight;
+    }
 
-    float fogDensity = frx_viewFlag(FRX_CAMERA_IN_FLUID) ? UNDERWATER_FOG_DENSITY : FOG_DENSITY;
-    float fogFar = frx_viewFlag(FRX_CAMERA_IN_FLUID) ? UNDERWATER_FOG_FAR : FOG_FAR;
+    float pFogDensity = frx_viewFlag(FRX_CAMERA_IN_FLUID) ? UNDERWATER_FOG_DENSITY : FOG_DENSITY;
+    float pFogFar     = frx_viewFlag(FRX_CAMERA_IN_FLUID) ? UNDERWATER_FOG_FAR     : FOG_FAR;
     // float fog_noise = snoise(worldPos.xz * FOG_NOISE_SCALE + frx_renderSeconds() * FOG_NOISE_SPEED) * FOG_NOISE_HEIGHT;
 
-    float altitudeFactor = 1.0;
+    float pfAltitude = 1.0;
     if (!frx_viewFlag(FRX_CAMERA_IN_FLUID) && frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT)) {
         float zigZagTime = abs(frx_worldTime()-0.5);
         float timeFactor = (l2_clampScale(0.45, 0.5, zigZagTime) + l2_clampScale(0.05, 0.0, zigZagTime));
@@ -122,61 +125,73 @@ vec4 fog (float skylightFactor, vec4 a, vec3 viewPos, vec3 worldPos, inout float
         inverseThickener -= 0.25 * timeFactor;
         inverseThickener -= 0.5 * inverseThickener * frx_rainGradient();
         inverseThickener -= 0.5 * inverseThickener * frx_thunderGradient();
-        fogFar *= inverseThickener;
-        fogDensity = mix(1.0, max(0.8, fogDensity), inverseThickener);
+        pFogFar *= inverseThickener;
+        pFogDensity = mix(1.0, max(0.8, pFogDensity), inverseThickener);
         #ifdef OVERWORLD_FOG_USE_ALTITUDE
             // altitude fog in the overworld :) valley fog is better than mountain-engulfing fog
             if (frx_worldFlag(FRX_WORLD_IS_OVERWORLD)) {
                 float fogTop = mix(FOG_TOP_THICK, FOG_TOP, inverseThickener);
-                altitudeFactor = l2_clampScale(fogTop, SEA_LEVEL, worldPos.y);
-                altitudeFactor *= altitudeFactor;
+                pfAltitude = l2_clampScale(fogTop, SEA_LEVEL, worldPos.y);
+                pfAltitude *= pfAltitude;
             }
         #endif
     }
 
-    bool useVolumetricFog = false;
+    bool useVolFog = false;
     #ifdef USE_VOLUMETRIC_FOG
-    useVolumetricFog = !frx_playerHasEffect(FRX_EFFECT_BLINDNESS)
-        && !frx_viewFlag(FRX_CAMERA_IN_LAVA)
-        && frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT);
+    useVolFog = !frx_playerHasEffect(FRX_EFFECT_BLINDNESS)
+                && !frx_viewFlag(FRX_CAMERA_IN_LAVA)
+                && frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT);
     #endif
 
-    float fogFactor = fogDensity * altitudeFactor
-        * ((frx_viewFlag(FRX_CAMERA_IN_FLUID) || useVolumetricFog) ? 1.0 : (CAVE_FOG_STR + (1.0 - CAVE_FOG_STR) * skylightFactor));
+    float fogFactor = pFogDensity * pfAltitude * ((frx_viewFlag(FRX_CAMERA_IN_FLUID) || useVolFog) ? 1.0 : pfSkyLight);
 
     // additive fog when it's not blindness or lava related
     bool useAdditive = true;
 
     if (frx_playerHasEffect(FRX_EFFECT_BLINDNESS)) {
         useAdditive = false;
-        useVolumetricFog = false;
-        fogFar = mix(fogFar, 3.0, v_blindness);
+        useVolFog = false;
+        pFogFar = mix(pFogFar, 3.0, v_blindness);
         fogFactor = mix(fogFactor, 1.0, v_blindness);
     }
 
     if (frx_viewFlag(FRX_CAMERA_IN_LAVA)) {
         useAdditive = false;
-        useVolumetricFog = false;
-        fogFar = frx_playerHasEffect(FRX_EFFECT_FIRE_RESISTANCE) ? 2.5 : 0.5;
+        useVolFog = false;
+        pFogFar = frx_playerHasEffect(FRX_EFFECT_FIRE_RESISTANCE) ? 2.5 : 0.5;
         fogFactor = 1.0;
     }
 
     // TODO: retrieve fog distance from render distance as an option especially for the nether
     float distFactor;
-    if (useVolumetricFog) { //TODO: blindness transition still broken
-        distFactor = raymarched_fog_density(viewPos, worldPos, fogFar);
-    } else {
-        distFactor = l2_clampScale(0.0, fogFar, length(viewPos));
-        distFactor *= distFactor;
+    float distToCamera = length(viewPos);
+    float pfCave = 1.0;
+    distFactor = min(1.0, distToCamera / pFogFar);
+    #ifdef USE_VOLUMETRIC_FOG
+    if (useVolFog) { //TODO: blindness transition still broken?
+        float fRaymarch = raymarched_fog_density(viewPos, worldPos, pFogFar);
+        distFactor = distFactor * 0.6 + 0.4 * fRaymarch;
+        pfCave -= fRaymarch;
     }
+    #endif
+    distFactor *= distFactor;
 
     fogFactor = clamp(fogFactor * distFactor, 0.0, 1.0);
-    
+
     // TODO: separate fog from sky color
     vec4 fogColor = vec4(atmos_hdrSkyColorRadiance(normalize(worldPos-frx_cameraPos())), 1.0);
 
     if (useAdditive) {
-        return vec4(a.rgb + fogColor.rgb * fogFactor, a.a);
+        #ifdef RGB_CAVES
+            float darkness = (1.0 - skyLight);
+        #else
+            float darkness = l2_clampScale(0.1, 0.0, skyLight);
+        #endif
+        pfCave *= min(1.0, distToCamera / FOG_FAR) * darkness;
+        pfCave *= pfCave;
+        vec3 caveFog = atmos_hdrCaveFogRadiance() * pfCave;
+        return vec4(a.rgb + fogColor.rgb * fogFactor + caveFog, a.a);
     }
 
     // no need to reduce bloom with additive blending
@@ -233,22 +248,27 @@ void custom_sky(in vec3 viewPos, in float blindnessFactor, inout vec4 a, inout f
     bloom_out = 0.0;
 
     if (frx_worldFlag(FRX_WORLD_IS_OVERWORLD) && v_not_in_void > 0.0) {
-        vec2 celestUV = rect_innerUV(Rect(v_celest1, v_celest2, v_celest3), skyVec * 1024.);
-        float starEraser = l2_clampScale(.99, .999, dot(worldSkyVec, frx_skyLightVector()));
-        vec3 celestialObjectColor = vec3(0.);
-        if (celestUV == clamp(celestUV, 0.0, 1.0) && dot(worldSkyVec, frx_skyLightVector())>0.) 
-        {
-            if (frx_worldFlag(FRX_WORLD_IS_MOONLIT)){
-                celestUV.x *= 0.25;
-                celestUV.y *= 0.5;
-                celestUV.x += mod(frx_worldDay(), 4.) * 0.25;
-                celestUV.y += (mod(frx_worldDay(), 8.) >= 4.) ? 0.5 : 0.0;
-                celestialObjectColor = hdr_gammaAdjust(texture(u_moon, celestUV).rgb) * 2.0;
-            } else {
-                celestialObjectColor = hdr_gammaAdjust(texture(u_sun, celestUV).rgb) * 2.0;
-            }
-        }
         #if SKY_MODE == SKY_MODE_LUMI
+            float starEraser = 0.;
+            vec2 celestUV = rect_innerUV(Rect(v_celest1, v_celest2, v_celest3), skyVec * 1024.);
+            vec3 celestialObjectColor = vec3(0.);
+            if (celestUV == clamp(celestUV, 0.0, 1.0) && dot(worldSkyVec, frx_skyLightVector()) >0.) {
+                if (frx_worldFlag(FRX_WORLD_IS_MOONLIT)){
+                    vec2 fullMoonUV = celestUV * vec2(0.25, 0.5);
+                    vec3 fullMoonColor = texture(u_moon, fullMoonUV).rgb;
+                    starEraser = l2_max3(fullMoonColor);
+                    starEraser = min(1.0, starEraser * 3.0);
+                    celestUV.x *= 0.25;
+                    celestUV.y *= 0.5;
+                    celestUV.x += mod(frx_worldDay(), 4.) * 0.25;
+                    celestUV.y += (mod(frx_worldDay(), 8.) >= 4.) ? 0.5 : 0.0;
+                    celestialObjectColor = hdr_gammaAdjust(texture(u_moon, celestUV).rgb) * 3.0;
+                    celestialObjectColor += vec3(0.01) * hdr_gammaAdjust(fullMoonColor);
+                    celestialObjectColor *= DEF_NIGHT_SKY_MULTIPLIER;
+                } else {
+                    celestialObjectColor = hdr_gammaAdjust(texture(u_sun, celestUV).rgb) * 2.0;
+                }
+            }
             // horizonBrightening can't be used on reflections yet due to clamping I think
             float horizonBrightening = 1. + 3. * pow(l2_clampScale(.5, -.1, skyDotUp), 2.) * (1. - frx_rainGradient() * .6);
             a.rgb = atmos_hdrSkyColorRadiance(worldSkyVec) * horizonBrightening;
@@ -258,25 +278,33 @@ void custom_sky(in vec3 viewPos, in float blindnessFactor, inout vec4 a, inout f
         #endif
 
         #if SKY_MODE == SKY_MODE_LUMI || SKY_MODE == SKY_MODE_VANILLA_STARRY
-            // float rainFactor = frx_rainGradient() * 0.67 + frx_thunderGradient() * 0.33;
             // stars
-            float starry = l2_clampScale(0.4, 0.0, frx_luminance(a.rgb)) * v_night;
+            const vec3  nonMilkyAxis  = vec3(-0.598964, 0.531492, 0.598964);
+            
+            float starry;
+            starry = l2_clampScale(0.4, 0.0, frx_luminance(a.rgb)) * v_night;
             starry *= l2_clampScale(-0.6, -0.5, skyDotUp); //prevent star near the void core
-            float occlusion = (1.0 - frx_rainGradient());
-            vec4 starVec = v_star_rotator * vec4(worldSkyVec, 0.0);
-            vec3 nonMilkyAxis = vec3(-0.598964, 0.531492, 0.598964);
+
             float milkyness = l2_clampScale(0.5, 0.0, abs(dot(nonMilkyAxis, worldSkyVec.xyz)));
-            float star = starry * smoothstep(0.75 - milkyness * 0.3, 0.9, snoise(starVec.xyz * 100));
-            // zoom sharpening
-            float zoomFactor = l2_clampScale(90, 30, v_fov);
-            star = l2_clampScale(0.3 * zoomFactor, 1.0 - 0.6 * zoomFactor, star) * occlusion;
-            star = max(0.0, star - starEraser);
-            float milkyHaze = starry * occlusion * milkyness * 0.4 * l2_clampScale(-1.0, 1.0, snoise(starVec.xyz * 2.0));
+
+            float rainOcclusion = (1.0 - frx_rainGradient());
+            vec4  starVec       = v_star_rotator * vec4(worldSkyVec, 0.0);
+            float zoomFactor    = l2_clampScale(90, 30, v_fov); // zoom sharpening
+            float star;
+            star = starry * smoothstep(0.75 - milkyness * 0.3, 0.9, snoise(starVec.xyz * 100));
+            star = l2_clampScale(0.3 * zoomFactor, 1.0 - 0.6 * zoomFactor, star) * rainOcclusion;
+
+            float milkyHaze = starry * rainOcclusion * milkyness * 0.4 * l2_clampScale(-1.0, 1.0, snoise(starVec.xyz * 2.0));
+
             #if SKY_MODE == SKY_MODE_LUMI
-            milkyHaze *= milkyHaze;
+                star -= star * starEraser;
+                milkyHaze -= milkyHaze * starEraser;
+                milkyHaze *= milkyHaze;
             #endif
+
             vec3 starRadiance = vec3(star) + NEBULAE_COLOR * milkyHaze;
-            a.rgb += starRadiance;
+
+            a.rgb += starRadiance * DEF_NIGHT_SKY_MULTIPLIER;;
             bloom_out += (star + milkyHaze);
         #endif
     }
@@ -357,7 +385,8 @@ vec4 hdr_shaded_color(
         #else
             vec4 shadowViewPos = frx_shadowViewMatrix() * vec4(worldPos - frx_cameraPos(), 1.0);
         #endif
-        float shadowFactor = calcShadowFactor(u_shadow, shadowViewPos);  
+        // PCF broke on translucent possibly because it wasn't included in shadow pass ?
+        float shadowFactor = translucent ? simpleShadowFactor(u_shadow, shadowViewPos) : calcShadowFactor(u_shadow, shadowViewPos);  
         light.z = shadowFactor;
         // Workaround before shadow occlusion culling to make caves playable
         light.z *= l2_clampScale(0.03125, 0.04, light.y);
@@ -410,7 +439,7 @@ vec4 hdr_shaded_color(
     #endif
 
     if (a.a != 0.0 && (translucent || translucentDepth >= depth) && depth != 1.0) {
-        a = fog(frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? light.y : 1.0, a, viewPos, worldPos, bloom_out);
+        a = fog(l2_lightmapRemap(light.y), a, viewPos, worldPos, bloom_out);
     }
 
     #if CAUSTICS_MODE == CAUSTICS_MODE_TEXTURE

@@ -10,7 +10,7 @@
 #include lumi:shaders/func/tonemap.glsl
 #include lumi:shaders/lib/fast_gaussian_blur.glsl
 #include lumi:shaders/lib/util.glsl
-#include lumi:shaders/lib/volumetric_cloud.glsl
+#include lumi:shaders/func/volumetric_cloud.glsl
 
 /*******************************************************
  *  lumi:shaders/post/clouds.frag                      *
@@ -25,6 +25,7 @@ uniform sampler2D u_clouds;
 uniform sampler2D u_clouds_texture;
 uniform sampler2D u_clouds_depth;
 uniform sampler2D u_solid_depth;
+uniform sampler2D u_translucent_depth;
 
 /*******************************************************
     vertexShader: lumi:shaders/post/clouds.vert
@@ -72,11 +73,17 @@ void main()
         
         float cloudColor = frx_ambientIntensity() * frx_ambientIntensity() * (1.0 - 0.3 * rainFactor);
 
-        vec4 clouds = vec4(hdr_orangeSkyColor(vec3(cloudColor), -skyVec), 1.0) * cloud;
+        vec4 clouds = vec4(ldr_tonemap3(atmos_hdrSkyColorRadiance(worldSkyVec) + atmos_hdrCelestialRadiance() * 0.3), 1.0) * cloud;
         fragColor[0] = mix(clouds, vec4(0.0), v_blindness);
         fragColor[1] = vec4(cloud > 0.5 ? 0.99999 : 1.0);
     #elif CLOUD_RENDERING == CLOUD_RENDERING_VOLUMETRIC
-        cloud_result volumetric = rayMarchCloud(u_clouds_texture, u_solid_depth, v_texcoord);
+        #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
+          cloud_result volumetric = rayMarchCloud(u_clouds_texture, u_solid_depth, v_texcoord);
+        #else
+          cloud_result volumetric = frx_viewFlag(FRX_CAMERA_IN_FLUID)
+                                    ? rayMarchCloud(u_clouds_texture, u_solid_depth, v_texcoord)
+                                    : rayMarchCloud(u_clouds_texture, u_translucent_depth, v_texcoord);
+        #endif
         
         vec4 worldPos = frx_inverseViewProjectionMatrix() * vec4(2.0 * v_texcoord - 1.0, 1.0, 1.0);
         worldPos.xyz /= worldPos.w;

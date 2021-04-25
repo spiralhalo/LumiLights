@@ -18,10 +18,10 @@
  *  published by the Free Software Foundation, Inc.    *
  *******************************************************/
 
-vert_out vec3 l2_viewpos;
 vert_out vec2 pv_lightcoord;
 vert_out float pv_ao;
 vert_out float pv_diffuse;
+vert_out float pv_ortho;
 
 // Grondag's vanilla diffuse but different
 float p_diffuseGui(vec3 normal) {
@@ -35,9 +35,10 @@ vec2 inv_size = 1.0 / vec2(frx_viewWidth(), frx_viewHeight());
 void frx_writePipelineVertex(inout frx_VertexData data) {
 
     if (frx_modelOriginType() == MODEL_ORIGIN_SCREEN) {
+        mat4 t = frx_guiViewProjectionMatrix();
+        pv_ortho = t[3][3];
         atmos_generateAtmosphereModel();
         gl_Position = frx_guiViewProjectionMatrix() * data.vertex;
-        l2_viewpos = data.vertex.xyz; // ??????
 
         #ifdef TAA_ENABLED
             float fragZ = gl_Position.z / gl_Position.w;
@@ -47,9 +48,7 @@ void frx_writePipelineVertex(inout frx_VertexData data) {
         #endif
     } else {
         data.vertex += frx_modelToCamera();
-        vec4 viewCoord = frx_viewMatrix() * data.vertex;
-        gl_Position = frx_projectionMatrix() * viewCoord;
-        l2_viewpos = viewCoord.xyz;
+        gl_Position = frx_viewProjectionMatrix() * data.vertex;
 
         #ifdef TAA_ENABLED
             gl_Position.st += taa_jitter(inv_size) * gl_Position.w;

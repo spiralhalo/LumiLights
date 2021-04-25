@@ -98,15 +98,6 @@ vec3 hdr_calcHeldLight(inout light_data data)
     return vec3(0.0);
 }
 
-vec3 hdr_calcSkyAmbientLight(inout light_data data)
-{
-    if (frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT))
-    {
-        return pbr_nonDirectional(data.albedo, data.metallic, atmos_hdrSkyAmbientRadiance() * l2_lightmapRemap(data.light.y));
-    }
-    return vec3(0.0);
-}
-
 vec3 hdr_calcSkyLight(inout light_data data)
 {
     if (frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT)) {
@@ -140,14 +131,17 @@ void pbr_shading(inout vec4 a, inout float bloom, vec3 viewPos, vec3 light, vec3
         vec3(0.0)
     );
 
-    vec3 held_light = hdr_calcHeldLight(data);
+    vec3 held_light  = hdr_calcHeldLight(data);
     vec3 block_light = hdr_calcBlockLight(data, l2_blockRadiance(data.light.x));
-    vec3 base_ambient_light = pbr_nonDirectional(data.albedo, data.metallic, l2_baseAmbientRadiance());
-    vec3 sky_ambient_light = hdr_calcSkyAmbientLight(data);
-    vec3 sky_light = hdr_calcSkyLight(data);
-    vec3 emissive_light = pbr_nonDirectional(data.albedo, data.metallic, l2_emissiveRadiance(data.albedo, bloom));
+    vec3 sky_light   = hdr_calcSkyLight(data);
+
+    vec3 ndRadiance = l2_baseAmbientRadiance();
+    ndRadiance += atmos_hdrSkyAmbientRadiance() * l2_lightmapRemap(data.light.y);
+    ndRadiance += l2_emissiveRadiance(data.albedo, bloom);
     
-    a.rgb = held_light + block_light + base_ambient_light + sky_ambient_light + sky_light + emissive_light;
+    vec3 nd_light = pbr_nonDirectional(data.albedo, data.metallic, ndRadiance);
+    
+    a.rgb = held_light + block_light + sky_light + nd_light;
 
     float specularLuminance = frx_luminance(data.specularAccu);
     float smoothness = 1 - data.roughness;

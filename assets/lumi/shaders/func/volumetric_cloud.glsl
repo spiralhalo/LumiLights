@@ -8,7 +8,7 @@
 #include lumi:shaders/post/common/clouds.glsl
 
 /*******************************************************
- *  lumi:shaders/lib/volumetric_cloud.glsl             *
+ *  lumi:shaders/func/volumetric_cloud.glsl             *
  *******************************************************
  *  Copyright (c) 2020-2021 spiralhalo                 *
  *  Released WITHOUT WARRANTY under the terms of the   *
@@ -194,7 +194,17 @@ cloud_result rayMarchCloud(in sampler2D scloudTex, in sampler2D sdepth, in vec2 
 vec4 generateCloudTexture(vec2 texcoord) {
      // TODO: optimize?
     float rainFactor = frx_rainGradient() * 0.67;// + frx_thunderGradient() * 0.33;
-    vec2 cloudCoord = uv2worldXz(texcoord) + (frx_worldDay() + frx_worldTime()) * 800.0;
+    vec2 worldXz = uv2worldXz(texcoord);
+    #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
+        worldXz -= frx_cameraPos().xz * 0.8;
+    #endif
+    #if CLOUD_TIME == CLOUD_TIME_WORLD
+    vec2 cloudCoord = worldXz + (frx_worldDay() + frx_worldTime()) * 1200.0;
+    #elif CLOUD_TIME == CLOUD_TIME_CLIENT
+    vec2 cloudCoord = worldXz + frx_renderSeconds();
+    #else
+    vec2 cloudCoord = worldXz;
+    #endif
     cloudCoord *= 2.0;
 
     float cloudBase = l2_clampScale(0.0, 1.0 - rainFactor, snoise(cloudCoord * 0.005));

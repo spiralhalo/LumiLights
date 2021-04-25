@@ -1,11 +1,16 @@
-#include frex:shaders/lib/math.glsl
+#include frex:shaders/api/player.glsl
+#include frex:shaders/api/world.glsl
 #include frex:shaders/lib/color.glsl
+#include frex:shaders/lib/math.glsl
+#include lumi:shaders/common/atmosphere.glsl
 #include lumi:shaders/common/userconfig.glsl
 #include lumi:shaders/lib/util.glsl
 
 /***********************************************************
  *  lumi:shaders/func/tonemap.glsl                         *
  ***********************************************************/
+
+#ifdef POST_SHADER
 
 vec3 ldr_reinhardJodieTonemap(in vec3 v) {
     float l = frx_luminance(v);
@@ -15,6 +20,19 @@ vec3 ldr_reinhardJodieTonemap(in vec3 v) {
 
 vec3 ldr_vibrantTonemap(in vec3 hdrColor){
     return hdrColor / (frx_luminance(hdrColor) + vec3(1.0));
+}
+
+vec3 exposure_tonemap(vec3 x)
+{
+    #if TONE_PROFILE == TONE_PROFILE_AUTO_EXPOSURE
+    float exposure = 1.0 - frx_smoothedEyeBrightness().y * atmos_celestIntensity(); /* * (0.5 + frx_ambientIntensity() * 0.5); // BAD */
+    exposure *= exposure;
+    exposure *= 4.5;
+    exposure += 0.25;
+    #else
+    float exposure = 0.25;
+    #endif
+    return vec3(1.0) - exp(-x * exposure);
 }
 
 vec3 hable_tonemap_partial(vec3 x)
@@ -41,8 +59,10 @@ vec3 hable_filmic(vec3 v)
 vec4 ldr_tonemap(vec4 a)
 {
     vec3 c = a.rgb;
-    #ifdef HIGH_CONTRAST
+    #if TONE_PROFILE == TONE_PROFILE_HIGH_CONTRAST_OLD
         c = frx_toneMap(c);
+    #elif defined(HIGH_CONTRAST_ENABLED)
+        c = exposure_tonemap(c);
     #else
         c = hable_filmic(c);
     #endif
@@ -54,8 +74,10 @@ vec4 ldr_tonemap(vec4 a)
 vec3 ldr_tonemap3(vec3 a)
 {
     vec3 c = a.rgb;
-    #ifdef HIGH_CONTRAST
+    #if TONE_PROFILE == TONE_PROFILE_HIGH_CONTRAST_OLD
         c = frx_toneMap(c);
+    #elif defined(HIGH_CONTRAST_ENABLED)
+        c = exposure_tonemap(c);
     #else
         c = hable_filmic(c);
     #endif
@@ -66,11 +88,15 @@ vec3 ldr_tonemap3(vec3 a)
 vec3 ldr_tonemap3noGamma(vec3 a)
 {
     vec3 c = a.rgb;
-    #ifdef HIGH_CONTRAST
+    #if TONE_PROFILE == TONE_PROFILE_HIGH_CONTRAST_OLD
         c = frx_toneMap(c);
+    #elif defined(HIGH_CONTRAST_ENABLED)
+        c = exposure_tonemap(c);
     #else
         c = hable_filmic(c);
     #endif
     c = clamp(c, 0.0, 1.0);
     return c;
 }
+
+#endif

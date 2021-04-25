@@ -43,6 +43,11 @@
           nameKey: "config.lumi_lights.value.reflection_maximum_roughness_relative",
           descriptionKey: "config.lumi_lights.help.reflection_maximum_roughness_relative"
         },
+        reflection_on_hand: {
+          default: true,
+          nameKey: "config.lumi_lights.value.reflection_on_hand",
+          descriptionKey: "config.lumi_lights.help.reflection_on_hand"
+        },
         cloud_rendering: {
           default: "volumetric",
           choices: ["vanilla", "flat", "volumetric"],

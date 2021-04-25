@@ -25,10 +25,23 @@
                     nameKey: "config.lumi_lights.value.multi_bounce_reflection",
                     descriptionKey: "config.lumi_lights.help.multi_bounce_reflection"
                 },
-                high_contrast: {
+                kaleidoskop: {
                     default: false,
-                    nameKey: "config.lumi_lights.value.high_contrast",
-                    descriptionKey: "config.lumi_lights.help.high_contrast"
+                    nameKey: "config.lumi_lights.value.kaleidoskop",
+                    descriptionKey: "config.lumi_lights.help.kaleidoskop"
+                },
+                rgb_caves: {
+                    default: false,
+                    nameKey: "config.lumi_lights.value.rgb_caves",
+                    descriptionKey: "config.lumi_lights.help.rgb_caves"
+                },
+                tone_profile: {
+                    default: "auto_exposure",
+                    choices: ["standard", "fixed_exposure", "auto_exposure", "high_contrast_old"],
+                    enum: true,
+                    prefix: "tone_profile_",
+                    nameKey: "config.lumi_lights.value.tone_profile",
+                    descriptionKey: "config.lumi_lights.help.tone_profile"
                 },
                 rain_puddles: {
                     default: false,
@@ -42,6 +55,14 @@
                     prefix: "caustics_mode_",
                     nameKey: "config.lumi_lights.value.caustics_mode",
                     descriptionKey: "config.lumi_lights.help.caustics_mode"
+                },
+                cloud_time: {
+                    default: "client",
+                    choices: ["client", "world", "stop"],
+                    enum: true,
+                    prefix: "cloud_time_",
+                    nameKey: "config.lumi_lights.value.cloud_time",
+                    descriptionKey: "config.lumi_lights.help.cloud_time"
                 },
                 overlay_debug: {
                     default: "none",

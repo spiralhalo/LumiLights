@@ -28,9 +28,10 @@
 
 	include: [
 		"lumi:pipeline/main.json",
-		"lumi:pipeline/main_passes.json",
-		"lumi:pipeline/taa.json",
 		"lumi:pipeline/common.json",
+		"lumi:pipeline/main_passes.json",
+		"lumi:pipeline/hand_passes.json",
+		"lumi:pipeline/taa.json",
 		"lumi:pipeline/bloom.json",
 		"lumi:pipeline/skyshadow_4x.json",
 		"lumi:pipeline/config/shadow_config.json",

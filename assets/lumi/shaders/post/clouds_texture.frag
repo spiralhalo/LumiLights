@@ -2,7 +2,7 @@
 #include frex:shaders/api/view.glsl
 #include frex:shaders/api/world.glsl
 #include lumi:shaders/lib/util.glsl
-#include lumi:shaders/lib/volumetric_cloud.glsl
+#include lumi:shaders/func/volumetric_cloud.glsl
 #include lumi:shaders/common/userconfig.glsl
 
 /*******************************************************

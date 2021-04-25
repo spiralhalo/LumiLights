@@ -1,0 +1,70 @@
+{
+    programs: [
+        {
+            name: "hand_process",
+            vertexSource: "lumi:shaders/post/hdr.vert",
+            fragmentSource: "lumi:shaders/post/hand_process.frag",
+            samplers: [
+                "u_color",
+                "u_depth",
+                "u_light",
+                "u_normal",
+                "u_normal_micro",
+                "u_material",
+                "u_misc",
+                
+                "u_translucent_depth",
+
+                "u_glint",
+                "u_shadow",
+            ]
+        }
+    ],
+
+    framebuffers: [
+        {
+            name: "hand_process",
+            colorAttachments: [
+                {image: "solid_main"},
+                {image: "emissive"},
+                {image: "composite_depth"},
+            ]
+        },
+        {
+            name: "copy_hand",
+            colorAttachments: [{image: "main_copy"}]
+        }
+    ],
+    
+    afterRenderHand: {
+        passes: [
+            {
+                name: "copy_hand",
+                program: "copy",
+                framebuffer: "copy_hand",
+                samplerImages: [
+                    "solid_main"
+                ]
+            },
+            {
+                name: "hand_process",
+                program: "hand_process",
+                framebuffer: "hand_process",
+                samplerImages: [
+                    "main_copy",
+                    "solid_depth",
+                    "light_solid",
+                    "normal_solid",
+                    "normal_micro_solid",
+                    "material_solid",
+                    "misc_solid",
+                    
+                    "translucent_depth",
+
+                    "minecraft:textures/misc/enchanted_item_glint.png",
+                    "shadow_map",
+                ]
+            },
+        ]
+    }
+}
