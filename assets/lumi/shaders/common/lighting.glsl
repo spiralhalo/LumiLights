@@ -11,6 +11,15 @@
  *******************************************************/
 
 // STRENGTHS
+#if TONE_PROFILE == TONE_PROFILE_AUTO_EXPOSURE
+const float SKYLESS_AMBIENT_STR = 0.1;
+const float SKYLESS_LIGHT_STR = 0.25;
+const float BLOCK_LIGHT_STR = 0.375;
+const float BASE_AMBIENT_STR = 0.005;
+const float HELD_LIGHT_STR = 0.1875;
+const float EMISSIVE_LIGHT_STR = 1.0;
+const float NIGHT_VISION_STR = 0.375;
+#else
 const float SKYLESS_AMBIENT_STR = 0.8;
 const float SKYLESS_LIGHT_STR = 2.0;
 const float BLOCK_LIGHT_STR = 3.0;
@@ -18,12 +27,17 @@ const float BASE_AMBIENT_STR = 0.02;
 const float HELD_LIGHT_STR = 1.5;
 const float EMISSIVE_LIGHT_STR = 1.0;
 const float NIGHT_VISION_STR = 3.0;
+#endif
 
 // MULTIPLIERS
 const float BRIGHT_FINAL_MULT = 2.0;
 
 // ADJUSTERS
+#if TONE_PROFILE == TONE_PROFILE_AUTO_EXPOSURE
+const float BLOCK_LIGHT_ADJUSTER = 12.0;
+#else
 const float BLOCK_LIGHT_ADJUSTER = 6.0;
+#endif
 
 // PREFERENCE
 const float DEFAULT_Z_WOBBLE = 0.1;

@@ -85,12 +85,18 @@ vec3 atmos_hdrSkyColorRadiance(vec3 world_toSky)
 #define DEF_DAY_SKY_COLOR hdr_gammaAdjust(vec3(0.52, 0.69, 1.0))
 #define DEF_NIGHT_SKY_COLOR hdr_gammaAdjust(vec3(0.01, 0.01, 0.01))
 #endif
-#ifdef HIGH_CONTRAST
+#if TONE_PROFILE == TONE_PROFILE_HIGH_CONTRAST
 #define DEF_SUNLIGHT_STR 12.0
 #define DEF_MOONLIGHT_STR 0.2
+#define DEF_SKY_STR 1.0;
+#elif TONE_PROFILE == TONE_PROFILE_AUTO_EXPOSURE
+#define DEF_SUNLIGHT_STR 24.0
+#define DEF_MOONLIGHT_STR 0.4
+#define DEF_SKY_STR 2.0;
 #else
 #define DEF_SUNLIGHT_STR 6.0
 #define DEF_MOONLIGHT_STR 0.1
+#define DEF_SKY_STR 1.0;
 #endif
 #define DEF_SKY_AMBIENT_STR 1.2
 /*************/
@@ -102,7 +108,7 @@ const float SKY_LIGHT_THUNDERING_MULT = 0.1;
 
 const float SUNLIGHT_STR = DEF_SUNLIGHT_STR;
 const float MOONLIGHT_STR = DEF_MOONLIGHT_STR;
-const float SKY_STR = 1.0;
+const float SKY_STR = DEF_SKY_STR;
 const float SKY_AMBIENT_STR = DEF_SKY_AMBIENT_STR;
 
 const vec3 DAY_SKY_COLOR = DEF_DAY_SKY_COLOR;

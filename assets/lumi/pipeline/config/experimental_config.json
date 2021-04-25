@@ -35,10 +35,13 @@
                     nameKey: "config.lumi_lights.value.rgb_caves",
                     descriptionKey: "config.lumi_lights.help.rgb_caves"
                 },
-                high_contrast: {
-                    default: false,
-                    nameKey: "config.lumi_lights.value.high_contrast",
-                    descriptionKey: "config.lumi_lights.help.high_contrast"
+                tone_profile: {
+                    default: "auto_exposure",
+                    choices: ["standard", "high_contrast", "auto_exposure"],
+                    enum: true,
+                    prefix: "tone_profile_",
+                    nameKey: "config.lumi_lights.value.tone_profile",
+                    descriptionKey: "config.lumi_lights.help.tone_profile"
                 },
                 rain_puddles: {
                     default: false,

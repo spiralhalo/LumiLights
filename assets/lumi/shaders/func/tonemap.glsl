@@ -1,3 +1,4 @@
+#include frex:shaders/api/player.glsl
 #include frex:shaders/lib/math.glsl
 #include frex:shaders/lib/color.glsl
 #include lumi:shaders/common/userconfig.glsl
@@ -18,6 +19,15 @@ vec3 ldr_vibrantTonemap(in vec3 hdrColor){
     return hdrColor / (frx_luminance(hdrColor) + vec3(1.0));
 }
 #endif
+
+vec3 exposure_tonemap(vec3 x)
+{
+    float exposure = 1.0 - frx_smoothedEyeBrightness().y;
+    // exposure *= exposure;
+    exposure *= 4.5;
+    exposure += 0.25;
+    return vec3(1.0) - exp(-x * exposure);
+}
 
 vec3 hable_tonemap_partial(vec3 x)
 {
@@ -43,8 +53,10 @@ vec3 hable_filmic(vec3 v)
 vec4 ldr_tonemap(vec4 a)
 {
     vec3 c = a.rgb;
-    #ifdef HIGH_CONTRAST
+    #if TONE_PROFILE == TONE_PROFILE_HIGH_CONTRAST
         c = frx_toneMap(c);
+    #elif TONE_PROFILE == TONE_PROFILE_AUTO_EXPOSURE
+        c = exposure_tonemap(c);
     #else
         c = hable_filmic(c);
     #endif
@@ -56,8 +68,10 @@ vec4 ldr_tonemap(vec4 a)
 vec3 ldr_tonemap3(vec3 a)
 {
     vec3 c = a.rgb;
-    #ifdef HIGH_CONTRAST
+    #if TONE_PROFILE == TONE_PROFILE_HIGH_CONTRAST
         c = frx_toneMap(c);
+    #elif TONE_PROFILE == TONE_PROFILE_AUTO_EXPOSURE
+        c = exposure_tonemap(c);
     #else
         c = hable_filmic(c);
     #endif
@@ -68,8 +82,10 @@ vec3 ldr_tonemap3(vec3 a)
 vec3 ldr_tonemap3noGamma(vec3 a)
 {
     vec3 c = a.rgb;
-    #ifdef HIGH_CONTRAST
+    #if TONE_PROFILE == TONE_PROFILE_HIGH_CONTRAST
         c = frx_toneMap(c);
+    #elif TONE_PROFILE == TONE_PROFILE_AUTO_EXPOSURE
+        c = exposure_tonemap(c);
     #else
         c = hable_filmic(c);
     #endif
