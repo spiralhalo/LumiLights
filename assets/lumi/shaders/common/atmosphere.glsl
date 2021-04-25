@@ -19,6 +19,7 @@
     out vec3 atmosv_hdrSkyAmbientRadiance;
 
     #ifdef POST_SHADER
+    out float atmosv_celestIntensity;
     out vec3 atmosv_hdrCaveFogRadiance;
     out vec3 atmosv_hdrSkyColorRadiance;
     out vec3 atmosv_hdrOWTwilightSkyRadiance;
@@ -32,6 +33,7 @@
     in vec3 atmosv_hdrSkyAmbientRadiance;
 
     #ifdef POST_SHADER
+    in float atmosv_celestIntensity;
     in vec3 atmosv_hdrCaveFogRadiance;
     in vec3 atmosv_hdrSkyColorRadiance;
     in vec3 atmosv_hdrOWTwilightSkyRadiance;
@@ -50,6 +52,11 @@ vec3 atmos_hdrSkyAmbientRadiance()
 }
 
 #ifdef POST_SHADER
+float atmos_celestIntensity()
+{
+    return atmosv_celestIntensity;
+}
+
 vec3 atmos_hdrCaveFogRadiance()
 {
     return atmosv_hdrCaveFogRadiance;
@@ -91,7 +98,7 @@ vec3 atmos_hdrSkyColorRadiance(vec3 world_toSky)
 #define DEF_SKY_STR 1.0;
 #elif defined(HIGH_CONTRAST_ENABLED)
 #define DEF_SUNLIGHT_STR 24.0
-#define DEF_MOONLIGHT_STR 0.4
+#define DEF_MOONLIGHT_STR 0.01
 #define DEF_SKY_STR 2.0;
 #else
 #define DEF_SUNLIGHT_STR 6.0
@@ -112,13 +119,13 @@ const float SKY_STR = DEF_SKY_STR;
 const float SKY_AMBIENT_STR = DEF_SKY_AMBIENT_STR;
 
 const vec3 DAY_SKY_COLOR = DEF_DAY_SKY_COLOR;
-const vec3 NIGHT_SKY_COLOR = DEF_NIGHT_SKY_COLOR;
+const vec3 NIGHT_SKY_COLOR = DEF_NIGHT_SKY_COLOR * DEF_NIGHT_SKY_MULTIPLIER;
 
 const vec3 NOON_SUNLIGHT_COLOR = vec3(1.0, 1.0, 1.0);
 const vec3 SUNRISE_LIGHT_COLOR = vec3(1.0, 0.7, 0.4);
 
 const vec3 NOON_AMBIENT  = hdr_gammaAdjust(vec3(1.0));
-const vec3 NIGHT_AMBIENT = hdr_gammaAdjust(vec3(0.3, 0.3, 0.45));
+const vec3 NIGHT_AMBIENT = hdr_gammaAdjust(vec3(0.3, 0.3, 0.45)) * DEF_NIGHT_SKY_MULTIPLIER;
 
 const vec3 CAVEFOG_C = DEF_DAY_SKY_COLOR;
 const vec3 CAVEFOG_DEEPC = hdr_gammaAdjust(SUNRISE_LIGHT_COLOR);
@@ -174,6 +181,7 @@ void atmos_generateAtmosphereModel()
     if (horizonTime <= CELEST_TIMES[0]) {
         atmosv_hdrCelestialRadiance = CELEST_COLOR[CELEST_INDICES[0]] * CELEST_STR[CELEST_INDICES[0]];
         #ifdef POST_SHADER
+            atmosv_celestIntensity = CELEST_STR[CELEST_INDICES[0]] / SUNLIGHT_STR;
             twgMappedA = twgMappedB = TWG_MAPPER[CELEST_INDICES[0]];
             twgTransition = 0.;
         #endif
@@ -187,6 +195,7 @@ void atmos_generateAtmosphereModel()
             celestTransition);
             
         #ifdef POST_SHADER
+            atmosv_celestIntensity = mix(CELEST_STR[CELEST_INDICES[sunI-1]], CELEST_STR[CELEST_INDICES[sunI]], celestTransition) / SUNLIGHT_STR;
             twgMappedA = TWG_MAPPER[CELEST_INDICES[sunI-1]];
             twgMappedB = TWG_MAPPER[CELEST_INDICES[sunI]];
             twgTransition = celestTransition;

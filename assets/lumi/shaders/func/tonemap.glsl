@@ -1,13 +1,16 @@
 #include frex:shaders/api/player.glsl
 #include frex:shaders/api/world.glsl
-#include frex:shaders/lib/math.glsl
 #include frex:shaders/lib/color.glsl
+#include frex:shaders/lib/math.glsl
+#include lumi:shaders/common/atmosphere.glsl
 #include lumi:shaders/common/userconfig.glsl
 #include lumi:shaders/lib/util.glsl
 
 /***********************************************************
  *  lumi:shaders/func/tonemap.glsl                         *
  ***********************************************************/
+
+#ifdef POST_SHADER
 
 vec3 ldr_reinhardJodieTonemap(in vec3 v) {
     float l = frx_luminance(v);
@@ -24,9 +27,8 @@ vec3 ldr_vibrantTonemap(in vec3 hdrColor){
 vec3 exposure_tonemap(vec3 x)
 {
     #if TONE_PROFILE == TONE_PROFILE_AUTO_EXPOSURE
-    // todo: adjust by atmos celest time
-    float exposure = 1.0 - frx_smoothedEyeBrightness().y; /* * (0.5 + frx_ambientIntensity() * 0.5); // BAD */
-    // exposure *= exposure;
+    float exposure = 1.0 - frx_smoothedEyeBrightness().y * atmos_celestIntensity(); /* * (0.5 + frx_ambientIntensity() * 0.5); // BAD */
+    exposure *= exposure;
     exposure *= 4.5;
     exposure += 0.25;
     #else
@@ -98,3 +100,5 @@ vec3 ldr_tonemap3noGamma(vec3 a)
     c = clamp(c, 0.0, 1.0);
     return c;
 }
+
+#endif
