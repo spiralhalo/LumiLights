@@ -40,7 +40,8 @@ out vec4 fragColor[3];
 void main()
 {
     float depth = texture(u_depth, v_texcoord).r;
-    if (depth == 1.0) {
+    float topMidDepth = texture(u_depth, vec2(0.5, 1.0)).r; // skip if hand render is disabled (F1)
+    if (depth == 1.0 || topMidDepth != 1.0) {
         discard;
     }
 
