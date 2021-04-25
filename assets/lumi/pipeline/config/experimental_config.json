@@ -36,7 +36,7 @@
                     descriptionKey: "config.lumi_lights.help.rgb_caves"
                 },
                 tone_profile: {
-                    default: "auto_exposure",
+                    default: "standard",
                     choices: ["standard", "fixed_exposure", "auto_exposure", "high_contrast_old"],
                     enum: true,
                     prefix: "tone_profile_",
