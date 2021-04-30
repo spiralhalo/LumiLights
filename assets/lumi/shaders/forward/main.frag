@@ -5,7 +5,6 @@
 #include frex:shaders/api/view.glsl
 #include frex:shaders/lib/math.glsl
 #include lumi:shaders/api/pbr_ext.glsl
-#include lumi:shaders/common/atmosphere.glsl
 #include lumi:shaders/common/userconfig.glsl
 #include lumi:shaders/func/tonemap.glsl
 #include lumi:shaders/func/pbr_shading.glsl
