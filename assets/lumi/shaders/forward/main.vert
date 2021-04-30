@@ -37,7 +37,6 @@ void frx_writePipelineVertex(inout frx_VertexData data) {
     if (frx_modelOriginType() == MODEL_ORIGIN_SCREEN) {
         mat4 t = frx_guiViewProjectionMatrix();
         pv_ortho = t[3][3];
-        atmos_generateAtmosphereModel();
         gl_Position = frx_guiViewProjectionMatrix() * data.vertex;
 
         #ifdef TAA_ENABLED

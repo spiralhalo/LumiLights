@@ -95,15 +95,15 @@ vec3 atmos_hdrSkyColorRadiance(vec3 world_toSky)
 #if TONE_PROFILE == TONE_PROFILE_HIGH_CONTRAST_OLD
 #define DEF_SUNLIGHT_STR 12.0
 #define DEF_MOONLIGHT_STR 0.2
-#define DEF_SKY_STR 1.0;
+#define DEF_SKY_STR 1.0
 #elif defined(HIGH_CONTRAST_ENABLED)
 #define DEF_SUNLIGHT_STR 24.0
 #define DEF_MOONLIGHT_STR 0.01
-#define DEF_SKY_STR 2.0;
+#define DEF_SKY_STR 2.0
 #else
 #define DEF_SUNLIGHT_STR 6.0
 #define DEF_MOONLIGHT_STR 0.1
-#define DEF_SKY_STR 1.0;
+#define DEF_SKY_STR 1.0
 #endif
 #define DEF_SKY_AMBIENT_STR 1.2
 /*************/
