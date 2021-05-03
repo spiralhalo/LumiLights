@@ -26,9 +26,9 @@
         {
             name: "solid_shaded_swap",
             lod: 0,
-            internalFormat: "RGBA16F",
+            internalFormat: "RGBA8",
             pixelFormat: "RGBA",
-            pixelDataType: "FLOAT",
+            pixelDataType: "UNSIGNED_BYTE",
             target: "TEXTURE_2D",
             texParams: [
                 {name: "TEXTURE_MIN_FILTER", val: "LINEAR"}, {name: "TEXTURE_MAG_FILTER", val: "LINEAR"},
@@ -37,31 +37,9 @@
         }, {
             name: "translucent_shaded_swap",
             lod: 0,
-            internalFormat: "RGBA16F",
+            internalFormat: "RGBA8",
             pixelFormat: "RGBA",
-            pixelDataType: "FLOAT",
-            target: "TEXTURE_2D",
-            texParams: [
-                {name: "TEXTURE_MIN_FILTER", val: "LINEAR"}, {name: "TEXTURE_MAG_FILTER", val: "LINEAR"},
-                {name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
-            ]
-        }, {
-            name: "solid_reflection_prev",
-            lod: 0,
-            internalFormat: "RGBA16F",
-            pixelFormat: "RGBA",
-            pixelDataType: "FLOAT",
-            target: "TEXTURE_2D",
-            texParams: [
-                {name: "TEXTURE_MIN_FILTER", val: "LINEAR"}, {name: "TEXTURE_MAG_FILTER", val: "LINEAR"},
-                {name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
-            ]
-        }, {
-            name: "translucent_reflection_prev",
-            lod: 0,
-            internalFormat: "RGBA16F",
-            pixelFormat: "RGBA",
-            pixelDataType: "FLOAT",
+            pixelDataType: "UNSIGNED_BYTE",
             target: "TEXTURE_2D",
             texParams: [
                 {name: "TEXTURE_MIN_FILTER", val: "LINEAR"}, {name: "TEXTURE_MAG_FILTER", val: "LINEAR"},
@@ -80,16 +58,6 @@
             name: "reflection_translucent",
             colorAttachments: [
                 {image: "translucent_shaded_swap", clearColor: 0x00000000}
-            ]
-        }, {
-            name: "reflection_solid_copy",
-            colorAttachments: [
-                {image: "solid_reflection_prev", clearColor: 0x00000000},
-            ]
-        }, {
-            name: "reflection_translucent_copy",
-            colorAttachments: [
-                {image: "translucent_reflection_prev", clearColor: 0x00000000},
             ]
         },
     ]
