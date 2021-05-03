@@ -50,9 +50,9 @@
         {
             name: "normal_micro_translucent",
             lod: 0,
-            internalFormat: "RGB16",
+            internalFormat: "RGB32F",
             pixelFormat: "RGB",
-            pixelDataType: "UNSIGNED_BYTE",
+            pixelDataType: "FLOAT",
             target: "TEXTURE_2D",
             texParams: [
                 {name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
