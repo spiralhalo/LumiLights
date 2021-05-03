@@ -95,8 +95,9 @@ vec3 pbr_lightCalc(float roughness, vec3 f0, vec3 radiance, vec3 lightDir, vec3 
 {
     vec3 halfway = normalize(viewDir + lightDir);
     vec3 fresnel = pbr_fresnelSchlick(pbr_dot(viewDir, halfway), f0);
+    float smoothness = (1-roughness);
 
-    return clamp(fresnel * radiance * (1-roughness), 0.0, 1.0);
+    return clamp(fresnel * radiance * smoothness * smoothness, 0.0, 1.0);
 }
 
 #if REFLECTION_PROFILE != REFLECTION_PROFILE_NONE
