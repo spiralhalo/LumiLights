@@ -70,7 +70,7 @@ float calcShadowFactor(in sampler2DArrayShadow shadowMap, vec4 shadowViewPos) {
         float shadowFactor = sampleShadowPCF(shadowMap, shadowCoords.xyz, float(cascade));
     #endif
     
-    return shadowFactor;
+    return min(1, shadowFactor + frx_rainGradient() * 0.8 + frx_thunderGradient() * 0.2);
 }
 
 // Canvas's method (credit: TheRealMJP, Grondag)
