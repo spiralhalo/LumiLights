@@ -1,6 +1,6 @@
+#include frex:shaders/api/material.glsl
 #include frex:shaders/api/view.glsl
 #include lumi:shaders/lib/util.glsl
-#include frex:shaders/api/material.glsl
 
 /******************************************************
     lumi:shaders/forward/shadow.vert

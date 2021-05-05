@@ -90,6 +90,11 @@
           nameKey: "config.lumi_lights.value.toon_outline",
           descriptionKey: "config.lumi_lights.help.toon_outline"
         },
+        name_tag_shadow: {
+          default: false,
+          nameKey: "config.lumi_lights.value.name_tag_shadow",
+          descriptionKey: "config.lumi_lights.help.name_tag_shadow"
+        },
         // bloom_upsample_dist: {
         //   default: 5,
         //   min: 1,

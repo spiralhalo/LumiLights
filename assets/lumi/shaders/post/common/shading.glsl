@@ -361,7 +361,7 @@ vec4 hdr_shaded_color(
             a.rgb *= 0.25 + 0.75 * fract(frx_renderSeconds()*2.0);
         #endif
         // marker for unmanaged draw
-        a.a = 0.0;
+        a.a = translucent ? a.a : 0.0;
         return a;
     }
     vec3  normal    = texture(snormal, uv).xyz * 2.0 - 1.0;

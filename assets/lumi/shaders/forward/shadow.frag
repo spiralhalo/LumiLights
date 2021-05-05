@@ -1,8 +1,9 @@
-#include frex:shaders/lib/math.glsl
-#include frex:shaders/lib/color.glsl
-#include frex:shaders/api/world.glsl
-#include frex:shaders/api/player.glsl
 #include frex:shaders/api/material.glsl
+#include frex:shaders/api/player.glsl
+#include frex:shaders/api/world.glsl
+#include frex:shaders/lib/color.glsl
+#include frex:shaders/lib/math.glsl
+#include lumi:shaders/common/userconfig.glsl
 
 /******************************************************
   lumi:shaders/forward/shadow.frag
@@ -18,9 +19,11 @@ frx_FragmentData frx_createPipelineFragment() {
 }
 
 void frx_writePipelineFragment(in frx_FragmentData fragData) {
+    #ifndef NAME_TAG_SHADOW
     if (v_managed == 0.) {
         discard;
     }
+    #endif
 
     gl_FragDepth = gl_FragCoord.z;
 }
