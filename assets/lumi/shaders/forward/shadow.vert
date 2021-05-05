@@ -9,7 +9,7 @@
  
 uniform int frxu_cascade;
 
-out float v_managed;
+vert_out float v_managed;
 
 void frx_writePipelineVertex(in frx_VertexData data) {
     // this approach might also exclude particles

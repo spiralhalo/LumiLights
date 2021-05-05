@@ -9,7 +9,7 @@
   lumi:shaders/forward/shadow.frag
 ******************************************************/
 
-in float v_managed;
+frag_in float v_managed;
 
 frx_FragmentData frx_createPipelineFragment() {
     return frx_FragmentData (
