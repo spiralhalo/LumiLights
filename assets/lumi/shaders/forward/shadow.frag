@@ -9,6 +9,8 @@
   lumi:shaders/forward/shadow.frag
 ******************************************************/
 
+in float v_managed;
+
 frx_FragmentData frx_createPipelineFragment() {
     return frx_FragmentData (
         texture(frxs_baseColor, frx_texcoord, frx_matUnmippedFactor() * -4.0),
@@ -17,5 +19,9 @@ frx_FragmentData frx_createPipelineFragment() {
 }
 
 void frx_writePipelineFragment(in frx_FragmentData fragData) {
+    if (v_managed == 0.) {
+        discard;
+    }
+
     gl_FragDepth = gl_FragCoord.z;
 }

@@ -339,7 +339,8 @@ vec4 hdr_shaded_color(
         // the sky
         if (v_blindness == 1.0) return vec4(0.0);
         custom_sky(viewPos, 1.0 - v_blindness, a, bloom_out);
-        return vec4(a.rgb * 1.0 - v_blindness, 0.0);
+        // mark as managed draw, vanilla sky is an exception
+        return vec4(a.rgb * 1.0 - v_blindness, 1.0);
         // vec3 worldPos = (128.0 / length(modelPos)) * modelPos + frx_cameraPos(); // doesn't help
         // return a + fog(frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? frx_ambientIntensity() : 1.0, vec4(0.0), viewPos, worldPos, bloom_out);
     }
@@ -359,6 +360,8 @@ vec4 hdr_shaded_color(
         #if OVERLAY_DEBUG == OVERLAY_DEBUG_DISCO
             a.rgb *= 0.25 + 0.75 * fract(frx_renderSeconds()*2.0);
         #endif
+        // marker for unmanaged draw
+        a.a = 0.0;
         return a;
     }
     vec3  normal    = texture(snormal, uv).xyz * 2.0 - 1.0;

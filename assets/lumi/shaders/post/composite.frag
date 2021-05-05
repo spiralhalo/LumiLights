@@ -84,7 +84,7 @@ void main()
     #if SKY_MODE == SKY_MODE_LUMI
         overworldLumiSky = frx_worldFlag(FRX_WORLD_IS_OVERWORLD);
     #endif
-    if (depth_solid != 1.0 || overworldLumiSky) {
+    if ((depth_solid != 1.0 || overworldLumiSky) && solid.a > 0) {
         solid.rgb = ldr_tonemap3(solid.rgb * brightnessMult);
     }
     
