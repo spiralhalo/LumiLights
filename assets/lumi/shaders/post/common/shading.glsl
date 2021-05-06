@@ -171,7 +171,7 @@ vec4 fog (float skyLight, vec4 a, vec3 viewPos, vec3 worldPos, inout float bloom
     #ifdef USE_VOLUMETRIC_FOG
     if (useVolFog) { //TODO: blindness transition still broken?
         float fRaymarch = raymarched_fog_density(viewPos, worldPos, pFogFar);
-        distFactor = distFactor * 0.6 + 0.4 * fRaymarch;
+        distFactor = distFactor * VOLUMETRIC_FOG_SOFTNESS + (1. - VOLUMETRIC_FOG_SOFTNESS) * fRaymarch;
         pfCave -= fRaymarch;
     }
     #endif

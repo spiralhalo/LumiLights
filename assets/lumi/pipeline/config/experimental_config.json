@@ -4,6 +4,13 @@
             includeToken: "lumi:experimental_config",
             categoryKey: "config.lumi_lights.category.experimental",
             options: {
+                volumetric_fog_softness_relative: {
+                    default: 12,
+                    min: 0,
+                    max: 18,
+                    nameKey: "config.lumi_lights.value.volumetric_fog_softness_relative",
+                    descriptionKey: "config.lumi_lights.help.volumetric_fog_softness_relative"
+                },
                 glint_mode: {
                     default: "shader",
                     choices: ["texture", "shader"],
