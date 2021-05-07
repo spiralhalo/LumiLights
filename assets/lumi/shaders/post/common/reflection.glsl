@@ -78,16 +78,12 @@ vec3 sample_worldNormal(vec2 uv, in sampler2D snormal)
     return 2.0 * texture(snormal, uv).xyz - 1.0;
 }
 
-float skylight_adjust(float skyLight, float intensity)
-{
-    return l2_clampScale(0.03125, 1.0, skyLight) * intensity;
-}
-
 const float SKYLESS_FACTOR = 0.5;
 vec3 calcFallbackColor(vec3 unit_view, vec3 unit_march, vec2 light)
 {
+    float skyLight = l2_clampScale(0.03125, 0.96875, light.y);
     float upFactor = frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? l2_clampScale(-0.1, 0.1, dot(unit_march, v_up)) : 1.0;
-    float skyLightFactor = frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? hdr_gammaAdjustf(light.y * frx_ambientIntensity()) : SKYLESS_FACTOR;
+    float skyLightFactor = frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? (skyLight * skyLight) : SKYLESS_FACTOR;
     return atmos_hdrSkyColorRadiance(unit_march * frx_normalModelMatrix()) * skyLightFactor * upFactor * 2.0;
 }
 
