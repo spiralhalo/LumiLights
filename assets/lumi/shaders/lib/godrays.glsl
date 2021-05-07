@@ -30,11 +30,11 @@ float godrays(float density, float weight, float decay, float exposure, int numS
     float samp;
     for (int i=0; i < numSamples; i++) {
         currentTexcoord -= deltaTexcoord;
-        samp = step(1.0, texture(ssoliddepth, currentTexcoord).r);
-        #if CLOUD_RENDERING == CLOUD_RENDERING_VOLUMETRIC
-            samp *= step(1.0, texture(sclouddepth, currentTexcoord).r);
-        #else
+        #if CLOUD_RENDERING == CLOUD_RENDERING_VANILLA
+            samp = step(1.0, texture(ssoliddepth, currentTexcoord).r);
             samp = min(samp, max(0.5, step(1.0, texture(sclouddepth, currentTexcoord).r)));
+        #else
+            samp = min(texture(ssoliddepth, currentTexcoord).r, texture(sclouddepth, currentTexcoord).r) < 1. ? 0. : 1.;
         #endif
         samp *= illuminationDecay * weight;
         strength += samp;

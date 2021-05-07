@@ -68,11 +68,9 @@ void main()
 
         cloud = cloud1 * 0.5 + cloud2 * 0.75 + cloud3;
         cloud = l2_clampScale(0.1, 0.4, cloud);
-        
-        float cloudColor = frx_ambientIntensity() * frx_ambientIntensity() * (1.0 - 0.3 * rainFactor);
 
-        vec4 clouds = vec4(ldr_tonemap3(atmos_hdrSkyColorRadiance(worldSkyVec) + atmos_hdrCelestialRadiance() * 0.3), 1.0) * cloud;
-        fragColor[0] = mix(clouds, vec4(0.0), v_blindness);
+        vec3 color = (ldr_tonemap3(atmos_hdrCelestialRadiance() * 0.05) + ldr_tonemap3(atmos_hdrSkyColorRadiance(worldSkyVec) * 0.4)) * cloud;
+        fragColor[0] = mix(vec4(color, cloud), vec4(0.0), v_blindness);
         fragColor[1] = vec4(cloud > 0.5 ? 0.99999 : 1.0);
     #elif CLOUD_RENDERING == CLOUD_RENDERING_VOLUMETRIC
         #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
@@ -82,23 +80,25 @@ void main()
                                     ? rayMarchCloud(u_clouds_texture, u_solid_depth, v_texcoord)
                                     : rayMarchCloud(u_clouds_texture, u_translucent_depth, v_texcoord);
         #endif
-        
+
         vec4 worldPos = frx_inverseViewProjectionMatrix() * vec4(2.0 * v_texcoord - 1.0, 1.0, 1.0);
         worldPos.xyz /= worldPos.w;
         vec3 skyVec = normalize(worldPos.xyz);
 
         float alpha = 1.0 - volumetric.transmittance;
         //  * l2_clampScale(-2.0, 1.0, dot(skyVec, frx_skyLightVector()))
-        vec3 color = ldr_tonemap3(atmos_hdrCelestialRadiance() * 0.2) * volumetric.lightEnergy + ldr_tonemap3(atmos_hdrSkyColorRadiance(skyVec) * 0.1) * alpha;
+        vec3 color = ldr_tonemap3(atmos_hdrCelestialRadiance() * 0.05) * volumetric.lightEnergy + ldr_tonemap3(atmos_hdrSkyColorRadiance(skyVec) * 0.4) * alpha;
         fragColor[0] = mix(vec4(color, alpha), vec4(0.0), v_blindness);
         #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
-            fragColor[1] = vec4(alpha > 0.0 ? 0.9999 : 1.0);
+            fragColor[1] = vec4(alpha > 0.5 ? 0.9999 : 1.0);
         #else
             vec3 reverseModelPos = volumetric.worldPos - frx_cameraPos();
             vec4 reverseClipPos = frx_viewProjectionMatrix() * vec4(reverseModelPos, 1.0);
             reverseClipPos.z /= reverseClipPos.w;
             // fragColor[1] = vec4(alpha > 0.0 ? 0.0 : 1.0);
-            fragColor[1] = vec4(alpha > 0.0 ? reverseClipPos.z : 1.0);
+            float backgroundDepth = texture(u_translucent_depth, v_texcoord).r;
+            float alphaThreshold = backgroundDepth == 1. ? 0.5 : 0.; 
+            fragColor[1] = vec4(alpha > alphaThreshold ? reverseClipPos.z : 1.0);
         #endif
     #else
         vec4 clouds = blur13(u_clouds, v_texcoord, frxu_size, vec2(1.0, 1.0));
