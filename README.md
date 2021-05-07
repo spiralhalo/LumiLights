@@ -51,4 +51,4 @@ Lumi Lights PBR Extension brings its own spin of roughness/metalness material mo
 
 Lumi Lights is released **without any warranty** under the GNU Lesser General Public License version 3 as published by the Free Software Foundation. See the files `COPYING` and `COPYING.LESSER` for license terms. You may also obtain a copy of the license at https://www.gnu.org/licenses/lgpl-3.0.html.
 
-Have some questions? [Join the Lumi Lights discord.](https://discord.gg/qcyBfhxkgk)
+Have some questions? [Join the Lumi Lights discord.](https://discord.gg/qcyBfhxkgk) [Or check our FAQ.](https://gist.github.com/Reeses-Puffs/15a7a093c3144fa8eadfdc7a255ef220)
