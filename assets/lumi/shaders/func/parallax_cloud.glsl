@@ -23,7 +23,6 @@
 vec4 parallaxCloud(in vec2 texcoord)
 {
     float rainFactor = frx_rainGradient() * 0.67 + frx_thunderGradient() * 0.33;
-    float cloud = 0.0;
 
     vec4 worldPos = frx_inverseViewProjectionMatrix() * vec4(2.0 * texcoord - 1.0, 1.0, 1.0);
     worldPos.xyz /= worldPos.w;
@@ -34,17 +33,23 @@ vec4 parallaxCloud(in vec2 texcoord)
         return vec4(0.);
     }
     
-    vec3 color = vec3 (0.0);
     const int flatLoop = 6;
     const float flatMult = 1./float(flatLoop);
-    const float CLOUD_ALTITUDE = PARALLAX_CLOUD_ALTITUDE;
+    const float CLOUD_ALTITUDE  = PARALLAX_CLOUD_ALTITUDE;
     const float CLOUD_THICKNESS = PARALLAX_CLOUD_THICKNESS;
+    
     vec3 start  = worldSkyVec * ((CLOUD_ALTITUDE + CLOUD_THICKNESS) / worldSkyVec.y);
     vec3 finish = worldSkyVec * (CLOUD_ALTITUDE / worldSkyVec.y);
     vec3 move   = (finish - start) * flatMult;
+
     float tileJitter = getRandomFloat(texcoord + frx_renderSeconds() * 0.1, frxu_size);
+    
+    vec3  color  = vec3 (0.0);
+    float cloud  = 0.0;
     vec3 current = start + move * tileJitter;
+
     current.xz += frx_cameraPos().xz + vec2(4.0) * frx_renderSeconds();
+
     for (int i = flatLoop; i > 0; i --) {
         vec3 cloudBox = current;
         current += move;
