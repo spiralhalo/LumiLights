@@ -252,8 +252,9 @@ void custom_sky(in vec3 viewPos, in float blindnessFactor, inout vec4 a, inout f
             float starEraser = 0.;
             vec2 celestUV = rect_innerUV(Rect(v_celest1, v_celest2, v_celest3), skyVec * 1024.);
             vec3 celestialObjectColor = vec3(0.);
-            if (celestUV == clamp(celestUV, 0.0, 1.0) && dot(worldSkyVec, frx_skyLightVector()) >0.) {
-                if (frx_worldFlag(FRX_WORLD_IS_MOONLIT)){
+            bool isMoon = dot(worldSkyVec, frx_skyLightVector()) < 0. ? !frx_worldFlag(FRX_WORLD_IS_MOONLIT) : frx_worldFlag(FRX_WORLD_IS_MOONLIT);
+            if (celestUV == clamp(celestUV, 0.0, 1.0)) {
+                if (isMoon){
                     vec2 fullMoonUV = celestUV * vec2(0.25, 0.5);
                     vec3 fullMoonColor = texture(u_moon, fullMoonUV).rgb;
                     starEraser = l2_max3(fullMoonColor);
