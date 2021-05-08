@@ -26,11 +26,12 @@ void main()
 
     atmos_generateAtmosphereModel();
 
-    float moonFactor = frx_worldFlag(FRX_WORLD_IS_MOONLIT)
-        ? frx_moonSize() : mix(frx_moonSize(), 1.0, frx_skyLightTransitionFactor());
+    float VDotSL = dot(frx_skyLightVector(), frx_cameraView());
+    bool isMoonGodray = frx_worldFlag(FRX_WORLD_IS_MOONLIT) ? VDotSL >= 0. : VDotSL < 0.;
+    float moonFactor = isMoonGodray ? frx_moonSize() : 1.;
     float dimensionFactor = frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? 1.0 : 0.0;
     float blindnessFactor = frx_playerHasEffect(FRX_EFFECT_BLINDNESS) ? 0.0 : 1.0;
-    float cameraViewFactor = frx_smootherstep(0.0, 0.1, dot(frx_skyLightVector(), frx_cameraView()));
+    float cameraViewFactor = frx_smootherstep(0.0, 0.1, abs(VDotSL));
     float notInVoidFactor = l2_clampScale(-1.0, 0.0, frx_cameraPos().y);
     v_godray_intensity = cameraViewFactor
         * moonFactor

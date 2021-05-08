@@ -7,10 +7,12 @@
 #include lumi:shaders/common/atmosphere.glsl
 #include lumi:shaders/common/lighting.glsl
 #include lumi:shaders/common/userconfig.glsl
+#include lumi:shaders/func/flat_cloud.glsl
+#include lumi:shaders/func/parallax_cloud.glsl
 #include lumi:shaders/func/tonemap.glsl
+#include lumi:shaders/func/volumetric_cloud.glsl
 #include lumi:shaders/lib/fast_gaussian_blur.glsl
 #include lumi:shaders/lib/util.glsl
-#include lumi:shaders/func/volumetric_cloud.glsl
 
 /*******************************************************
  *  lumi:shaders/post/clouds.frag                      *
@@ -46,36 +48,13 @@ void main()
     if (v_blindness == 1.0) return;
     // float brightnessMult = mix(1.0, BRIGHT_FINAL_MULT, frx_viewBrightness());
     #if CLOUD_RENDERING == CLOUD_RENDERING_FLAT
-        float rainFactor = frx_rainGradient() * 0.67 + frx_thunderGradient() * 0.33;
-        float cloud = 0.0;
-
-        vec4 viewPos = frx_inverseProjectionMatrix() * vec4(2.0 * v_texcoord - 1.0, 1.0, 1.0);
-        viewPos.xyz /= viewPos.w;
-        vec3 skyVec = normalize(viewPos.xyz);
-        vec3 worldSkyVec = skyVec * frx_normalModelMatrix();
-        float skyDotUp = dot(skyVec, v_up);
-        
-        // convert hemisphere to plane centered around cameraPos
-        vec2 cloudPlane = worldSkyVec.xz / (0.1 + worldSkyVec.y) * 100.0
-            + frx_cameraPos().xz + vec2(4.0) * frx_renderSeconds();//(frx_worldDay() + frx_worldTime());
-        vec2 rotatedCloudPlane = (v_cloud_rotator * vec4(cloudPlane.x, 0.0, cloudPlane.y, 0.0)).xz;
-        cloudPlane *= 0.1;
-
-        float cloudBase = 1.0
-            * l2_clampScale(0.0, 0.1, skyDotUp)
-            * l2_clampScale(-0.5 - rainFactor * 0.5, 1.0 - rainFactor, snoise(rotatedCloudPlane * 0.005));
-        float cloud1 = cloudBase * l2_clampScale(-1.0, 1.0, snoise(rotatedCloudPlane * 0.015));
-        float cloud2 = cloud1 * l2_clampScale(-1.0, 1.0, snoise(rotatedCloudPlane * 0.04));
-        float cloud3 = cloud2 * l2_clampScale(-1.0, 1.0, snoise(rotatedCloudPlane * 0.1));
-
-        cloud = cloud1 * 0.5 + cloud2 * 0.75 + cloud3;
-        cloud = l2_clampScale(0.1, 0.4, cloud);
-        
-        float cloudColor = frx_ambientIntensity() * frx_ambientIntensity() * (1.0 - 0.3 * rainFactor);
-
-        vec4 clouds = vec4(ldr_tonemap3(atmos_hdrSkyColorRadiance(worldSkyVec) + atmos_hdrCelestialRadiance() * 0.3), 1.0) * cloud;
-        fragColor[0] = mix(clouds, vec4(0.0), v_blindness);
-        fragColor[1] = vec4(cloud > 0.5 ? 0.99999 : 1.0);
+        vec4 cloudColor = flatCloud(v_texcoord, v_cloud_rotator, v_up);
+        fragColor[0] = mix(cloudColor, vec4(0.0), v_blindness);
+        fragColor[1] = vec4(cloudColor.a > 0. ? 0.99999 : 1.0);
+    #elif CLOUD_RENDERING == CLOUD_RENDERING_PARALLAX
+        vec4 cloudColor = parallaxCloud(v_texcoord, v_up);
+        fragColor[0] = mix(cloudColor, vec4(0.0), v_blindness);
+        fragColor[1] = vec4(cloudColor.a > 0. ? 0.99999 : 1.0);
     #elif CLOUD_RENDERING == CLOUD_RENDERING_VOLUMETRIC
         #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
           cloud_result volumetric = rayMarchCloud(u_clouds_texture, u_solid_depth, v_texcoord);
@@ -84,23 +63,25 @@ void main()
                                     ? rayMarchCloud(u_clouds_texture, u_solid_depth, v_texcoord)
                                     : rayMarchCloud(u_clouds_texture, u_translucent_depth, v_texcoord);
         #endif
-        
+
         vec4 worldPos = frx_inverseViewProjectionMatrix() * vec4(2.0 * v_texcoord - 1.0, 1.0, 1.0);
         worldPos.xyz /= worldPos.w;
         vec3 skyVec = normalize(worldPos.xyz);
 
         float alpha = 1.0 - volumetric.transmittance;
         //  * l2_clampScale(-2.0, 1.0, dot(skyVec, frx_skyLightVector()))
-        vec3 color = ldr_tonemap3(atmos_hdrCelestialRadiance() * 0.2) * volumetric.lightEnergy + ldr_tonemap3(atmos_hdrSkyColorRadiance(skyVec) * 0.1) * alpha;
+        vec3 color = ldr_tonemap3(atmos_hdrCelestialRadiance() * 0.05) * volumetric.lightEnergy + ldr_tonemap3(atmos_hdrSkyColorRadiance(skyVec) * 0.4) * alpha;
         fragColor[0] = mix(vec4(color, alpha), vec4(0.0), v_blindness);
         #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
-            fragColor[1] = vec4(alpha > 0.0 ? 0.9999 : 1.0);
+            fragColor[1] = vec4(alpha > 0. ? 0.9999 : 1.0);
         #else
             vec3 reverseModelPos = volumetric.worldPos - frx_cameraPos();
             vec4 reverseClipPos = frx_viewProjectionMatrix() * vec4(reverseModelPos, 1.0);
             reverseClipPos.z /= reverseClipPos.w;
             // fragColor[1] = vec4(alpha > 0.0 ? 0.0 : 1.0);
-            fragColor[1] = vec4(alpha > 0.0 ? reverseClipPos.z : 1.0);
+            float backgroundDepth = texture(u_translucent_depth, v_texcoord).r;
+            float alphaThreshold = backgroundDepth == 1. ? 0.5 : 0.; 
+            fragColor[1] = vec4(alpha > alphaThreshold ? reverseClipPos.z : 1.0);
         #endif
     #else
         vec4 clouds = blur13(u_clouds, v_texcoord, frxu_size, vec2(1.0, 1.0));

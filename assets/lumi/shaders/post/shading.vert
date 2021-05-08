@@ -29,7 +29,7 @@ Rect celestSetup()
     const vec3 o       = vec3(-1024., 0.,  0.);
     const vec3 dayAxis = vec3(    0., 0., -1.);
 
-    float size = frx_worldFlag(FRX_WORLD_IS_MOONLIT) ? 200. : 300.;
+    float size = 250.; // One size fits all; vanilla would be -50 for moon and +50 for sun
 
     Rect result = Rect(o + vec3(.0, -size, -size), o + vec3(.0, -size,  size), o + vec3(.0,  size, -size));
     

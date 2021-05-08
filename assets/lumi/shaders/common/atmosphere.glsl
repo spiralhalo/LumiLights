@@ -105,7 +105,11 @@ vec3 atmos_hdrSkyColorRadiance(vec3 world_toSky)
 #define DEF_MOONLIGHT_STR 0.1
 #define DEF_SKY_STR 1.0
 #endif
+#if defined(SHADOW_MAP_PRESENT) && !defined(HIGH_CONTRAST_ENABLED)
+#define DEF_SKY_AMBIENT_STR 0.6
+#else
 #define DEF_SKY_AMBIENT_STR 1.2
+#endif
 /*************/
 
 
@@ -121,14 +125,14 @@ const float SKY_AMBIENT_STR = DEF_SKY_AMBIENT_STR;
 const vec3 DAY_SKY_COLOR = DEF_DAY_SKY_COLOR;
 const vec3 NIGHT_SKY_COLOR = DEF_NIGHT_SKY_COLOR * DEF_NIGHT_SKY_MULTIPLIER;
 
-const vec3 NOON_SUNLIGHT_COLOR = vec3(1.0, 1.0, 1.0);
-const vec3 SUNRISE_LIGHT_COLOR = vec3(1.0, 0.7, 0.4);
+const vec3 NOON_SUNLIGHT_COLOR = hdr_gammaAdjust(vec3(1.0, 1.0, 1.0));
+const vec3 SUNRISE_LIGHT_COLOR = hdr_gammaAdjust(vec3(1.0, 0.7, 0.4));
 
 const vec3 NOON_AMBIENT  = hdr_gammaAdjust(vec3(1.0));
 const vec3 NIGHT_AMBIENT = hdr_gammaAdjust(vec3(0.3, 0.3, 0.45)) * DEF_NIGHT_SKY_MULTIPLIER;
 
 const vec3 CAVEFOG_C = DEF_DAY_SKY_COLOR;
-const vec3 CAVEFOG_DEEPC = hdr_gammaAdjust(SUNRISE_LIGHT_COLOR);
+const vec3 CAVEFOG_DEEPC = SUNRISE_LIGHT_COLOR;
 const float CAVEFOG_MAXY = 16.0;
 const float CAVEFOG_MINY = 0.0;
 const float CAVEFOG_STR = 0.1;

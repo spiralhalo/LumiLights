@@ -26,7 +26,8 @@
         {
             name: "solid_shaded_swap",
             lod: 0,
-            internalFormat: "RGBA8",
+            // higher precision reduces/eliminates banding
+            internalFormat: "RGBA16",
             pixelFormat: "RGBA",
             pixelDataType: "UNSIGNED_BYTE",
             target: "TEXTURE_2D",
@@ -37,7 +38,8 @@
         }, {
             name: "translucent_shaded_swap",
             lod: 0,
-            internalFormat: "RGBA8",
+            // higher precision reduces/eliminates banding
+            internalFormat: "RGBA16",
             pixelFormat: "RGBA",
             pixelDataType: "UNSIGNED_BYTE",
             target: "TEXTURE_2D",

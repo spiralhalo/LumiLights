@@ -1,11 +1,11 @@
-#include frex:shaders/lib/math.glsl
 #include frex:shaders/api/view.glsl
 #include frex:shaders/api/world.glsl
+#include frex:shaders/lib/math.glsl
+#include frex:shaders/lib/noise/cellular2x2.glsl
+#include frex:shaders/lib/noise/noise2d.glsl
+#include lumi:shaders/common/userconfig.glsl
 #include lumi:shaders/lib/util.glsl
 #include lumi:shaders/lib/tile_noise.glsl
-#include frex:shaders/lib/noise/noise2d.glsl
-#include frex:shaders/lib/noise/cellular2x2.glsl
-#include lumi:shaders/post/common/clouds.glsl
 
 /*******************************************************
  *  lumi:shaders/func/volumetric_cloud.glsl             *
@@ -63,7 +63,7 @@ vec2 modelXz2Uv(vec2 modelXz)
 #else
     const float CLOUD_ALTITUDE = 115.5;
 #endif
-const float CLOUD_HEIGHT = 20.0;
+const float CLOUD_HEIGHT = 25.0;
 const float CLOUD_MID_HEIGHT = 5.0;
 const float CLOUD_TOP_HEIGHT = CLOUD_HEIGHT - CLOUD_MID_HEIGHT;
 const float CLOUD_MID_ALTITUDE = CLOUD_ALTITUDE + CLOUD_MID_HEIGHT;
@@ -205,7 +205,7 @@ vec4 generateCloudTexture(vec2 texcoord) {
     #else
     vec2 cloudCoord = worldXz;
     #endif
-    cloudCoord *= 2.0;
+    cloudCoord *= 1.8;
 
     float cloudBase = l2_clampScale(0.0, 1.0 - rainFactor, snoise(cloudCoord * 0.005));
     float cloud1 = cloudBase * l2_clampScale(0.0, 1.0, wnoise2(cloudCoord * 0.015));
