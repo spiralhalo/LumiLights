@@ -56,6 +56,31 @@
           nameKey: "config.lumi_lights.value.cloud_rendering",
           descriptionKey: "config.lumi_lights.help.cloud_rendering"
         },
+        volumetric_fog: {
+            default: true,
+            nameKey: "config.lumi_lights.value.volumetric_fog",
+            descriptionKey: "config.lumi_lights.help.volumetric_fog"
+        },
+      }
+    },
+    {
+      includeToken: "lumi:clouds_config",
+      categoryKey: "config.lumi_lights.category.clouds",
+      options: {
+        parallax_cloud_altitude: {
+          default: 100,
+          min: 0,
+          max: 1000,
+          nameKey: "config.lumi_lights.value.parallax_cloud_altitude",
+          descriptionKey: "config.lumi_lights.help.parallax_cloud_altitude"
+        },
+        parallax_cloud_thickness: {
+          default: 80,
+          min: 0,
+          max: 1000,
+          nameKey: "config.lumi_lights.value.parallax_cloud_thickness",
+          descriptionKey: "config.lumi_lights.help.parallax_cloud_thickness"
+        },
         volumetric_cloud_mode: {
           default: "skybox",
           choices: ["skybox", "world"],
@@ -69,12 +94,7 @@
           nameKey: "config.lumi_lights.value.volumetric_cloud_denoising",
           descriptionKey: "config.lumi_lights.help.volumetric_cloud_denoising"
         },
-        volumetric_fog: {
-            default: true,
-            nameKey: "config.lumi_lights.value.volumetric_fog",
-            descriptionKey: "config.lumi_lights.help.volumetric_fog"
-        },
       }
-    }
+    },
   ]
 }

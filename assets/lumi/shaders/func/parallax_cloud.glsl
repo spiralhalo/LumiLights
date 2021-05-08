@@ -18,36 +18,43 @@
  *  published by the Free Software Foundation, Inc.    *
  *******************************************************/
 
+#if CLOUD_RENDERING == CLOUD_RENDERING_PARALLAX
 #define wnoise3(a) cellular2x2x2(a).x
-vec4 parallaxCloud(in vec2 texcoord, in vec3 up)
+vec4 parallaxCloud(in vec2 texcoord)
 {
     float rainFactor = frx_rainGradient() * 0.67 + frx_thunderGradient() * 0.33;
     float cloud = 0.0;
 
-    vec4 viewPos = frx_inverseProjectionMatrix() * vec4(2.0 * texcoord - 1.0, 1.0, 1.0);
-    viewPos.xyz /= viewPos.w;
-    vec3 skyVec = normalize(viewPos.xyz);
-    vec3 worldSkyVec = skyVec * frx_normalModelMatrix();
-    float skyDotUp = dot(skyVec, up);
+    vec4 worldPos = frx_inverseViewProjectionMatrix() * vec4(2.0 * texcoord - 1.0, 1.0, 1.0);
+    worldPos.xyz /= worldPos.w;
+    vec3 worldSkyVec = normalize(worldPos.xyz);
+    float skyDotUp = dot(worldSkyVec, vec3(0., 1., 0.));
+
+    if (skyDotUp <= 0.05) {
+        return vec4(0.);
+    }
     
-    // convert hemisphere to plane centered around cameraPos
     vec3 color = vec3 (0.0);
     const int flatLoop = 6;
     const float flatMult = 1./float(flatLoop);
-    const float flatThickness = 0.1;
-    float tileJitter = getRandomFloat(texcoord, frxu_size);
+    const float CLOUD_ALTITUDE = PARALLAX_CLOUD_ALTITUDE;
+    const float CLOUD_THICKNESS = PARALLAX_CLOUD_THICKNESS;
+    vec3 start  = worldSkyVec * ((CLOUD_ALTITUDE + CLOUD_THICKNESS) / worldSkyVec.y);
+    vec3 finish = worldSkyVec * (CLOUD_ALTITUDE / worldSkyVec.y);
+    vec3 move   = (finish - start) * flatMult;
+    float tileJitter = getRandomFloat(texcoord + frx_renderSeconds() * 0.1, frxu_size);
+    vec3 current = start + move * tileJitter;
+    current.xz += frx_cameraPos().xz + vec2(4.0) * frx_renderSeconds();
     for (int i = flatLoop; i > 0; i --) {
-        float cloudY = (float(i) - 1. + tileJitter) * flatThickness * flatMult;
-        vec2 cloudPlane = worldSkyVec.xz / (0.1 + worldSkyVec.y + cloudY) * 100.0 + frx_cameraPos().xz + vec2(4.0) * frx_renderSeconds();
-        cloudPlane *= 2.;
-        vec3 cloudBox = vec3(cloudPlane.x, cloudY * 500., cloudPlane.y);
+        vec3 cloudBox = current;
+        current += move;
 
         float cloudBase = l2_clampScale(-0.5 - rainFactor * 0.5, 1.0 - rainFactor, snoise(cloudBox * 0.005));
         float cloudFluff = snoise(cloudBox * 0.015);
         float cloud1 = cloudBase * l2_clampScale(-1.0, 1.0, cloudFluff);
         float localCloud;
-        localCloud = l2_clampScale(0.1, 0.4, cloud1);
-        localCloud *= flatMult;
+        localCloud = l2_clampScale(0.15, 0.45, cloud1);
+        localCloud *= flatMult * PARALLAX_CLOUD_DENSITY;
 
         float topness = float(i) * flatMult * 0.7 + 0.3;
 
@@ -61,7 +68,8 @@ vec4 parallaxCloud(in vec2 texcoord, in vec3 up)
     }
 
     cloud = min(1., cloud);
-    cloud *= l2_clampScale(0.0, 0.1, skyDotUp);
+    cloud *= l2_clampScale(0.05, 0.15, skyDotUp);
     color *= cloud;
     return vec4(color, cloud);
 }
+#endif

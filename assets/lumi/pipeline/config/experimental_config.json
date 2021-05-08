@@ -4,6 +4,13 @@
             includeToken: "lumi:experimental_config",
             categoryKey: "config.lumi_lights.category.experimental",
             options: {
+                parallax_cloud_density: {
+                    default: 1.0,
+                    min: 0.5,
+                    max: 10.0,
+                    nameKey: "config.lumi_lights.value.parallax_cloud_density",
+                    descriptionKey: "config.lumi_lights.help.parallax_cloud_density"
+                },
                 volumetric_fog_softness_relative: {
                     default: 12,
                     min: 0,
