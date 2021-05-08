@@ -1,11 +1,11 @@
-#include frex:shaders/lib/math.glsl
 #include frex:shaders/api/view.glsl
 #include frex:shaders/api/world.glsl
+#include frex:shaders/lib/math.glsl
+#include frex:shaders/lib/noise/cellular2x2.glsl
+#include frex:shaders/lib/noise/noise2d.glsl
+#include lumi:shaders/common/userconfig.glsl
 #include lumi:shaders/lib/util.glsl
 #include lumi:shaders/lib/tile_noise.glsl
-#include frex:shaders/lib/noise/noise2d.glsl
-#include frex:shaders/lib/noise/cellular2x2.glsl
-#include lumi:shaders/post/common/clouds.glsl
 
 /*******************************************************
  *  lumi:shaders/func/volumetric_cloud.glsl             *

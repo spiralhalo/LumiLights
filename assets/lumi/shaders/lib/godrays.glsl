@@ -20,7 +20,7 @@
  *  published by the Free Software Foundation, Inc.    *
  *******************************************************/
 
-float godrays(float density, float weight, float decay, float exposure, int numSamples, sampler2D ssoliddepth, sampler2D sclouddepth, vec2 screenSpaceLightPos, vec2 texcoord)
+float godrays(float density, float weight, float decay, float exposure, int numSamples, sampler2D ssoliddepth, sampler2D scloudcolor, vec2 screenSpaceLightPos, vec2 texcoord)
 {
     float strength = 0.0;
     vec2 deltaTexcoord = vec2(texcoord - screenSpaceLightPos.xy);
@@ -30,12 +30,8 @@ float godrays(float density, float weight, float decay, float exposure, int numS
     float samp;
     for (int i=0; i < numSamples; i++) {
         currentTexcoord -= deltaTexcoord;
-        #if CLOUD_RENDERING == CLOUD_RENDERING_VANILLA
-            samp = step(1.0, texture(ssoliddepth, currentTexcoord).r);
-            samp = min(samp, max(0.5, step(1.0, texture(sclouddepth, currentTexcoord).r)));
-        #else
-            samp = min(texture(ssoliddepth, currentTexcoord).r, texture(sclouddepth, currentTexcoord).r) < 1. ? 0. : 1.;
-        #endif
+        samp = step(1., texture(ssoliddepth, currentTexcoord).r);
+        samp = max(0., samp - texture(scloudcolor, currentTexcoord).a);
         samp *= illuminationDecay * weight;
         strength += samp;
         illuminationDecay *= decay;

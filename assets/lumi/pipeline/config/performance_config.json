@@ -50,7 +50,7 @@
         },
         cloud_rendering: {
           default: "volumetric",
-          choices: ["vanilla", "flat", "volumetric"],
+          choices: ["vanilla", "flat", "parallax", "volumetric"],
           enum: true,
           prefix: "cloud_rendering_",
           nameKey: "config.lumi_lights.value.cloud_rendering",
