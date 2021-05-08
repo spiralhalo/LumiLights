@@ -75,7 +75,7 @@
           descriptionKey: "config.lumi_lights.help.parallax_cloud_altitude"
         },
         parallax_cloud_thickness: {
-          default: 80,
+          default: 40,
           min: 0,
           max: 1000,
           nameKey: "config.lumi_lights.value.parallax_cloud_thickness",

@@ -61,7 +61,7 @@ vec4 parallaxCloud(in vec2 texcoord)
         localCloud = l2_clampScale(0.15, 0.45, cloud1);
         localCloud *= flatMult * PARALLAX_CLOUD_DENSITY;
 
-        float topness = float(i) * flatMult * 0.7 + 0.3;
+        float topness = float(i) * flatMult * 0.6 + 0.4;
 
         vec3 localColor = ldr_tonemap3(atmos_hdrCelestialRadiance() * 0.2) * topness + ldr_tonemap3(atmos_hdrSkyColorRadiance(worldSkyVec) * 0.3);
         if (i == flatLoop) {
