@@ -52,7 +52,7 @@ void main()
         fragColor[0] = mix(cloudColor, vec4(0.0), v_blindness);
         fragColor[1] = vec4(cloudColor.a > 0. ? 0.99999 : 1.0);
     #elif CLOUD_RENDERING == CLOUD_RENDERING_PARALLAX
-        vec4 cloudColor = parallaxCloud(v_texcoord, v_up);
+        vec4 cloudColor = parallaxCloud(v_texcoord);
         fragColor[0] = mix(cloudColor, vec4(0.0), v_blindness);
         fragColor[1] = vec4(cloudColor.a > 0. ? 0.99999 : 1.0);
     #elif CLOUD_RENDERING == CLOUD_RENDERING_VOLUMETRIC

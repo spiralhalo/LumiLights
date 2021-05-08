@@ -1,6 +1,7 @@
 #include lumi:experimental_config
 #include lumi:aesthetics_config
 #include lumi:performance_config
+#include lumi:clouds_config
 #include lumi:gameplay_config
 #include lumi:fog_config
 
