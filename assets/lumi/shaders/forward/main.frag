@@ -66,12 +66,10 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
     pbr_roughness = clamp(pbr_roughness, 0.0, 1.0);
     pbr_metallic = clamp(pbr_metallic, 0.0, 1.0);
 
-    #ifdef DISABLE_ENTITY_AO
-        // hack to prevent AO on entities which usually just result in black pixels
-        if (frx_modelOriginType() == MODEL_ORIGIN_CAMERA) {
-            fragData.ao = false;
-        }
-    #endif
+    // Vanilla AO never make sense for anything other than terrain
+    if (frx_modelOriginType() != MODEL_ORIGIN_REGION) {
+        fragData.ao = false;
+    }
 
     bool maybeGUI = frx_modelOriginType() == MODEL_ORIGIN_SCREEN && pv_ortho == 1.;
 
