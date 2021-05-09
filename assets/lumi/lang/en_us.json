@@ -98,8 +98,6 @@
     "config.lumi_lights.help.underwater_fog_density_relative": "Overall density of underwater fog",
 
     "config.lumi_lights.category.experimental": "Experimental & Debug",
-    "config.lumi_lights.value.disable_entity_ao": "Disable entity AO",
-    "config.lumi_lights.help.disable_entity_ao": "Prevents erroneous entity rendering.;Turn off if causing problems.",
     "config.lumi_lights.value.volumetric_fog_softness_relative": "Volumetric fog softness",
     "config.lumi_lights.help.volumetric_fog_softness_relative": "Softens transition between shadowed and;unshadowed in volumetric fog",
     "config.lumi_lights.value.glint_mode": "Enchantment glint render",
