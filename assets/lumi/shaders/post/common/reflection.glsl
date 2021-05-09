@@ -17,6 +17,8 @@
  *  published by the Free Software Foundation, Inc.    *
  *******************************************************/
 
+uniform sampler2D u_blue_noise;
+
 #if REFLECTION_PROFILE == REFLECTION_PROFILE_EXTREME
     const float HITBOX = 0.0625;
     const int MAXSTEPS = 109;
@@ -214,7 +216,7 @@ rt_color_depth work_on_pair(
 
     vec3 unit_view = normalize(-ray_view);
     
-    vec3 jitter    = 2.0 * getRandomVec(v_texcoord, frxu_size) - 1.0;
+    vec3 jitter    = 2.0 * getRandomVec(u_blue_noise, v_texcoord, frxu_size) - 1.0;
     vec3 normal    = frx_normalModelMatrix() * normalize(worldNormal);
     float roughness2 = roughness * roughness;
     // if (ray_view.y < normal.y) return noreturn;

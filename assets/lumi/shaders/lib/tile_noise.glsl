@@ -1,3 +1,4 @@
+#include frex:shaders/api/world.glsl
 #include frex:shaders/lib/math.glsl
 #include lumi:shaders/lib/util.glsl
 
@@ -9,6 +10,32 @@
  *  GNU Lesser General Public License version 3 as     *
  *  published by the Free Software Foundation, Inc.    *
  *******************************************************/
+
+#define BLUE_NOISE_RES 32.
+const float BLUE_NOISE_SPEED = BLUE_NOISE_RES * BLUE_NOISE_RES;
+const float BLUE_NOISE_RES_RCP = 1. / BLUE_NOISE_RES;
+
+vec3 getRandomVec(sampler2D blueNoiseTex, vec2 uv, vec2 texSize)
+{
+#if __VERSION__ < 130
+    vec2 noiseUv = mod((uv + frx_renderSeconds() * 0.9) * texSize, BLUE_NOISE_RES) * BLUE_NOISE_RES_RCP;
+    return texture2D(blueNoiseTex, noiseUv).rgb;
+#else
+    ivec2 texelPos = ivec2(mod((uv + frx_renderSeconds() * 0.9) * texSize, BLUE_NOISE_RES));
+    return texelFetch(blueNoiseTex, texelPos, 0).rgb;
+#endif
+}
+
+float getRandomFloat(sampler2D blueNoiseTex, vec2 uv, vec2 texSize)
+{
+#if __VERSION__ < 130
+    vec2 noiseUv = mod((uv + frx_renderSeconds() * 0.9) * texSize, BLUE_NOISE_RES) * BLUE_NOISE_RES_RCP;
+    return texture2D(blueNoiseTex, noiseUv).r;
+#else
+    ivec2 texelPos = ivec2(mod((uv + frx_renderSeconds() * 0.9) * texSize, BLUE_NOISE_RES));
+    return texelFetch(blueNoiseTex, texelPos, 0).r;
+#endif
+}
 
 const vec3 tile_randomVec[16] = vec3[16](
     vec3(0.5, 0.3333333333333333, 0.25), 
@@ -29,12 +56,12 @@ const vec3 tile_randomVec[16] = vec3[16](
     vec3(0.03125, 0.5925925925925926, 0.015625)
 );
 
-vec3 getRandomVec(vec2 uv, vec2 texSize) {
+vec3 getRandomVecHalton(vec2 uv, vec2 texSize) {
     ivec2 texelPos = ivec2(mod(uv * texSize, 4.0));
     return tile_randomVec[texelPos.x + texelPos.y * 4];
 }
 
-float getRandomFloat(vec2 uv, vec2 texSize) {
+float getRandomFloatHalton(vec2 uv, vec2 texSize) {
     ivec2 texelPos = ivec2(mod(uv * texSize, 4.0));
     return tile_randomVec[texelPos.x + texelPos.y * 4].x;
 }

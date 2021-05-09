@@ -32,8 +32,11 @@
  *  published by the Free Software Foundation, Inc.    *
  *******************************************************/
 
+uniform sampler2D u_glint;
 uniform sampler2D u_sun;
 uniform sampler2D u_moon;
+uniform sampler2DArrayShadow u_shadow;
+uniform sampler2D u_blue_noise;
 
 /*******************************************************
     vertexShader: lumi:shaders/post/hdr.vert

@@ -20,8 +20,7 @@ uniform sampler2D u_particles_color;
 uniform sampler2D u_particles_depth;
 uniform sampler2D u_light_particles;
 
-uniform sampler2D u_glint;
-uniform sampler2DArrayShadow u_shadow;
+/* More samplers in /common/shading.glsl */
 
 out vec4[3] fragColor;
 
@@ -51,7 +50,7 @@ vec4 ldr_shaded_particle(vec2 uv, sampler2D scolor, sampler2D sdepth, sampler2D 
 
 void main()
 {
-    tileJitter = getRandomFloat(v_texcoord, frxu_size);
+    tileJitter = getRandomFloat(u_blue_noise, v_texcoord, frxu_size);
     float bloom1;
     float bloom2;
     vec4 a1 = hdr_shaded_color(v_texcoord, u_translucent_color, u_translucent_depth, u_light_translucent, u_normal_translucent, u_material_translucent, u_misc_translucent, 1.0, true, 1.0, bloom1);

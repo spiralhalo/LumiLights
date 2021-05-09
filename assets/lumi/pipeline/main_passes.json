@@ -5,13 +5,19 @@
                 name: "ssao",
                 program: "ssao",
                 framebuffer: "ao_values",
-                samplerImages: ["normal_solid", "solid_depth"]
-            }, {
+                samplerImages: [
+                "normal_solid",
+                "solid_depth",
+                "lumi:textures/filter_pattern/bluenoise32.png",
+                ]
+            }, 
+            /* {
                 name: "one_filter",
                 program: "one_filter",
                 framebuffer: "ao_filtered",
                 samplerImages: ["ao_values", "solid_depth"]
-            }, {
+            }, */
+            {
                 name: "shading_solid",
                 program: "shading_solid",
                 framebuffer: "shading_solid",
@@ -26,11 +32,12 @@
                     "translucent_depth",
                     "translucent_main",
 
-                    "ao_filtered",
+                    "ao_values",
                     "minecraft:textures/misc/enchanted_item_glint.png",
                     "shadow_map",
                     "minecraft:textures/environment/sun.png",
                     "minecraft:textures/environment/moon_phases.png",
+                    "lumi:textures/filter_pattern/bluenoise32.png",
                 ]
             }, {
                 name: "shading_translucent",
@@ -50,6 +57,7 @@
                     
                     "minecraft:textures/misc/enchanted_item_glint.png",
                     "shadow_map",
+                    "lumi:textures/filter_pattern/bluenoise32.png",
                 ]
             }, {
                 name: "reflection_solid",
@@ -69,6 +77,8 @@
                     "translucent_combine",
                     "translucent_depth",
                     "normal_translucent",
+
+                    "lumi:textures/filter_pattern/bluenoise32.png",
                 ]
             }, {
                 name: "reflection_translucent",
@@ -88,6 +98,8 @@
                     "solid_combine",
                     "solid_depth",
                     "normal_solid",
+
+                    "lumi:textures/filter_pattern/bluenoise32.png",
                 ]
             }, /*{
                 name: "refraction",
@@ -124,6 +136,7 @@
                     "clouds_depth",
                     "solid_depth",
                     "translucent_depth",
+                    "lumi:textures/filter_pattern/bluenoise32.png",
                 ]
             }, {
                 name: "composite",

@@ -90,7 +90,7 @@ float sampleCloud(in vec3 worldPos, in sampler2D scloudTex)
     // return smoothstep(0.1, 0.11, yF * tF * eF);
 }
 
-cloud_result rayMarchCloud(in sampler2D scloudTex, in sampler2D sdepth, in vec2 texcoord)
+cloud_result rayMarchCloud(in sampler2D scloudTex, in sampler2D sdepth, in sampler2D sbluenoise, in vec2 texcoord)
 {
     float rainFactor = frx_rainGradient() * 0.67 + frx_thunderGradient() * 0.33; // TODO: optimize
     float depth = texture(sdepth, texcoord).r;
@@ -120,7 +120,7 @@ cloud_result rayMarchCloud(in sampler2D scloudTex, in sampler2D sdepth, in vec2 
 
     // Adapted from Sebastian Lague's code (technically not the same, but just in case his code was MIT Licensed)
 
-    float tileJitter = getRandomFloat(v_texcoord, frxu_size); //CLOUD_MARCH_JITTER_STRENGTH;
+    float tileJitter = getRandomFloat(sbluenoise, texcoord, frxu_size); //CLOUD_MARCH_JITTER_STRENGTH;
     float traveled = SAMPLE_SIZE * tileJitter;
 
     // Optimization block

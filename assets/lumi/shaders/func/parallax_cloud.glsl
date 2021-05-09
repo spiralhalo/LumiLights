@@ -20,7 +20,7 @@
 
 #if CLOUD_RENDERING == CLOUD_RENDERING_PARALLAX
 #define wnoise3(a) cellular2x2x2(a).x
-vec4 parallaxCloud(in vec2 texcoord)
+vec4 parallaxCloud(in sampler2D sbluenoise, in vec2 texcoord)
 {
     float rainFactor = frx_rainGradient() * 0.67 + frx_thunderGradient() * 0.33;
 
@@ -42,7 +42,7 @@ vec4 parallaxCloud(in vec2 texcoord)
     vec3 finish = worldSkyVec * (CLOUD_ALTITUDE / worldSkyVec.y);
     vec3 move   = (finish - start) * flatMult;
 
-    float tileJitter = getRandomFloat(texcoord + frx_renderSeconds() * 0.1, frxu_size);
+    float tileJitter = getRandomFloat(sbluenoise, texcoord + frx_renderSeconds() * 0.1, frxu_size);
     
     vec3  color  = vec3 (0.0);
     float cloud  = 0.0;

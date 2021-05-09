@@ -16,6 +16,7 @@
 
 uniform sampler2D u_normal;
 uniform sampler2D u_depth;
+uniform sampler2D u_blue_noise;
 
 out vec4 fragColor;
 
@@ -34,7 +35,8 @@ void main()
     } else {
         float random = v_texcoord.x*v_texcoord.y;
         float ssao = calc_ssao(
-            u_normal, u_depth, frx_normalModelMatrix(), frx_inverseProjectionMatrix(), frxu_size, 
+            u_normal, u_depth, u_blue_noise,
+            frx_normalModelMatrix(), frx_inverseProjectionMatrix(), frxu_size, 
             v_texcoord, RADIUS, BIAS, INTENSITY);
         fragColor = vec4(ssao, 0.0, 0.0, 1.0);
     }
