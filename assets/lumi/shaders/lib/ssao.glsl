@@ -67,7 +67,8 @@ float calc_ssao(
             float gamma = (PI / 2.0) - acos(dot(normal_view, normalize(sampleDir_view)));
             if (gamma > oldAngle) {
                 float value = sin(gamma) - sin(oldAngle);
-                occlusion += value;
+                float attenuation = clamp(1.0 - pow(length(sampleDir_view) / radius_screen, 2.0), 0.0, 1.0);
+                occlusion += attenuation * value;
                 oldAngle = gamma;
             }
         }
