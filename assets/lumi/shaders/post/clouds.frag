@@ -42,10 +42,8 @@ frag_in float v_blindness;
 out vec4[2] fragColor;
 #endif
 
-void main()
+void doCloudStuff()
 {
-    if (!frx_worldFlag(FRX_WORLD_IS_OVERWORLD)) return;
-    if (v_blindness == 1.0) return;
     // float brightnessMult = mix(1.0, BRIGHT_FINAL_MULT, frx_viewBrightness());
     #if CLOUD_RENDERING == CLOUD_RENDERING_FLAT
         vec4 cloudColor = flatCloud(v_texcoord, v_cloud_rotator, v_up);
@@ -91,4 +89,12 @@ void main()
     #endif
 }
 
-
+void main()
+{
+    if (!frx_worldFlag(FRX_WORLD_IS_OVERWORLD) || v_blindness == 1.0) {
+        fragColor[0] = vec4(0.);
+        fragColor[1] = vec4(1.);
+    } else {
+        doCloudStuff();
+    }
+}
