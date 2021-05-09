@@ -4,6 +4,11 @@
             includeToken: "lumi:experimental_config",
             categoryKey: "config.lumi_lights.category.experimental",
             options: {
+                disable_entity_ao: {
+                    default: true,
+                    nameKey: "config.lumi_lights.value.disable_entity_ao",
+                    descriptionKey: "config.lumi_lights.help.disable_entity_ao"
+                },
                 parallax_cloud_density: {
                     default: 1.0,
                     min: 0.5,

@@ -66,6 +66,12 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
     pbr_roughness = clamp(pbr_roughness, 0.0, 1.0);
     pbr_metallic = clamp(pbr_metallic, 0.0, 1.0);
 
+#ifdef DISABLE_ENTITY_AO
+    if (frx_modelOriginType() == MODEL_ORIGIN_CAMERA) {
+        fragData.ao = false;
+    }
+#endif
+
     bool maybeGUI = frx_modelOriginType() == MODEL_ORIGIN_SCREEN && pv_ortho == 1.;
 
     if (maybeGUI) {
