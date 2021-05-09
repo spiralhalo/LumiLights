@@ -39,8 +39,9 @@ float calc_ssao(
 {
     vec3 origin_view = coords_view(uv, inv_projection, sdepth);
     vec3 normal_view = coords_normal(uv, normal_mat, snormal);
+    float radius_view = radius_screen / abs(origin_view.z - 1);
 
-    vec2 deltaUV = vec2(1.0, 0.0) * (radius_screen / (float(NUM_SAMPLE_DIRECTIONS * NUM_SAMPLE_STEPS) + 1.0));
+    vec2 deltaUV = vec2(1.0, 0.0) * (radius_view / (float(NUM_SAMPLE_DIRECTIONS * NUM_SAMPLE_STEPS) + 1.0));
 
     // PERF: Use noise texture?
     vec3 sampleNoise = normalize(2.0 * getRandomVec(sbluenoise, uv, tex_size) - 1.0);
@@ -66,8 +67,7 @@ float calc_ssao(
             float gamma = (PI / 2.0) - acos(dot(normal_view, normalize(sampleDir_view)));
             if (gamma > oldAngle) {
                 float value = sin(gamma) - sin(oldAngle);
-                float attenuation = clamp(1.0 - pow(length(sampleDir_view) / radius_screen, 2.0), 0.0, 1.0);
-                occlusion += attenuation * value;
+                occlusion += value;
                 oldAngle = gamma;
             }
         }

@@ -21,9 +21,9 @@ uniform sampler2D u_blue_noise;
 out vec4 fragColor;
 
 #ifdef SSAO_ENABLED
-const float RADIUS = 1.0;
+const float RADIUS = 2.0;
 const float BIAS = 0.5;
-const float INTENSITY = 5.0;
+const float INTENSITY = 2.5;
 #endif
 
 void main()
