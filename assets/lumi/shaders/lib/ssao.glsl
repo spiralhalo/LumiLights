@@ -43,8 +43,7 @@ float calc_ssao(
     vec2 deltaUV = vec2(1.0, 0.0) * (radius_screen / (float(NUM_SAMPLE_DIRECTIONS * NUM_SAMPLE_STEPS) + 1.0));
 
     // PERF: Use noise texture?
-    vec3 sampleNoise = normalize(getRandomVec(uv, tex_size));
-    sampleNoise.xy   = sampleNoise.xy * 2.0 - vec2(1.0);
+    vec3 sampleNoise = normalize(2.0 * getRandomVec(uv, tex_size) - 1.0);
     mat2 rotationMatrix = mat2(
         sampleNoise.x, -sampleNoise.y,
         sampleNoise.y,  sampleNoise.x
