@@ -176,7 +176,7 @@ rt_Result rt_reflection(
 }
 #endif
 
-const float JITTER_STRENGTH = 0.2;
+const float JITTER_STRENGTH = 0.6;
 
 struct rt_color_depth
 {
