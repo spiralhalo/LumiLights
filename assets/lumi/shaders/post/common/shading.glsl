@@ -74,37 +74,18 @@ vec2 coords_uv(vec3 view, mat4 projection)
 #ifdef USE_VOLUMETRIC_FOG
 float raymarched_fog_density(vec3 viewPos, vec3 worldPos, float pFogFar)
 {
-    // vec3 unitMarch_view = normalize(-viewPos);
-    // vec3 ray_view = viewPos + tileJitter * unitMarch_view;
-
+    const int nSteps = 16;
     vec3 modelPos = worldPos - frx_cameraPos();
-    float distToCamera = length(modelPos);
-    float sampleSize = max(2.0, pFogFar / 64.0);
-    vec3 unitMarch_model = sampleSize * ((-modelPos) / distToCamera);
-    vec3 ray_model = modelPos + tileJitter * unitMarch_model;
-
-    float distTraveled = tileJitter * sampleSize;
-    float maxDist = min(distToCamera, pFogFar);
-
-    // March in shadow space for performance boost
-    // vec3 shadowPos = (frx_shadowViewMatrix() * vec4(modelPos, 1.0)).xyz;
-    //nb: camera pos in shadow view space is zero, but is non-zero in shadow view-projection space
-    // vec3 cameraPos_shadow = (frx_shadowViewMatrix() * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
-    // vec3 unitMarch_shadow = (/*cameraPos_shadow*/ - shadowPos) / distToCamera;
-    // shadowPos = shadowPos * 0.5 + 0.5; // Transform from screen coordinates to texture coordinates
-    vec4 ray_shadow;// = vec4(shadowPos + tileJitter * unitMarch_shadow, 1.0);
-
-    float illuminated = 0.0;
-    while (distTraveled < maxDist) {
-        ray_shadow = (frx_shadowViewMatrix() * vec4(ray_model, 1.0));
-        illuminated += simpleShadowFactor(u_shadow, ray_shadow) * sampleSize;
-        distTraveled += sampleSize;
-        // ray_shadow.xyz += unitMarch_shadow;
-        ray_model += unitMarch_model;
-        // ray_view += unitMarch_view;
+    vec3 unitMarch_model = -modelPos / nSteps;
+    vec3 ray_model = modelPos + unitMarch_model * tileJitter;
+    vec4 ray_shadow;
+    float illuminated = 0.;
+    for (int i = 0; i < nSteps; i++) {
+        ray_shadow  = (frx_shadowViewMatrix() * vec4(ray_model, 1.0));
+        illuminated += simpleShadowFactor(u_shadow, ray_shadow);
+        ray_model   += unitMarch_model;
     }
-
-    return illuminated / max(1.0, pFogFar);
+    return illuminated / float(nSteps);
 }
 #endif
 
@@ -183,7 +164,7 @@ vec4 fog (float skyLight, vec4 a, vec3 viewPos, vec3 worldPos, inout float bloom
     fogFactor = clamp(fogFactor * distFactor, 0.0, 1.0);
 
     // TODO: separate fog from sky color
-    vec4 fogColor = vec4(atmos_hdrSkyColorRadiance(normalize(worldPos-frx_cameraPos())), 1.0);
+    vec4 fogColor = vec4(atmos_hdrCelestialRadiance(), 1.0);
 
     if (useAdditive) {
         #ifdef RGB_CAVES
@@ -335,15 +316,17 @@ vec4 hdr_shaded_color(
     sampler2D scolor, sampler2D sdepth, sampler2D slight, sampler2D snormal, sampler2D smaterial, sampler2D smisc,
     float aoval, bool translucent, float translucentDepth, out float bloom_out)
 {
-    vec4  a       = texture(scolor, uv);
-    float depth   = texture(sdepth, uv).r;
-    vec3  viewPos = coords_view(uv, frx_inverseProjectionMatrix(), depth);
+    vec4  a        = texture(scolor, uv);
+    float depth    = texture(sdepth, uv).r;
+    vec3  viewPos  = coords_view(uv, frx_inverseProjectionMatrix(), depth);
+    vec3  worldPos = frx_cameraPos() + (frx_inverseViewMatrix() * vec4(viewPos, 1.0)).xyz;
 
     if (depth == 1.0 && !translucent) {
         // the sky
         if (v_blindness == 1.0) return vec4(0.0);
         custom_sky(viewPos, 1.0 - v_blindness, a, bloom_out);
         // mark as managed draw, vanilla sky is an exception
+        a = fog(1.0, a, viewPos, worldPos, bloom_out);
         return vec4(a.rgb * 1.0 - v_blindness, 1.0);
         // vec3 worldPos = (128.0 / length(modelPos)) * modelPos + frx_cameraPos(); // doesn't help
         // return a + fog(frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? frx_ambientIntensity() : 1.0, vec4(0.0), viewPos, worldPos, bloom_out);
@@ -372,7 +355,6 @@ vec4 hdr_shaded_color(
     vec3  material  = texture(smaterial, uv).xyz;
     float roughness = material.x == 0.0 ? 1.0 : min(1.0, 1.0203 * material.x - 0.01);
     float metallic  = material.y;
-    vec3  worldPos  = frx_cameraPos() + (frx_inverseViewMatrix() * vec4(viewPos, 1.0)).xyz;
     float f0        = material.z;
     float bloom_raw = light.z * 2.0 - 1.0;
     bool  diffuse   = material.x < 1.0;
