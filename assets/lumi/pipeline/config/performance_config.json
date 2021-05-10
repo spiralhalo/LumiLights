@@ -14,7 +14,7 @@
         },
         ambient_occlusion: {
           default: "ssao",
-          choices: ["none", "vanilla", "ssao"],
+          choices: ["no_ao", "vanilla", "vanilla_and_ssao", "pure_ssao"],
           enum: true,
           prefix: "ambient_occlusion_",
           nameKey: "config.lumi_lights.value.ambient_occlusion",

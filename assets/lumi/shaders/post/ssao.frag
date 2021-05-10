@@ -21,7 +21,7 @@ uniform sampler2D u_depth;
 out vec4[1] fragColor;
 #endif
 
-#if AMBIENT_OCCLUSION == AMBIENT_OCCLUSION_SSAO
+#ifdef SSAO_ENABLED
 const float RADIUS = 1.0;
 const float BIAS = 0.5;
 const float INTENSITY = 5.0;
@@ -29,7 +29,7 @@ const float INTENSITY = 5.0;
 
 void main()
 {
-#if AMBIENT_OCCLUSION == AMBIENT_OCCLUSION_SSAO
+#ifdef SSAO_ENABLED
     // Modest performance saving by skipping the sky
     if (texture(u_depth, v_texcoord).r == 1.0) {
         fragColor[0] = vec4(1.0, 0.0, 0.0, 1.0);

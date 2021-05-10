@@ -22,7 +22,7 @@ frag_in vec2 v_invSize;
 out vec4[1] fragColor;
 #endif
 
-#if AMBIENT_OCCLUSION == AMBIENT_OCCLUSION_SSAO
+#ifdef SSAO_ENABLED
 const int size = 4;
 void main()
 {

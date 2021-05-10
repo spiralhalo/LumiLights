@@ -426,8 +426,12 @@ vec4 hdr_shaded_color(
     pbr_shading(a, bloom_out, viewPos, light.xyz, normal, roughness, metallic, f0, diffuse, translucent);
 
 
-#if AMBIENT_OCCLUSION != AMBIENT_OCCLUSION_NONE
-    float ao_shaded = 1.0 + min(0.0, bloom_raw);
+#if AMBIENT_OCCLUSION != AMBIENT_OCCLUSION_NO_AO
+    #if AMBIENT_OCCLUSION != AMBIENT_OCCLUSION_PURE_SSAO
+        float ao_shaded = 1.0 + min(0.0, bloom_raw);
+    #else
+        float ao_shaded = 1.0;
+    #endif
     float ssao = mix(aoval, 1.0, min(bloom_out, 1.0));
     a.rgb *= ao_shaded * ssao;
 #endif
