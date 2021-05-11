@@ -5,7 +5,7 @@
             categoryKey: "config.lumi_lights.category.fog",
             options: {
                 overworld_fog_use_altitude: {
-                    default: true,
+                    default: false,
                     nameKey: "config.lumi_lights.value.overworld_fog_use_altitude",
                     descriptionKey: "config.lumi_lights.help.overworld_fog_use_altitude"
                 },
