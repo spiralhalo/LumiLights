@@ -76,7 +76,7 @@ float raymarched_fog_density(vec3 viewPos, vec3 worldPos, float pFogFar)
 
     vec3 modelPos = worldPos - frx_cameraPos();
     float distToCamera = length(modelPos);
-    float sampleSize = max(2.0, pFogFar / 64.0);
+    float sampleSize = max(2.0, pFogFar / 8.0);
     vec3 unitMarch_model = sampleSize * ((-modelPos) / distToCamera);
     vec3 ray_model = modelPos + tileJitter * unitMarch_model;
 
