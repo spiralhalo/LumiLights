@@ -315,7 +315,7 @@ void custom_sky(in vec3 viewPos, in float blindnessFactor, inout vec4 a, inout f
         // VOID CORE
         float voidCore = l2_clampScale(-0.8 + v_near_void_core, -1.0 + v_near_void_core, skyDotUp); 
         vec3 voidColor = mix(vec3(0.0), VOID_CORE_COLOR, voidCore);
-        bloom_out = voidCore;
+        bloom_out = voidCore * (1. - v_not_in_void);
         a.rgb = mix(voidColor, a.rgb, v_not_in_void);
     }
 
