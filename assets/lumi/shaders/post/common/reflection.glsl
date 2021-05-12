@@ -235,7 +235,7 @@ rt_color_depth work_on_pair(
     if (impossibleRay || exceedsThreshold) {
         result.hit = false;
     } else {
-        result = rt_reflection(ray_view, unit_view, normal, unit_march, frx_normalModelMatrix(), frx_projectionMatrix(), frx_inverseProjectionMatrix(), reflected_depth, reflected_normal);
+        result = rt_reflection(ray_view + unit_march * jitter.x * HITBOX, unit_view, normal, unit_march, frx_normalModelMatrix(), frx_projectionMatrix(), frx_inverseProjectionMatrix(), reflected_depth, reflected_normal);
     }
     #endif
 

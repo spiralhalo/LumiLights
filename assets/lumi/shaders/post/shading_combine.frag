@@ -2,7 +2,6 @@
 #include lumi:shaders/func/tonemap.glsl
 #include lumi:shaders/lib/util.glsl
 #include lumi:shaders/lib/tile_noise.glsl
-#include lumi:shaders/post/common/reflection.glsl
 
 /*******************************************************
  *  lumi:shaders/post/shading_combine.frag             *
