@@ -86,8 +86,8 @@
     "config.lumi_lights.help.true_darkness_moonlight": "Disable moonlight",
 
     "config.lumi_lights.category.fog": "Fog",
-    "config.lumi_lights.value.overworld_fog_use_altitude": "Altitude affects fog (overworld)",
-    "config.lumi_lights.help.overworld_fog_use_altitude": "Thicker fog near sea level in the overworld",
+    "config.lumi_lights.value.overworld_fog_altitude_affected": "Altitude affects fog (overworld)",
+    "config.lumi_lights.help.overworld_fog_altitude_affected": "Thicker fog near sea level in the overworld",
     "config.lumi_lights.value.fog_far_chunks": "Fog chunks distance",
     "config.lumi_lights.help.fog_far_chunks": "Distance where fog gets the thickest in chunks",
     "config.lumi_lights.value.fog_density_relative": "Fog density",

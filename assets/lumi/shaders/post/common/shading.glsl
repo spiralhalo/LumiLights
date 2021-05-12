@@ -79,7 +79,7 @@ float raymarched_fog_density(vec3 viewPos, vec3 worldPos, float pFogFar)
 
     vec3 modelPos = worldPos - frx_cameraPos();
     float distToCamera = length(modelPos);
-    float sampleSize = max(2.0, pFogFar / 64.0);
+    float sampleSize = max(2.0, pFogFar / 8.0);
     vec3 unitMarch_model = sampleSize * ((-modelPos) / distToCamera);
     vec3 ray_model = modelPos + tileJitter * unitMarch_model;
 
@@ -129,8 +129,8 @@ vec4 fog (float skyLight, vec4 a, vec3 viewPos, vec3 worldPos, inout float bloom
         inverseThickener -= 0.5 * inverseThickener * frx_rainGradient();
         inverseThickener -= 0.5 * inverseThickener * frx_thunderGradient();
         pFogFar *= inverseThickener;
-        pFogDensity = mix(1.0, max(0.8, pFogDensity), inverseThickener);
-        #ifdef OVERWORLD_FOG_USE_ALTITUDE
+        pFogDensity = mix(min(1.0, pFogDensity * 2.0), min(0.8, pFogDensity), inverseThickener);
+        #ifdef OVERWORLD_FOG_ALTITUDE_AFFECTED
             // altitude fog in the overworld :) valley fog is better than mountain-engulfing fog
             if (frx_worldFlag(FRX_WORLD_IS_OVERWORLD)) {
                 float fogTop = mix(FOG_TOP_THICK, FOG_TOP, inverseThickener);
