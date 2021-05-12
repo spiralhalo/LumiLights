@@ -18,10 +18,10 @@ const float BLUE_NOISE_RES_RCP = 1. / BLUE_NOISE_RES;
 vec3 getRandomVec(sampler2D blueNoiseTex, vec2 uv, vec2 texSize)
 {
 #if __VERSION__ < 130
-    vec2 noiseUv = mod((uv + frx_renderSeconds() * 0.9) * texSize, BLUE_NOISE_RES) * BLUE_NOISE_RES_RCP;
+    vec2 noiseUv = mod((uv + frx_renderSeconds()) * texSize, BLUE_NOISE_RES) * BLUE_NOISE_RES_RCP;
     return texture2D(blueNoiseTex, noiseUv).rgb;
 #else
-    ivec2 texelPos = ivec2(mod((uv + frx_renderSeconds() * 0.9) * texSize, BLUE_NOISE_RES));
+    ivec2 texelPos = ivec2(mod((uv + frx_renderSeconds()) * texSize, BLUE_NOISE_RES));
     return texelFetch(blueNoiseTex, texelPos, 0).rgb;
 #endif
 }
@@ -29,10 +29,10 @@ vec3 getRandomVec(sampler2D blueNoiseTex, vec2 uv, vec2 texSize)
 float getRandomFloat(sampler2D blueNoiseTex, vec2 uv, vec2 texSize)
 {
 #if __VERSION__ < 130
-    vec2 noiseUv = mod((uv + frx_renderSeconds() * 0.9) * texSize, BLUE_NOISE_RES) * BLUE_NOISE_RES_RCP;
+    vec2 noiseUv = mod((uv + frx_renderSeconds()) * texSize, BLUE_NOISE_RES) * BLUE_NOISE_RES_RCP;
     return texture2D(blueNoiseTex, noiseUv).r;
 #else
-    ivec2 texelPos = ivec2(mod((uv + frx_renderSeconds() * 0.9) * texSize, BLUE_NOISE_RES));
+    ivec2 texelPos = ivec2(mod((uv + frx_renderSeconds()) * texSize, BLUE_NOISE_RES));
     return texelFetch(blueNoiseTex, texelPos, 0).r;
 #endif
 }
