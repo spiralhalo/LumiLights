@@ -4,10 +4,10 @@
             includeToken: "lumi:fog_config",
             categoryKey: "config.lumi_lights.category.fog",
             options: {
-                overworld_fog_use_altitude: {
+                overworld_fog_altitude_affected: {
                     default: false,
-                    nameKey: "config.lumi_lights.value.overworld_fog_use_altitude",
-                    descriptionKey: "config.lumi_lights.help.overworld_fog_use_altitude"
+                    nameKey: "config.lumi_lights.value.overworld_fog_altitude_affected",
+                    descriptionKey: "config.lumi_lights.help.overworld_fog_altitude_affected"
                 },
                 fog_far_chunks: {
                     default: 8,

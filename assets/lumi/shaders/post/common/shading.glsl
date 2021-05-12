@@ -127,7 +127,7 @@ vec4 fog (float skyLight, vec4 a, vec3 viewPos, vec3 worldPos, inout float bloom
         inverseThickener -= 0.5 * inverseThickener * frx_thunderGradient();
         pFogFar *= inverseThickener;
         pFogDensity = mix(min(1.0, pFogDensity * 2.0), min(0.8, pFogDensity), inverseThickener);
-        #ifdef OVERWORLD_FOG_USE_ALTITUDE
+        #ifdef OVERWORLD_FOG_ALTITUDE_AFFECTED
             // altitude fog in the overworld :) valley fog is better than mountain-engulfing fog
             if (frx_worldFlag(FRX_WORLD_IS_OVERWORLD)) {
                 float fogTop = mix(FOG_TOP_THICK, FOG_TOP, inverseThickener);
