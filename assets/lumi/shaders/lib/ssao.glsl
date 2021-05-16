@@ -8,8 +8,9 @@
  * https://gist.github.com/transitive-bullshit/6770346 *
  *******************************************************/
 
-#define NUM_SAMPLE_DIRECTIONS 5
-#define NUM_SAMPLE_STEPS      5
+// 5 for each is smoother but this setup has double the performance
+#define NUM_SAMPLE_DIRECTIONS 3
+#define NUM_SAMPLE_STEPS      3
 
 vec3 coords_view(vec2 uv, mat4 inv_projection, in sampler2D target)
 {
