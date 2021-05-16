@@ -29,6 +29,7 @@ out vec4[3] fragColor;
 vec4 ldr_shaded_particle(vec2 uv, sampler2D scolor, sampler2D sdepth, sampler2D slight, out float bloom_out)
 {
     vec4 a = texture(scolor, uv);
+    if (a.a == 0.) return vec4(0.);
 
     float depth     = texture(sdepth, uv).r;
     vec3  viewPos   = coords_view(uv, frx_inverseProjectionMatrix(), depth);

@@ -336,6 +336,8 @@ vec4 hdr_shaded_color(
     float aoval, bool translucent, float translucentDepth, out float bloom_out)
 {
     vec4  a       = texture(scolor, uv);
+    if (translucent && a.a == 0.) return vec4(0.);
+    
     float depth   = texture(sdepth, uv).r;
     vec3  viewPos = coords_view(uv, frx_inverseProjectionMatrix(), depth);
 
