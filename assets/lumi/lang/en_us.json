@@ -66,8 +66,6 @@
     "config.lumi_lights.help.parallax_cloud_density": "This isn't meant to be configurable (debug)",
     "config.lumi_lights.value.volumetric_cloud_mode": "Volumetric cloud mode",
     "config.lumi_lights.help.volumetric_cloud_mode": "Skybox clouds are generally faster",
-    "config.lumi_lights.value.volumetric_cloud_denoising": "Volumetric cloud denoising",
-    "config.lumi_lights.help.volumetric_cloud_denoising": "Attempt to remove noise from volumetric cloud",
 
     "config.lumi_lights.category.shadow": "Shadows",
     "config.lumi_lights.value.shadow_filtering": "Shadow filtering",

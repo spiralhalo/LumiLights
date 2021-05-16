@@ -20,8 +20,8 @@ uniform sampler2D u_translucent_depth;
 uniform sampler2D u_translucent_color;
 
 uniform sampler2D u_ao;
-uniform sampler2D u_glint;
-uniform sampler2DArrayShadow u_shadow;
+
+/* More samplers in /common/shading.glsl */
 
 out vec4[2] fragColor;
 
@@ -29,7 +29,7 @@ out vec4[2] fragColor;
 
 void main()
 {
-    tileJitter = getRandomFloat(v_texcoord, frxu_size); //JITTER_STRENGTH;
+    tileJitter = getRandomFloat(u_blue_noise, v_texcoord, frxu_size); //JITTER_STRENGTH;
     float bloom1;
     float ssao = texture(u_ao, v_texcoord).r;
     float translucentDepth = texture(u_translucent_depth, v_texcoord).r;

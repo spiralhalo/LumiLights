@@ -18,7 +18,7 @@
 #include lumi:shaders/lib/puddle.glsl
 #include lumi:shaders/lib/rectangle.glsl
 #include lumi:shaders/lib/taa_jitter.glsl
-#include lumi:shaders/lib/tile_noise.glsl
+#include lumi:shaders/func/tile_noise.glsl
 #include lumi:shaders/lib/util.glsl
 #include lumi:shaders/post/common/bloom.glsl
 #include lumi:shaders/post/common/fog.glsl
@@ -32,8 +32,11 @@
  *  published by the Free Software Foundation, Inc.    *
  *******************************************************/
 
+uniform sampler2D u_glint;
 uniform sampler2D u_sun;
 uniform sampler2D u_moon;
+uniform sampler2DArrayShadow u_shadow;
+uniform sampler2D u_blue_noise;
 
 /*******************************************************
     vertexShader: lumi:shaders/post/hdr.vert
@@ -333,6 +336,8 @@ vec4 hdr_shaded_color(
     float aoval, bool translucent, float translucentDepth, out float bloom_out)
 {
     vec4  a       = texture(scolor, uv);
+    if (translucent && a.a == 0.) return vec4(0.);
+    
     float depth   = texture(sdepth, uv).r;
     vec3  viewPos = coords_view(uv, frx_inverseProjectionMatrix(), depth);
 

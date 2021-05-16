@@ -17,6 +17,7 @@
 
                 "u_glint",
                 "u_shadow",
+                "u_blue_noise",
             ]
         }
     ],
@@ -63,6 +64,7 @@
 
                     "minecraft:textures/misc/enchanted_item_glint.png",
                     "shadow_map",
+                    "lumi:textures/filter_pattern/bluenoise256.png",
                 ]
             },
         ]

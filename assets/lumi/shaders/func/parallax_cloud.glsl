@@ -7,7 +7,7 @@
 #include lumi:shaders/common/userconfig.glsl
 #include lumi:shaders/func/tonemap.glsl
 #include lumi:shaders/lib/util.glsl
-#include lumi:shaders/lib/tile_noise.glsl
+#include lumi:shaders/func/tile_noise.glsl
 
 /*******************************************************
  *  lumi:shaders/func/parallax_cloud.glsl              *
@@ -20,7 +20,7 @@
 
 #if CLOUD_RENDERING == CLOUD_RENDERING_PARALLAX
 #define wnoise3(a) cellular2x2x2(a).x
-vec4 parallaxCloud(in vec2 texcoord)
+vec4 parallaxCloud(in sampler2D sbluenoise, in vec2 texcoord)
 {
     float rainFactor = frx_rainGradient() * 0.67 + frx_thunderGradient() * 0.33;
 
@@ -33,7 +33,7 @@ vec4 parallaxCloud(in vec2 texcoord)
         return vec4(0.);
     }
     
-    const int flatLoop = 6;
+    const int flatLoop = 3;
     const float flatMult = 1./float(flatLoop);
     const float CLOUD_ALTITUDE  = PARALLAX_CLOUD_ALTITUDE;
     const float CLOUD_THICKNESS = PARALLAX_CLOUD_THICKNESS;
@@ -42,7 +42,7 @@ vec4 parallaxCloud(in vec2 texcoord)
     vec3 finish = worldSkyVec * (CLOUD_ALTITUDE / worldSkyVec.y);
     vec3 move   = (finish - start) * flatMult;
 
-    float tileJitter = getRandomFloat(texcoord + frx_renderSeconds() * 0.1, frxu_size);
+    float tileJitter = getRandomFloat(sbluenoise, texcoord + frx_renderSeconds() * 0.1, frxu_size);
     
     vec3  color  = vec3 (0.0);
     float cloud  = 0.0;
@@ -61,7 +61,7 @@ vec4 parallaxCloud(in vec2 texcoord)
         localCloud = l2_clampScale(0.15, 0.45, cloud1);
         localCloud *= flatMult * PARALLAX_CLOUD_DENSITY;
 
-        float topness = float(i) * flatMult * 0.6 + 0.4;
+        float topness = float(i) * flatMult;
 
         vec3 localColor = ldr_tonemap3(atmos_hdrCelestialRadiance() * 0.2) * topness + ldr_tonemap3(atmos_hdrSkyColorRadiance(worldSkyVec) * 0.3);
         if (i == flatLoop) {

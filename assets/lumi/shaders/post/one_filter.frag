@@ -1,7 +1,7 @@
 #include lumi:shaders/post/common/header.glsl
 #include frex:shaders/lib/math.glsl
 #include lumi:shaders/lib/util.glsl
-#include lumi:shaders/lib/tile_noise.glsl
+#include lumi:shaders/func/tile_noise.glsl
 #include lumi:shaders/common/lighting.glsl
 
 /*******************************************************

@@ -5,7 +5,7 @@
 #include frex:shaders/lib/noise/noise2d.glsl
 #include lumi:shaders/common/userconfig.glsl
 #include lumi:shaders/lib/util.glsl
-#include lumi:shaders/lib/tile_noise.glsl
+#include lumi:shaders/func/tile_noise.glsl
 
 /*******************************************************
  *  lumi:shaders/func/volumetric_cloud.glsl             *
@@ -28,12 +28,12 @@ struct cloud_result {
 // const float CLOUD_MARCH_JITTER_STRENGTH = 0.01;
 const float TEXTURE_RADIUS = 512.0;
 const float TEXTURE_RADIUS_RCP = 1.0 / TEXTURE_RADIUS;
-const int NUM_SAMPLE = 512;
+const int NUM_SAMPLE = 128;
 const float SAMPLE_SIZE = TEXTURE_RADIUS / float(NUM_SAMPLE);
 const int LIGHT_SAMPLE = 5;
-const float LIGHT_SAMPLE_SIZE = 0.2;
+const float LIGHT_SAMPLE_SIZE = 0.8;
 const float LIGHT_ABSORPTION_SKYLIGHT = 0.99;
-const float LIGHT_ABSORPTION_CLOUD = 0.99;
+const float LIGHT_ABSORPTION_CLOUD = 0.5;
 const float DARKNESS_THRESHOLD = 0.2;
 const float DARKNESS_THRESHOLD_INV = 1.0 - DARKNESS_THRESHOLD;
 
@@ -90,7 +90,7 @@ float sampleCloud(in vec3 worldPos, in sampler2D scloudTex)
     // return smoothstep(0.1, 0.11, yF * tF * eF);
 }
 
-cloud_result rayMarchCloud(in sampler2D scloudTex, in sampler2D sdepth, in vec2 texcoord)
+cloud_result rayMarchCloud(in sampler2D scloudTex, in sampler2D sdepth, in sampler2D sbluenoise, in vec2 texcoord)
 {
     float rainFactor = frx_rainGradient() * 0.67 + frx_thunderGradient() * 0.33; // TODO: optimize
     float depth = texture(sdepth, texcoord).r;
@@ -120,7 +120,7 @@ cloud_result rayMarchCloud(in sampler2D scloudTex, in sampler2D sdepth, in vec2 
 
     // Adapted from Sebastian Lague's code (technically not the same, but just in case his code was MIT Licensed)
 
-    float tileJitter = getRandomFloat(v_texcoord, frxu_size); //CLOUD_MARCH_JITTER_STRENGTH;
+    float tileJitter = getRandomFloat(sbluenoise, texcoord, frxu_size); //CLOUD_MARCH_JITTER_STRENGTH;
     float traveled = SAMPLE_SIZE * tileJitter;
 
     // Optimization block
