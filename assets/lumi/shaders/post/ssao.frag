@@ -37,7 +37,7 @@ void main()
         float ssao = calc_ssao(
             u_normal, u_depth, u_blue_noise,
             frx_normalModelMatrix(), frx_inverseProjectionMatrix(), frxu_size, 
-            v_texcoord, RADIUS, BIAS, INTENSITY);
+            v_texcoord, RADIUS, RADIUS * 0.5, BIAS, INTENSITY);
         fragColor = vec4(ssao, 0.0, 0.0, 1.0);
     }
 #else

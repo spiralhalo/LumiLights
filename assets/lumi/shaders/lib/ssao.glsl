@@ -35,11 +35,12 @@ const mat2 deltaRotationMatrix = mat2(
 
 float calc_ssao(
     in sampler2D snormal, in sampler2D sdepth, in sampler2D sbluenoise, mat3 normal_mat, mat4 inv_projection, vec2 tex_size,
-    vec2 uv, float radius_screen, float angle_bias, float intensity)
+    vec2 uv, float radius_screen, float attenuation_radius, float angle_bias, float intensity)
 {
     vec3 origin_view = coords_view(uv, inv_projection, sdepth);
     vec3 normal_view = coords_normal(uv, normal_mat, snormal);
     float radius_view = radius_screen / abs(origin_view.z - 1);
+    float attenuation_rad2 = attenuation_radius * attenuation_radius;
 
     vec2 deltaUV = vec2(1.0, 0.0) * (radius_view / (float(NUM_SAMPLE_DIRECTIONS * NUM_SAMPLE_STEPS) + 1.0));
 
@@ -67,7 +68,7 @@ float calc_ssao(
             float gamma = (PI / 2.0) - acos(dot(normal_view, normalize(sampleDir_view)));
             if (gamma > oldAngle) {
                 float value = sin(gamma) - sin(oldAngle);
-                float attenuation = clamp(1.0 - pow(length(sampleDir_view) / radius_screen, 2.0), 0.0, 1.0);
+                float attenuation = clamp(1.0 - dot(sampleDir_view, sampleDir_view) / attenuation_rad2, 0.0, 1.0);
                 occlusion += attenuation * value;
                 oldAngle = gamma;
             }
