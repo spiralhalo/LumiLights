@@ -96,6 +96,8 @@
     "config.lumi_lights.help.underwater_fog_density_relative": "Overall density of underwater fog",
 
     "config.lumi_lights.category.experimental": "Experimental & Debug",
+    "config.lumi_lights.value.noise_mode": "Dithering mode",
+    "config.lumi_lights.help.noise_mode": "Noise technique used for dithering AO, reflection, and volumetrics.;Blue noise requires texture loading support.",
     "config.lumi_lights.value.volumetric_fog_softness_relative": "Volumetric fog softness",
     "config.lumi_lights.help.volumetric_fog_softness_relative": "Softens transition between shadowed and;unshadowed in volumetric fog",
     "config.lumi_lights.value.glint_mode": "Enchantment glint render",
