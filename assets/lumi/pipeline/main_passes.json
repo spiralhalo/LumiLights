@@ -157,6 +157,8 @@
 
                     "weather",
                     "weather_depth",
+                    
+                    "lumi:textures/filter_pattern/bluenoise256.png",
                 ]
             }
         ]
