@@ -7,7 +7,7 @@
 #include lumi:shaders/common/userconfig.glsl
 #include lumi:shaders/func/tonemap.glsl
 #include lumi:shaders/lib/util.glsl
-#include lumi:shaders/lib/tile_noise.glsl
+#include lumi:shaders/func/tile_noise.glsl
 
 /*******************************************************
  *  lumi:shaders/func/parallax_cloud.glsl              *

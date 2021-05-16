@@ -1,9 +1,10 @@
 #include frex:shaders/api/world.glsl
 #include frex:shaders/lib/math.glsl
+#include lumi:shaders/common/userconfig.glsl
 #include lumi:shaders/lib/util.glsl
 
 /*******************************************************
- *  lumi:shaders/lib/tile_noise.glsl                   *
+ *  lumi:shaders/func/tile_noise.glsl                  *
  *******************************************************
  *  Copyright (c) 2020-2021 spiralhalo                 *
  *  Released WITHOUT WARRANTY under the terms of the   *
@@ -17,22 +18,28 @@ const float BLUE_NOISE_RES_RCP = 1. / BLUE_NOISE_RES;
 
 vec3 getRandomVec(sampler2D blueNoiseTex, vec2 uv, vec2 texSize)
 {
+#ifdef TAA_ENABLED
+    uv += frx_renderSeconds();
+#endif
 #if __VERSION__ < 130
-    vec2 noiseUv = mod((uv + frx_renderSeconds()) * texSize, BLUE_NOISE_RES) * BLUE_NOISE_RES_RCP;
+    vec2 noiseUv = mod(uv * texSize, BLUE_NOISE_RES) * BLUE_NOISE_RES_RCP;
     return texture2D(blueNoiseTex, noiseUv).rgb;
 #else
-    ivec2 texelPos = ivec2(mod((uv + frx_renderSeconds()) * texSize, BLUE_NOISE_RES));
+    ivec2 texelPos = ivec2(mod(uv * texSize, BLUE_NOISE_RES));
     return texelFetch(blueNoiseTex, texelPos, 0).rgb;
 #endif
 }
 
 float getRandomFloat(sampler2D blueNoiseTex, vec2 uv, vec2 texSize)
 {
+#ifdef TAA_ENABLED
+    uv += frx_renderSeconds();
+#endif
 #if __VERSION__ < 130
-    vec2 noiseUv = mod((uv + frx_renderSeconds()) * texSize, BLUE_NOISE_RES) * BLUE_NOISE_RES_RCP;
+    vec2 noiseUv = mod(uv * texSize, BLUE_NOISE_RES) * BLUE_NOISE_RES_RCP;
     return texture2D(blueNoiseTex, noiseUv).r;
 #else
-    ivec2 texelPos = ivec2(mod((uv + frx_renderSeconds()) * texSize, BLUE_NOISE_RES));
+    ivec2 texelPos = ivec2(mod(uv * texSize, BLUE_NOISE_RES));
     return texelFetch(blueNoiseTex, texelPos, 0).r;
 #endif
 }

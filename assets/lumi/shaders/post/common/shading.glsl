@@ -18,7 +18,7 @@
 #include lumi:shaders/lib/puddle.glsl
 #include lumi:shaders/lib/rectangle.glsl
 #include lumi:shaders/lib/taa_jitter.glsl
-#include lumi:shaders/lib/tile_noise.glsl
+#include lumi:shaders/func/tile_noise.glsl
 #include lumi:shaders/lib/util.glsl
 #include lumi:shaders/post/common/bloom.glsl
 #include lumi:shaders/post/common/fog.glsl

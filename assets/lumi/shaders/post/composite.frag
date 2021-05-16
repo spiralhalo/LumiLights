@@ -6,7 +6,7 @@
 #include lumi:shaders/func/tonemap.glsl
 #include lumi:shaders/lib/fast_gaussian_blur.glsl
 #include lumi:shaders/lib/godrays.glsl
-#include lumi:shaders/lib/tile_noise.glsl
+#include lumi:shaders/func/tile_noise.glsl
 #include lumi:shaders/common/lighting.glsl
 #include lumi:shaders/common/userconfig.glsl
 #include lumi:shaders/post/common/clouds.glsl
@@ -96,18 +96,7 @@ void main()
     vec4 particles = texture(u_particles, v_texcoord);
 
     float depth_clouds = texture(u_clouds_depth, v_texcoord).r;
-    #if CLOUD_RENDERING == CLOUD_RENDERING_VOLUMETRIC && defined(VOLUMETRIC_CLOUD_DENOISING)
-        float ldepth_clouds = ldepth(depth_clouds);
-        vec4 clouds;
-        if (ldepth_clouds < 0.01){
-            vec4 clouds_blur = tile_denoise(v_texcoord, u_clouds, 1.0/frxu_size, 3);
-            clouds = mix(clouds_blur, texture(u_clouds, v_texcoord), l2_clampScale(0.0, 0.01, ldepth_clouds));
-        } else {
-            clouds = texture(u_clouds, v_texcoord);;
-        }
-    #else
-        vec4 clouds = texture(u_clouds, v_texcoord);
-    #endif
+    vec4 clouds = texture(u_clouds, v_texcoord);
 
     float depth_weather = texture(u_weather_depth, v_texcoord).r;
     vec4 weather = texture(u_weather, v_texcoord);

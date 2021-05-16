@@ -5,7 +5,7 @@
 #include lumi:shaders/common/userconfig.glsl
 #include lumi:shaders/lib/pbr.glsl
 #include lumi:shaders/lib/puddle.glsl
-#include lumi:shaders/lib/tile_noise.glsl
+#include lumi:shaders/func/tile_noise.glsl
 #include lumi:shaders/lib/util.glsl
 
 /*******************************************************

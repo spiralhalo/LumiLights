@@ -1,4 +1,4 @@
-#include lumi:shaders/lib/tile_noise.glsl
+#include lumi:shaders/func/tile_noise.glsl
 
 /*******************************************************
  *  lumi:shaders/lib/godrays.glsl                      *

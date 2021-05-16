@@ -1,5 +1,5 @@
 #include frex:shaders/lib/math.glsl
-#include lumi:shaders/lib/tile_noise.glsl
+#include lumi:shaders/func/tile_noise.glsl
 
 /*******************************************************
  *  lumi:shaders/lib/ssao.glsl                         *
