@@ -28,12 +28,12 @@ struct cloud_result {
 // const float CLOUD_MARCH_JITTER_STRENGTH = 0.01;
 const float TEXTURE_RADIUS = 512.0;
 const float TEXTURE_RADIUS_RCP = 1.0 / TEXTURE_RADIUS;
-const int NUM_SAMPLE = 512;
+const int NUM_SAMPLE = 128;
 const float SAMPLE_SIZE = TEXTURE_RADIUS / float(NUM_SAMPLE);
 const int LIGHT_SAMPLE = 5;
-const float LIGHT_SAMPLE_SIZE = 0.2;
+const float LIGHT_SAMPLE_SIZE = 0.8;
 const float LIGHT_ABSORPTION_SKYLIGHT = 0.99;
-const float LIGHT_ABSORPTION_CLOUD = 0.99;
+const float LIGHT_ABSORPTION_CLOUD = 0.5;
 const float DARKNESS_THRESHOLD = 0.2;
 const float DARKNESS_THRESHOLD_INV = 1.0 - DARKNESS_THRESHOLD;
 
