@@ -12,38 +12,6 @@
  *  published by the Free Software Foundation, Inc.    *
  *******************************************************/
 
-#define BLUE_NOISE_RES 32.
-const float BLUE_NOISE_SPEED = BLUE_NOISE_RES * BLUE_NOISE_RES;
-const float BLUE_NOISE_RES_RCP = 1. / BLUE_NOISE_RES;
-
-vec3 getRandomVec(sampler2D blueNoiseTex, vec2 uv, vec2 texSize)
-{
-#ifdef TAA_ENABLED
-    uv += frx_renderSeconds();
-#endif
-#if __VERSION__ < 130
-    vec2 noiseUv = mod(uv * texSize, BLUE_NOISE_RES) * BLUE_NOISE_RES_RCP;
-    return texture2D(blueNoiseTex, noiseUv).rgb;
-#else
-    ivec2 texelPos = ivec2(mod(uv * texSize, BLUE_NOISE_RES));
-    return texelFetch(blueNoiseTex, texelPos, 0).rgb;
-#endif
-}
-
-float getRandomFloat(sampler2D blueNoiseTex, vec2 uv, vec2 texSize)
-{
-#ifdef TAA_ENABLED
-    uv += frx_renderSeconds();
-#endif
-#if __VERSION__ < 130
-    vec2 noiseUv = mod(uv * texSize, BLUE_NOISE_RES) * BLUE_NOISE_RES_RCP;
-    return texture2D(blueNoiseTex, noiseUv).r;
-#else
-    ivec2 texelPos = ivec2(mod(uv * texSize, BLUE_NOISE_RES));
-    return texelFetch(blueNoiseTex, texelPos, 0).r;
-#endif
-}
-
 const vec3 tile_randomVec[16] = vec3[16](
     vec3(0.5, 0.3333333333333333, 0.25), 
     vec3(0.25, 0.6666666666666666, 0.5), 
@@ -63,14 +31,46 @@ const vec3 tile_randomVec[16] = vec3[16](
     vec3(0.03125, 0.5925925925925926, 0.015625)
 );
 
-vec3 getRandomVecHalton(vec2 uv, vec2 texSize) {
+#define BLUE_NOISE_RES 256.
+const float BLUE_NOISE_SPEED = BLUE_NOISE_RES * BLUE_NOISE_RES;
+const float BLUE_NOISE_RES_RCP = 1. / BLUE_NOISE_RES;
+
+vec3 getRandomVec(sampler2D blueNoiseTex, vec2 uv, vec2 texSize)
+{
+#ifdef TAA_ENABLED
+    uv += frx_renderSeconds();
+#endif
+#if NOISE_MODE == NOISE_MODE_HALTON
     ivec2 texelPos = ivec2(mod(uv * texSize, 4.0));
     return tile_randomVec[texelPos.x + texelPos.y * 4];
+#else
+#if __VERSION__ < 130
+    vec2 noiseUv = mod(uv * texSize, BLUE_NOISE_RES) * BLUE_NOISE_RES_RCP;
+    return texture2D(blueNoiseTex, noiseUv).rgb;
+#else
+    ivec2 texelPos = ivec2(mod(uv * texSize, BLUE_NOISE_RES));
+    return texelFetch(blueNoiseTex, texelPos, 0).rgb;
+#endif
+#endif
 }
 
-float getRandomFloatHalton(vec2 uv, vec2 texSize) {
+float getRandomFloat(sampler2D blueNoiseTex, vec2 uv, vec2 texSize)
+{
+#ifdef TAA_ENABLED
+    uv += frx_renderSeconds();
+#endif
+#if NOISE_MODE == NOISE_MODE_HALTON
     ivec2 texelPos = ivec2(mod(uv * texSize, 4.0));
     return tile_randomVec[texelPos.x + texelPos.y * 4].x;
+#else
+#if __VERSION__ < 130
+    vec2 noiseUv = mod(uv * texSize, BLUE_NOISE_RES) * BLUE_NOISE_RES_RCP;
+    return texture2D(blueNoiseTex, noiseUv).r;
+#else
+    ivec2 texelPos = ivec2(mod(uv * texSize, BLUE_NOISE_RES));
+    return texelFetch(blueNoiseTex, texelPos, 0).r;
+#endif
+#endif
 }
 
 vec4 tile_denoise(vec2 uv, sampler2D scolor, vec2 inv_size, int noise_size)
