@@ -19,6 +19,8 @@
 
                 "u_weather",
                 "u_weather_depth",
+
+                "u_blue_noise",
             ]
         },
     ],

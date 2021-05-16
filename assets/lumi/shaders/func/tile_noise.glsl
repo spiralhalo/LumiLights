@@ -1,8 +1,10 @@
+#include frex:shaders/api/world.glsl
 #include frex:shaders/lib/math.glsl
+#include lumi:shaders/common/userconfig.glsl
 #include lumi:shaders/lib/util.glsl
 
 /*******************************************************
- *  lumi:shaders/lib/tile_noise.glsl                   *
+ *  lumi:shaders/func/tile_noise.glsl                  *
  *******************************************************
  *  Copyright (c) 2020-2021 spiralhalo                 *
  *  Released WITHOUT WARRANTY under the terms of the   *
@@ -29,14 +31,46 @@ const vec3 tile_randomVec[16] = vec3[16](
     vec3(0.03125, 0.5925925925925926, 0.015625)
 );
 
-vec3 getRandomVec(vec2 uv, vec2 texSize) {
+#define BLUE_NOISE_RES 256.
+const float BLUE_NOISE_SPEED = BLUE_NOISE_RES * BLUE_NOISE_RES;
+const float BLUE_NOISE_RES_RCP = 1. / BLUE_NOISE_RES;
+
+vec3 getRandomVec(sampler2D blueNoiseTex, vec2 uv, vec2 texSize)
+{
+#ifdef TAA_ENABLED
+    uv += frx_renderSeconds();
+#endif
+#if NOISE_MODE == NOISE_MODE_HALTON
     ivec2 texelPos = ivec2(mod(uv * texSize, 4.0));
     return tile_randomVec[texelPos.x + texelPos.y * 4];
+#else
+#if __VERSION__ < 130
+    vec2 noiseUv = mod(uv * texSize, BLUE_NOISE_RES) * BLUE_NOISE_RES_RCP;
+    return texture2D(blueNoiseTex, noiseUv).rgb;
+#else
+    ivec2 texelPos = ivec2(mod(uv * texSize, BLUE_NOISE_RES));
+    return texelFetch(blueNoiseTex, texelPos, 0).rgb;
+#endif
+#endif
 }
 
-float getRandomFloat(vec2 uv, vec2 texSize) {
+float getRandomFloat(sampler2D blueNoiseTex, vec2 uv, vec2 texSize)
+{
+#ifdef TAA_ENABLED
+    uv += frx_renderSeconds();
+#endif
+#if NOISE_MODE == NOISE_MODE_HALTON
     ivec2 texelPos = ivec2(mod(uv * texSize, 4.0));
     return tile_randomVec[texelPos.x + texelPos.y * 4].x;
+#else
+#if __VERSION__ < 130
+    vec2 noiseUv = mod(uv * texSize, BLUE_NOISE_RES) * BLUE_NOISE_RES_RCP;
+    return texture2D(blueNoiseTex, noiseUv).r;
+#else
+    ivec2 texelPos = ivec2(mod(uv * texSize, BLUE_NOISE_RES));
+    return texelFetch(blueNoiseTex, texelPos, 0).r;
+#endif
+#endif
 }
 
 vec4 tile_denoise(vec2 uv, sampler2D scolor, vec2 inv_size, int noise_size)

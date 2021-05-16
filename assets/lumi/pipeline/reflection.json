@@ -18,6 +18,8 @@
                 "u_target_combine",
                 "u_target_depth",
                 "u_normal_target",
+                
+                "u_blue_noise",
             ]
         }, 
     ],

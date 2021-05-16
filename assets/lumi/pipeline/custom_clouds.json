@@ -10,6 +10,7 @@
                 "u_clouds_depth",
                 "u_solid_depth",
                 "u_translucent_depth",
+                "u_blue_noise",
             ]
         }, {
             name: "clouds_texture",

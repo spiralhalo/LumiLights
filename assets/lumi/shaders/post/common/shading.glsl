@@ -18,7 +18,7 @@
 #include lumi:shaders/lib/puddle.glsl
 #include lumi:shaders/lib/rectangle.glsl
 #include lumi:shaders/lib/taa_jitter.glsl
-#include lumi:shaders/lib/tile_noise.glsl
+#include lumi:shaders/func/tile_noise.glsl
 #include lumi:shaders/lib/util.glsl
 #include lumi:shaders/post/common/bloom.glsl
 #include lumi:shaders/post/common/fog.glsl
@@ -32,8 +32,11 @@
  *  published by the Free Software Foundation, Inc.    *
  *******************************************************/
 
+uniform sampler2D u_glint;
 uniform sampler2D u_sun;
 uniform sampler2D u_moon;
+uniform sampler2DArrayShadow u_shadow;
+uniform sampler2D u_blue_noise;
 
 /*******************************************************
     vertexShader: lumi:shaders/post/hdr.vert
@@ -76,7 +79,7 @@ float raymarched_fog_density(vec3 viewPos, vec3 worldPos, float pFogFar)
 
     vec3 modelPos = worldPos - frx_cameraPos();
     float distToCamera = length(modelPos);
-    float sampleSize = max(2.0, pFogFar / 64.0);
+    float sampleSize = max(2.0, pFogFar / 8.0);
     vec3 unitMarch_model = sampleSize * ((-modelPos) / distToCamera);
     vec3 ray_model = modelPos + tileJitter * unitMarch_model;
 
@@ -126,8 +129,8 @@ vec4 fog (float skyLight, vec4 a, vec3 viewPos, vec3 worldPos, inout float bloom
         inverseThickener -= 0.5 * inverseThickener * frx_rainGradient();
         inverseThickener -= 0.5 * inverseThickener * frx_thunderGradient();
         pFogFar *= inverseThickener;
-        pFogDensity = mix(1.0, max(0.8, pFogDensity), inverseThickener);
-        #ifdef OVERWORLD_FOG_USE_ALTITUDE
+        pFogDensity = mix(min(1.0, pFogDensity * 2.0), min(0.8, pFogDensity), inverseThickener);
+        #ifdef OVERWORLD_FOG_ALTITUDE_AFFECTED
             // altitude fog in the overworld :) valley fog is better than mountain-engulfing fog
             if (frx_worldFlag(FRX_WORLD_IS_OVERWORLD)) {
                 float fogTop = mix(FOG_TOP_THICK, FOG_TOP, inverseThickener);
@@ -315,7 +318,7 @@ void custom_sky(in vec3 viewPos, in float blindnessFactor, inout vec4 a, inout f
         // VOID CORE
         float voidCore = l2_clampScale(-0.8 + v_near_void_core, -1.0 + v_near_void_core, skyDotUp); 
         vec3 voidColor = mix(vec3(0.0), VOID_CORE_COLOR, voidCore);
-        bloom_out = voidCore;
+        bloom_out = voidCore * (1. - v_not_in_void);
         a.rgb = mix(voidColor, a.rgb, v_not_in_void);
     }
 
@@ -333,6 +336,8 @@ vec4 hdr_shaded_color(
     float aoval, bool translucent, float translucentDepth, out float bloom_out)
 {
     vec4  a       = texture(scolor, uv);
+    if (translucent && a.a == 0.) return vec4(0.);
+    
     float depth   = texture(sdepth, uv).r;
     vec3  viewPos = coords_view(uv, frx_inverseProjectionMatrix(), depth);
 

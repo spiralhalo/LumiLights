@@ -89,11 +89,6 @@
           nameKey: "config.lumi_lights.value.volumetric_cloud_mode",
           descriptionKey: "config.lumi_lights.help.volumetric_cloud_mode"
         },
-        volumetric_cloud_denoising: {
-          default: false,
-          nameKey: "config.lumi_lights.value.volumetric_cloud_denoising",
-          descriptionKey: "config.lumi_lights.help.volumetric_cloud_denoising"
-        },
       }
     },
   ]

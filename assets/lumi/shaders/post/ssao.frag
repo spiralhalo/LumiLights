@@ -16,15 +16,16 @@
 
 uniform sampler2D u_normal;
 uniform sampler2D u_depth;
+uniform sampler2D u_blue_noise;
 
 #ifndef USING_OLD_OPENGL
 out vec4[1] fragColor;
 #endif
 
 #ifdef SSAO_ENABLED
-const float RADIUS = 1.0;
+const float RADIUS = 2.0;
 const float BIAS = 0.5;
-const float INTENSITY = 5.0;
+const float INTENSITY = 2.5;
 #endif
 
 void main()
@@ -36,8 +37,9 @@ void main()
     } else {
         float random = v_texcoord.x*v_texcoord.y;
         float ssao = calc_ssao(
-            u_normal, u_depth, frx_normalModelMatrix(), frx_inverseProjectionMatrix(), frxu_size, 
-            v_texcoord, RADIUS, BIAS, INTENSITY);
+            u_normal, u_depth, u_blue_noise,
+            frx_normalModelMatrix(), frx_inverseProjectionMatrix(), frxu_size, 
+            v_texcoord, RADIUS, RADIUS * 0.5, BIAS, INTENSITY);
         fragColor[0] = vec4(ssao, 0.0, 0.0, 1.0);
     }
 #else

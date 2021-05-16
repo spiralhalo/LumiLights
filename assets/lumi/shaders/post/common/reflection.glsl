@@ -5,7 +5,7 @@
 #include lumi:shaders/common/userconfig.glsl
 #include lumi:shaders/lib/pbr.glsl
 #include lumi:shaders/lib/puddle.glsl
-#include lumi:shaders/lib/tile_noise.glsl
+#include lumi:shaders/func/tile_noise.glsl
 #include lumi:shaders/lib/util.glsl
 
 /*******************************************************
@@ -16,6 +16,8 @@
  *  GNU Lesser General Public License version 3 as     *
  *  published by the Free Software Foundation, Inc.    *
  *******************************************************/
+
+uniform sampler2D u_blue_noise;
 
 #if REFLECTION_PROFILE == REFLECTION_PROFILE_EXTREME
     const float HITBOX = 0.0625;
@@ -174,7 +176,7 @@ rt_Result rt_reflection(
 }
 #endif
 
-const float JITTER_STRENGTH = 0.2;
+const float JITTER_STRENGTH = 0.6;
 
 struct rt_color_depth
 {
@@ -214,7 +216,7 @@ rt_color_depth work_on_pair(
 
     vec3 unit_view = normalize(-ray_view);
     
-    vec3 jitter    = 2.0 * getRandomVec(v_texcoord, frxu_size) - 1.0;
+    vec3 jitter    = 2.0 * getRandomVec(u_blue_noise, v_texcoord, frxu_size) - 1.0;
     vec3 normal    = frx_normalModelMatrix() * normalize(worldNormal);
     float roughness2 = roughness * roughness;
     // if (ray_view.y < normal.y) return noreturn;
@@ -233,7 +235,7 @@ rt_color_depth work_on_pair(
     if (impossibleRay || exceedsThreshold) {
         result.hit = false;
     } else {
-        result = rt_reflection(ray_view, unit_view, normal, unit_march, frx_normalModelMatrix(), frx_projectionMatrix(), frx_inverseProjectionMatrix(), reflected_depth, reflected_normal);
+        result = rt_reflection(ray_view + unit_march * jitter.x * HITBOX, unit_view, normal, unit_march, frx_normalModelMatrix(), frx_projectionMatrix(), frx_inverseProjectionMatrix(), reflected_depth, reflected_normal);
     }
     #endif
 
