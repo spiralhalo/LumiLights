@@ -13,7 +13,8 @@ out vec4 fragColor;
 void main()
 {
 #ifdef HALF_REFLECTION_RESOLUTION
-    vec2 deltaRes = v_invSize * 0.5;
+    // double deltaRes, causes slight ghosting to reduce flickering
+    vec2 deltaRes = v_invSize;
     vec2 currentUv = v_texcoord * 0.5 + vec2(.5, .0);
 
     vec4 current2x2Colors[neighborCount2x2];

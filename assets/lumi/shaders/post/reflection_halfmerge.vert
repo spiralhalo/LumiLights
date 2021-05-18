@@ -19,5 +19,5 @@ void main()
 #else
     gl_Position.xy = vec2(0.);
 #endif
-    v_invSize = 2.0/frxu_size;
+    v_invSize = 1.0 / frxu_size;
 }
