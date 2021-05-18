@@ -102,7 +102,8 @@ void main()
         u_color,
         u_translucent_depth,
         u_normal,
-        1.0);
+        1.0,
+        true);
     a.rgb += source_source.color.rgb;
     #endif
 
