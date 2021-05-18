@@ -6,9 +6,11 @@
 ******************************************************/
 uniform sampler2D u_input;
 
-in vec2 v_invSize;
+frag_in vec2 v_invSize;
 
-out vec4 fragColor;
+#ifndef USING_OLD_OPENGL
+out vec4[1] fragColor;
+#endif
 
 void main()
 {
@@ -30,7 +32,7 @@ void main()
     
     history = clip_aabb(min2.rgb, max2.rgb, current, history);
 
-    fragColor = mix(current, history, 0.9);
+    fragColor[0] = mix(current, history, 0.9);
 #else
     discard;
 #endif

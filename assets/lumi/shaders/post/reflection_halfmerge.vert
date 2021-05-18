@@ -8,7 +8,7 @@
  *  lumi:shaders/post/reflection_halfmerge.vert        *
  *******************************************************/
 
-out vec2 v_invSize;
+vert_out vec2 v_invSize;
 
 void main()
 {

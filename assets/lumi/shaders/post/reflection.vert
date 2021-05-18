@@ -10,8 +10,8 @@
  *  lumi:shaders/post/hdr_half.vert                    *
  *******************************************************/
 
-out vec2 v_invSize;
-out float v_blindness;
+vert_out vec2 v_invSize;
+vert_out float v_blindness;
 
 void main()
 {
