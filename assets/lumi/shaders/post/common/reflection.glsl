@@ -197,7 +197,8 @@ rt_color_depth work_on_pair(
     in sampler2D reflected_combine,
     in sampler2D reflected_depth,
     in sampler2D reflected_normal,
-    float fallback
+    float fallback,
+    bool compute_colors
 )
 {
     vec4 material   = texture(reflector_material, v_texcoord);
@@ -239,15 +240,9 @@ rt_color_depth work_on_pair(
     }
     #endif
 
-    vec4 reflected;
+    vec4 reflected = vec4(0.);
     float reflected_depth_value;
-
-    vec4 fallbackColor;
-    if (fallback > 0.0) {
-        fallbackColor = vec4(calcFallbackColor(unit_view, unit_march, light), fallback);
-    } else {
-        fallbackColor = vec4(0.0);
-    }
+    float fallbackMix = 0.;
 
     #if REFLECTION_PROFILE != REFLECTION_PROFILE_NONE
     reflected_depth_value = sample_depth(result.reflected_uv, reflected_depth);
@@ -257,11 +252,12 @@ rt_color_depth work_on_pair(
         float occlusionFactor = 1.0;
     #endif
         // reflected.rgb = mix(vec3(0.0), hdr_gammaAdjust(BLOCK_LIGHT_COLOR), pow(light.x, 6.0) * material.y);
-        reflected = fallbackColor * occlusionFactor;
+        fallbackMix = occlusionFactor;
         reflected_depth_value = 1.0;
 
     #if REFLECTION_PROFILE != REFLECTION_PROFILE_NONE
     } else {
+        if (compute_colors) {
         #ifdef KALEIDOSKOP
             reflected = texture(reflected_combine, result.reflected_uv);
         #elif defined(MULTI_BOUNCE_REFLECTION)
@@ -274,15 +270,24 @@ rt_color_depth work_on_pair(
         #else
             reflected = texture(reflected_color, result.reflected_uv);
         #endif
+        }
         // fade to fallback on edges
         vec2 uvFade = smoothstep(0.5, 0.45, abs(result.reflected_uv - 0.5));
-        reflected = mix(fallbackColor, reflected, min(uvFade.x, uvFade.y));
+        fallbackMix = 1.0 - min(uvFade.x, uvFade.y);
     }
     #endif
 
-    // more useful in worldspace after rt computation is done
-    unit_view  *= frx_normalModelMatrix();
-    unit_march *= frx_normalModelMatrix();
-    vec4 pbr_color = vec4(pbr_lightCalc(roughness, f0, reflected.rgb * base_color.a, unit_march, unit_view), reflected.a);
-    return rt_color_depth(pbr_color, reflected_depth_value);
+    // nb: compute_colors is currently unused as of the commmit it was added in ¯\_(ツ)_/¯
+    if (compute_colors) {
+        vec4 fallbackColor   = fallback > 0.0 ? vec4(calcFallbackColor(unit_view, unit_march, light), fallback) : vec4(0.0);
+        vec4 reflected_final = mix(reflected, fallbackColor, fallbackMix);
+        vec3 unit_world      = unit_view * frx_normalModelMatrix();
+        vec3 unitMarch_world = unit_march * frx_normalModelMatrix();
+
+        vec4 pbr_color = vec4(pbr_lightCalc(roughness, f0, reflected_final.rgb * base_color.a, unitMarch_world, unit_world), reflected_final.a);
+        
+        return rt_color_depth(pbr_color, reflected_depth_value);
+    } else {
+        return rt_color_depth(vec4(result.reflected_uv, fallbackMix, 1.0), reflected_depth_value);
+    }
 }

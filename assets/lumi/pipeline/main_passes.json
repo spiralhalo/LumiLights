@@ -109,6 +109,38 @@
                     "solid_shaded", "solid_depth", "normal_solid",
                     "translucent_depth", "light_translucent", "normal_translucent"]
             },*/ {
+                // copy solid reflection to translucent BOTTOM RIGHT and vice versa
+                // highly cursed
+                name: "reflection_halfcopy_br_solid",
+                program: "reflection_halfcopy_br",
+                framebuffer: "reflection_translucent",
+                samplerImages: [
+                    "solid_shaded_swap",
+                ]
+            }, {
+                name: "reflection_halfcopy_br_translucent",
+                program: "reflection_halfcopy_br",
+                framebuffer: "reflection_solid",
+                samplerImages: [
+                    "translucent_shaded_swap",
+                ]
+            }, {
+                // merge translucent back to solid and vice versa
+                // highly cursed
+                name: "reflection_halfmerge_solid",
+                program: "reflection_halfmerge",
+                framebuffer: "reflection_solid",
+                samplerImages: [
+                    "translucent_shaded_swap",
+                ]
+            }, {
+                name: "reflection_halfmerge_translucent",
+                program: "reflection_halfmerge",
+                framebuffer: "reflection_translucent",
+                samplerImages: [
+                    "solid_shaded_swap",
+                ]
+            }, {
                 name: "shading_combine",
                 program: "shading_combine",
                 framebuffer: "shading_combine",
@@ -120,6 +152,24 @@
                     "translucent_shaded",
                     "translucent_shaded_swap",
                     "translucent_depth",
+                    
+                    "lumi:textures/filter_pattern/bluenoise256.png",
+                ]
+            }, {
+                // copy solid reflection to translucent TOP RIGHT and vice versa
+                // highly cursed
+                name: "reflection_halfcopy_tr_solid",
+                program: "reflection_halfcopy_tr",
+                framebuffer: "reflection_translucent",
+                samplerImages: [
+                    "solid_shaded_swap",
+                ]
+            }, {
+                name: "reflection_halfcopy_tr_translucent",
+                program: "reflection_halfcopy_tr",
+                framebuffer: "reflection_solid",
+                samplerImages: [
+                    "translucent_shaded_swap",
                 ]
             }, {
                 name: "clouds_texture",

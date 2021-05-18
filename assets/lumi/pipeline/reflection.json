@@ -2,7 +2,7 @@
     programs: [
          {
             name: "reflection",
-            vertexSource: "lumi:shaders/post/hdr.vert",
+            vertexSource: "lumi:shaders/post/reflection.vert",
             fragmentSource: "lumi:shaders/post/reflection.frag",
             samplers: [
                 "u_source_color",
@@ -20,6 +20,30 @@
                 "u_normal_target",
                 
                 "u_blue_noise",
+            ]
+        }, 
+        {
+            name: "reflection_halfmerge",
+            vertexSource: "lumi:shaders/post/reflection_halfmerge.vert",
+            fragmentSource: "lumi:shaders/post/reflection_halfmerge.frag",
+            samplers: [
+                "u_input",
+            ]
+        },
+        {
+            name: "reflection_halfcopy_tr",
+            vertexSource: "lumi:shaders/post/reflection_halfcopy_tr.vert",
+            fragmentSource: "lumi:shaders/post/reflection_halfcopy.frag",
+            samplers: [
+                "u_input",
+            ]
+        }, 
+        {
+            name: "reflection_halfcopy_br",
+            vertexSource: "lumi:shaders/post/reflection_halfcopy_br.vert",
+            fragmentSource: "lumi:shaders/post/reflection_halfcopy.frag",
+            samplers: [
+                "u_input",
             ]
         }, 
     ],

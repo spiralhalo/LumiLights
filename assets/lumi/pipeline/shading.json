@@ -54,6 +54,8 @@
                 "u_hdr_translucent",
                 "u_hdr_translucent_swap",
                 "u_translucent_depth",
+                
+                "u_blue_noise",
             ]
         },
     ],
