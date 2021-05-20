@@ -29,7 +29,7 @@
           descriptionKey: "config.lumi_lights.help.blocklight_specular_mode"
         },
         reflection_profile: {
-          default: "medium",
+          default: "low",
           choices: ["none", "low", "medium", "high", "extreme"],
           enum: true,
           prefix: "reflection_profile_",
@@ -44,7 +44,7 @@
           descriptionKey: "config.lumi_lights.help.reflection_maximum_roughness_relative"
         },
         half_reflection_resolution: {
-            default: true,
+            default: false,
             nameKey: "config.lumi_lights.value.half_reflection_resolution",
             descriptionKey: "config.lumi_lights.help.half_reflection_resolution"
         },
