@@ -121,7 +121,7 @@ rt_Result rt_reflection(
     vec3 ray = unitMarch_view * hitbox_z;
 
     // limit hitbox size for inbound reflection
-    float hitboxLimit = unitMarch_view.z > 0.0 ? 2. : 1024000.;
+    float hitboxLimit = unitMarch_view.z > 0.0 ? 6. : 1024000.;
 
     vec2 rayHit_uv;
     int hits = 0;
