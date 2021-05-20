@@ -81,12 +81,12 @@ vec3 sample_worldNormal(vec2 uv, in sampler2D snormal)
 }
 
 const float SKYLESS_FACTOR = 0.5;
-vec3 calcFallbackColor(vec3 unit_view, vec3 unit_march, vec2 light)
+vec3 calcFallbackColor(vec3 unit_view, vec3 unitMarch_view, vec2 light)
 {
     float skyLight = l2_clampScale(0.03125, 0.96875, light.y);
-    float upFactor = frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? l2_clampScale(-0.1, 0.1, dot(unit_march, v_up)) : 1.0;
+    float upFactor = frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? l2_clampScale(-0.1, 0.1, dot(unitMarch_view, v_up)) : 1.0;
     float skyLightFactor = frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? (skyLight * skyLight) : SKYLESS_FACTOR;
-    return atmos_hdrSkyColorRadiance(unit_march * frx_normalModelMatrix()) * skyLightFactor * upFactor * 2.0;
+    return atmos_hdrSkyColorRadiance(unitMarch_view * frx_normalModelMatrix()) * skyLightFactor * upFactor * 2.0;
 }
 
 vec3 pbr_lightCalc(float roughness, vec3 f0, vec3 radiance, vec3 lightDir, vec3 viewDir)
@@ -107,76 +107,80 @@ struct rt_Result
 };
 
 rt_Result rt_reflection(
-    vec3 ray_view, vec3 unit_view, vec3 normal, vec3 unit_march,
+    vec3 start_view, vec3 unit_view, vec3 normal, vec3 unitMarch_view,
     mat3 normal_matrix, mat4 projection, mat4 inv_projection,
     in sampler2D reflected_depth, in sampler2D reflected_normal
 )
 {
-    ray_view.xyz += unit_march * -ray_view.z / 50; // magic
-    vec3 start_view = ray_view.xyz;
+    start_view = start_view + unitMarch_view * -start_view.z / vec3(50.); // magic
+    vec3 ray_view = start_view;
     float edge_z = start_view.z + 0.25;
+
     // float hitbox_z = mix(HITBOX, 1.0, sqrt(start_view.z/512.0));
     float hitbox_z = HITBOX;
-    vec3 ray = unit_march * hitbox_z;
+    vec3 ray = unitMarch_view * hitbox_z;
 
     // limit hitbox size for inbound reflection
-    float hitboxLimit = unit_march.z > 0.0 ? 2. : 1024000.;
+    float hitboxLimit = unitMarch_view.z > 0.0 ? 2. : 1024000.;
 
-    float hitbox_mult;
-    vec2 current_uv;
-    vec3 current_view;
-    float delta_z; 
-    bool frontface;
-    vec3 reflectedNormal;
-
+    vec2 rayHit_uv;
     int hits = 0;
     int steps = 0;
-    int refine_steps = 0;
     while (steps < MAXSTEPS && hitbox_z < hitboxLimit) {
+
         ray_view += ray;
-        current_uv = view2uv(ray_view, projection);
-        current_view = uv2view(current_uv, inv_projection, reflected_depth);
-        delta_z = current_view.z - ray_view.z; 
-        reflectedNormal = normalize(normal_matrix * sample_worldNormal(current_uv, reflected_normal));
-        frontface = dot(unit_march, reflectedNormal) < 0;
-        if (delta_z > 0 && frontface && (current_view.z < edge_z || unit_march.z > 0.0)) {
+        rayHit_uv = view2uv(ray_view, projection);
+        vec3 rayHit_view = uv2view(rayHit_uv, inv_projection, reflected_depth);
+
+        float delta_z = rayHit_view.z - ray_view.z; 
+        vec3 reflectedNormal   = normalize(normal_matrix * sample_worldNormal(rayHit_uv, reflected_normal));
+        bool reflectsFrontFace = dot(unitMarch_view, reflectedNormal) < 0.;
+
+        if (delta_z > 0 && reflectsFrontFace && (rayHit_view.z < edge_z || unitMarch_view.z > 0.)) {
             // Pad hitbox to reduce "stripes" artifact when surface is almost perpendicular to 
-            hitbox_mult = 1.0 + 3.0 * (1.0 - dot(vec3(0.0, 0.0, 1.0), reflectedNormal)); // dot is unclamped intentionally
-            float hitboxNow = min(hitboxLimit, hitbox_mult * hitbox_z);
+            float hitboxMult = 1. + 3. * (1. - dot(vec3(0., 0., 1.), reflectedNormal)); // dot is unclamped intentionally
+            float hitboxNow = min(hitboxLimit, hitboxMult * hitbox_z);
 
             if (delta_z < hitboxNow) {
                 //refine
-                vec2 prev_uv = current_uv;
-                float prev_delta_z = delta_z;
-                float refine_ray_length = 0.0625;
-                ray = unit_march * refine_ray_length;
+                int refine_steps = 0;
+                vec2 last_uv = rayHit_uv;
+                float lastDelta_z = delta_z;
+                float refineRayLength = 0.0625;
+                ray = unitMarch_view * refineRayLength;
+
                 // 0.01 is the delta_z at which no more detail will be achieved even for very nearby reflection
                 // PERF: adapt based on initial z
                 while (refine_steps < REFINE && abs(delta_z) > 0.01) {
-                    if (abs(delta_z) < refine_ray_length) {
-                        refine_ray_length = abs(delta_z);
-                        ray = unit_march * refine_ray_length;
+
+                    if (abs(delta_z) < refineRayLength) {
+                        refineRayLength = abs(delta_z);
+                        ray = unitMarch_view * refineRayLength;
                     }
+
                     ray_view -= ray;
-                    current_uv = view2uv(ray_view, projection);
-                    current_view = uv2view(current_uv, inv_projection, reflected_depth);
-                    delta_z = current_view.z - ray_view.z;
-                    // Ensure delta_z never exceeds the amount we started with
-                    if (abs(delta_z) > abs(prev_delta_z)) break;
-                    prev_uv = current_uv;
-                    prev_delta_z = delta_z;
+                    rayHit_uv = view2uv(ray_view, projection);
+                    rayHit_view = uv2view(rayHit_uv, inv_projection, reflected_depth);
+
+                    delta_z = rayHit_view.z - ray_view.z;
+                    // Ensure delta_z never increases
+                    if (abs(delta_z) > abs(lastDelta_z)) break;
+
+                    last_uv = rayHit_uv;
+                    lastDelta_z = delta_z;
                     refine_steps ++;
                 }
-                return rt_Result(prev_uv, true, hits);
+
+                return rt_Result(last_uv, true, hits);
             }
         }
         if (mod(steps, PERIOD) == 0) {
-            ray *= 2.0;
-            hitbox_z *= 2.0;
+            ray *= 2.;
+            hitbox_z *= 2.;
         }
         steps ++;
     }
-    return rt_Result(current_uv, false, hits);
+    return rt_Result(rayHit_uv, false, hits);
 }
 #endif
 
@@ -228,19 +232,19 @@ rt_color_depth work_on_pair(
     vec3 reg_f0     = vec3(material.z);
     vec3 f0         = mix(reg_f0, albedo, material.y);
 
-    vec3 unit_march = normalize(reflect(-unit_view, normal) + mix(vec3(0.0, 0.0, 0.0), jitter * JITTER_STRENGTH, roughness2));
+    vec3 unitMarch_view = normalize(reflect(-unit_view, normal) + mix(vec3(0.0, 0.0, 0.0), jitter * JITTER_STRENGTH, roughness2));
 
     #if REFLECTION_PROFILE != REFLECTION_PROFILE_NONE
     rt_Result result;
 
     vec3 rawNormal_view   = frx_normalModelMatrix() * sample_worldNormal(v_texcoord, reflector_normal);
-    bool impossibleRay    = dot(rawNormal_view, unit_march) < 0;
+    bool impossibleRay    = dot(rawNormal_view, unitMarch_view) < 0;
     bool exceedsThreshold = roughness > REFLECTION_MAXIMUM_ROUGHNESS;
 
     if (impossibleRay || exceedsThreshold) {
         result.hit = false;
     } else {
-        result = rt_reflection(ray_view + unit_march * jitter.x * HITBOX, unit_view, normal, unit_march, frx_normalModelMatrix(), frx_projectionMatrix(), frx_inverseProjectionMatrix(), reflected_depth, reflected_normal);
+        result = rt_reflection(ray_view + unitMarch_view * jitter.x * HITBOX, unit_view, normal, unitMarch_view, frx_normalModelMatrix(), frx_projectionMatrix(), frx_inverseProjectionMatrix(), reflected_depth, reflected_normal);
     }
     #endif
 
@@ -283,10 +287,10 @@ rt_color_depth work_on_pair(
 
     // nb: compute_colors is currently unused as of the commmit it was added in ¯\_(ツ)_/¯
     if (compute_colors) {
-        vec4 fallbackColor   = fallback > 0.0 ? vec4(calcFallbackColor(unit_view, unit_march, light), fallback) : vec4(0.0);
+        vec4 fallbackColor   = fallback > 0.0 ? vec4(calcFallbackColor(unit_view, unitMarch_view, light), fallback) : vec4(0.0);
         vec4 reflected_final = mix(reflected, fallbackColor, fallbackMix);
         vec3 unit_world      = unit_view * frx_normalModelMatrix();
-        vec3 unitMarch_world = unit_march * frx_normalModelMatrix();
+        vec3 unitMarch_world = unitMarch_view * frx_normalModelMatrix();
 
         vec4 pbr_color = vec4(pbr_lightCalc(roughness, f0, reflected_final.rgb * base_color.a, unitMarch_world, unit_world), reflected_final.a);
         
