@@ -296,6 +296,10 @@ rt_color_depth work_on_pair(
         
         return rt_color_depth(pbr_color, reflected_depth_value);
     } else {
+    #if REFLECTION_PROFILE != REFLECTION_PROFILE_NONE
         return rt_color_depth(vec4(result.reflected_uv, fallbackMix, 1.0), reflected_depth_value);
+    #else
+        return rt_color_depth(vec4(0., 0., fallbackMix, 1.0), reflected_depth_value);
+    #endif
     }
 }
