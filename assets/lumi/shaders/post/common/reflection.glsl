@@ -119,17 +119,20 @@ rt_Result rt_reflection(
     float hitbox_z = HITBOX;
     vec3 ray = unit_march * hitbox_z;
 
+    // limit hitbox size for inbound reflection
+    float hitboxLimit = unit_march.z > 0.0 ? 2. : 1024000.;
+
     float hitbox_mult;
     vec2 current_uv;
     vec3 current_view;
     float delta_z; 
     bool frontface;
     vec3 reflectedNormal;
-    
+
     int hits = 0;
     int steps = 0;
     int refine_steps = 0;
-    while (steps < MAXSTEPS) {
+    while (steps < MAXSTEPS && hitbox_z < hitboxLimit) {
         ray_view += ray;
         current_uv = view2uv(ray_view, projection);
         current_view = uv2view(current_uv, inv_projection, reflected_depth);
@@ -139,8 +142,9 @@ rt_Result rt_reflection(
         if (delta_z > 0 && frontface && (current_view.z < edge_z || unit_march.z > 0.0)) {
             // Pad hitbox to reduce "stripes" artifact when surface is almost perpendicular to 
             hitbox_mult = 1.0 + 3.0 * (1.0 - dot(vec3(0.0, 0.0, 1.0), reflectedNormal)); // dot is unclamped intentionally
+            float hitboxNow = min(hitboxLimit, hitbox_mult * hitbox_z);
 
-            if (delta_z < hitbox_z * hitbox_mult) {
+            if (delta_z < hitboxNow) {
                 //refine
                 vec2 prev_uv = current_uv;
                 float prev_delta_z = delta_z;
