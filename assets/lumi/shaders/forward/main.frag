@@ -60,7 +60,7 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
     vec4 a = clamp(fragData.spriteColor * fragData.vertexColor, 0.0, 1.0);
 
     if (pbr_f0 < 0.0) {
-        pbr_f0 = frx_luminance(hdr_gammaAdjust(a.rgb)) * 0.1;
+        pbr_f0 = 1./256. + frx_luminance(a.rgb) * 0.04;
     }
     pbr_f0 = clamp(pbr_f0, 0.0, 1.0);
     pbr_roughness = clamp(pbr_roughness, 0.0, 1.0);
