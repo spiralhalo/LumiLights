@@ -62,9 +62,6 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
     if (pbr_f0 < 0.0) {
         pbr_f0 = 1./256. + frx_luminance(a.rgb) * 0.04;
     }
-    pbr_f0 = clamp(pbr_f0, 0.0, 1.0);
-    pbr_roughness = clamp(pbr_roughness, 0.0, 1.0);
-    pbr_metallic = clamp(pbr_metallic, 0.0, 1.0);
 
     // Vanilla AO never make sense for anything other than terrain
     if (frx_modelOriginType() != MODEL_ORIGIN_REGION) {
@@ -106,7 +103,7 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
 
         //pad with 0.01 to prevent conflation with unmanaged draw
         // NB: diffuse is forced true for hand
-        float roughness = (fragData.diffuse || maybeHand) ? 0.01 + pbr_roughness * 0.98 : 1.0;
+        float roughness = (fragData.diffuse || maybeHand) ? 0.01 + clamp(pbr_roughness, 0.0, 1.0) * 0.98 : 1.0;
 
         float bitFlags = bit_pack(frx_matFlash() ? 1. : 0., frx_matHurt() ? 1. : 0., frx_matGlint(), 0., 0., 0., 0., 0.);
 
