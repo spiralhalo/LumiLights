@@ -57,7 +57,7 @@ frx_FragmentData frx_createPipelineFragment()
 
 void frx_writePipelineFragment(in frx_FragmentData fragData)
 {
-    vec4 a = clamp(fragData.spriteColor * fragData.vertexColor, 0.0, 1.0);
+    vec4 a = fragData.spriteColor * fragData.vertexColor;
 
     if (pbr_f0 < 0.0) {
         pbr_f0 = 1./256. + frx_luminance(a.rgb) * 0.04;
@@ -90,21 +90,19 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
         bool maybeHand = frx_modelOriginType() == MODEL_ORIGIN_SCREEN;
         bool isParticle = (frx_renderTarget() == TARGET_PARTICLES);
 
-        vec3 normal;
-        vec3 normal_micro;
+        vec3 normal = fragData.vertexNormal;
+        vec3 normal_micro = pbr_normalMicro.x > 90. ? normal : pbr_normalMicro;
         float bloom = fragData.emissivity * a.a;
-        float ao;
-        float normalizedBloom;
+        float ao = fragData.ao ? (1.0 - fragData.aoShade) * a.a : 0.0;
+        float normalizedBloom = (bloom - ao) * 0.5 + 0.5;
 
         if (maybeHand) {
-            normal = normalize(fragData.vertexNormal) * frx_normalModelMatrix() * 0.5 + 0.5;
-            normal_micro = pbr_normalMicro.x > 90. ? normal : normalize(pbr_normalMicro) * frx_normalModelMatrix() * 0.5 + 0.5;
-        } else {
-            normal = normalize(fragData.vertexNormal) * 0.5 + 0.5;
-            normal_micro = pbr_normalMicro.x > 90. ? normal : normalize(pbr_normalMicro) * 0.5 + 0.5;
-            ao = fragData.ao ? (1.0 - fragData.aoShade) * a.a : 0.0;
-            normalizedBloom = (bloom - ao) * 0.5 + 0.5;
+            normal = normal * frx_normalModelMatrix();
+            normal_micro = pbr_normalMicro * frx_normalModelMatrix();
         }
+
+        normal = normal * 0.5 + 0.5;
+        normal_micro = normal_micro * 0.5 + 0.5;
 
         //pad with 0.01 to prevent conflation with unmanaged draw
         // NB: diffuse is forced true for hand
