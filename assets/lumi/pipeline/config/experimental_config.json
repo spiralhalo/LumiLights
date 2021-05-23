@@ -4,13 +4,13 @@
             includeToken: "lumi:experimental_config",
             categoryKey: "config.lumi_lights.category.experimental",
             options: {
-                noise_mode: {
-                    default: "halton",
+                dithering_mode: {
+                    default: "blue_noise",
                     choices: ["blue_noise", "halton"],
                     enum: true,
-                    prefix: "noise_mode_",
-                    nameKey: "config.lumi_lights.value.noise_mode",
-                    descriptionKey: "config.lumi_lights.help.noise_mode"
+                    prefix: "dithering_mode_",
+                    nameKey: "config.lumi_lights.value.dithering_mode",
+                    descriptionKey: "config.lumi_lights.help.dithering_mode"
                 },
                 parallax_cloud_density: {
                     default: 1.0,
@@ -25,14 +25,6 @@
                     max: 18,
                     nameKey: "config.lumi_lights.value.volumetric_fog_softness_relative",
                     descriptionKey: "config.lumi_lights.help.volumetric_fog_softness_relative"
-                },
-                glint_mode: {
-                    default: "shader",
-                    choices: ["texture", "shader"],
-                    enum: true,
-                    prefix: "glint_mode_",
-                    nameKey: "config.lumi_lights.value.glint_mode",
-                    descriptionKey: "config.lumi_lights.help.glint_mode"
                 },
                 taa_debug_render: {
                     default: "off",

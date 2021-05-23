@@ -40,7 +40,7 @@ vec3 getRandomVec(sampler2D blueNoiseTex, vec2 uv, vec2 texSize)
 #ifdef TAA_ENABLED
     uv += frx_renderSeconds();
 #endif
-#if NOISE_MODE == NOISE_MODE_HALTON
+#if DITHERING_MODE == DITHERING_MODE_HALTON
     ivec2 texelPos = ivec2(mod(uv * texSize, 4.0));
     return tile_randomVec[texelPos.x + texelPos.y * 4];
 #else
@@ -59,7 +59,7 @@ float getRandomFloat(sampler2D blueNoiseTex, vec2 uv, vec2 texSize)
 #ifdef TAA_ENABLED
     uv += frx_renderSeconds();
 #endif
-#if NOISE_MODE == NOISE_MODE_HALTON
+#if DITHERING_MODE == DITHERING_MODE_HALTON
     ivec2 texelPos = ivec2(mod(uv * texSize, 4.0));
     return tile_randomVec[texelPos.x + texelPos.y * 4].x;
 #else

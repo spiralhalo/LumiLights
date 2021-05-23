@@ -79,7 +79,7 @@ void main()
 
     vec3 misc = texture(u_misc, v_texcoord).xyz;
 
-    #if GLINT_MODE == GLINT_MODE_SHADER
+    #if GLINT_MODE == GLINT_MODE_GLINT_SHADER
         a.rgb += hdr_gammaAdjust(noise_glint(misc.xy, bit_unpack(misc.z, 2)));
     #else
         a.rgb += hdr_gammaAdjust(texture_glint(u_glint, misc.xy, bit_unpack(misc.z, 2)));

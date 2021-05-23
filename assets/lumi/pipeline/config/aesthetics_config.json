@@ -56,6 +56,14 @@
           nameKey: "config.lumi_lights.value.lumi_sky_color",
           descriptionKey: "config.lumi_lights.help.lumi_sky_color"
         },
+        glint_mode: {
+          default: "glint_texture",
+          choices: ["glint_texture", "glint_shader"],
+          enum: true,
+          prefix: "glint_mode_",
+          nameKey: "config.lumi_lights.value.glint_mode",
+          descriptionKey: "config.lumi_lights.help.glint_mode"
+        },
         glint_style: {
           default: "glint_a",
           choices: ["glint_a", "glint_b", "glint_d"],
@@ -89,11 +97,6 @@
           default: false,
           nameKey: "config.lumi_lights.value.toon_outline",
           descriptionKey: "config.lumi_lights.help.toon_outline"
-        },
-        name_tag_shadow: {
-          default: false,
-          nameKey: "config.lumi_lights.value.name_tag_shadow",
-          descriptionKey: "config.lumi_lights.help.name_tag_shadow"
         },
         // bloom_upsample_dist: {
         //   default: 5,

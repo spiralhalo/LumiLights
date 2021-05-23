@@ -445,7 +445,7 @@ vec4 hdr_shaded_color(
 
     a.a = min(1.0, a.a);
 
-    #if GLINT_MODE == GLINT_MODE_SHADER
+    #if GLINT_MODE == GLINT_MODE_GLINT_SHADER
         a.rgb += hdr_gammaAdjust(noise_glint(misc.xy, bit_unpack(misc.z, 2)));
     #else
         a.rgb += hdr_gammaAdjust(texture_glint(u_glint, misc.xy, bit_unpack(misc.z, 2)));

@@ -79,7 +79,7 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
         // diffuse = frx_isGui() ? diffuse : min(1.0, 1.5 - diffuse);
         diffuse = fragData.diffuse ? diffuse : 1.0;
         a.rgb *= diffuse;
-        #if GLINT_MODE == GLINT_MODE_SHADER
+        #if GLINT_MODE == GLINT_MODE_GLINT_SHADER
             a.rgb += noise_glint(frx_normalizeMappedUV(frx_texcoord), frx_matGlint());
         #else
             a.rgb += texture_glint(u_glint, frx_normalizeMappedUV(frx_texcoord), frx_matGlint());
