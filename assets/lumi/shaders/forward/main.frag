@@ -88,18 +88,18 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
         bool isParticle = (frx_renderTarget() == TARGET_PARTICLES);
 
         vec3 normal = fragData.vertexNormal;
-        vec3 normal_micro = pbr_normalMicro.x > 90. ? normal : pbr_normalMicro;
+        pbr_normalMicro = pbr_normalMicro.x > 90. ? normal : pbr_normalMicro;
         float bloom = fragData.emissivity * a.a;
         float ao = fragData.ao ? (1.0 - fragData.aoShade) * a.a : 0.0;
         float normalizedBloom = (bloom - ao) * 0.5 + 0.5;
 
         if (maybeHand) {
             normal = normal * frx_normalModelMatrix();
-            normal_micro = pbr_normalMicro * frx_normalModelMatrix();
+            pbr_normalMicro = pbr_normalMicro * frx_normalModelMatrix();
         }
 
         normal = normal * 0.5 + 0.5;
-        normal_micro = normal_micro * 0.5 + 0.5;
+        pbr_normalMicro = pbr_normalMicro * 0.5 + 0.5;
 
         //pad with 0.01 to prevent conflation with unmanaged draw
         // NB: diffuse is forced true for hand
@@ -110,7 +110,7 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
         // PERF: view normal, more useful than world normal
         fragColor[1] = vec4(fragData.light.xy, (isParticle || maybeHand) ? bloom : normalizedBloom, 1.0);
         fragColor[2] = vec4(normal, 1.0);
-        fragColor[3] = vec4(normal_micro, 1.0);
+        fragColor[3] = vec4(pbr_normalMicro, 1.0);
         fragColor[4] = vec4(roughness, pbr_metallic, pbr_f0, 1.0);
         fragColor[5] = vec4(frx_normalizeMappedUV(frx_texcoord), bitFlags, 1.0);
     }
