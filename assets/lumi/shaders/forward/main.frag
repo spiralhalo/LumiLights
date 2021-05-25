@@ -57,14 +57,11 @@ frx_FragmentData frx_createPipelineFragment()
 
 void frx_writePipelineFragment(in frx_FragmentData fragData)
 {
-    vec4 a = clamp(fragData.spriteColor * fragData.vertexColor, 0.0, 1.0);
+    vec4 a = fragData.spriteColor * fragData.vertexColor;
 
     if (pbr_f0 < 0.0) {
         pbr_f0 = 1./256. + frx_luminance(a.rgb) * 0.04;
     }
-    pbr_f0 = clamp(pbr_f0, 0.0, 1.0);
-    pbr_roughness = clamp(pbr_roughness, 0.0, 1.0);
-    pbr_metallic = clamp(pbr_metallic, 0.0, 1.0);
 
     // Vanilla AO never make sense for anything other than terrain
     if (frx_modelOriginType() != MODEL_ORIGIN_REGION) {
@@ -90,32 +87,30 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
         bool maybeHand = frx_modelOriginType() == MODEL_ORIGIN_SCREEN;
         bool isParticle = (frx_renderTarget() == TARGET_PARTICLES);
 
-        vec3 normal;
-        vec3 normal_micro;
+        vec3 normal = fragData.vertexNormal;
+        pbr_normalMicro = pbr_normalMicro.x > 90. ? normal : pbr_normalMicro;
         float bloom = fragData.emissivity * a.a;
-        float ao;
-        float normalizedBloom;
+        float ao = fragData.ao ? (1.0 - fragData.aoShade) * a.a : 0.0;
+        float normalizedBloom = (bloom - ao) * 0.5 + 0.5;
 
         if (maybeHand) {
-            normal = normalize(fragData.vertexNormal) * frx_normalModelMatrix() * 0.5 + 0.5;
-            normal_micro = pbr_normalMicro.x > 90. ? normal : normalize(pbr_normalMicro) * frx_normalModelMatrix() * 0.5 + 0.5;
-        } else {
-            normal = normalize(fragData.vertexNormal) * 0.5 + 0.5;
-            normal_micro = pbr_normalMicro.x > 90. ? normal : normalize(pbr_normalMicro) * 0.5 + 0.5;
-            ao = fragData.ao ? (1.0 - fragData.aoShade) * a.a : 0.0;
-            normalizedBloom = (bloom - ao) * 0.5 + 0.5;
+            normal = normal * frx_normalModelMatrix();
+            pbr_normalMicro = pbr_normalMicro * frx_normalModelMatrix();
         }
+
+        normal = normal * 0.5 + 0.5;
+        pbr_normalMicro = pbr_normalMicro * 0.5 + 0.5;
 
         //pad with 0.01 to prevent conflation with unmanaged draw
         // NB: diffuse is forced true for hand
-        float roughness = (fragData.diffuse || maybeHand) ? 0.01 + pbr_roughness * 0.98 : 1.0;
+        float roughness = (fragData.diffuse || maybeHand) ? 0.01 + clamp(pbr_roughness, 0.0, 1.0) * 0.98 : 1.0;
 
         float bitFlags = bit_pack(frx_matFlash() ? 1. : 0., frx_matHurt() ? 1. : 0., frx_matGlint(), 0., 0., 0., 0., 0.);
 
         // PERF: view normal, more useful than world normal
         fragColor[1] = vec4(fragData.light.xy, (isParticle || maybeHand) ? bloom : normalizedBloom, 1.0);
         fragColor[2] = vec4(normal, 1.0);
-        fragColor[3] = vec4(normal_micro, 1.0);
+        fragColor[3] = vec4(pbr_normalMicro, 1.0);
         fragColor[4] = vec4(roughness, pbr_metallic, pbr_f0, 1.0);
         fragColor[5] = vec4(frx_normalizeMappedUV(frx_texcoord), bitFlags, 1.0);
     }
