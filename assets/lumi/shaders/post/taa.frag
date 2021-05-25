@@ -59,7 +59,11 @@ void main()
     // [o] terrain distortion is reduced by reducing feedback factor when camera moves
 
     #ifdef TAA_ENABLED
-        float cameraMove = length(frx_cameraPos() - frx_lastCameraPos());
+        #if ANTIALIASING == ANTIALIASING_TAA_BLURRY
+            float cameraMove = 0.0;
+        #else
+            float cameraMove = length(frx_cameraPos() - frx_lastCameraPos());
+        #endif
         fragColor = TAA(u_current, u_history0, u_depthCurrent, v_texcoord, calc_velocity(), v_invSize, cameraMove);
     #else
         fragColor = texture(u_current, v_texcoord);
