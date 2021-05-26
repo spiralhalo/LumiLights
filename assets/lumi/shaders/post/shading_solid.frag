@@ -31,7 +31,11 @@ void main()
 {
     tileJitter = getRandomFloat(u_blue_noise, v_texcoord, frxu_size); //JITTER_STRENGTH;
     float bloom1;
+#ifdef SSAO_ENABLED
     float ssao = texture(u_ao, v_texcoord).r;
+#else
+    float ssao = 1.;
+#endif
     float translucentDepth = texture(u_translucent_depth, v_texcoord).r;
     vec4 a1 = hdr_shaded_color(v_texcoord, u_solid_color, u_solid_depth, u_light_solid, u_normal_solid, u_material_solid, u_misc_solid, ssao, false, translucentDepth, bloom1);
     fragColor[0] = a1;

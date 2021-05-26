@@ -2,6 +2,7 @@
 #include lumi:shaders/lib/util.glsl
 #include lumi:shaders/common/userconfig.glsl
 #include lumi:shaders/lib/taa.glsl
+#include lumi:shaders/lib/taa_velocity.glsl
 
 /******************************************************
  *    lumi:shaders/post/taa.frag                      *
@@ -15,27 +16,6 @@ in vec2 v_invSize;
 
 out vec4 fragColor;
 
-vec2 calc_velocity() {
-    float closestDepth = texture(u_depthCurrent, GetClosestUV(u_depthCurrent, v_texcoord, v_invSize)).r;
-    vec4 currentModelPos = frx_inverseViewProjectionMatrix() * vec4(v_texcoord * 2.0 - 1.0, closestDepth * 2.0 - 1.0, 1.0);
-    currentModelPos.xyz /= currentModelPos.w;
-    currentModelPos.w = 1.0;
-
-    #if ANTIALIASING == ANTIALIASING_TAA_BLURRY
-        vec4 prevModelPos = currentModelPos;
-    #else
-        // This produces correct velocity?
-        vec4 cameraToLastCamera = vec4(frx_cameraPos() - frx_lastCameraPos(), 0.0);
-        vec4 prevModelPos = currentModelPos + cameraToLastCamera;
-    #endif
-
-    prevModelPos = frx_lastViewProjectionMatrix() * prevModelPos;
-    prevModelPos.xy /= prevModelPos.w;
-    vec2 prevPos = (prevModelPos.xy * 0.5 + 0.5);
-
-    return vec2(v_texcoord - prevPos);
-}
-
 void main()
 {
 #if defined(TAA_ENABLED) && TAA_DEBUG_RENDER != TAA_DEBUG_RENDER_OFF
@@ -43,11 +23,11 @@ void main()
         fragColor = vec4(ldepth(texture(u_depthCurrent, v_texcoord).r));
     #elif TAA_DEBUG_RENDER == TAA_DEBUG_RENDER_FRAMES
         float d = ldepth(texture(u_depthCurrent, v_texcoord).r);
-        int frames = int(mod(frx_renderFrames(), frxu_size.x)); 
-        float on = frames == int(frxu_size.x * v_texcoord.x) ? 1.0 : 0.0;
+        uint frames = frx_renderFrames() % uint(frxu_size.x); 
+        float on = frames == uint(frxu_size.x * v_texcoord.x) ? 1.0 : 0.0;
         fragColor = vec4(on, 0.0, 0.25 + d * 0.5, 1.0);
     #else
-        vec2 velocity = 0.5 + calc_velocity() * 50.0;
+        vec2 velocity = 0.5 + calcVelocity(u_depthCurrent, v_texcoord, v_invSize) * 50.0;
         fragColor = vec4(velocity, 0.0, 1.0);
     #endif
 #else
@@ -61,10 +41,12 @@ void main()
     #ifdef TAA_ENABLED
         #if ANTIALIASING == ANTIALIASING_TAA_BLURRY
             float cameraMove = 0.0;
+            vec2 velocity = vec2(0.0);
         #else
             float cameraMove = length(frx_cameraPos() - frx_lastCameraPos());
+            vec2 velocity = calcVelocity(u_depthCurrent, v_texcoord, v_invSize);
         #endif
-        fragColor = TAA(u_current, u_history0, u_depthCurrent, v_texcoord, calc_velocity(), v_invSize, cameraMove);
+        fragColor = TAA(u_current, u_history0, u_depthCurrent, v_texcoord, velocity, v_invSize, cameraMove);
     #else
         fragColor = texture(u_current, v_texcoord);
     #endif

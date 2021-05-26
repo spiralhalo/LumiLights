@@ -437,7 +437,11 @@ vec4 hdr_shaded_color(
     #else
         float ao_shaded = 1.0;
     #endif
+#ifdef SSAO_ENABLED
     float ssao = mix(aoval, 1.0, min(bloom_out, 1.0));
+#else
+    float ssao = 1.;
+#endif
     a.rgb *= ao_shaded * ssao;
 #endif
     if (matflash == 1.0) a.rgb += 1.0;

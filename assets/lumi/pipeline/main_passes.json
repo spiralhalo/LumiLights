@@ -6,11 +6,29 @@
                 program: "ssao",
                 framebuffer: "ao_values",
                 samplerImages: [
-                "normal_solid",
-                "solid_depth",
-                "lumi:textures/filter_pattern/bluenoise256.png",
+                    "normal_solid",
+                    "solid_depth",
+                    "lumi:textures/filter_pattern/bluenoise256.png",
                 ]
             }, 
+            {
+                name: "ssao_merge",
+                program: "ssao_merge",
+                framebuffer: "ao_filtered",
+                samplerImages: [
+                    "ao_values",
+                    "solid_depth",
+                    "ao_history",
+                ]
+            },
+            {
+                name: "copy",
+                program: "copy",
+                framebuffer: "ao_history",
+                samplerImages: [
+                    "ao_filtered",
+                ]
+            },
             /* {
                 name: "one_filter",
                 program: "one_filter",
@@ -32,7 +50,7 @@
                     "translucent_depth",
                     "translucent_main",
 
-                    "ao_values",
+                    "ao_filtered",
                     "minecraft:textures/misc/enchanted_item_glint.png",
                     "shadow_map",
                     "minecraft:textures/environment/sun.png",
