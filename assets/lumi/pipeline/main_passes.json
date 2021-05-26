@@ -164,13 +164,13 @@
                 framebuffer: "shading_combine",
                 samplerImages: [
                     "solid_shaded",
+                    "material_solid",
                     "solid_shaded_swap",
-                    "solid_depth",
 
                     "translucent_shaded",
+                    "material_translucent",
                     "translucent_shaded_swap",
-                    "translucent_depth",
-                    
+
                     "lumi:textures/filter_pattern/bluenoise256.png",
                 ]
             }, {

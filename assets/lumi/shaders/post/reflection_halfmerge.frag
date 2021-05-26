@@ -31,6 +31,7 @@ void main()
     history = clip_aabb(min2.rgb, max2.rgb, current, history);
 
     fragColor = mix(current, history, 0.9);
+    fragColor.a = current.a;
 #else
     discard;
 #endif
