@@ -121,7 +121,8 @@ rt_Result rt_reflection(
     vec3 ray = unitMarch_view * hitbox_z;
 
     // limit hitbox size for inbound reflection
-    float hitboxLimit = unitMarch_view.z > 0.0 ? 1. : 1024000.;
+    bool inbound = unitMarch_view.z > 0.0;
+    float hitboxLimit = inbound ? 1. : 1024000.;
 
     vec2 rayHit_uv;
     int hits = 0;
@@ -136,7 +137,7 @@ rt_Result rt_reflection(
         vec3 reflectedNormal   = normalize(normal_matrix * sample_worldNormal(rayHit_uv, reflected_normal));
         bool reflectsFrontFace = dot(unitMarch_view, reflectedNormal) < 0.;
 
-        if (delta_z > 0 && reflectsFrontFace && (rayHit_view.z < edge_z || unitMarch_view.z > 0.)) {
+        if (delta_z > 0 && ((reflectsFrontFace && rayHit_view.z < edge_z) || inbound)) {
             // Pad hitbox to reduce "stripes" artifact when surface is almost perpendicular to 
             float hitboxMult = 1. + 3. * (1. - dot(vec3(0., 0., 1.), reflectedNormal)); // dot is unclamped intentionally
             float hitboxNow = min(hitboxLimit, hitboxMult * hitbox_z);
