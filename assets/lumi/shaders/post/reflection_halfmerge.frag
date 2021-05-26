@@ -1,5 +1,6 @@
 #include lumi:shaders/post/common/header.glsl
 #include lumi:shaders/lib/taa.glsl
+#include lumi:shaders/lib/taa_velocity.glsl
 
 /******************************************************
   lumi:shaders/post/reflection_halfmerge.frag
