@@ -43,10 +43,7 @@ void main()
     vec4 current = texture(u_input, currentUv);
     vec4 history = texture(u_history, currentUv - velocity);
 
-    vec3 cameraMove = frx_cameraPos() - frx_lastCameraPos();
-    bool cameraMoved = abs(dot(velocity, velocity)) > dot(deltaRes, deltaRes) || dot(cameraMove, cameraMove) != 0.;
-
-    history = cameraMoved ? clip_aabb(min2.rgb, max2.rgb, current, history) : history;
+    history = clip_aabb(min2.rgb, max2.rgb, current, history);
 
     fragColor = mix(current, history, 0.9);
 #else
