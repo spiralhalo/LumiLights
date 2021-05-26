@@ -437,7 +437,11 @@ vec4 hdr_shaded_color(
     #else
         float ao_shaded = 1.0;
     #endif
+#ifdef SSAO_ENABLED
     float ssao = mix(aoval, 1.0, min(bloom_out, 1.0));
+#else
+    float ssao = 1.;
+#endif
     a.rgb *= ao_shaded * ssao;
 #endif
     if (matflash == 1.0) a.rgb += 1.0;
@@ -445,7 +449,7 @@ vec4 hdr_shaded_color(
 
     a.a = min(1.0, a.a);
 
-    #if GLINT_MODE == GLINT_MODE_SHADER
+    #if GLINT_MODE == GLINT_MODE_GLINT_SHADER
         a.rgb += hdr_gammaAdjust(noise_glint(misc.xy, bit_unpack(misc.z, 2)));
     #else
         a.rgb += hdr_gammaAdjust(texture_glint(u_glint, misc.xy, bit_unpack(misc.z, 2)));

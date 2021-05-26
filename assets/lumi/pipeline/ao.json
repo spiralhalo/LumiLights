@@ -1,6 +1,6 @@
 {
     programs:[
-         {
+        {
             name: "ssao",
             vertexSource: "lumi:shaders/post/simple.vert",
             fragmentSource: "lumi:shaders/post/ssao.frag",
@@ -9,14 +9,25 @@
                 "u_depth",
                 "u_blue_noise",
             ]
-        }, {
+        },
+        {
+            name: "ssao_merge",
+            vertexSource: "lumi:shaders/post/simple.vert",
+            fragmentSource: "lumi:shaders/post/ssao_merge.frag",
+            samplers: [
+                "u_input",
+                "u_depth",
+                "u_history",
+            ]
+        },
+        {
             name: "one_filter",
             vertexSource: "lumi:shaders/post/simple.vert",
             fragmentSource: "lumi:shaders/post/one_filter.frag",
             samplers: ["u_source", "u_depth"]
         }
     ],
-    
+
     images: [
         {
             name: "ao_values",
@@ -29,8 +40,21 @@
                 {name: "TEXTURE_MIN_FILTER", val: "LINEAR"}, {name: "TEXTURE_MAG_FILTER", val: "LINEAR"},
                 {name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
             ]
-        }, {
+        },
+        {
             name: "ao_filtered",
+            lod: 0,
+            internalFormat: "RGBA8",
+            pixelFormat: "RGBA",
+            pixelDataType: "UNSIGNED_BYTE",
+            target: "TEXTURE_2D",
+            texParams: [
+                {name: "TEXTURE_MIN_FILTER", val: "LINEAR"}, {name: "TEXTURE_MAG_FILTER", val: "LINEAR"},
+                {name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
+            ]
+        }, 
+        {
+            name: "ao_history",
             lod: 0,
             internalFormat: "RGBA8",
             pixelFormat: "RGBA",
@@ -47,9 +71,14 @@
         {
             name: "ao_values",
             colorAttachments: [{image: "ao_values", clearColor: 0x00000000}]
-        }, {
+        },
+        {
             name: "ao_filtered",
             colorAttachments: [{image: "ao_filtered", clearColor: 0x00000000}]
+        },
+        {
+            name: "ao_history",
+            colorAttachments: [{image: "ao_history"}]
         }
     ]
 }

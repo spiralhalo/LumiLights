@@ -12,6 +12,7 @@
  *  published by the Free Software Foundation, Inc.    *
  *******************************************************/
 
+#if DITHERING_MODE == DITHERING_MODE_HALTON
 const vec3 tile_randomVec[16] = vec3[16](
     vec3(0.5, 0.3333333333333333, 0.25), 
     vec3(0.25, 0.6666666666666666, 0.5), 
@@ -30,46 +31,33 @@ const vec3 tile_randomVec[16] = vec3[16](
     vec3(0.9375, 0.25925925925925924, 0.9375),
     vec3(0.03125, 0.5925925925925926, 0.015625)
 );
+#endif
 
-#define BLUE_NOISE_RES 256.
-const float BLUE_NOISE_SPEED = BLUE_NOISE_RES * BLUE_NOISE_RES;
-const float BLUE_NOISE_RES_RCP = 1. / BLUE_NOISE_RES;
+#define _MSPD 9u
+const uint BLUE_RES = 256u;
+const float BLUE_RES_RCP = 1. / float(BLUE_RES);
 
 vec3 getRandomVec(sampler2D blueNoiseTex, vec2 uv, vec2 texSize)
 {
-#ifdef TAA_ENABLED
-    uv += frx_renderSeconds();
-#endif
-#if NOISE_MODE == NOISE_MODE_HALTON
-    ivec2 texelPos = ivec2(mod(uv * texSize, 4.0));
-    return tile_randomVec[texelPos.x + texelPos.y * 4];
+    uvec2 texelPos = uvec2(uv * texSize) + uvec2((frx_renderFrames() % BLUE_RES) * _MSPD); 
+#if DITHERING_MODE == DITHERING_MODE_HALTON
+    texelPos %= uvec2(4);
+    return tile_randomVec[texelPos.x + texelPos.y * 4u];
 #else
-#if __VERSION__ < 130
-    vec2 noiseUv = mod(uv * texSize, BLUE_NOISE_RES) * BLUE_NOISE_RES_RCP;
+    vec2 noiseUv = (texelPos % BLUE_RES) * BLUE_RES_RCP;
     return texture2D(blueNoiseTex, noiseUv).rgb;
-#else
-    ivec2 texelPos = ivec2(mod(uv * texSize, BLUE_NOISE_RES));
-    return texelFetch(blueNoiseTex, texelPos, 0).rgb;
-#endif
 #endif
 }
 
 float getRandomFloat(sampler2D blueNoiseTex, vec2 uv, vec2 texSize)
 {
-#ifdef TAA_ENABLED
-    uv += frx_renderSeconds();
-#endif
-#if NOISE_MODE == NOISE_MODE_HALTON
-    ivec2 texelPos = ivec2(mod(uv * texSize, 4.0));
-    return tile_randomVec[texelPos.x + texelPos.y * 4].x;
+    uvec2 texelPos = uvec2(uv * texSize) + uvec2((frx_renderFrames() % BLUE_RES) * _MSPD); 
+#if DITHERING_MODE == DITHERING_MODE_HALTON
+    texelPos %= uvec2(4);
+    return tile_randomVec[texelPos.x + texelPos.y * 4u].x;
 #else
-#if __VERSION__ < 130
-    vec2 noiseUv = mod(uv * texSize, BLUE_NOISE_RES) * BLUE_NOISE_RES_RCP;
+    vec2 noiseUv = (texelPos % BLUE_RES) * BLUE_RES_RCP;
     return texture2D(blueNoiseTex, noiseUv).r;
-#else
-    ivec2 texelPos = ivec2(mod(uv * texSize, BLUE_NOISE_RES));
-    return texelFetch(blueNoiseTex, texelPos, 0).r;
-#endif
 #endif
 }
 

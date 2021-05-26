@@ -53,7 +53,7 @@ void main()
     vec3 viewPos = temp.xyz / temp.w;
 
     vec3 light  = texture(u_light, v_texcoord).xyz;
-    vec3 normal = (2.0 * texture(u_normal_micro, v_texcoord).xyz - 1.0);
+    vec3 normal = normalize(2.0 * texture(u_normal_micro, v_texcoord).xyz - 1.0);
     vec3 mat    = texture(u_material, v_texcoord).xyz;
     
     float roughness = mat.x == 0.0 ? 1.0 : min(1.0, 1.0203 * mat.x - 0.01);
@@ -81,7 +81,7 @@ void main()
 
     vec3 misc = texture(u_misc, v_texcoord).xyz;
 
-    #if GLINT_MODE == GLINT_MODE_SHADER
+    #if GLINT_MODE == GLINT_MODE_GLINT_SHADER
         a.rgb += hdr_gammaAdjust(noise_glint(misc.xy, bit_unpack(misc.z, 2)));
     #else
         a.rgb += hdr_gammaAdjust(texture_glint(u_glint, misc.xy, bit_unpack(misc.z, 2)));

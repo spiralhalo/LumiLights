@@ -160,11 +160,11 @@ vec4 Inside2Resolve(sampler2D currColorTex, sampler2D prevColorTex, vec2 texcoor
     vec4 mixedMax = mix(rounded3x3Max, max2, 0.5);
 
     float adjustedFeedback = cameraMove == 0.0 ? feedbackFactor : minimumFeedbackFactor;
-    vec4 clippedHistoryColor = clip_aabb(mixedMin.rgb, mixedMax.rgb, current2x2Colors[2], texture(prevColorTex, texcoord + velocity));
+    vec4 clippedHistoryColor = clip_aabb(mixedMin.rgb, mixedMax.rgb, current2x2Colors[2], texture(prevColorTex, texcoord - velocity));
     return mix(current2x2Colors[2], clippedHistoryColor, adjustedFeedback);
 }
 
 vec4 TAA(in sampler2D currentColorTex, in sampler2D previousColorTex, in sampler2D currentDepthTex, vec2 texcoord, vec2 velocity, vec2 invRes, float cameraMove)
 {
-    return Inside2Resolve(currentColorTex, previousColorTex, texcoord, -velocity, invRes, cameraMove);//vec4(1, 0, 0, 1);
+    return Inside2Resolve(currentColorTex, previousColorTex, texcoord, velocity, invRes, cameraMove);//vec4(1, 0, 0, 1);
 }

@@ -4,6 +4,7 @@
 #include lumi:clouds_config
 #include lumi:gameplay_config
 #include lumi:fog_config
+#include lumi:shadow_config
 
 /*******************************************************
  *  lumi:shaders/common/userconfig.glsl                *

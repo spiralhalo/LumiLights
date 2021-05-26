@@ -14,22 +14,22 @@
  *******************************************************/
 
 uniform sampler2D u_hdr_solid;
+uniform sampler2D u_material_solid;
 uniform sampler2D u_hdr_solid_swap;
-uniform sampler2D u_solid_depth;
+
 uniform sampler2D u_hdr_translucent;
+uniform sampler2D u_material_translucent;
 uniform sampler2D u_hdr_translucent_swap;
-uniform sampler2D u_translucent_depth;
+
 uniform sampler2D u_blue_noise;
 
-in vec2 v_invSize;
+frag_in vec2 v_invSize;
 
 #ifndef USING_OLD_OPENGL
 out vec4[2] fragColor;
 #endif
 
-// arbitrary chosen depth threshold
-#define blurDepthThreshold 0.01
-vec4 hdr_combine(sampler2D a, sampler2D b, sampler2D sb2, sampler2D sdepth, vec2 uv)
+vec4 hdr_combine(sampler2D a, sampler2D matA, sampler2D b, vec2 uv)
 {
 #ifdef HALF_REFLECTION_RESOLUTION
     vec2 buv = (uv + (getRandomVec(u_blue_noise, uv, frxu_size).xy * 2. - 1.) * v_invSize * 2.) * 0.5;
@@ -37,14 +37,19 @@ vec4 hdr_combine(sampler2D a, sampler2D b, sampler2D sb2, sampler2D sdepth, vec2
     vec2 buv = uv;
 #endif
     vec4 a1 = texture(a, uv);
-    float roughness = texture(b, buv).a;
-    if (roughness == 0.0) return vec4(a1.rgb, a1.a); // unmanaged draw (don't gamma adjust)
     vec4 b1 = texture(b, buv);
+    bool filtered = b1.a == 0.0; // unmanaged
+#ifdef HALF_REFLECTION_RESOLUTION
+    const float ROUGHNESS_TOLERANCE = 0.1;
+    float a1r = texture(matA, uv).r;
+    filtered = filtered || abs(b1.a - a1r) > ROUGHNESS_TOLERANCE; // roughness mismatch
+#endif
+    b1 = filtered ? vec4(0.0) : b1;
     return vec4(a1.rgb + b1.rgb, a1.a);
 }
 
 void main()
 {
-    fragColor[0] = hdr_combine(u_hdr_solid, u_hdr_solid_swap, u_hdr_translucent_swap, u_solid_depth, v_texcoord);
-    fragColor[1] = hdr_combine(u_hdr_translucent, u_hdr_translucent_swap, u_hdr_solid_swap, u_translucent_depth, v_texcoord);
+    fragColor[0] = hdr_combine(u_hdr_solid, u_material_solid, u_hdr_solid_swap, v_texcoord);
+    fragColor[1] = hdr_combine(u_hdr_translucent, u_material_translucent, u_hdr_translucent_swap, v_texcoord);
 }

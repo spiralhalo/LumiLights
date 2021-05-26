@@ -41,7 +41,7 @@ void frx_writePipelineVertex(inout frx_VertexData data) {
 
         #ifdef TAA_ENABLED
             float fragZ = gl_Position.z / gl_Position.w;
-            if (fragZ > 0.6) { // hack to include only hand
+            if (pv_ortho == 0.) { // hack to include only hand
                 gl_Position.st += taa_jitter(inv_size) * gl_Position.w;
             }
         #endif

@@ -48,13 +48,13 @@
             fragmentSource: "lumi:shaders/post/shading_combine.frag",
             samplers: [
                 "u_hdr_solid",
+                "u_material_solid",
                 "u_hdr_solid_swap",
-                "u_solid_depth",
 
                 "u_hdr_translucent",
+                "u_material_translucent",
                 "u_hdr_translucent_swap",
-                "u_translucent_depth",
-                
+
                 "u_blue_noise",
             ]
         },
@@ -68,7 +68,6 @@
                 {image: "emissive", clearColor: 0x00000000},
             ]
         },
-        
         {
             name: "shading_translucent",
             colorAttachments: [
@@ -77,7 +76,6 @@
                 {image: "emissive_translucent", clearColor: 0x00000000},
             ]
         },
-
         {
             name: "shading_combine",
             colorAttachments: [
