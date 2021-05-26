@@ -121,12 +121,12 @@ rt_Result rt_reflection(
     vec3 ray = unitMarch_view * hitbox_z;
 
     // limit hitbox size for inbound reflection
-    float hitboxLimit = unitMarch_view.z > 0.0 ? 6. : 1024000.;
+    float hitboxLimit = unitMarch_view.z > 0.0 ? 1. : 1024000.;
 
     vec2 rayHit_uv;
     int hits = 0;
     int steps = 0;
-    while (steps < MAXSTEPS && hitbox_z < hitboxLimit) {
+    while (steps < MAXSTEPS) {
 
         ray_view += ray;
         rayHit_uv = view2uv(ray_view, projection);
@@ -174,7 +174,7 @@ rt_Result rt_reflection(
                 return rt_Result(last_uv, true, hits);
             }
         }
-        if (mod(steps, PERIOD) == 0) {
+        if (mod(steps, PERIOD) == 0 && hitbox_z < hitboxLimit) {
             ray *= 2.;
             hitbox_z *= 2.;
         }
