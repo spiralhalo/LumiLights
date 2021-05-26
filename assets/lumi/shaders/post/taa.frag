@@ -44,7 +44,7 @@ void main()
             vec2 velocity = vec2(0.0);
         #else
             float cameraMove = length(frx_cameraPos() - frx_lastCameraPos());
-            vec2 velocity = calcVelocity(u_depthCurrent, v_texcoord, v_invSize);
+            vec2 velocity = fastVelocity(u_depthCurrent, v_texcoord);
         #endif
         fragColor = TAA(u_current, u_history0, u_depthCurrent, v_texcoord, velocity, v_invSize, cameraMove);
     #else
