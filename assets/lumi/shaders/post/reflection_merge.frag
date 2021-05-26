@@ -27,7 +27,7 @@ void main()
     vec2 velocity = fastVelocity(u_depth, v_texcoord);
 
 #ifdef HALF_REFLECTION_RESOLUTION
-    deltaRes *= 0.5;
+    deltaRes *= 4.;
     currentUv *= 0.5;
     velocity *= 0.5;
 #endif
