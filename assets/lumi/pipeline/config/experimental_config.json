@@ -34,6 +34,11 @@
                     nameKey: "config.lumi_lights.value.taa_debug_render",
                     descriptionKey: "config.lumi_lights.help.taa_debug_render"
                 },
+                half_reflection_resolution: {
+                    default: false,
+                    nameKey: "config.lumi_lights.value.half_reflection_resolution",
+                    descriptionKey: "config.lumi_lights.help.half_reflection_resolution"
+                },
                 multi_bounce_reflection: {
                     default: false,
                     nameKey: "config.lumi_lights.value.multi_bounce_reflection",

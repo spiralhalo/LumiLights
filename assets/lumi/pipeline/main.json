@@ -213,10 +213,10 @@
             ]
         },
 
-        {
-            name: "refraction",
-            colorAttachments: [{image: "solid_shaded_swap"}]
-        },
+        // {
+        //     name: "refraction",
+        //     colorAttachments: [{image: "solid_shaded_swap"}]
+        // },
         /* AFTER-HAND FRAMEBUFFERS */
     ],
 
