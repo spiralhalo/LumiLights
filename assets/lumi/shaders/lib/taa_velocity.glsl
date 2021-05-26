@@ -42,5 +42,7 @@ vec2 fastVelocity(sampler2D depthTex, vec2 currentUv) {
     prevModelPos.xy /= prevModelPos.w;
     vec2 prevPos = (prevModelPos.xy * 0.5 + 0.5);
 
+    if (prevPos != clamp(prevPos, 0., 1.)) return vec2(0.); // out of bounds
+
     return vec2(currentUv - prevPos);
 }
