@@ -22,7 +22,7 @@
                 ]
             },
             {
-                name: "copy",
+                name: "ao_history",
                 program: "copy",
                 framebuffer: "ao_history",
                 samplerImages: [
@@ -57,7 +57,8 @@
                     "minecraft:textures/environment/moon_phases.png",
                     "lumi:textures/filter_pattern/bluenoise256.png",
                 ]
-            }, {
+            },
+            {
                 name: "shading_translucent",
                 program: "shading_translucent",
                 framebuffer: "shading_translucent",
@@ -77,7 +78,8 @@
                     "shadow_map",
                     "lumi:textures/filter_pattern/bluenoise256.png",
                 ]
-            }, {
+            },
+            {
                 name: "reflection_solid",
                 program: "reflection",
                 framebuffer: "reflection_solid",
@@ -98,7 +100,8 @@
 
                     "lumi:textures/filter_pattern/bluenoise256.png",
                 ]
-            }, {
+            },
+            {
                 name: "reflection_translucent",
                 program: "reflection",
                 framebuffer: "reflection_translucent",
@@ -119,84 +122,74 @@
 
                     "lumi:textures/filter_pattern/bluenoise256.png",
                 ]
-            }, /*{
+            },
+            {
+                name: "reflection_merge_solid",
+                program: "reflection_merge",
+                framebuffer: "reflection_merge_solid",
+                samplerImages: [
+                    "solid_reflection",
+                    "solid_depth",
+                    "solid_reflection_history",
+                ]
+            },
+            {
+                name: "reflection_copy_solid",
+                program: "copy",
+                framebuffer: "reflection_copy_solid",
+                samplerImages: [
+                    "solid_reflection_merge",
+                ]
+            },
+            {
+                name: "reflection_merge_translucent",
+                program: "reflection_merge",
+                framebuffer: "reflection_merge_translucent",
+                samplerImages: [
+                    "translucent_reflection",
+                    "translucent_depth",
+                    "translucent_reflection_history",
+                ]
+            },
+            {
+                name: "reflection_copy_translucent",
+                program: "copy",
+                framebuffer: "reflection_copy_translucent",
+                samplerImages: [
+                    "translucent_reflection_merge",
+                ]
+            },
+            /*{
                 name: "refraction",
                 program: "refraction",
                 framebuffer: "refraction",
                 samplerImages: [
                     "solid_shaded", "solid_depth", "normal_solid",
                     "translucent_depth", "light_translucent", "normal_translucent"]
-            },*/ {
-                // copy solid reflection to translucent BOTTOM RIGHT and vice versa
-                // highly cursed
-                name: "reflection_halfcopy_br_solid",
-                program: "reflection_halfcopy_br",
-                framebuffer: "reflection_translucent",
-                samplerImages: [
-                    "solid_shaded_swap",
-                ]
-            }, {
-                name: "reflection_halfcopy_br_translucent",
-                program: "reflection_halfcopy_br",
-                framebuffer: "reflection_solid",
-                samplerImages: [
-                    "translucent_shaded_swap",
-                ]
-            }, {
-                // merge translucent back to solid and vice versa
-                // highly cursed
-                name: "reflection_halfmerge_solid",
-                program: "reflection_halfmerge",
-                framebuffer: "reflection_solid",
-                samplerImages: [
-                    "translucent_shaded_swap",
-                    "solid_depth",
-                ]
-            }, {
-                name: "reflection_halfmerge_translucent",
-                program: "reflection_halfmerge",
-                framebuffer: "reflection_translucent",
-                samplerImages: [
-                    "solid_shaded_swap",
-                    "translucent_depth",
-                ]
-            }, {
+            },*/
+            {
                 name: "shading_combine",
                 program: "shading_combine",
                 framebuffer: "shading_combine",
                 samplerImages: [
                     "solid_shaded",
                     "material_solid",
-                    "solid_shaded_swap",
+                    "solid_reflection_merge",
 
                     "translucent_shaded",
                     "material_translucent",
-                    "translucent_shaded_swap",
+                    "translucent_reflection_merge",
 
                     "lumi:textures/filter_pattern/bluenoise256.png",
                 ]
-            }, {
-                // copy solid reflection to translucent TOP RIGHT and vice versa
-                // highly cursed
-                name: "reflection_halfcopy_tr_solid",
-                program: "reflection_halfcopy_tr",
-                framebuffer: "reflection_translucent",
-                samplerImages: [
-                    "solid_shaded_swap",
-                ]
-            }, {
-                name: "reflection_halfcopy_tr_translucent",
-                program: "reflection_halfcopy_tr",
-                framebuffer: "reflection_solid",
-                samplerImages: [
-                    "translucent_shaded_swap",
-                ]
-            }, {
+            },
+            {
                 name: "clouds_texture",
                 program: "clouds_texture",
                 framebuffer: "clouds_texture",
                 samplerImages: []
-            }, {
+            },
+            {
                 name: "clouds",
                 program: "clouds",
                 framebuffer: "custom_clouds",
@@ -208,7 +201,8 @@
                     "translucent_depth",
                     "lumi:textures/filter_pattern/bluenoise256.png",
                 ]
-            }, {
+            },
+            {
                 name: "composite",
                 program: "composite",
                 framebuffer: "composite",

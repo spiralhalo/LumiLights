@@ -23,38 +23,23 @@
             ]
         }, 
         {
-            name: "reflection_halfmerge",
-            vertexSource: "lumi:shaders/post/reflection_halfmerge.vert",
-            fragmentSource: "lumi:shaders/post/reflection_halfmerge.frag",
+            name: "reflection_merge",
+            vertexSource: "lumi:shaders/post/reflection.vert",
+            fragmentSource: "lumi:shaders/post/reflection_merge.frag",
             samplers: [
                 "u_input",
                 "u_depth",
+                "u_history",
             ]
         },
-        {
-            name: "reflection_halfcopy_tr",
-            vertexSource: "lumi:shaders/post/reflection_halfcopy_tr.vert",
-            fragmentSource: "lumi:shaders/post/reflection_halfcopy.frag",
-            samplers: [
-                "u_input",
-            ]
-        }, 
-        {
-            name: "reflection_halfcopy_br",
-            vertexSource: "lumi:shaders/post/reflection_halfcopy_br.vert",
-            fragmentSource: "lumi:shaders/post/reflection_halfcopy.frag",
-            samplers: [
-                "u_input",
-            ]
-        }, 
     ],
 
     images: [
         {
-            name: "solid_shaded_swap",
+            name: "solid_reflection",
             lod: 0,
-            // higher precision reduces/eliminates banding
-            internalFormat: "RGBA16",
+            // low precision may introduce banding, but reduces potential of crime against potatoes
+            internalFormat: "RGBA8",
             pixelFormat: "RGBA",
             pixelDataType: "UNSIGNED_BYTE",
             target: "TEXTURE_2D",
@@ -62,11 +47,59 @@
                 {name: "TEXTURE_MIN_FILTER", val: "LINEAR"}, {name: "TEXTURE_MAG_FILTER", val: "LINEAR"},
                 {name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
             ]
-        }, {
-            name: "translucent_shaded_swap",
+        },
+        {
+            name: "solid_reflection_merge",
             lod: 0,
-            // higher precision reduces/eliminates banding
-            internalFormat: "RGBA16",
+            internalFormat: "RGBA8",
+            pixelFormat: "RGBA",
+            pixelDataType: "UNSIGNED_BYTE",
+            target: "TEXTURE_2D",
+            texParams: [
+                {name: "TEXTURE_MIN_FILTER", val: "LINEAR"}, {name: "TEXTURE_MAG_FILTER", val: "LINEAR"},
+                {name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
+            ]
+        },
+        {
+            name: "solid_reflection_history",
+            lod: 0,
+            internalFormat: "RGBA8",
+            pixelFormat: "RGBA",
+            pixelDataType: "UNSIGNED_BYTE",
+            target: "TEXTURE_2D",
+            texParams: [
+                {name: "TEXTURE_MIN_FILTER", val: "LINEAR"}, {name: "TEXTURE_MAG_FILTER", val: "LINEAR"},
+                {name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
+            ]
+        },
+        {
+            name: "translucent_reflection",
+            lod: 0,
+            internalFormat: "RGBA8",
+            pixelFormat: "RGBA",
+            pixelDataType: "UNSIGNED_BYTE",
+            target: "TEXTURE_2D",
+            texParams: [
+                {name: "TEXTURE_MIN_FILTER", val: "LINEAR"}, {name: "TEXTURE_MAG_FILTER", val: "LINEAR"},
+                {name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
+            ]
+        },
+        {
+            name: "translucent_reflection_merge",
+            lod: 0,
+            internalFormat: "RGBA8",
+            pixelFormat: "RGBA",
+            pixelDataType: "UNSIGNED_BYTE",
+            target: "TEXTURE_2D",
+            texParams: [
+                {name: "TEXTURE_MIN_FILTER", val: "LINEAR"}, {name: "TEXTURE_MAG_FILTER", val: "LINEAR"},
+                {name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
+            ]
+        },
+        {
+            name: "translucent_reflection_history",
+            lod: 0,
+            internalFormat: "RGBA8",
             pixelFormat: "RGBA",
             pixelDataType: "UNSIGNED_BYTE",
             target: "TEXTURE_2D",
@@ -76,17 +109,42 @@
             ]
         },
     ],
-    
+
     framebuffers: [
         {
             name: "reflection_solid",
             colorAttachments: [
-                {image: "solid_shaded_swap", clearColor: 0x00000000}
+                {image: "solid_reflection", clearColor: 0x00000000}
             ]
-        }, {
+        },
+        {
+            name: "reflection_merge_solid",
+            colorAttachments: [
+                {image: "solid_reflection_merge", clearColor: 0x00000000}
+            ]
+        },
+        {
+            name: "reflection_copy_solid",
+            colorAttachments: [
+                {image: "solid_reflection_history"}
+            ]
+        },
+        {
             name: "reflection_translucent",
             colorAttachments: [
-                {image: "translucent_shaded_swap", clearColor: 0x00000000}
+                {image: "translucent_reflection", clearColor: 0x00000000}
+            ]
+        },
+        {
+            name: "reflection_merge_translucent",
+            colorAttachments: [
+                {image: "translucent_reflection_merge", clearColor: 0x00000000}
+            ]
+        },
+        {
+            name: "reflection_copy_translucent",
+            colorAttachments: [
+                {image: "translucent_reflection_history"}
             ]
         },
     ]
