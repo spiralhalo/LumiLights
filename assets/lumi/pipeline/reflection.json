@@ -28,6 +28,7 @@
             fragmentSource: "lumi:shaders/post/reflection_halfmerge.frag",
             samplers: [
                 "u_input",
+                "u_depth",
             ]
         },
         {

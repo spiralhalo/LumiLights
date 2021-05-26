@@ -150,6 +150,7 @@
                 framebuffer: "reflection_solid",
                 samplerImages: [
                     "translucent_shaded_swap",
+                    "solid_depth",
                 ]
             }, {
                 name: "reflection_halfmerge_translucent",
@@ -157,6 +158,7 @@
                 framebuffer: "reflection_translucent",
                 samplerImages: [
                     "solid_shaded_swap",
+                    "translucent_depth",
                 ]
             }, {
                 name: "shading_combine",

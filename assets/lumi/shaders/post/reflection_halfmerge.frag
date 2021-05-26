@@ -5,6 +5,7 @@
   lumi:shaders/post/reflection_halfmerge.frag
 ******************************************************/
 uniform sampler2D u_input;
+uniform sampler2D u_depth;
 
 in vec2 v_invSize;
 
@@ -16,6 +17,7 @@ void main()
     // double deltaRes, causes slight ghosting to reduce flickering
     vec2 deltaRes = v_invSize;
     vec2 currentUv = v_texcoord * 0.5 + vec2(.5, .0);
+    vec2 velocity = fastVelocity(u_depth, v_texcoord);
 
     vec4 current2x2Colors[neighborCount2x2];
     for(int iter = 0; iter < neighborCount2x2; iter++)
@@ -26,7 +28,7 @@ void main()
     vec4 max2 = MaxColors(current2x2Colors);
 
     vec4 current = texture(u_input, currentUv);
-    vec4 history = texture(u_input, v_texcoord * 0.5 + 0.5);
+    vec4 history = texture(u_input, (v_texcoord - velocity) * 0.5 + 0.5);
     
     history = clip_aabb(min2.rgb, max2.rgb, current, history);
 
