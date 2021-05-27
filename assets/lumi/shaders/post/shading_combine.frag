@@ -43,6 +43,7 @@ vec4 hdr_combine(sampler2D a, sampler2D matA, sampler2D b, vec2 uv)
     filtered = filtered || abs(b1.a - a1r) > ROUGHNESS_TOLERANCE; // roughness mismatch
 #endif
     b1 = filtered ? vec4(0.0) : b1;
+    b1.rgb *= b1.rgb; // anti-banding
     return vec4(a1.rgb + b1.rgb, a1.a);
 }
 

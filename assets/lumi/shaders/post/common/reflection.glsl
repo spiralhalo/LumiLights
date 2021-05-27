@@ -295,6 +295,8 @@ rt_color_depth work_on_pair(
 
         vec4 pbr_color = vec4(pbr_lightCalc(roughness, f0, reflected_final.rgb * base_color.a, unitMarch_world, unit_world), reflected_final.a);
         
+        pbr_color.rgb = sqrt(clamp(pbr_color.rgb, 0., 1.)); // anti-banding
+
         return rt_color_depth(pbr_color, reflected_depth_value);
     } else {
     #if REFLECTION_PROFILE != REFLECTION_PROFILE_NONE

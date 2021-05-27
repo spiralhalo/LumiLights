@@ -38,8 +38,8 @@
         {
             name: "solid_reflection",
             lod: 0,
-            // high precision to prevent banding. tried with banding +dithering but it doesn't work. goodbye potatoes..
-            internalFormat: "RGBA16",
+            // low precision but banding is prevented. save the potatoes
+            internalFormat: "RGBA8",
             pixelFormat: "RGBA",
             pixelDataType: "UNSIGNED_BYTE",
             target: "TEXTURE_2D",
@@ -51,7 +51,7 @@
         {
             name: "solid_reflection_merge",
             lod: 0,
-            internalFormat: "RGBA16",
+            internalFormat: "RGBA8",
             pixelFormat: "RGBA",
             pixelDataType: "UNSIGNED_BYTE",
             target: "TEXTURE_2D",
@@ -63,7 +63,7 @@
         {
             name: "solid_reflection_history",
             lod: 0,
-            internalFormat: "RGBA16",
+            internalFormat: "RGBA8",
             pixelFormat: "RGBA",
             pixelDataType: "UNSIGNED_BYTE",
             target: "TEXTURE_2D",
@@ -75,7 +75,7 @@
         {
             name: "translucent_reflection",
             lod: 0,
-            internalFormat: "RGBA16",
+            internalFormat: "RGBA8",
             pixelFormat: "RGBA",
             pixelDataType: "UNSIGNED_BYTE",
             target: "TEXTURE_2D",
@@ -87,7 +87,7 @@
         {
             name: "translucent_reflection_merge",
             lod: 0,
-            internalFormat: "RGBA16",
+            internalFormat: "RGBA8",
             pixelFormat: "RGBA",
             pixelDataType: "UNSIGNED_BYTE",
             target: "TEXTURE_2D",
@@ -99,7 +99,7 @@
         {
             name: "translucent_reflection_history",
             lod: 0,
-            internalFormat: "RGBA16",
+            internalFormat: "RGBA8",
             pixelFormat: "RGBA",
             pixelDataType: "UNSIGNED_BYTE",
             target: "TEXTURE_2D",
