@@ -404,7 +404,7 @@ vec4 hdr_shaded_color(
             light.z *= pow(light.y, 6.0);
         }
     #else
-        light.z = l2_lightmapRemap(light.y);
+        light.z = hdr_gammaAdjustf(l2_lightmapRemap(light.y));
         // Prevent full direct light underwater
         if (maybeUnderwater) {
             light.z *= pow(light.y, 6.0);
