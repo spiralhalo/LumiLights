@@ -41,8 +41,10 @@ void main()
         vec3 reflection_color = (source_source.depth < source_target.depth)
             ? source_source.color.rgb * source_source.color.a
             : (source_source.color.rgb * (1.0 - source_target.color.a) + source_target.color.rgb * source_target.color.a);
-        fragColor = vec4(reflection_color, source_roughness);
+        // with anti-banding
+        fragColor = vec4(sqrt(clamp(reflection_color, 0., 1.)), source_roughness);
     #else
-        fragColor = vec4(source_source.color.rgb, source_roughness);
+        // with anti-banding
+        fragColor = vec4(sqrt(clamp(source_source.color.rgb, 0., 1.)), source_roughness);
     #endif
 }
