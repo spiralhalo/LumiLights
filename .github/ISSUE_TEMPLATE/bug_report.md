@@ -7,25 +7,24 @@ assignees: ''
 
 ---
 
-**Describe the bug**
-A clear and concise description of what the bug is.
+**Describe the bug:**
+...
 
-**To Reproduce**
-Steps to reproduce the behavior:
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
+**Where/when the bug happens or *doesn't* happen:**
+...
 
-**Expected behavior**
-A clear and concise description of what you expected to happen.
+**Screenshots or link to video:**
+...
 
-**Screenshots**
-If applicable, add screenshots to help explain your problem.
+**Environment:**
+- Lumi Lights release version or link to commit: ...
+- Canvas debug info from `latest.log` [[see example]](https://github.com/spiralhalo/LumiLights/wiki/Canvas-Debug-Info):
+```
+(paste here)
+```
 
-**Environment**
-- Lumi Lights release version or link to commit:
-- Canvas version(s):
+**Content of `.minecraft/canvas_shader_debug/failed/` if present (put "N/A" otherwise):**
+...
 
-**Additional context**
-Add any other context about the problem here.
+**Additional context:**
+...
