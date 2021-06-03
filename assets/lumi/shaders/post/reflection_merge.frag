@@ -26,7 +26,7 @@ void main()
 #if REFLECTION_PROFILE != REFLECTION_PROFILE_NONE
     vec2 deltaRes = v_invSize;
     vec2 currentUv = v_texcoord;
-    vec2 velocity = fastVelocity(u_depth, v_texcoord);
+    vec2 velocity = fastVelocity(u_depth, v_texcoord) * 0.75; // magic anti-ghosting hack
 
 #ifdef HALF_REFLECTION_RESOLUTION
     deltaRes *= 4.;

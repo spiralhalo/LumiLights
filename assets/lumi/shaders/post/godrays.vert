@@ -38,7 +38,8 @@ void main()
         * dimensionFactor
         * blindnessFactor
         * notInVoidFactor
-        * USER_GODRAYS_INTENSITY;
+        * USER_GODRAYS_INTENSITY
+        * 0.5;
 
     if (frx_viewFlag(FRX_CAMERA_IN_WATER)) {
         #if CAUSTICS_MODE == CAUSTICS_MODE_TEXTURE
