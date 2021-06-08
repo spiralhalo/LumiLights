@@ -25,6 +25,9 @@ vert_out float pv_ortho;
 
 // Grondag's vanilla diffuse but different
 float p_diffuseGui(vec3 normal) {
+    // disable diffuse for front facing GUI item
+    if (normal.z == 1.0) return 1.;
+
     float light = 0.5
     + 0.3 * clamp(dot(normal.xyz, vec3(0.96104145, 0.078606814, 0.2593495)), 0.0, 1.0)
     + 0.5 * clamp(dot(normal.xyz, vec3(0.26765957, 0.95667744, -0.100838766)), 0.0, 1.0);
