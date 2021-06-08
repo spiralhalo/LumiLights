@@ -47,6 +47,6 @@ void main()
 
     fragColor = mix(current, history, 0.9);
 #else
-    fragColor = vec4(1.0, 0.0, 0.0, 1.0);
+    fragColor = texture(u_input, v_texcoord);
 #endif
 }
