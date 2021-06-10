@@ -101,7 +101,7 @@ vec3 hdr_calcHeldLight(inout light_data data)
 vec3 hdr_calcSkyLight(inout light_data data)
 {
     if (frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT)) {
-        vec3 celestialRad = data.light.z * atmos_hdrCelestialRadiance();
+        vec3 celestialRad = data.light.z * atmos_hdrCelestialRadiance() * (1. - frx_rainGradient()); // no direct sunlight during rain
         return pbr_lightCalc(data.albedo, data.roughness, data.metallic, data.f0, celestialRad, frx_skyLightVector(), data.viewDir, data.normal, data.diffuse, data.specularAccu);
     } else {
         vec3 skylessRadiance = l2_skylessRadiance();

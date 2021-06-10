@@ -294,8 +294,8 @@ void atmos_generateAtmosphereModel()
 
     float toGray = frx_rainGradient() * 0.6 + frx_thunderGradient() * 0.35;
 
-    atmosv_hdrCelestialRadiance     = mix(atmosv_hdrCelestialRadiance, grayCelestial, toGray) * rainBrightness; 
-    atmosv_hdrSkyAmbientRadiance    = mix(atmosv_hdrSkyAmbientRadiance, graySkyAmbient, toGray) * rainBrightness;
+    atmosv_hdrCelestialRadiance     = mix(atmosv_hdrCelestialRadiance, grayCelestial, toGray) * rainBrightness; // only used for cloud shading during rain
+    atmosv_hdrSkyAmbientRadiance    = mix(atmosv_hdrSkyAmbientRadiance, graySkyAmbient, toGray) * mix(1., .5, frx_thunderGradient());
     #ifdef POST_SHADER
     atmosv_celestIntensity *= rainBrightness;
     if (customOWFog) {
