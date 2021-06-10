@@ -71,7 +71,7 @@ void doCloudStuff()
         // simulate dark clouds
         float rainBrightness = mix(0.13, 0.05, hdr_gammaAdjustf(frx_rainGradient()));
         //  * l2_clampScale(-2.0, 1.0, dot(skyVec, frx_skyLightVector()))
-        vec3 color = ldr_tonemap3(atmos_hdrCelestialRadiance()) * rainBrightness * volumetric.lightEnergy + ldr_tonemap3(atmos_hdrSkyColorRadiance(skyVec)) * 0.9 * alpha;
+        vec3 color = ldr_tonemap3(atmos_hdrCelestialRadiance()) * rainBrightness * volumetric.lightEnergy + ldr_tonemap3(atmos_hdrCloudColorRadiance(skyVec)) * 0.9 * alpha;
         fragColor[0] = mix(vec4(color, alpha), vec4(0.0), v_blindness);
         #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
             fragColor[1] = vec4(alpha > 0. ? 0.9999 : 1.0);

@@ -22,7 +22,9 @@
     vert_out float atmosv_celestIntensity;
     vert_out vec3 atmosv_hdrCaveFogRadiance;
     vert_out vec3 atmosv_hdrSkyColorRadiance;
+    vert_out vec3 atmosv_hdrCloudColorRadiance;
     vert_out vec3 atmosv_hdrOWTwilightSkyRadiance;
+    vert_out float atmosv_hdrOWTwilightFactor;
     #endif
 
     void atmos_generateAtmosphereModel();
@@ -36,7 +38,9 @@
     frag_in float atmosv_celestIntensity;
     frag_in vec3 atmosv_hdrCaveFogRadiance;
     frag_in vec3 atmosv_hdrSkyColorRadiance;
+    frag_in vec3 atmosv_hdrCloudColorRadiance;
     frag_in vec3 atmosv_hdrOWTwilightSkyRadiance;
+    frag_in float atmosv_hdrOWTwilightFactor;
     #endif
 
 #endif
@@ -70,9 +74,40 @@ vec3 atmos_hdrSkyColorRadiance(vec3 world_toSky)
 
     //NB: only works if sun always rise from dead east instead of north/southeast etc.
     float isTwilight = max(0.0, dot(world_toSky, vec3(sign(frx_skyLightVector().x), 0.0, 0.0)));
-    isTwilight *= isTwilight;
+    isTwilight *= isTwilight * atmosv_hdrOWTwilightFactor;
 
     return mix(atmosv_hdrSkyColorRadiance, atmosv_hdrOWTwilightSkyRadiance, isTwilight);
+}
+
+vec3 atmos_hdrSkyGradientRadiance(vec3 world_toSky)
+{
+    //TODO: test non-overworld has_sky_light custom dimension and broaden if fits
+    if (!frx_worldFlag(FRX_WORLD_IS_OVERWORLD)) // this is for nether performance increase mostly
+        return atmosv_hdrSkyColorRadiance;
+
+    //NB: only works if sun always rise from dead east instead of north/southeast etc.
+    float isTwilight = max(0.0, dot(world_toSky, vec3(sign(frx_skyLightVector().x), 0.0, 0.0)));
+    isTwilight *= isTwilight * atmosv_hdrOWTwilightFactor;
+
+    // horizonBrightening can't be used on reflections yet due to clamping I think
+    float skyDotUp = l2_clampScale(.9, -.1, world_toSky.y);
+    float brighteningCancel = min(1., atmosv_hdrOWTwilightFactor * .6 + frx_rainGradient() * .6);
+    float horizonBrightening = 1. + 9. * pow(skyDotUp, 5.) * (1. - brighteningCancel);
+
+    return mix(atmosv_hdrSkyColorRadiance, atmosv_hdrOWTwilightSkyRadiance, isTwilight) * horizonBrightening;
+}
+
+vec3 atmos_hdrCloudColorRadiance(vec3 world_toSky)
+{
+    //TODO: test non-overworld has_sky_light custom dimension and broaden if fits
+    if (!frx_worldFlag(FRX_WORLD_IS_OVERWORLD)) // this is for nether performance increase mostly
+        return atmosv_hdrCloudColorRadiance;
+
+    //NB: only works if sun always rise from dead east instead of north/southeast etc.
+    float isTwilight = max(0.0, dot(world_toSky, vec3(sign(frx_skyLightVector().x), 0.0, 0.0)));
+    isTwilight *= isTwilight * atmosv_hdrOWTwilightFactor;
+
+    return mix(atmosv_hdrCloudColorRadiance, atmosv_hdrOWTwilightSkyRadiance, isTwilight);
 }
 #endif
 
@@ -81,17 +116,22 @@ vec3 atmos_hdrSkyColorRadiance(vec3 world_toSky)
 #ifdef VERTEX_SHADER
 
 /** DEFINES **/
+#define DEF_VANILLA_DAY_SKY_COLOR hdr_gammaAdjust(vec3(0.52, 0.69, 1.0))
 #if SKY_MODE == SKY_MODE_LUMI
-#if LUMI_SKY_COLOR == LUMI_SKY_COLOR_BRIGHT_CYAN
-#define DEF_DAY_SKY_COLOR hdr_gammaAdjust(vec3(0.33, 0.7, 1.0))
-#else
-#define DEF_DAY_SKY_COLOR hdr_gammaAdjust(vec3(0.3, 0.5, 1.0))
-#endif
+    #if LUMI_SKY_COLOR == LUMI_SKY_COLOR_BRIGHT_CYAN
+    #define DEF_DAY_SKY_COLOR hdr_gammaAdjust(vec3(0.33, 0.7, 1.0))
+    #define DEF_DAY_CLOUD_COLOR hdr_gammaAdjust(vec3(0.40, 0.69, 1.0))
+    #else
+    #define DEF_DAY_SKY_COLOR hdr_gammaAdjust(vec3(0.3, 0.5, 1.0))
+    #define DEF_DAY_CLOUD_COLOR DEF_VANILLA_DAY_SKY_COLOR
+    #endif
 #define DEF_NIGHT_SKY_COLOR hdr_gammaAdjust(vec3(0.1, 0.1, 0.2))
 #else
-#define DEF_DAY_SKY_COLOR hdr_gammaAdjust(vec3(0.52, 0.69, 1.0))
+#define DEF_DAY_SKY_COLOR DEF_VANILLA_DAY_SKY_COLOR
+#define DEF_DAY_CLOUD_COLOR DEF_VANILLA_DAY_SKY_COLOR
 #define DEF_NIGHT_SKY_COLOR hdr_gammaAdjust(vec3(0.01, 0.01, 0.01))
 #endif
+
 #if TONE_PROFILE == TONE_PROFILE_HIGH_CONTRAST_OLD
 #define DEF_SUNLIGHT_STR 12.0
 #define DEF_MOONLIGHT_STR 0.2
@@ -105,6 +145,7 @@ vec3 atmos_hdrSkyColorRadiance(vec3 world_toSky)
 #define DEF_MOONLIGHT_STR 0.1
 #define DEF_SKY_STR 1.0
 #endif
+
 #if defined(SHADOW_MAP_PRESENT) && !defined(HIGH_CONTRAST_ENABLED)
 #define DEF_SKY_AMBIENT_STR 0.6
 #else
@@ -124,6 +165,7 @@ const float SKY_AMBIENT_STR = DEF_SKY_AMBIENT_STR;
 
 const vec3 DAY_SKY_COLOR = DEF_DAY_SKY_COLOR;
 const vec3 NIGHT_SKY_COLOR = DEF_NIGHT_SKY_COLOR * DEF_NIGHT_SKY_MULTIPLIER;
+const vec3 DAY_CLOUD_COLOR = DEF_DAY_CLOUD_COLOR;
 
 const vec3 NOON_SUNLIGHT_COLOR = hdr_gammaAdjust(vec3(1.0, 1.0, 1.0));
 const vec3 SUNRISE_LIGHT_COLOR = hdr_gammaAdjust(vec3(1.0, 0.7, 0.4));
@@ -143,6 +185,7 @@ const int SNONC = 1;
 const int SMONC = 2;
 const vec3[3] CELEST_COLOR =  vec3[](SUNRISE_LIGHT_COLOR, NOON_SUNLIGHT_COLOR, vec3(1.0)    );
      float[3] CELEST_STR   = float[](SUNLIGHT_STR       , SUNLIGHT_STR       , MOONLIGHT_STR);
+const float[3] TWG_FACTOR  = float[](1.0, 0.0, 0.0); // maps celest color to twilight factor
 const int CELEST_LEN = 8;
 const int[CELEST_LEN] CELEST_INDICES = int[]  (SMONC, SRISC, SRISC, SNONC, SNONC, SRISC, SRISC, SMONC);
 const float[CELEST_LEN] CELEST_TIMES = float[](-0.04, -0.03, -0.01,  0.02,  0.48,  0.51,  0.53,  0.54);
@@ -150,13 +193,14 @@ const float[CELEST_LEN] CELEST_TIMES = float[](-0.04, -0.03, -0.01,  0.02,  0.48
 const int DAYC = 0;
 const int NGTC = 1;
 const int TWGC = 2;
+const int CLDC = 3;
 #ifdef POST_SHADER
-const vec3[3] SKY_COLOR   = vec3[](DAY_SKY_COLOR, NIGHT_SKY_COLOR, SUNRISE_LIGHT_COLOR);
-const int[3] TWG_MAPPER   = int[] (TWGC, DAYC, NGTC); // maps celest color to sky color
+const vec3[4] SKY_COLOR   = vec3[](DAY_SKY_COLOR, NIGHT_SKY_COLOR, SUNRISE_LIGHT_COLOR, DAY_CLOUD_COLOR);
 #endif
       vec3[2] SKY_AMBIENT = vec3[](NOON_AMBIENT,  NIGHT_AMBIENT  );
 const int SKY_LEN = 4;
 const int[SKY_LEN] SKY_INDICES = int[]  ( NGTC, DAYC, DAYC, NGTC);
+const int[SKY_LEN] CLOUD_INDICES = int[]( NGTC, CLDC, CLDC, NGTC);
 const float[SKY_LEN] SKY_TIMES = float[](-0.04, -0.01, 0.51, 0.54);
 
 void atmos_generateAtmosphereModel()
@@ -175,19 +219,11 @@ void atmos_generateAtmosphereModel()
 
     float horizonTime = frx_worldTime() < 0.75 ? frx_worldTime():frx_worldTime() - 1.0; // [-0.25, 0.75)
 
-
-    #ifdef POST_SHADER
-        int twgMappedA;
-        int twgMappedB;
-        float twgTransition;
-    #endif
-
     if (horizonTime <= CELEST_TIMES[0]) {
         atmosv_hdrCelestialRadiance = CELEST_COLOR[CELEST_INDICES[0]] * CELEST_STR[CELEST_INDICES[0]];
         #ifdef POST_SHADER
             atmosv_celestIntensity = CELEST_STR[CELEST_INDICES[0]] / SUNLIGHT_STR;
-            twgMappedA = twgMappedB = TWG_MAPPER[CELEST_INDICES[0]];
-            twgTransition = 0.;
+            atmosv_hdrOWTwilightFactor = TWG_FACTOR[CELEST_INDICES[0]];
         #endif
     } else {
         int sunI = 1;
@@ -200,9 +236,7 @@ void atmos_generateAtmosphereModel()
             
         #ifdef POST_SHADER
             atmosv_celestIntensity = mix(CELEST_STR[CELEST_INDICES[sunI-1]], CELEST_STR[CELEST_INDICES[sunI]], celestTransition) / SUNLIGHT_STR;
-            twgMappedA = TWG_MAPPER[CELEST_INDICES[sunI-1]];
-            twgMappedB = TWG_MAPPER[CELEST_INDICES[sunI]];
-            twgTransition = celestTransition;
+            atmosv_hdrOWTwilightFactor = mix(TWG_FACTOR[CELEST_INDICES[sunI-1]], TWG_FACTOR[CELEST_INDICES[sunI]], celestTransition);
         #endif
     }
 
@@ -212,6 +246,7 @@ void atmos_generateAtmosphereModel()
         atmosv_hdrSkyAmbientRadiance = SKY_AMBIENT[SKY_INDICES[0]] * SKY_AMBIENT_STR * (frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? 1.0 : 0.0);
         #ifdef POST_SHADER
         atmosv_hdrSkyColorRadiance   = SKY_COLOR  [SKY_INDICES[0]] * SKY_STR;
+        atmosv_hdrCloudColorRadiance = SKY_COLOR[CLOUD_INDICES[0]] * SKY_STR;
         #endif
     } else {
         int skyI = 1;
@@ -222,6 +257,7 @@ void atmos_generateAtmosphereModel()
                                               * SKY_AMBIENT_STR * (frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? 1.0 : 0.0);
         #ifdef POST_SHADER
         atmosv_hdrSkyColorRadiance      = mix(SKY_COLOR[SKY_INDICES[skyI-1]], SKY_COLOR[SKY_INDICES[skyI]], skyTransition) * SKY_STR;
+        atmosv_hdrCloudColorRadiance    = mix(SKY_COLOR[CLOUD_INDICES[skyI-1]], SKY_COLOR[CLOUD_INDICES[skyI]], skyTransition) * SKY_STR;
         #endif
     }
 
@@ -234,10 +270,12 @@ void atmos_generateAtmosphereModel()
         && frx_worldFlag(FRX_WORLD_IS_OVERWORLD)
         && !frx_playerHasEffect(FRX_EFFECT_BLINDNESS);
 
-    atmosv_hdrSkyColorRadiance = customOWFog ? atmosv_hdrSkyColorRadiance : hdr_gammaAdjust(frx_vanillaClearColor());
-    atmosv_hdrOWTwilightSkyRadiance = customOWFog
-                                      ? mix(SKY_COLOR[twgMappedA], SKY_COLOR[twgMappedB], twgTransition) * SKY_STR
-                                      : atmosv_hdrSkyColorRadiance;
+    if (!customOWFog) {
+        // high saturation non-ow fog
+        atmosv_hdrSkyColorRadiance = hdr_gammaAdjust(mix(frx_vanillaClearColor() / l2_max3(frx_vanillaClearColor()), frx_vanillaClearColor(), 0.75));
+    }
+
+    atmosv_hdrOWTwilightSkyRadiance = customOWFog ? SKY_COLOR[TWGC] : atmosv_hdrSkyColorRadiance;
     atmosv_hdrCaveFogRadiance       = customOWFog
                                       ? mix(CAVEFOG_C, CAVEFOG_DEEPC, l2_clampScale(CAVEFOG_MAXY, CAVEFOG_MINY, frx_cameraPos().y)) * CAVEFOG_STR
                                       : vec3(0.0);
@@ -256,13 +294,14 @@ void atmos_generateAtmosphereModel()
 
     float toGray = frx_rainGradient() * 0.6 + frx_thunderGradient() * 0.35;
 
-    atmosv_hdrCelestialRadiance     = mix(atmosv_hdrCelestialRadiance, grayCelestial, toGray) * rainBrightness; 
-    atmosv_hdrSkyAmbientRadiance    = mix(atmosv_hdrSkyAmbientRadiance, graySkyAmbient, toGray) * rainBrightness;
+    atmosv_hdrCelestialRadiance     = mix(atmosv_hdrCelestialRadiance, grayCelestial, toGray) * rainBrightness; // only used for cloud shading during rain
+    atmosv_hdrSkyAmbientRadiance    = mix(atmosv_hdrSkyAmbientRadiance, graySkyAmbient, toGray) * mix(1., .5, frx_thunderGradient());
     #ifdef POST_SHADER
     atmosv_celestIntensity *= rainBrightness;
     if (customOWFog) {
         atmosv_hdrSkyColorRadiance      = mix(atmosv_hdrSkyColorRadiance, graySky, toGray) * rainBrightness;
         atmosv_hdrOWTwilightSkyRadiance = mix(atmosv_hdrOWTwilightSkyRadiance, graySky, toGray) * rainBrightness;
+        atmosv_hdrCloudColorRadiance    = mix(atmosv_hdrCloudColorRadiance, graySky, toGray) * rainBrightness;
     }
     #endif
     /**********/

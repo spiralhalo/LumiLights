@@ -118,6 +118,7 @@ vec4 fog (float skyLight, vec4 a, vec3 viewPos, vec3 worldPos, inout float bloom
 
     float pFogDensity = frx_viewFlag(FRX_CAMERA_IN_FLUID) ? UNDERWATER_FOG_DENSITY : FOG_DENSITY;
     float pFogFar     = frx_viewFlag(FRX_CAMERA_IN_FLUID) ? UNDERWATER_FOG_FAR     : FOG_FAR;
+          pFogFar     = min(frx_viewDistance(), pFogFar); // clamp to render distance
     // float fog_noise = snoise(worldPos.xz * FOG_NOISE_SCALE + frx_renderSeconds() * FOG_NOISE_SPEED) * FOG_NOISE_HEIGHT;
 
     float pfAltitude = 1.0;
@@ -273,9 +274,7 @@ void custom_sky(in vec3 viewPos, in float blindnessFactor, inout vec4 a, inout f
                     celestialObjectColor = hdr_gammaAdjust(texture(u_sun, celestUV).rgb) * 2.0;
                 }
             }
-            // horizonBrightening can't be used on reflections yet due to clamping I think
-            float horizonBrightening = 1. + 3. * pow(l2_clampScale(.5, -.1, skyDotUp), 2.) * (1. - frx_rainGradient() * .6);
-            a.rgb = atmos_hdrSkyColorRadiance(worldSkyVec) * horizonBrightening;
+            a.rgb = atmos_hdrSkyGradientRadiance(worldSkyVec);
             a.rgb += celestialObjectColor * (1. - frx_rainGradient());
         #else
             // a.rgb = hdr_gammaAdjust(a.rgb) * 2.0; // Don't gamma-correct vanilla sky
@@ -284,7 +283,7 @@ void custom_sky(in vec3 viewPos, in float blindnessFactor, inout vec4 a, inout f
         #if SKY_MODE == SKY_MODE_LUMI || SKY_MODE == SKY_MODE_VANILLA_STARRY
             // stars
             const vec3  nonMilkyAxis  = vec3(-0.598964, 0.531492, 0.598964);
-            
+
             float starry;
             starry = l2_clampScale(0.4, 0.0, frx_luminance(a.rgb)) * v_night;
             starry *= l2_clampScale(-0.6, -0.5, skyDotUp); //prevent star near the void core
@@ -308,9 +307,11 @@ void custom_sky(in vec3 viewPos, in float blindnessFactor, inout vec4 a, inout f
 
             vec3 starRadiance = vec3(star) + NEBULAE_COLOR * milkyHaze;
 
-            a.rgb += starRadiance * DEF_NIGHT_SKY_MULTIPLIER;;
+            a.rgb += starRadiance * DEF_NIGHT_SKY_MULTIPLIER;
             bloom_out += (star + milkyHaze);
         #endif
+    } else if(frx_worldFlag(FRX_WORLD_IS_NETHER)) {
+        a.rgb = atmosv_hdrSkyColorRadiance;
     }
 
     //prevent sky in the void for extra immersion

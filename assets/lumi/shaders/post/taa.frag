@@ -48,7 +48,12 @@ void main()
             float cameraMove = length(frx_cameraPos() - frx_lastCameraPos());
             vec2 velocity = fastVelocity(u_depthCurrent, v_texcoord);
         #endif
-        fragColor[0] = TAA(u_current, u_history0, u_depthCurrent, v_texcoord, velocity, v_invSize, cameraMove);
+        float depth = texture(u_depthCurrent, v_texcoord).r;
+        if (depth == 1. && frx_worldFlag(FRX_WORLD_IS_END)) {
+            fragColor[0] = texture(u_current, v_texcoord); // the end sky is noisy so don't apply TAA (note: true for vanilla)
+        } else {
+            fragColor[0] = TAA(u_current, u_history0, u_depthCurrent, v_texcoord, velocity, v_invSize, cameraMove);
+        }
     #else
         fragColor[0] = texture(u_current, v_texcoord);
     #endif
