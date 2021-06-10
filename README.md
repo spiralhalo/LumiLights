@@ -22,6 +22,11 @@ A custom rendering pipeline for Canvas for improved visual fidelity.
 
 **[=> View Latest Releases <=](https://github.com/spiralhalo/LumiLights/releases)**
 
+## How to Install Lumi Lights
+
+1. Put `LumiLights-vX.XX.zip` in resource packs and activate the resource pack(s).
+2. Go to Video Settings → Canvas → Change the `Pipeline` to `Lumi Lights` (no shadow) or `Lumi Shadow xx` (with shadow)
+
 ## PBR Extension
 
 - [Lumi PBR Ext](https://github.com/spiralhalo/LumiPBRExt) vanilla PBR materials.
