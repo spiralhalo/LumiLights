@@ -90,9 +90,9 @@ vec3 atmos_hdrSkyGradientRadiance(vec3 world_toSky)
     isTwilight *= isTwilight * atmosv_hdrOWTwilightFactor;
 
     // horizonBrightening can't be used on reflections yet due to clamping I think
-    float skyDotUp = l2_clampScale(.25, -.1, world_toSky.y);
-    float brighteningCancel = atmosv_hdrOWTwilightFactor * .4 + frx_rainGradient() * .6;
-    float horizonBrightening = 1. + 9. * skyDotUp * skyDotUp * (1. - brighteningCancel);
+    float skyDotUp = l2_clampScale(.9, -.1, world_toSky.y);
+    float brighteningCancel = min(1., atmosv_hdrOWTwilightFactor * .6 + frx_rainGradient() * .6);
+    float horizonBrightening = 1. + 16. * pow(skyDotUp, 10.) * (1. - brighteningCancel);
 
     return mix(atmosv_hdrSkyColorRadiance, atmosv_hdrOWTwilightSkyRadiance, isTwilight) * horizonBrightening;
 }
