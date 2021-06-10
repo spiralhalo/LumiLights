@@ -41,5 +41,5 @@
 #define vert_in in
 #define vert_out out
 #define frag_in in
-#define sample_shadow(y,z) shadow2DArray(y,z).x
+#define sample_shadow(y,z) texture(y,z)
 #endif
