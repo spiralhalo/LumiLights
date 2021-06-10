@@ -270,7 +270,11 @@ void atmos_generateAtmosphereModel()
         && frx_worldFlag(FRX_WORLD_IS_OVERWORLD)
         && !frx_playerHasEffect(FRX_EFFECT_BLINDNESS);
 
-    atmosv_hdrSkyColorRadiance = customOWFog ? atmosv_hdrSkyColorRadiance : hdr_gammaAdjust(frx_vanillaClearColor());
+    if (!customOWFog) {
+        // high saturation non-ow fog
+        atmosv_hdrSkyColorRadiance = hdr_gammaAdjust(mix(frx_vanillaClearColor() / l2_max3(frx_vanillaClearColor()), frx_vanillaClearColor(), 0.75));
+    }
+
     atmosv_hdrOWTwilightSkyRadiance = customOWFog ? SKY_COLOR[TWGC] : atmosv_hdrSkyColorRadiance;
     atmosv_hdrCaveFogRadiance       = customOWFog
                                       ? mix(CAVEFOG_C, CAVEFOG_DEEPC, l2_clampScale(CAVEFOG_MAXY, CAVEFOG_MINY, frx_cameraPos().y)) * CAVEFOG_STR

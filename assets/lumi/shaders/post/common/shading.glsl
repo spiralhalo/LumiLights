@@ -310,6 +310,8 @@ void custom_sky(in vec3 viewPos, in float blindnessFactor, inout vec4 a, inout f
             a.rgb += starRadiance * DEF_NIGHT_SKY_MULTIPLIER;;
             bloom_out += (star + milkyHaze);
         #endif
+    } else if(frx_worldFlag(FRX_WORLD_IS_NETHER)) {
+        a.rgb = atmosv_hdrSkyColorRadiance;
     }
 
     //prevent sky in the void for extra immersion
