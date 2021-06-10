@@ -79,6 +79,24 @@ vec3 atmos_hdrSkyColorRadiance(vec3 world_toSky)
     return mix(atmosv_hdrSkyColorRadiance, atmosv_hdrOWTwilightSkyRadiance, isTwilight);
 }
 
+vec3 atmos_hdrSkyGradientRadiance(vec3 world_toSky)
+{
+    //TODO: test non-overworld has_sky_light custom dimension and broaden if fits
+    if (!frx_worldFlag(FRX_WORLD_IS_OVERWORLD)) // this is for nether performance increase mostly
+        return atmosv_hdrSkyColorRadiance;
+
+    //NB: only works if sun always rise from dead east instead of north/southeast etc.
+    float isTwilight = max(0.0, dot(world_toSky, vec3(sign(frx_skyLightVector().x), 0.0, 0.0)));
+    isTwilight *= isTwilight * atmosv_hdrOWTwilightFactor;
+
+    // horizonBrightening can't be used on reflections yet due to clamping I think
+    float skyDotUp = l2_clampScale(.25, -.1, world_toSky.y);
+    float brighteningCancel = atmosv_hdrOWTwilightFactor * .4 + frx_rainGradient() * .6;
+    float horizonBrightening = 1. + 9. * skyDotUp * skyDotUp * (1. - brighteningCancel);
+
+    return mix(atmosv_hdrSkyColorRadiance, atmosv_hdrOWTwilightSkyRadiance, isTwilight) * horizonBrightening;
+}
+
 vec3 atmos_hdrCloudColorRadiance(vec3 world_toSky)
 {
     //TODO: test non-overworld has_sky_light custom dimension and broaden if fits

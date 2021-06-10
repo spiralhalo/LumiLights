@@ -273,9 +273,7 @@ void custom_sky(in vec3 viewPos, in float blindnessFactor, inout vec4 a, inout f
                     celestialObjectColor = hdr_gammaAdjust(texture(u_sun, celestUV).rgb) * 2.0;
                 }
             }
-            // horizonBrightening can't be used on reflections yet due to clamping I think
-            float horizonBrightening = 1. + 3. * pow(l2_clampScale(.5, -.1, skyDotUp), 2.) * (1. - frx_rainGradient() * .6);
-            a.rgb = atmos_hdrSkyColorRadiance(worldSkyVec) * horizonBrightening;
+            a.rgb = atmos_hdrSkyGradientRadiance(worldSkyVec);
             a.rgb += celestialObjectColor * (1. - frx_rainGradient());
         #else
             // a.rgb = hdr_gammaAdjust(a.rgb) * 2.0; // Don't gamma-correct vanilla sky
