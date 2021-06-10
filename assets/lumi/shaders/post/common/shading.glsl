@@ -284,7 +284,7 @@ void custom_sky(in vec3 viewPos, in float blindnessFactor, inout vec4 a, inout f
         #if SKY_MODE == SKY_MODE_LUMI || SKY_MODE == SKY_MODE_VANILLA_STARRY
             // stars
             const vec3  nonMilkyAxis  = vec3(-0.598964, 0.531492, 0.598964);
-            
+
             float starry;
             starry = l2_clampScale(0.4, 0.0, frx_luminance(a.rgb)) * v_night;
             starry *= l2_clampScale(-0.6, -0.5, skyDotUp); //prevent star near the void core
@@ -308,7 +308,7 @@ void custom_sky(in vec3 viewPos, in float blindnessFactor, inout vec4 a, inout f
 
             vec3 starRadiance = vec3(star) + NEBULAE_COLOR * milkyHaze;
 
-            a.rgb += starRadiance * DEF_NIGHT_SKY_MULTIPLIER;;
+            a.rgb += starRadiance * DEF_NIGHT_SKY_MULTIPLIER;
             bloom_out += (star + milkyHaze);
         #endif
     }
