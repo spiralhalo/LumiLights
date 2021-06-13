@@ -45,7 +45,7 @@ vec3 getRandomVec(sampler2D blueNoiseTex, vec2 uv, vec2 texSize)
     return tile_randomVec[texelPos.x + texelPos.y * 4u];
 #else
     vec2 noiseUv = (texelPos % BLUE_RES) * BLUE_RES_RCP;
-    return texture2D(blueNoiseTex, noiseUv).rgb;
+    return texture(blueNoiseTex, noiseUv).rgb;
 #endif
 }
 
@@ -57,7 +57,7 @@ float getRandomFloat(sampler2D blueNoiseTex, vec2 uv, vec2 texSize)
     return tile_randomVec[texelPos.x + texelPos.y * 4u].x;
 #else
     vec2 noiseUv = (texelPos % BLUE_RES) * BLUE_RES_RCP;
-    return texture2D(blueNoiseTex, noiseUv).r;
+    return texture(blueNoiseTex, noiseUv).r;
 #endif
 }
 
