@@ -127,7 +127,7 @@ rt_Result rt_reflection(
     vec2 rayHit_uv;
     int hits = 0;
     int steps = 0;
-    while (steps < MAXSTEPS) {
+    while (steps < MAXSTEPS && ray_view.z < 0.0) {
 
         ray_view += ray;
         rayHit_uv = view2uv(ray_view, projection);
