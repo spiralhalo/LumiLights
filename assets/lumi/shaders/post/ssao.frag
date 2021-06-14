@@ -24,7 +24,7 @@ out vec4[1] fragColor;
 
 #ifdef SSAO_ENABLED
 const float RADIUS = 2.0;
-const float BIAS = 0.5;
+const float BIAS = 0.3;
 const float INTENSITY = 2.5;
 #endif
 

@@ -27,22 +27,22 @@ uniform sampler2D u_blue_noise;
 #endif
 
 #if REFLECTION_PROFILE == REFLECTION_PROFILE_HIGH
-    const float HITBOX = 0.25;
-    const int MAXSTEPS = 50;
-    const int PERIOD = 8;
+    const float HITBOX = 0.125;
+    const int MAXSTEPS = 55;
+    const int PERIOD = 7;
     const int REFINE = 16;
 #endif
 
 #if REFLECTION_PROFILE == REFLECTION_PROFILE_MEDIUM
-    const float HITBOX = 0.25;
-    const int MAXSTEPS = 34;
-    const int PERIOD = 5;
+    const float HITBOX = 0.125;
+    const int MAXSTEPS = 35;
+    const int PERIOD = 4;
     const int REFINE = 8;
 #endif
 
 #if REFLECTION_PROFILE == REFLECTION_PROFILE_LOW
     const float HITBOX = 0.125;
-    const int MAXSTEPS = 19;
+    const int MAXSTEPS = 20;
     const int PERIOD = 2;
     const int REFINE = 8;
 #endif
