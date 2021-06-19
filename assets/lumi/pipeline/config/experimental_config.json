@@ -33,8 +33,13 @@
                     nameKey: "config.lumi_lights.value.parallax_cloud_density",
                     descriptionKey: "config.lumi_lights.help.parallax_cloud_density"
                 },
+                volumetric_fog_softness_override: {
+                    default: false,
+                    nameKey: "config.lumi_lights.value.volumetric_fog_softness_override",
+                    descriptionKey: "config.lumi_lights.help.volumetric_fog_softness_override"
+                },
                 volumetric_fog_softness_relative: {
-                    default: 12,
+                    default: 16,
                     min: 0,
                     max: 18,
                     nameKey: "config.lumi_lights.value.volumetric_fog_softness_relative",

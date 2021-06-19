@@ -70,7 +70,7 @@ vec3 l2_baseAmbientRadiance()
         #ifdef TRUE_DARKNESS_DEFAULT
             return vec3(0.0);
         #else
-            return vec3(0.1) * BASE_AMBIENT_STR;
+            return vec3(BASE_AMBIENT_STR);
         #endif
     } else {
         #ifdef TRUE_DARKNESS_NETHER

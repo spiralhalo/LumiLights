@@ -78,7 +78,7 @@ vec3 blend(vec3 dst, vec4 src)
 #define blurDepthThreshold 0.01
 void main()
 {
-    float brightnessMult = mix(1.0, BRIGHT_FINAL_MULT, frx_viewBrightness());
+    float brightnessMult = 1.0;//mix(1.0, BRIGHT_FINAL_MULT, frx_viewBrightness());
 
     float depth_solid = texture(u_solid_depth, v_texcoord).r;
     vec4 solid = texture(u_combine_solid, v_texcoord);
