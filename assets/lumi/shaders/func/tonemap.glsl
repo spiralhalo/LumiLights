@@ -57,9 +57,10 @@ vec3 hable_filmic(vec3 v)
     return curr * white_scale;
 }
 
-vec4 ldr_tonemap(vec4 a)
+vec3 ldr_tonemap3noGamma(vec3 a)
 {
     vec3 c = a.rgb;
+
     #if TONE_PROFILE == TONE_PROFILE_HIGH_CONTRAST_OLD
         c = frx_toneMap(c);
     #elif defined(HIGH_CONTRAST_ENABLED)
@@ -67,37 +68,27 @@ vec4 ldr_tonemap(vec4 a)
     #else
         c = frx_toneMap(c);
     #endif
-    // Somehow the film tonemap requires clamping. I don't understand..
-    c = pow(clamp(c, 0.0, 1.0), vec3(1.0 / (hdr_gamma + frx_viewBrightness() * 1.0)));
-    return vec4(c, a.a);
+
+    // In the past ACES requires clamping for some reason
+    c = clamp(c, 0.0, 1.0);
+    return c;
 }
 
 vec3 ldr_tonemap3(vec3 a)
 {
-    vec3 c = a.rgb;
-    #if TONE_PROFILE == TONE_PROFILE_HIGH_CONTRAST_OLD
-        c = frx_toneMap(c);
-    #elif defined(HIGH_CONTRAST_ENABLED)
-        c = exposure_tonemap(c);
-    #else
-        c = frx_toneMap(c);
-    #endif
-    c = pow(clamp(c, 0.0, 1.0), vec3(1.0 / (hdr_gamma + frx_viewBrightness() * 1.0)));
+    vec3 c = ldr_tonemap3noGamma(a);
+    float capBrightness = min(1.5, frx_viewBrightness());
+    float viewGamma = hdr_gamma + capBrightness;
+
+    c = pow(c, vec3(1.0 / viewGamma));
     return c;
 }
 
-vec3 ldr_tonemap3noGamma(vec3 a)
+vec4 ldr_tonemap(vec4 a)
 {
-    vec3 c = a.rgb;
-    #if TONE_PROFILE == TONE_PROFILE_HIGH_CONTRAST_OLD
-        c = frx_toneMap(c);
-    #elif defined(HIGH_CONTRAST_ENABLED)
-        c = exposure_tonemap(c);
-    #else
-        c = frx_toneMap(c);
-    #endif
-    c = clamp(c, 0.0, 1.0);
-    return c;
+    vec3 c = ldr_tonemap3(a.rgb);
+
+    return vec4(c, a.a);
 }
 
 #endif
