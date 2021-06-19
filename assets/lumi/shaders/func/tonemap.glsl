@@ -1,4 +1,5 @@
 #include frex:shaders/api/player.glsl
+#include frex:shaders/api/view.glsl
 #include frex:shaders/api/world.glsl
 #include frex:shaders/lib/color.glsl
 #include frex:shaders/lib/math.glsl
@@ -67,7 +68,7 @@ vec4 ldr_tonemap(vec4 a)
         c = frx_toneMap(c);
     #endif
     // Somehow the film tonemap requires clamping. I don't understand..
-    c = pow(clamp(c, 0.0, 1.0), vec3(1.0 / hdr_gamma));
+    c = pow(clamp(c, 0.0, 1.0), vec3(1.0 / (hdr_gamma + frx_viewBrightness() * 1.0)));
     return vec4(c, a.a);
 }
 
@@ -81,7 +82,7 @@ vec3 ldr_tonemap3(vec3 a)
     #else
         c = frx_toneMap(c);
     #endif
-    c = pow(clamp(c, 0.0, 1.0), vec3(1.0 / hdr_gamma));
+    c = pow(clamp(c, 0.0, 1.0), vec3(1.0 / (hdr_gamma + frx_viewBrightness() * 1.0)));
     return c;
 }
 
