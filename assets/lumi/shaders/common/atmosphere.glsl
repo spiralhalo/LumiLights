@@ -144,7 +144,7 @@ vec3 atmos_hdrCloudColorRadiance(vec3 world_toSky)
 #define DEF_SKY_STR 2.0
 #else
 #define DEF_SUNLIGHT_STR 6.0
-#define DEF_MOONLIGHT_STR 0.1
+#define DEF_MOONLIGHT_STR 0.5
 #define DEF_SKY_STR 1.0
 #endif
 
@@ -173,7 +173,7 @@ const vec3 NOON_SUNLIGHT_COLOR = hdr_gammaAdjust(vec3(1.0, 1.0, 1.0));
 const vec3 SUNRISE_LIGHT_COLOR = hdr_gammaAdjust(vec3(1.0, 0.7, 0.4));
 
 const vec3 NOON_AMBIENT  = hdr_gammaAdjust(vec3(1.0));
-const vec3 NIGHT_AMBIENT = hdr_gammaAdjust(vec3(0.3, 0.3, 0.45)) * DEF_NIGHT_SKY_MULTIPLIER;
+const vec3 NIGHT_AMBIENT = hdr_gammaAdjust(vec3(0.6, 0.6, 0.9)) * DEF_NIGHT_SKY_MULTIPLIER;
 
 const vec3 CAVEFOG_C = DEF_DAY_SKY_COLOR;
 const vec3 CAVEFOG_DEEPC = SUNRISE_LIGHT_COLOR;
@@ -215,8 +215,8 @@ void atmos_generateAtmosphereModel()
     /*******************/
 
 
-    CELEST_STR[SMONC] *= 0.4 + 0.6 * frx_moonSize();
-    SKY_AMBIENT[NGTC] *= 0.4 + 0.6 * frx_moonSize();
+    CELEST_STR[SMONC] *= 0.5 + 0.5 * frx_moonSize();
+    SKY_AMBIENT[NGTC] *= 0.5 + 0.5 * frx_moonSize();
     
 
     float horizonTime = frx_worldTime() < 0.75 ? frx_worldTime():frx_worldTime() - 1.0; // [-0.25, 0.75)
