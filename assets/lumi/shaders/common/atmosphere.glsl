@@ -1,6 +1,7 @@
 #include frex:shaders/api/world.glsl
 #include frex:shaders/api/view.glsl
 #include frex:shaders/lib/math.glsl
+#include lumi:shaders/lib/atmosphere_phys.glsl
 #include lumi:shaders/lib/util.glsl
 #include lumi:shaders/common/userconfig.glsl
 
@@ -68,33 +69,50 @@ vec3 atmos_hdrCaveFogRadiance()
 
 vec3 atmos_hdrSkyColorRadiance(vec3 world_toSky)
 {
-    //TODO: test non-overworld has_sky_light custom dimension and broaden if fits
-    if (!frx_worldFlag(FRX_WORLD_IS_OVERWORLD)) // this is for nether performance increase mostly
-        return atmosv_hdrSkyColorRadiance;
-
-    //NB: only works if sun always rise from dead east instead of north/southeast etc.
-    float isTwilight = max(0.0, dot(world_toSky, vec3(sign(frx_skyLightVector().x), 0.0, 0.0)));
-    isTwilight *= isTwilight * atmosv_hdrOWTwilightFactor;
-
-    return mix(atmosv_hdrSkyColorRadiance, atmosv_hdrOWTwilightSkyRadiance, isTwilight);
+    return  atmosphere(
+        world_toSky,           // normalized ray direction
+        vec3(0,6372e3,0),               // ray origin
+        frx_skyLightVector(),                        // position of the sun
+        22.0,                           // intensity of the sun
+        6371e3,                         // radius of the planet in meters
+        6471e3,                         // radius of the atmosphere in meters
+        vec3(5.5e-6, 13.0e-6, 22.4e-6), // Rayleigh scattering coefficient
+        21e-6,                          // Mie scattering coefficient
+        8e3,                            // Rayleigh scale height
+        1.2e3,                          // Mie scale height
+        0.758                           // Mie preferred scattering direction
+    );
 }
 
 vec3 atmos_hdrSkyGradientRadiance(vec3 world_toSky)
 {
-    //TODO: test non-overworld has_sky_light custom dimension and broaden if fits
-    if (!frx_worldFlag(FRX_WORLD_IS_OVERWORLD)) // this is for nether performance increase mostly
-        return atmosv_hdrSkyColorRadiance;
+    return  atmosphere(
+        world_toSky,           // normalized ray direction
+        vec3(0,6372e3,0),               // ray origin
+        frx_skyLightVector(),                        // position of the sun
+        22.0,                           // intensity of the sun
+        6371e3,                         // radius of the planet in meters
+        6471e3,                         // radius of the atmosphere in meters
+        vec3(5.5e-6, 13.0e-6, 22.4e-6), // Rayleigh scattering coefficient
+        21e-6,                          // Mie scattering coefficient
+        8e3,                            // Rayleigh scale height
+        1.2e3,                          // Mie scale height
+        0.758                           // Mie preferred scattering direction
+    );
+    // //TODO: test non-overworld has_sky_light custom dimension and broaden if fits
+    // if (!frx_worldFlag(FRX_WORLD_IS_OVERWORLD)) // this is for nether performance increase mostly
+    //     return atmosv_hdrSkyColorRadiance;
 
-    //NB: only works if sun always rise from dead east instead of north/southeast etc.
-    float isTwilight = max(0.0, dot(world_toSky, vec3(sign(frx_skyLightVector().x), 0.0, 0.0)));
-    isTwilight *= isTwilight * atmosv_hdrOWTwilightFactor;
+    // //NB: only works if sun always rise from dead east instead of north/southeast etc.
+    // float isTwilight = max(0.0, dot(world_toSky, vec3(sign(frx_skyLightVector().x), 0.0, 0.0)));
+    // isTwilight *= isTwilight * atmosv_hdrOWTwilightFactor;
 
-    // horizonBrightening can't be used on reflections yet due to clamping I think
-    float skyDotUp = l2_clampScale(.9, -.1, world_toSky.y);
-    float brighteningCancel = min(1., atmosv_hdrOWTwilightFactor * .6 + frx_rainGradient() * .6);
-    float horizonBrightening = 1. + 9. * pow(skyDotUp, 5.) * (1. - brighteningCancel);
+    // // horizonBrightening can't be used on reflections yet due to clamping I think
+    // float skyDotUp = l2_clampScale(.9, -.1, world_toSky.y);
+    // float brighteningCancel = min(1., atmosv_hdrOWTwilightFactor * .6 + frx_rainGradient() * .6);
+    // float horizonBrightening = 1. + 9. * pow(skyDotUp, 5.) * (1. - brighteningCancel);
 
-    return mix(atmosv_hdrSkyColorRadiance, atmosv_hdrOWTwilightSkyRadiance, isTwilight) * horizonBrightening;
+    // return mix(atmosv_hdrSkyColorRadiance, atmosv_hdrOWTwilightSkyRadiance, isTwilight) * horizonBrightening;
 }
 
 vec3 atmos_hdrCloudColorRadiance(vec3 world_toSky)
