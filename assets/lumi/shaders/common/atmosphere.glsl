@@ -66,17 +66,22 @@ vec3 atmos_hdrCaveFogRadiance()
     return atmosv_hdrCaveFogRadiance;
 }
 
+float twilightCalc(vec3 world_toSky) {
+    float isHorizon = (1.0 - abs (world_toSky.y));
+    //NB: only works if sun always rise from dead East instead of NE/SE etc.
+    float isTwilight = l2_clampScale(-1.5, .5, world_toSky.x * sign(frx_skyLightVector().x));
+    float result = isTwilight * isHorizon * isHorizon * atmosv_hdrOWTwilightFactor;
+
+    return frx_smootherstep(0., 1., result);
+}
+
 vec3 atmos_hdrSkyColorRadiance(vec3 world_toSky)
 {
     //TODO: test non-overworld has_sky_light custom dimension and broaden if fits
     if (!frx_worldFlag(FRX_WORLD_IS_OVERWORLD)) // this is for nether performance increase mostly
         return atmosv_hdrSkyColorRadiance;
 
-    //NB: only works if sun always rise from dead east instead of north/southeast etc.
-    float isTwilight = max(0.0, dot(world_toSky, vec3(sign(frx_skyLightVector().x), 0.0, 0.0)));
-    isTwilight *= isTwilight * atmosv_hdrOWTwilightFactor;
-
-    return mix(atmosv_hdrSkyColorRadiance, atmosv_hdrOWTwilightSkyRadiance, isTwilight);
+    return mix(atmosv_hdrSkyColorRadiance, atmosv_hdrOWTwilightSkyRadiance, twilightCalc(world_toSky));
 }
 
 vec3 atmos_hdrSkyGradientRadiance(vec3 world_toSky)
@@ -85,16 +90,14 @@ vec3 atmos_hdrSkyGradientRadiance(vec3 world_toSky)
     if (!frx_worldFlag(FRX_WORLD_IS_OVERWORLD)) // this is for nether performance increase mostly
         return atmosv_hdrSkyColorRadiance;
 
-    //NB: only works if sun always rise from dead east instead of north/southeast etc.
-    float isTwilight = max(0.0, dot(world_toSky, vec3(sign(frx_skyLightVector().x), 0.0, 0.0)));
-    isTwilight *= isTwilight * atmosv_hdrOWTwilightFactor;
-
     // horizonBrightening can't be used on reflections yet due to clamping I think
-    float skyDotUp = l2_clampScale(.9, -.1, world_toSky.y);
+    float skyHorizon = 1.0 - abs(world_toSky.y);
     float brighteningCancel = min(1., atmosv_hdrOWTwilightFactor * .6 + frx_rainGradient() * .6);
-    float horizonBrightening = 1. + 9. * pow(skyDotUp, 5.) * (1. - brighteningCancel);
+    float brightenFactor = pow(skyHorizon, 20.) * (1. - brighteningCancel);
+    float darkenFactor = abs(world_toSky.y);
+    float horizonBrightening = 1. + 2. * brightenFactor - darkenFactor * .7;
 
-    return mix(atmosv_hdrSkyColorRadiance, atmosv_hdrOWTwilightSkyRadiance, isTwilight) * horizonBrightening;
+    return mix(atmosv_hdrSkyColorRadiance, atmosv_hdrOWTwilightSkyRadiance, twilightCalc(world_toSky)) * horizonBrightening;
 }
 
 vec3 atmos_hdrCloudColorRadiance(vec3 world_toSky)
@@ -103,11 +106,7 @@ vec3 atmos_hdrCloudColorRadiance(vec3 world_toSky)
     if (!frx_worldFlag(FRX_WORLD_IS_OVERWORLD)) // this is for nether performance increase mostly
         return atmosv_hdrCloudColorRadiance;
 
-    //NB: only works if sun always rise from dead east instead of north/southeast etc.
-    float isTwilight = max(0.0, dot(world_toSky, vec3(sign(frx_skyLightVector().x), 0.0, 0.0)));
-    isTwilight *= isTwilight * atmosv_hdrOWTwilightFactor;
-
-    return mix(atmosv_hdrCloudColorRadiance, atmosv_hdrOWTwilightSkyRadiance, isTwilight);
+    return mix(atmosv_hdrCloudColorRadiance, atmosv_hdrOWTwilightSkyRadiance, twilightCalc(world_toSky));
 }
 #endif
 
@@ -142,7 +141,7 @@ vec3 atmos_hdrCloudColorRadiance(vec3 world_toSky)
 #define DEF_SKY_STR 2.0
 #else
 #define DEF_SUNLIGHT_STR 6.0
-#define DEF_MOONLIGHT_STR 0.1
+#define DEF_MOONLIGHT_STR 0.5
 #define DEF_SKY_STR 1.0
 #endif
 
@@ -171,7 +170,7 @@ const vec3 NOON_SUNLIGHT_COLOR = hdr_gammaAdjust(vec3(1.0, 1.0, 1.0));
 const vec3 SUNRISE_LIGHT_COLOR = hdr_gammaAdjust(vec3(1.0, 0.7, 0.4));
 
 const vec3 NOON_AMBIENT  = hdr_gammaAdjust(vec3(1.0));
-const vec3 NIGHT_AMBIENT = hdr_gammaAdjust(vec3(0.3, 0.3, 0.45)) * DEF_NIGHT_SKY_MULTIPLIER;
+const vec3 NIGHT_AMBIENT = hdr_gammaAdjust(vec3(0.6, 0.6, 0.9)) * DEF_NIGHT_SKY_MULTIPLIER;
 
 const vec3 CAVEFOG_C = DEF_DAY_SKY_COLOR;
 const vec3 CAVEFOG_DEEPC = SUNRISE_LIGHT_COLOR;
@@ -213,8 +212,8 @@ void atmos_generateAtmosphereModel()
     /*******************/
 
 
-    CELEST_STR[SMONC] *= 0.4 + 0.6 * frx_moonSize();
-    SKY_AMBIENT[NGTC] *= 0.4 + 0.6 * frx_moonSize();
+    CELEST_STR[SMONC] *= 0.5 + 0.5 * frx_moonSize();
+    SKY_AMBIENT[NGTC] *= 0.5 + 0.5 * frx_moonSize();
     
 
     float horizonTime = frx_worldTime() < 0.75 ? frx_worldTime():frx_worldTime() - 1.0; // [-0.25, 0.75)
@@ -233,12 +232,14 @@ void atmos_generateAtmosphereModel()
             CELEST_COLOR[CELEST_INDICES[sunI-1]] * CELEST_STR[CELEST_INDICES[sunI-1]],
             CELEST_COLOR[CELEST_INDICES[sunI]] * CELEST_STR[CELEST_INDICES[sunI]],
             celestTransition);
-            
+
         #ifdef POST_SHADER
             atmosv_celestIntensity = mix(CELEST_STR[CELEST_INDICES[sunI-1]], CELEST_STR[CELEST_INDICES[sunI]], celestTransition) / SUNLIGHT_STR;
             atmosv_hdrOWTwilightFactor = mix(TWG_FACTOR[CELEST_INDICES[sunI-1]], TWG_FACTOR[CELEST_INDICES[sunI]], celestTransition);
         #endif
     }
+
+    atmosv_hdrCelestialRadiance *= frx_skyLightTransitionFactor();
 
 
 
@@ -298,6 +299,9 @@ void atmos_generateAtmosphereModel()
     atmosv_hdrSkyAmbientRadiance    = mix(atmosv_hdrSkyAmbientRadiance, graySkyAmbient, toGray) * mix(1., .5, frx_thunderGradient());
     #ifdef POST_SHADER
     atmosv_celestIntensity *= rainBrightness;
+
+    atmosv_hdrCloudColorRadiance = mix(atmosv_hdrCloudColorRadiance, graySky, 0.2); // ACES adjustment
+
     if (customOWFog) {
         atmosv_hdrSkyColorRadiance      = mix(atmosv_hdrSkyColorRadiance, graySky, toGray) * rainBrightness;
         atmosv_hdrOWTwilightSkyRadiance = mix(atmosv_hdrOWTwilightSkyRadiance, graySky, toGray) * rainBrightness;

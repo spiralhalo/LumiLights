@@ -34,18 +34,25 @@ void main()
     velocity *= 0.5;
 #endif
 
-    vec4 current2x2Colors[neighborCount2x2];
-    for(int iter = 0; iter < neighborCount2x2; iter++)
-    {
-        current2x2Colors[iter] = texture(u_input, currentUv + (kOffsets2x2[iter] * deltaRes));
-    }
-    vec4 min2 = MinColors(current2x2Colors);
-    vec4 max2 = MaxColors(current2x2Colors);
-
     vec4 current = texture(u_input, currentUv);
     vec4 history = texture(u_history, currentUv - velocity);
 
-    history = clip_aabb(min2.rgb, max2.rgb, current, history);
+    const float ROUGHNESS_TOLERANCE = 0.03;
+
+    if (abs(history.a - current.a) < ROUGHNESS_TOLERANCE) {
+        vec4 current2x2Colors[neighborCount2x2];
+        for(int iter = 0; iter < neighborCount2x2; iter++)
+        {
+            current2x2Colors[iter] = texture(u_input, currentUv + (kOffsets2x2[iter] * deltaRes));
+        }
+        vec4 min2 = MinColors(current2x2Colors);
+        vec4 max2 = MaxColors(current2x2Colors);
+
+        //NB: clips history.a to current.a if outside of bounding box
+        history = clip_aabb(min2.rgb, max2.rgb, current, history);
+    } else {
+        history = current;
+    }
 
     fragColor[0] = mix(current, history, 0.9);
 #else

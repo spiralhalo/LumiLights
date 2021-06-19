@@ -64,7 +64,7 @@ vec4 ldr_tonemap(vec4 a)
     #elif defined(HIGH_CONTRAST_ENABLED)
         c = exposure_tonemap(c);
     #else
-        c = hable_filmic(c);
+        c = frx_toneMap(c);
     #endif
     // Somehow the film tonemap requires clamping. I don't understand..
     c = pow(clamp(c, 0.0, 1.0), vec3(1.0 / hdr_gamma));
@@ -79,7 +79,7 @@ vec3 ldr_tonemap3(vec3 a)
     #elif defined(HIGH_CONTRAST_ENABLED)
         c = exposure_tonemap(c);
     #else
-        c = hable_filmic(c);
+        c = frx_toneMap(c);
     #endif
     c = pow(clamp(c, 0.0, 1.0), vec3(1.0 / hdr_gamma));
     return c;
@@ -93,7 +93,7 @@ vec3 ldr_tonemap3noGamma(vec3 a)
     #elif defined(HIGH_CONTRAST_ENABLED)
         c = exposure_tonemap(c);
     #else
-        c = hable_filmic(c);
+        c = frx_toneMap(c);
     #endif
     c = clamp(c, 0.0, 1.0);
     return c;
