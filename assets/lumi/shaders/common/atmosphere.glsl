@@ -89,11 +89,11 @@ vec3 atmos_hdrSkyGradientRadiance(vec3 world_toSky)
         return atmosv_hdrSkyColorRadiance;
 
     // horizonBrightening can't be used on reflections yet due to clamping I think
-    float skyDotUp = l2_clampScale(.5, -.1, world_toSky.y);
+    float skyHorizon = 1.0 - abs(world_toSky.y);
     float brighteningCancel = min(1., atmosv_hdrOWTwilightFactor * .6 + frx_rainGradient() * .6);
-    float brightenFactor = pow(skyDotUp, 5.) * (1. - brighteningCancel);
-    float darkenFactor = max(world_toSky.y, 0.);
-    float horizonBrightening = 1. + 9. * brightenFactor - darkenFactor * .6;
+    float brightenFactor = pow(skyHorizon, 20.) * (1. - brighteningCancel);
+    float darkenFactor = abs(world_toSky.y);
+    float horizonBrightening = 1. + 2. * brightenFactor - darkenFactor * .7;
 
     return mix(atmosv_hdrSkyColorRadiance, atmosv_hdrOWTwilightSkyRadiance, twilightCalc(world_toSky)) * horizonBrightening;
 }
@@ -295,6 +295,7 @@ void atmos_generateAtmosphereModel()
     atmosv_hdrSkyAmbientRadiance    = mix(atmosv_hdrSkyAmbientRadiance, graySkyAmbient, toGray) * mix(1., .5, frx_thunderGradient());
     #ifdef POST_SHADER
     atmosv_celestIntensity *= rainBrightness;
+
     if (customOWFog) {
         atmosv_hdrSkyColorRadiance      = mix(atmosv_hdrSkyColorRadiance, graySky, toGray) * rainBrightness;
         atmosv_hdrOWTwilightSkyRadiance = mix(atmosv_hdrOWTwilightSkyRadiance, graySky, toGray) * rainBrightness;
