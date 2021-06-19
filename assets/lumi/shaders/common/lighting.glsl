@@ -15,7 +15,7 @@
 const float BASE_AMBIENT_STR = 0.005;
 const float HELD_LIGHT_STR = 0.1875;
 #else
-const float BASE_AMBIENT_STR = 0.02;
+const float BASE_AMBIENT_STR = 0.1;
 const float HELD_LIGHT_STR = 1.5;
 #endif
 

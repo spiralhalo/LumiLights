@@ -141,7 +141,7 @@ vec3 atmos_hdrCloudColorRadiance(vec3 world_toSky)
 #define DEF_SKY_STR 2.0
 #else
 #define DEF_SUNLIGHT_STR 6.0
-#define DEF_MOONLIGHT_STR 0.5
+#define DEF_MOONLIGHT_STR 0.4
 #define DEF_SKY_STR 1.0
 #endif
 
