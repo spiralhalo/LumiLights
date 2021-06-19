@@ -104,7 +104,10 @@ vec3 atmos_hdrCloudColorRadiance(vec3 world_toSky)
     if (!frx_worldFlag(FRX_WORLD_IS_OVERWORLD)) // this is for nether performance increase mostly
         return atmosv_hdrCloudColorRadiance;
 
-    return mix(atmosv_hdrCloudColorRadiance, atmosv_hdrOWTwilightSkyRadiance, twilightCalc(world_toSky));
+    float cloudTwilightFactor = twilightCalc(world_toSky);
+    cloudTwilightFactor = pow(cloudTwilightFactor, 1.5);
+
+    return mix(atmosv_hdrCloudColorRadiance, atmosv_hdrOWTwilightSkyRadiance, cloudTwilightFactor);
 }
 #endif
 
@@ -230,12 +233,14 @@ void atmos_generateAtmosphereModel()
             CELEST_COLOR[CELEST_INDICES[sunI-1]] * CELEST_STR[CELEST_INDICES[sunI-1]],
             CELEST_COLOR[CELEST_INDICES[sunI]] * CELEST_STR[CELEST_INDICES[sunI]],
             celestTransition);
-            
+
         #ifdef POST_SHADER
             atmosv_celestIntensity = mix(CELEST_STR[CELEST_INDICES[sunI-1]], CELEST_STR[CELEST_INDICES[sunI]], celestTransition) / SUNLIGHT_STR;
             atmosv_hdrOWTwilightFactor = mix(TWG_FACTOR[CELEST_INDICES[sunI-1]], TWG_FACTOR[CELEST_INDICES[sunI]], celestTransition);
         #endif
     }
+
+    atmosv_hdrCelestialRadiance *= frx_skyLightTransitionFactor();
 
 
 
@@ -295,6 +300,8 @@ void atmos_generateAtmosphereModel()
     atmosv_hdrSkyAmbientRadiance    = mix(atmosv_hdrSkyAmbientRadiance, graySkyAmbient, toGray) * mix(1., .5, frx_thunderGradient());
     #ifdef POST_SHADER
     atmosv_celestIntensity *= rainBrightness;
+
+    atmosv_hdrCloudColorRadiance = mix(atmosv_hdrCloudColorRadiance, graySky, 0.2); // ACES adjustment
 
     if (customOWFog) {
         atmosv_hdrSkyColorRadiance      = mix(atmosv_hdrSkyColorRadiance, graySky, toGray) * rainBrightness;

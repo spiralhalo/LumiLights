@@ -46,12 +46,16 @@ void doCloudStuff()
     // float brightnessMult = mix(1.0, BRIGHT_FINAL_MULT, frx_viewBrightness());
     #if CLOUD_RENDERING == CLOUD_RENDERING_FLAT
         vec4 cloudColor = flatCloud(v_texcoord, v_cloud_rotator, v_up);
+
         fragColor[0] = mix(cloudColor, vec4(0.0), v_blindness);
         fragColor[1] = vec4(cloudColor.a > 0. ? 0.99999 : 1.0);
+
     #elif CLOUD_RENDERING == CLOUD_RENDERING_PARALLAX
         vec4 cloudColor = parallaxCloud(u_blue_noise, v_texcoord);
+
         fragColor[0] = mix(cloudColor, vec4(0.0), v_blindness);
         fragColor[1] = vec4(cloudColor.a > 0. ? 0.99999 : 1.0);
+
     #elif CLOUD_RENDERING == CLOUD_RENDERING_VOLUMETRIC
         #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
           cloud_result volumetric = rayMarchCloud(u_clouds_texture, u_solid_depth, u_blue_noise, v_texcoord);
@@ -63,14 +67,23 @@ void doCloudStuff()
 
         vec4 worldPos = frx_inverseViewProjectionMatrix() * vec4(2.0 * v_texcoord - 1.0, 1.0, 1.0);
         worldPos.xyz /= worldPos.w;
-        vec3 skyVec = normalize(worldPos.xyz);
 
+        vec3 skyVec = normalize(worldPos.xyz);
         float alpha = 1.0 - volumetric.transmittance;
-        // simulate dark clouds
-        float rainBrightness = mix(0.13, 0.05, hdr_gammaAdjustf(frx_rainGradient()));
-        //  * l2_clampScale(-2.0, 1.0, dot(skyVec, frx_skyLightVector()))
-        vec3 color = ldr_tonemap3(atmos_hdrCelestialRadiance()) * rainBrightness * volumetric.lightEnergy + ldr_tonemap3(atmos_hdrCloudColorRadiance(skyVec)) * 0.9 * alpha;
+        float rainBrightness = mix(0.13, 0.05, hdr_gammaAdjustf(frx_rainGradient())); // simulate dark clouds
+        vec3 celestRadiance = atmos_hdrCelestialRadiance();
+
+        if (frx_worldFlag(FRX_WORLD_IS_MOONLIT)) {
+            celestRadiance *= 0.2;
+        }
+
+        vec3 color;
+        
+        color = ldr_tonemap3(celestRadiance) * rainBrightness * volumetric.lightEnergy
+            + ldr_tonemap3(atmos_hdrCloudColorRadiance(skyVec)) * 0.9 * alpha;
+
         fragColor[0] = mix(vec4(color, alpha), vec4(0.0), v_blindness);
+
         #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
             fragColor[1] = vec4(alpha > 0. ? 0.9999 : 1.0);
         #else
@@ -84,6 +97,7 @@ void doCloudStuff()
         #endif
     #else
         vec4 clouds = blur13(u_clouds, v_texcoord, frxu_size, vec2(1.0, 1.0));
+
         fragColor[0] = clouds;
         fragColor[1] = texture(u_clouds_depth, v_texcoord);
         // Thanks to Lomo for the inspiration on depth copying
