@@ -144,11 +144,11 @@ vec3 atmos_hdrCloudColorRadiance(vec3 world_toSky)
 #define DEF_MOONLIGHT_STR 0.4
 #define DEF_SKY_STR 1.0
 #endif
-
-#if defined(SHADOW_MAP_PRESENT) && !defined(HIGH_CONTRAST_ENABLED)
-#define DEF_SKY_AMBIENT_STR 0.6
-#else
+ 
+#ifdef HIGH_CONTRAST_ENABLED
 #define DEF_SKY_AMBIENT_STR 1.2
+#else
+#define DEF_SKY_AMBIENT_STR 0.6
 #endif
 /*************/
 
