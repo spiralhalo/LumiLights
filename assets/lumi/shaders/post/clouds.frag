@@ -37,6 +37,7 @@ uniform sampler2D u_blue_noise;
 #if CLOUD_RENDERING == CLOUD_RENDERING_FLAT
 in mat4 v_cloud_rotator;
 #endif
+
 in float v_blindness;
 
 out vec4[2] fragColor;
@@ -89,10 +90,12 @@ void doCloudStuff()
         #else
             vec3 reverseModelPos = volumetric.worldPos - frx_cameraPos();
             vec4 reverseClipPos = frx_viewProjectionMatrix() * vec4(reverseModelPos, 1.0);
+
             reverseClipPos.z /= reverseClipPos.w;
-            // fragColor[1] = vec4(alpha > 0.0 ? 0.0 : 1.0);
+
             float backgroundDepth = texture(u_translucent_depth, v_texcoord).r;
             float alphaThreshold = backgroundDepth == 1. ? 0.5 : 0.; 
+
             fragColor[1] = vec4(alpha > alphaThreshold ? reverseClipPos.z : 1.0);
         #endif
     #else
@@ -100,7 +103,7 @@ void doCloudStuff()
 
         fragColor[0] = clouds;
         fragColor[1] = texture(u_clouds_depth, v_texcoord);
-        // Thanks to Lomo for the inspiration on depth copying
+        // Thanks to fewizz for the inspiration on depth copying in Lomo
     #endif
 }
 
