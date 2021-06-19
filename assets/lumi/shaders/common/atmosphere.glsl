@@ -70,7 +70,9 @@ float twilightCalc(vec3 world_toSky) {
     float isHorizon = (1.0 - abs (world_toSky.y));
     //NB: only works if sun always rise from dead East instead of NE/SE etc.
     float isTwilight = l2_clampScale(-1.5, .5, world_toSky.x * sign(frx_skyLightVector().x));
-    return isTwilight * isHorizon * isHorizon * atmosv_hdrOWTwilightFactor;
+    float result = isTwilight * isHorizon * isHorizon * atmosv_hdrOWTwilightFactor;
+
+    return frx_smootherstep(0., 1., result);
 }
 
 vec3 atmos_hdrSkyColorRadiance(vec3 world_toSky)
@@ -104,10 +106,7 @@ vec3 atmos_hdrCloudColorRadiance(vec3 world_toSky)
     if (!frx_worldFlag(FRX_WORLD_IS_OVERWORLD)) // this is for nether performance increase mostly
         return atmosv_hdrCloudColorRadiance;
 
-    float cloudTwilightFactor = twilightCalc(world_toSky);
-    cloudTwilightFactor = pow(cloudTwilightFactor, 1.5);
-
-    return mix(atmosv_hdrCloudColorRadiance, atmosv_hdrOWTwilightSkyRadiance, cloudTwilightFactor);
+    return mix(atmosv_hdrCloudColorRadiance, atmosv_hdrOWTwilightSkyRadiance, twilightCalc(world_toSky));
 }
 #endif
 
