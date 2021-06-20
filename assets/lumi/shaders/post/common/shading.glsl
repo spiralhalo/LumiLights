@@ -259,14 +259,16 @@ float volumetric_caustics_beam(vec3 worldPos)
     return max(0.0, float(power) / stepLimit);
 }
 
-void custom_sky(in vec3 viewPos, in float blindnessFactor, in bool underwater, inout vec4 a, inout float bloom_out)
+void custom_sky(in vec3 viewPos, in float blindnessFactor, in bool maybeUnderwater, inout vec4 a, inout float bloom_out)
 {
     vec3 skyVec = normalize(viewPos);
     vec3 worldSkyVec = skyVec * frx_normalModelMatrix();
     float skyDotUp = dot(skyVec, v_up);
     bloom_out = 0.0;
 
-    if (frx_worldFlag(FRX_WORLD_IS_OVERWORLD) && v_not_in_void > 0.0 && !underwater) {
+    if ((frx_viewFlag(FRX_CAMERA_IN_WATER) && maybeUnderwater) || frx_worldFlag(FRX_WORLD_IS_NETHER)) {
+        a.rgb = atmosv_hdrFogColorRadiance;
+    } else if (frx_worldFlag(FRX_WORLD_IS_OVERWORLD) && v_not_in_void > 0.0) {
         #if SKY_MODE == SKY_MODE_LUMI
             float starEraser = 0.;
             vec2 celestUV = rect_innerUV(Rect(v_celest1, v_celest2, v_celest3), skyVec * 1024.);
@@ -325,8 +327,6 @@ void custom_sky(in vec3 viewPos, in float blindnessFactor, in bool underwater, i
             a.rgb += starRadiance * DEF_NIGHT_SKY_MULTIPLIER;
             bloom_out += (star + milkyHaze);
         #endif
-    } else if(frx_worldFlag(FRX_WORLD_IS_NETHER) || underwater) {
-        a.rgb = atmosv_hdrFogColorRadiance;
     }
 
     //prevent sky in the void for extra immersion
