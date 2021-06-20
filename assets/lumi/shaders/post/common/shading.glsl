@@ -259,14 +259,14 @@ float volumetric_caustics_beam(vec3 worldPos)
     return max(0.0, float(power) / stepLimit);
 }
 
-void custom_sky(in vec3 viewPos, in float blindnessFactor, inout vec4 a, inout float bloom_out)
+void custom_sky(in vec3 viewPos, in float blindnessFactor, in bool underwater, inout vec4 a, inout float bloom_out)
 {
     vec3 skyVec = normalize(viewPos);
     vec3 worldSkyVec = skyVec * frx_normalModelMatrix();
     float skyDotUp = dot(skyVec, v_up);
     bloom_out = 0.0;
 
-    if (frx_worldFlag(FRX_WORLD_IS_OVERWORLD) && v_not_in_void > 0.0) {
+    if (frx_worldFlag(FRX_WORLD_IS_OVERWORLD) && v_not_in_void > 0.0 && !underwater) {
         #if SKY_MODE == SKY_MODE_LUMI
             float starEraser = 0.;
             vec2 celestUV = rect_innerUV(Rect(v_celest1, v_celest2, v_celest3), skyVec * 1024.);
@@ -325,8 +325,8 @@ void custom_sky(in vec3 viewPos, in float blindnessFactor, inout vec4 a, inout f
             a.rgb += starRadiance * DEF_NIGHT_SKY_MULTIPLIER;
             bloom_out += (star + milkyHaze);
         #endif
-    } else if(frx_worldFlag(FRX_WORLD_IS_NETHER)) {
-        a.rgb = atmosv_hdrSkyColorRadiance;
+    } else if(frx_worldFlag(FRX_WORLD_IS_NETHER) || underwater) {
+        a.rgb = atmosv_hdrFogColorRadiance;
     }
 
     //prevent sky in the void for extra immersion
@@ -356,11 +356,13 @@ vec4 hdr_shaded_color(
     
     float depth   = texture(sdepth, uv).r;
     vec3  viewPos = coords_view(uv, frx_inverseProjectionMatrix(), depth);
+    bool maybeUnderwater = (!translucent && translucentDepth >= depth && frx_viewFlag(FRX_CAMERA_IN_WATER))
+        || (translucentDepth < depth && !frx_viewFlag(FRX_CAMERA_IN_WATER));
 
     if (depth == 1.0 && !translucent) {
         // the sky
         if (v_blindness == 1.0) return vec4(0.0);
-        custom_sky(viewPos, 1.0 - v_blindness, a, bloom_out);
+        custom_sky(viewPos, 1.0 - v_blindness, maybeUnderwater, a, bloom_out);
         // mark as managed draw, vanilla sky is an exception
         return vec4(a.rgb * 1.0 - v_blindness, 1.0);
         // vec3 worldPos = (128.0 / length(modelPos)) * modelPos + frx_cameraPos(); // doesn't help
@@ -398,9 +400,6 @@ vec4 hdr_shaded_color(
     float matflash  = bit_unpack(misc.z, 0);
     float mathurt   = bit_unpack(misc.z, 1);
     // return vec4(coords_view(uv, frx_inverseProjectionMatrix(), depth), 1.0);
-
-    bool maybeUnderwater = (!translucent && translucentDepth >= depth && frx_viewFlag(FRX_CAMERA_IN_WATER))
-        || (translucentDepth < depth && !frx_viewFlag(FRX_CAMERA_IN_WATER));
 
     #if defined(SHADOW_MAP_PRESENT)
         #ifdef TAA_ENABLED

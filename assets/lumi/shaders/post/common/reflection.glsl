@@ -81,12 +81,13 @@ vec3 sample_worldNormal(vec2 uv, in sampler2D snormal)
 }
 
 const float SKYLESS_FACTOR = 0.5;
-vec3 calcFallbackColor(vec3 unit_view, vec3 unitMarch_view, vec2 light)
+vec3 calcFallbackColor(vec3 unitMarch_world, vec2 light)
 {
     float skyLight = l2_clampScale(0.03125, 0.96875, light.y);
-    float upFactor = frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? l2_clampScale(-0.1, 0.1, dot(unitMarch_view, v_up)) : 1.0;
+    // float bottomLimit = frx_viewFlag(FRX_CAMERA_IN_WATER) ? 0.0 : -0.3;
+    float upFactor = frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? l2_clampScale(-0.3, 0.1, unitMarch_world.y) : 1.0;
     float skyLightFactor = frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? (skyLight * skyLight) : SKYLESS_FACTOR;
-    return atmos_hdrSkyColorRadiance(unitMarch_view * frx_normalModelMatrix()) * skyLightFactor * upFactor * 2.0;
+    return atmos_hdrSkyColorRadiance(unitMarch_world) * skyLightFactor * upFactor * 2.0;
 }
 
 vec3 pbr_lightCalc(float roughness, vec3 f0, vec3 radiance, vec3 lightDir, vec3 viewDir)
@@ -288,10 +289,10 @@ rt_color_depth work_on_pair(
 
     // nb: compute_colors is currently unused as of the commmit it was added in ¯\_(ツ)_/¯
     if (compute_colors) {
-        vec4 fallbackColor   = fallback > 0.0 ? vec4(calcFallbackColor(unit_view, unitMarch_view, light), fallback) : vec4(0.0);
+        vec3 unitMarch_world = unitMarch_view * frx_normalModelMatrix();
+        vec4 fallbackColor   = fallback > 0.0 ? vec4(calcFallbackColor(unitMarch_world, light), fallback) : vec4(0.0);
         vec4 reflected_final = mix(reflected, fallbackColor, fallbackMix);
         vec3 unit_world      = unit_view * frx_normalModelMatrix();
-        vec3 unitMarch_world = unitMarch_view * frx_normalModelMatrix();
 
         vec4 pbr_color = vec4(pbr_lightCalc(roughness, f0, reflected_final.rgb * base_color.a, unitMarch_world, unit_world), reflected_final.a);
 
