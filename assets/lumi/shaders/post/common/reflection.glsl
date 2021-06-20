@@ -84,10 +84,10 @@ const float SKYLESS_FACTOR = 0.5;
 vec3 calcFallbackColor(vec3 unitMarch_world, vec2 light)
 {
     float skyLight = l2_clampScale(0.03125, 0.96875, light.y);
-    // float bottomLimit = frx_viewFlag(FRX_CAMERA_IN_WATER) ? 0.0 : -0.3;
+    float aboveWaterFactor = frx_viewFlag(FRX_CAMERA_IN_WATER) ? 0.0 : 1.0;
     float upFactor = frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? l2_clampScale(-0.3, 0.1, unitMarch_world.y) : 1.0;
     float skyLightFactor = frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? (skyLight * skyLight) : SKYLESS_FACTOR;
-    return atmos_hdrSkyColorRadiance(unitMarch_world) * skyLightFactor * upFactor * 2.0;
+    return atmos_hdrSkyColorRadiance(unitMarch_world) * skyLightFactor * upFactor * 2.0 * aboveWaterFactor;
 }
 
 vec3 pbr_lightCalc(float roughness, vec3 f0, vec3 radiance, vec3 lightDir, vec3 viewDir)
