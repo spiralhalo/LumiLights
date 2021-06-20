@@ -198,8 +198,7 @@ vec4 fog(float skyLight, vec4 a, vec3 viewPos, vec3 worldPos, inout float bloom)
 
     fogFactor = clamp(fogFactor * distFactor, 0.0, 1.0);
 
-    // TODO: separate fog from sky color
-    vec4 fogColor = vec4(atmos_hdrSkyColorRadiance(normalize(worldPos-frx_cameraPos())), 1.0);
+    vec4 fogColor = vec4(atmos_hdrFogColorRadiance(normalize(worldPos-frx_cameraPos())), 1.0);
 
     if (useAdditive) {
         #ifdef RGB_CAVES
