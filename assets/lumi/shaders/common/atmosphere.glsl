@@ -21,10 +21,12 @@
     #ifdef POST_SHADER
     vert_out float atmosv_celestIntensity;
     vert_out vec3 atmosv_hdrCaveFogRadiance;
-    vert_out vec3 atmosv_hdrSkyColorRadiance;
     vert_out vec3 atmosv_hdrCloudColorRadiance;
-    vert_out vec3 atmosv_hdrOWTwilightSkyRadiance;
+    vert_out vec3 atmosv_hdrFogColorRadiance;
+    vert_out vec3 atmosv_hdrSkyColorRadiance;
+    vert_out float atmosv_hdrOWTwilightFogFactor;
     vert_out float atmosv_hdrOWTwilightFactor;
+    vert_out vec3 atmosv_hdrOWTwilightSkyRadiance;
     #endif
 
     void atmos_generateAtmosphereModel();
@@ -37,10 +39,12 @@
     #ifdef POST_SHADER
     frag_in float atmosv_celestIntensity;
     frag_in vec3 atmosv_hdrCaveFogRadiance;
-    frag_in vec3 atmosv_hdrSkyColorRadiance;
     frag_in vec3 atmosv_hdrCloudColorRadiance;
-    frag_in vec3 atmosv_hdrOWTwilightSkyRadiance;
+    frag_in vec3 atmosv_hdrFogColorRadiance;
+    frag_in vec3 atmosv_hdrSkyColorRadiance;
+    frag_in float atmosv_hdrOWTwilightFogFactor;
     frag_in float atmosv_hdrOWTwilightFactor;
+    frag_in vec3 atmosv_hdrOWTwilightSkyRadiance;
     #endif
 
 #endif
@@ -73,6 +77,15 @@ float twilightCalc(vec3 world_toSky) {
     float result = isTwilight * isHorizon * isHorizon * atmosv_hdrOWTwilightFactor;
 
     return frx_smootherstep(0., 1., result);
+}
+
+vec3 atmos_hdrFogColorRadiance(vec3 world_toSky)
+{
+    //TODO: test non-overworld has_sky_light custom dimension and broaden if fits
+    if (!frx_worldFlag(FRX_WORLD_IS_OVERWORLD)) // this is for nether performance increase mostly
+        return atmosv_hdrFogColorRadiance;
+
+    return mix(atmosv_hdrFogColorRadiance, atmosv_hdrOWTwilightSkyRadiance, twilightCalc(world_toSky) * atmosv_hdrOWTwilightFogFactor);
 }
 
 vec3 atmos_hdrSkyColorRadiance(vec3 world_toSky)
@@ -271,15 +284,18 @@ void atmos_generateAtmosphereModel()
         && frx_worldFlag(FRX_WORLD_IS_OVERWORLD)
         && !frx_playerHasEffect(FRX_EFFECT_BLINDNESS);
 
-    if (!customOWFog) {
-        // high saturation non-ow fog
-        atmosv_hdrSkyColorRadiance = hdr_gammaAdjust(mix(frx_vanillaClearColor() / l2_max3(frx_vanillaClearColor()), frx_vanillaClearColor(), 0.75));
+    if (customOWFog) {
+        atmosv_hdrFogColorRadiance = atmosv_hdrSkyColorRadiance;
+        atmosv_hdrCaveFogRadiance = mix(CAVEFOG_C, CAVEFOG_DEEPC, l2_clampScale(CAVEFOG_MAXY, CAVEFOG_MINY, frx_cameraPos().y)) * CAVEFOG_STR;
+        atmosv_hdrOWTwilightFogFactor = atmosv_hdrOWTwilightFactor;
+    } else {
+        // high saturation vanilla fog
+        atmosv_hdrFogColorRadiance = hdr_gammaAdjust(mix(frx_vanillaClearColor() / l2_max3(frx_vanillaClearColor()), frx_vanillaClearColor(), 0.75));
+        atmosv_hdrCaveFogRadiance = vec3(0.0);
+        atmosv_hdrOWTwilightFogFactor = 0.0;
     }
 
-    atmosv_hdrOWTwilightSkyRadiance = customOWFog ? SKY_COLOR[TWGC] : atmosv_hdrSkyColorRadiance;
-    atmosv_hdrCaveFogRadiance       = customOWFog
-                                      ? mix(CAVEFOG_C, CAVEFOG_DEEPC, l2_clampScale(CAVEFOG_MAXY, CAVEFOG_MINY, frx_cameraPos().y)) * CAVEFOG_STR
-                                      : vec3(0.0);
+    atmosv_hdrOWTwilightSkyRadiance = SKY_COLOR[TWGC];
     #endif
 
 

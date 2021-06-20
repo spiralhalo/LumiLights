@@ -180,6 +180,9 @@
                     "material_translucent",
                     "translucent_reflection_merge",
 
+                    "translucent_depth",
+                    "normal_micro_translucent",
+
                     "lumi:textures/filter_pattern/bluenoise256.png",
                 ]
             },
