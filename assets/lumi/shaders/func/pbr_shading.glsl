@@ -30,7 +30,7 @@ vec3 pbr_nonDirectional(vec3 albedo, float metallic, vec3 radiance)
     return albedo * pbr_fakeMetallicDiffuseMultiplier(albedo, metallic, radiance) / PI * radiance;
 }
 
-vec3 pbr_lightCalc(vec3 albedo, float roughness, float metallic, vec3 pbr_f0, vec3 radiance, vec3 lightDir, vec3 viewDir, vec3 normal, bool diffuseOn, inout vec3 specularAccu)
+vec3 pbr_lightCalc(vec3 albedo, float roughness, float metallic, vec3 pbr_f0, vec3 radiance, vec3 lightDir, vec3 viewDir, vec3 normal, float translucency, bool diffuseOn, inout vec3 specularAccu)
 {
     vec3 halfway = normalize(viewDir + lightDir);
     // disableDiffuse hack
@@ -41,8 +41,9 @@ vec3 pbr_lightCalc(vec3 albedo, float roughness, float metallic, vec3 pbr_f0, ve
     float NdotL = pbr_dot(normal, lightDir);
     vec3 specularRadiance = pbr_specularBRDF(roughness, radiance, halfway, lightDir, viewDir, normal, fresnel, NdotL);
     //Fake metallic diffuse applied
+    float diffuseNdotL = mix(NdotL, 1.0, translucency); // let more light pass through translucent objects
     vec3 diffuse = (1.0 - fresnel);
-    vec3 diffuseRadiance = albedo * pbr_fakeMetallicDiffuseMultiplier(albedo, metallic, radiance) / PI * radiance * NdotL;
+    vec3 diffuseRadiance = albedo * pbr_fakeMetallicDiffuseMultiplier(albedo, metallic, radiance) / PI * radiance * diffuseNdotL;
     specularAccu += specularRadiance;
     return specularRadiance + diffuseRadiance;
 }
@@ -58,6 +59,7 @@ struct light_data{
     vec3 viewDir;
     vec3 viewPos;
     vec3 specularAccu;
+    float translucency;
 };
 
 vec3 hdr_calcBlockLight(inout light_data data, vec3 radiance)
@@ -80,7 +82,7 @@ vec3 hdr_calcBlockLight(inout light_data data, vec3 radiance)
     // harshly lower f0 the further away from light source for non-metal
     vec3 f0 = data.f0 * mix(l2_clampScale(0.5, 0.96875, data.light.x), 1.0, data.metallic);
     
-    return pbr_lightCalc(data.albedo, roughness, data.metallic, f0, radiance, lightDir, data.viewDir, data.normal, true, data.specularAccu);
+    return pbr_lightCalc(data.albedo, roughness, data.metallic, f0, radiance, lightDir, data.viewDir, data.normal, data.translucency, true, data.specularAccu);
 }
 
 vec3 hdr_calcHeldLight(inout light_data data)
@@ -91,7 +93,7 @@ vec3 hdr_calcHeldLight(inout light_data data)
         vec3 handHeldRadiance = l2_handHeldRadiance(data.viewPos);
         if (handHeldRadiance.x + handHeldRadiance.y + handHeldRadiance.z > 0) {
             vec3 adjustedNormal = data.diffuse ? data.normal : data.viewDir;
-            return pbr_lightCalc(data.albedo, data.roughness, data.metallic, data.f0, handHeldRadiance, handHeldDir, data.viewDir, adjustedNormal, true, data.specularAccu);
+            return pbr_lightCalc(data.albedo, data.roughness, data.metallic, data.f0, handHeldRadiance, handHeldDir, data.viewDir, adjustedNormal, data.translucency, true, data.specularAccu);
         }
     }
 #endif
@@ -102,14 +104,14 @@ vec3 hdr_calcSkyLight(inout light_data data)
 {
     if (frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT)) {
         vec3 celestialRad = data.light.z * atmos_hdrCelestialRadiance() * (1. - frx_rainGradient()); // no direct sunlight during rain
-        return pbr_lightCalc(data.albedo, data.roughness, data.metallic, data.f0, celestialRad, frx_skyLightVector(), data.viewDir, data.normal, data.diffuse, data.specularAccu);
+        return pbr_lightCalc(data.albedo, data.roughness, data.metallic, data.f0, celestialRad, frx_skyLightVector(), data.viewDir, data.normal, data.translucency, data.diffuse, data.specularAccu);
     } else {
         vec3 skylessRadiance = l2_skylessRadiance();
         vec3 skylessDir = l2_skylessDir();
-        vec3 skylessLight = pbr_lightCalc(data.albedo, data.roughness, data.metallic, data.f0, skylessRadiance, skylessDir, data.viewDir, data.normal, data.diffuse, data.specularAccu);
+        vec3 skylessLight = pbr_lightCalc(data.albedo, data.roughness, data.metallic, data.f0, skylessRadiance, skylessDir, data.viewDir, data.normal, data.translucency, data.diffuse, data.specularAccu);
         if (frx_isSkyDarkened()) {
             vec3 skylessDarkenedDir = l2_skylessDarkenedDir();
-            skylessLight += pbr_lightCalc(data.albedo, data.roughness, data.metallic, data.f0, skylessRadiance, skylessDarkenedDir, data.viewDir, data.normal, data.diffuse, data.specularAccu);
+            skylessLight += pbr_lightCalc(data.albedo, data.roughness, data.metallic, data.f0, skylessRadiance, skylessDarkenedDir, data.viewDir, data.normal, data.translucency, data.diffuse, data.specularAccu);
         }
         return skylessLight;
     }
@@ -128,7 +130,8 @@ void pbr_shading(inout vec4 a, inout float bloom, vec3 viewPos, vec3 light, vec3
         normal,
         normalize(-viewPos) * frx_normalModelMatrix(),
         viewPos,
-        vec3(0.0)
+        vec3(0.0),
+        (translucent && a.a > 0.) ? (1.0 - min(a.a, 1.0)) : 0.0
     );
 
     vec3 held_light  = hdr_calcHeldLight(data);
