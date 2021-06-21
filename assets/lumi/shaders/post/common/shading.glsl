@@ -290,6 +290,7 @@ void custom_sky(in vec3 viewPos, in float blindnessFactor, in bool maybeUnderwat
                 } else {
                     celestialObjectColor = hdr_gammaAdjust(texture(u_sun, celestUV).rgb) * 2.0;
                 }
+                bloom_out += frx_luminance(clamp(celestialObjectColor, 0.0, 1.0)) * 0.25;
             }
             a.rgb = atmos_hdrSkyGradientRadiance(worldSkyVec);
             a.rgb += celestialObjectColor * (1. - frx_rainGradient());
