@@ -219,4 +219,55 @@ vec4 generateCloudTexture(vec2 texcoord) {
     // cloud = sqrt(1.0 - pow(1.0 - cloud, 2.0));
     return vec4(cloud, sqrt(1.0 - pow(1.0 - cloud1 * cloud2, 2.0)), 0.0, 1.0);
 }
+
+vec4 volumetricCloud(
+    in sampler2D scloudTex,
+    in sampler2D ssolidDepth,
+    in sampler2D stranslucentDepth,
+    in sampler2D sbluenoise,
+    in vec2 texcoord,
+    out float out_depth)
+{
+    #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
+        cloud_result volumetric = rayMarchCloud(scloudTex, ssolidDepth, sbluenoise, texcoord);
+    #else
+        cloud_result volumetric = frx_viewFlag(FRX_CAMERA_IN_FLUID)
+                                ? rayMarchCloud(scloudTex, ssolidDepth, sbluenoise, texcoord)
+                                : rayMarchCloud(scloudTex, stranslucentDepth, sbluenoise, texcoord);
+    #endif
+
+    vec4 worldPos = frx_inverseViewProjectionMatrix() * vec4(2.0 * texcoord - 1.0, 1.0, 1.0);
+
+    worldPos.xyz /= worldPos.w;
+
+    vec3 skyVec = normalize(worldPos.xyz);
+    float alpha = 1.0 - volumetric.transmittance;
+    float rainBrightness = mix(0.13, 0.05, hdr_gammaAdjustf(frx_rainGradient())); // simulate dark clouds
+    vec3 celestRadiance = atmos_hdrCelestialRadiance();
+
+    if (frx_worldFlag(FRX_WORLD_IS_MOONLIT)) {
+        celestRadiance *= 0.2;
+    }
+
+    vec3 color;
+    
+    color = ldr_tonemap3(celestRadiance) * rainBrightness * volumetric.lightEnergy
+        + ldr_tonemap3(atmos_hdrCloudColorRadiance(skyVec)) * 0.9 * alpha;
+
+    #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
+        out_depth = alpha > 0. ? 0.9999 : 1.0;
+    #else
+        vec3 reverseModelPos = volumetric.worldPos - frx_cameraPos();
+        vec4 reverseClipPos = frx_viewProjectionMatrix() * vec4(reverseModelPos, 1.0);
+
+        reverseClipPos.z /= reverseClipPos.w;
+
+        float backgroundDepth = texture(stranslucentDepth, texcoord).r;
+        float alphaThreshold = backgroundDepth == 1. ? 0.5 : 0.; 
+
+        out_depth = alpha > alphaThreshold ? reverseClipPos.z : 1.0;
+    #endif
+
+    return vec4(color, alpha);
+}
 #endif
