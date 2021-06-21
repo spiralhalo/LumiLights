@@ -65,7 +65,7 @@ vec4 hdr_combine(sampler2D a, sampler2D matA, sampler2D b, vec2 uv, bool translu
         vec3 viewDir = normalize(-viewPos.xyz);
         float fresnelApprox = pow(1.0 - pbr_dot(viewDir, normal), 2.0);
         float bLuminance = frx_luminance(b1.rgb);
-        float alphaAdd = fresnelApprox * l2_clampScale(0.0, 0.3, bLuminance); //wip: arbitrary clampscale
+        float alphaAdd = fresnelApprox * pow(bLuminance, 0.01);
 
         a1.a = a1.a > 0.0 ? mix(a1.a, 1.0, alphaAdd) : 0.0;
     }
