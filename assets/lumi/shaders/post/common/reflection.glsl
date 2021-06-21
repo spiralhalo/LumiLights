@@ -294,7 +294,7 @@ rt_color_depth work_on_pair(
         vec4 reflected_final = mix(reflected, fallbackColor, fallbackMix);
         vec3 unit_world      = unit_view * frx_normalModelMatrix();
 
-        vec4 pbr_color = vec4(pbr_lightCalc(roughness, f0, reflected_final.rgb, unitMarch_world, unit_world), reflected_final.a);
+        vec4 pbr_color = vec4(pbr_lightCalc(roughness, f0, reflected_final.rgb * base_color.a, unitMarch_world, unit_world), reflected_final.a);
 
         return rt_color_depth(pbr_color, reflected_depth_value);
     } else {
