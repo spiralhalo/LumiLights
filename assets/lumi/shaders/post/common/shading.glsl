@@ -276,17 +276,21 @@ void custom_sky(in vec3 viewPos, in float blindnessFactor, in bool maybeUnderwat
             bool isMoon = dot(worldSkyVec, frx_skyLightVector()) < 0. ? !frx_worldFlag(FRX_WORLD_IS_MOONLIT) : frx_worldFlag(FRX_WORLD_IS_MOONLIT);
             if (celestUV == clamp(celestUV, 0.0, 1.0)) {
                 if (isMoon){
-                    vec2 fullMoonUV = celestUV * vec2(0.25, 0.5);
-                    vec3 fullMoonColor = texture(u_moon, fullMoonUV).rgb;
-                    starEraser = l2_max3(fullMoonColor);
-                    starEraser = min(1.0, starEraser * 3.0);
-                    celestUV.x *= 0.25;
-                    celestUV.y *= 0.5;
-                    celestUV.x += mod(frx_worldDay(), 4.) * 0.25;
-                    celestUV.y += (mod(frx_worldDay(), 8.) >= 4.) ? 0.5 : 0.0;
-                    celestialObjectColor = hdr_gammaAdjust(texture(u_moon, celestUV).rgb) * 3.0;
-                    celestialObjectColor += vec3(0.01) * hdr_gammaAdjust(fullMoonColor);
-                    celestialObjectColor *= DEF_NIGHT_SKY_MULTIPLIER;
+                    vec2 moonUv = clamp(celestUV, 0.25, 0.75);
+                    if (celestUV == moonUv) {
+                        celestUV = 2.0 * moonUv - 0.5;
+                        vec2 fullMoonUV = celestUV * vec2(0.25, 0.5);
+                        vec3 fullMoonColor = texture(u_moon, fullMoonUV).rgb;
+                        starEraser = l2_max3(fullMoonColor);
+                        starEraser = min(1.0, starEraser * 3.0);
+                        celestUV.x *= 0.25;
+                        celestUV.y *= 0.5;
+                        celestUV.x += mod(frx_worldDay(), 4.) * 0.25;
+                        celestUV.y += (mod(frx_worldDay(), 8.) >= 4.) ? 0.5 : 0.0;
+                        celestialObjectColor = hdr_gammaAdjust(texture(u_moon, celestUV).rgb) * 3.0;
+                        celestialObjectColor += vec3(0.01) * hdr_gammaAdjust(fullMoonColor);
+                        celestialObjectColor *= DEF_NIGHT_SKY_MULTIPLIER;
+                    }
                 } else {
                     celestialObjectColor = hdr_gammaAdjust(texture(u_sun, celestUV).rgb) * 2.0;
                 }
