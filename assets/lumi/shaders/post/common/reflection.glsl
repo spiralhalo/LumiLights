@@ -87,8 +87,7 @@ vec3 calcFallbackColor(vec3 unitMarch_world, vec2 light)
     float aboveWaterFactor = frx_viewFlag(FRX_CAMERA_IN_WATER) ? 0.0 : 1.0;
     float upFactor = frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? l2_clampScale(-0.3, 0.1, unitMarch_world.y) : 1.0;
     float skyLightFactor = frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? (skyLight * skyLight) : SKYLESS_FACTOR;
-
-    return atmos_hdrSkyGradientRadiance(unitMarch_world) * skyLightFactor * upFactor * aboveWaterFactor;
+    return atmos_hdrSkyColorRadiance(unitMarch_world) * skyLightFactor * upFactor * 2.0 * aboveWaterFactor;
 }
 
 vec3 pbr_lightCalc(float roughness, vec3 f0, vec3 radiance, vec3 lightDir, vec3 viewDir)
@@ -97,7 +96,7 @@ vec3 pbr_lightCalc(float roughness, vec3 f0, vec3 radiance, vec3 lightDir, vec3 
     vec3 fresnel = pbr_fresnelSchlick(pbr_dot(viewDir, halfway), f0);
     float smoothness = (1-roughness);
 
-    return fresnel * radiance * smoothness * smoothness;
+    return clamp(fresnel * radiance * smoothness * smoothness, 0.0, 1.0);
 }
 
 #if REFLECTION_PROFILE != REFLECTION_PROFILE_NONE
