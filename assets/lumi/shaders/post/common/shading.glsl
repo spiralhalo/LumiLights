@@ -299,19 +299,18 @@ void custom_sky(in vec3 viewPos, in float blindnessFactor, in bool maybeUnderwat
 
         #if SKY_MODE == SKY_MODE_LUMI || SKY_MODE == SKY_MODE_VANILLA_STARRY
             // stars
-            const vec3  nonMilkyAxis  = vec3(-0.598964, 0.531492, 0.598964);
+            const vec3 nonMilkyAxis = vec3(-0.598964, 0.531492, 0.598964);
 
-            float starry;
-            starry = l2_clampScale(0.4, 0.0, frx_luminance(a.rgb)) * v_night;
+            float starry = l2_clampScale(0.4, 0.0, frx_luminance(a.rgb)) * v_night;
+
             starry *= l2_clampScale(-0.6, -0.5, skyDotUp); //prevent star near the void core
 
             float milkyness = l2_clampScale(0.5, 0.0, abs(dot(nonMilkyAxis, worldSkyVec.xyz)));
-
             float rainOcclusion = (1.0 - frx_rainGradient());
-            vec4  starVec       = v_star_rotator * vec4(worldSkyVec, 0.0);
-            float zoomFactor    = l2_clampScale(90, 30, v_fov); // zoom sharpening
-            float star;
-            star = starry * smoothstep(0.75 - milkyness * 0.3, 0.9, snoise(starVec.xyz * 100));
+            vec4  starVec = v_star_rotator * vec4(worldSkyVec, 0.0);
+            float zoomFactor = l2_clampScale(90, 30, v_fov); // zoom sharpening
+            float star = starry * smoothstep(0.12 + milkyness * 0.15, 0.0, cellular2x2x2(starVec.xyz * 100).x);
+
             star = l2_clampScale(0.3 * zoomFactor, 1.0 - 0.6 * zoomFactor, star) * rainOcclusion;
 
             float milkyHaze = starry * rainOcclusion * milkyness * 0.4 * l2_clampScale(-1.0, 1.0, snoise(starVec.xyz * 2.0));
@@ -334,7 +333,7 @@ void custom_sky(in vec3 viewPos, in float blindnessFactor, in bool maybeUnderwat
         // VOID CORE
         float voidCore = l2_clampScale(-0.8 + v_near_void_core, -1.0 + v_near_void_core, skyDotUp); 
         vec3 voidColor = mix(vec3(0.0), VOID_CORE_COLOR, voidCore);
-        bloom_out = voidCore * (1. - v_not_in_void);
+        bloom_out += voidCore * (1. - v_not_in_void);
         a.rgb = mix(voidColor, a.rgb, v_not_in_void);
     }
 
