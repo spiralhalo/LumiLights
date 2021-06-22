@@ -2,6 +2,12 @@
     fabulous: {
         passes: [
             {
+                name: "clouds_texture",
+                program: "clouds_texture",
+                framebuffer: "clouds_texture",
+                samplerImages: []
+            },
+            {
                 name: "ssao",
                 program: "ssao",
                 framebuffer: "ao_values",
@@ -98,6 +104,9 @@
                     "translucent_depth",
                     "normal_translucent",
 
+                    "clouds",
+                    "clouds_texture",
+
                     "lumi:textures/filter_pattern/bluenoise256.png",
                 ]
             },
@@ -119,6 +128,9 @@
                     "solid_combine",
                     "solid_depth",
                     "normal_solid",
+
+                    "clouds",
+                    "clouds_texture",
 
                     "lumi:textures/filter_pattern/bluenoise256.png",
                 ]
@@ -182,12 +194,6 @@
 
                     "lumi:textures/filter_pattern/bluenoise256.png",
                 ]
-            },
-            {
-                name: "clouds_texture",
-                program: "clouds_texture",
-                framebuffer: "clouds_texture",
-                samplerImages: []
             },
             {
                 name: "clouds",

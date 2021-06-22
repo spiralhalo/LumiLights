@@ -56,6 +56,8 @@
     "config.lumi_lights.help.half_reflection_resolution": "Blurry reflection with slight ghosting, but very fast",
     "config.lumi_lights.value.reflection_on_hand": "Reflection on hand",
     "config.lumi_lights.help.reflection_on_hand": "Allow held objects to reflect the environment",
+    "config.lumi_lights.value.cloud_reflection": "Cloud reflection",
+    "config.lumi_lights.help.cloud_reflection": "Renders the cloud once more as a reflection",
     "config.lumi_lights.value.cloud_rendering": "Cloud rendering mode",
     "config.lumi_lights.help.cloud_rendering": "Cloud rendering mode;Volumetric cloud affects performance.",
     "config.lumi_lights.value.volumetric_fog": "Volumetric fog",
