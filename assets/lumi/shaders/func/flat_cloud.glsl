@@ -43,6 +43,6 @@ vec4 flatCloud(in vec2 texcoord, in mat4 cloudRotator, in vec3 up)
     cloud = cloud1 * 0.5 + cloud2 * 0.75 + cloud3;
     cloud = l2_clampScale(0.1, 0.4, cloud);
 
-    vec3 color = (ldr_tonemap3(atmos_hdrCelestialRadiance() * 0.05) + ldr_tonemap3(atmos_hdrSkyColorRadiance(worldSkyVec) * 0.4)) * cloud;
+    vec3 color = (ldr_tonemap3(atmos_hdrCelestialRadiance() * 0.1) + ldr_tonemap3(atmos_hdrSkyColorRadiance(worldSkyVec) * 0.2)) * cloud;
     return vec4(color, cloud);
 }
