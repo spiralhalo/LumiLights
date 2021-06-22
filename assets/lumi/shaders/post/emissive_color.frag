@@ -7,9 +7,9 @@
 /******************************************************
   lumi:shaders/post/emissive_color.frag
 ******************************************************/
-uniform sampler2D u_base;
-uniform sampler2D u_emissive;
-uniform sampler2D u_emissive_translucent;
+uniform sampler2D u_base_composite;
+uniform sampler2D u_emissive_solid;
+uniform sampler2D u_emissive_composite;
 uniform sampler2D u_solid_depth;
 
 #ifndef USING_OLD_OPENGL
@@ -20,12 +20,11 @@ void main()
 {
     // Couldn't unjitter bloom :-?
     // vec2 unjitteredTexcoord = v_texcoord - taa_jitter(v_invSize) * 0.5;
-    
-    // TODO: elaborate hand bloom blending? (requires more image = more vram)
-    float t = texture(u_solid_depth, v_texcoord).r == 1.0
-        ? texture(u_emissive_translucent, v_texcoord).r
-        : 0.0;
-    float e = max(texture(u_emissive, v_texcoord).r, t);
-    vec4 c = frx_fromGamma(texture(u_base, v_texcoord));
+
+    // TODO: elaborate hand blending? (requires hand alpha)
+    float solidDepth = texture(u_solid_depth, v_texcoord).r;
+    float e = solidDepth == 1.0 ? texture(u_emissive_composite, v_texcoord).r : texture(u_emissive_solid, v_texcoord).r;
+    vec4 c = frx_fromGamma(texture(u_base_composite, v_texcoord));
+
     fragColor[0] = vec4(c.rgb * e, e);
 }

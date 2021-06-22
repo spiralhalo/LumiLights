@@ -63,7 +63,7 @@ vec4 parallaxCloud(in sampler2D sbluenoise, in vec2 texcoord)
 
         float topness = float(i) * flatMult;
 
-        vec3 localColor = ldr_tonemap3(atmos_hdrCelestialRadiance() * 0.2) * topness + ldr_tonemap3(atmos_hdrSkyColorRadiance(worldSkyVec) * 0.3);
+        vec3 localColor = ldr_tonemap3(atmos_hdrCelestialRadiance() * 0.4) * topness + ldr_tonemap3(atmos_hdrSkyColorRadiance(worldSkyVec) * 0.2);
         if (i == flatLoop) {
             color = localColor;
         } else {

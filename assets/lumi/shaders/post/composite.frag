@@ -26,6 +26,9 @@ uniform sampler2D u_clouds_depth;
 uniform sampler2D u_weather;
 uniform sampler2D u_weather_depth;
 
+uniform sampler2D u_emissive_solid;
+uniform sampler2D u_emissive_transparent;
+
 uniform sampler2D u_blue_noise;
 
 frag_in vec3 v_godray_color;
@@ -35,7 +38,7 @@ frag_in float v_aspect_adjuster;
 frag_in vec2 v_invSize;
 
 #ifndef USING_OLD_OPENGL
-out vec4[2] fragColor;
+out vec4[3] fragColor;
 #endif
 
 #define NUM_LAYERS 5
@@ -156,6 +159,13 @@ void main()
         lineness += (1.0 - lineness) * (maxD > ldepth(depth_layers[active_layers-1]) ? color_layers[active_layers-1].a : 0.0);
         fragColor[0] *= lineness;
     #endif
+
+    // no need to check for solid depth because translucent behind solid are culled in GL depth test
+    float bloom = max(texture(u_emissive_solid, v_texcoord).r, texture(u_emissive_transparent, v_texcoord).r);
+    float min_occluder = min(depth_clouds, depth_weather);
+    float occluder_alpha = min_occluder == depth_clouds ? clouds.a : weather.a;
+
+    bloom *= max(0.0, 1.0 - occluder_alpha);
+
+    fragColor[2].r = bloom;
 }
-
-

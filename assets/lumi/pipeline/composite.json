@@ -20,6 +20,9 @@
                 "u_weather",
                 "u_weather_depth",
 
+                "u_emissive_solid",
+                "u_emissive_transparent",
+
                 "u_blue_noise",
             ]
         },
@@ -32,6 +35,7 @@
             colorAttachments: [
                 {image: "solid_main"},
                 {image: "composite_depth"},
+                {image: "emissive_composite", clearColor: 0x00000000},
                 // {image: "velocity"},
             ]
         },
