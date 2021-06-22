@@ -2,8 +2,6 @@
 #include frex:shaders/api/view.glsl
 #include frex:shaders/api/world.glsl
 #include frex:shaders/lib/math.glsl
-#include frex:shaders/lib/noise/noise2d.glsl
-#include frex:shaders/lib/noise/noise3d.glsl
 #include lumi:shaders/common/atmosphere.glsl
 #include lumi:shaders/common/lighting.glsl
 #include lumi:shaders/common/userconfig.glsl

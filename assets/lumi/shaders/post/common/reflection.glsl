@@ -6,6 +6,7 @@
 #include lumi:shaders/lib/pbr.glsl
 #include lumi:shaders/lib/puddle.glsl
 #include lumi:shaders/func/tile_noise.glsl
+#include lumi:shaders/func/cloud_adapter.glsl
 #include lumi:shaders/lib/util.glsl
 
 /*******************************************************
@@ -81,13 +82,23 @@ vec3 sample_worldNormal(vec2 uv, in sampler2D snormal)
 }
 
 const float SKYLESS_FACTOR = 0.5;
-vec3 calcFallbackColor(vec3 unitMarch_world, vec2 light)
+vec3 calcFallbackColor(in sampler2D sdepth, vec3 unitMarch_world, vec2 light)
 {
     float skyLight = l2_clampScale(0.03125, 0.96875, light.y);
     float aboveWaterFactor = frx_viewFlag(FRX_CAMERA_IN_WATER) ? 0.0 : 1.0;
     float upFactor = frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? l2_clampScale(-0.3, 0.1, unitMarch_world.y) : 1.0;
     float skyLightFactor = frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? (skyLight * skyLight) : SKYLESS_FACTOR;
-    return atmos_hdrSkyColorRadiance(unitMarch_world) * skyLightFactor * upFactor * 2.0 * aboveWaterFactor;
+    vec3 sky = atmos_hdrSkyColorRadiance(unitMarch_world);
+
+#ifdef CLOUD_REFLECTION
+    // PERF: optimize by roughness
+    // WIP: elaborate depth samplers
+    vec4 cloud = cloudColor(sdepth, sdepth, u_blue_noise, unitMarch_world);
+
+    sky = (sky.rgb * (1.0 - cloud.a) + cloud.rgb);
+#endif
+
+    return sky * skyLightFactor * upFactor * aboveWaterFactor;
 }
 
 vec3 pbr_lightCalc(float roughness, vec3 f0, vec3 radiance, vec3 lightDir, vec3 viewDir)
@@ -227,14 +238,14 @@ rt_color_depth work_on_pair(
 
     vec3 unit_view = normalize(-ray_view);
     
-    vec3 jitter    = 2.0 * getRandomVec(u_blue_noise, v_texcoord, frxu_size) - 1.0;
+    vec3 rJitter   = getRandomVec(u_blue_noise, v_texcoord, frxu_size) * 2.0 - 1.0;
     vec3 normal    = frx_normalModelMatrix() * normalize(worldNormal);
     float roughness2 = roughness * roughness;
     // if (ray_view.y < normal.y) return noreturn;
     vec3 reg_f0     = vec3(material.z);
     vec3 f0         = mix(reg_f0, albedo, material.y);
 
-    vec3 unitMarch_view = normalize(reflect(-unit_view, normal) + mix(vec3(0.0, 0.0, 0.0), jitter * JITTER_STRENGTH, roughness2));
+    vec3 unitMarch_view = normalize(reflect(-unit_view, normal) + mix(vec3(0.0, 0.0, 0.0), rJitter * JITTER_STRENGTH, roughness2));
 
     #if REFLECTION_PROFILE != REFLECTION_PROFILE_NONE
     rt_Result result;
@@ -246,7 +257,7 @@ rt_color_depth work_on_pair(
     if (impossibleRay || exceedsThreshold) {
         result.hit = false;
     } else {
-        result = rt_reflection(ray_view + unitMarch_view * jitter.x * HITBOX, unit_view, normal, unitMarch_view, frx_normalModelMatrix(), frx_projectionMatrix(), frx_inverseProjectionMatrix(), reflected_depth, reflected_normal);
+        result = rt_reflection(ray_view + unitMarch_view * rJitter.x * HITBOX, unit_view, normal, unitMarch_view, frx_normalModelMatrix(), frx_projectionMatrix(), frx_inverseProjectionMatrix(), reflected_depth, reflected_normal);
     }
     #endif
 
@@ -290,7 +301,7 @@ rt_color_depth work_on_pair(
     // nb: compute_colors is currently unused as of the commmit it was added in ¯\_(ツ)_/¯
     if (compute_colors) {
         vec3 unitMarch_world = unitMarch_view * frx_normalModelMatrix();
-        vec4 fallbackColor   = fallback > 0.0 ? vec4(calcFallbackColor(unitMarch_world, light), fallback) : vec4(0.0);
+        vec4 fallbackColor   = fallback > 0.0 ? vec4(calcFallbackColor(reflector_depth, unitMarch_world, light), fallback) : vec4(0.0);
         vec4 reflected_final = mix(reflected, fallbackColor, fallbackMix);
         vec3 unit_world      = unit_view * frx_normalModelMatrix();
 

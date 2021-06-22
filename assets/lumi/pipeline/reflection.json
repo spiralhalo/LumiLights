@@ -18,7 +18,10 @@
                 "u_target_combine",
                 "u_target_depth",
                 "u_normal_target",
-                
+
+                "u_clouds",
+                "u_clouds_texture",
+
                 "u_blue_noise",
             ]
         }, 

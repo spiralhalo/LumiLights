@@ -16,6 +16,10 @@
  *  published by the Free Software Foundation, Inc.    *
  *******************************************************/
 
+mat4 computeCloudRotator() {
+    return l2_rotationMatrix(vec3(0.0, 1.0, 0.0), PI * 0.25);
+}
+
 vec4 flatCloud(in vec2 texcoord, in mat4 cloudRotator, in vec3 up)
 {
     float rainFactor = frx_rainGradient() * 0.67 + frx_thunderGradient() * 0.33;
