@@ -27,7 +27,7 @@
             name: "hand_process",
             colorAttachments: [
                 {image: "solid_main"},
-                {image: "emissive"},
+                {image: "emissive_solid"},
                 {image: "composite_depth"},
             ]
         },

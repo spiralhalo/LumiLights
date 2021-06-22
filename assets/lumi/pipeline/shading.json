@@ -65,7 +65,7 @@
             name: "shading_solid",
             colorAttachments: [
                 {image: "solid_shaded", clearColor: 0x00000000},
-                {image: "emissive", clearColor: 0x00000000},
+                {image: "emissive_solid", clearColor: 0x00000000},
             ]
         },
         {

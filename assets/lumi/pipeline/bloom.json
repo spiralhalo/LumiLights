@@ -6,9 +6,9 @@
             vertexSource: "lumi:shaders/post/simple.vert",
             fragmentSource: "lumi:shaders/post/emissive_color.frag",
             samplers: [
-                "u_base",
-                "u_emissive",
-                "u_emissive_translucent",
+                "u_base_composite",
+                "u_emissive_solid",
+                "u_emissive_composite",
                 "u_solid_depth"
             ]
         }, {
@@ -48,8 +48,11 @@
                 samplerImages: [
                     // solid_main = from hand render without taa
                     "solid_main",
-                    "emissive",
-                    "emissive_translucent",
+                    // emissive = for hand render only. other emissive buffers are combined in composite
+                    "emissive_solid",
+                    // emissive_composite = combination of emissive and translucent plus other layers occlusion
+                    "emissive_composite",
+                    // solid_depth = from hand render
                     "solid_depth"
                 ]
             }, {
@@ -195,10 +198,6 @@
 
     framebuffers: [
         {
-            // TODO: should be able to remove this now
-            name: "emissive",
-            colorAttachments: [{image: "emissive", clearColor: 0x00000000}]
-        }, {
             name: "emissive_color",
             colorAttachments: [{image: "emissive_color"}]
         }, {
