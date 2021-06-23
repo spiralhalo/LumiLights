@@ -16,6 +16,8 @@
 
 uniform sampler2D u_normal;
 uniform sampler2D u_depth;
+uniform sampler2D u_light;
+uniform sampler2D u_color;
 uniform sampler2D u_blue_noise;
 
 out vec4 fragColor;
@@ -31,16 +33,14 @@ void main()
 #ifdef SSAO_ENABLED
     // Modest performance saving by skipping the sky
     if (texture(u_depth, v_texcoord).r == 1.0) {
-        fragColor = vec4(1.0, 0.0, 0.0, 1.0);
+        fragColor = vec4(0.0, 0.0, 0.0, 1.0);
     } else {
-        float random = v_texcoord.x*v_texcoord.y;
-        float ssao = calc_ssao(
-            u_normal, u_depth, u_blue_noise,
+        fragColor = calcSSAO(
+            u_normal, u_depth, u_light, u_color, u_blue_noise,
             frx_normalModelMatrix(), frx_inverseProjectionMatrix(), frxu_size, 
             v_texcoord, RADIUS, RADIUS * 0.5, BIAS, INTENSITY);
-        fragColor = vec4(ssao, 0.0, 0.0, 1.0);
     }
 #else
-    fragColor = vec4(1.0, 0.0, 0.0, 1.0);
+    fragColor = vec4(0.0, 0.0, 0.0, 1.0);
 #endif
 }

@@ -17,6 +17,7 @@ vec3 coords_view(vec2 uv, mat4 inv_projection, in sampler2D target)
     float depth = texture(target, uv).r;
     vec3 clip = vec3(2.0 * uv - 1.0, 2.0 * depth - 1.0);
     vec4 view = inv_projection * vec4(clip, 1.0);
+
     return view.xyz / view.w;
 }
 
@@ -34,9 +35,10 @@ const mat2 deltaRotationMatrix = mat2(
     sinTheta, cosTheta
 );
 
-float calc_ssao(
-    in sampler2D snormal, in sampler2D sdepth, in sampler2D sbluenoise, mat3 normal_mat, mat4 inv_projection, vec2 tex_size,
-    vec2 uv, float radius_screen, float attenuation_radius, float angle_bias, float intensity)
+vec4 calcSSAO(
+    in sampler2D snormal, in sampler2D sdepth, in sampler2D slight, in sampler2D scolor, in sampler2D sbluenoise,
+    mat3 normal_mat, mat4 inv_projection, vec2 tex_size, vec2 uv,
+    float radius_screen, float attenuation_radius, float angle_bias, float intensity)
 {
     vec3 origin_view = coords_view(uv, inv_projection, sdepth);
     vec3 normal_view = coords_normal(uv, normal_mat, snormal);
@@ -51,13 +53,17 @@ float calc_ssao(
         sampleNoise.x, -sampleNoise.y,
         sampleNoise.y,  sampleNoise.x
     );
+
     deltaUV = rotationMatrix * deltaUV;
 
     float jitter = sampleNoise.z;
     float occlusion = 0.0;
+    float emissionVal = 0.0;
+    vec3 emission = vec3(0.0);
 
     for (int i = 0; i < NUM_SAMPLE_DIRECTIONS; ++i) {
         deltaUV = deltaRotationMatrix * deltaUV;
+
         vec2 sampleDirUV = deltaUV;
         float oldAngle   = angle_bias;
 
@@ -66,15 +72,35 @@ float calc_ssao(
             vec3 sample_view    = coords_view(sample_uv, inv_projection, sdepth);
             vec3 sampleDir_view = (sample_view - origin_view);
 
+            float bloom = max(texture(slight, sample_uv).z - 0.5, 0.0) * 2.0;
             float gamma = (PI / 2.0) - acos(dot(normal_view, normalize(sampleDir_view)));
+
             if (gamma > oldAngle) {
-                float value = sin(gamma) - sin(oldAngle);
                 float attenuation = clamp(1.0 - dot(sampleDir_view, sampleDir_view) / attenuation_rad2, 0.0, 1.0);
-                occlusion += attenuation * value;
+
+                if (bloom <= 0.0) {
+                    float value = sin(gamma) - sin(oldAngle);
+                    occlusion += attenuation * value;
+                } else {
+                    vec3 bloomColor = texture(scolor, sample_uv).rgb;
+
+                    bloom *= attenuation;
+                    emissionVal += bloom;
+                    emission += bloomColor * bloom;
+                }
+
                 oldAngle = gamma;
             }
         }
     }
-    occlusion = 1.0 - occlusion / float(NUM_SAMPLE_DIRECTIONS);
-    return clamp(pow(occlusion, 1.0 + intensity), 0.0, 1.0);
+
+    float averager = 1.0 / float(NUM_SAMPLE_DIRECTIONS);
+
+    emission *= averager;
+    emissionVal *= averager;
+    occlusion *= averager;
+    occlusion = max(0.0, occlusion - emissionVal);
+    occlusion = clamp(pow(1.0 - occlusion, 1.0 + intensity), 0.0, 1.0);
+
+    return vec4(emission, occlusion);
 }
