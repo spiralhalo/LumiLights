@@ -44,6 +44,7 @@ vec4 calcSSAO(
     vec3 normal_view = coords_normal(uv, normal_mat, snormal);
     float radius_view = radius_screen / abs(origin_view.z - 1);
     float attenuation_rad2 = attenuation_radius * attenuation_radius;
+    float attenuation2_rad2 = attenuation_radius * attenuation_radius * 4.0;
 
     vec2 deltaUV = vec2(1.0, 0.0) * (radius_view / (float(NUM_SAMPLE_DIRECTIONS * NUM_SAMPLE_STEPS) + 1.0));
 
@@ -76,12 +77,15 @@ vec4 calcSSAO(
             float gamma = (PI / 2.0) - acos(dot(normal_view, normalize(sampleDir_view)));
 
             if (gamma > oldAngle) {
-                float attenuation = clamp(1.0 - dot(sampleDir_view, sampleDir_view) / attenuation_rad2, 0.0, 1.0);
+                float sampleDir_view2 = dot(sampleDir_view, sampleDir_view);
 
                 if (bloom <= 0.0) {
+                    float attenuation = clamp(1.0 - sampleDir_view2 / attenuation_rad2, 0.0, 1.0);
                     float value = sin(gamma) - sin(oldAngle);
+
                     occlusion += attenuation * value;
                 } else {
+                    float attenuation = clamp(1.0 - sampleDir_view2 / attenuation2_rad2, 0.0, 1.0);
                     vec3 bloomColor = texture(scolor, sample_uv).rgb;
 
                     bloom *= attenuation;
@@ -96,8 +100,12 @@ vec4 calcSSAO(
 
     float averager = 1.0 / float(NUM_SAMPLE_DIRECTIONS);
 
-    emission *= averager;
     emissionVal *= averager;
+    emission *= averager;
+
+    float dampener = 1.0 - frx_luminance(min(emission, vec3(1.0)));
+
+    emission *= dampener;
     occlusion *= averager;
     occlusion = max(0.0, occlusion - emissionVal);
     occlusion = clamp(pow(1.0 - occlusion, 1.0 + intensity), 0.0, 1.0);
