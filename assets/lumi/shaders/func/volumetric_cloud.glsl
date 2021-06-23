@@ -3,7 +3,6 @@
 #include frex:shaders/lib/math.glsl
 #include frex:shaders/lib/noise/cellular2x2.glsl
 #include frex:shaders/lib/noise/noise2d.glsl
-#include frex:shaders/lib/noise/noise3d.glsl
 #include lumi:shaders/common/userconfig.glsl
 #include lumi:shaders/lib/util.glsl
 #include lumi:shaders/func/tile_noise.glsl
@@ -207,7 +206,7 @@ cloud_result rayMarchCloud(in sampler2D scloudTex, in sampler2D sdepth, in sampl
 
 vec4 generateCloudTexture(vec2 texcoord) {
      // TODO: optimize?
-    float rainFactor = frx_rainGradient() * 0.67;// + frx_thunderGradient() * 0.33;
+    float rainFactor = frx_rainGradient() * 0.37;// + frx_thunderGradient() * 0.33;
     vec2 worldXz = uv2worldXz(texcoord);
     #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
         worldXz -= frx_cameraPos().xz * 0.8;
