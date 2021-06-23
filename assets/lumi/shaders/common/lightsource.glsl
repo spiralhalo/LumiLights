@@ -34,7 +34,7 @@ vec3 l2_blockRadiance(float blockLight)
 {
     float bl = smoothstep(0.03125, 0.96875, blockLight);
 
-    bl *= pow(bl, 5.0) * 2.0;
+    bl *= pow(bl, 3.0) * 2.0;
 
     return BLOCK_LIGHT_COLOR * BLOCK_LIGHT_STR * bl;
 }
@@ -47,7 +47,7 @@ vec3 l2_handHeldRadiance(vec3 viewPos)
     float hlRadSq = heldLight.w * HANDHELD_LIGHT_RADIUS * heldLight.w * HANDHELD_LIGHT_RADIUS;
     float hl = l2_clampScale(hlRadSq, 0.0, distSq);
 
-    hl *= pow(hl, 5.0) * 2.0;
+    hl *= pow(hl, 3.0) * 2.0;
 
     return hdr_gammaAdjust(heldLight.rgb) * BLOCK_LIGHT_STR * hl;
 }
