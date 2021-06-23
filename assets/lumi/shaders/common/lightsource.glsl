@@ -33,8 +33,9 @@ float l2_lightmapRemap(float lightMapCoords)
 vec3 l2_blockRadiance(float blockLight)
 {
     float bl = smoothstep(0.03125, 0.96875, blockLight);
+    float brightness = frx_viewBrightness();
 
-    bl *= pow(bl, 3.0) * 2.0;
+    bl *= pow(bl, 3.0 + brightness * 2.0) * (2.0 - brightness * 0.5); // lyfe hax
 
     return BLOCK_LIGHT_COLOR * BLOCK_LIGHT_STR * bl;
 }
@@ -46,8 +47,9 @@ vec3 l2_handHeldRadiance(vec3 viewPos)
     float distSq = dot(viewPos, viewPos);
     float hlRadSq = heldLight.w * HANDHELD_LIGHT_RADIUS * heldLight.w * HANDHELD_LIGHT_RADIUS;
     float hl = l2_clampScale(hlRadSq, 0.0, distSq);
+    float brightness = frx_viewBrightness();
 
-    hl *= pow(hl, 3.0) * 2.0;
+    hl *= pow(hl, 3.0 + brightness * 2.0) * (2.0 - brightness * 0.5); // lyfe hax
 
     return hdr_gammaAdjust(heldLight.rgb) * BLOCK_LIGHT_STR * hl;
 }
@@ -60,7 +62,6 @@ vec3 l2_emissiveRadiance(vec3 hdrFragColor, float emissivity)
 
 vec3 l2_baseAmbientRadiance()
 {
-    //frx_viewBrightness() is maxed out by night vision so it's useless here
     if (frx_playerHasNightVision()) return hdr_gammaAdjust(NIGHT_VISION_COLOR) * NIGHT_VISION_STR;
     if (frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT)) {
         #ifdef TRUE_DARKNESS_DEFAULT
