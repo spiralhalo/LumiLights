@@ -36,13 +36,6 @@ const float EMISSIVE_LIGHT_STR = 2.0;
 // MULTIPLIERS
 const float BRIGHT_FINAL_MULT = 2.0;
 
-// ADJUSTERS
-#if TONE_PROFILE == TONE_PROFILE_FIXED_EXPOSURE
-const float BLOCK_LIGHT_ADJUSTER = 18.0;
-#else
-const float BLOCK_LIGHT_ADJUSTER = 6.0;
-#endif
-
 // PREFERENCE
 const float DEFAULT_Z_WOBBLE = 0.1;
 
