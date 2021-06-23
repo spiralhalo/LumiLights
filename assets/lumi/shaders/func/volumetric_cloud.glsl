@@ -250,7 +250,7 @@ vec4 volumetricCloud(
     #else
         cloud_result volumetric = frx_viewFlag(FRX_CAMERA_IN_FLUID)
                                 ? rayMarchCloud(scloudTex, ssolidDepth, sbluenoise, texcoord, worldVec)
-                                : rayMarchCloud(scloudTex, stranslucentDepth, sbluenoise, texcoord);
+                                : rayMarchCloud(scloudTex, stranslucentDepth, sbluenoise, texcoord, worldVec);
     #endif
 
     float alpha = 1.0 - volumetric.transmittance;
