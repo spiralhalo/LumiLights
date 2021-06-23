@@ -307,6 +307,7 @@ void atmos_generateAtmosphereModel()
     vec3 graySkyAmbient = vec3(frx_luminance(atmosv_hdrSkyAmbientRadiance));
     #ifdef POST_SHADER
     vec3 graySky        = vec3(frx_luminance(atmosv_hdrSkyColorRadiance));
+    vec3 grayFog        = vec3(frx_luminance(atmosv_hdrFogColorRadiance));
     #endif
 
     float toGray = frx_rainGradient() * 0.6 + frx_thunderGradient() * 0.35;
@@ -320,6 +321,7 @@ void atmos_generateAtmosphereModel()
 
     if (customOWFog) {
         atmosv_hdrSkyColorRadiance      = mix(atmosv_hdrSkyColorRadiance, graySky, toGray) * rainBrightness;
+        atmosv_hdrFogColorRadiance      = mix(atmosv_hdrFogColorRadiance, grayFog, toGray) * rainBrightness;
         atmosv_hdrOWTwilightSkyRadiance = mix(atmosv_hdrOWTwilightSkyRadiance, graySky, toGray) * rainBrightness;
         atmosv_hdrCloudColorRadiance    = mix(atmosv_hdrCloudColorRadiance, graySky, toGray) * rainBrightness;
     }
