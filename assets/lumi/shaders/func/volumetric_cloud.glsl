@@ -90,19 +90,14 @@ float sampleCloud(in vec3 worldPos, in sampler2D scloudTex)
     // return smoothstep(0.1, 0.11, yF * tF * eF);
 }
 
-cloud_result rayMarchCloud(in sampler2D scloudTex, in sampler2D sdepth, in sampler2D sbluenoise, in vec2 texcoord)
+cloud_result rayMarchCloud(in sampler2D scloudTex, in sampler2D sdepth, in sampler2D sbluenoise, in vec2 texcoord, in vec3 worldVec)
 {
     float rainFactor = frx_rainGradient() * 0.67 + frx_thunderGradient() * 0.33; // TODO: optimize
-    float depth = texture(sdepth, texcoord).r;
+    float depth = (texcoord == clamp(texcoord, 0.0, 1.0)) ? texture(sdepth, texcoord).r : 1.0;
     float maxDist;
-    vec3 worldVec;
 
     cloud_result placeholder = cloud_result(0.0, 1.0, vec3(0.0));
     if (depth == 1.0) {
-        vec4 viewPos = frx_inverseProjectionMatrix() * vec4(2.0 * texcoord - 1.0, 1.0, 1.0);
-        viewPos.xyz /= viewPos.w;
-        vec3 viewVec = normalize(viewPos.xyz);
-        worldVec = viewVec * frx_normalModelMatrix();
         maxDist = 1024.0;
     } else {
         #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
@@ -111,7 +106,6 @@ cloud_result rayMarchCloud(in sampler2D scloudTex, in sampler2D sdepth, in sampl
             vec4 viewPos = frx_inverseProjectionMatrix() * vec4(2.0 * texcoord - 1.0, 2.0 * depth - 1.0, 1.0);
             viewPos.xyz /= viewPos.w;
             maxDist = length(viewPos.xyz);
-            worldVec = normalize(viewPos.xyz) * frx_normalModelMatrix();
         #endif
     }
 
@@ -125,20 +119,32 @@ cloud_result rayMarchCloud(in sampler2D scloudTex, in sampler2D sdepth, in sampl
 
     // Optimization block
     #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
-        if (worldVec.y <= 0) return placeholder;
+        if (worldVec.y <= 0) {
+            return placeholder;
+        }
+
         float gotoBottom = CLOUD_MIN_Y / worldVec.y;
         vec3 currentWorldPos = worldVec * gotoBottom;/*frx_cameraPos()*/
+
         traveled += gotoBottom;
     #else
         vec3 currentWorldPos = frx_cameraPos();
         float gotoBorder = 0.0;
+
         if (currentWorldPos.y >= CLOUD_MAX_Y) {
-            if (worldVec.y >= 0) return placeholder;
+            if (worldVec.y >= 0) {
+                return placeholder;
+            }
+
             gotoBorder = (currentWorldPos.y - CLOUD_MAX_Y) / -worldVec.y;
         } else if (currentWorldPos.y <= CLOUD_MIN_Y) {
-            if (worldVec.y <= 0) return placeholder;
+            if (worldVec.y <= 0) {
+                return placeholder;
+            }
+
             gotoBorder = (CLOUD_MIN_Y - currentWorldPos.y) / worldVec.y;
         }
+
         currentWorldPos += worldVec * gotoBorder;
         traveled += gotoBorder;
     #endif
@@ -160,7 +166,9 @@ cloud_result rayMarchCloud(in sampler2D scloudTex, in sampler2D sdepth, in sampl
         i ++;
         traveled += SAMPLE_SIZE;
         currentWorldPos += unitSample;
+
         float sampledDensity = sampleCloud(currentWorldPos, scloudTex);
+
         if (sampledDensity > 0) {
             // ATTEMPT 1
             if (first) {
@@ -172,20 +180,28 @@ cloud_result rayMarchCloud(in sampler2D scloudTex, in sampler2D sdepth, in sampl
             //     maxDensity = sampledDensity;
             //     firstDensePos = currentWorldPos;
             // }
-            vec3 occlusionWorldPos = currentWorldPos;
+
             // vec3 lightPos = frx_skyLightVector() * 512.0 + frx_cameraPos();
+            vec3 occlusionWorldPos = currentWorldPos;
             float occlusionDensity = 0.0;
             int j = 0;
+
             while (j < LIGHT_SAMPLE) {
                 j ++;
                 occlusionWorldPos += toLight;
                 occlusionDensity += sampleCloud(occlusionWorldPos, scloudTex);
             }
+
             occlusionDensity *= LIGHT_SAMPLE_SIZE; // this is what *stepSize means
+
             float lightTransmittance = DARKNESS_THRESHOLD + DARKNESS_THRESHOLD_INV * exp(-occlusionDensity * LIGHT_ABSORPTION_SKYLIGHT);
+
             lightEnergy += sampledDensity * transmittance * lightTransmittance * SAMPLE_SIZE; // * phaseVal;
             transmittance *= exp(-sampledDensity * LIGHT_ABSORPTION_CLOUD * SAMPLE_SIZE);
-            if (transmittance < 0.01) break;
+
+            if (transmittance < 0.01) {
+                break;
+            }
         }
     }
     return cloud_result(lightEnergy, transmittance, firstHitPos);
@@ -226,21 +242,17 @@ vec4 volumetricCloud(
     in sampler2D stranslucentDepth,
     in sampler2D sbluenoise,
     in vec2 texcoord,
+    in vec3 worldVec,
     out float out_depth)
 {
     #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
-        cloud_result volumetric = rayMarchCloud(scloudTex, ssolidDepth, sbluenoise, texcoord);
+        cloud_result volumetric = rayMarchCloud(scloudTex, ssolidDepth, sbluenoise, texcoord, worldVec);
     #else
         cloud_result volumetric = frx_viewFlag(FRX_CAMERA_IN_FLUID)
-                                ? rayMarchCloud(scloudTex, ssolidDepth, sbluenoise, texcoord)
+                                ? rayMarchCloud(scloudTex, ssolidDepth, sbluenoise, texcoord, worldVec)
                                 : rayMarchCloud(scloudTex, stranslucentDepth, sbluenoise, texcoord);
     #endif
 
-    vec4 worldPos = frx_inverseViewProjectionMatrix() * vec4(2.0 * texcoord - 1.0, 1.0, 1.0);
-
-    worldPos.xyz /= worldPos.w;
-
-    vec3 skyVec = normalize(worldPos.xyz);
     float alpha = 1.0 - volumetric.transmittance;
     float rainBrightness = mix(0.13, 0.05, hdr_gammaAdjustf(frx_rainGradient())); // simulate dark clouds
     vec3 celestRadiance = atmos_hdrCelestialRadiance();
@@ -250,9 +262,9 @@ vec4 volumetricCloud(
     }
 
     vec3 color;
-    
+
     color = ldr_tonemap3(celestRadiance) * rainBrightness * volumetric.lightEnergy
-        + ldr_tonemap3(atmos_hdrCloudColorRadiance(skyVec)) * 0.9 * alpha;
+        + ldr_tonemap3(atmos_hdrCloudColorRadiance(worldVec)) * 0.9 * alpha;
 
     #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
         out_depth = alpha > 0. ? 0.9999 : 1.0;

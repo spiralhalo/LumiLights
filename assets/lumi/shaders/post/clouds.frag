@@ -61,7 +61,7 @@ void doCloudStuff()
 
     #elif CLOUD_RENDERING == CLOUD_RENDERING_VOLUMETRIC
         float out_depth = 1.0;
-        vec4 cloudColor = volumetricCloud(u_clouds_texture, u_solid_depth, u_translucent_depth, u_blue_noise, v_texcoord, out_depth);
+        vec4 cloudColor = volumetricCloud(u_clouds_texture, u_solid_depth, u_translucent_depth, u_blue_noise, v_texcoord, worldVec, out_depth);
 
         fragColor[0] = mix(cloudColor, vec4(0.0), v_blindness);
         fragColor[1] = vec4(out_depth);
