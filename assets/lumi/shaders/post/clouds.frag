@@ -42,15 +42,19 @@ out vec4[2] fragColor;
 
 void doCloudStuff()
 {
+    vec4 modelPos = frx_inverseViewProjectionMatrix() * vec4(2.0 * v_texcoord - 1.0, 1.0, 1.0);
+    modelPos.xyz /= modelPos.w;
+    vec3 worldVec = normalize(modelPos.xyz);
+
     // float brightnessMult = mix(1.0, BRIGHT_FINAL_MULT, frx_viewBrightness());
     #if CLOUD_RENDERING == CLOUD_RENDERING_FLAT
-        vec4 cloudColor = flatCloud(v_texcoord, v_cloud_rotator, v_up);
+        vec4 cloudColor = flatCloud(worldVec, v_cloud_rotator, v_up);
 
         fragColor[0] = mix(cloudColor, vec4(0.0), v_blindness);
         fragColor[1] = vec4(cloudColor.a > 0. ? 0.99999 : 1.0);
 
     #elif CLOUD_RENDERING == CLOUD_RENDERING_PARALLAX
-        vec4 cloudColor = parallaxCloud(u_blue_noise, v_texcoord);
+        vec4 cloudColor = parallaxCloud(u_blue_noise, v_texcoord, worldVec);
 
         fragColor[0] = mix(cloudColor, vec4(0.0), v_blindness);
         fragColor[1] = vec4(cloudColor.a > 0. ? 0.99999 : 1.0);

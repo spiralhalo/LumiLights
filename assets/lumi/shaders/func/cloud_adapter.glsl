@@ -22,8 +22,9 @@ in mat4 v_cloud_rotator;
 
 vec4 cloudColor(in sampler2D ssolidDepth, in sampler2D stranslucentDepth, in sampler2D sbluenoise, in vec3 worldVec)
 {
+#if CLOUD_RENDERING != CLOUD_RENDERING_FLAT
     vec4 cloudPos = vec4(worldVec * 1024., 1.0);
-    
+
     cloudPos = frx_viewProjectionMatrix() * cloudPos;
     cloudPos.xyz /= cloudPos.w;
 
@@ -41,11 +42,12 @@ vec4 cloudColor(in sampler2D ssolidDepth, in sampler2D stranslucentDepth, in sam
 #endif
 
     vec2 texcoord = cloudPos.xy * 0.5 + 0.5;
+#endif
 
     #if CLOUD_RENDERING == CLOUD_RENDERING_FLAT
-        return flatCloud(texcoord, v_cloud_rotator, v_up);
+        return flatCloud(worldVec, v_cloud_rotator, v_up);
     #elif CLOUD_RENDERING == CLOUD_RENDERING_PARALLAX
-        return parallaxCloud(sbluenoise, texcoord);
+        return parallaxCloud(sbluenoise, texcoord, worldVec);
     #elif CLOUD_RENDERING == CLOUD_RENDERING_VOLUMETRIC
         float unused = 1.0;
         return volumetricCloud(u_clouds_texture, ssolidDepth, stranslucentDepth, sbluenoise, texcoord, unused) * fade;
