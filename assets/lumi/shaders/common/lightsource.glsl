@@ -32,14 +32,11 @@ float l2_lightmapRemap(float lightMapCoords)
 
 vec3 l2_blockRadiance(float blockLight)
 {
-    float dist = (1.001 - min(l2_clampScale(0.03125, 0.96875, blockLight), 0.93)) * 15;
-    float bl = BLOCK_LIGHT_ADJUSTER / (dist * dist);
-    // CLAMP DOWN TO ZERO
-    if (bl <= 0.01 * BLOCK_LIGHT_ADJUSTER) {
-        bl *= l2_clampScale(0.0045 * BLOCK_LIGHT_ADJUSTER, 0.01 * BLOCK_LIGHT_ADJUSTER, bl);
-    }
-    bl *= BLOCK_LIGHT_STR;
-    return bl * hdr_gammaAdjust(BLOCK_LIGHT_COLOR);
+    float bl = hdr_gammaAdjustf(smoothstep(0.03125, 0.96875, blockLight));
+
+    bl += pow(bl, 10.0) * 3.0;
+
+    return BLOCK_LIGHT_COLOR * BLOCK_LIGHT_STR * bl;
 }
 
 #if HANDHELD_LIGHT_RADIUS != 0

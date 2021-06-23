@@ -49,9 +49,9 @@ const float DEFAULT_Z_WOBBLE = 0.1;
 // LIGHT COLORS
 #if BLOCK_LIGHT_MODE == BLOCK_LIGHT_MODE_NEUTRAL
  // Not 1-triplet for balance. Is this necessary though?
-const vec3 BLOCK_LIGHT_COLOR = vec3(0.74152, 0.74152, 0.74152);
+const vec3 BLOCK_LIGHT_COLOR = hdr_gammaAdjust(vec3(0.74152, 0.74152, 0.74152));
 #else
-const vec3 BLOCK_LIGHT_COLOR = vec3(1.0, 0.7, 0.4);
+const vec3 BLOCK_LIGHT_COLOR = hdr_gammaAdjust(vec3(1.0, 0.7, 0.4));
 #endif
 const vec3 NIGHT_VISION_COLOR = vec3(0.63, 0.55, 0.64);
 const vec3 SKYLESS_LIGHT_COLOR = vec3(1.0, 1.0, 1.0);
