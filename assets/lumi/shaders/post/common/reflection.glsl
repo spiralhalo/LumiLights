@@ -274,7 +274,7 @@ rt_color_depth work_on_pair(
     #else
         float occlusionFactor = 1.0;
     #endif
-        // reflected.rgb = mix(vec3(0.0), hdr_gammaAdjust(BLOCK_LIGHT_COLOR), pow(light.x, 6.0) * material.y);
+        // reflected.rgb = mix(vec3(0.0), BLOCK_LIGHT_COLOR, pow(light.x, 6.0) * material.y);
         fallbackMix = occlusionFactor;
         reflected_depth_value = 1.0;
 
