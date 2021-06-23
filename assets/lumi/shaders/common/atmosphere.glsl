@@ -314,16 +314,18 @@ void atmos_generateAtmosphereModel()
 
     atmosv_hdrCelestialRadiance     = mix(atmosv_hdrCelestialRadiance, grayCelestial, toGray) * rainBrightness; // only used for cloud shading during rain
     atmosv_hdrSkyAmbientRadiance    = mix(atmosv_hdrSkyAmbientRadiance, graySkyAmbient, toGray) * mix(1., .5, frx_thunderGradient());
+
     #ifdef POST_SHADER
     atmosv_celestIntensity *= rainBrightness;
 
     atmosv_hdrCloudColorRadiance = mix(atmosv_hdrCloudColorRadiance, graySky, 0.2); // ACES adjustment
 
+    atmosv_hdrSkyColorRadiance   = mix(atmosv_hdrSkyColorRadiance, graySky, toGray) * rainBrightness;
+    atmosv_hdrCloudColorRadiance = mix(atmosv_hdrCloudColorRadiance, graySky, toGray) * rainBrightness;
+
     if (customOWFog) {
-        atmosv_hdrSkyColorRadiance      = mix(atmosv_hdrSkyColorRadiance, graySky, toGray) * rainBrightness;
         atmosv_hdrFogColorRadiance      = mix(atmosv_hdrFogColorRadiance, grayFog, toGray) * rainBrightness;
         atmosv_hdrOWTwilightSkyRadiance = mix(atmosv_hdrOWTwilightSkyRadiance, graySky, toGray) * rainBrightness;
-        atmosv_hdrCloudColorRadiance    = mix(atmosv_hdrCloudColorRadiance, graySky, toGray) * rainBrightness;
     }
     #endif
     /**********/
