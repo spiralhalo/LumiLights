@@ -95,10 +95,12 @@ vec3 calcFallbackColor(in sampler2D sdepth, vec3 unitMarch_world, vec2 light)
     // WIP: elaborate depth samplers
     vec4 cloud = cloudColor(sdepth, sdepth, u_blue_noise, unitMarch_world);
 
-    sky = (sky.rgb * (1.0 - cloud.a) + cloud.rgb);
+    // HDR's bizzare alpha blending
+    cloud.a *= 0.3;
+    sky = (sky * (1.0 - cloud.a) + cloud.rgb * sqrt(cloud.a));
 #endif
 
-    return sky * skyLightFactor * upFactor * aboveWaterFactor;
+    return sky * skyLightFactor * upFactor * aboveWaterFactor * 1.5;
 }
 
 vec3 pbr_lightCalc(float roughness, vec3 f0, vec3 radiance, vec3 lightDir, vec3 viewDir)
