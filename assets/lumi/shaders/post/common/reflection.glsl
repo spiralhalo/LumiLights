@@ -93,8 +93,9 @@ vec3 calcFallbackColor(in sampler2D sdepth, vec3 unitMarch_world, vec2 light)
 #ifdef CLOUD_REFLECTION
     // PERF: optimize by roughness
     // WIP: elaborate depth samplers
-    vec4 cloud = cloudColor(sdepth, sdepth, u_blue_noise, unitMarch_world);
+    vec4 cloud = cloudColor(sdepth, sdepth, u_blue_noise, unitMarch_world, true);
 
+    cloud.a *= 0.5;
     sky = (sky * (1. - cloud.a) + cloud.rgb * cloud.a);
 #endif
 

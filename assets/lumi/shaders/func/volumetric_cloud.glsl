@@ -30,7 +30,6 @@ const float CLOUD_TEXTURE_ZOOM = 1.0;
 const float TEXTURE_RADIUS = 512.0;
 const float TEXTURE_RADIUS_RCP = 1.0 / TEXTURE_RADIUS;
 const int NUM_SAMPLE = 32;
-const float SAMPLE_SIZE = TEXTURE_RADIUS / float(NUM_SAMPLE);
 const int LIGHT_SAMPLE = 5; 
 const float LIGHT_ABSORPTION = 0.9;
 const float LIGHT_SAMPLE_SIZE = 1.0;
@@ -90,10 +89,11 @@ float sampleCloud(in vec3 worldPos, in sampler2D scloudTex)
     // return smoothstep(0.1, 0.11, yF * tF * eF);
 }
 
-cloud_result rayMarchCloud(in sampler2D scloudTex, in sampler2D sdepth, in sampler2D sbluenoise, in vec2 texcoord, in vec3 worldVec)
+cloud_result rayMarchCloud(in sampler2D scloudTex, in sampler2D sdepth, in sampler2D sbluenoise, in vec2 texcoord, in vec3 worldVec, in float numSample)
 {
     float rainFactor = frx_rainGradient() * 0.67 + frx_thunderGradient() * 0.33; // TODO: optimize
     float depth = (texcoord == clamp(texcoord, 0.0, 1.0)) ? texture(sdepth, texcoord).r : 1.0;
+    float sampleSize = TEXTURE_RADIUS / float(numSample);
     float maxDist;
 
     cloud_result placeholder = cloud_result(0.0, 1.0, vec3(0.0));
@@ -109,13 +109,13 @@ cloud_result rayMarchCloud(in sampler2D scloudTex, in sampler2D sdepth, in sampl
         #endif
     }
 
-    vec3 unitSample = worldVec * SAMPLE_SIZE;
+    vec3 unitSample = worldVec * sampleSize;
     vec3 toLight = frx_skyLightVector() * LIGHT_SAMPLE_SIZE;
 
     // Adapted from Sebastian Lague's code (technically not the same, but just in case his code was MIT Licensed)
 
     float tileJitter = getRandomFloat(sbluenoise, texcoord, frxu_size) * CLOUD_MARCH_JITTER_STRENGTH;
-    float traveled = SAMPLE_SIZE * tileJitter;
+    float traveled = sampleSize * tileJitter;
 
     // Optimization block
     #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
@@ -162,9 +162,9 @@ cloud_result rayMarchCloud(in sampler2D scloudTex, in sampler2D sdepth, in sampl
     // vec3 firstDensePos = worldPos - worldVec * 0.1;
 
     int i = 0;
-    while (traveled < maxDist && currentWorldPos.y >= CLOUD_MIN_Y && currentWorldPos.y <= CLOUD_MAX_Y && i < NUM_SAMPLE) {
+    while (traveled < maxDist && currentWorldPos.y >= CLOUD_MIN_Y && currentWorldPos.y <= CLOUD_MAX_Y && i < numSample) {
         i ++;
-        traveled += SAMPLE_SIZE;
+        traveled += sampleSize;
         currentWorldPos += unitSample;
 
         float sampledDensity = sampleCloud(currentWorldPos, scloudTex);
@@ -196,8 +196,8 @@ cloud_result rayMarchCloud(in sampler2D scloudTex, in sampler2D sdepth, in sampl
 
             float lightTransmittance = exp(-occlusionDensity * LIGHT_ABSORPTION);
 
-            lightEnergy += sampledDensity * transmittance * lightTransmittance * SAMPLE_SIZE; // * phaseVal;
-            transmittance *= exp(-sampledDensity * SAMPLE_SIZE);
+            lightEnergy += sampledDensity * transmittance * lightTransmittance * sampleSize; // * phaseVal;
+            transmittance *= exp(-sampledDensity * sampleSize);
 
             if (transmittance < 0.01) {
                 break;
@@ -244,14 +244,15 @@ vec4 volumetricCloud(
     in sampler2D sbluenoise,
     in vec2 texcoord,
     in vec3 worldVec,
+    in int numSample,
     out float out_depth)
 {
     #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
-        cloud_result volumetric = rayMarchCloud(scloudTex, ssolidDepth, sbluenoise, texcoord, worldVec);
+        cloud_result volumetric = rayMarchCloud(scloudTex, ssolidDepth, sbluenoise, texcoord, worldVec, numSample);
     #else
         cloud_result volumetric = frx_viewFlag(FRX_CAMERA_IN_FLUID)
-                                ? rayMarchCloud(scloudTex, ssolidDepth, sbluenoise, texcoord, worldVec)
-                                : rayMarchCloud(scloudTex, stranslucentDepth, sbluenoise, texcoord, worldVec);
+                                ? rayMarchCloud(scloudTex, ssolidDepth, sbluenoise, texcoord, worldVec, numSample)
+                                : rayMarchCloud(scloudTex, stranslucentDepth, sbluenoise, texcoord, worldVec, numSample);
     #endif
 
     float alpha = 1.0 - min(1.0, volumetric.transmittance);
