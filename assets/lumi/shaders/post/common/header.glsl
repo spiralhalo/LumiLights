@@ -5,7 +5,6 @@
 #include lumi:shaders/common/compat.glsl
 #include lumi:shaders/lib/util.glsl
 #include lumi:shaders/func/tonemap.glsl
-#include lumi:shaders/common/lighting.glsl
 #include lumi:shaders/common/userconfig.glsl
 #include frex:shaders/api/world.glsl
 #include frex:shaders/api/player.glsl

@@ -4,7 +4,6 @@
 #include frex:shaders/api/view.glsl
 #include frex:shaders/lib/math.glsl
 #include lumi:shaders/common/atmosphere.glsl
-#include lumi:shaders/common/lightsource.glsl
 #include lumi:shaders/lib/rectangle.glsl
 #include lumi:shaders/lib/taa_jitter.glsl
 #include lumi:shaders/lib/util.glsl

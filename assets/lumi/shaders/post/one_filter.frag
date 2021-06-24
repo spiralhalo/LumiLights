@@ -2,7 +2,6 @@
 #include frex:shaders/lib/math.glsl
 #include lumi:shaders/lib/util.glsl
 #include lumi:shaders/func/tile_noise.glsl
-#include lumi:shaders/common/lighting.glsl
 
 /*******************************************************
  *  lumi:shaders/post/one_filter.frag         *

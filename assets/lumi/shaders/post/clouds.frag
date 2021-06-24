@@ -3,7 +3,6 @@
 #include frex:shaders/api/world.glsl
 #include frex:shaders/lib/math.glsl
 #include lumi:shaders/common/atmosphere.glsl
-#include lumi:shaders/common/lighting.glsl
 #include lumi:shaders/common/userconfig.glsl
 #include lumi:shaders/func/flat_cloud.glsl
 #include lumi:shaders/func/parallax_cloud.glsl

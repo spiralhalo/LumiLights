@@ -4,7 +4,6 @@
 #include frex:shaders/lib/math.glsl
 #include lumi:shaders/lib/util.glsl
 #include lumi:shaders/common/atmosphere.glsl
-#include lumi:shaders/common/lightsource.glsl
 
 /*******************************************************
  *  lumi:shaders/post/godrays.vert            *

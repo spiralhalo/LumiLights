@@ -7,7 +7,6 @@
 #include frex:shaders/api/view.glsl
 #include frex:shaders/api/world.glsl
 #include lumi:shaders/common/atmosphere.glsl
-#include lumi:shaders/common/lighting.glsl
 #include lumi:shaders/common/shadow.glsl
 #include lumi:shaders/common/userconfig.glsl
 #include lumi:shaders/func/glintify2.glsl
@@ -422,7 +421,7 @@ vec4 hdr_shaded_color(
             light.z *= pow(light.y, 6.0);
         }
     #else
-        light.z = hdr_fromGammaf(l2_lightmapRemap(light.y));
+        light.z = hdr_fromGammaf(lightmapRemap(light.y));
         // Prevent full direct light underwater
         if (maybeUnderwater) {
             light.z *= pow(light.y, 6.0);
@@ -475,7 +474,7 @@ vec4 hdr_shaded_color(
     #endif
 
     if (a.a != 0.0 && (translucent || translucentDepth >= depth) && depth != 1.0) {
-        a = fog(l2_lightmapRemap(light.y), a, viewPos, worldPos, bloom_out);
+        a = fog(lightmapRemap(light.y), a, viewPos, worldPos, bloom_out);
     }
 
     #if CAUSTICS_MODE == CAUSTICS_MODE_TEXTURE

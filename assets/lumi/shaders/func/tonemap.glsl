@@ -26,7 +26,7 @@ vec3 ldr_tonemap3noGamma(vec3 a)
     exposure = mix(2.0, 1.0, eyeBrightness);
 #endif
 
-    c = frx_toneMap(c * exposure);
+    c = acesNarkowicz(c * exposure);
 
     // In the past ACES requires clamping for some reason
     c = clamp(c, 0.0, 1.0);

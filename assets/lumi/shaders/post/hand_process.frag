@@ -72,7 +72,7 @@ void main()
         // Workaround before shadow occlusion culling to make caves playable
         light.z *= l2_clampScale(0.03125, 0.04, light.y);
     #else
-        light.z = l2_lightmapRemap(light.y);
+        light.z = lightmapRemap(light.y);
     #endif
 
     pbr_shading(a, bloom_out, viewPos, light, normal, roughness, mat.y, mat.z, /*diffuse=*/true, true);

@@ -127,7 +127,7 @@ vec3 atmos_hdrCloudColorRadiance(vec3 world_toSky)
 
 #ifdef VERTEX_SHADER
 
-/** DEFINES **/
+/** COLOR DEFINES **/
 #define DEF_VANILLA_DAY_SKY_COLOR hdr_fromGamma(vec3(0.52, 0.69, 1.0))
 #if SKY_MODE == SKY_MODE_LUMI
     #if LUMI_SKY_COLOR == LUMI_SKY_COLOR_BRIGHT_CYAN
@@ -143,12 +143,14 @@ vec3 atmos_hdrCloudColorRadiance(vec3 world_toSky)
 #define DEF_DAY_CLOUD_COLOR DEF_VANILLA_DAY_SKY_COLOR
 #define DEF_NIGHT_SKY_COLOR hdr_fromGamma(vec3(0.01, 0.01, 0.01))
 #endif
+/*************/
 
-#define DEF_SUNLIGHT_STR 5.0
-#define DEF_MOONLIGHT_STR 0.4
-#define DEF_SKY_STR 1.0
- 
-#define DEF_SKY_AMBIENT_STR 1.6
+/** STRENGTH DEFINES **/
+#define DEF_SUNLIGHT_STR 1.5
+#define DEF_MOONLIGHT_STR 0.5
+#define DEF_SKY_STR 0.5
+
+#define DEF_SKY_AMBIENT_STR 0.5
 /*************/
 
 
