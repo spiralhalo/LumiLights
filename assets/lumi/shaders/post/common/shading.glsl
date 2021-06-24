@@ -289,7 +289,6 @@ void custom_sky(in vec3 viewPos, in float blindnessFactor, in bool maybeUnderwat
                         celestUV.y += (mod(frx_worldDay(), 8.) >= 4.) ? 0.5 : 0.0;
                         celestialObjectColor = hdr_gammaAdjust(texture(u_moon, celestUV).rgb) * 3.0;
                         celestialObjectColor += vec3(0.01) * hdr_gammaAdjust(fullMoonColor);
-                        celestialObjectColor *= DEF_NIGHT_SKY_MULTIPLIER;
                     }
                 } else {
                     celestialObjectColor = hdr_gammaAdjust(texture(u_sun, celestUV).rgb) * 2.0;
@@ -328,7 +327,7 @@ void custom_sky(in vec3 viewPos, in float blindnessFactor, in bool maybeUnderwat
 
             vec3 starRadiance = vec3(star) + NEBULAE_COLOR * milkyHaze;
 
-            a.rgb += starRadiance * DEF_NIGHT_SKY_MULTIPLIER;
+            a.rgb += starRadiance;
             bloom_out += (star + milkyHaze);
         #endif
     }

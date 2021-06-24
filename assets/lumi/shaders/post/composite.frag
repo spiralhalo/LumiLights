@@ -79,8 +79,6 @@ vec3 blend(vec3 dst, vec4 src)
 #define blurDepthThreshold 0.01
 void main()
 {
-    float brightnessMult = 1.0;//mix(1.0, BRIGHT_FINAL_MULT, frx_viewBrightness());
-
     float depth_solid = texture(u_solid_depth, v_texcoord).r;
     vec4 solid = texture(u_combine_solid, v_texcoord);
     bool tonemapTheSky = frx_worldFlag(FRX_WORLD_IS_NETHER);
@@ -88,12 +86,12 @@ void main()
         tonemapTheSky = tonemapTheSky || frx_worldFlag(FRX_WORLD_IS_OVERWORLD);
     #endif
     if ((depth_solid != 1.0 || tonemapTheSky) && solid.a > 0) {
-        solid.rgb = ldr_tonemap3(solid.rgb * brightnessMult);
+        solid.rgb = ldr_tonemap3(solid.rgb);
     }
-    
+
     float depth_translucent = texture(u_translucent_depth, v_texcoord).r;
     vec4 translucent = texture(u_combine_translucent, v_texcoord);
-    translucent.rgb = ldr_tonemap3(translucent.rgb * brightnessMult);
+    translucent.rgb = ldr_tonemap3(translucent.rgb);
 
     float depth_particles = texture(u_particles_depth, v_texcoord).r;
     vec4 particles = texture(u_particles, v_texcoord);
@@ -103,7 +101,7 @@ void main()
 
     float depth_weather = texture(u_weather_depth, v_texcoord).r;
     vec4 weather = texture(u_weather, v_texcoord);
-    weather.rgb = ldr_tonemap3(hdr_gammaAdjust(weather.rgb) * brightnessMult);
+    weather.rgb = ldr_tonemap3(hdr_gammaAdjust(weather.rgb));
 
     color_layers[0] = vec4(solid. rgb, 1.0);
     depth_layers[0] = depth_solid;

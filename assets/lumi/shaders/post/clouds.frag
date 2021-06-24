@@ -46,7 +46,6 @@ void doCloudStuff()
     modelPos.xyz /= modelPos.w;
     vec3 worldVec = normalize(modelPos.xyz);
 
-    // float brightnessMult = mix(1.0, BRIGHT_FINAL_MULT, frx_viewBrightness());
     #if CLOUD_RENDERING == CLOUD_RENDERING_FLAT
         vec4 cloudColor = flatCloud(worldVec, v_cloud_rotator, v_up);
 
