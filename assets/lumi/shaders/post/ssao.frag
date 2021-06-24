@@ -35,14 +35,14 @@ void main()
 #ifdef SSAO_ENABLED
     // Modest performance saving by skipping the sky
     if (texture(u_depth, v_texcoord).r == 1.0) {
-        fragColor = vec4(0.0, 0.0, 0.0, 1.0);
+        fragColor[0] = vec4(0.0, 0.0, 0.0, 1.0);
     } else {
-        fragColor = calcSSAO(
+        fragColor[0] = calcSSAO(
             u_normal, u_depth, u_light, u_color, u_blue_noise,
             frx_normalModelMatrix(), frx_inverseProjectionMatrix(), frxu_size, 
             v_texcoord, RADIUS, RADIUS * 0.5, BIAS, INTENSITY);
     }
 #else
-    fragColor = vec4(0.0, 0.0, 0.0, 1.0);
+    fragColor[0] = vec4(0.0, 0.0, 0.0, 1.0);
 #endif
 }
