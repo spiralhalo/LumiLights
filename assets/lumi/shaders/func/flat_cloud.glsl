@@ -4,7 +4,6 @@
 #include frex:shaders/lib/noise/noise2d.glsl
 #include lumi:shaders/common/atmosphere.glsl
 #include lumi:shaders/common/userconfig.glsl
-#include lumi:shaders/func/tonemap.glsl
 #include lumi:shaders/lib/util.glsl
 
 /*******************************************************
@@ -42,6 +41,6 @@ vec4 flatCloud(in vec3 worldVec, in mat4 cloudRotator, in vec3 up)
     cloud = cloud1 * 0.5 + cloud2 * 0.75 + cloud3;
     cloud = l2_clampScale(0.1, 0.4, cloud);
 
-    vec3 color = (ldr_tonemap3(atmos_hdrCelestialRadiance() * 0.1) + ldr_tonemap3(atmos_hdrSkyColorRadiance(worldVec) * 0.2)) * cloud;
+    vec3 color = atmos_hdrCelestialRadiance() * 0.1 + atmos_hdrCloudColorRadiance(worldVec);
     return vec4(color, cloud);
 }

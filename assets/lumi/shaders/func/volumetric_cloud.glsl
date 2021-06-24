@@ -268,7 +268,6 @@ vec4 volumetricCloud(
 
     celestRadiance = celestRadiance * energy * rainBrightness * 0.5;
     color = celestRadiance + atmos_hdrCloudColorRadiance(worldVec);
-    color = ldr_tonemap3(color) * alpha;
 
     #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
         out_depth = alpha > 0. ? 0.9999 : 1.0;
