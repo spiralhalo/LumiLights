@@ -31,7 +31,8 @@ const float TEXTURE_RADIUS = 512.0;
 const float TEXTURE_RADIUS_RCP = 1.0 / TEXTURE_RADIUS;
 const int NUM_SAMPLE = 32;
 const float SAMPLE_SIZE = TEXTURE_RADIUS / float(NUM_SAMPLE);
-const int LIGHT_SAMPLE = 5;
+const int LIGHT_SAMPLE = 5; 
+const float LIGHT_ABSORPTION = 0.9;
 const float LIGHT_SAMPLE_SIZE = 1.0;
 
 // coordinate helper functions because it won't work properly
@@ -56,12 +57,12 @@ vec2 modelXz2Uv(vec2 modelXz)
 }
 
 #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
-    const float CLOUD_ALTITUDE = 55.0;
+    const float CLOUD_ALTITUDE = 50.0;
 #else
-    const float CLOUD_ALTITUDE = 115.5;
+    const float CLOUD_ALTITUDE = 110.0;
 #endif
-const float CLOUD_HEIGHT = 40.0 / CLOUD_TEXTURE_ZOOM;
-const float CLOUD_MID_HEIGHT = 10.0;
+const float CLOUD_HEIGHT = 50.0 / CLOUD_TEXTURE_ZOOM;
+const float CLOUD_MID_HEIGHT = 20.0;
 const float CLOUD_TOP_HEIGHT = CLOUD_HEIGHT - CLOUD_MID_HEIGHT;
 const float CLOUD_MID_ALTITUDE = CLOUD_ALTITUDE + CLOUD_MID_HEIGHT;
 const float CLOUD_MIN_Y = CLOUD_ALTITUDE;
@@ -81,7 +82,9 @@ float sampleCloud(in vec3 worldPos, in sampler2D scloudTex)
     vec2 tex = texture(scloudTex, uv).rg; 
     float tF = tex.r;
     float hF = sqrt(tex.g);
-    float yF = smoothstep(CLOUD_MID_ALTITUDE + CLOUD_TOP_HEIGHT * hF, CLOUD_MID_ALTITUDE, worldPos.y) * smoothstep(CLOUD_ALTITUDE, CLOUD_MID_ALTITUDE, worldPos.y);
+    float yF = smoothstep(CLOUD_MID_ALTITUDE + CLOUD_TOP_HEIGHT * hF, CLOUD_MID_ALTITUDE, worldPos.y);
+
+    yF *= smoothstep(CLOUD_MID_ALTITUDE - CLOUD_MID_HEIGHT * hF, CLOUD_MID_ALTITUDE, worldPos.y);
 
     return smoothstep(0.0, 0.3, yF * tF * eF);
     // return smoothstep(0.1, 0.11, yF * tF * eF);
@@ -191,7 +194,7 @@ cloud_result rayMarchCloud(in sampler2D scloudTex, in sampler2D sdepth, in sampl
 
             occlusionDensity *= LIGHT_SAMPLE_SIZE; // this is what *stepSize means
 
-            float lightTransmittance = exp(-occlusionDensity);
+            float lightTransmittance = exp(-occlusionDensity * LIGHT_ABSORPTION);
 
             lightEnergy += sampledDensity * transmittance * lightTransmittance * SAMPLE_SIZE; // * phaseVal;
             transmittance *= exp(-sampledDensity * SAMPLE_SIZE);
@@ -251,7 +254,9 @@ vec4 volumetricCloud(
                                 : rayMarchCloud(scloudTex, stranslucentDepth, sbluenoise, texcoord, worldVec);
     #endif
 
-    float alpha = 1.0 - volumetric.transmittance;
+    float alpha = 1.0 - min(1.0, volumetric.transmittance);
+    float energy = volumetric.lightEnergy;
+
     float rainBrightness = mix(0.13, 0.05, hdr_gammaAdjustf(frx_rainGradient())); // simulate dark clouds
     vec3 celestRadiance = atmos_hdrCelestialRadiance();
 
@@ -261,8 +266,9 @@ vec4 volumetricCloud(
 
     vec3 color;
 
-    celestRadiance = ldr_tonemap3(celestRadiance) * rainBrightness * volumetric.lightEnergy * 0.4;
-    color = celestRadiance + ldr_tonemap3(atmos_hdrCloudColorRadiance(worldVec)) * alpha;
+    celestRadiance = celestRadiance * energy * rainBrightness * 0.5;
+    color = celestRadiance + atmos_hdrCloudColorRadiance(worldVec);
+    color = ldr_tonemap3(color) * alpha;
 
     #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
         out_depth = alpha > 0. ? 0.9999 : 1.0;
