@@ -119,7 +119,7 @@ vec3 hdr_calcSkyLight(inout light_data data)
 
 void pbr_shading(inout vec4 a, inout float bloom, vec3 viewPos, vec3 light, vec3 normal, float roughness, float metallic, float pbr_f0, bool isDiffuse, bool translucent)
 {
-    vec3 albedo = hdr_gammaAdjust(a.rgb);
+    vec3 albedo = hdr_fromGamma(a.rgb);
     light_data data = light_data(
         isDiffuse,
         albedo,

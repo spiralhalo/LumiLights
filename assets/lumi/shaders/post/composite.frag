@@ -101,7 +101,7 @@ void main()
 
     float depth_weather = texture(u_weather_depth, v_texcoord).r;
     vec4 weather = texture(u_weather, v_texcoord);
-    weather.rgb = ldr_tonemap3(hdr_gammaAdjust(weather.rgb));
+    weather.rgb = ldr_tonemap3(hdr_fromGamma(weather.rgb));
 
     color_layers[0] = vec4(solid. rgb, 1.0);
     depth_layers[0] = depth_solid;
@@ -111,7 +111,7 @@ void main()
     try_insert(particles, depth_particles);
     try_insert(clouds, depth_clouds);
     try_insert(weather, depth_weather);
-    
+
     vec3 c = color_layers[0].rgb;
 
     for (int i = 1; i < active_layers; ++i) {

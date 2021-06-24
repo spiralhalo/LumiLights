@@ -24,7 +24,7 @@
 
 float l2_lightmapRemap(float lightMapCoords)
 {
-    return hdr_gammaAdjustf(l2_clampScale(0.03125, 0.96875, lightMapCoords));
+    return hdr_fromGammaf(l2_clampScale(0.03125, 0.96875, lightMapCoords));
 }
 
 /*  RADIANCE
@@ -51,18 +51,18 @@ vec3 l2_handHeldRadiance(vec3 viewPos)
 
     hl *= pow(hl, 3.0 + brightness * 2.0) * (2.0 - brightness * 0.5); // lyfe hax
 
-    return hdr_gammaAdjust(heldLight.rgb) * BLOCK_LIGHT_STR * hl;
+    return hdr_fromGamma(heldLight.rgb) * BLOCK_LIGHT_STR * hl;
 }
 #endif
 
 vec3 l2_emissiveRadiance(vec3 hdrFragColor, float emissivity)
 {
-    return hdrFragColor * hdr_gammaAdjustf(emissivity) * EMISSIVE_LIGHT_STR;
+    return hdrFragColor * hdr_fromGammaf(emissivity) * EMISSIVE_LIGHT_STR;
 }
 
 vec3 l2_baseAmbientRadiance()
 {
-    if (frx_playerHasNightVision()) return hdr_gammaAdjust(NIGHT_VISION_COLOR) * NIGHT_VISION_STR;
+    if (frx_playerHasNightVision()) return hdr_fromGamma(NIGHT_VISION_COLOR) * NIGHT_VISION_STR;
     if (frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT)) {
         #ifdef TRUE_DARKNESS_DEFAULT
             return vec3(0.0);
@@ -80,14 +80,14 @@ vec3 l2_baseAmbientRadiance()
                 return vec3(0.0);
             }
         #endif
-        vec3 dimensionColor = hdr_gammaAdjust(vec3(0.8, 0.7, 1.0));
+        vec3 dimensionColor = hdr_fromGamma(vec3(0.8, 0.7, 1.0));
         // THE NETHER
         if (frx_isWorldTheNether()) {
             float min_col = l2_min3(frx_vanillaClearColor());
             float max_col = l2_max3(frx_vanillaClearColor());
             float sat = 0.0;
             if (max_col != 0.0) sat = (max_col-min_col)/max_col;
-            dimensionColor = hdr_gammaAdjust(clamp((frx_vanillaClearColor()*(1/max_col))+pow(sat,2)/2, 0.0, 1.0));
+            dimensionColor = hdr_fromGamma(clamp((frx_vanillaClearColor()*(1/max_col))+pow(sat,2)/2, 0.0, 1.0));
         }
         return dimensionColor * SKYLESS_AMBIENT_STR;
     }
@@ -111,6 +111,6 @@ vec3 l2_skylessRadiance()
     else {
         vec3 color = frx_worldFlag(FRX_WORLD_IS_NETHER) ? NETHER_SKYLESS_LIGHT_COLOR : SKYLESS_LIGHT_COLOR;
         float darkenedFactor = frx_isSkyDarkened() ? 0.6 : 1.0;
-        return darkenedFactor * SKYLESS_LIGHT_STR * hdr_gammaAdjust(color);
+        return darkenedFactor * SKYLESS_LIGHT_STR * hdr_fromGamma(color);
     }
 }

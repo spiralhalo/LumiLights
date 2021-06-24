@@ -53,7 +53,7 @@ in float v_not_in_void;
 in float v_near_void_core;
 in float v_blindness;
 
-const vec3 VOID_CORE_COLOR = hdr_gammaAdjust(vec3(1.0, 0.7, 0.5));
+const vec3 VOID_CORE_COLOR = hdr_fromGamma(vec3(1.0, 0.7, 0.5));
 
 // const float JITTER_STRENGTH = 0.4;
 float tileJitter;
@@ -287,18 +287,18 @@ void custom_sky(in vec3 viewPos, in float blindnessFactor, in bool maybeUnderwat
                         celestUV.y *= 0.5;
                         celestUV.x += mod(frx_worldDay(), 4.) * 0.25;
                         celestUV.y += (mod(frx_worldDay(), 8.) >= 4.) ? 0.5 : 0.0;
-                        celestialObjectColor = hdr_gammaAdjust(texture(u_moon, celestUV).rgb) * 3.0;
-                        celestialObjectColor += vec3(0.01) * hdr_gammaAdjust(fullMoonColor);
+                        celestialObjectColor = hdr_fromGamma(texture(u_moon, celestUV).rgb) * 3.0;
+                        celestialObjectColor += vec3(0.01) * hdr_fromGamma(fullMoonColor);
                     }
                 } else {
-                    celestialObjectColor = hdr_gammaAdjust(texture(u_sun, celestUV).rgb) * 2.0;
+                    celestialObjectColor = hdr_fromGamma(texture(u_sun, celestUV).rgb) * 2.0;
                 }
                 bloom_out += frx_luminance(clamp(celestialObjectColor, 0.0, 1.0)) * 0.25;
             }
             a.rgb = atmos_hdrSkyGradientRadiance(worldSkyVec);
             a.rgb += celestialObjectColor * (1. - frx_rainGradient());
         #else
-            // a.rgb = hdr_gammaAdjust(a.rgb) * 2.0; // Don't gamma-correct vanilla sky
+            // a.rgb = hdr_fromGamma(a.rgb) * 2.0; // Don't gamma-correct vanilla sky
         #endif
 
         #if SKY_MODE == SKY_MODE_LUMI || SKY_MODE == SKY_MODE_VANILLA_STARRY
@@ -422,7 +422,7 @@ vec4 hdr_shaded_color(
             light.z *= pow(light.y, 6.0);
         }
     #else
-        light.z = hdr_gammaAdjustf(l2_lightmapRemap(light.y));
+        light.z = hdr_fromGammaf(l2_lightmapRemap(light.y));
         // Prevent full direct light underwater
         if (maybeUnderwater) {
             light.z *= pow(light.y, 6.0);
@@ -469,9 +469,9 @@ vec4 hdr_shaded_color(
     a.a = min(1.0, a.a);
 
     #if GLINT_MODE == GLINT_MODE_GLINT_SHADER
-        a.rgb += hdr_gammaAdjust(noise_glint(misc.xy, bit_unpack(misc.z, 2)));
+        a.rgb += hdr_fromGamma(noise_glint(misc.xy, bit_unpack(misc.z, 2)));
     #else
-        a.rgb += hdr_gammaAdjust(texture_glint(u_glint, misc.xy, bit_unpack(misc.z, 2)));
+        a.rgb += hdr_fromGamma(texture_glint(u_glint, misc.xy, bit_unpack(misc.z, 2)));
     #endif
 
     if (a.a != 0.0 && (translucent || translucentDepth >= depth) && depth != 1.0) {

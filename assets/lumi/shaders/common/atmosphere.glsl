@@ -128,20 +128,20 @@ vec3 atmos_hdrCloudColorRadiance(vec3 world_toSky)
 #ifdef VERTEX_SHADER
 
 /** DEFINES **/
-#define DEF_VANILLA_DAY_SKY_COLOR hdr_gammaAdjust(vec3(0.52, 0.69, 1.0))
+#define DEF_VANILLA_DAY_SKY_COLOR hdr_fromGamma(vec3(0.52, 0.69, 1.0))
 #if SKY_MODE == SKY_MODE_LUMI
     #if LUMI_SKY_COLOR == LUMI_SKY_COLOR_BRIGHT_CYAN
-    #define DEF_DAY_SKY_COLOR hdr_gammaAdjust(vec3(0.33, 0.7, 1.0))
-    #define DEF_DAY_CLOUD_COLOR hdr_gammaAdjust(vec3(0.40, 0.69, 1.0))
+    #define DEF_DAY_SKY_COLOR hdr_fromGamma(vec3(0.33, 0.7, 1.0))
+    #define DEF_DAY_CLOUD_COLOR hdr_fromGamma(vec3(0.40, 0.69, 1.0))
     #else
-    #define DEF_DAY_SKY_COLOR hdr_gammaAdjust(vec3(0.3, 0.5, 1.0))
+    #define DEF_DAY_SKY_COLOR hdr_fromGamma(vec3(0.3, 0.5, 1.0))
     #define DEF_DAY_CLOUD_COLOR DEF_VANILLA_DAY_SKY_COLOR
     #endif
-#define DEF_NIGHT_SKY_COLOR hdr_gammaAdjust(vec3(0.1, 0.1, 0.2))
+#define DEF_NIGHT_SKY_COLOR hdr_fromGamma(vec3(0.1, 0.1, 0.2))
 #else
 #define DEF_DAY_SKY_COLOR DEF_VANILLA_DAY_SKY_COLOR
 #define DEF_DAY_CLOUD_COLOR DEF_VANILLA_DAY_SKY_COLOR
-#define DEF_NIGHT_SKY_COLOR hdr_gammaAdjust(vec3(0.01, 0.01, 0.01))
+#define DEF_NIGHT_SKY_COLOR hdr_fromGamma(vec3(0.01, 0.01, 0.01))
 #endif
 
 #define DEF_SUNLIGHT_STR 5.0
@@ -165,11 +165,11 @@ const vec3 DAY_SKY_COLOR = DEF_DAY_SKY_COLOR;
 const vec3 NIGHT_SKY_COLOR = DEF_NIGHT_SKY_COLOR;
 const vec3 DAY_CLOUD_COLOR = DEF_DAY_CLOUD_COLOR;
 
-const vec3 NOON_SUNLIGHT_COLOR = hdr_gammaAdjust(vec3(1.0, 1.0, 1.0));
-const vec3 SUNRISE_LIGHT_COLOR = hdr_gammaAdjust(vec3(1.0, 0.7, 0.4));
+const vec3 NOON_SUNLIGHT_COLOR = hdr_fromGamma(vec3(1.0, 1.0, 1.0));
+const vec3 SUNRISE_LIGHT_COLOR = hdr_fromGamma(vec3(1.0, 0.7, 0.4));
 
-const vec3 NOON_AMBIENT  = hdr_gammaAdjust(vec3(1.0));
-const vec3 NIGHT_AMBIENT = hdr_gammaAdjust(vec3(0.5, 0.5, 0.7));
+const vec3 NOON_AMBIENT  = hdr_fromGamma(vec3(1.0));
+const vec3 NIGHT_AMBIENT = hdr_fromGamma(vec3(0.5, 0.5, 0.7));
 
 const vec3 CAVEFOG_C = DEF_DAY_SKY_COLOR;
 const vec3 CAVEFOG_DEEPC = SUNRISE_LIGHT_COLOR;
@@ -276,7 +276,7 @@ void atmos_generateAtmosphereModel()
         atmosv_hdrOWTwilightFogFactor = atmosv_hdrOWTwilightFactor;
     } else {
         // high saturation vanilla fog
-        atmosv_hdrFogColorRadiance = hdr_gammaAdjust(mix(frx_vanillaClearColor() / l2_max3(frx_vanillaClearColor()), frx_vanillaClearColor(), 0.75));
+        atmosv_hdrFogColorRadiance = hdr_fromGamma(mix(frx_vanillaClearColor() / l2_max3(frx_vanillaClearColor()), frx_vanillaClearColor(), 0.75));
         atmosv_hdrCaveFogRadiance = vec3(0.0);
         atmosv_hdrOWTwilightFogFactor = 0.0;
     }

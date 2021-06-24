@@ -257,7 +257,7 @@ vec4 volumetricCloud(
     float alpha = 1.0 - min(1.0, volumetric.transmittance);
     float energy = volumetric.lightEnergy;
 
-    float rainBrightness = mix(0.13, 0.05, hdr_gammaAdjustf(frx_rainGradient())); // simulate dark clouds
+    float rainBrightness = mix(0.13, 0.05, hdr_fromGammaf(frx_rainGradient())); // simulate dark clouds
     vec3 celestRadiance = atmos_hdrCelestialRadiance();
 
     if (frx_worldFlag(FRX_WORLD_IS_MOONLIT)) {
