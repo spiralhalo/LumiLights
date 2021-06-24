@@ -39,10 +39,10 @@ void main()
     vec4 current = texture(u_input, currentUv);
     vec4 history = texture(u_history, currentUv - velocity);
 
-    history = clip_aabb(min2.rgb, max2.rgb, current, history);
+    history = clip_aabb_rgba(min2, max2, current, history);
 
     fragColor[0] = mix(current, history, 0.9);
 #else
-    fragColor[0] = vec4(1.0, 0.0, 0.0, 1.0);
+    fragColor = vec4(0.0, 0.0, 0.0, 1.0);
 #endif
 }

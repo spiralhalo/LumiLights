@@ -153,22 +153,18 @@ vec3 atmos_hdrCloudColorRadiance(vec3 world_toSky)
 #define DEF_MOONLIGHT_STR 0.01
 #define DEF_SKY_STR 2.0
 #else
-#define DEF_SUNLIGHT_STR 4.0
+#define DEF_SUNLIGHT_STR 5.0
 #define DEF_MOONLIGHT_STR 0.4
 #define DEF_SKY_STR 1.0
 #endif
  
-#ifdef HIGH_CONTRAST_ENABLED
-#define DEF_SKY_AMBIENT_STR 1.2
-#else
-#define DEF_SKY_AMBIENT_STR 0.6
-#endif
+#define DEF_SKY_AMBIENT_STR 1.6
 /*************/
 
 
 
-const float SKY_LIGHT_RAINING_MULT = 0.3;
-const float SKY_LIGHT_THUNDERING_MULT = 0.1;
+const float SKY_LIGHT_RAINING_MULT = 0.5;
+const float SKY_LIGHT_THUNDERING_MULT = 0.2;
 
 const float SUNLIGHT_STR = DEF_SUNLIGHT_STR;
 const float MOONLIGHT_STR = DEF_MOONLIGHT_STR;
@@ -307,21 +303,25 @@ void atmos_generateAtmosphereModel()
     vec3 graySkyAmbient = vec3(frx_luminance(atmosv_hdrSkyAmbientRadiance));
     #ifdef POST_SHADER
     vec3 graySky        = vec3(frx_luminance(atmosv_hdrSkyColorRadiance));
+    vec3 grayFog        = vec3(frx_luminance(atmosv_hdrFogColorRadiance));
     #endif
 
     float toGray = frx_rainGradient() * 0.6 + frx_thunderGradient() * 0.35;
 
     atmosv_hdrCelestialRadiance     = mix(atmosv_hdrCelestialRadiance, grayCelestial, toGray) * rainBrightness; // only used for cloud shading during rain
     atmosv_hdrSkyAmbientRadiance    = mix(atmosv_hdrSkyAmbientRadiance, graySkyAmbient, toGray) * mix(1., .5, frx_thunderGradient());
+
     #ifdef POST_SHADER
     atmosv_celestIntensity *= rainBrightness;
 
     atmosv_hdrCloudColorRadiance = mix(atmosv_hdrCloudColorRadiance, graySky, 0.2); // ACES adjustment
 
+    atmosv_hdrSkyColorRadiance   = mix(atmosv_hdrSkyColorRadiance, graySky, toGray) * rainBrightness;
+    atmosv_hdrCloudColorRadiance = mix(atmosv_hdrCloudColorRadiance, graySky, toGray) * rainBrightness;
+
     if (customOWFog) {
-        atmosv_hdrSkyColorRadiance      = mix(atmosv_hdrSkyColorRadiance, graySky, toGray) * rainBrightness;
+        atmosv_hdrFogColorRadiance      = mix(atmosv_hdrFogColorRadiance, grayFog, toGray) * rainBrightness;
         atmosv_hdrOWTwilightSkyRadiance = mix(atmosv_hdrOWTwilightSkyRadiance, graySky, toGray) * rainBrightness;
-        atmosv_hdrCloudColorRadiance    = mix(atmosv_hdrCloudColorRadiance, graySky, toGray) * rainBrightness;
     }
     #endif
     /**********/

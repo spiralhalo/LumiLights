@@ -353,7 +353,7 @@ const float INTENSITY = 10.0;
 vec4 hdr_shaded_color(
     vec2 uv,
     sampler2D scolor, sampler2D sdepth, sampler2D slight, sampler2D snormal, sampler2D smaterial, sampler2D smisc,
-    float aoval, bool translucent, float translucentDepth, out float bloom_out)
+    vec3 emissionRadiance, float aoval, bool translucent, float translucentDepth, out float bloom_out)
 {
     vec4  a       = texture(scolor, uv);
     if (translucent && a.a == 0.) return vec4(0.);
@@ -461,6 +461,7 @@ vec4 hdr_shaded_color(
 #else
     float ssao = 1.;
 #endif
+    a.rgb += emissionRadiance;
     a.rgb *= ao_shaded * ssao;
 #endif
     if (matflash == 1.0) a.rgb += 1.0;

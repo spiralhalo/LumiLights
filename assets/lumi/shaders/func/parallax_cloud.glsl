@@ -20,14 +20,10 @@
 
 #if CLOUD_RENDERING == CLOUD_RENDERING_PARALLAX
 #define wnoise3(a) cellular2x2x2(a).x
-vec4 parallaxCloud(in sampler2D sbluenoise, in vec2 texcoord)
+vec4 parallaxCloud(in sampler2D sbluenoise, in vec2 texcoord, in vec3 worldVec)
 {
     float rainFactor = frx_rainGradient() * 0.67 + frx_thunderGradient() * 0.33;
-
-    vec4 worldPos = frx_inverseViewProjectionMatrix() * vec4(2.0 * texcoord - 1.0, 1.0, 1.0);
-    worldPos.xyz /= worldPos.w;
-    vec3 worldSkyVec = normalize(worldPos.xyz);
-    float skyDotUp = dot(worldSkyVec, vec3(0., 1., 0.));
+    float skyDotUp = worldVec.y;
 
     if (skyDotUp <= 0.05) {
         return vec4(0.);
@@ -38,8 +34,8 @@ vec4 parallaxCloud(in sampler2D sbluenoise, in vec2 texcoord)
     const float CLOUD_ALTITUDE  = PARALLAX_CLOUD_ALTITUDE;
     const float CLOUD_THICKNESS = PARALLAX_CLOUD_THICKNESS;
     
-    vec3 start  = worldSkyVec * ((CLOUD_ALTITUDE + CLOUD_THICKNESS) / worldSkyVec.y);
-    vec3 finish = worldSkyVec * (CLOUD_ALTITUDE / worldSkyVec.y);
+    vec3 start  = worldVec * ((CLOUD_ALTITUDE + CLOUD_THICKNESS) / worldVec.y);
+    vec3 finish = worldVec * (CLOUD_ALTITUDE / worldVec.y);
     vec3 move   = (finish - start) * flatMult;
 
     float tileJitter = getRandomFloat(sbluenoise, texcoord + frx_renderSeconds() * 0.1, frxu_size);
@@ -63,7 +59,7 @@ vec4 parallaxCloud(in sampler2D sbluenoise, in vec2 texcoord)
 
         float topness = float(i) * flatMult;
 
-        vec3 localColor = ldr_tonemap3(atmos_hdrCelestialRadiance() * 0.4) * topness + ldr_tonemap3(atmos_hdrSkyColorRadiance(worldSkyVec) * 0.2);
+        vec3 localColor = ldr_tonemap3(atmos_hdrCelestialRadiance() * 0.4) * topness + ldr_tonemap3(atmos_hdrSkyColorRadiance(worldVec) * 0.2);
         if (i == flatLoop) {
             color = localColor;
         } else {

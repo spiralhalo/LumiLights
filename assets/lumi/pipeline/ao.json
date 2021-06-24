@@ -7,6 +7,8 @@
             samplers: [
                 "u_normal",
                 "u_depth",
+                "u_light",
+                "u_color",
                 "u_blue_noise",
             ]
         },

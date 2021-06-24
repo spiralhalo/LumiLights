@@ -127,9 +127,29 @@ vec4 clip_aabb(vec3 colorMin, vec3 colorMax, vec4 currentColor, vec4 previousCol
     vec3 v_unit = v_clip.rgb / e_clip;
     vec3 a_unit = abs(v_unit);
     float ma_unit = max(a_unit.x, max(a_unit.y, a_unit.z));
+
     if (ma_unit > 1.0)
     {
         return vec4(p_clip, currentColor.a) + v_clip / ma_unit;
+    }
+    else
+    {
+        return previousColor;// point inside aabb
+    }
+}
+
+vec4 clip_aabb_rgba(vec4 colorMin, vec4 colorMax, vec4 currentColor, vec4 previousColor)
+{
+    vec4 p_clip = 0.5 * (colorMax + colorMin);
+    vec4 e_clip = 0.5 * (colorMax - colorMin);
+    vec4 v_clip = previousColor - p_clip;
+    vec4 v_unit = v_clip / e_clip;
+    vec4 a_unit = abs(v_unit);
+    float ma_unit = max(a_unit.x, max(a_unit.y, max(a_unit.z, a_unit.w)));
+
+    if (ma_unit > 1.0)
+    {
+        return p_clip + v_clip / ma_unit;
     }
     else
     {

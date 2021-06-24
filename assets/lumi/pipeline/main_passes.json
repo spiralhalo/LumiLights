@@ -14,6 +14,8 @@
                 samplerImages: [
                     "normal_solid",
                     "solid_depth",
+                    "light_solid",
+                    "solid_main",
                     "lumi:textures/filter_pattern/bluenoise256.png",
                 ]
             }, 
