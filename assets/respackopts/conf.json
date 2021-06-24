@@ -4,9 +4,9 @@
   "conf": {
     "NoWaterColor": false,
     "NoWaterTexture": false,
-    "WavyWaterModel": false,
+    "WavyWaterModel": true,
     "WavyWaterIntensity": {
-      "default": 1,
+      "default": 7,
       "min": 1,
       "max": 15
     }

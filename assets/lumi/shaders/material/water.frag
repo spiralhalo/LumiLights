@@ -9,34 +9,33 @@
 
 const float stretch = 1.2;
 
-void frx_startFragment(inout frx_FragmentData fragData) {
+void frx_startFragment(inout frx_FragmentData fragData)
+{
+#ifdef LUMI_PBRX
+    /* PBR PARAMS */
+    pbr_f0 = 0.02;
+    pbr_roughness = 0.05;
+#else
+    /* HACK */
+    fragData.light.y += 0.077 * smoothstep(1.0, 0.99, fragData.vertexNormal.y);
+    fragData.light.y = min(0.96875, fragData.light.y);
 
-    #ifdef LUMI_PBRX
-        /* PBR PARAMS */
-        pbr_f0 = 0.02;
-        pbr_roughness = 0.05;
-    #else
-        /* HACK */
-        fragData.light.y += 0.077 * smoothstep(1.0, 0.99, fragData.vertexNormal.y);
-        fragData.light.y = min(0.96875, fragData.light.y);
+    /* LUMI PARAMS */
+    phong_specular = 500.0;
+#endif
 
-        /* LUMI PARAMS */
-        phong_specular = 500.0;
-    #endif
-    
-    /* WATER RECOLOR */
-    #ifdef LUMI_NoWaterTexture
-        fragData.spriteColor.rgb = vec3(1.0);
-        fragData.spriteColor.a = 0.3;
-    #else
-        fragData.spriteColor.rgb *= fragData.spriteColor.rgb;
-        fragData.spriteColor.a *= 0.8;
-    #endif
-    #ifdef LUMI_NoWaterColor
-        fragData.vertexColor.rgb = vec3(0.0);
-        fragData.spriteColor.a = 0.1;
-    #endif
-    
+/* WATER RECOLOR */
+    fragData.vertexColor.rb *= fragData.vertexColor.rb;
+#ifdef LUMI_NoWaterTexture
+    fragData.spriteColor.rgb = vec3(1.0);
+    fragData.spriteColor.a = 0.3;
+#else
+    fragData.spriteColor.a *= 0.6;
+#endif
+#ifdef LUMI_NoWaterColor
+    fragData.vertexColor.rgb = vec3(0.0);
+#endif
+
     /* WAVY NORMALS */
     // wave movement doesn't necessarily follow flow direction for the time being
     float waveSpeed = frx_var2.x;
@@ -46,5 +45,6 @@ void frx_startFragment(inout frx_FragmentData fragData) {
     vec3 up = fragData.vertexNormal.xyz;
     vec3 samplePos = frx_var0.xyz;
     vec3 noisyNormal = ww_normals(up, l2_tangent, cross(up, l2_tangent), samplePos, waveSpeed, scale, amplitude, stretch, moveSpeed);
+
     pbr_normalMicro = mix(noisyNormal, fragData.vertexNormal, pow(gl_FragCoord.z, 500.0));
 }
