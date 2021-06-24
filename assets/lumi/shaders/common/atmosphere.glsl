@@ -179,7 +179,7 @@ const vec3 NOON_SUNLIGHT_COLOR = hdr_gammaAdjust(vec3(1.0, 1.0, 1.0));
 const vec3 SUNRISE_LIGHT_COLOR = hdr_gammaAdjust(vec3(1.0, 0.7, 0.4));
 
 const vec3 NOON_AMBIENT  = hdr_gammaAdjust(vec3(1.0));
-const vec3 NIGHT_AMBIENT = hdr_gammaAdjust(vec3(0.6, 0.6, 0.9)) * DEF_NIGHT_SKY_MULTIPLIER;
+const vec3 NIGHT_AMBIENT = hdr_gammaAdjust(vec3(0.5, 0.5, 0.7)) * DEF_NIGHT_SKY_MULTIPLIER;
 
 const vec3 CAVEFOG_C = DEF_DAY_SKY_COLOR;
 const vec3 CAVEFOG_DEEPC = SUNRISE_LIGHT_COLOR;
