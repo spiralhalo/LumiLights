@@ -26,13 +26,14 @@ void main()
     vec2 currentUv = v_texcoord;
     vec2 velocity = fastVelocity(u_depth, v_texcoord);
 
-    vec4 current2x2Colors[neighborCount2x2];
+    vec4 min2 = vec4(1.0);
+    vec4 max2 = vec4(0.0);
     for(int iter = 0; iter < neighborCount2x2; iter++)
     {
-        current2x2Colors[iter] = texture(u_input, currentUv + (kOffsets2x2[iter] * deltaRes));
+        vec4 currentIter = texture(u_input, currentUv + (kOffsets2x2[iter] * deltaRes * 3.0));
+        min2 = min(min2, currentIter);
+        max2 = max(max2, currentIter);
     }
-    vec4 min2 = MinColors(current2x2Colors);
-    vec4 max2 = MaxColors(current2x2Colors);
 
     vec4 current = texture(u_input, currentUv);
     vec4 history = texture(u_history, currentUv - velocity);
