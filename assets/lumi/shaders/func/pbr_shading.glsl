@@ -175,7 +175,8 @@ vec3 baseAmbientRadiance(vec3 fogRadiance)
     }
 
     if (!frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT)) {
-        bar += fogRadiance * SKYLESS_AMBIENT_STR;
+        bar += fogRadiance * SKYLESS_AMBIENT_STR * 0.5;
+        bar += vec3(SKYLESS_AMBIENT_STR) * 0.5;
     }
 
     return bar;
