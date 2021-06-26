@@ -35,6 +35,8 @@
 		samplerImages: ["minecraft:textures/misc/enchanted_item_glint.png"]
 	},
 
+    smoothBrightnessBidirectionaly: true,
+
     include: [
         "lumi:pipeline/reflection.json",
         "lumi:pipeline/custom_clouds.json",

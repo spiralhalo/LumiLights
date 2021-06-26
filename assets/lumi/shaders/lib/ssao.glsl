@@ -59,7 +59,6 @@ vec4 calcSSAO(
 
     float jitter = sampleNoise.z;
     float occlusion = 0.0;
-    float emissionVal = 0.0;
     vec3 emission = vec3(0.0);
 
     for (int i = 0; i < NUM_SAMPLE_DIRECTIONS; ++i) {
@@ -89,7 +88,6 @@ vec4 calcSSAO(
                     vec3 bloomColor = texture(scolor, sample_uv).rgb;
 
                     bloom *= attenuation;
-                    emissionVal += bloom;
                     emission += bloomColor * bloom;
                 }
 
@@ -99,15 +97,11 @@ vec4 calcSSAO(
     }
 
     float averager = 1.0 / float(NUM_SAMPLE_DIRECTIONS);
-
-    emissionVal *= averager;
-    emission *= averager;
-
     float dampener = 1.0 - frx_luminance(min(emission, vec3(1.0)));
 
+    emission *= averager;
     emission *= dampener;
     occlusion *= averager;
-    occlusion = max(0.0, occlusion - emissionVal);
     occlusion = clamp(pow(1.0 - occlusion, 1.0 + intensity), 0.0, 1.0);
 
     return vec4(emission, occlusion);

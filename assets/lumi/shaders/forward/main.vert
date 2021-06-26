@@ -3,8 +3,6 @@
 #include frex:shaders/api/vertex.glsl
 #include frex:shaders/api/view.glsl
 #include lumi:shaders/common/compat.glsl
-#include lumi:shaders/common/atmosphere.glsl
-#include lumi:shaders/common/lightsource.glsl
 #include lumi:shaders/common/userconfig.glsl
 #include lumi:shaders/api/pbr_ext.glsl
 #include lumi:shaders/lib/taa_jitter.glsl

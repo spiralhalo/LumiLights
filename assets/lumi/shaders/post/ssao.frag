@@ -2,7 +2,6 @@
 #include lumi:shaders/lib/ssao.glsl
 #include frex:shaders/api/view.glsl
 #include frex:shaders/api/world.glsl
-#include lumi:shaders/common/lighting.glsl
 #include lumi:shaders/common/userconfig.glsl
 
 /*******************************************************

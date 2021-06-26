@@ -8,7 +8,6 @@
 #include lumi:shaders/api/pbr_ext.glsl
 #include lumi:shaders/common/userconfig.glsl
 #include lumi:shaders/func/tonemap.glsl
-#include lumi:shaders/func/pbr_shading.glsl
 #include lumi:shaders/func/glintify2.glsl
 #include lumi:shaders/lib/bitpack.glsl
 #include lumi:shaders/lib/util.glsl

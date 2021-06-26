@@ -1,8 +1,6 @@
 #include lumi:shaders/post/common/header.glsl
-#include lumi:shaders/post/common/reflection.glsl
-
-#include lumi:shaders/common/lighting.glsl
 #include lumi:shaders/common/userconfig.glsl
+#include lumi:shaders/post/common/reflection.glsl
 
 /*******************************************************
  *  lumi:shaders/post/reflection.frag         *

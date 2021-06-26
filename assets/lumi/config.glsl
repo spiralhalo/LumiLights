@@ -20,13 +20,13 @@
 ***************************************************************/
 // #define LUMI_NoWaterTexture
 
-/* Uncomment to enable wavy water model
+/* Comment out to disable wavy water model
 ***************************************************************/
-// #define LUMI_WavyWaterModel
+#define LUMI_WavyWaterModel
 
-/* Intensity of the wavy water model. Range: 1 ... 15 Default: 1
+/* Intensity of the wavy water model. Range: 1 ... 15 Default: 7
 *******************************************************************/
-#define LUMI_WavyWaterIntensity 1
+#define LUMI_WavyWaterIntensity 7
 
 /*******************************
  * ^^ CONFIGURATIONS END ^^    *

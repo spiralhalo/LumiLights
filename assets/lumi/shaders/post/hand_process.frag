@@ -74,7 +74,7 @@ void main()
         // Workaround before shadow occlusion culling to make caves playable
         light.z *= l2_clampScale(0.03125, 0.04, light.y);
     #else
-        light.z = l2_lightmapRemap(light.y);
+        light.z = lightmapRemap(light.y);
     #endif
 
     pbr_shading(a, bloom_out, viewPos, light, normal, roughness, mat.y, mat.z, /*diffuse=*/true, true);
@@ -82,9 +82,9 @@ void main()
     vec3 misc = texture(u_misc, v_texcoord).xyz;
 
     #if GLINT_MODE == GLINT_MODE_GLINT_SHADER
-        a.rgb += hdr_gammaAdjust(noise_glint(misc.xy, bit_unpack(misc.z, 2)));
+        a.rgb += hdr_fromGamma(noise_glint(misc.xy, bit_unpack(misc.z, 2)));
     #else
-        a.rgb += hdr_gammaAdjust(texture_glint(u_glint, misc.xy, bit_unpack(misc.z, 2)));
+        a.rgb += hdr_fromGamma(texture_glint(u_glint, misc.xy, bit_unpack(misc.z, 2)));
     #endif
 
 

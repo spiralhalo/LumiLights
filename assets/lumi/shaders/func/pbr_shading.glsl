@@ -1,9 +1,9 @@
 #include frex:shaders/lib/math.glsl
 #include frex:shaders/api/world.glsl
+#include frex:shaders/api/player.glsl
 #include frex:shaders/api/view.glsl
 #include lumi:shaders/common/userconfig.glsl
 #include lumi:shaders/common/lighting.glsl
-#include lumi:shaders/common/lightsource.glsl
 #include lumi:shaders/lib/pbr.glsl
 #include lumi:shaders/lib/util.glsl
 #include lumi:shaders/lib/block_dir.glsl
@@ -16,6 +16,14 @@
  *  GNU Lesser General Public License version 3 as     *
  *  published by the Free Software Foundation, Inc.    *
  *******************************************************/
+
+const vec3 skylessDarkenedDir = vec3(0, -0.977358, 0.211593);
+const vec3 skylessDir = vec3(0, 0.977358, 0.211593);
+
+float lightmapRemap(float lightMapCoords)
+{
+    return hdr_fromGammaf(l2_clampScale(0.03125, 0.96875, lightMapCoords));
+}
 
 const float PBR_SPECULAR_BLOOM_ADD = 0.01;
 const float PBR_SPECULAR_ALPHA_ADD = 0.01;
@@ -62,8 +70,15 @@ struct light_data{
     float translucency;
 };
 
-vec3 hdr_calcBlockLight(inout light_data data, vec3 radiance)
+vec3 hdr_calcBlockLight(inout light_data data)
 {
+    float bl = smoothstep(0.03125, 0.96875, data.light.x);
+    float brightness = frx_viewBrightness();
+
+    bl *= pow(bl, 3.0 + brightness * 2.0) * (2.0 - brightness * 0.5); // lyfe hax
+
+    vec3 radiance = BLOCK_LIGHT_COLOR * BLOCK_LIGHT_STR * bl;
+
     bool useFancySpecular = data.diffuse;
     #if BLOCKLIGHT_SPECULAR_MODE == BLOCKLIGHT_SPECULAR_MODE_FAST
         useFancySpecular = useFancySpecular && data.metallic > 0.0;
@@ -90,7 +105,17 @@ vec3 hdr_calcHeldLight(inout light_data data)
 #if HANDHELD_LIGHT_RADIUS != 0
     if (frx_heldLight().w > 0) {
         vec3 handHeldDir = data.viewDir;
-        vec3 handHeldRadiance = l2_handHeldRadiance(data.viewPos);
+
+        vec4 heldLight = frx_heldLight();
+        float distSq = dot(data.viewPos, data.viewPos);
+        float hlRadSq = heldLight.w * HANDHELD_LIGHT_RADIUS * heldLight.w * HANDHELD_LIGHT_RADIUS;
+        float hl = l2_clampScale(hlRadSq, 0.0, distSq);
+        float brightness = frx_viewBrightness();
+
+        hl *= pow(hl, 3.0 + brightness * 2.0) * (2.0 - brightness * 0.5); // lyfe hax
+
+        vec3 handHeldRadiance = hdr_fromGamma(heldLight.rgb) * BLOCK_LIGHT_STR * hl;
+
         if (handHeldRadiance.x + handHeldRadiance.y + handHeldRadiance.z > 0) {
             vec3 adjustedNormal = data.diffuse ? data.normal : data.viewDir;
             return pbr_lightCalc(data.albedo, data.roughness, data.metallic, data.f0, handHeldRadiance, handHeldDir, data.viewDir, adjustedNormal, data.translucency, true, data.specularAccu);
@@ -106,20 +131,60 @@ vec3 hdr_calcSkyLight(inout light_data data)
         vec3 celestialRad = data.light.z * atmos_hdrCelestialRadiance() * (1. - frx_rainGradient()); // no direct sunlight during rain
         return pbr_lightCalc(data.albedo, data.roughness, data.metallic, data.f0, celestialRad, frx_skyLightVector(), data.viewDir, data.normal, data.translucency, data.diffuse, data.specularAccu);
     } else {
-        vec3 skylessRadiance = l2_skylessRadiance();
-        vec3 skylessDir = l2_skylessDir();
+
+    #ifdef TRUE_DARKNESS_END
+        if (frx_worldFlag(FRX_WORLD_IS_END)) return vec3(0.0);
+    #endif
+
+        vec3 color = SKYLESS_LIGHT_COLOR;
+
+        if (frx_worldFlag(FRX_WORLD_IS_NETHER)) {
+        #ifdef TRUE_DARKNESS_NETHER
+            return vec3(0.0);
+        #endif
+            color = NETHER_SKYLESS_LIGHT_COLOR;
+        }
+
+        float darkenedFactor = frx_isSkyDarkened() ? 0.6 : 1.0;
+        vec3 skylessRadiance = darkenedFactor * SKYLESS_LIGHT_STR * color;
         vec3 skylessLight = pbr_lightCalc(data.albedo, data.roughness, data.metallic, data.f0, skylessRadiance, skylessDir, data.viewDir, data.normal, data.translucency, data.diffuse, data.specularAccu);
+
         if (frx_isSkyDarkened()) {
-            vec3 skylessDarkenedDir = l2_skylessDarkenedDir();
             skylessLight += pbr_lightCalc(data.albedo, data.roughness, data.metallic, data.f0, skylessRadiance, skylessDarkenedDir, data.viewDir, data.normal, data.translucency, data.diffuse, data.specularAccu);
         }
+
         return skylessLight;
     }
 }
 
+vec3 emissiveRadiance(vec3 hdrFragColor, float emissivity)
+{
+    return hdrFragColor * emissivity * EMISSIVE_LIGHT_STR;
+}
+
+vec3 baseAmbientRadiance(vec3 fogRadiance)
+{
+    vec3 bar = vec3(0.0);
+
+    #ifndef TRUE_DARKNESS_DEFAULT
+        bar += vec3(BASE_AMBIENT_STR);
+    #endif
+
+    if (frx_playerHasNightVision()) {
+        bar += hdr_fromGamma(NIGHT_VISION_COLOR) * NIGHT_VISION_STR;
+    }
+
+    if (!frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT)) {
+        bar += fogRadiance * SKYLESS_AMBIENT_STR * 0.5;
+        bar += vec3(SKYLESS_AMBIENT_STR) * 0.5;
+    }
+
+    return bar;
+}
+
 void pbr_shading(inout vec4 a, inout float bloom, vec3 viewPos, vec3 light, vec3 normal, float roughness, float metallic, float pbr_f0, bool isDiffuse, bool translucent)
 {
-    vec3 albedo = hdr_gammaAdjust(a.rgb);
+    vec3 albedo = hdr_fromGamma(a.rgb);
     light_data data = light_data(
         isDiffuse,
         albedo,
@@ -135,15 +200,16 @@ void pbr_shading(inout vec4 a, inout float bloom, vec3 viewPos, vec3 light, vec3
     );
 
     vec3 held_light  = hdr_calcHeldLight(data);
-    vec3 block_light = hdr_calcBlockLight(data, l2_blockRadiance(data.light.x));
+    vec3 block_light = hdr_calcBlockLight(data);
     vec3 sky_light   = hdr_calcSkyLight(data) * CELESTIAL_LIGHT_MULTIPLIER;
 
-    vec3 ndRadiance = l2_baseAmbientRadiance();
-    ndRadiance += atmos_hdrSkyAmbientRadiance() * l2_lightmapRemap(data.light.y) * SKY_AMBIENT_MULTIPLIER;
-    ndRadiance += l2_emissiveRadiance(data.albedo, bloom);
-    
+    vec3 ndRadiance = baseAmbientRadiance(atmosv_hdrFogColorRadiance);
+
+    ndRadiance += atmos_hdrSkyAmbientRadiance() * lightmapRemap(data.light.y) * SKY_AMBIENT_MULTIPLIER;
+    ndRadiance += emissiveRadiance(data.albedo, bloom);
+
     vec3 nd_light = pbr_nonDirectional(data.albedo, data.metallic, ndRadiance);
-    
+
     a.rgb = held_light + block_light + sky_light + nd_light;
 
     float specularLuminance = frx_luminance(data.specularAccu);
