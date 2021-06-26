@@ -266,7 +266,7 @@ void atmos_generateAtmosphereModel()
 
 
     #ifdef POST_SHADER
-    // TODO: separate fog
+    /** FOG **/
     bool customOWFog =
         !frx_viewFlag(FRX_CAMERA_IN_FLUID)
         && frx_worldFlag(FRX_WORLD_IS_OVERWORLD)
@@ -284,6 +284,20 @@ void atmos_generateAtmosphereModel()
     }
 
     atmosv_hdrOWTwilightSkyRadiance = SKY_COLOR[TWGC];
+
+    // prevent custom overworld sky reflection in non-overworld dimension or when the sky mode is not Lumi
+    bool customOWSkyAndFallback =
+        frx_worldFlag(FRX_WORLD_IS_OVERWORLD)
+        && !frx_playerHasEffect(FRX_EFFECT_BLINDNESS);
+
+    #if SKY_MODE != SKY_MODE_LUMI
+        customOWSkyAndFallback = false;
+    #endif
+
+    if (!customOWSkyAndFallback) {
+        atmosv_hdrSkyColorRadiance = atmosv_hdrFogColorRadiance;
+    }
+
     #endif
 
 
