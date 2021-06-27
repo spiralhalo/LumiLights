@@ -24,7 +24,7 @@ void frx_startFragment(inout frx_FragmentData fragData)
     phong_specular = 500.0;
 #endif
 
-/* WATER RECOLOR */
+    /* WATER RECOLOR */
     fragData.vertexColor.rb *= fragData.vertexColor.rb;
 #ifdef LUMI_NoWaterTexture
     fragData.spriteColor.rgb = vec3(1.0);
