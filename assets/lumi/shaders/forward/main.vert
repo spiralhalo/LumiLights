@@ -57,7 +57,11 @@ void frx_writePipelineVertex(inout frx_VertexData data) {
 
 #ifdef VANILLA_LIGHTING
     pv_lightcoord = data.light;
+#ifdef VANILLA_AO_ENABLED
     pv_ao = data.aoShade;
+#else
+    pv_ao = 1.0;
+#endif
 #endif
 
     pv_diffuse = p_diffuseGui(data.normal);
