@@ -30,7 +30,7 @@ out vec4 fragColor;
 void main()
 {
     vec4 source_base = texture(u_source_color, v_texcoord);
-    vec3 source_albedo = texture(u_source_albedo, v_texcoord).rgb;
+    vec3 source_albedo = hdr_fromGamma(texture(u_source_albedo, v_texcoord).rgb);
     float source_roughness = texture(u_material_source, v_texcoord).x;
     rt_color_depth source_source = work_on_pair(source_base, source_albedo, u_source_depth, u_light_source, u_normal_source, u_normal_micro_source, u_material_source, u_source_color, u_source_combine, u_source_depth, u_normal_source, 1.0, true);
     #if REFLECTION_PROFILE != REFLECTION_PROFILE_NONE
