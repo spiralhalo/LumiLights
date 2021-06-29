@@ -71,10 +71,10 @@ void main()
     backColor.rgb = max(vec3(0.0), backColor.rgb - frontAlbedo.rgb * frontAlbedo.a);
     backColor.rgb /= (frontAlbedo.a < 1.0) ? (1.0 - frontAlbedo.a) : 1.0;
 
-    // shade back color
-    backColor.rgb = hdr_shaded_color(
-        v_texcoord, u_translucent_depth, u_light_translucent, u_normal_translucent, u_material_translucent, u_misc_translucent,
-        backColor, vec3(0.0), 1.0, true, 1.0, bloom1).rgb;
+    // fake shading for back color --todo: solid light takes priority if exists
+    vec2 transLight = texture(u_light_translucent, v_texcoord).xy;
+    float luminosity = hdr_fromGammaf(max(lightmapRemap(transLight.x), lightmapRemap(transLight.y) * atmosv_celestIntensity)) * 0.5;
+    backColor.rgb = hdr_fromGamma(backColor.rgb) * luminosity;
 
     float finalAlpha = max(frontColor.a, backColor.a);
     float excess = sqrt(finalAlpha - frontColor.a); //hacks
