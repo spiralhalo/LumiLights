@@ -67,6 +67,28 @@ void main()
         v_texcoord, u_translucent_depth, u_light_translucent, u_normal_translucent, u_material_translucent, u_misc_translucent,
         transAlbedoAlpha, vec3(0.0), 1.0, true, 1.0, bloom1);
 
+    vec4 transBlended = texture(u_translucent_color, v_texcoord);
+
+    // reverse forward gl_blend with foreground layer (lossy if clipping)
+    transBlended.rgb = max(vec3(0.0), transBlended.rgb - transAlbedoAlpha.rgb * transAlbedoAlpha.a);
+
+    if (transAlbedoAlpha.a > 0.0) {
+        transBlended.rgb /= (1.0 - transAlbedoAlpha.a);
+    }
+
+    // transBlended.a = max(0.0, transBlended.a - transAlbedoAlpha.a);
+    // end reverse gl_blend
+
+
+    // blend with shaded
+    vec4 transShaded = a1;
+
+    transBlended.rgb = hdr_fromGamma(transBlended.rgb);
+    transShaded.rgb = transBlended.rgb * (1.0 - transShaded.a) + transShaded.rgb * transShaded.a;
+    transShaded.a = max(transShaded.a, transBlended.a);
+
+    a1 = transShaded;
+
     vec4 a2 = ldr_shaded_particle(v_texcoord, u_particles_color, u_particles_depth, u_light_particles, bloom2);
 
     fragColor[0] = a1;
