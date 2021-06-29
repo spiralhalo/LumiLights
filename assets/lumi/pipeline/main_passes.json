@@ -122,7 +122,7 @@
                 samplerImages: [
                     "translucent_shaded",
                     "translucent_combine",
-                    "translucent_main",
+                    "prime_albedo_translucent",
                     "translucent_depth",
                     "light_translucent",
                     "normal_translucent",
