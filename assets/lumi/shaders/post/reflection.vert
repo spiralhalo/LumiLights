@@ -22,7 +22,7 @@ void main()
     basicFrameSetup();
     atmos_generateAtmosphereModel();
 
-#ifdef HALF_REFLECTION_RESOLUTION
+#if defined(HALF_REFLECTION_RESOLUTION) && REFLECTION_PROFILE != REFLECTION_PROFILE_NONE
     gl_Position.xy -= (gl_Position.xy - vec2(-1., -1.)) * .5;
 #endif
 

@@ -29,7 +29,7 @@ out vec4[2] fragColor;
 
 vec4 hdr_combine(sampler2D a, sampler2D matA, sampler2D b, vec2 uv)
 {
-#ifdef HALF_REFLECTION_RESOLUTION
+#if defined(HALF_REFLECTION_RESOLUTION) && REFLECTION_PROFILE != REFLECTION_PROFILE_NONE
     vec2 buv = (uv + (getRandomVec(u_blue_noise, uv, frxu_size).xy * 2. - 1.) * v_invSize * 2.) * 0.5;
 #else
     vec2 buv = uv;
@@ -37,7 +37,7 @@ vec4 hdr_combine(sampler2D a, sampler2D matA, sampler2D b, vec2 uv)
     vec4 a1 = texture(a, uv);
     vec4 b1 = texture(b, buv);
     bool filtered = b1.a == 0.0; // unmanaged
-#ifdef HALF_REFLECTION_RESOLUTION
+#if defined(HALF_REFLECTION_RESOLUTION) && REFLECTION_PROFILE != REFLECTION_PROFILE_NONE
     const float ROUGHNESS_TOLERANCE = 0.1;
     float a1r = texture(matA, uv).r;
     filtered = filtered || abs(b1.a - a1r) > ROUGHNESS_TOLERANCE; // roughness mismatch
