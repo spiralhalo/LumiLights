@@ -71,7 +71,7 @@ void try_insert(vec4 color, float depth)
 
 vec3 blend(vec3 dst, vec4 src)
 {
-    return (dst * (1.0 - src.a)) + src.rgb * src.a;
+    return (dst * (1.0 - src.a)) + src.rgb;
 }
 
 // arbitrary chosen depth threshold

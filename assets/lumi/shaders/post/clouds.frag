@@ -48,7 +48,7 @@ void doCloudStuff()
     #if CLOUD_RENDERING == CLOUD_RENDERING_FLAT
         vec4 cloudColor = flatCloud(worldVec, v_cloud_rotator, v_up);
 
-        cloudColor.rgb = ldr_tonemap3(cloudColor.rgb);
+        cloudColor.rgb = ldr_tonemap3(cloudColor.rgb) * cloudColor.a;
 
         fragColor[0] = mix(cloudColor, vec4(0.0), v_blindness);
         fragColor[1] = vec4(cloudColor.a > 0. ? 0.99999 : 1.0);
@@ -56,7 +56,7 @@ void doCloudStuff()
     #elif CLOUD_RENDERING == CLOUD_RENDERING_PARALLAX
         vec4 cloudColor = parallaxCloud(u_blue_noise, v_texcoord, worldVec);
 
-        cloudColor.rgb = ldr_tonemap3(cloudColor.rgb);
+        cloudColor.rgb = ldr_tonemap3(cloudColor.rgb) * cloudColor.a;
 
         fragColor[0] = mix(cloudColor, vec4(0.0), v_blindness);
         fragColor[1] = vec4(cloudColor.a > 0. ? 0.99999 : 1.0);
@@ -65,7 +65,7 @@ void doCloudStuff()
         float out_depth = 1.0;
         vec4 cloudColor = volumetricCloud(u_clouds_texture, u_solid_depth, u_translucent_depth, u_blue_noise, v_texcoord, worldVec, NUM_SAMPLE, out_depth);
 
-        cloudColor.rgb = ldr_tonemap3(cloudColor.rgb);
+        cloudColor.rgb = ldr_tonemap3(cloudColor.rgb) * cloudColor.a;
 
         fragColor[0] = mix(cloudColor, vec4(0.0), v_blindness);
         fragColor[1] = vec4(out_depth);
