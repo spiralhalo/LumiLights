@@ -57,7 +57,7 @@ frx_FragmentData frx_createPipelineFragment()
 void frx_writePipelineFragment(in frx_FragmentData fragData)
 {
     vec4 a = fragData.spriteColor * fragData.vertexColor;
-    
+ 
     // cutout_zero by default. remove if causing unwanted consequences.
     if (fragData.spriteColor.a == 0.0) {
         discard;
@@ -87,6 +87,8 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
         #endif
 
     } else {
+
+        a.rgb = hdr_fromGamma(a.rgb);
 
         bool maybeHand = frx_modelOriginType() == MODEL_ORIGIN_SCREEN;
         bool isParticle = (frx_renderTarget() == TARGET_PARTICLES);
