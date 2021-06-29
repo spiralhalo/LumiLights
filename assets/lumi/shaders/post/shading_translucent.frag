@@ -75,8 +75,9 @@ void main()
     // fake shading for back color
     vec2 fakeLight = texture(u_light_solid, v_texcoord).xy;
     fakeLight = fakeLight * 0.25 + texture(u_light_translucent, v_texcoord).xy * 0.75;
-    float luminosity = hdr_fromGammaf(max(lightmapRemap(fakeLight.x), lightmapRemap(fakeLight.y) * atmosv_celestIntensity)) * 0.5;
-    backColor.rgb = hdr_fromGamma(backColor.rgb) * luminosity;
+    float luminosity = hdr_fromGammaf(max(lightmapRemap(fakeLight.x), lightmapRemap(fakeLight.y) * atmosv_celestIntensity));
+    luminosity = luminosity * (1.0 - BASE_AMBIENT_STR) + BASE_AMBIENT_STR;
+    backColor.rgb = hdr_fromGamma(backColor.rgb) * luminosity * 0.5;
 
     float finalAlpha = max(frontColor.a, backColor.a);
     float excess = sqrt(finalAlpha - frontColor.a); //hacks
