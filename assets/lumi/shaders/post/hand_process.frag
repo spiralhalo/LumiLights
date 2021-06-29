@@ -66,8 +66,11 @@ void main()
             vec4 worldPos = frx_inverseViewMatrix() * vec4(viewPos, 1.0);
             vec4 shadowViewPos = frx_shadowViewMatrix() * vec4(worldPos.xyz / worldPos.w, 1.0);
         #endif
-        // PCF broke on hand possibly because it wasn't included in shadow pass?
-        float shadowFactor = simpleShadowFactor(u_shadow, shadowViewPos);  
+
+        float shadowFactor = calcShadowFactor(u_shadow, shadowViewPos);
+        // workaround for janky shadow on edges of things (hardly perfect, better than nothing)
+        shadowFactor = mix(shadowFactor, simpleShadowFactor(u_shadow, shadowViewPos), step(0.99, shadowFactor));
+
         light.z = shadowFactor;
         // Workaround before shadow occlusion culling to make caves playable
         light.z *= l2_clampScale(0.03125, 0.04, light.y);
