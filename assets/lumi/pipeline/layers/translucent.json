@@ -81,6 +81,28 @@
                 {name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
                 {name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
             ]
+        },  {
+            name: "prime_albedo_translucent",
+            lod: 0,
+            internalFormat: "RGB8",
+            pixelFormat: "RGB",
+            pixelDataType: "UNSIGNED_BYTE",
+            target: "TEXTURE_2D",
+            texParams: [
+                {name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
+                {name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
+            ]
+        },  {
+            name: "prime_alpha_translucent",
+            lod: 0,
+            internalFormat: "R8",
+            pixelFormat: "GL_RED",
+            pixelDataType: "UNSIGNED_BYTE",
+            target: "TEXTURE_2D",
+            texParams: [
+                {name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
+                {name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
+            ]
         }
     ],
 
@@ -100,6 +122,8 @@
                 {image: "normal_micro_translucent", clearColor: 0x00000000},
                 {image: "material_translucent", clearColor: 0x00000000},
                 {image: "misc_translucent", clearColor: 0x00000000},
+                {image: "prime_albedo_translucent", clearColor: 0x00000000},
+                {image: "prime_alpha_translucent", clearColor: 0x00000000},
             ]
         }
     ],
