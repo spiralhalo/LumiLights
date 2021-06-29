@@ -71,13 +71,17 @@ void main()
     backColor.rgb = max(vec3(0.0), backColor.rgb - frontAlbedo.rgb * frontAlbedo.a);
     backColor.rgb /= (frontAlbedo.a < 1.0) ? (1.0 - frontAlbedo.a) : 1.0;
 
-    // blend with shaded
-    backColor.rgb = hdr_fromGamma(backColor.rgb);
+    // shade back color
     backColor.rgb = hdr_shaded_color(
         v_texcoord, u_translucent_depth, u_light_translucent, u_normal_translucent, u_material_translucent, u_misc_translucent,
         backColor, vec3(0.0), 1.0, true, 1.0, bloom1).rgb;
-    frontColor.rgb = backColor.rgb * (1.0 - frontColor.a) + frontColor.rgb * frontColor.a;
-    frontColor.a = max(frontColor.a, backColor.a);
+
+    float finalAlpha = max(frontColor.a, backColor.a);
+    float excess = sqrt(finalAlpha - frontColor.a); //hacks
+
+    // blend front and back
+    frontColor.rgb = backColor.rgb * (1.0 - frontColor.a) + frontColor.rgb * frontColor.a * (1.0 - excess);
+    frontColor.a = finalAlpha;
 
     vec4 a1 = frontColor;
     vec4 a2 = ldr_shaded_particle(v_texcoord, u_particles_color, u_particles_depth, u_light_particles, bloom2);
