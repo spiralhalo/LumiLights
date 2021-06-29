@@ -78,6 +78,9 @@
                     "material_translucent",
                     "misc_translucent",
 
+                    "prime_albedo_translucent",
+                    "prime_alpha_translucent",
+
                     "particles",
                     "particles_depth",
                     "light_particles",

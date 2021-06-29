@@ -16,6 +16,9 @@ uniform sampler2D u_normal_translucent;
 uniform sampler2D u_material_translucent;
 uniform sampler2D u_misc_translucent;
 
+uniform sampler2D u_albedo_translucent;
+uniform sampler2D u_alpha_translucent;
+
 uniform sampler2D u_particles_color;
 uniform sampler2D u_particles_depth;
 uniform sampler2D u_light_particles;
@@ -56,7 +59,14 @@ void main()
     float bloom1;
     float bloom2;
 
-    vec4 a1 = hdr_shaded_color(v_texcoord, u_translucent_color, u_translucent_depth, u_light_translucent, u_normal_translucent, u_material_translucent, u_misc_translucent, vec3(0.0), 1.0, true, 1.0, bloom1);
+    vec4 transAlbedoAlpha = texture(u_albedo_translucent, v_texcoord);
+
+    transAlbedoAlpha.a = texture(u_alpha_translucent, v_texcoord).r;
+
+    vec4 a1 = hdr_shaded_color(
+        v_texcoord, u_translucent_depth, u_light_translucent, u_normal_translucent, u_material_translucent, u_misc_translucent,
+        transAlbedoAlpha, vec3(0.0), 1.0, true, 1.0, bloom1);
+
     vec4 a2 = ldr_shaded_particle(v_texcoord, u_particles_color, u_particles_depth, u_light_particles, bloom2);
 
     fragColor[0] = a1;
