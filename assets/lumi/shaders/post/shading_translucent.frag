@@ -84,6 +84,9 @@ void main()
     vec4 transShaded = a1;
 
     transBlended.rgb = hdr_fromGamma(transBlended.rgb);
+    transBlended.rgb = hdr_shaded_color(
+        v_texcoord, u_translucent_depth, u_light_translucent, u_normal_translucent, u_material_translucent, u_misc_translucent,
+        transBlended, vec3(0.0), 1.0, true, 1.0, bloom1).rgb;
     transShaded.rgb = transBlended.rgb * (1.0 - transShaded.a) + transShaded.rgb * transShaded.a;
     transShaded.a = max(transShaded.a, transBlended.a);
 
