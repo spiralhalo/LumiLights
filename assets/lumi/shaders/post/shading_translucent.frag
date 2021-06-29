@@ -59,39 +59,27 @@ void main()
     float bloom1;
     float bloom2;
 
-    vec4 transAlbedoAlpha = texture(u_albedo_translucent, v_texcoord);
+    vec4 frontAlbedo = vec4(texture(u_albedo_translucent, v_texcoord).rgb, texture(u_alpha_translucent, v_texcoord).r);
 
-    transAlbedoAlpha.a = texture(u_alpha_translucent, v_texcoord).r;
-
-    vec4 a1 = hdr_shaded_color(
+    vec4 frontColor = hdr_shaded_color(
         v_texcoord, u_translucent_depth, u_light_translucent, u_normal_translucent, u_material_translucent, u_misc_translucent,
-        transAlbedoAlpha, vec3(0.0), 1.0, true, 1.0, bloom1);
+        frontAlbedo, vec3(0.0), 1.0, true, 1.0, bloom1);
 
-    vec4 transBlended = texture(u_translucent_color, v_texcoord);
+    vec4 backColor = texture(u_translucent_color, v_texcoord);
 
     // reverse forward gl_blend with foreground layer (lossy if clipping)
-    transBlended.rgb = max(vec3(0.0), transBlended.rgb - transAlbedoAlpha.rgb * transAlbedoAlpha.a);
-
-    if (transAlbedoAlpha.a > 0.0) {
-        transBlended.rgb /= (1.0 - transAlbedoAlpha.a);
-    }
-
-    // transBlended.a = max(0.0, transBlended.a - transAlbedoAlpha.a);
-    // end reverse gl_blend
-
+    backColor.rgb = max(vec3(0.0), backColor.rgb - frontAlbedo.rgb * frontAlbedo.a);
+    backColor.rgb /= (frontAlbedo.a < 1.0) ? (1.0 - frontAlbedo.a) : 1.0;
 
     // blend with shaded
-    vec4 transShaded = a1;
-
-    transBlended.rgb = hdr_fromGamma(transBlended.rgb);
-    transBlended.rgb = hdr_shaded_color(
+    backColor.rgb = hdr_fromGamma(backColor.rgb);
+    backColor.rgb = hdr_shaded_color(
         v_texcoord, u_translucent_depth, u_light_translucent, u_normal_translucent, u_material_translucent, u_misc_translucent,
-        transBlended, vec3(0.0), 1.0, true, 1.0, bloom1).rgb;
-    transShaded.rgb = transBlended.rgb * (1.0 - transShaded.a) + transShaded.rgb * transShaded.a;
-    transShaded.a = max(transShaded.a, transBlended.a);
+        backColor, vec3(0.0), 1.0, true, 1.0, bloom1).rgb;
+    frontColor.rgb = backColor.rgb * (1.0 - frontColor.a) + frontColor.rgb * frontColor.a;
+    frontColor.a = max(frontColor.a, backColor.a);
 
-    a1 = transShaded;
-
+    vec4 a1 = frontColor;
     vec4 a2 = ldr_shaded_particle(v_texcoord, u_particles_color, u_particles_depth, u_light_particles, bloom2);
 
     fragColor[0] = a1;
