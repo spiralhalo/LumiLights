@@ -349,11 +349,11 @@ const float BIAS = 0.4;
 const float INTENSITY = 10.0;
 
 vec4 hdr_shaded_color(
-    vec2 uv,
-    sampler2D scolor, sampler2D sdepth, sampler2D slight, sampler2D snormal, sampler2D smaterial, sampler2D smisc,
-    vec3 emissionRadiance, float aoval, bool translucent, float translucentDepth, out float bloom_out)
+    vec2 uv, sampler2D sdepth, sampler2D slight, sampler2D snormal, sampler2D smaterial, sampler2D smisc,
+    vec4 albedo_alpha, vec3 emissionRadiance, float aoval, bool translucent, float translucentDepth, out float bloom_out)
 {
-    vec4  a       = texture(scolor, uv);
+    vec4  a = albedo_alpha;
+
     if (translucent && a.a == 0.) return vec4(0.);
     
     float depth   = texture(sdepth, uv).r;
@@ -417,13 +417,13 @@ vec4 hdr_shaded_color(
         // Workaround before shadow occlusion culling to make caves playable
         light.z *= l2_clampScale(0.03125, 0.04, light.y);
         // This can be improved with translucent layer shadow when it's available
-        if (maybeUnderwater) {
+        if (maybeUnderwater || frx_viewFlag(FRX_CAMERA_IN_WATER)) {
             light.z *= pow(light.y, 6.0);
         }
     #else
         light.z = hdr_fromGammaf(lightmapRemap(light.y));
         // Prevent full direct light underwater
-        if (maybeUnderwater) {
+        if (maybeUnderwater || frx_viewFlag(FRX_CAMERA_IN_WATER)) {
             light.z *= pow(light.y, 6.0);
         }
     #endif
@@ -473,7 +473,7 @@ vec4 hdr_shaded_color(
         a.rgb += hdr_fromGamma(texture_glint(u_glint, misc.xy, bit_unpack(misc.z, 2)));
     #endif
 
-    if (a.a != 0.0 && (translucent || translucentDepth >= depth) && depth != 1.0) {
+    if (a.a != 0.0 && depth != 1.0) {
         a = fog(lightmapRemap(light.y), a, viewPos, worldPos, bloom_out);
     }
 

@@ -16,6 +16,10 @@ uniform sampler2D u_normal_translucent;
 uniform sampler2D u_material_translucent;
 uniform sampler2D u_misc_translucent;
 
+uniform sampler2D u_albedo_translucent;
+uniform sampler2D u_alpha_translucent;
+uniform sampler2D u_light_solid;
+
 uniform sampler2D u_particles_color;
 uniform sampler2D u_particles_depth;
 uniform sampler2D u_light_particles;
@@ -52,10 +56,39 @@ vec4 ldr_shaded_particle(vec2 uv, sampler2D scolor, sampler2D sdepth, sampler2D 
 void main()
 {
     tileJitter = getRandomFloat(u_blue_noise, v_texcoord, frxu_size);
+
     float bloom1;
     float bloom2;
-    vec4 a1 = hdr_shaded_color(v_texcoord, u_translucent_color, u_translucent_depth, u_light_translucent, u_normal_translucent, u_material_translucent, u_misc_translucent, vec3(0.0), 1.0, true, 1.0, bloom1);
+
+    vec4 frontAlbedo = vec4(texture(u_albedo_translucent, v_texcoord).rgb, texture(u_alpha_translucent, v_texcoord).r);
+
+    vec4 frontColor = hdr_shaded_color(
+        v_texcoord, u_translucent_depth, u_light_translucent, u_normal_translucent, u_material_translucent, u_misc_translucent,
+        frontAlbedo, vec3(0.0), 1.0, true, 1.0, bloom1);
+
+    vec4 backColor = texture(u_translucent_color, v_texcoord);
+
+    // reverse forward gl_blend with foreground layer (lossy if clipping)
+    backColor.rgb = max(vec3(0.0), backColor.rgb - frontAlbedo.rgb * frontAlbedo.a);
+    backColor.rgb /= (frontAlbedo.a < 1.0) ? (1.0 - frontAlbedo.a) : 1.0;
+
+    // fake shading for back color
+    vec2 fakeLight = texture(u_light_solid, v_texcoord).xy;
+    fakeLight = fakeLight * 0.25 + texture(u_light_translucent, v_texcoord).xy * 0.75;
+    float luminosity = hdr_fromGammaf(max(lightmapRemap(fakeLight.x), lightmapRemap(fakeLight.y) * atmosv_celestIntensity));
+    luminosity = luminosity * (1.0 - BASE_AMBIENT_STR) + BASE_AMBIENT_STR;
+    backColor.rgb = hdr_fromGamma(backColor.rgb) * luminosity * 0.5;
+
+    float finalAlpha = max(frontColor.a, backColor.a);
+    float excess = sqrt(finalAlpha - frontColor.a); //hacks
+
+    // blend front and back
+    frontColor.rgb = backColor.rgb * (1.0 - frontColor.a) + frontColor.rgb * frontColor.a * (1.0 - excess);
+    frontColor.a = finalAlpha;
+
+    vec4 a1 = frontColor;
     vec4 a2 = ldr_shaded_particle(v_texcoord, u_particles_color, u_particles_depth, u_light_particles, bloom2);
+
     fragColor[0] = a1;
     fragColor[1] = a2;
     fragColor[2] = vec4(bloom1 + bloom2, 0.0, 0.0, 1.0);

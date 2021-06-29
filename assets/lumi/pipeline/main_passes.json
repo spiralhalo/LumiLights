@@ -78,6 +78,10 @@
                     "material_translucent",
                     "misc_translucent",
 
+                    "prime_albedo_translucent",
+                    "prime_alpha_translucent",
+                    "light_solid",
+
                     "particles",
                     "particles_depth",
                     "light_particles",
@@ -119,7 +123,7 @@
                 samplerImages: [
                     "translucent_shaded",
                     "translucent_combine",
-                    "translucent_main",
+                    "prime_albedo_translucent",
                     "translucent_depth",
                     "light_translucent",
                     "normal_translucent",

@@ -216,7 +216,12 @@ void pbr_shading(inout vec4 a, inout float bloom, vec3 viewPos, vec3 light, vec3
     float smoothness = 1 - data.roughness;
     bloom += specularLuminance * PBR_SPECULAR_BLOOM_ADD * smoothness * smoothness; 
     if (translucent && data.diffuse) {
-        a.a = a.a > 0.0 ? mix(a.a, 1.0, pow(1.0 - pbr_dot(data.viewDir, data.normal), 2.0)) : 0.0;
+        float opacityLerp = a.a > 0.0 ? pow(1.0 - pbr_dot(data.viewDir, data.normal), 5.0) : 0.0;
+        // make sure opacity interpolation doesn't make it excessively brighter.
+        float luminanceCompensation = (1.0 - a.a) * opacityLerp;
+        a.a += (1.0 - a.a) * opacityLerp;
+        a.rgb *= hdr_fromGammaf(1.0 - luminanceCompensation);
+
         a.a += specularLuminance * PBR_SPECULAR_ALPHA_ADD;
     }
 }

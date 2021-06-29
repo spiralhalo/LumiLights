@@ -37,9 +37,14 @@ void main()
     vec4 ssao = vec4(0.0, 0.0, 0.0, 1.0);
 #endif
     float translucentDepth = texture(u_translucent_depth, v_texcoord).r;
-    vec4 a1 = hdr_shaded_color(v_texcoord, u_solid_color, u_solid_depth, u_light_solid, u_normal_solid, u_material_solid, u_misc_solid, ssao.rgb, ssao.a, false, translucentDepth, bloom1);
+    vec4 solidAlbedoAlpha = texture(u_solid_color, v_texcoord);
+
+    vec4 a1 = hdr_shaded_color(
+        v_texcoord, u_solid_depth, u_light_solid, u_normal_solid, u_material_solid, u_misc_solid,
+        solidAlbedoAlpha, ssao.rgb, ssao.a, false, translucentDepth, bloom1);
+
     fragColor[0] = a1;
-    
+
     float translucentAlpha = texture(u_translucent_color, v_texcoord).a;
     float bloomTransmittance = translucentDepth < texture(u_solid_depth, v_texcoord).r
           ? (1.0 - translucentAlpha * translucentAlpha)
