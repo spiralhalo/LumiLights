@@ -417,13 +417,13 @@ vec4 hdr_shaded_color(
         // Workaround before shadow occlusion culling to make caves playable
         light.z *= l2_clampScale(0.03125, 0.04, light.y);
         // This can be improved with translucent layer shadow when it's available
-        if (maybeUnderwater) {
+        if (maybeUnderwater || frx_viewFlag(FRX_CAMERA_IN_WATER)) {
             light.z *= pow(light.y, 6.0);
         }
     #else
         light.z = hdr_fromGammaf(lightmapRemap(light.y));
         // Prevent full direct light underwater
-        if (maybeUnderwater) {
+        if (maybeUnderwater || frx_viewFlag(FRX_CAMERA_IN_WATER)) {
             light.z *= pow(light.y, 6.0);
         }
     #endif
