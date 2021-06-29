@@ -57,6 +57,11 @@ frx_FragmentData frx_createPipelineFragment()
 void frx_writePipelineFragment(in frx_FragmentData fragData)
 {
     vec4 a = fragData.spriteColor * fragData.vertexColor;
+    
+    // cutout_zero by default. remove if causing unwanted consequences.
+    if (fragData.spriteColor.a == 0.0) {
+        discard;
+    }
 
     if (pbr_f0 < 0.0) {
         pbr_f0 = 1./256. + frx_luminance(a.rgb) * 0.04;
@@ -87,7 +92,9 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
         bool isParticle = (frx_renderTarget() == TARGET_PARTICLES);
 
         vec3 normal = fragData.vertexNormal;
+
         pbr_normalMicro = pbr_normalMicro.x > 90. ? normal : pbr_normalMicro;
+
         float bloom = fragData.emissivity * a.a;
         float ao = fragData.ao ? (1.0 - fragData.aoShade) * a.a : 0.0;
         float normalizedBloom = (bloom - ao) * 0.5 + 0.5;
@@ -113,7 +120,7 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
         fragColor[4] = vec4(roughness, pbr_metallic, pbr_f0, 1.0);
         fragColor[5] = vec4(frx_normalizeMappedUV(frx_texcoord), bitFlags, 1.0);
     }
-    
+
     gl_FragDepth = gl_FragCoord.z;
     fragColor[0] = a;
 }
