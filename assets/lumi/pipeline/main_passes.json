@@ -80,6 +80,7 @@
 
                     "prime_albedo_translucent",
                     "prime_alpha_translucent",
+                    "light_solid",
 
                     "particles",
                     "particles_depth",

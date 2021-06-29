@@ -18,6 +18,7 @@ uniform sampler2D u_misc_translucent;
 
 uniform sampler2D u_albedo_translucent;
 uniform sampler2D u_alpha_translucent;
+uniform sampler2D u_light_solid;
 
 uniform sampler2D u_particles_color;
 uniform sampler2D u_particles_depth;
@@ -71,9 +72,10 @@ void main()
     backColor.rgb = max(vec3(0.0), backColor.rgb - frontAlbedo.rgb * frontAlbedo.a);
     backColor.rgb /= (frontAlbedo.a < 1.0) ? (1.0 - frontAlbedo.a) : 1.0;
 
-    // fake shading for back color --todo: solid light takes priority if exists
-    vec2 transLight = texture(u_light_translucent, v_texcoord).xy;
-    float luminosity = hdr_fromGammaf(max(lightmapRemap(transLight.x), lightmapRemap(transLight.y) * atmosv_celestIntensity)) * 0.5;
+    // fake shading for back color
+    vec2 fakeLight = texture(u_light_solid, v_texcoord).xy;
+    fakeLight = fakeLight * 0.25 + texture(u_light_translucent, v_texcoord).xy * 0.75;
+    float luminosity = hdr_fromGammaf(max(lightmapRemap(fakeLight.x), lightmapRemap(fakeLight.y) * atmosv_celestIntensity)) * 0.5;
     backColor.rgb = hdr_fromGamma(backColor.rgb) * luminosity;
 
     float finalAlpha = max(frontColor.a, backColor.a);
