@@ -257,9 +257,19 @@ float volumetric_caustics_beam(vec3 worldPos)
     while (traveled < maxDist && steps < maxSteps) {
         // assume ocean only
         float y = max(0., beamL - abs(SEA_LEVEL - ray.y)) * (1. / beamL);
-        float e = caustics(ray);
-        e = pow(e, 15.0) * y;
-        e *= traveled / range;
+        float e = 0.0;
+
+        if (y > 0.0) {
+            e = caustics(ray);
+            e = pow(e, 15.0) * y;
+            e *= traveled / range;
+
+        #ifdef SHADOW_MAP_PRESENT
+            vec4 ray_shadow = (frx_shadowViewMatrix() * vec4(ray - frx_cameraPos(), 1.0));
+            e *= simpleShadowFactor(u_shadow, ray_shadow);
+        #endif
+        }
+
         power += e;
         ray += march;
         traveled += sample;
