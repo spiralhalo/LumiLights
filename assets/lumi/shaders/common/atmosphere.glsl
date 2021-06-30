@@ -281,10 +281,13 @@ void atmos_generateAtmosphereModel()
 
         if (frx_viewFlag(FRX_CAMERA_IN_WATER)) {
             vanillaFog.rb *= vanillaFog.rb;
+            // low saturation water fog
+            atmosv_hdrFogColorRadiance = vanillaFog;
+        } else {
+            // high saturation vanilla fog
+            atmosv_hdrFogColorRadiance = hdr_fromGamma(mix(vanillaFog / l2_max3(vanillaFog), vanillaFog, 0.75));
         }
 
-        // high saturation vanilla fog
-        atmosv_hdrFogColorRadiance = hdr_fromGamma(mix(vanillaFog / l2_max3(vanillaFog), vanillaFog, 0.75));
         atmosv_hdrCaveFogRadiance = vec3(0.0);
         atmosv_hdrOWTwilightFogFactor = 0.0;
     }
