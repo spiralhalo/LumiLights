@@ -219,13 +219,16 @@ vec4 fog(float skyLight, vec4 a, vec3 viewPos, vec3 worldPos, inout float bloom)
 
 float caustics(vec3 worldPos)
 {
-    if (!frx_worldFlag(FRX_WORLD_IS_OVERWORLD)) return 0.0;
     // turns out, to get accurate coords, a global y-coordinate of water surface is required :S
-    // 64 is used for the time being..
+    // Sea level is used for the time being..
     // TODO: might need to prevent division by 0 ?
     float animator = frx_renderSeconds() * 0.5;
-    float animatonator = frx_renderSeconds() * 0.2;
-    float e = cellular2x2x2(vec3(worldPos.xz + (64.0-worldPos.y) * frx_skyLightVector().xz + animatonator / frx_skyLightVector().y, animator)).x;
+    vec2 animatonator = frx_renderSeconds() * vec2(0.5, -1.0);
+    vec3 pos = vec3(worldPos.xz + animatonator, animator);
+
+    pos.xy += (SEA_LEVEL - worldPos.y) * frx_skyLightVector().xz / frx_skyLightVector().y;
+
+    float e = cellular2x2x2(pos).x;
 
     e = smoothstep(-1.0, 1.0, e);
 
@@ -237,6 +240,7 @@ float volumetric_caustics_beam(vec3 worldPos)
     const float sample = 0.4;
     const int maxSteps = 10;
     const float range = 10.0;
+    const float beamL = 3.;
 
     vec3 ray = frx_cameraPos();
     vec3 direction = worldPos - frx_cameraPos();
@@ -252,7 +256,7 @@ float volumetric_caustics_beam(vec3 worldPos)
 
     while (traveled < maxDist && steps < maxSteps) {
         // assume ocean only
-        float y = max(0., 4. - abs(SEA_LEVEL - ray.y)) * (1./4.);
+        float y = max(0., beamL - abs(SEA_LEVEL - ray.y)) * (1. / beamL);
         float e = caustics(ray);
         e = pow(e, 15.0) * y;
         e *= traveled / range;
@@ -436,7 +440,7 @@ vec4 hdr_shaded_color(
     #endif
 
     #if CAUSTICS_MODE == CAUSTICS_MODE_TEXTURE
-        if (maybeUnderwater) {
+        if (maybeUnderwater && frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT)) {
             float e = caustics(worldPos);
             e = pow(e, 15.0);
             e *= smoothstep(0.0, 1.0, light.y);
@@ -483,11 +487,11 @@ vec4 hdr_shaded_color(
         a = fog(light.y, a, viewPos, worldPos, bloom_out);
     }
 
-    #if CAUSTICS_MODE == CAUSTICS_MODE_TEXTURE
-        if (frx_viewFlag(FRX_CAMERA_IN_WATER) && translucentDepth >= depth) {
-            a.rgb += atmos_hdrCelestialRadiance() * volumetric_caustics_beam(worldPos);
-        }
-    #endif
+#if CAUSTICS_MODE == CAUSTICS_MODE_TEXTURE
+    if (frx_viewFlag(FRX_CAMERA_IN_WATER) && translucentDepth >= depth && frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT)) {
+        a.rgb += atmos_hdrCelestialRadiance() * volumetric_caustics_beam(worldPos);
+    }
+#endif
 
     return a;
 }
