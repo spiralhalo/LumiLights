@@ -256,7 +256,7 @@ float volumetric_caustics_beam(vec3 worldPos)
 
     while (traveled < maxDist && steps < maxSteps) {
         // assume ocean only
-        float y = max(0., beamL - abs(SEA_LEVEL - ray.y)) * (1. / beamL);
+        float y = l2_clampScale(SEA_LEVEL - beamL, SEA_LEVEL, ray.y);
         float e = 0.0;
 
         if (y > 0.0) {
