@@ -85,7 +85,7 @@ vec4 calcSSAO(
                     occlusion += attenuation * value;
                 } else {
                     float attenuation = clamp(1.0 - sampleDir_view2 / attenuation2_rad2, 0.0, 1.0);
-                    vec3 bloomColor = texture(scolor, sample_uv).rgb;
+                    vec3 bloomColor = hdr_fromGamma(texture(scolor, sample_uv).rgb);
 
                     bloom *= attenuation;
                     emission += bloomColor * bloom;
