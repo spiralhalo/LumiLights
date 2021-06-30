@@ -416,7 +416,7 @@ vec4 hdr_shaded_color(
 
     light.y = lightmapRemap(light.y);
 
-    #if defined(SHADOW_MAP_PRESENT)
+    #ifdef SHADOW_MAP_PRESENT
         #ifdef TAA_ENABLED
             vec2 uvJitter = taa_jitter(v_invSize);
             vec4 unjitteredModelPos = frx_inverseViewProjectionMatrix() * vec4(2.0 * uv - uvJitter - 1.0, 2.0 * depth - 1.0, 1.0);
@@ -432,21 +432,29 @@ vec4 hdr_shaded_color(
         light.z = shadowFactor;
         // Workaround before shadow occlusion culling to make caves playable
         light.z *= l2_clampScale(0.03125, 0.04, light.y);
-        if (maybeUnderwater || frx_viewFlag(FRX_CAMERA_IN_WATER)) {
-            light.z *= hdr_fromGammaf(light.y);
-        }
     #else
         light.z = hdr_fromGammaf(light.y);
     #endif
 
+    float causticLight = 0.0;
+
     #if CAUSTICS_MODE == CAUSTICS_MODE_TEXTURE
         if (maybeUnderwater && frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT)) {
-            float e = caustics(worldPos);
-            e = pow(e, 15.0);
-            e *= smoothstep(0.0, 1.0, light.y);
-            light.z += e;
+            causticLight = caustics(worldPos);
+            causticLight = pow(causticLight, 15.0);
+            causticLight *= smoothstep(0.0, 1.0, light.y);
         }
     #endif
+
+    #ifdef SHADOW_MAP_PRESENT
+        causticLight *= light.z;
+
+        if (maybeUnderwater || frx_viewFlag(FRX_CAMERA_IN_WATER)) {
+            light.z *= hdr_fromGammaf(light.y);
+        }
+    #endif
+
+    light.z += causticLight;
 
     bloom_out = max(0.0, bloom_raw);
     #ifdef RAIN_PUDDLES
