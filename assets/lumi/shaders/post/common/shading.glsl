@@ -410,6 +410,8 @@ vec4 hdr_shaded_color(
     float mathurt   = bit_unpack(misc.z, 1);
     // return vec4(coords_view(uv, frx_inverseProjectionMatrix(), depth), 1.0);
 
+    light.y = lightmapRemap(light.y);
+
     #if defined(SHADOW_MAP_PRESENT)
         #ifdef TAA_ENABLED
             vec2 uvJitter = taa_jitter(v_invSize);
@@ -426,23 +428,18 @@ vec4 hdr_shaded_color(
         light.z = shadowFactor;
         // Workaround before shadow occlusion culling to make caves playable
         light.z *= l2_clampScale(0.03125, 0.04, light.y);
-        // This can be improved with translucent layer shadow when it's available
         if (maybeUnderwater || frx_viewFlag(FRX_CAMERA_IN_WATER)) {
-            light.z *= pow(light.y, 6.0);
+            light.z *= hdr_fromGammaf(light.y);
         }
     #else
-        light.z = hdr_fromGammaf(lightmapRemap(light.y));
-        // Prevent full direct light underwater
-        if (maybeUnderwater || frx_viewFlag(FRX_CAMERA_IN_WATER)) {
-            light.z *= pow(light.y, 6.0);
-        }
+        light.z = hdr_fromGammaf(light.y);
     #endif
 
     #if CAUSTICS_MODE == CAUSTICS_MODE_TEXTURE
         if (maybeUnderwater) {
             float e = caustics(worldPos);
             e = pow(e, 15.0);
-            e *= pow(light.y, 2.0);
+            e *= smoothstep(0.0, 1.0, light.y);
             light.z += e;
         }
     #endif
@@ -483,7 +480,7 @@ vec4 hdr_shaded_color(
     #endif
 
     if (a.a != 0.0 && depth != 1.0) {
-        a = fog(lightmapRemap(light.y), a, viewPos, worldPos, bloom_out);
+        a = fog(light.y, a, viewPos, worldPos, bloom_out);
     }
 
     #if CAUSTICS_MODE == CAUSTICS_MODE_TEXTURE
