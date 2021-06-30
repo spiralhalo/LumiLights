@@ -234,35 +234,35 @@ float caustics(vec3 worldPos)
 
 float volumetric_caustics_beam(vec3 worldPos)
 {
-    // const float stepSize = 0.125;
-    // const float maxDist = 16.0;
-    const float stepSize = 0.25;
-    const float maxDist = 8.0;
-    const float stepLimit = maxDist / stepSize;
-    const int iStepLimit = int(stepLimit);
+    const float sample = 0.4;
+    const int maxSteps = 10;
+    const float range = 10.0;
 
-    vec3 unitMarch = normalize(frx_cameraPos()-worldPos);
-    vec3 stepMarch = unitMarch * stepSize;
-    vec3 ray_world = worldPos + stepMarch * tileJitter;
+    vec3 ray = frx_cameraPos();
+    vec3 direction = worldPos - frx_cameraPos();
+    vec3 unit = normalize(direction);
+    vec3 march = unit * sample;
+    float maxDist = length(direction);
 
-    float distToCamera = distance(worldPos, frx_cameraPos());
-    int maxSteps = min(iStepLimit, int(distToCamera / stepSize));
+    ray += tileJitter * march + unit * 4.0;
 
-    if (distToCamera >= maxDist) {
-        ray_world += unitMarch * (distToCamera - maxDist);
-    }
-
-    int stepCount = 0;
     float power = 0.0;
-    while (stepCount < maxSteps) {
-        float e = caustics(worldPos);
-        e = pow(e, 15.);
+    float traveled = tileJitter * sample + 4.0;
+    int steps = 0;
+
+    while (traveled < maxDist && steps < maxSteps) {
+        // assume ocean only
+        float y = max(0., 4. - abs(SEA_LEVEL - ray.y)) * (1./4.);
+        float e = caustics(ray);
+        e = pow(e, 15.0) * y;
+        e *= traveled / range;
         power += e;
-        stepCount ++;
-        ray_world += stepMarch;
+        ray += march;
+        traveled += sample;
+        steps ++;
     }
 
-    return max(0.0, float(power) / stepLimit);
+    return power * sample / float(maxSteps);
 }
 
 void custom_sky(in vec3 viewPos, in float blindnessFactor, in bool maybeUnderwater, inout vec4 a, inout float bloom_out)
@@ -488,7 +488,7 @@ vec4 hdr_shaded_color(
 
     #if CAUSTICS_MODE == CAUSTICS_MODE_TEXTURE
         if (frx_viewFlag(FRX_CAMERA_IN_WATER) && translucentDepth >= depth) {
-            a.rgb += light.y * light.y * 0.1 * atmos_hdrCelestialRadiance() * volumetric_caustics_beam(worldPos);
+            a.rgb += atmos_hdrCelestialRadiance() * volumetric_caustics_beam(worldPos);
         }
     #endif
 
