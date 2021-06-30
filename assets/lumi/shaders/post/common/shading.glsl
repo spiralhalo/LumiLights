@@ -208,7 +208,7 @@ vec4 fog(float skyLight, vec4 a, vec3 viewPos, vec3 worldPos, inout float bloom)
         pfCave *= min(1.0, distToCamera / FOG_FAR) * darkness;
         pfCave *= pfCave;
         vec3 caveFog = atmos_hdrCaveFogRadiance() * pfCave;
-        return vec4(a.rgb + fogColor.rgb * fogFactor + caveFog, a.a);
+        return vec4(a.rgb + fogColor.rgb * fogFactor + caveFog, a.a + max(0.0, 1.0 - a.a) * fogFactor);
     }
 
     // no need to reduce bloom with additive blending
