@@ -223,7 +223,13 @@ float caustics(vec3 worldPos)
     // turns out, to get accurate coords, a global y-coordinate of water surface is required :S
     // 64 is used for the time being..
     // TODO: might need to prevent division by 0 ?
-    return 1.0 - abs(cellular2x2x2(vec3(worldPos.xz + (64.0-worldPos.y) * frx_skyLightVector().xz / frx_skyLightVector().y, frx_renderSeconds())).x);
+    float animator = frx_renderSeconds() * 0.5;
+    float animatonator = frx_renderSeconds() * 0.2;
+    float e = cellular2x2x2(vec3(worldPos.xz + (64.0-worldPos.y) * frx_skyLightVector().xz + animatonator / frx_skyLightVector().y, animator)).x;
+
+    e = smoothstep(-1.0, 1.0, e);
+
+    return e;
 }
 
 float volumetric_caustics_beam(vec3 worldPos)
@@ -237,7 +243,7 @@ float volumetric_caustics_beam(vec3 worldPos)
 
     vec3 unitMarch = normalize(frx_cameraPos()-worldPos);
     vec3 stepMarch = unitMarch * stepSize;
-    vec3 ray_world = worldPos;
+    vec3 ray_world = worldPos + stepMarch * tileJitter;
 
     float distToCamera = distance(worldPos, frx_cameraPos());
     int maxSteps = min(iStepLimit, int(distToCamera / stepSize));
@@ -249,8 +255,9 @@ float volumetric_caustics_beam(vec3 worldPos)
     int stepCount = 0;
     float power = 0.0;
     while (stepCount < maxSteps) {
-        power += smoothstep(0.3, 0.1, caustics(ray_world));
-        // power += 1.0-1.5*caustics(ray_world);
+        float e = caustics(worldPos);
+        e = pow(e, 15.);
+        power += e;
         stepCount ++;
         ray_world += stepMarch;
     }
@@ -433,11 +440,10 @@ vec4 hdr_shaded_color(
 
     #if CAUSTICS_MODE == CAUSTICS_MODE_TEXTURE
         if (maybeUnderwater) {
-            #if defined(SHADOW_MAP_PRESENT)
-                light.z = mix(light.z, 0.0, min(1.0, 0.25 * caustics(worldPos)));
-            #else
-                light.z = mix(1.0, light.z, (1.0-light.z) * min(1.0, 1.5 * caustics(worldPos)));
-            #endif
+            float e = caustics(worldPos);
+            e = pow(e, 15.0);
+            e *= pow(light.y, 2.0);
+            light.z += e;
         }
     #endif
 
