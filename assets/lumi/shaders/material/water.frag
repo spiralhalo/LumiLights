@@ -15,6 +15,7 @@ void frx_startFragment(inout frx_FragmentData fragData)
     /* PBR PARAMS */
     pbr_f0 = 0.02;
     pbr_roughness = 0.05;
+    pbr_isWater = true;
 #else
     /* HACK */
     fragData.light.y += 0.077 * smoothstep(1.0, 0.99, fragData.vertexNormal.y);

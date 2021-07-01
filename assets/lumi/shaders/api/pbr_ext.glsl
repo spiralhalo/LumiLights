@@ -3,7 +3,7 @@
  *******************************************************/
 
 #define LUMI_PBRX
-#define LUMI_PBR_API 3
+#define LUMI_PBR_API 4
 
 #ifdef VERTEX_SHADER
 
@@ -30,5 +30,6 @@ float pbr_roughness = 1.0;
 float pbr_metallic = 0.0;
 float pbr_f0 = -1.0;
 vec3  pbr_normalMicro = vec3(99., 99., 99.);
+bool  pbr_isWater = false;
 
 #endif

@@ -111,7 +111,8 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
         // NB: diffuse is forced true for hand
         float roughness = (fragData.diffuse || maybeHand) ? 0.01 + clamp(pbr_roughness, 0.0, 1.0) * 0.98 : 1.0;
 
-        float bitFlags = bit_pack(frx_matFlash() ? 1. : 0., frx_matHurt() ? 1. : 0., frx_matGlint(), 0., 0., 0., 0., 0.);
+        // put water flag last because it makes the material buffer looks blue :D easier to debug
+        float bitFlags = bit_pack(frx_matFlash() ? 1. : 0., frx_matHurt() ? 1. : 0., frx_matGlint(), 0., 0., 0., 0., pbr_isWater ? 1. : 0.);
 
         // PERF: view normal, more useful than world normal
         fragColor[1] = vec4(fragData.light.xy, (isParticle || maybeHand) ? bloom : normalizedBloom, 1.0);
