@@ -281,7 +281,9 @@ void atmos_generateAtmosphereModel()
 
         if (frx_viewFlag(FRX_CAMERA_IN_WATER)) {
             vanillaFog.rb *= vanillaFog.rb;
-            // low saturation water fog
+            // special handling, lower saturaion ocean, higher saturation swamp
+            vanillaFog = pow(vanillaFog, vec3(1.0 + vanillaFog.g));
+
             atmosv_hdrFogColorRadiance = vanillaFog;
         } else {
             // high saturation vanilla fog
