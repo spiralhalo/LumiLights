@@ -64,7 +64,7 @@ void main()
 
     vec4 frontColor = hdr_shaded_color(
         v_texcoord, u_translucent_depth, u_light_translucent, u_normal_translucent, u_material_translucent, u_misc_translucent,
-        frontAlbedo, vec3(0.0), 1.0, true, 1.0, bloom1);
+        frontAlbedo, vec3(0.0), 1.0, true, true, 1.0, bloom1);
 
     vec4 backColor = texture(u_translucent_color, v_texcoord);
 

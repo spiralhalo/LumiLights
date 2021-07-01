@@ -385,17 +385,17 @@ const float INTENSITY = 10.0;
 
 vec4 hdr_shaded_color(
     vec2 uv, sampler2D sdepth, sampler2D slight, sampler2D snormal, sampler2D smaterial, sampler2D smisc,
-    vec4 albedo_alpha, vec3 emissionRadiance, float aoval, bool translucent, float translucentDepth, out float bloom_out)
+    vec4 albedo_alpha, vec3 emissionRadiance, float aoval, bool translucent, bool translucentIsWater, float translucentDepth, out float bloom_out)
 {
     vec4  a = albedo_alpha;
 
     if (translucent && a.a == 0.) return vec4(0.);
-    
+
     float depth   = texture(sdepth, uv).r;
     vec3  viewPos = coords_view(uv, frx_inverseProjectionMatrix(), depth);
     vec3  worldPos  = frx_cameraPos() + (frx_inverseViewMatrix() * vec4(viewPos, 1.0)).xyz;
     bool maybeUnderwater = (!translucent && translucentDepth >= depth && frx_viewFlag(FRX_CAMERA_IN_WATER))
-        || (translucentDepth < depth && !frx_viewFlag(FRX_CAMERA_IN_WATER));
+        || (translucentIsWater && translucentDepth < depth && !frx_viewFlag(FRX_CAMERA_IN_WATER));
 
     if (depth == 1.0 && !translucent) {
         // the sky

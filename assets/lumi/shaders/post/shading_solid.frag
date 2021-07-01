@@ -18,6 +18,7 @@ uniform sampler2D u_misc_solid;
 
 uniform sampler2D u_translucent_depth;
 uniform sampler2D u_translucent_color;
+uniform sampler2D u_misc_translucent;
 
 uniform sampler2D u_ao;
 
@@ -39,9 +40,11 @@ void main()
     float translucentDepth = texture(u_translucent_depth, v_texcoord).r;
     vec4 solidAlbedoAlpha = texture(u_solid_color, v_texcoord);
 
+    bool translucentIsWater = bit_unpack(texture(u_misc_translucent, v_texcoord).z, 7) == 1.;
+
     vec4 a1 = hdr_shaded_color(
         v_texcoord, u_solid_depth, u_light_solid, u_normal_solid, u_material_solid, u_misc_solid,
-        solidAlbedoAlpha, ssao.rgb, ssao.a, false, translucentDepth, bloom1);
+        solidAlbedoAlpha, ssao.rgb, ssao.a, false, translucentIsWater, translucentDepth, bloom1);
 
     fragColor[0] = a1;
 

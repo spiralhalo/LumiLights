@@ -57,6 +57,7 @@
 
                     "translucent_depth",
                     "translucent_main",
+                    "misc_translucent",
 
                     "ao_filtered",
                     "minecraft:textures/misc/enchanted_item_glint.png",
