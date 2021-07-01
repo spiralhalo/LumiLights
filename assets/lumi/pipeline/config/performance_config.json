@@ -61,6 +61,12 @@
           nameKey: "config.lumi_lights.value.cloud_rendering",
           descriptionKey: "config.lumi_lights.help.cloud_rendering"
         },
+        water_caustics: {
+          default: true,
+          prefix: "water_caustics_",
+          nameKey: "config.lumi_lights.value.water_caustics",
+          descriptionKey: "config.lumi_lights.help.water_caustics"
+        },
         volumetric_fog: {
             default: true,
             nameKey: "config.lumi_lights.value.volumetric_fog",

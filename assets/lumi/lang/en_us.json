@@ -60,6 +60,8 @@
     "config.lumi_lights.help.cloud_reflection": "Renders the cloud once more as a reflection",
     "config.lumi_lights.value.cloud_rendering": "Cloud rendering mode",
     "config.lumi_lights.help.cloud_rendering": "Cloud rendering mode;Volumetric cloud affects performance.",
+    "config.lumi_lights.value.water_caustics": "Water caustics effect",
+    "config.lumi_lights.help.water_caustics": "Emulate water caustics",
     "config.lumi_lights.value.volumetric_fog": "Volumetric fog",
     "config.lumi_lights.help.volumetric_fog": "Apply shadow volume to fog",
 
@@ -120,8 +122,6 @@
     "config.lumi_lights.help.tone_profile": "Experimental lighting and contrast profiles that;change the overall tone of the render result.",
     "config.lumi_lights.value.rain_puddles": "Rain puddles effect",
     "config.lumi_lights.help.rain_puddles": "Wet ground during rain",
-    "config.lumi_lights.value.caustics_mode": "Water caustics mode",
-    "config.lumi_lights.help.caustics_mode": "Emulate water caustics",
     "config.lumi_lights.value.cloud_time": "Cloud movement sync",
     "config.lumi_lights.help.cloud_time": "Whether volumetric cloud synchronizes with client;time or in-game world time.",
     "config.lumi_lights.value.overlay_debug": "Overlay debug",

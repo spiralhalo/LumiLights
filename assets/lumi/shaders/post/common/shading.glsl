@@ -410,7 +410,7 @@ vec4 hdr_shaded_color(
         // the sky
         if (v_blindness == 1.0) return vec4(0.0);
         custom_sky(viewPos, 1.0 - v_blindness, maybeUnderwater, a, bloom_out);
-    #if CAUSTICS_MODE == CAUSTICS_MODE_TEXTURE
+    #ifdef WATER_CAUSTICS
         a = underwaterLightRays(a, worldPos, translucentDepth, depth);
     #endif
         // mark as managed draw, vanilla sky is an exception
@@ -474,7 +474,7 @@ vec4 hdr_shaded_color(
 
     float causticLight = 0.0;
 
-    #if CAUSTICS_MODE == CAUSTICS_MODE_TEXTURE
+    #ifdef WATER_CAUSTICS
         if (maybeUnderwater && frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT)) {
             causticLight = caustics(worldPos);
             causticLight = pow(causticLight, 15.0);
@@ -531,7 +531,7 @@ vec4 hdr_shaded_color(
         a = fog(light.y, a, viewPos, worldPos, bloom_out);
     }
 
-#if CAUSTICS_MODE == CAUSTICS_MODE_TEXTURE
+#ifdef WATER_CAUSTICS
     a = underwaterLightRays(a, worldPos, translucentDepth, depth);
 #endif
 

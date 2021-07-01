@@ -41,7 +41,7 @@ void main()
         * 0.5;
 
     if (frx_viewFlag(FRX_CAMERA_IN_WATER)) {
-        #if CAUSTICS_MODE == CAUSTICS_MODE_TEXTURE
+        #ifdef WATER_CAUSTICS
             v_godray_intensity = 0.0;
         #else
             v_godray_intensity *= 0.5;
