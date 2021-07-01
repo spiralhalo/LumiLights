@@ -235,40 +235,50 @@ float caustics(vec3 worldPos)
     return e;
 }
 
-float volumetric_caustics_beam(vec3 worldPos)
+vec4 underwaterLightRays(vec4 a, vec3 worldPos, float translucentDepth, float depth)
 {
-    const float sample = 0.4;
+    bool doUnderwaterRays = frx_viewFlag(FRX_CAMERA_IN_WATER) && translucentDepth >= depth && frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT);
+
+    vec3 direction = worldPos - frx_cameraPos();
+    vec3 unit = normalize(direction);
+
+    float scatter = dot(unit, frx_skyLightVector());
+
+    scatter = 0.5 - abs(scatter - 0.5);
+    scatter *= 2.0;
+
+    if (!doUnderwaterRays || scatter <= 0.0) {
+        return a;
+    }
+
+    const float sample = 2.0;
     const int maxSteps = 10;
     const float range = 10.0;
     const float beamL = 3.;
+    const float basePower = 0.25;
+    const float deadRadius = 4.0;
 
     vec3 ray = frx_cameraPos();
-    vec3 direction = worldPos - frx_cameraPos();
-    vec3 unit = normalize(direction);
     vec3 march = unit * sample;
     float maxDist = length(direction);
 
-    ray += tileJitter * march + unit * 4.0;
+    ray += tileJitter * march + unit * deadRadius;
 
     float power = 0.0;
-    float traveled = tileJitter * sample + 4.0;
+    float traveled = tileJitter * sample + deadRadius;
     int steps = 0;
 
     while (traveled < maxDist && steps < maxSteps) {
-        // assume ocean only
-        float y = l2_clampScale(SEA_LEVEL - beamL, SEA_LEVEL, ray.y);
         float e = 0.0;
 
-        if (y > 0.0) {
-            e = caustics(ray);
-            e = pow(e, 15.0) * y;
-            e *= traveled / range;
+        e = caustics(ray);
+        e = pow(e, 30.0);
+        // e *= traveled / range;
 
-        #ifdef SHADOW_MAP_PRESENT
-            vec4 ray_shadow = (frx_shadowViewMatrix() * vec4(ray - frx_cameraPos(), 1.0));
-            e *= simpleShadowFactor(u_shadow, ray_shadow);
-        #endif
-        }
+    #ifdef SHADOW_MAP_PRESENT
+        vec4 ray_shadow = (frx_shadowViewMatrix() * vec4(ray - frx_cameraPos(), 1.0));
+        e *= simpleShadowFactor(u_shadow, ray_shadow);
+    #endif
 
         power += e;
         ray += march;
@@ -276,7 +286,11 @@ float volumetric_caustics_beam(vec3 worldPos)
         steps ++;
     }
 
-    return power * sample / float(maxSteps);
+    power = power * sample / float(maxSteps) * scatter * basePower;
+    a.rgb += atmos_hdrCelestialRadiance() * power;
+    a.a += max(0.0, 1.0 - a.a) * power;
+
+    return a;
 }
 
 void custom_sky(in vec3 viewPos, in float blindnessFactor, in bool maybeUnderwater, inout vec4 a, inout float bloom_out)
@@ -379,6 +393,7 @@ vec4 hdr_shaded_color(
     
     float depth   = texture(sdepth, uv).r;
     vec3  viewPos = coords_view(uv, frx_inverseProjectionMatrix(), depth);
+    vec3  worldPos  = frx_cameraPos() + (frx_inverseViewMatrix() * vec4(viewPos, 1.0)).xyz;
     bool maybeUnderwater = (!translucent && translucentDepth >= depth && frx_viewFlag(FRX_CAMERA_IN_WATER))
         || (translucentDepth < depth && !frx_viewFlag(FRX_CAMERA_IN_WATER));
 
@@ -386,6 +401,9 @@ vec4 hdr_shaded_color(
         // the sky
         if (v_blindness == 1.0) return vec4(0.0);
         custom_sky(viewPos, 1.0 - v_blindness, maybeUnderwater, a, bloom_out);
+    #if CAUSTICS_MODE == CAUSTICS_MODE_TEXTURE
+        a = underwaterLightRays(a, worldPos, translucentDepth, depth);
+    #endif
         // mark as managed draw, vanilla sky is an exception
         return vec4(a.rgb * 1.0 - v_blindness, 1.0);
         // vec3 worldPos = (128.0 / length(modelPos)) * modelPos + frx_cameraPos(); // doesn't help
@@ -415,7 +433,6 @@ vec4 hdr_shaded_color(
     vec3  material  = texture(smaterial, uv).xyz;
     float roughness = material.x == 0.0 ? 1.0 : min(1.0, 1.0203 * material.x - 0.01);
     float metallic  = material.y;
-    vec3  worldPos  = frx_cameraPos() + (frx_inverseViewMatrix() * vec4(viewPos, 1.0)).xyz;
     float f0        = material.z;
     float bloom_raw = light.z * 2.0 - 1.0;
     bool  diffuse   = material.x < 1.0;
@@ -506,9 +523,7 @@ vec4 hdr_shaded_color(
     }
 
 #if CAUSTICS_MODE == CAUSTICS_MODE_TEXTURE
-    if (frx_viewFlag(FRX_CAMERA_IN_WATER) && translucentDepth >= depth && frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT)) {
-        a.rgb += atmos_hdrCelestialRadiance() * volumetric_caustics_beam(worldPos);
-    }
+    a = underwaterLightRays(a, worldPos, translucentDepth, depth);
 #endif
 
     return a;
