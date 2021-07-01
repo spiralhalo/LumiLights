@@ -394,8 +394,17 @@ vec4 hdr_shaded_color(
     float depth   = texture(sdepth, uv).r;
     vec3  viewPos = coords_view(uv, frx_inverseProjectionMatrix(), depth);
     vec3  worldPos  = frx_cameraPos() + (frx_inverseViewMatrix() * vec4(viewPos, 1.0)).xyz;
-    bool maybeUnderwater = (!translucent && translucentDepth >= depth && frx_viewFlag(FRX_CAMERA_IN_WATER))
-        || (translucentIsWater && translucentDepth < depth && !frx_viewFlag(FRX_CAMERA_IN_WATER));
+    bool maybeUnderwater = false;
+    
+    if (frx_viewFlag(FRX_CAMERA_IN_WATER)) {
+        if (translucent) {
+            maybeUnderwater = true;
+        } else {
+            maybeUnderwater = translucentDepth >= depth;
+        }
+    } else {
+        maybeUnderwater = translucentIsWater && translucentDepth < depth;
+    }
 
     if (depth == 1.0 && !translucent) {
         // the sky
