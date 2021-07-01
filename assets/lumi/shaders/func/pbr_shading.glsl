@@ -65,7 +65,7 @@ struct light_data{
     vec3 light;
     vec3 normal;
     vec3 viewDir;
-    vec3 viewPos;
+    vec3 modelPos;
     vec3 specularAccu;
     float translucency;
 };
@@ -107,7 +107,7 @@ vec3 hdr_calcHeldLight(inout light_data data)
         vec3 handHeldDir = data.viewDir;
 
         vec4 heldLight = frx_heldLight();
-        float distSq = dot(data.viewPos, data.viewPos);
+        float distSq = dot(data.modelPos, data.modelPos);
         float hlRadSq = heldLight.w * HANDHELD_LIGHT_RADIUS * heldLight.w * HANDHELD_LIGHT_RADIUS;
         float hl = l2_clampScale(hlRadSq, 0.0, distSq);
         float brightness = frx_viewBrightness();
@@ -182,7 +182,7 @@ vec3 baseAmbientRadiance(vec3 fogRadiance)
     return bar;
 }
 
-void pbr_shading(inout vec4 a, inout float bloom, vec3 viewPos, vec3 light, vec3 normal, float roughness, float metallic, float pbr_f0, bool isDiffuse, bool translucent)
+void pbr_shading(inout vec4 a, inout float bloom, vec3 modelPos, vec3 light, vec3 normal, float roughness, float metallic, float pbr_f0, bool isDiffuse, bool translucent)
 {
     vec3 albedo = hdr_fromGamma(a.rgb);
     light_data data = light_data(
@@ -193,8 +193,8 @@ void pbr_shading(inout vec4 a, inout float bloom, vec3 viewPos, vec3 light, vec3
         mix(vec3(pbr_f0), albedo, metallic),
         light,
         normal,
-        normalize(-viewPos) * frx_normalModelMatrix(),
-        viewPos,
+        normalize(-modelPos),
+        modelPos,
         vec3(0.0),
         (translucent && a.a > 0.) ? (1.0 - min(a.a, 1.0)) : 0.0
     );

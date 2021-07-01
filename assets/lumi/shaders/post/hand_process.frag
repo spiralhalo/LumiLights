@@ -47,8 +47,8 @@ void main()
 
     vec4  a = texture(u_color, v_texcoord);
 
-    vec4 temp    = frx_inverseProjectionMatrix() * vec4(2.0 * v_texcoord - 1.0, 2.0 * depth - 1.0, 1.0);
-    vec3 viewPos = temp.xyz / temp.w;
+    vec4 temp = frx_inverseViewProjectionMatrix() * vec4(2.0 * v_texcoord - 1.0, 2.0 * depth - 1.0, 1.0);
+    vec3 modelPos = temp.xyz / temp.w;
 
     vec3 light  = texture(u_light, v_texcoord).xyz;
     vec3 normal = normalize(2.0 * texture(u_normal_micro, v_texcoord).xyz - 1.0);
@@ -63,8 +63,7 @@ void main()
             vec4 unjitteredModelPos = frx_inverseViewProjectionMatrix() * vec4(2.0 * v_texcoord - uvJitter - 1.0, 2.0 * depth - 1.0, 1.0);
             vec4 shadowViewPos = frx_shadowViewMatrix() * vec4(unjitteredModelPos.xyz / unjitteredModelPos.w, 1.0);
         #else
-            vec4 worldPos = frx_inverseViewMatrix() * vec4(viewPos, 1.0);
-            vec4 shadowViewPos = frx_shadowViewMatrix() * vec4(worldPos.xyz / worldPos.w, 1.0);
+            vec4 shadowViewPos = frx_shadowViewMatrix() * vec4(modelPos, 1.0);
         #endif
 
         float shadowFactor = calcShadowFactor(u_shadow, shadowViewPos);
@@ -78,7 +77,7 @@ void main()
         light.z = lightmapRemap(light.y);
     #endif
 
-    pbr_shading(a, bloom_out, viewPos, light, normal, roughness, mat.y, mat.z, /*diffuse=*/true, true);
+    pbr_shading(a, bloom_out, modelPos, light, normal, roughness, mat.y, mat.z, /*diffuse=*/true, true);
 
     vec3 misc = texture(u_misc, v_texcoord).xyz;
 

@@ -71,12 +71,8 @@ vec2 coords_uv(vec3 view, mat4 projection)
 }
 
 #ifdef USE_VOLUMETRIC_FOG
-float raymarched_fog_density(vec3 viewPos, vec3 worldPos, float pFogFar)
+float raymarched_fog_density(vec3 modelPos, float pFogFar)
 {
-    // vec3 unitMarch_view = normalize(-viewPos);
-    // vec3 ray_view = viewPos + tileJitter * unitMarch_view;
-
-    vec3 modelPos = worldPos - frx_cameraPos();
     float distToCamera = length(modelPos);
     float sampleSize = max(2.0, pFogFar / 8.0);
     vec3 unitMarch_model = sampleSize * ((-modelPos) / distToCamera);
@@ -107,7 +103,7 @@ float raymarched_fog_density(vec3 viewPos, vec3 worldPos, float pFogFar)
 }
 #endif
 
-vec4 fog(float skyLight, vec4 a, vec3 viewPos, vec3 worldPos, inout float bloom)
+vec4 fog(float skyLight, vec4 a, vec3 modelPos, vec3 worldPos, inout float bloom)
 {
     float pfSkyLight = 1.0;
 
@@ -176,7 +172,7 @@ vec4 fog(float skyLight, vec4 a, vec3 viewPos, vec3 worldPos, inout float bloom)
         fogFactor = 1.0;
     }
 
-    float distToCamera = length(viewPos);
+    float distToCamera = length(modelPos);
     float pfCave = 1.0;
 
     // TODO: retrieve fog distance from render distance as an option especially for the nether
@@ -187,7 +183,7 @@ vec4 fog(float skyLight, vec4 a, vec3 viewPos, vec3 worldPos, inout float bloom)
 
     #ifdef USE_VOLUMETRIC_FOG
     if (useVolFog) { //TODO: blindness transition still broken?
-        float fRaymarch = raymarched_fog_density(viewPos, worldPos, pFogFar);
+        float fRaymarch = raymarched_fog_density(modelPos, pFogFar);
         distFactor = distFactor * VOLUMETRIC_FOG_SOFTNESS + (1. - VOLUMETRIC_FOG_SOFTNESS) * fRaymarch;
         pfCave -= fRaymarch;
     }
@@ -197,7 +193,7 @@ vec4 fog(float skyLight, vec4 a, vec3 viewPos, vec3 worldPos, inout float bloom)
 
     fogFactor = clamp(fogFactor * distFactor, 0.0, 1.0);
 
-    vec4 fogColor = vec4(atmos_hdrFogColorRadiance(normalize(worldPos-frx_cameraPos())), 1.0);
+    vec4 fogColor = vec4(atmos_hdrFogColorRadiance(normalize(modelPos)), 1.0);
 
     if (useAdditive) {
         #ifdef RGB_CAVES
@@ -235,13 +231,10 @@ float caustics(vec3 worldPos)
     return e;
 }
 
-vec4 underwaterLightRays(vec4 a, vec3 worldPos, float translucentDepth, float depth)
+vec4 underwaterLightRays(vec4 a, vec3 modelPos, float translucentDepth, float depth)
 {
     bool doUnderwaterRays = frx_viewFlag(FRX_CAMERA_IN_WATER) && translucentDepth >= depth && frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT);
-
-    vec3 direction = worldPos - frx_cameraPos();
-    vec3 unit = normalize(direction);
-
+    vec3 unit = normalize(modelPos);
     float scatter = dot(unit, frx_skyLightVector());
 
     scatter = 0.5 - abs(scatter - 0.5);
@@ -260,7 +253,7 @@ vec4 underwaterLightRays(vec4 a, vec3 worldPos, float translucentDepth, float de
 
     vec3 ray = frx_cameraPos();
     vec3 march = unit * sample;
-    float maxDist = length(direction);
+    float maxDist = length(modelPos);
 
     ray += tileJitter * march + unit * deadRadius;
 
@@ -293,11 +286,11 @@ vec4 underwaterLightRays(vec4 a, vec3 worldPos, float translucentDepth, float de
     return a;
 }
 
-void custom_sky(in vec3 viewPos, in float blindnessFactor, in bool maybeUnderwater, inout vec4 a, inout float bloom_out)
+void custom_sky(in vec3 modelPos, in float blindnessFactor, in bool maybeUnderwater, inout vec4 a, inout float bloom_out)
 {
-    vec3 skyVec = normalize(viewPos);
-    vec3 worldSkyVec = skyVec * frx_normalModelMatrix();
-    float skyDotUp = dot(skyVec, v_up);
+    vec3 worldSkyVec = normalize(modelPos);
+    float skyDotUp = dot(worldSkyVec, vec3(0.0, 1.0, 0.0));
+
     bloom_out = 0.0;
 
     if ((frx_viewFlag(FRX_CAMERA_IN_WATER) && maybeUnderwater) || frx_worldFlag(FRX_WORLD_IS_NETHER)) {
@@ -305,7 +298,7 @@ void custom_sky(in vec3 viewPos, in float blindnessFactor, in bool maybeUnderwat
     } else if (frx_worldFlag(FRX_WORLD_IS_OVERWORLD) && v_not_in_void > 0.0) {
         #if SKY_MODE == SKY_MODE_LUMI
             float starEraser = 0.;
-            vec2 celestUV = rect_innerUV(Rect(v_celest1, v_celest2, v_celest3), skyVec * 1024.);
+            vec2 celestUV = rect_innerUV(Rect(v_celest1, v_celest2, v_celest3), worldSkyVec * 1024.);
             vec3 celestialObjectColor = vec3(0.);
             bool isMoon = dot(worldSkyVec, frx_skyLightVector()) < 0. ? !frx_worldFlag(FRX_WORLD_IS_MOONLIT) : frx_worldFlag(FRX_WORLD_IS_MOONLIT);
             if (celestUV == clamp(celestUV, 0.0, 1.0)) {
@@ -393,7 +386,8 @@ vec4 hdr_shaded_color(
 
     float depth   = texture(sdepth, uv).r;
     vec3  viewPos = coords_view(uv, frx_inverseProjectionMatrix(), depth);
-    vec3  worldPos  = frx_cameraPos() + (frx_inverseViewMatrix() * vec4(viewPos, 1.0)).xyz;
+    vec3  modelPos = coords_view(uv, frx_inverseViewProjectionMatrix(), depth);
+    vec3  worldPos  = frx_cameraPos() + modelPos;
     bool maybeUnderwater = false;
     
     if (frx_viewFlag(FRX_CAMERA_IN_WATER)) {
@@ -409,14 +403,12 @@ vec4 hdr_shaded_color(
     if (depth == 1.0 && !translucent) {
         // the sky
         if (v_blindness == 1.0) return vec4(0.0);
-        custom_sky(viewPos, 1.0 - v_blindness, maybeUnderwater, a, bloom_out);
+        custom_sky(modelPos, 1.0 - v_blindness, maybeUnderwater, a, bloom_out);
     #ifdef WATER_CAUSTICS
-        a = underwaterLightRays(a, worldPos, translucentDepth, depth);
+        a = underwaterLightRays(a, modelPos, translucentDepth, depth);
     #endif
         // mark as managed draw, vanilla sky is an exception
         return vec4(a.rgb * 1.0 - v_blindness, 1.0);
-        // vec3 worldPos = (128.0 / length(modelPos)) * modelPos + frx_cameraPos(); // doesn't help
-        // return a + fog(frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? frx_ambientIntensity() : 1.0, vec4(0.0), viewPos, worldPos, bloom_out);
     }
 
     vec4  light     = texture(slight, uv);
@@ -499,7 +491,7 @@ vec4 hdr_shaded_color(
     #if BLOCKLIGHT_SPECULAR_MODE == BLOCKLIGHT_SPECULAR_MODE_FANTASTIC
         preCalc_blockDir = calcBlockDir(slight, uv, v_invSize, normal, viewPos, sdepth);
     #endif
-    pbr_shading(a, bloom_out, viewPos, light.xyz, normal, roughness, metallic, f0, diffuse, translucent);
+    pbr_shading(a, bloom_out, modelPos, light.xyz, normal, roughness, metallic, f0, diffuse, translucent);
 
 
 #if AMBIENT_OCCLUSION != AMBIENT_OCCLUSION_NO_AO
@@ -528,11 +520,11 @@ vec4 hdr_shaded_color(
     #endif
 
     if (a.a != 0.0 && depth != 1.0) {
-        a = fog(light.y, a, viewPos, worldPos, bloom_out);
+        a = fog(light.y, a, modelPos, worldPos, bloom_out);
     }
 
 #ifdef WATER_CAUSTICS
-    a = underwaterLightRays(a, worldPos, translucentDepth, depth);
+    a = underwaterLightRays(a, modelPos, translucentDepth, depth);
 #endif
 
     return a;
