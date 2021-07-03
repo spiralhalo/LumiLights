@@ -389,6 +389,7 @@ vec4 hdr_shaded_color(
     vec3  modelPos = coords_view(uv, frx_inverseViewProjectionMatrix(), depth);
     vec3  worldPos  = frx_cameraPos() + modelPos;
     bool maybeUnderwater = false;
+    bool mostlikelyUnderwater = false;
     
     if (frx_viewFlag(FRX_CAMERA_IN_WATER)) {
         if (translucent) {
@@ -396,8 +397,10 @@ vec4 hdr_shaded_color(
         } else {
             maybeUnderwater = translucentDepth >= depth;
         }
+        mostlikelyUnderwater = maybeUnderwater;
     } else {
-        maybeUnderwater = translucentIsWater && translucentDepth < depth;
+        maybeUnderwater = translucentDepth < depth;
+        mostlikelyUnderwater = maybeUnderwater && translucentIsWater;
     }
 
     if (depth == 1.0 && !translucent) {
@@ -467,7 +470,7 @@ vec4 hdr_shaded_color(
     float causticLight = 0.0;
 
     #ifdef WATER_CAUSTICS
-        if (maybeUnderwater && frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT)) {
+        if (mostlikelyUnderwater && frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT)) {
             causticLight = caustics(worldPos);
             causticLight = pow(causticLight, 15.0);
             causticLight *= smoothstep(0.0, 1.0, light.y);
