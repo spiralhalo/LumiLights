@@ -372,6 +372,25 @@ void custom_sky(in vec3 modelPos, in float blindnessFactor, in bool maybeUnderwa
     bloom_out *= blindnessFactor;
 }
 
+vec4 unmanaged(in vec4 a, out float bloom_out, bool translucent) {
+    // bypass unmanaged translucent draw (LITEMATICA WORKAROUND)
+    // bypass unmanaged solid sky draw (fix debug rendering color)
+    // rationale: light.x is always at least 0.03125 for managed draws
+    //            this might not always hold up in the future.
+    #if OVERLAY_DEBUG == OVERLAY_DEBUG_NEON || OVERLAY_DEBUG == OVERLAY_DEBUG_DISCO
+        bloom_out = step(0.01, a.a);
+        a.r += a.g * 0.25;
+        a.b += a.g * 0.5;
+        a.g *= 0.25;
+    #endif
+    #if OVERLAY_DEBUG == OVERLAY_DEBUG_DISCO
+        a.rgb *= 0.25 + 0.75 * fract(frx_renderSeconds()*2.0);
+    #endif
+    // marker for unmanaged draw
+    a.a = translucent ? a.a : 0.0;
+    return a;
+}
+
 const float RADIUS = 0.4;
 const float BIAS = 0.4;
 const float INTENSITY = 10.0;
@@ -414,25 +433,12 @@ vec4 hdr_shaded_color(
         return vec4(a.rgb * 1.0 - v_blindness, 1.0);
     }
 
-    vec4  light     = texture(slight, uv);
+    vec4  light = texture(slight, uv);
+
     if (light.x == 0.0) {
-        // bypass unmanaged translucent draw (LITEMATICA WORKAROUND)
-        // bypass unmanaged solid sky draw (fix debug rendering color)
-        // rationale: light.x is always at least 0.03125 for managed draws
-        //            this might not always hold up in the future.
-        #if OVERLAY_DEBUG == OVERLAY_DEBUG_NEON || OVERLAY_DEBUG == OVERLAY_DEBUG_DISCO
-            bloom_out = step(0.01, a.a);
-            a.r += a.g * 0.25;
-            a.b += a.g * 0.5;
-            a.g *= 0.25;
-        #endif
-        #if OVERLAY_DEBUG == OVERLAY_DEBUG_DISCO
-            a.rgb *= 0.25 + 0.75 * fract(frx_renderSeconds()*2.0);
-        #endif
-        // marker for unmanaged draw
-        a.a = translucent ? a.a : 0.0;
-        return a;
+        return unmanaged(a, bloom_out, translucent);
     }
+
     vec3  normal    = texture(snormal, uv).xyz * 2.0 - 1.0;
     vec3  material  = texture(smaterial, uv).xyz;
     float roughness = material.x == 0.0 ? 1.0 : min(1.0, 1.0203 * material.x - 0.01);
