@@ -259,6 +259,7 @@ vec4 volumetricCloud(
     float energy = volumetric.lightEnergy;
 
     float rainBrightness = mix(0.13, 0.05, hdr_fromGammaf(frx_rainGradient())); // simulate dark clouds
+    vec3 cloudShading = atmos_hdrCloudColorRadiance(worldVec) * mix(1.0, smoothstep(-0.5, 0.5, energy), abs(worldVec.y));
     vec3 celestRadiance = atmos_hdrCelestialRadiance();
 
     if (frx_worldFlag(FRX_WORLD_IS_MOONLIT)) {
@@ -268,7 +269,7 @@ vec4 volumetricCloud(
     vec3 color;
 
     celestRadiance = celestRadiance * energy * rainBrightness * 0.5;
-    color = celestRadiance + atmos_hdrCloudColorRadiance(worldVec);
+    color = celestRadiance + cloudShading;
 
     #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
         out_depth = alpha > 0. ? 0.9999 : 1.0;
