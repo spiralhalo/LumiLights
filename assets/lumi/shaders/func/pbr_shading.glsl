@@ -107,12 +107,17 @@ vec3 hdr_calcHeldLight(inout light_data data)
         vec3 handHeldDir = data.viewDir;
 
         vec4 heldLight = frx_heldLight();
+        float coneInner = clamp(frx_heldLightInnerRadius(), 0.0, 3.14159265359) / 3.14159265359;
+        float coneOuter = max(coneInner, clamp(frx_heldLightOuterRadius(), 0.0, 3.14159265359) / 3.14159265359);
+        float cosView = max(dot(handHeldDir, -frx_cameraView()), 0.0);
+        float cone = l2_clampScale(1.0 - coneOuter, 1.0 - coneInner, cosView);
         float distSq = dot(data.modelPos, data.modelPos);
         float hlRadSq = heldLight.w * HANDHELD_LIGHT_RADIUS * heldLight.w * HANDHELD_LIGHT_RADIUS;
         float hl = l2_clampScale(hlRadSq, 0.0, distSq);
         float brightness = frx_viewBrightness();
 
         hl *= pow(hl, 3.0 + brightness * 2.0) * (2.0 - brightness * 0.5); // lyfe hax
+        hl *= cone;
 
         vec3 handHeldRadiance = hdr_fromGamma(heldLight.rgb) * BLOCK_LIGHT_STR * hl;
 
