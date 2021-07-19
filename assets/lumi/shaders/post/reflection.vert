@@ -3,6 +3,7 @@
 #include frex:shaders/api/view.glsl
 #include frex:shaders/lib/math.glsl
 #include lumi:shaders/common/atmosphere.glsl
+#include lumi:shaders/lib/celest_adapter.glsl
 #include lumi:shaders/func/flat_cloud.glsl
 #include lumi:shaders/lib/util.glsl
 
@@ -16,11 +17,19 @@ out mat4 v_cloud_rotator;
 
 out vec2 v_invSize;
 out float v_blindness;
+out vec3 v_celest1;
+out vec3 v_celest2;
+out vec3 v_celest3;
 
 void main()
 {
     basicFrameSetup();
     atmos_generateAtmosphereModel();
+    Rect theCelest = celestSetup();
+
+    v_celest1 = theCelest.bottomLeft;
+    v_celest2 = theCelest.bottomRight;
+    v_celest3 = theCelest.topLeft;
 
 #if defined(HALF_REFLECTION_RESOLUTION) && REFLECTION_PROFILE != REFLECTION_PROFILE_NONE
     gl_Position.xy -= (gl_Position.xy - vec2(-1., -1.)) * .5;

@@ -4,6 +4,7 @@
 #include frex:shaders/api/view.glsl
 #include frex:shaders/lib/math.glsl
 #include lumi:shaders/common/atmosphere.glsl
+#include lumi:shaders/lib/celest_adapter.glsl
 #include lumi:shaders/lib/rectangle.glsl
 #include lumi:shaders/lib/taa_jitter.glsl
 #include lumi:shaders/lib/util.glsl
@@ -22,27 +23,6 @@ out float v_night;
 out float v_not_in_void;
 out float v_near_void_core;
 out float v_blindness;
-
-Rect celestSetup()
-{
-    const vec3 o       = vec3(-1024., 0.,  0.);
-    const vec3 dayAxis = vec3(    0., 0., -1.);
-
-    float size = 250.; // One size fits all; vanilla would be -50 for moon and +50 for sun
-
-    Rect result = Rect(o + vec3(.0, -size, -size), o + vec3(.0, -size,  size), o + vec3(.0,  size, -size));
-    
-    vec3  zenithAxis  = cross(frx_skyLightVector(), vec3( 0.,  0., -1.));
-    float zenithAngle = asin(frx_skyLightVector().z);
-    float dayAngle    = frx_skyAngleRadians() + PI * 0.5;
-
-    mat4 transformation = l2_rotationMatrix(zenithAxis, zenithAngle);
-        transformation *= l2_rotationMatrix(dayAxis, dayAngle);
-
-    rect_applyMatrix(transformation, result, 1.0);
-
-    return result;
-}
 
 void main()
 {

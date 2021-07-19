@@ -9,6 +9,31 @@
  *  published by the Free Software Foundation, Inc.    *
  *******************************************************/
 
+#ifdef VERTEX_SHADER
+
+Rect celestSetup()
+{
+    const vec3 o       = vec3(-1024., 0.,  0.);
+    const vec3 dayAxis = vec3(    0., 0., -1.);
+
+    float size = 250.; // One size fits all; vanilla would be -50 for moon and +50 for sun
+
+    Rect result = Rect(o + vec3(.0, -size, -size), o + vec3(.0, -size,  size), o + vec3(.0,  size, -size));
+    
+    vec3  zenithAxis  = cross(frx_skyLightVector(), vec3( 0.,  0., -1.));
+    float zenithAngle = asin(frx_skyLightVector().z);
+    float dayAngle    = frx_skyAngleRadians() + PI * 0.5;
+
+    mat4 transformation = l2_rotationMatrix(zenithAxis, zenithAngle);
+        transformation *= l2_rotationMatrix(dayAxis, dayAngle);
+
+    rect_applyMatrix(transformation, result, 1.0);
+
+    return result;
+}
+
+#else
+
 vec4 celestFrag(in Rect celestRect, sampler2D ssun, sampler2D smoon, vec3 worldVec) {
     vec2 celestUV = rect_innerUV(celestRect, worldVec * 1024.);
     vec3 celestialObjectColor = vec3(0.);
@@ -41,3 +66,5 @@ vec4 celestFrag(in Rect celestRect, sampler2D ssun, sampler2D smoon, vec3 worldV
 
     return vec4(celestialObjectColor, opacity);
 }
+
+#endif

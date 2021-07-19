@@ -23,6 +23,8 @@
 				"u_clouds_texture",
 
 				"u_blue_noise",
+				"u_sun",
+				"u_moon",
 			]
 		}, 
 		{
@@ -202,6 +204,8 @@
 					"clouds_texture",
 
 					"lumi:textures/filter_pattern/bluenoise256.png",
+					"minecraft:textures/environment/sun.png",
+					"minecraft:textures/environment/moon_phases.png",
 				]
 			},
 			{

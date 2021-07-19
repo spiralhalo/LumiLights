@@ -7,6 +7,7 @@
 #include lumi:shaders/lib/puddle.glsl
 #include lumi:shaders/func/tile_noise.glsl
 #include lumi:shaders/func/cloud_adapter.glsl
+#include lumi:shaders/lib/celest_adapter.glsl
 #include lumi:shaders/lib/util.glsl
 
 /*******************************************************
@@ -19,6 +20,12 @@
  *******************************************************/
 
 uniform sampler2D u_blue_noise;
+uniform sampler2D u_sun;
+uniform sampler2D u_moon;
+
+in vec3 v_celest1;
+in vec3 v_celest2;
+in vec3 v_celest3;
 
 #if REFLECTION_PROFILE == REFLECTION_PROFILE_EXTREME
     const float HITBOX = 0.0625;
@@ -97,7 +104,15 @@ vec3 calcFallbackColor(in sampler2D sdepth, vec3 unitMarch_world, vec2 light)
 
     cloud.a *= 0.5;
     sky = (sky * (1. - cloud.a) + cloud.rgb * cloud.a);
+
+    float occluder = cloud.a;
+#else
+    float occluder = 0.0;
 #endif
+
+    vec4 celestColor = celestFrag(Rect(v_celest1, v_celest2, v_celest3), u_sun, u_moon, unitMarch_world);
+
+    sky += celestColor.rgb * (1. - occluder);
 
     return sky * skyLightFactor * upFactor * aboveWaterFactor * 1.5;
 }
