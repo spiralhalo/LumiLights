@@ -18,6 +18,7 @@ uniform sampler2D u_misc_translucent;
 
 uniform sampler2D u_albedo_translucent;
 uniform sampler2D u_alpha_translucent;
+uniform sampler2D u_solid_depth;
 uniform sampler2D u_light_solid;
 
 uniform sampler2D u_particles_color;
@@ -95,6 +96,16 @@ vec4 advancedTranslucentShading(out float bloom_out) {
     // blend front and back
     frontColor.rgb = backColor.rgb * (1.0 - frontColor.a) + frontColor.rgb * frontColor.a * (1.0 - excess);
     frontColor.a = finalAlpha;
+
+    // gelatin material (tentative name)
+    bool isWater = bit_unpack(texture(u_misc_translucent, v_texcoord).z, 7) == 1.;
+
+    if (isWater && !frx_viewFlag(FRX_CAMERA_IN_WATER)) {
+        float solidDepth = ldepth(texture(u_solid_depth, v_texcoord).r);
+        float transDepth = ldepth(texture(u_translucent_depth, v_texcoord).r);
+        float gelatinOpacity = l2_clampScale(0.0, 0.05, solidDepth - transDepth);
+        frontColor.a += gelatinOpacity * (1.0 - frontColor.a);
+    }
 
     return frontColor;
 }

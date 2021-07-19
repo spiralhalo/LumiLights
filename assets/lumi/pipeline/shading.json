@@ -37,6 +37,7 @@
 
 				"u_albedo_translucent",
 				"u_alpha_translucent",
+				"u_solid_depth",
 				"u_light_solid",
 
 				"u_particles_color",
@@ -196,6 +197,7 @@
 
 					"prime_albedo_translucent",
 					"prime_alpha_translucent",
+					"solid_depth"
 					"light_solid",
 
 					"particles",
