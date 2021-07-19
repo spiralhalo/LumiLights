@@ -17,6 +17,7 @@
 				"u_target_color",
 				"u_target_combine",
 				"u_target_depth",
+				"u_light_target",
 				"u_normal_target",
 
 				"u_clouds",
@@ -175,6 +176,7 @@
 					"translucent_shaded",
 					"translucent_combine",
 					"translucent_depth",
+					"light_translucent",
 					"normal_translucent",
 
 					"clouds",
@@ -200,6 +202,7 @@
 					"solid_shaded",
 					"solid_combine",
 					"solid_depth",
+					"light_solid",
 					"normal_solid",
 
 					"clouds",

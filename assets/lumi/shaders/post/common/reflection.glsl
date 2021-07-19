@@ -234,6 +234,7 @@ rt_ColorDepthBloom work_on_pair(
     in sampler2D reflected_color,
     in sampler2D reflected_combine,
     in sampler2D reflected_depth,
+    in sampler2D reflected_light,
     in sampler2D reflected_normal,
     float fallback,
     bool compute_colors
@@ -279,6 +280,7 @@ rt_ColorDepthBloom work_on_pair(
     #endif
 
     vec4 reflected = vec4(0.);
+    float reflectedBloom = 0.;
     float reflected_depth_value;
     float fallbackMix = 0.;
 
@@ -308,6 +310,8 @@ rt_ColorDepthBloom work_on_pair(
         #else
             reflected = texture(reflected_color, result.reflected_uv);
         #endif
+
+            reflectedBloom = max(0.0, texture(reflected_light, result.reflected_uv).z - 0.5) * 2.0;
         }
         // fade to fallback on edges
         vec2 uvFade = smoothstep(0.5, 0.45, abs(result.reflected_uv - 0.5));
@@ -328,7 +332,7 @@ rt_ColorDepthBloom work_on_pair(
 
         vec4 pbr_color = vec4(pbr_lightCalc(roughness, f0, reflected_final.rgb * base_color.a, unitMarch_world, unit_world), reflected_final.a);
 
-        return rt_ColorDepthBloom(pbr_color, reflected_depth_value, sunBloom);
+        return rt_ColorDepthBloom(pbr_color, reflected_depth_value, max(sunBloom, reflectedBloom));
     } else {
     #if REFLECTION_PROFILE != REFLECTION_PROFILE_NONE
         return rt_ColorDepthBloom(vec4(result.reflected_uv, fallbackMix, 1.0), reflected_depth_value, 0.0);

@@ -103,6 +103,7 @@ void main()
         u_color,
         u_color,
         u_translucent_depth,
+        u_light,
         u_normal,
         1.0,
         true);
