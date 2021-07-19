@@ -156,8 +156,8 @@ vec4 fog(float skyLight, vec4 a, vec3 modelPos, vec3 worldPos, inout float bloom
 
     float fogFactor = pFogDensity * pfAltitude * ((frx_viewFlag(FRX_CAMERA_IN_FLUID) || useVolFog) ? 1.0 : pfSkyLight);
 
-    // additive fog when it's not blindness or lava related
-    bool useAdditive = true;
+    // additive fog when it's not blindness or fluid related
+    bool useAdditive = !frx_viewFlag(FRX_CAMERA_IN_WATER);
 
     if (frx_playerHasEffect(FRX_EFFECT_BLINDNESS)) {
         useAdditive = false;
@@ -281,7 +281,16 @@ vec4 underwaterLightRays(vec4 a, vec3 modelPos, float translucentDepth, float de
     }
 
     power = power * sample / float(maxSteps) * scatter * basePower;
-    a.rgb += atmos_hdrCelestialRadiance() * power;
+
+    vec3 scatterColor = atmos_hdrFogColorRadiance(unit);
+
+    scatterColor /= l2_max3(scatterColor);
+
+    float scatterLuminance = frx_luminance(scatterColor);
+
+    scatterColor = scatterLuminance == 0.0 ? vec3(1.0) : scatterColor / scatterLuminance;
+
+    a.rgb += atmos_hdrCelestialRadiance() * scatterColor * power;
     a.a += max(0.0, 1.0 - a.a) * power;
 
     return a;
