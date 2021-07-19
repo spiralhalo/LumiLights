@@ -3,7 +3,7 @@
 #include frex:shaders/api/player.glsl
 #include frex:shaders/api/view.glsl
 #include lumi:shaders/common/userconfig.glsl
-#include lumi:shaders/common/lighting.glsl
+#include lumi:shaders/common/contrast.glsl
 #include lumi:shaders/lib/pbr.glsl
 #include lumi:shaders/lib/util.glsl
 #include lumi:shaders/lib/block_dir.glsl

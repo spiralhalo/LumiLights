@@ -23,7 +23,7 @@ vec3 ldr_tonemap3noGamma(vec3 a)
     float eyeBrightness = frx_smoothedEyeBrightness().y * atmos_celestIntensity();
 
     eyeBrightness *= eyeBrightness;
-    exposure = mix(2.0, 1.0, eyeBrightness);
+    exposure = getExposure(eyeBrightness);
 #endif
 
     c = acesNarkowicz(c * exposure);

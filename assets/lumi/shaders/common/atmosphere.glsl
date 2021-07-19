@@ -2,6 +2,7 @@
 #include frex:shaders/api/view.glsl
 #include frex:shaders/lib/math.glsl
 #include lumi:shaders/lib/util.glsl
+#include lumi:shaders/common/contrast.glsl
 #include lumi:shaders/common/userconfig.glsl
 
 /*******************************************************
@@ -127,34 +128,6 @@ vec3 atmos_hdrCloudColorRadiance(vec3 world_toSky)
 
 #ifdef VERTEX_SHADER
 
-/** COLOR DEFINES **/
-#define DEF_VANILLA_DAY_SKY_COLOR hdr_fromGamma(vec3(0.52, 0.69, 1.0))
-#if SKY_MODE == SKY_MODE_LUMI
-    #if LUMI_SKY_COLOR == LUMI_SKY_COLOR_BRIGHT_CYAN
-    #define DEF_DAY_SKY_COLOR hdr_fromGamma(vec3(0.33, 0.7, 1.0))
-    #define DEF_DAY_CLOUD_COLOR hdr_fromGamma(vec3(0.40, 0.69, 1.0))
-    #else
-    #define DEF_DAY_SKY_COLOR hdr_fromGamma(vec3(0.3, 0.5, 1.0))
-    #define DEF_DAY_CLOUD_COLOR DEF_VANILLA_DAY_SKY_COLOR
-    #endif
-#define DEF_NIGHT_SKY_COLOR hdr_fromGamma(vec3(0.1, 0.1, 0.2))
-#else
-#define DEF_DAY_SKY_COLOR DEF_VANILLA_DAY_SKY_COLOR
-#define DEF_DAY_CLOUD_COLOR DEF_VANILLA_DAY_SKY_COLOR
-#define DEF_NIGHT_SKY_COLOR hdr_fromGamma(vec3(0.01, 0.01, 0.01))
-#endif
-/*************/
-
-/** STRENGTH DEFINES **/
-#define DEF_SUNLIGHT_STR 1.5
-#define DEF_MOONLIGHT_STR 0.25
-#define DEF_SKY_STR 0.5
-
-#define DEF_SKY_AMBIENT_STR 0.5
-/*************/
-
-
-
 const float SKY_LIGHT_RAINING_MULT = 0.5;
 const float SKY_LIGHT_THUNDERING_MULT = 0.2;
 
@@ -171,7 +144,7 @@ const vec3 NOON_SUNLIGHT_COLOR = hdr_fromGamma(vec3(1.0, 1.0, 1.0));
 const vec3 SUNRISE_LIGHT_COLOR = hdr_fromGamma(vec3(1.0, 0.7, 0.4));
 
 const vec3 NOON_AMBIENT  = hdr_fromGamma(vec3(1.0));
-const vec3 NIGHT_AMBIENT = hdr_fromGamma(vec3(0.65, 0.65, 0.8));
+const vec3 NIGHT_AMBIENT = hdr_fromGamma(DEF_NIGHT_AMBIENT);
 
 const vec3 CAVEFOG_C = DEF_DAY_SKY_COLOR;
 const vec3 CAVEFOG_DEEPC = SUNRISE_LIGHT_COLOR;

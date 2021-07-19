@@ -514,7 +514,7 @@ vec4 hdr_shaded_color(
 #else
     float ssao = 1.;
 #endif
-    a.rgb += emissionRadiance;
+    a.rgb += emissionRadiance * EMISSIVE_LIGHT_STR;
     a.rgb *= ao_shaded * ssao;
 #endif
     if (matflash == 1.0) a.rgb += 1.0;
