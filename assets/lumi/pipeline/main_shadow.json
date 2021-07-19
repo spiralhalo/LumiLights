@@ -1,0 +1,10 @@
+{
+	sky: {
+		// Used when dimension/celestial object does not specify
+		defaultZenithAngle: 30
+	},
+
+	include: [
+		"lumi:pipeline/config/shadow_config.json",
+	]
+}

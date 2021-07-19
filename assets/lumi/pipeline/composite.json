@@ -1,43 +1,74 @@
 {
-    programs: [
-        {
-            name: "composite",
-            vertexSource: "lumi:shaders/post/godrays.vert",
-            fragmentSource: "lumi:shaders/post/composite.frag",
-            samplers: [
-                "u_combine_solid",
-                "u_solid_depth",
+	programs: [
+		{
+			name: "composite",
+			vertexSource: "lumi:shaders/post/godrays.vert",
+			fragmentSource: "lumi:shaders/post/composite.frag",
+			samplers: [
+				"u_combine_solid",
+				"u_solid_depth",
 
-                "u_combine_translucent",
-                "u_translucent_depth",
+				"u_combine_translucent",
+				"u_translucent_depth",
 
-                "u_particles",
-                "u_particles_depth",
+				"u_particles",
+				"u_particles_depth",
 
-                "u_clouds",
-                "u_clouds_depth",
+				"u_clouds",
+				"u_clouds_depth",
 
-                "u_weather",
-                "u_weather_depth",
+				"u_weather",
+				"u_weather_depth",
 
-                "u_emissive_solid",
-                "u_emissive_transparent",
+				"u_emissive_solid",
+				"u_emissive_transparent",
 
-                "u_blue_noise",
-            ]
-        },
-    ],
+				"u_blue_noise",
+			]
+		},
+	],
 
-    framebuffers: [
-        /* COMPOSITE FRAMEBUFFERS */
-        {
-            name: "composite",
-            colorAttachments: [
-                {image: "solid_main"},
-                {image: "composite_depth"},
-                {image: "emissive_composite", clearColor: 0x00000000},
-                // {image: "velocity"},
-            ]
-        },
-    ]
+	framebuffers: [
+		/* COMPOSITE FRAMEBUFFERS */
+		{
+			name: "composite",
+			colorAttachments: [
+				{image: "solid_main"},
+				{image: "composite_depth"},
+				{image: "emissive_composite", clearColor: 0x00000000},
+				// {image: "velocity"},
+			]
+		},
+	],
+
+	fabulous: {
+		passes: [
+			{
+				name: "composite",
+				program: "composite",
+				framebuffer: "composite",
+				samplerImages: [
+					"solid_combine",
+					"solid_depth",
+
+					"translucent_combine",
+					"translucent_depth",
+
+					"particles_final",
+					"particles_depth",
+
+					"custom_clouds",
+					"custom_clouds_depth",
+
+					"weather",
+					"weather_depth",
+
+					"emissive_solid",
+					"emissive_translucent",
+
+					"lumi:textures/filter_pattern/bluenoise256.png",
+				]
+			}
+		]
+	}
 }

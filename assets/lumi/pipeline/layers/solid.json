@@ -1,0 +1,111 @@
+{
+	images: [
+		/* SOLID */
+		{
+			name: "solid_main",
+			lod: 0,
+			internalFormat: "RGBA8",
+			pixelFormat: "RGBA",
+			pixelDataType: "UNSIGNED_BYTE",
+			target: "TEXTURE_2D",
+			texParams: [
+				{name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
+				{name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
+			]
+		}, {
+			name: "solid_depth",
+			lod: 0,
+			internalFormat: "DEPTH_COMPONENT",
+			pixelFormat: "DEPTH_COMPONENT",
+			pixelDataType: "FLOAT",
+			target: "TEXTURE_2D",
+			texParams: [ 
+				{name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
+				{name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"},
+				{name: "TEXTURE_COMPARE_MODE", val: "NONE"}
+			]
+		}, {
+			name: "light_solid",
+			lod: 0,
+			internalFormat: "RGB16F",
+			pixelFormat: "RGB",
+			pixelDataType: "FLOAT",
+			target: "TEXTURE_2D",
+			texParams: [
+				{name: "TEXTURE_MIN_FILTER", val: "LINEAR"}, {name: "TEXTURE_MAG_FILTER", val: "LINEAR"},
+				{name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
+			]
+		},
+		{
+			name: "normal_solid",
+			lod: 0,
+			internalFormat: "RGB8",
+			pixelFormat: "RGB",
+			pixelDataType: "UNSIGNED_BYTE",
+			target: "TEXTURE_2D",
+			texParams: [
+				{name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
+				{name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
+			]
+		},
+		{
+			name: "normal_micro_solid",
+			lod: 0,
+			internalFormat: "RGB16",
+			pixelFormat: "RGB",
+			pixelDataType: "UNSIGNED_BYTE",
+			target: "TEXTURE_2D",
+			texParams: [
+				{name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
+				{name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
+			]
+		},
+		{
+			name: "material_solid",
+			lod: 0,
+			internalFormat: "RGB8",
+			pixelFormat: "RGB",
+			pixelDataType: "UNSIGNED_BYTE",
+			target: "TEXTURE_2D",
+			texParams: [
+				{name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
+				{name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
+			]
+		}, {
+			name: "misc_solid",
+			lod: 0,
+			internalFormat: "RGB16",
+			pixelFormat: "RGB",
+			pixelDataType: "UNSIGNED_BYTE",
+			target: "TEXTURE_2D",
+			texParams: [
+				{name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
+				{name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
+			]
+		},
+	],
+
+	framebuffers: [
+		// These are the framebuffers visible to the game and to mods.
+		// They exist mainly so mods can't mess up the managed fb state.
+		// Attachements are the same as those for managed draws.
+		{
+			name: "default",
+				depthAttachment: {image: "solid_depth"},
+				colorAttachments: [{image: "solid_main"}]
+		},
+		
+		{
+			name: "solid",
+			depthAttachment: {image: "solid_depth", clearDepth: 1.0},
+			colorAttachments: [
+				{image: "solid_main", clearColor: 0x00000000},
+				{image: "light_solid", clearColor: 0x00000000},
+				{image: "normal_solid", clearColor: 0x00000000},
+				{image: "normal_micro_solid", clearColor: 0x00000000},
+				{image: "material_solid", clearColor: 0x00000000},
+				{image: "misc_solid", clearColor: 0x00000000},
+			]
+		},
+	],
+}

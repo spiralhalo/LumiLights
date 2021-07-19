@@ -1,76 +1,100 @@
 {
-    programs: [
-         {
-            name: "clouds",
-            vertexSource: "lumi:shaders/post/clouds.vert",
-            fragmentSource: "lumi:shaders/post/clouds.frag",
-            samplers: [
-                "u_clouds",
-                "u_clouds_texture",
-                "u_clouds_depth",
-                "u_solid_depth",
-                "u_translucent_depth",
-                "u_blue_noise",
-            ]
-        }, {
-            name: "clouds_texture",
-            vertexSource: "lumi:shaders/post/simple.vert",
-            fragmentSource: "lumi:shaders/post/clouds_texture.frag",
-            samplers: []
-        }, 
-    ],
+	programs: [
+		 {
+			name: "clouds",
+			vertexSource: "lumi:shaders/post/clouds.vert",
+			fragmentSource: "lumi:shaders/post/clouds.frag",
+			samplers: [
+				"u_clouds",
+				"u_clouds_texture",
+				"u_clouds_depth",
+				"u_solid_depth",
+				"u_translucent_depth",
+				"u_blue_noise",
+			]
+		}, {
+			name: "clouds_texture",
+			vertexSource: "lumi:shaders/post/simple.vert",
+			fragmentSource: "lumi:shaders/post/clouds_texture.frag",
+			samplers: []
+		}, 
+	],
 
-    images: [
-        {
-            name: "custom_clouds",
-            lod: 0,
-            internalFormat: "RGBA8",
-            pixelFormat: "RGBA",
-            pixelDataType: "UNSIGNED_BYTE",
-            target: "TEXTURE_2D",
-            texParams: [
-                {name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
-                {name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
-            ]
-        }, {
-            name: "clouds_texture",
-            lod: 0,
-            // size: 1024, // causes odd behavior due to framebuffer size mismatch
-            internalFormat: "GL_RG8",
-            pixelFormat: "GL_RG",
-            pixelDataType: "UNSIGNED_BYTE",
-            target: "TEXTURE_2D",
-            texParams: [
-                {name: "TEXTURE_MIN_FILTER", val: "LINEAR"}, {name: "TEXTURE_MAG_FILTER", val: "LINEAR"},
-                {name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
-            ]
-        }, {
-            name: "custom_clouds_depth",
-            lod: 0,
-            internalFormat: "GL_R32F",
-            pixelFormat: "GL_RED",
-            pixelDataType: "FLOAT",
-            target: "TEXTURE_2D",
-            texParams: [
-                { "name": "TEXTURE_MIN_FILTER", "val": "NEAREST" },
-                { "name": "TEXTURE_MAG_FILTER", "val": "NEAREST" },
-                { "name": "TEXTURE_WRAP_S", "val": "CLAMP_TO_EDGE" },
-                { "name": "TEXTURE_WRAP_T", "val": "CLAMP_TO_EDGE" },
-                { "name": "TEXTURE_COMPARE_MODE", "val": "NONE" }
-            ]
-        },
-    ],
-    
-    framebuffers: [
-        {
-            name: "custom_clouds",
-            colorAttachments: [
-                {image: "custom_clouds", clearColor: "0x00000000"},
-                {image: "custom_clouds_depth", clearColor: "0xFFFFFFFF"}]
-        }, {
-            name: "clouds_texture",
-            colorAttachments: [
-                {image: "clouds_texture", clearColor: "0x00000000"}]
-        }, 
-    ]
+	images: [
+		{
+			name: "custom_clouds",
+			lod: 0,
+			internalFormat: "RGBA8",
+			pixelFormat: "RGBA",
+			pixelDataType: "UNSIGNED_BYTE",
+			target: "TEXTURE_2D",
+			texParams: [
+				{name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
+				{name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
+			]
+		}, {
+			name: "clouds_texture",
+			lod: 0,
+			// size: 1024, // causes odd behavior due to framebuffer size mismatch
+			internalFormat: "GL_RG8",
+			pixelFormat: "GL_RG",
+			pixelDataType: "UNSIGNED_BYTE",
+			target: "TEXTURE_2D",
+			texParams: [
+				{name: "TEXTURE_MIN_FILTER", val: "LINEAR"}, {name: "TEXTURE_MAG_FILTER", val: "LINEAR"},
+				{name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
+			]
+		}, {
+			name: "custom_clouds_depth",
+			lod: 0,
+			internalFormat: "GL_R32F",
+			pixelFormat: "GL_RED",
+			pixelDataType: "FLOAT",
+			target: "TEXTURE_2D",
+			texParams: [
+				{ "name": "TEXTURE_MIN_FILTER", "val": "NEAREST" },
+				{ "name": "TEXTURE_MAG_FILTER", "val": "NEAREST" },
+				{ "name": "TEXTURE_WRAP_S", "val": "CLAMP_TO_EDGE" },
+				{ "name": "TEXTURE_WRAP_T", "val": "CLAMP_TO_EDGE" },
+				{ "name": "TEXTURE_COMPARE_MODE", "val": "NONE" }
+			]
+		},
+	],
+	
+	framebuffers: [
+		{
+			name: "custom_clouds",
+			colorAttachments: [
+				{image: "custom_clouds", clearColor: "0x00000000"},
+				{image: "custom_clouds_depth", clearColor: "0xFFFFFFFF"}]
+		}, {
+			name: "clouds_texture",
+			colorAttachments: [
+				{image: "clouds_texture", clearColor: "0x00000000"}]
+		}, 
+	],
+	
+	fabulous: {
+		passes: [
+			{
+				name: "clouds_texture",
+				program: "clouds_texture",
+				framebuffer: "clouds_texture",
+				samplerImages: []
+			},
+			{
+				name: "clouds",
+				program: "clouds",
+				framebuffer: "custom_clouds",
+				samplerImages: [
+					"clouds",
+					"clouds_texture",
+					"clouds_depth",
+					"solid_depth",
+					"translucent_depth",
+					"lumi:textures/filter_pattern/bluenoise256.png",
+				]
+			},
+		]
+	}
 }

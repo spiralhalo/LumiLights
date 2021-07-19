@@ -1,32 +1,25 @@
 {
-    drawTargets: {
-        solidTerrain: "solid",
-        translucentTerrain: "translucent",
-        translucentEntity: "translucent",
-        weather: "weather",
-        clouds: "clouds",
-        // TODO: segregate solid particles
-        translucentParticles: "particles"
-    },
-// When present, will force Minecraft to operate as if "fabulous" mode was selected.
-// Normally this means translucent geometry will be drawn to different framebuffers
-// and mc and mods expect five additional framebuffers will be available:
-//    mc_entity       - item entities
-//    mc_particles
-//    mc_weather
-//    mc_clouds
-//    mc_translucent  - terrain
-// The actual target for managed draws will be controlled by the stage configuration.
-// These mappings will *only* affect unmanaged draws that directly target one of these buffers.
-    fabulousTargets: {
-        entity: "fab_translucent",
-        particles: "fab_particles",
-        weather: "fab_weather",
-        clouds: "fab_clouds",
-        translucent: "fab_translucent"
-    },
+	// Managed draw targets
+	drawTargets: {
+		solidTerrain: "solid",             // terrain and entities
+		translucentTerrain: "translucent", // translucent terrain
+		translucentEntity: "translucent",  // translucent ITEM entities
+		translucentParticles: "particles", // TODO: segregate solid particles
+		weather: "weather",
+		clouds: "clouds",
+	},
 
-    materialProgram: {
+	// Unmanaged draw targets
+	defaultFramebuffer: "default",
+	fabulousTargets: {
+		translucent: "fab_translucent", // translucent terrain
+		entity: "fab_translucent",      // translucent ITEM entities
+		particles: "fab_particles",
+		weather: "fab_weather",
+		clouds: "fab_clouds",
+	},
+
+	materialProgram: {
 		vertexSource: "lumi:shaders/forward/main.vert",
 		fragmentSource: "lumi:shaders/forward/main.frag",
 		// glsl names for samplers additive to the FREX pre-defined samplers
@@ -35,196 +28,27 @@
 		samplerImages: ["minecraft:textures/misc/enchanted_item_glint.png"]
 	},
 
-    smoothBrightnessBidirectionaly: true,
+	smoothBrightnessBidirectionaly: true,
 
-    include: [
-        "lumi:pipeline/reflection.json",
-        "lumi:pipeline/custom_clouds.json",
-        "lumi:pipeline/ao.json",
-        "lumi:pipeline/shading.json",
-        "lumi:pipeline/composite.json",
-        "lumi:pipeline/layers/clouds.json",
-        "lumi:pipeline/layers/particles.json",
-        "lumi:pipeline/layers/translucent.json",
-        "lumi:pipeline/layers/weather.json",
-    ],
+	include: [
+		"lumi:pipeline/layers/solid.json",
+		"lumi:pipeline/layers/translucent.json",
+		"lumi:pipeline/layers/clouds.json",
+		"lumi:pipeline/layers/particles.json",
+		"lumi:pipeline/layers/weather.json",
+		"lumi:pipeline/common.json",
+		// PASSES IN CORRECT ORDER
+		// NB: Passes need to be in the same "include" level to be ordered correctly.
+		//     Passes in higher "include" level will always come before passes in lower level.
+		"lumi:pipeline/clear.json",
+		"lumi:pipeline/custom_clouds.json",
+		"lumi:pipeline/ao.json",
+		"lumi:pipeline/shading.json",
+		"lumi:pipeline/reflection.json",
+		"lumi:pipeline/composite.json",
+		"lumi:pipeline/hand.json",
+		"lumi:pipeline/taa.json",
+		"lumi:pipeline/bloom.json",
+	],
 
-    programs: [
-        {
-            name: "refraction",
-            vertexSource: "lumi:shaders/post/hdr.vert",
-            fragmentSource: "lumi:shaders/post/refraction.frag",
-            samplers: [
-                "u_solid_color",
-                "u_solid_depth",
-                "u_normal_solid",
-
-                "u_translucent_depth",
-                "u_light_translucent",
-                "u_normal_translucent",
-            ]
-        },  
-    ],
-
-    beforeWorldRender: {
-        passes: [
-            {
-                name: "clear_main",
-                framebuffer: "solid",
-                program: "frex_clear"
-            }, {
-                name: "clear_translucent",
-                framebuffer: "translucent",
-                program: "frex_clear"
-            }, {
-                name: "clear_particles",
-                framebuffer: "particles",
-                program: "frex_clear"
-            }, {
-                name: "clear_clouds",
-                framebuffer: "clouds",
-                program: "frex_clear"
-            }, {
-                name: "clear_weather",
-                framebuffer: "weather",
-                program: "frex_clear"
-            }
-        ]
-    },
-
-    images: [
-        /* SOLID */
-        {
-            name: "solid_main",
-            lod: 0,
-            internalFormat: "RGBA8",
-            pixelFormat: "RGBA",
-            pixelDataType: "UNSIGNED_BYTE",
-            target: "TEXTURE_2D",
-            texParams: [
-                {name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
-                {name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
-            ]
-        }, {
-            name: "solid_depth",
-            lod: 0,
-            internalFormat: "DEPTH_COMPONENT",
-            pixelFormat: "DEPTH_COMPONENT",
-            pixelDataType: "FLOAT",
-            target: "TEXTURE_2D",
-            texParams: [ 
-                {name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
-                {name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"},
-                {name: "TEXTURE_COMPARE_MODE", val: "NONE"}
-            ]
-        }, {
-            name: "light_solid",
-            lod: 0,
-            internalFormat: "RGB16F",
-            pixelFormat: "RGB",
-            pixelDataType: "FLOAT",
-            target: "TEXTURE_2D",
-            texParams: [
-                {name: "TEXTURE_MIN_FILTER", val: "LINEAR"}, {name: "TEXTURE_MAG_FILTER", val: "LINEAR"},
-                {name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
-            ]
-        },
-        {
-            name: "normal_solid",
-            lod: 0,
-            internalFormat: "RGB8",
-            pixelFormat: "RGB",
-            pixelDataType: "UNSIGNED_BYTE",
-            target: "TEXTURE_2D",
-            texParams: [
-                {name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
-                {name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
-            ]
-        },
-        {
-            name: "normal_micro_solid",
-            lod: 0,
-            internalFormat: "RGB16",
-            pixelFormat: "RGB",
-            pixelDataType: "UNSIGNED_BYTE",
-            target: "TEXTURE_2D",
-            texParams: [
-                {name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
-                {name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
-            ]
-        },
-        {
-            name: "material_solid",
-            lod: 0,
-            internalFormat: "RGB8",
-            pixelFormat: "RGB",
-            pixelDataType: "UNSIGNED_BYTE",
-            target: "TEXTURE_2D",
-            texParams: [
-                {name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
-                {name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
-            ]
-        }, {
-            name: "misc_solid",
-            lod: 0,
-            internalFormat: "RGB16",
-            pixelFormat: "RGB",
-            pixelDataType: "UNSIGNED_BYTE",
-            target: "TEXTURE_2D",
-            texParams: [
-                {name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
-                {name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
-            ]
-        },
-        /* AFTER-HAND */
-        {
-            name: "main_copy",
-            lod: 0,
-            internalFormat: "RGBA8",
-            target: "TEXTURE_2D",
-            texParams: [
-                // nearest because don't want filtering when copy back from main
-                {name: "TEXTURE_MIN_FILTER", val: "NEAREST"},
-                {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
-                {name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"},
-                {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
-            ]
-        }
-    ],
-
-    framebuffers: [
-        // These are the framebuffers visible to the game and to mods.
-        // They exist mainly so mods can't mess up the managed fb state.
-        // Attachements are the same as those for managed draws.
-        {
-            name: "default",
-                depthAttachment: {image: "solid_depth"},
-                colorAttachments: [{image: "solid_main"}]
-        },
-        
-        {
-            name: "solid",
-            depthAttachment: {image: "solid_depth", clearDepth: 1.0},
-            colorAttachments: [
-                {image: "solid_main", clearColor: 0x00000000},
-                {image: "light_solid", clearColor: 0x00000000},
-                {image: "normal_solid", clearColor: 0x00000000},
-                {image: "normal_micro_solid", clearColor: 0x00000000},
-                {image: "material_solid", clearColor: 0x00000000},
-                {image: "misc_solid", clearColor: 0x00000000},
-            ]
-        },
-
-        // {
-        //     name: "refraction",
-        //     colorAttachments: [{image: "solid_shaded_swap"}]
-        // },
-        /* AFTER-HAND FRAMEBUFFERS */
-    ],
-
-    // Framebuffer that will be visible to the game and to mods as the primary framebuffer.
-    // Should generally keep it the same as vanilla has it and avoid using it except as a
-    // sink for unmanaged draws and for final output.
-    // Canvas will make no managed draws to this framebuffer unless requested.
-    defaultFramebuffer: "default",
 }
