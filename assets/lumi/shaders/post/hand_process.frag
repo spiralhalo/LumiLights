@@ -92,7 +92,7 @@ void main()
     vec4 source_base = a;
     vec3 source_albedo = texture(u_color, v_texcoord).rgb;
     float source_roughness = mat.x;
-    rt_color_depth source_source = work_on_pair(
+    rt_ColorDepthBloom source_source = work_on_pair(
         source_base,
         source_albedo,
         u_depth,

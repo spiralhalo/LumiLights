@@ -89,7 +89,7 @@ vec3 sample_worldNormal(vec2 uv, in sampler2D snormal)
 }
 
 const float SKYLESS_FACTOR = 0.5;
-vec3 calcFallbackColor(in sampler2D sdepth, vec3 unitMarch_world, vec2 light)
+vec4 calcFallbackColor(in sampler2D sdepth, vec3 unitMarch_world, vec2 light)
 {
     float skyLight = l2_clampScale(0.03125, 0.96875, light.y);
     float aboveWaterFactor = frx_viewFlag(FRX_CAMERA_IN_WATER) ? 0.0 : 1.0;
@@ -110,11 +110,11 @@ vec3 calcFallbackColor(in sampler2D sdepth, vec3 unitMarch_world, vec2 light)
     float occluder = 0.0;
 #endif
 
-    vec4 celestColor = celestFrag(Rect(v_celest1, v_celest2, v_celest3), u_sun, u_moon, unitMarch_world);
+    vec4 celestColor = celestFrag(Rect(v_celest1, v_celest2, v_celest3), u_sun, u_moon, unitMarch_world) * 2.0;
 
     sky += celestColor.rgb * (1. - occluder);
 
-    return sky * skyLightFactor * upFactor * aboveWaterFactor * 1.5;
+    return vec4(sky * skyLightFactor * upFactor * aboveWaterFactor * 1.5, celestColor.a);
 }
 
 vec3 pbr_lightCalc(float roughness, vec3 f0, vec3 radiance, vec3 lightDir, vec3 viewDir)
@@ -215,13 +215,14 @@ rt_Result rt_reflection(
 
 const float JITTER_STRENGTH = 0.6;
 
-struct rt_color_depth
+struct rt_ColorDepthBloom
 {
     vec4 color;
     float depth;
+    float bloom;
 };
 
-rt_color_depth work_on_pair(
+rt_ColorDepthBloom work_on_pair(
     in vec4 base_color,
     in vec3 albedo,
     in sampler2D reflector_depth,
@@ -240,7 +241,7 @@ rt_color_depth work_on_pair(
 {
     vec4 material   = texture(reflector_material, v_texcoord);
     float roughness = material.x == 0.0 ? 1.0 : min(1.0, 1.0203 * material.x - 0.01);
-    if (roughness == 1.0) return rt_color_depth(vec4(0.0), 1.0); // unmanaged draw
+    if (roughness == 1.0) return rt_ColorDepthBloom(vec4(0.0), 1.0, 0.0); // unmanaged draw
 
     vec3 worldNormal = sample_worldNormal(v_texcoord, reflector_micro_normal);
     vec3 ray_view    = uv2view(v_texcoord, frx_inverseProjectionMatrix(), reflector_depth);
@@ -317,18 +318,22 @@ rt_color_depth work_on_pair(
     // nb: compute_colors is currently unused as of the commmit it was added in ¯\_(ツ)_/¯
     if (compute_colors) {
         vec3 unitMarch_world = unitMarch_view * frx_normalModelMatrix();
-        vec4 fallbackColor   = fallback > 0.0 ? vec4(calcFallbackColor(reflector_depth, unitMarch_world, light), fallback) : vec4(0.0);
+        vec4 calcFaclback    = calcFallbackColor(reflector_depth, unitMarch_world, light);
+        vec4 fallbackColor   = fallback > 0.0 ? vec4(calcFaclback.rgb, fallback) : vec4(0.0);
         vec4 reflected_final = mix(reflected, fallbackColor, fallbackMix);
         vec3 unit_world      = unit_view * frx_normalModelMatrix();
+        float sunBloom       = calcFaclback.a * fallbackMix * (1.0 - roughness);
+
+        f0 += (vec3(1.0) - f0) * sunBloom * 0.2; // magic hax
 
         vec4 pbr_color = vec4(pbr_lightCalc(roughness, f0, reflected_final.rgb * base_color.a, unitMarch_world, unit_world), reflected_final.a);
 
-        return rt_color_depth(pbr_color, reflected_depth_value);
+        return rt_ColorDepthBloom(pbr_color, reflected_depth_value, sunBloom);
     } else {
     #if REFLECTION_PROFILE != REFLECTION_PROFILE_NONE
-        return rt_color_depth(vec4(result.reflected_uv, fallbackMix, 1.0), reflected_depth_value);
+        return rt_ColorDepthBloom(vec4(result.reflected_uv, fallbackMix, 1.0), reflected_depth_value, 0.0);
     #else
-        return rt_color_depth(vec4(0., 0., fallbackMix, 1.0), reflected_depth_value);
+        return rt_ColorDepthBloom(vec4(0., 0., fallbackMix, 1.0), reflected_depth_value, 0.0);
     #endif
     }
 }

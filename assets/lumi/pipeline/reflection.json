@@ -119,7 +119,8 @@
 		{
 			name: "reflection_solid",
 			colorAttachments: [
-				{image: "solid_reflection", clearColor: 0x00000000}
+				{image: "solid_reflection", clearColor: 0x00000000},
+				{image: "emissive_reflection_solid", clearColor: 0x00000000},
 			]
 		},
 		{
@@ -137,7 +138,8 @@
 		{
 			name: "reflection_translucent",
 			colorAttachments: [
-				{image: "translucent_reflection", clearColor: 0x00000000}
+				{image: "translucent_reflection", clearColor: 0x00000000},
+				{image: "emissive_reflection_translucent", clearColor: 0x00000000},
 			]
 		},
 		{

@@ -9,6 +9,8 @@
                 "u_base_composite",
                 "u_emissive_solid",
                 "u_emissive_composite",
+                "u_emissive_reflection_solid",
+                "u_emissive_reflection_translucent",
                 "u_solid_depth"
             ]
         }, {
@@ -46,14 +48,12 @@
                 program: "emissive_color",
                 framebuffer: "emissive_color",
                 samplerImages: [
-                    // solid_main = from hand render without taa
                     "solid_main",
-                    // emissive = for hand render only. other emissive buffers are combined in composite
-                    "emissive_solid",
-                    // emissive_composite = combination of emissive and translucent plus other layers occlusion
+                    "emissive_solid", // for hand only but require depth filtering
                     "emissive_composite",
-                    // solid_depth = from hand render
-                    "solid_depth"
+                    "emissive_reflection_solid",
+                    "emissive_reflection_translucent",
+                    "solid_depth" // depth after hand render for filtering
                 ]
             }, {
                 // build bloom mipmaps, blurring as part of downscale
