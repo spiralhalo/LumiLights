@@ -61,6 +61,8 @@
 				"u_material_translucent",
 				"u_hdr_translucent_swap",
 
+				"u_emissive_reflection_translucent",
+
 				"u_blue_noise",
 			]
 		},

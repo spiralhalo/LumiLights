@@ -324,7 +324,7 @@ rt_ColorDepthBloom work_on_pair(
         vec3 unit_world      = unit_view * frx_normalModelMatrix();
         float sunBloom       = calcFaclback.a * fallbackMix * (1.0 - roughness);
 
-        f0 += (vec3(1.0) - f0) * sunBloom * 0.2; // magic hax
+        f0 += (vec3(1.0) - f0) * sunBloom * 0.5; // magic hax
 
         vec4 pbr_color = vec4(pbr_lightCalc(roughness, f0, reflected_final.rgb * base_color.a, unitMarch_world, unit_world), reflected_final.a);
 

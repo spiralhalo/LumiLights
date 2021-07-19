@@ -21,11 +21,15 @@ uniform sampler2D u_hdr_translucent;
 uniform sampler2D u_material_translucent;
 uniform sampler2D u_hdr_translucent_swap;
 
+uniform sampler2D u_emissive_reflection_translucent;
+
 uniform sampler2D u_blue_noise;
 
 in vec2 v_invSize;
 
 out vec4[2] fragColor;
+
+const float BLOOM_ALPHA_ADD = 0.5;
 
 vec4 hdr_combine(sampler2D a, sampler2D matA, sampler2D b, vec2 uv)
 {
@@ -51,4 +55,5 @@ void main()
 {
     fragColor[0] = hdr_combine(u_hdr_solid, u_material_solid, u_hdr_solid_swap, v_texcoord);
     fragColor[1] = hdr_combine(u_hdr_translucent, u_material_translucent, u_hdr_translucent_swap, v_texcoord);
+    fragColor[1].a = min(1.0, fragColor[1].a + BLOOM_ALPHA_ADD * texture(u_emissive_reflection_translucent, v_texcoord).r);
 }
