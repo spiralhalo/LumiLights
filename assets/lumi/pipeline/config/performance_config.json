@@ -75,6 +75,43 @@
       }
     },
     {
+      includeToken: "lumi:ssao_config",
+      categoryKey: "config.lumi_lights.category.ssao",
+      options: {
+        ssao_radius: {
+          default: 2.0,
+          min: 0.01,
+          max: 100.0,
+          nameKey: "config.lumi_lights.value.ssao_radius",
+          descriptionKey: "config.lumi_lights.help.ssao_radius"
+        },
+        ssao_bias: {
+          default: 0.3,
+          min: 0.01,
+          max: 100.0,
+          nameKey: "config.lumi_lights.value.ssao_bias",
+          descriptionKey: "config.lumi_lights.help.ssao_bias"
+        },
+        ssao_intensity: {
+          default: 2.5,
+          min: 0.01,
+          max: 100.0,
+          nameKey: "config.lumi_lights.value.ssao_intensity",
+          descriptionKey: "config.lumi_lights.help.ssao_intensity"
+        },
+        ssao_use_attenuation: {
+          default: true,
+          nameKey: "config.lumi_lights.value.ssao_use_attenuation",
+          descriptionKey: "config.lumi_lights.help.ssao_use_attenuation"
+        },
+        ssao_glow: {
+          default: true,
+          nameKey: "config.lumi_lights.value.ssao_glow",
+          descriptionKey: "config.lumi_lights.help.ssao_glow"
+        },
+      }
+    }
+    {
       includeToken: "lumi:clouds_config",
       categoryKey: "config.lumi_lights.category.clouds",
       options: {

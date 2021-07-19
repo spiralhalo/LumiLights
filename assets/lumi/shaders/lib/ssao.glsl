@@ -38,7 +38,8 @@ const mat2 deltaRotationMatrix = mat2(
 vec4 calcSSAO(
     in sampler2D snormal, in sampler2D sdepth, in sampler2D slight, in sampler2D scolor, in sampler2D sbluenoise,
     mat3 normal_mat, mat4 inv_projection, vec2 tex_size, vec2 uv,
-    float radius_screen, float attenuation_radius, float angle_bias, float intensity)
+    float radius_screen, float attenuation_radius, float angle_bias, float intensity,
+    bool useAttenuation, bool glowOcclusion)
 {
     vec3 origin_view = coords_view(uv, inv_projection, sdepth);
     vec3 normal_view = coords_normal(uv, normal_mat, snormal);
@@ -79,11 +80,11 @@ vec4 calcSSAO(
                 float sampleDir_view2 = dot(sampleDir_view, sampleDir_view);
 
                 if (bloom <= 0.0) {
-                    float attenuation = clamp(1.0 - sampleDir_view2 / attenuation_rad2, 0.0, 1.0);
+                    float attenuation = useAttenuation ? clamp(1.0 - sampleDir_view2 / attenuation_rad2, 0.0, 1.0) : 1.0;
                     float value = sin(gamma) - sin(oldAngle);
 
                     occlusion += attenuation * value;
-                } else {
+                } else if (glowOcclusion) {
                     float attenuation = clamp(1.0 - sampleDir_view2 / attenuation2_rad2, 0.0, 1.0);
                     vec3 bloomColor = hdr_fromGamma(texture(scolor, sample_uv).rgb);
 

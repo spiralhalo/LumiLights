@@ -22,14 +22,26 @@ uniform sampler2D u_blue_noise;
 out vec4 fragColor;
 
 #ifdef SSAO_ENABLED
-const float RADIUS = 2.0;
-const float BIAS = 0.3;
-const float INTENSITY = 2.5;
+const float RADIUS = SSAO_RADIUS;
+const float BIAS = SSAO_BIAS;
+const float INTENSITY = SSAO_INTENSITY;
 #endif
 
 void main()
 {
 #ifdef SSAO_ENABLED
+    #ifdef SSAO_USE_ATTENUATION
+        const bool useAttenuation = true;
+    #else
+        const bool useAttenuation = false;
+    #endif
+
+    #ifdef SSAO_GLOW
+        const bool glowOcclusion = true;
+    #else
+        const bool glowOcclusion = false;
+    #endif
+
     // Modest performance saving by skipping the sky
     if (texture(u_depth, v_texcoord).r == 1.0) {
         fragColor = vec4(0.0, 0.0, 0.0, 1.0);
@@ -37,7 +49,8 @@ void main()
         fragColor = calcSSAO(
             u_normal, u_depth, u_light, u_color, u_blue_noise,
             frx_normalModelMatrix(), frx_inverseProjectionMatrix(), frxu_size, 
-            v_texcoord, RADIUS, RADIUS * 0.5, BIAS, INTENSITY);
+            v_texcoord, RADIUS, RADIUS * 0.5, BIAS, INTENSITY,
+            useAttenuation, glowOcclusion);
     }
 #else
     fragColor = vec4(0.0, 0.0, 0.0, 1.0);
