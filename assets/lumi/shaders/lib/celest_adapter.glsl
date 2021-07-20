@@ -69,12 +69,17 @@ vec4 celestFrag(in Rect celestRect, sampler2D ssun, sampler2D smoon, vec3 worldV
 }
 
 vec2 celestSpecular(in Rect celestRect, sampler2D ssun, sampler2D smoon, vec3 worldVec) {
+    float top = max(0.0, worldVec.y);
+    
+    if (top <= 0.) return vec2(0.0);
+
     vec4 celestialObjectColor = celestFrag(celestRect, ssun, smoon, worldVec);
 
     celestialObjectColor.rgb = smoothstep(0.0, 1.0, celestialObjectColor.rgb);
+    top = smoothstep(0.0, 0.01, top);
 
-    float specular = frx_luminance(clamp(celestialObjectColor.rgb, 0.0, 1.0));
-    float opacity = max(celestialObjectColor.a, specular);
+    float specular = frx_luminance(clamp(celestialObjectColor.rgb, 0.0, 1.0)) * top;
+    float opacity = max(celestialObjectColor.a, specular) * top;
 
     return vec2(specular, opacity);
 }
