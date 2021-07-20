@@ -128,11 +128,13 @@ void main()
 
         float tileJitter = getRandomFloat(u_blue_noise, v_texcoord, frxu_size);
 
-        vec4 godBeam = underwaterLightRays(u_shadow, worldPos.xyz, tileJitter, depth_translucent, min_depth);
+        vec4 godBeam = celestialLightRays(u_shadow, worldPos.xyz, tileJitter, depth_translucent, min_depth);
 
         godBeam = ldr_tonemap(godBeam) * v_godray_intensity;
 
-        c = c * (1.0 - godBeam.a) + godBeam.rgb * godBeam.a;
+        c = c + godBeam.rgb * godBeam.a;
+
+        // TODO: screenspace godrays when there is no shadow map
 
         // vec2 diff = abs(v_texcoord - v_skylightpos);
         // diff.x *= v_aspect_adjuster;

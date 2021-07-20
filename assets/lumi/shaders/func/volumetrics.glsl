@@ -1,3 +1,4 @@
+#include frex:shaders/api/view.glsl
 #include frex:shaders/api/world.glsl
 #include lumi:shaders/common/shadow.glsl
 #include lumi:shaders/lib/caustics.glsl
@@ -11,29 +12,33 @@
  *  published by the Free Software Foundation, Inc.    *
  *******************************************************/
 
-vec4 underwaterLightRays(sampler2DArrayShadow sshadow, vec3 modelPos, float tileJitter, float translucentDepth, float depth)
+vec4 celestialLightRays(sampler2DArrayShadow sshadow, vec3 modelPos, float tileJitter, float translucentDepth, float depth)
 {
     bool doUnderwaterRays = frx_viewFlag(FRX_CAMERA_IN_WATER) && translucentDepth >= depth && frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT);
     vec3 unit = normalize(modelPos);
     float scatter = dot(unit, frx_skyLightVector());
 
-    scatter = 0.5 - abs(scatter - 0.5);
-    scatter *= 2.0;
+    if (doUnderwaterRays) {
+        scatter = 0.5 - abs(scatter - 0.5);
+        scatter *= 2.0;
+    } else {
+        scatter = smoothstep(0.0, 1.0, scatter);
+        // scatter *= 1.0 - max(0.0, unit.y) * 0.5;
+    }
 
-    if (!doUnderwaterRays || scatter <= 0.0) {
+    if (scatter <= 0.0) {
         return vec4(0.0);
     }
 
-    const float sample = 2.0;
-    const int maxSteps = 10;
-    const float range = 10.0;
-    const float beamL = 3.;
-    const float basePower = 1.0;
-    const float deadRadius = 4.0;
+    float maxDist = length(modelPos);
+    int maxSteps = doUnderwaterRays ? 10 : 16;
+    float sample = doUnderwaterRays ? 2.0 : maxDist / float(maxSteps);
+    float basePower = doUnderwaterRays ? 1.0 : 0.2;
+    float deadRadius = doUnderwaterRays ? 4.0 : 0.0;
+    // const float range = 10.0;
 
     vec3 ray = frx_cameraPos();
     vec3 march = unit * sample;
-    float maxDist = length(modelPos);
 
     ray += tileJitter * march + unit * deadRadius;
 
@@ -44,8 +49,12 @@ vec4 underwaterLightRays(sampler2DArrayShadow sshadow, vec3 modelPos, float tile
     while (traveled < maxDist && steps < maxSteps) {
         float e = 0.0;
 
-        e = caustics(ray);
-        e = pow(e, 30.0);
+        if (doUnderwaterRays) {
+            e = caustics(ray);
+            e = pow(e, 30.0);
+        } else {
+            e = 1.0;
+        }
         // e *= traveled / range;
 
     #ifdef SHADOW_MAP_PRESENT
@@ -59,11 +68,14 @@ vec4 underwaterLightRays(sampler2DArrayShadow sshadow, vec3 modelPos, float tile
         steps ++;
     }
 
-    power = power * sample / float(maxSteps) * scatter * basePower;
+    power = power / float(maxSteps) * scatter * basePower;
 
-    vec3 scatterColor = atmos_hdrFogColorRadiance(unit);
-
-    scatterColor /= l2_max3(scatterColor);
+    vec3 scatterColor = vec3(1.0);
+    
+    if (doUnderwaterRays) {
+        scatterColor = atmos_hdrFogColorRadiance(unit);
+        scatterColor /= l2_max3(scatterColor);
+    }
 
     float scatterLuminance = frx_luminance(scatterColor);
 
