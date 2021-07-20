@@ -1,4 +1,5 @@
 #include frex:shaders/api/world.glsl
+#include frex:shaders/lib/noise/cellular2x2x2.glsl
 
 /*******************************************************
  *  lumi:shaders/lib/caustics.glsl                     *

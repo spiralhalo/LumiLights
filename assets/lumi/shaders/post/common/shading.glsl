@@ -335,9 +335,6 @@ vec4 hdr_shaded_color(
         // the sky
         if (v_blindness == 1.0) return vec4(0.0);
         custom_sky(modelPos, 1.0 - v_blindness, maybeUnderwater, a, bloom_out);
-    #ifdef WATER_CAUSTICS
-        a = underwaterLightRays(u_shadow, a, modelPos, tileJitter, translucentDepth, depth);
-    #endif
         // mark as managed draw, vanilla sky is an exception
         return vec4(a.rgb * 1.0 - v_blindness, 1.0);
     }
@@ -440,10 +437,6 @@ vec4 hdr_shaded_color(
     if (a.a != 0.0 && depth != 1.0) {
         a = fog(light.y, a, modelPos, worldPos, bloom_out);
     }
-
-#ifdef WATER_CAUSTICS
-    a = underwaterLightRays(u_shadow, a, modelPos, tileJitter, translucentDepth, depth);
-#endif
 
     return a;
 }

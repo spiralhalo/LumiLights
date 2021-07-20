@@ -23,6 +23,7 @@
 				"u_emissive_solid",
 				"u_emissive_transparent",
 
+				"u_shadow",
 				"u_blue_noise",
 			]
 		},
@@ -66,6 +67,7 @@
 					"emissive_solid",
 					"emissive_translucent",
 
+					"shadow_map",
 					"lumi:textures/filter_pattern/bluenoise256.png",
 				]
 			}
