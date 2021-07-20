@@ -1,4 +1,5 @@
 #include lumi:shaders/lib/rectangle.glsl
+#include lumi:shaders/lib/util.glsl
 
 /*******************************************************
  *  lumi:shaders/lib/celest_adapter.glsl               *
@@ -65,6 +66,17 @@ vec4 celestFrag(in Rect celestRect, sampler2D ssun, sampler2D smoon, vec3 worldV
     }
 
     return vec4(celestialObjectColor, opacity);
+}
+
+vec2 celestSpecular(in Rect celestRect, sampler2D ssun, sampler2D smoon, vec3 worldVec) {
+    vec4 celestialObjectColor = celestFrag(celestRect, ssun, smoon, worldVec);
+
+    celestialObjectColor.rgb = smoothstep(0.0, 1.0, celestialObjectColor.rgb);
+
+    float specular = frx_luminance(clamp(celestialObjectColor.rgb, 0.0, 1.0));
+    float opacity = max(celestialObjectColor.a, specular);
+
+    return vec2(specular, opacity);
 }
 
 #endif
