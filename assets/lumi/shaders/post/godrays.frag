@@ -2,6 +2,7 @@
 
 #include frex:shaders/api/view.glsl
 #include frex:shaders/api/world.glsl
+#include lumi:shaders/common/userconfig.glsl
 #include lumi:shaders/func/tile_noise.glsl
 #include lumi:shaders/func/volumetrics.glsl
 #include lumi:shaders/lib/godrays.glsl
@@ -82,9 +83,11 @@ void main() {
         // }
     }
 
+#ifdef EXPOSURE_DEBUG
     if (abs(v_texcoord.x - v_exposure) < v_invSize.x * 10.0 && abs(v_texcoord.y - 0.5) < v_invSize.x * 2.0 ) {
         c.g += 1.0;
     }
+#endif
 
     fragColor = c;
 }

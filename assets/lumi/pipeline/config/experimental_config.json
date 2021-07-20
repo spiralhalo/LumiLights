@@ -53,6 +53,11 @@
                     nameKey: "config.lumi_lights.value.translucent_layering",
                     descriptionKey: "config.lumi_lights.help.translucent_layering"
                 },
+                exposure_debug: {
+                    default: false,
+                    nameKey: "config.lumi_lights.value.exposure_debug",
+                    descriptionKey: "config.lumi_lights.help.exposure_debug"
+                },
                 taa_debug_render: {
                     default: "off",
                     choices: ["off", "velocity", "depth", "frames"],
