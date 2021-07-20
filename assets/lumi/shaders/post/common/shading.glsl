@@ -22,7 +22,6 @@
 #include lumi:shaders/lib/rectangle.glsl
 #include lumi:shaders/lib/taa_jitter.glsl
 #include lumi:shaders/lib/util.glsl
-#include lumi:shaders/post/common/bloom.glsl
 #include lumi:shaders/post/common/fog.glsl
 
 /*******************************************************
@@ -277,7 +276,6 @@ void custom_sky(in vec3 modelPos, in float blindnessFactor, in bool maybeUnderwa
         a.rgb = mix(voidColor, a.rgb, v_not_in_void);
     }
 
-    bloom_out += l2_skyBloom();
     bloom_out *= blindnessFactor;
 }
 

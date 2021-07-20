@@ -26,19 +26,12 @@
           nameKey: "config.lumi_lights.value.bloom_scale",
           descriptionKey: "config.lumi_lights.help.bloom_scale"
         },
-        sky_bloom_intensity: {
-          default: 2,
+        lightrays_intensity: {
+          default: 10,
           min: 0,
           max: 10,
-          nameKey: "config.lumi_lights.value.sky_bloom_intensity",
-          descriptionKey: "config.lumi_lights.help.sky_bloom_intensity"
-        },
-        godrays_intensity: {
-          default: 5,
-          min: 0,
-          max: 10,
-          nameKey: "config.lumi_lights.value.godrays_intensity",
-          descriptionKey: "config.lumi_lights.help.godrays_intensity"
+          nameKey: "config.lumi_lights.value.lightrays_intensity",
+          descriptionKey: "config.lumi_lights.help.lightrays_intensity"
         },
         sky_mode: {
           default: "lumi",
