@@ -111,9 +111,12 @@ vec4 calcFallbackColor(in sampler2D sdepth, vec3 unitMarch_world, vec2 light)
 #endif
 
     vec2 specular = celestSpecular(Rect(v_celest1, v_celest2, v_celest3), u_sun, u_moon, unitMarch_world);
+
+    specular *= (1. - occluder);
+
     vec3 celestColor = atmos_hdrCelestialRadiance() * specular.x; // specular.y (opacity) will be used later for star reflection
 
-    sky += celestColor * (1. - occluder);
+    sky += celestColor;
 
     return vec4(sky * skyLightFactor * upFactor * aboveWaterFactor * 1.5, specular.x);
 }
