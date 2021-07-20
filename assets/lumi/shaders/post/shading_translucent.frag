@@ -1,5 +1,7 @@
 #include lumi:shaders/post/common/header.glsl
 
+#include lumi:shaders/lib/translucent_layering.glsl
+
 /*******************************************************
  *  lumi:shaders/post/shading_translucent.frag         *
  *******************************************************
@@ -71,6 +73,8 @@ vec4 advancedTranslucentShading(out float bloom_out) {
         return unmanaged(color, bloom_out, true);
     }
 
+    vec3 normal =  2.0 * texture(u_normal_translucent, v_texcoord).xyz - 1.0;
+
     vec4 frontAlbedo = vec4(texture(u_albedo_translucent, v_texcoord).rgb, texture(u_alpha_translucent, v_texcoord).r);
 
     vec4 frontColor = hdr_shaded_color(
@@ -80,22 +84,26 @@ vec4 advancedTranslucentShading(out float bloom_out) {
     vec4 backColor = texture(u_translucent_color, v_texcoord);
 
     // reverse forward gl_blend with foreground layer (lossy if clipping)
-    backColor.rgb = max(vec3(0.0), backColor.rgb - frontAlbedo.rgb * frontAlbedo.a);
-    backColor.rgb /= (frontAlbedo.a < 1.0) ? (1.0 - frontAlbedo.a) : 1.0;
+    vec3 unblend = frontAlbedo.rgb * frontAlbedo.a;
+#if TRANSLUCENT_LAYERING == TRANSLUCENT_LAYERING_FANCY
+    float luminosity2 = calcLuminosity(normal, light.xy, frontAlbedo.a);
 
+    unblend *= luminosity2 * luminosity2;
+#endif
+    backColor.rgb = max(vec3(0.0), backColor.rgb - unblend);
+    // backColor.rgb /= (frontAlbedo.a < 1.0) ? (1.0 - frontAlbedo.a) : 1.0;
+
+#if TRANSLUCENT_LAYERING == TRANSLUCENT_LAYERING_FAST
     // fake shading for back color
     vec2 fakeLight = texture(u_light_solid, v_texcoord).xy;
     fakeLight = fakeLight * 0.25 + texture(u_light_translucent, v_texcoord).xy * 0.75;
     float luminosity = hdr_fromGammaf(max(lightmapRemap(fakeLight.x), lightmapRemap(fakeLight.y) * atmosv_celestIntensity));
     luminosity = luminosity * (1.0 - BASE_AMBIENT_STR) + BASE_AMBIENT_STR;
-    backColor.rgb = hdr_fromGamma(backColor.rgb) * luminosity * 0.5;
+    backColor.rgb = backColor.rgb * luminosity * 0.5;
+#endif
 
     float finalAlpha = max(frontColor.a, backColor.a);
     float excess = sqrt(finalAlpha - frontColor.a); //hacks
-
-    // blend front and back
-    frontColor.rgb = backColor.rgb * (1.0 - frontColor.a) + frontColor.rgb * frontColor.a * (1.0 - excess);
-    frontColor.a = finalAlpha;
 
     // gelatin material (tentative name)
     bool isWater = bit_unpack(texture(u_misc_translucent, v_texcoord).z, 7) == 1.;
@@ -103,9 +111,14 @@ vec4 advancedTranslucentShading(out float bloom_out) {
     if (isWater && !frx_viewFlag(FRX_CAMERA_IN_WATER)) {
         float solidDepth = ldepth(texture(u_solid_depth, v_texcoord).r);
         float transDepth = ldepth(texture(u_translucent_depth, v_texcoord).r);
-        float gelatinOpacity = l2_clampScale(0.0, 0.05, solidDepth - transDepth);
-        frontColor.a += gelatinOpacity * (1.0 - frontColor.a);
+        float gelatinOpacity = l2_clampScale(0.0, 0.1, solidDepth - transDepth);
+        backColor.rgb = mix(backColor.rgb, frontColor.rgb, gelatinOpacity);
+        finalAlpha += gelatinOpacity * (1.0 - finalAlpha);
     }
+
+    // blend front and back
+    frontColor.rgb = backColor.rgb * (1.0 - frontColor.a) + frontColor.rgb * frontColor.a * (1.0 - excess);
+    frontColor.a = finalAlpha;
 
     return frontColor;
 }

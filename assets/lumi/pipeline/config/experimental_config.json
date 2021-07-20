@@ -45,6 +45,14 @@
                     nameKey: "config.lumi_lights.value.volumetric_fog_softness_relative",
                     descriptionKey: "config.lumi_lights.help.volumetric_fog_softness_relative"
                 },
+                translucent_layering: {
+                    default: "fancy",
+                    choices: ["fast", "fancy"],
+                    enum: true,
+                    prefix: "translucent_layering_",
+                    nameKey: "config.lumi_lights.value.translucent_layering",
+                    descriptionKey: "config.lumi_lights.help.translucent_layering"
+                },
                 taa_debug_render: {
                     default: "off",
                     choices: ["off", "velocity", "depth", "frames"],

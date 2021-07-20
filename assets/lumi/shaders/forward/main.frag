@@ -9,6 +9,7 @@
 #include lumi:shaders/func/tonemap.glsl
 #include lumi:shaders/func/glintify2.glsl
 #include lumi:shaders/lib/bitpack.glsl
+#include lumi:shaders/lib/translucent_layering.glsl
 #include lumi:shaders/lib/util.glsl
 
 /*******************************************************
@@ -92,6 +93,9 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
         bool isParticle = (frx_renderTarget() == TARGET_PARTICLES);
 
         vec3 normal = fragData.vertexNormal;
+    #if TRANSLUCENT_LAYERING == TRANSLUCENT_LAYERING_FANCY
+        vec3 cleanNormal = normal;
+    #endif
 
         pbr_normalMicro = pbr_normalMicro.x > 90. ? normal : pbr_normalMicro;
 
@@ -124,6 +128,11 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
         if (frx_renderTarget() == TARGET_TRANSLUCENT || frx_renderTarget() == TARGET_ENTITY) {
             fragColor[6] = vec4(a.rgb, 1.0);
             fragColor[7] = vec4(a.a, 0.0, 0.0, 1.0);
+
+        #if TRANSLUCENT_LAYERING == TRANSLUCENT_LAYERING_FANCY
+            // apply semi-real diffuse in forward
+            a.rgb *= calcLuminosity(cleanNormal, fragData.light, a.a);
+        #endif
         }
     }
 
