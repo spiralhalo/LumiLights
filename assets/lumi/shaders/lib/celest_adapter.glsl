@@ -70,16 +70,24 @@ vec4 celestFrag(in Rect celestRect, sampler2D ssun, sampler2D smoon, vec3 worldV
 
 vec2 celestSpecular(in Rect celestRect, sampler2D ssun, sampler2D smoon, vec3 worldVec) {
     float top = max(0.0, worldVec.y);
+    // float size = frx_worldFlag(FRX_WORLD_IS_MOONLIT) ? 0.0025 : 0.005;
     
     if (top <= 0.) return vec2(0.0);
+
+    top = smoothstep(0.0, 0.01, top);
 
     vec4 celestialObjectColor = celestFrag(celestRect, ssun, smoon, worldVec);
 
     celestialObjectColor.rgb = smoothstep(0.0, 1.0, celestialObjectColor.rgb);
-    top = smoothstep(0.0, 0.01, top);
 
     float specular = frx_luminance(clamp(celestialObjectColor.rgb, 0.0, 1.0)) * top;
     float opacity = max(celestialObjectColor.a, specular) * top;
+
+    // float specular = max(0.0, dot(worldVec, frx_skyLightVector()));
+
+    // specular = smoothstep(1.0 - size, 1.0, specular) * top;
+
+    // float opacity = specular;
 
     return vec2(specular, opacity);
 }
