@@ -12,7 +12,7 @@
  *  published by the Free Software Foundation, Inc.    *
  *******************************************************/
 
-vec4 celestialLightRays(sampler2DArrayShadow sshadow, vec3 modelPos, float tileJitter, float translucentDepth, float depth)
+vec4 celestialLightRays(sampler2DArrayShadow sshadow, vec3 modelPos, float exposure, float tileJitter, float translucentDepth, float depth)
 {
     bool doUnderwaterRays = frx_viewFlag(FRX_CAMERA_IN_WATER) && translucentDepth >= depth && frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT);
     vec3 unit = normalize(modelPos);
@@ -22,7 +22,7 @@ vec4 celestialLightRays(sampler2DArrayShadow sshadow, vec3 modelPos, float tileJ
         scatter = 0.5 - abs(scatter - 0.5);
         scatter *= 2.0;
     } else {
-        scatter = smoothstep(0.0, 1.0, scatter);
+        scatter = smoothstep(-1.0, 0.5, scatter);
         // scatter *= 1.0 - max(0.0, unit.y) * 0.5;
     }
 
@@ -33,7 +33,7 @@ vec4 celestialLightRays(sampler2DArrayShadow sshadow, vec3 modelPos, float tileJ
     float maxDist = length(modelPos);
     int maxSteps = doUnderwaterRays ? 10 : 16;
     float sample = doUnderwaterRays ? 2.0 : maxDist / float(maxSteps);
-    float basePower = doUnderwaterRays ? 1.0 : 0.2;
+    float basePower = doUnderwaterRays ? 1.0 : mix(0.5, 0.05, exposure);
     float deadRadius = doUnderwaterRays ? 4.0 : 0.0;
     // const float range = 10.0;
 

@@ -1,0 +1,67 @@
+#include lumi:shaders/post/common/header.glsl
+
+#include lumi:shaders/func/tile_noise.glsl
+#include lumi:shaders/func/volumetrics.glsl
+
+/*******************************************************
+ *  lumi:shaders/post/godrays.frag                     *
+ *******************************************************
+ *  Copyright (c) 2020-2021 spiralhalo                 *
+ *  Released WITHOUT WARRANTY under the terms of the   *
+ *  GNU Lesser General Public License version 3 as     *
+ *  published by the Free Software Foundation, Inc.    *
+ *******************************************************/
+
+uniform sampler2D u_color;
+uniform sampler2D u_depth;
+uniform sampler2D u_depth_translucent;
+
+uniform sampler2DArrayShadow u_shadow;
+
+uniform sampler2D u_blue_noise;
+
+in float v_godray_intensity;
+in float v_exposure;
+in vec2 v_invSize;
+
+out vec4 fragColor;
+
+void main() {
+
+    float min_depth = texture(u_depth, v_texcoord).r;
+    float depth_translucent = texture(u_depth_translucent, v_texcoord).r;
+
+    vec4 c = texture(u_color, v_texcoord);
+
+    if (v_godray_intensity > 0.0) {
+        vec4 worldPos = frx_inverseViewProjectionMatrix() * vec4(v_texcoord * 2.0 - 1.0, min_depth * 2.0 - 1.0, 1.0);
+
+        worldPos.xyz /= worldPos.w;
+
+        float tileJitter = getRandomFloat(u_blue_noise, v_texcoord, frxu_size);
+
+        vec4 godBeam = celestialLightRays(u_shadow, worldPos.xyz, v_exposure, tileJitter, depth_translucent, min_depth);
+
+        godBeam = ldr_tonemap(godBeam) * v_godray_intensity;
+
+        c.rgb = c.rgb + godBeam.rgb * godBeam.a;
+
+        // TODO: screenspace godrays when there is no shadow map
+
+        // vec2 diff = abs(v_texcoord - v_skylightpos);
+        // diff.x *= v_aspect_adjuster;
+        // float rainFactor = 1.0 - frx_rainGradient();
+        // float godlightfactor = frx_smootherstep(frx_worldFlag(FRX_WORLD_IS_MOONLIT) ? 0.3 : 0.6, 0.0, length(diff)) * v_godray_intensity * rainFactor;
+        // float godhack = depth_solid == 1.0 ? 0.5 : 1.0;
+        // if (godlightfactor > 0.0) {
+        //     vec3 godlight = v_godray_color * godrays(4, u_solid_depth, u_clouds, u_blue_noise, v_skylightpos, v_texcoord, frxu_size);
+        //     c += godlightfactor * godlight * godhack;
+        // }
+    }
+
+    if (abs(v_texcoord.x - v_exposure) < v_invSize.x * 10.0 && abs(v_texcoord.y - 0.5) < v_invSize.x * 2.0 ) {
+        c.g += 1.0;
+    }
+
+    fragColor = c;
+}

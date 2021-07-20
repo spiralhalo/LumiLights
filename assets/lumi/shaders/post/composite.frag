@@ -29,13 +29,6 @@ uniform sampler2D u_weather_depth;
 uniform sampler2D u_emissive_solid;
 uniform sampler2D u_emissive_transparent;
 
-uniform sampler2DArrayShadow u_shadow;
-uniform sampler2D u_blue_noise;
-
-in vec3 v_godray_color;
-in vec2 v_skylightpos;
-in float v_godray_intensity;
-in float v_aspect_adjuster;
 in vec2 v_invSize;
 
 out vec4[3] fragColor;
@@ -121,32 +114,6 @@ void main()
 
     float min_depth = min(depth_translucent, depth_particles);
 
-    if (v_godray_intensity > 0.0) {
-        vec4 worldPos = frx_inverseViewProjectionMatrix() * vec4(v_texcoord * 2.0 - 1.0, min_depth * 2.0 - 1.0, 1.0);
-
-        worldPos.xyz /= worldPos.w;
-
-        float tileJitter = getRandomFloat(u_blue_noise, v_texcoord, frxu_size);
-
-        vec4 godBeam = celestialLightRays(u_shadow, worldPos.xyz, tileJitter, depth_translucent, min_depth);
-
-        godBeam = ldr_tonemap(godBeam) * v_godray_intensity;
-
-        c = c + godBeam.rgb * godBeam.a;
-
-        // TODO: screenspace godrays when there is no shadow map
-
-        // vec2 diff = abs(v_texcoord - v_skylightpos);
-        // diff.x *= v_aspect_adjuster;
-        // float rainFactor = 1.0 - frx_rainGradient();
-        // float godlightfactor = frx_smootherstep(frx_worldFlag(FRX_WORLD_IS_MOONLIT) ? 0.3 : 0.6, 0.0, length(diff)) * v_godray_intensity * rainFactor;
-        // float godhack = depth_solid == 1.0 ? 0.5 : 1.0;
-        // if (godlightfactor > 0.0) {
-        //     vec3 godlight = v_godray_color * godrays(4, u_solid_depth, u_clouds, u_blue_noise, v_skylightpos, v_texcoord, frxu_size);
-        //     c += godlightfactor * godlight * godhack;
-        // }
-    }
-    
     fragColor[0] = vec4(c, 1.0); //frx_luminance(c.rgb)); // FXAA 3 would need this
     fragColor[1] = vec4(min_depth, 0., 0., 1.);
     

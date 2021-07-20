@@ -2,7 +2,7 @@
 	programs: [
 		{
 			name: "composite",
-			vertexSource: "lumi:shaders/post/godrays.vert",
+			vertexSource: "lumi:shaders/post/hdr.vert",
 			fragmentSource: "lumi:shaders/post/composite.frag",
 			samplers: [
 				"u_combine_solid",
@@ -22,7 +22,16 @@
 
 				"u_emissive_solid",
 				"u_emissive_transparent",
-
+			]
+		},
+		{
+			name: "godrays",
+			vertexSource: "lumi:shaders/post/godrays.vert",
+			fragmentSource: "lumi:shaders/post/godrays.frag",
+			samplers: [
+				"u_color",
+				"u_depth",
+				"u_depth_translucent",
 				"u_shadow",
 				"u_blue_noise",
 			]
@@ -34,10 +43,16 @@
 		{
 			name: "composite",
 			colorAttachments: [
-				{image: "solid_main"},
+				{image: "main_copy"},
 				{image: "composite_depth"},
 				{image: "emissive_composite", clearColor: 0x00000000},
 				// {image: "velocity"},
+			]
+		},
+		{
+			name: "godrays",
+			colorAttachments: [
+				{image: "solid_main"},
 			]
 		},
 	],
@@ -66,7 +81,16 @@
 
 					"emissive_solid",
 					"emissive_translucent",
-
+				]
+			},
+			{
+				name: "godrays",
+				program: "godrays",
+				framebuffer: "godrays",
+				samplerImages: [
+					"main_copy",
+					"composite_depth",
+					"translucent_depth",
 					"shadow_map",
 					"lumi:textures/filter_pattern/bluenoise256.png",
 				]

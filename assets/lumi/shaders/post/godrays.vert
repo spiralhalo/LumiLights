@@ -9,10 +9,10 @@
  *  lumi:shaders/post/godrays.vert            *
  *******************************************************/
 
-out vec3 v_godray_color;
-out vec2 v_skylightpos;
+uniform sampler2D u_color;
+
 out float v_godray_intensity;
-out float v_aspect_adjuster;
+out float v_exposure;
 out vec2 v_invSize;
 
 void main()
@@ -28,21 +28,46 @@ void main()
     float dimensionFactor = frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? 1.0 : 0.0;
     float blindnessFactor = frx_playerHasEffect(FRX_EFFECT_BLINDNESS) ? 0.0 : 1.0;
     float notInVoidFactor = l2_clampScale(-1.0, 0.0, frx_cameraPos().y);
+    float notInFluidFactor = frx_viewFlag(FRX_CAMERA_IN_FLUID) ? (frx_viewFlag(FRX_CAMERA_IN_WATER) ? 1.0 : 0.0) : 1.0;
+    // float brightnessFactor = 1.0 - 0.3 * frx_viewBrightness(); // adjust because godrays are added after tonemap
 
     v_godray_intensity = 1.0
+        * atmosv_celestIntensity
         * dimensionFactor
         * blindnessFactor
         * notInVoidFactor
+        * notInFluidFactor
+        // * brightnessFactor
         * USER_GODRAYS_INTENSITY;
 
-    #if SKY_MODE == SKY_MODE_LUMI
-        vec3 skyLightVector = frx_skyLightVector();
-    #else
-        // Remove zenith angle tilt until Canvas implements it on vanilla celestial object
-        vec3 skyLightVector = normalize(vec3(frx_skyLightVector().xy, 0.0));
-    #endif
-    vec4 skylight_clip = frx_projectionMatrix() * vec4(frx_normalModelMatrix() * skyLightVector * 1000, 1.0);
-    v_skylightpos = (skylight_clip.xy / skylight_clip.w) * 0.5 + 0.5;
-    v_aspect_adjuster = float(frxu_size.x)/float(frxu_size.y);
-    v_godray_color = frx_worldFlag(FRX_WORLD_IS_MOONLIT) ? vec3(0.5) : ldr_tonemap3(atmos_hdrCelestialRadiance());
+    v_exposure = 0.0;
+
+    bool doCalcExposure = v_godray_intensity > 0. && !frx_viewFlag(FRX_CAMERA_IN_FLUID);
+
+    // TODO: calc exposure at the end with temporal smoothing to let it stabilize itself
+    if (doCalcExposure) {
+        int x = 0;
+        for (int i = 0; i < 100; i ++) {
+            for (int j = 0; j < 100; j ++) {
+                x ++;
+                vec2 coord = vec2(i, j) / 100.;
+
+                // scale down in center (fovea)
+                // coord -= 0.5;
+
+                // vec2 scaling = 0.25 + smoothstep(0.0, 0.5, abs(coord)) * 0.75; // more scaling down the closer to center
+
+                // coord *= scaling;
+                // coord += 0.5;
+
+                v_exposure += frx_luminance(texture(u_color, coord).xyz);
+            }
+        }
+
+        v_exposure /= float(x);
+
+        // a bunch of magic based on experiment
+        v_exposure = smoothstep(0.0, 0.5, v_exposure);
+        // v_exposure = pow(v_exposure, 0.5);
+    }
 }
