@@ -14,6 +14,7 @@ uniform sampler2D u_color;
 out float v_godray_intensity;
 out float v_exposure;
 out vec2 v_invSize;
+out vec2 v_skylightpos;
 
 void main()
 {
@@ -25,6 +26,7 @@ void main()
 
     atmos_generateAtmosphereModel();
 
+    // TODO: rain factor but only above water
     float dimensionFactor = frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? 1.0 : 0.0;
     float blindnessFactor = frx_playerHasEffect(FRX_EFFECT_BLINDNESS) ? 0.0 : 1.0;
     float notInVoidFactor = l2_clampScale(-1.0, 0.0, frx_cameraPos().y);
@@ -39,6 +41,21 @@ void main()
         * notInFluidFactor
         // * brightnessFactor
         * USER_GODRAYS_INTENSITY;
+
+
+
+    #if SKY_MODE == SKY_MODE_LUMI
+        vec3 skyLightVector = frx_skyLightVector();
+    #else
+        // Remove zenith angle tilt until Canvas implements it on vanilla celestial object
+        vec3 skyLightVector = normalize(vec3(frx_skyLightVector().xy, 0.0));
+    #endif
+
+    vec4 skylight_clip = frx_projectionMatrix() * vec4(frx_normalModelMatrix() * skyLightVector * 1000, 1.0);
+
+    v_skylightpos = (skylight_clip.xy / skylight_clip.w) * 0.5 + 0.5;
+
+
 
     v_exposure = 0.0;
 

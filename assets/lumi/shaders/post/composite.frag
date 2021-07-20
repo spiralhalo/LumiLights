@@ -7,7 +7,6 @@
 #include lumi:shaders/func/volumetrics.glsl
 #include lumi:shaders/lib/util.glsl
 #include lumi:shaders/lib/fast_gaussian_blur.glsl
-#include lumi:shaders/lib/godrays.glsl
 #include lumi:shaders/common/userconfig.glsl
 #include lumi:shaders/post/common/clouds.glsl
 

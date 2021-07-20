@@ -1,5 +1,3 @@
-#include lumi:shaders/func/tile_noise.glsl
-
 /*******************************************************
  *  lumi:shaders/lib/godrays.glsl                      *
  *******************************************************
@@ -22,19 +20,20 @@
  *  published by the Free Software Foundation, Inc.    *
  *******************************************************/
 
-float godrays(int numSamples, sampler2D ssoliddepth, sampler2D scloudcolor, sampler2D sbluenoise, vec2 screenSpaceLightPos, vec2 texcoord, vec2 texSize)
+float godrays(int numSamples, sampler2D ssoliddepth, float tileJitter, vec2 screenSpaceLightPos, vec2 texcoord, vec2 texSize)
 {
     float weight = (1.0 /  float(numSamples));
     vec2 deltaTexcoord = (texcoord - screenSpaceLightPos) * weight;
-    vec2 currentTexcoord = texcoord.xy + deltaTexcoord * (2.0 * getRandomFloat(sbluenoise, texcoord, texSize) - 1.0);
+    vec2 currentTexcoord = texcoord.xy + deltaTexcoord * (2.0 * tileJitter - 1.0);
 
     float strength = 0.0;
     float samp;
+
     for (int i=0; i < numSamples; i++) {
         currentTexcoord -= deltaTexcoord;
-        samp = step(1., texture(ssoliddepth, currentTexcoord).r);
-        samp = max(0., samp - texture(scloudcolor, currentTexcoord).a);
+        samp = texture(ssoliddepth, currentTexcoord).r == 1.0 ? 1.0 : 0.0;
         strength += samp;
     }
+
     return strength * weight;
 }

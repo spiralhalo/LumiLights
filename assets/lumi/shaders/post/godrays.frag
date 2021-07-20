@@ -1,7 +1,10 @@
 #include lumi:shaders/post/common/header.glsl
 
+#include frex:shaders/api/view.glsl
+#include frex:shaders/api/world.glsl
 #include lumi:shaders/func/tile_noise.glsl
 #include lumi:shaders/func/volumetrics.glsl
+#include lumi:shaders/lib/godrays.glsl
 
 /*******************************************************
  *  lumi:shaders/post/godrays.frag                     *
@@ -23,6 +26,7 @@ uniform sampler2D u_blue_noise;
 in float v_godray_intensity;
 in float v_exposure;
 in vec2 v_invSize;
+in vec2 v_skylightpos;
 
 out vec4 fragColor;
 
@@ -40,7 +44,26 @@ void main() {
 
         float tileJitter = getRandomFloat(u_blue_noise, v_texcoord, frxu_size);
 
-        vec4 godBeam = celestialLightRays(u_shadow, worldPos.xyz, v_exposure, tileJitter, depth_translucent, min_depth);
+        vec4 godBeam;
+        bool ssFallback = false;
+
+    #ifndef SHADOW_MAP_PRESENT
+        ssFallback = !frx_viewFlag(FRX_CAMERA_IN_WATER);
+    #endif
+
+        float exposure =  mix(0.5, 0.05, v_exposure);
+
+        if (ssFallback) {
+            float scatter = smoothstep(-1.0, 0.5, dot(normalize(worldPos.xyz), frx_skyLightVector()));
+
+            scatter *= max(0.0, dot(frx_cameraView(), frx_skyLightVector()));
+
+            // note: kinda buggy, flickers in some scenes
+            godBeam.a = godrays(16, u_depth, tileJitter, v_skylightpos, v_texcoord, frxu_size) * exposure * scatter;
+            godBeam.rgb = atmos_hdrCelestialRadiance();
+        } else {
+            godBeam = celestialLightRays(u_shadow, worldPos.xyz, exposure, tileJitter, depth_translucent, min_depth);
+        }
 
         godBeam = ldr_tonemap(godBeam) * v_godray_intensity;
 

@@ -33,7 +33,7 @@ vec4 celestialLightRays(sampler2DArrayShadow sshadow, vec3 modelPos, float expos
     float maxDist = length(modelPos);
     int maxSteps = doUnderwaterRays ? 10 : 16;
     float sample = doUnderwaterRays ? 2.0 : maxDist / float(maxSteps);
-    float basePower = doUnderwaterRays ? 1.0 : mix(0.5, 0.05, exposure);
+    float basePower = doUnderwaterRays ? 1.0 : exposure;
     float deadRadius = doUnderwaterRays ? 4.0 : 0.0;
     // const float range = 10.0;
 
