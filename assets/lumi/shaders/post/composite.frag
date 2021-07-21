@@ -115,7 +115,7 @@ void main()
 
     fragColor[0] = vec4(c, 1.0); //frx_luminance(c.rgb)); // FXAA 3 would need this
     fragColor[1] = vec4(min_depth, 0., 0., 1.);
-    
+
     #ifdef TOON_OUTLINE
         float d1 = ldepth(min_depth);
         float maxDiff = 0.;
@@ -141,6 +141,8 @@ void main()
     float bloom = max(texture(u_emissive_solid, v_texcoord).r, texture(u_emissive_transparent, v_texcoord).r);
     float min_occluder = min(depth_clouds, depth_weather);
     float occluder_alpha = min_occluder == depth_clouds ? clouds.a : weather.a;
+
+    occluder_alpha = min_occluder <= min_depth ? occluder_alpha : 0.0;
 
     bloom *= max(0.0, 1.0 - occluder_alpha);
 
