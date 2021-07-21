@@ -6,6 +6,7 @@
 #include lumi:shaders/func/tile_noise.glsl
 #include lumi:shaders/func/volumetrics.glsl
 #include lumi:shaders/lib/godrays.glsl
+#include lumi:shaders/lib/util.glsl
 
 /*******************************************************
  *  lumi:shaders/post/godrays.frag                     *
@@ -69,7 +70,8 @@ void main() {
 
         godBeam = ldr_tonemap(godBeam) * v_godray_intensity;
 
-        c.rgb = c.rgb + godBeam.rgb * godBeam.a;
+        c.rgb = hdr_fromGamma(c.rgb) + hdr_fromGamma(godBeam.rgb) * godBeam.a;
+        c.rgb = hdr_toSRGB(c.rgb);
 
         // TODO: remove
         // vec2 diff = abs(v_texcoord - v_skylightpos);
