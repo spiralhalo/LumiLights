@@ -8,7 +8,7 @@
 #include lumi:shaders/func/tile_noise.glsl
 
 /*******************************************************
- *  lumi:shaders/func/volumetric_cloud.glsl             *
+ *  lumi:shaders/func/volumetric_cloud.glsl            *
  *******************************************************
  *  Copyright (c) 2020-2021 spiralhalo                 *
  *  Released WITHOUT WARRANTY under the terms of the   *

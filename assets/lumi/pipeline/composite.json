@@ -22,6 +22,8 @@
 
 				"u_emissive_solid",
 				"u_emissive_transparent",
+
+				"u_exposure",
 			]
 		},
 		{
@@ -156,6 +158,8 @@
 
 					"emissive_solid",
 					"emissive_translucent",
+
+					"exposure",
 				]
 			},
 			{

@@ -11,6 +11,7 @@
 				"u_solid_depth",
 				"u_translucent_depth",
 				"u_blue_noise",
+				"u_exposure",
 			]
 		}, {
 			name: "clouds_texture",
@@ -93,6 +94,7 @@
 					"solid_depth",
 					"translucent_depth",
 					"lumi:textures/filter_pattern/bluenoise256.png",
+					"exposure",
 				]
 			},
 		]

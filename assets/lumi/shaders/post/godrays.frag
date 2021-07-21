@@ -4,6 +4,7 @@
 #include frex:shaders/api/world.glsl
 #include lumi:shaders/common/userconfig.glsl
 #include lumi:shaders/func/tile_noise.glsl
+#include lumi:shaders/func/tonemap.glsl
 #include lumi:shaders/func/volumetrics.glsl
 #include lumi:shaders/lib/godrays.glsl
 
@@ -20,7 +21,6 @@ uniform sampler2D u_color;
 uniform sampler2D u_depth;
 uniform sampler2D u_depth_translucent;
 
-uniform sampler2D u_exposure;
 uniform sampler2DArrayShadow u_shadow;
 
 uniform sampler2D u_blue_noise;
@@ -37,7 +37,7 @@ void main() {
     float depth_translucent = texture(u_depth_translucent, v_texcoord).r;
 
     vec4 c = texture(u_color, v_texcoord);
-    float ec = texture(u_exposure, vec2(0.5)).r;
+    float ec = exposureCompensation();
 
     if (v_godray_intensity > 0.0) {
         vec4 worldPos = frx_inverseViewProjectionMatrix() * vec4(v_texcoord * 2.0 - 1.0, min_depth * 2.0 - 1.0, 1.0);

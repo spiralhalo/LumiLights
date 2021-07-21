@@ -8,9 +8,20 @@
 #include lumi:shaders/lib/tmo.glsl
 #include lumi:shaders/lib/util.glsl
 
-/***********************************************************
- *  lumi:shaders/func/tonemap.glsl                         *
- ***********************************************************/
+/*******************************************************
+ *  lumi:shaders/func/tonemap.glsl                     *
+ *******************************************************
+ *  Copyright (c) 2020-2021 spiralhalo                 *
+ *  Released WITHOUT WARRANTY under the terms of the   *
+ *  GNU Lesser General Public License version 3 as     *
+ *  published by the Free Software Foundation, Inc.    *
+ *******************************************************/
+
+uniform sampler2D u_exposure;
+
+float exposureCompensation() {
+    return texture(u_exposure, vec2(0.5)).r;
+}
 
 #ifdef POST_SHADER
 
@@ -20,9 +31,7 @@ vec3 ldr_tonemap3noGamma(vec3 a)
     float exposure = 1.0;
 
 #ifdef HIGH_CONTRAST_ENABLED
-    float eyeBrightness = frx_smoothedEyeBrightness().y * atmos_celestIntensity();
-
-    eyeBrightness *= eyeBrightness;
+    float eyeBrightness = exposureCompensation();
     exposure = getExposure(eyeBrightness);
 #endif
 
