@@ -21,9 +21,10 @@ vec4 celestialLightRays(sampler2DArrayShadow sshadow, vec3 modelPos, float expos
     if (doUnderwaterRays) {
         scatter = 0.5 - abs(scatter - 0.5);
         scatter *= 2.0;
-    } else {
-        scatter = smoothstep(-1.0, 0.5, scatter);
-        // scatter *= 1.0 - max(0.0, unit.y) * 0.5;
+    } else { 
+        float sunHorizon = smoothstep(1.5, 0.0, frx_skyLightVector().y);
+
+        scatter = smoothstep(-1.0, 0.5, scatter) * sunHorizon;
     }
 
     if (scatter <= 0.0) {
