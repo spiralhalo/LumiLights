@@ -35,6 +35,7 @@ void main()
     float blindnessFactor = frx_playerHasEffect(FRX_EFFECT_BLINDNESS) ? 0.0 : 1.0;
     float notInVoidFactor = l2_clampScale(-1.0, 0.0, frx_cameraPos().y);
     float notInFluidFactor = frx_viewFlag(FRX_CAMERA_IN_FLUID) ? (frx_viewFlag(FRX_CAMERA_IN_WATER) ? 1.0 : 0.0) : 1.0;
+    float transitionFactor = smoothstep(0.25, 0.5, frx_skyLightTransitionFactor()); // work in progress?
     // float brightnessFactor = 1.0 - 0.3 * frx_viewBrightness(); // adjust because godrays are added after tonemap
 
     v_godray_intensity = 1.0
@@ -43,7 +44,7 @@ void main()
         * blindnessFactor
         * notInVoidFactor
         * notInFluidFactor
-        * frx_skyLightTransitionFactor()
+        * transitionFactor
         // * brightnessFactor
         * USER_GODRAYS_INTENSITY;
 
