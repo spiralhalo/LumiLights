@@ -43,6 +43,7 @@ void main()
         * blindnessFactor
         * notInVoidFactor
         * notInFluidFactor
+        * frx_skyLightTransitionFactor()
         // * brightnessFactor
         * USER_GODRAYS_INTENSITY;
 
