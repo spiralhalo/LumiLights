@@ -1,6 +1,5 @@
 #include lumi:shaders/post/common/header.glsl
 
-#include frex:shaders/api/view.glsl
 #include frex:shaders/lib/math.glsl
 #include lumi:shaders/lib/util.glsl
 
@@ -43,9 +42,7 @@ void main()
 
     v_exposure /= float(x);
 
-    float brightnessPadding = frx_viewBrightness() * 0.1;
-
     // a bunch of magic based on experiment
-    v_exposure = l2_clampScale(0.0, 0.4 + brightnessPadding, v_exposure);
-    v_exposure = pow(v_exposure, 1. / 2.2);
+    v_exposure = smoothstep(0.0, 0.5, v_exposure);
+    // v_exposure = pow(v_exposure, 0.5);
 }
