@@ -72,48 +72,8 @@ vec2 coords_uv(vec3 view, mat4 projection)
     return clip.xy * 0.5 + 0.5;
 }
 
-#ifdef USE_VOLUMETRIC_FOG
-float raymarched_fog_density(vec3 modelPos, float pFogFar)
-{
-    float distToCamera = length(modelPos);
-    float sampleSize = max(2.0, pFogFar / 8.0);
-    vec3 unitMarch_model = sampleSize * ((-modelPos) / distToCamera);
-    vec3 ray_model = modelPos + tileJitter * unitMarch_model;
-
-    float distTraveled = tileJitter * sampleSize;
-    float maxDist = min(distToCamera, pFogFar);
-
-    // March in shadow space for performance boost
-    // vec3 shadowPos = (frx_shadowViewMatrix() * vec4(modelPos, 1.0)).xyz;
-    //nb: camera pos in shadow view space is zero, but is non-zero in shadow view-projection space
-    // vec3 cameraPos_shadow = (frx_shadowViewMatrix() * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
-    // vec3 unitMarch_shadow = (/*cameraPos_shadow*/ - shadowPos) / distToCamera;
-    // shadowPos = shadowPos * 0.5 + 0.5; // Transform from screen coordinates to texture coordinates
-    vec4 ray_shadow;// = vec4(shadowPos + tileJitter * unitMarch_shadow, 1.0);
-
-    float illuminated = 0.0;
-    while (distTraveled < maxDist) {
-        ray_shadow = (frx_shadowViewMatrix() * vec4(ray_model, 1.0));
-        illuminated += simpleShadowFactor(u_shadow, ray_shadow) * sampleSize;
-        distTraveled += sampleSize;
-        // ray_shadow.xyz += unitMarch_shadow;
-        ray_model += unitMarch_model;
-        // ray_view += unitMarch_view;
-    }
-
-    return illuminated / max(1.0, pFogFar);
-}
-#endif
-
 vec4 fog(float skyLight, vec4 a, vec3 modelPos, vec3 worldPos, inout float bloom)
 {
-    float pfSkyLight = 1.0;
-
-    if (frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT)) {
-        pfSkyLight = mix(skyLight, 1.0, l2_clampScale(0., SEA_LEVEL, frx_cameraPos().y));
-        pfSkyLight *= pfSkyLight;
-    }
-
     float pFogDensity = frx_viewFlag(FRX_CAMERA_IN_FLUID) ? UNDERWATER_FOG_DENSITY : FOG_DENSITY;
     float pFogFar     = frx_viewFlag(FRX_CAMERA_IN_FLUID) ? UNDERWATER_FOG_FAR     : FOG_FAR;
 
@@ -121,8 +81,6 @@ vec4 fog(float skyLight, vec4 a, vec3 modelPos, vec3 worldPos, inout float bloom
 
 
     // float fog_noise = snoise(worldPos.xz * FOG_NOISE_SCALE + frx_renderSeconds() * FOG_NOISE_SPEED) * FOG_NOISE_HEIGHT;
-
-    float pfAltitude = 1.0;
 
     if (!frx_viewFlag(FRX_CAMERA_IN_FLUID) && frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT)) {
         float zigZagTime = abs(frx_worldTime()-0.5);
@@ -135,41 +93,22 @@ vec4 fog(float skyLight, vec4 a, vec3 modelPos, vec3 worldPos, inout float bloom
 
         pFogFar *= inverseThickener;
         pFogDensity = mix(min(1.0, pFogDensity * 2.0), min(0.8, pFogDensity), inverseThickener);
-
-        #ifdef OVERWORLD_FOG_ALTITUDE_AFFECTED
-            // altitude fog in the overworld :) valley fog is better than mountain-engulfing fog
-            if (frx_worldFlag(FRX_WORLD_IS_OVERWORLD)) {
-                float fogTop = mix(FOG_TOP_THICK, FOG_TOP, inverseThickener);
-                pfAltitude = l2_clampScale(fogTop, SEA_LEVEL, worldPos.y);
-                pfAltitude *= pfAltitude;
-            }
-        #endif
     }
 
-    bool useVolFog = false;
 
-    #ifdef USE_VOLUMETRIC_FOG
-    useVolFog = !frx_playerHasEffect(FRX_EFFECT_BLINDNESS)
-                && !frx_viewFlag(FRX_CAMERA_IN_LAVA)
-                && frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT);
-    #endif
-
-
-    float fogFactor = pFogDensity * pfAltitude * ((frx_viewFlag(FRX_CAMERA_IN_FLUID) || useVolFog) ? 1.0 : pfSkyLight);
+    float fogFactor = pFogDensity;
 
     // additive fog when it's not blindness or fluid related
     bool useAdditive = !frx_viewFlag(FRX_CAMERA_IN_WATER);
 
     if (frx_playerHasEffect(FRX_EFFECT_BLINDNESS)) {
         useAdditive = false;
-        useVolFog = false;
         pFogFar = mix(pFogFar, 3.0, v_blindness);
         fogFactor = mix(fogFactor, 1.0, v_blindness);
     }
 
     if (frx_viewFlag(FRX_CAMERA_IN_LAVA)) {
         useAdditive = false;
-        useVolFog = false;
         pFogFar = frx_playerHasEffect(FRX_EFFECT_FIRE_RESISTANCE) ? 2.5 : 0.5;
         fogFactor = 1.0;
     }
@@ -177,20 +116,9 @@ vec4 fog(float skyLight, vec4 a, vec3 modelPos, vec3 worldPos, inout float bloom
     float distToCamera = length(modelPos);
     float pfCave = 1.0;
 
-    // TODO: retrieve fog distance from render distance as an option especially for the nether
     float distFactor;
 
     distFactor = min(1.0, distToCamera / pFogFar);
-
-
-    #ifdef USE_VOLUMETRIC_FOG
-    if (useVolFog) { //TODO: blindness transition still broken?
-        float fRaymarch = raymarched_fog_density(modelPos, pFogFar);
-        distFactor = distFactor * VOLUMETRIC_FOG_SOFTNESS + (1. - VOLUMETRIC_FOG_SOFTNESS) * fRaymarch;
-        pfCave -= fRaymarch;
-    }
-    #endif
-
     distFactor *= distFactor;
 
     fogFactor = clamp(fogFactor * distFactor, 0.0, 1.0);
@@ -205,7 +133,9 @@ vec4 fog(float skyLight, vec4 a, vec3 modelPos, vec3 worldPos, inout float bloom
         #endif
         pfCave *= min(1.0, distToCamera / FOG_FAR) * darkness;
         pfCave *= pfCave;
+
         vec3 caveFog = atmos_hdrCaveFogRadiance() * pfCave;
+
         return vec4(a.rgb + fogColor.rgb * fogFactor + caveFog, a.a + max(0.0, 1.0 - a.a) * fogFactor);
     }
 
