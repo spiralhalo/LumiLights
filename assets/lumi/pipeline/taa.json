@@ -26,22 +26,6 @@
         //     ]
         // },
         {
-            name: "composite_depth",
-            lod: 0,
-            internalFormat: "GL_R32F",
-            pixelFormat: "GL_RED",
-            pixelDataType: "FLOAT",
-            target: "TEXTURE_2D",
-            texParams: [
-                { "name": "TEXTURE_MIN_FILTER", "val": "NEAREST" },
-                { "name": "TEXTURE_MAG_FILTER", "val": "NEAREST" },
-                { "name": "TEXTURE_WRAP_S", "val": "CLAMP_TO_EDGE" },
-                { "name": "TEXTURE_WRAP_T", "val": "CLAMP_TO_EDGE" },
-                { "name": "TEXTURE_COMPARE_MODE", "val": "NONE" }
-            ]
-        },
-        
-        {
             name: "history0",
             internalFormat: "RGBA8",
             target: "TEXTURE_2D",
@@ -50,7 +34,6 @@
                 {name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
             ]
         },
-        
         // {
         //     name: "history_depth0",
         //     lod: 0,

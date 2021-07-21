@@ -20,12 +20,12 @@ uniform sampler2D u_color;
 uniform sampler2D u_depth;
 uniform sampler2D u_depth_translucent;
 
+uniform sampler2D u_exposure;
 uniform sampler2DArrayShadow u_shadow;
 
 uniform sampler2D u_blue_noise;
 
 in float v_godray_intensity;
-in float v_exposure;
 in vec2 v_invSize;
 in vec2 v_skylightpos;
 
@@ -37,6 +37,7 @@ void main() {
     float depth_translucent = texture(u_depth_translucent, v_texcoord).r;
 
     vec4 c = texture(u_color, v_texcoord);
+    float ec = texture(u_exposure, vec2(0.5)).r;
 
     if (v_godray_intensity > 0.0) {
         vec4 worldPos = frx_inverseViewProjectionMatrix() * vec4(v_texcoord * 2.0 - 1.0, min_depth * 2.0 - 1.0, 1.0);
@@ -52,7 +53,7 @@ void main() {
         ssFallback = !frx_viewFlag(FRX_CAMERA_IN_WATER);
     #endif
 
-        float exposure =  mix(0.5, 0.05, v_exposure);
+        float exposure =  mix(0.5, 0.05, ec);
 
         if (ssFallback) {
             float scatter = smoothstep(-1.0, 0.5, dot(normalize(worldPos.xyz), frx_skyLightVector()));
@@ -70,8 +71,7 @@ void main() {
 
         c.rgb = c.rgb + godBeam.rgb * godBeam.a;
 
-        // TODO: screenspace godrays when there is no shadow map
-
+        // TODO: remove
         // vec2 diff = abs(v_texcoord - v_skylightpos);
         // diff.x *= v_aspect_adjuster;
         // float rainFactor = 1.0 - frx_rainGradient();
@@ -84,7 +84,7 @@ void main() {
     }
 
 #ifdef EXPOSURE_DEBUG
-    if (abs(v_texcoord.x - v_exposure) < v_invSize.x * 10.0 && abs(v_texcoord.y - 0.5) < v_invSize.x * 2.0 ) {
+    if (abs(v_texcoord.x - ec) < v_invSize.x * 10.0 && abs(v_texcoord.y - 0.5) < v_invSize.x * 2.0 ) {
         c.g += 1.0;
     }
 #endif

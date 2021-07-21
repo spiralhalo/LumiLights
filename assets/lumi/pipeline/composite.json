@@ -32,10 +32,67 @@
 				"u_color",
 				"u_depth",
 				"u_depth_translucent",
+				"u_exposure",
 				"u_shadow",
 				"u_blue_noise",
 			]
 		},
+		{
+			name: "exposure",
+			vertexSource: "lumi:shaders/post/exposure.vert",
+			fragmentSource: "lumi:shaders/post/exposure.frag",
+			samplers: [
+				"u_color",
+			]
+		},
+		{
+			name: "exposure_merge",
+			vertexSource: "lumi:shaders/post/simple.vert",
+			fragmentSource: "lumi:shaders/post/exposure_merge.frag",
+			samplers: [
+				"u_exposure",
+			]
+		},
+		{
+			name: "exposure_copy",
+			vertexSource: "lumi:shaders/post/simple.vert",
+			fragmentSource: "lumi:shaders/post/exposure_copy.frag",
+			samplers: [
+				"u_exposure",
+			]
+		},
+	],
+
+	images: [
+        {
+            name: "composite_depth",
+            lod: 0,
+            internalFormat: "GL_R32F",
+            pixelFormat: "GL_RED",
+            pixelDataType: "FLOAT",
+            target: "TEXTURE_2D",
+            texParams: [
+                { "name": "TEXTURE_MIN_FILTER", "val": "NEAREST" },
+                { "name": "TEXTURE_MAG_FILTER", "val": "NEAREST" },
+                { "name": "TEXTURE_WRAP_S", "val": "CLAMP_TO_EDGE" },
+                { "name": "TEXTURE_WRAP_T", "val": "CLAMP_TO_EDGE" },
+                { "name": "TEXTURE_COMPARE_MODE", "val": "NONE" }
+            ]
+        },
+        {
+            name: "exposure",
+            lod: 2,
+            internalFormat: "GL_R32F", // exponential smoothing is a serious business >B(
+            pixelFormat: "GL_RED",
+            pixelDataType: "FLOAT",
+            target: "TEXTURE_2D",
+            texParams: [
+                {name: "TEXTURE_MIN_FILTER", val: "LINEAR_MIPMAP_NEAREST"},
+                {name: "TEXTURE_MAG_FILTER", val: "LINEAR"},
+                {name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"},
+                {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
+            ]
+        }
 	],
 
 	framebuffers: [
@@ -53,6 +110,24 @@
 			name: "godrays",
 			colorAttachments: [
 				{image: "solid_main"},
+			]
+		},
+		{
+			name: "exposure_2",
+			colorAttachments: [
+				{image: "exposure", lod: 2},
+			]
+		},
+		{
+			name: "exposure_1",
+			colorAttachments: [
+				{image: "exposure", lod: 1},
+			]
+		},
+		{
+			name: "exposure_0",
+			colorAttachments: [
+				{image: "exposure"},
 			]
 		},
 	],
@@ -91,10 +166,38 @@
 					"main_copy",
 					"composite_depth",
 					"translucent_depth",
+					"exposure",
 					"shadow_map",
 					"lumi:textures/filter_pattern/bluenoise256.png",
-				]
-			}
+				],
+			},
+			{
+				name: "exposure",
+				program: "exposure",
+				framebuffer: "exposure_2",
+				samplerImages: [
+					"solid_main",
+				],
+				lod: 2,
+			},
+			{
+				name: "exposure_merge",
+				program: "exposure_merge",
+				framebuffer: "exposure_1",
+				samplerImages: [
+					"exposure",
+				],
+				lod: 1,
+			},
+			{
+				name: "exposure_copy",
+				program: "exposure_copy",
+				framebuffer: "exposure_0",
+				samplerImages: [
+					"exposure",
+				],
+				lod: 0,
+			},
 		]
 	}
 }

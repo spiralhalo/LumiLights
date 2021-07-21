@@ -6,13 +6,17 @@
 #include lumi:shaders/common/atmosphere.glsl
 
 /*******************************************************
- *  lumi:shaders/post/godrays.vert            *
+ *  lumi:shaders/post/godrays.vert                     *
+ *******************************************************
+ *  Copyright (c) 2020-2021 spiralhalo                 *
+ *  Released WITHOUT WARRANTY under the terms of the   *
+ *  GNU Lesser General Public License version 3 as     *
+ *  published by the Free Software Foundation, Inc.    *
  *******************************************************/
 
 uniform sampler2D u_color;
 
 out float v_godray_intensity;
-out float v_exposure;
 out vec2 v_invSize;
 out vec2 v_skylightpos;
 
@@ -54,37 +58,4 @@ void main()
     vec4 skylight_clip = frx_projectionMatrix() * vec4(frx_normalModelMatrix() * skyLightVector * 1000, 1.0);
 
     v_skylightpos = (skylight_clip.xy / skylight_clip.w) * 0.5 + 0.5;
-
-
-
-    v_exposure = 0.0;
-
-    bool doCalcExposure = v_godray_intensity > 0. && !frx_viewFlag(FRX_CAMERA_IN_FLUID);
-
-    // TODO: calc exposure at the end with temporal smoothing to let it stabilize itself
-    if (doCalcExposure) {
-        int x = 0;
-        for (int i = 0; i < 100; i ++) {
-            for (int j = 0; j < 100; j ++) {
-                x ++;
-                vec2 coord = vec2(i, j) / 100.;
-
-                // scale down in center (fovea)
-                // coord -= 0.5;
-
-                // vec2 scaling = 0.25 + smoothstep(0.0, 0.5, abs(coord)) * 0.75; // more scaling down the closer to center
-
-                // coord *= scaling;
-                // coord += 0.5;
-
-                v_exposure += frx_luminance(texture(u_color, coord).xyz);
-            }
-        }
-
-        v_exposure /= float(x);
-
-        // a bunch of magic based on experiment
-        v_exposure = smoothstep(0.0, 0.5, v_exposure);
-        // v_exposure = pow(v_exposure, 0.5);
-    }
 }
