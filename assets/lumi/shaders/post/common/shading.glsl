@@ -158,10 +158,12 @@ void custom_sky(in vec3 modelPos, in float blindnessFactor, in bool maybeUnderwa
         #if SKY_MODE == SKY_MODE_LUMI
             vec4 celestColor = celestFrag(Rect(v_celest1, v_celest2, v_celest3), u_sun, u_moon, worldSkyVec);
             float starEraser = celestColor.a;
+            float isNight = l2_clampScale(0.25, 0.21, abs(max(0.0, frx_worldTime() - 0.5) - 0.25));
+            float celestStr = mix(1.0, STARS_STR, isNight);
 
             bloom_out += celestColor.a;
             a.rgb = atmos_hdrSkyGradientRadiance(worldSkyVec);
-            a.rgb += celestColor.rgb * (1. - frx_rainGradient());
+            a.rgb += celestColor.rgb * (1. - frx_rainGradient()) * celestStr;
         #else
             // a.rgb = hdr_fromGamma(a.rgb) * 2.0; // Don't gamma-correct vanilla sky
         #endif
