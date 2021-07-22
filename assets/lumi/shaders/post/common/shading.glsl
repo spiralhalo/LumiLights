@@ -190,7 +190,7 @@ void custom_sky(in vec3 modelPos, in float blindnessFactor, in bool maybeUnderwa
                 milkyHaze *= milkyHaze;
             #endif
 
-            vec3 starRadiance = vec3(star) + NEBULAE_COLOR * milkyHaze;
+            vec3 starRadiance = vec3(star) * STARS_STR + NEBULAE_COLOR * milkyHaze;
 
             a.rgb += starRadiance;
             bloom_out += (star + milkyHaze);

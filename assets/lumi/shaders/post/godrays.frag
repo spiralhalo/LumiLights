@@ -3,6 +3,7 @@
 #include frex:shaders/api/view.glsl
 #include frex:shaders/api/world.glsl
 #include lumi:shaders/common/atmosphere.glsl
+#include lumi:shaders/common/contrast.glsl
 #include lumi:shaders/common/userconfig.glsl
 #include lumi:shaders/func/tile_noise.glsl
 #include lumi:shaders/func/tonemap.glsl
@@ -52,7 +53,7 @@ void main() {
         ssFallback = !frx_viewFlag(FRX_CAMERA_IN_WATER);
     #endif
 
-        float exposure =  mix(1.0, 0.05, ec);
+        float exposure =  mix(1.0, 0.05, ec) * LIGHT_RAYS_STR;
 
         if (ssFallback) {
             float scatter = smoothstep(-1.0, 0.5, dot(normalize(worldPos.xyz), frx_skyLightVector()));

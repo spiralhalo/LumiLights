@@ -74,14 +74,6 @@
                     nameKey: "config.lumi_lights.value.rgb_caves",
                     descriptionKey: "config.lumi_lights.help.rgb_caves"
                 },
-                tone_profile: {
-                    default: "standard",
-                    choices: ["standard", "auto_exposure"],
-                    enum: true,
-                    prefix: "tone_profile_",
-                    nameKey: "config.lumi_lights.value.tone_profile",
-                    descriptionKey: "config.lumi_lights.help.tone_profile"
-                },
                 rain_puddles: {
                     default: false,
                     nameKey: "config.lumi_lights.value.rain_puddles",

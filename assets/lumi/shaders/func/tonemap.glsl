@@ -1,3 +1,4 @@
+#include lumi:shaders/common/contrast.glsl
 #include lumi:shaders/lib/tmo.glsl
 #include lumi:shaders/lib/util.glsl
 
