@@ -1,8 +1,10 @@
 #include lumi:shaders/post/common/header.glsl
-#include lumi:shaders/post/common/bloom.glsl
+
 #include frex:shaders/lib/color.glsl
 #include frex:shaders/lib/sample.glsl
 #include frex:shaders/lib/math.glsl
+#include lumi:shaders/post/common/bloom.glsl
+#include lumi:shaders/lib/util.glsl
 
 /******************************************************
   lumi:shaders/post/emissive_color.frag
@@ -25,7 +27,9 @@ void main()
     float solidDepth = texture(u_solid_depth, v_texcoord).r;
     float ref = max(texture(u_emissive_reflection_solid, v_texcoord).r, texture(u_emissive_reflection_translucent, v_texcoord).r);
     float ems = solidDepth == 1.0 ? max(texture(u_emissive_composite, v_texcoord).r, ref) : texture(u_emissive_solid, v_texcoord).r;
-    vec4 c = frx_fromGamma(texture(u_base_composite, v_texcoord));
+    vec4 c = texture(u_base_composite, v_texcoord);
+
+    c.rgb = hdr_fromGamma(c.rgb);
 
     fragColor = vec4(c.rgb * ems, ems);
 }

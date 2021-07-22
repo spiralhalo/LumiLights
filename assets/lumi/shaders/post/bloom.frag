@@ -1,9 +1,11 @@
 #include lumi:shaders/post/common/header.glsl
-#include lumi:shaders/post/common/bloom.glsl
+
 #include frex:shaders/lib/color.glsl
 #include frex:shaders/lib/sample.glsl
 #include frex:shaders/lib/math.glsl
 #include frex:shaders/api/world.glsl
+#include lumi:shaders/post/common/bloom.glsl
+#include lumi:shaders/lib/util.glsl
 
 /******************************************************
   lumi:shaders/post/bloom.frag
@@ -18,14 +20,10 @@ out vec4 fragColor;
 // http://www.iryoku.com/next-generation-post-processing-in-call-of-duty-advanced-warfare
 void main()
 {
-    vec4 base = frx_fromGamma(texture(u_base, v_texcoord));
+    vec4 base = texture(u_base, v_texcoord);
     vec4 bloom = textureLod(u_bloom, v_texcoord, 0) * BLOOM_INTENSITY_FLOAT;
 
-    // ramp down the very low end to avoid halo banding
-    vec3 cutoff = min(bloom.rgb, vec3(BLOOM_CUTOFF_FLOAT));
-    vec3 ramp = cutoff / BLOOM_CUTOFF_FLOAT;
-    ramp = ramp * ramp * BLOOM_CUTOFF_FLOAT;
-    vec3 color = base.rgb + bloom.rgb - cutoff + ramp;
+    vec3 color = hdr_fromGamma(base.rgb) + bloom.rgb;
 
-    fragColor = clamp(frx_toGamma(vec4(color, 1.0)), 0.0, 1.0);
+    fragColor = vec4(hdr_toSRGB(color), 1.0);
 }
