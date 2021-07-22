@@ -13,7 +13,7 @@ uniform sampler2D u_exposure;
 
 out vec4 fragColor;
 
-#define SMOOTHING_FRAMES 100.
+#define SMOOTHING_FRAMES 50.
 
 void main() {
     const float a = 1. - exp(-1. / SMOOTHING_FRAMES);

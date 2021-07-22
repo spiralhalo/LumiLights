@@ -22,6 +22,7 @@
     #define _0_EMISSIVE_LIGHT_STR 1.0
     const float NIGHT_VISION_STR = 1.5;
     #define _0_STARS_STR 1.0
+    #define LIGHT_RAYS_STR 1.0 // this was never meant to go above 1.0 due to sdr blending
 
     // ATMOS STRENGTHS
     #define DEF_SUNLIGHT_STR 1.5
@@ -80,7 +81,6 @@
     const float SKYLESS_LIGHT_STR = _0_SKYLESS_LIGHT_STR / HIGH_CONTRAST_EXPOSURE;
     const float BLOCK_LIGHT_STR = _0_BLOCK_LIGHT_STR / HIGH_CONTRAST_EXPOSURE;
     const float EMISSIVE_LIGHT_STR = _0_EMISSIVE_LIGHT_STR / HIGH_CONTRAST_EXPOSURE;
-    #define LIGHT_RAYS_STR 2.0
     #define STARS_STR _0_STARS_STR / HIGH_CONTRAST_EXPOSURE
 
     // ATMOS STRENGTHS
@@ -103,7 +103,6 @@
     const float SKYLESS_LIGHT_STR = _0_SKYLESS_LIGHT_STR;
     const float BLOCK_LIGHT_STR = _0_BLOCK_LIGHT_STR;
     const float EMISSIVE_LIGHT_STR = _0_EMISSIVE_LIGHT_STR;
-    #define LIGHT_RAYS_STR 1.0
     #define STARS_STR _0_STARS_STR
 
     // ATMOS STRENGTHS
