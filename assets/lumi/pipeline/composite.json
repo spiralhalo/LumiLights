@@ -33,6 +33,8 @@
 			samplers: [
 				"u_depth",
 				"u_depth_translucent",
+				"u_light_solid",
+				"u_light_translucent",
 				"u_exposure",
 				"u_shadow",
 				"u_blue_noise",
@@ -214,6 +216,8 @@
 				samplerImages: [
 					"composite_depth",
 					"translucent_depth",
+					"light_solid",
+					"light_translucent",
 					"exposure",
 					"shadow_map",
 					"lumi:textures/filter_pattern/bluenoise256.png",

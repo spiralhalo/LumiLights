@@ -4,15 +4,6 @@
             includeToken: "lumi:experimental_config",
             categoryKey: "config.lumi_lights.category.experimental",
             options: {
-                // DEBUG - separate from experiment
-                dithering_mode: {
-                    default: "blue_noise",
-                    choices: ["blue_noise", "halton"],
-                    enum: true,
-                    prefix: "dithering_mode_",
-                    nameKey: "config.lumi_lights.value.dithering_mode",
-                    descriptionKey: "config.lumi_lights.help.dithering_mode"
-                },
                 // DEPRECATED - marked for removal
                 celestial_light_multiplier: {
                     default: 1.0,
@@ -29,15 +20,6 @@
                     nameKey: "config.lumi_lights.value.sky_ambient_multiplier",
                     descriptionKey: "config.lumi_lights.help.sky_ambient_multiplier"
                 },
-                // DEBUG - separate from experiment
-                parallax_cloud_density: {
-                    default: 1.0,
-                    min: 0.5,
-                    max: 10.0,
-                    nameKey: "config.lumi_lights.value.parallax_cloud_density",
-                    descriptionKey: "config.lumi_lights.help.parallax_cloud_density"
-                },
-                // DEBUG - separate from experiment
                 translucent_layering: {
                     default: "fancy",
                     choices: ["fast", "fancy"],
@@ -46,20 +28,10 @@
                     nameKey: "config.lumi_lights.value.translucent_layering",
                     descriptionKey: "config.lumi_lights.help.translucent_layering"
                 },
-                // DEBUG - separate from experiment
-                exposure_debug: {
+                shadow_workaround: {
                     default: false,
-                    nameKey: "config.lumi_lights.value.exposure_debug",
-                    descriptionKey: "config.lumi_lights.help.exposure_debug"
-                },
-                // DEBUG - separate from experiment
-                taa_debug_render: {
-                    default: "off",
-                    choices: ["off", "velocity", "depth", "frames"],
-                    enum: true,
-                    prefix: "taa_debug_render_",
-                    nameKey: "config.lumi_lights.value.taa_debug_render",
-                    descriptionKey: "config.lumi_lights.help.taa_debug_render"
+                    nameKey: "config.lumi_lights.value.shadow_workaround",
+                    descriptionKey: "config.lumi_lights.help.shadow_workaround"
                 },
                 half_reflection_resolution: {
                     default: false,
@@ -81,7 +53,40 @@
                     nameKey: "config.lumi_lights.value.rain_puddles",
                     descriptionKey: "config.lumi_lights.help.rain_puddles"
                 },
-                // DEBUG - separate from experiment
+            }
+        },
+        {
+            includeToken: "lumi:debug_config",
+            categoryKey: "config.lumi_lights.category.debug",
+            options: {
+                dithering_mode: {
+                    default: "blue_noise",
+                    choices: ["blue_noise", "halton"],
+                    enum: true,
+                    prefix: "dithering_mode_",
+                    nameKey: "config.lumi_lights.value.dithering_mode",
+                    descriptionKey: "config.lumi_lights.help.dithering_mode"
+                },
+                parallax_cloud_density: {
+                    default: 1.0,
+                    min: 0.5,
+                    max: 10.0,
+                    nameKey: "config.lumi_lights.value.parallax_cloud_density",
+                    descriptionKey: "config.lumi_lights.help.parallax_cloud_density"
+                },
+                exposure_debug: {
+                    default: false,
+                    nameKey: "config.lumi_lights.value.exposure_debug",
+                    descriptionKey: "config.lumi_lights.help.exposure_debug"
+                },
+                taa_debug_render: {
+                    default: "off",
+                    choices: ["off", "velocity", "depth", "frames"],
+                    enum: true,
+                    prefix: "taa_debug_render_",
+                    nameKey: "config.lumi_lights.value.taa_debug_render",
+                    descriptionKey: "config.lumi_lights.help.taa_debug_render"
+                },
                 cloud_time: {
                     default: "client",
                     choices: ["client", "world", "stop"],
@@ -90,7 +95,6 @@
                     nameKey: "config.lumi_lights.value.cloud_time",
                     descriptionKey: "config.lumi_lights.help.cloud_time"
                 },
-                // DEBUG - separate from experiment
                 overlay_debug: {
                     default: "none",
                     choices: ["none", "neon", "disco"],

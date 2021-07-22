@@ -21,6 +21,8 @@
 
 uniform sampler2D u_depth;
 uniform sampler2D u_depth_translucent;
+uniform sampler2D u_light_solid;
+uniform sampler2D u_light_translucent;
 
 uniform sampler2DArrayShadow u_shadow;
 
@@ -64,7 +66,11 @@ void main() {
             godBeam.a = godrays(16, u_depth, tileJitter, v_skylightpos, v_texcoord, frxu_size) * exposure * scatter;
             godBeam.rgb = atmos_hdrCelestialRadiance();
         } else {
-            godBeam = celestialLightRays(u_shadow, worldPos.xyz, exposure, tileJitter, depth_translucent, min_depth);
+            float yLight = texture(u_light_solid, v_texcoord).y;
+
+            yLight = max(yLight, texture(u_light_translucent, v_texcoord).y);
+
+            godBeam = celestialLightRays(u_shadow, worldPos.xyz, exposure, yLight, tileJitter, depth_translucent, min_depth);
         }
 
         godBeam = ldr_tonemap(godBeam) * v_godray_intensity;

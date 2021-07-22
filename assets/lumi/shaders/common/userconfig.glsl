@@ -1,11 +1,12 @@
-#include lumi:experimental_config
 #include lumi:aesthetics_config
-#include lumi:performance_config
-#include lumi:ssao_config
 #include lumi:clouds_config
-#include lumi:gameplay_config
+#include lumi:debug_config
+#include lumi:experimental_config
 #include lumi:fog_config
+#include lumi:gameplay_config
+#include lumi:performance_config
 #include lumi:shadow_config
+#include lumi:ssao_config
 
 /*******************************************************
  *  lumi:shaders/common/userconfig.glsl                *

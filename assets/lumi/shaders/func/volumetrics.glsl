@@ -13,7 +13,7 @@
  *  published by the Free Software Foundation, Inc.    *
  *******************************************************/
 
-vec4 celestialLightRays(sampler2DArrayShadow sshadow, vec3 modelPos, float exposure, float tileJitter, float translucentDepth, float depth)
+vec4 celestialLightRays(sampler2DArrayShadow sshadow, vec3 modelPos, float exposure, float yLightmap, float tileJitter, float translucentDepth, float depth)
 {
     bool doUnderwaterRays = frx_viewFlag(FRX_CAMERA_IN_WATER) && translucentDepth >= depth && frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT);
     vec3 unit = normalize(modelPos);
@@ -26,6 +26,11 @@ vec4 celestialLightRays(sampler2DArrayShadow sshadow, vec3 modelPos, float expos
         float sunHorizon = smoothstep(1.5, 0.0, frx_skyLightVector().y);
 
         scatter = smoothstep(-1.0, 0.5, scatter) * sunHorizon;
+
+    #ifdef SHADOW_WORKAROUND
+        // Workaround to fix patches in shadow map until it's FLAWLESS
+        scatter *= l2_clampScale(0.03125, 0.0625, yLightmap);
+    #endif
     }
 
     if (scatter <= 0.0) {

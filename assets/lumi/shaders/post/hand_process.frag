@@ -71,8 +71,10 @@ void main()
         shadowFactor = mix(shadowFactor, simpleShadowFactor(u_shadow, shadowViewPos), step(0.99, shadowFactor));
 
         light.z = shadowFactor;
-        // Workaround before shadow occlusion culling to make caves playable
+    #ifdef SHADOW_WORKAROUND
+        // Workaround to fix patches in shadow map until it's FLAWLESS
         light.z *= l2_clampScale(0.03125, 0.04, light.y);
+    #endif
     #else
         light.z = lightmapRemap(light.y);
     #endif
