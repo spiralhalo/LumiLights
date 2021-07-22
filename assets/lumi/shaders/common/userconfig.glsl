@@ -9,26 +9,26 @@
 #include lumi:ssao_config
 
 /*******************************************************
- *  lumi:shaders/common/userconfig.glsl                *
+ *  lumi:shaders/common/userconfig.glsl
  *******************************************************
- *  One context for "pure" userconfigs defines.        *
- *  No const allowed here.                             *
+ *  One context for "pure" userconfigs defines.
+ *  No const allowed here.
  *******************************************************/
 
 #if ANTIALIASING == ANTIALIASING_TAA || ANTIALIASING == ANTIALIASING_TAA_BLURRY
-    #define TAA_ENABLED
+	#define TAA_ENABLED
 #endif
 
 #if TONE_PROFILE == TONE_PROFILE_HIGH_CONTRAST
-    #define HIGH_CONTRAST_ENABLED
+	#define HIGH_CONTRAST_ENABLED
 #endif
 
 #if AMBIENT_OCCLUSION == AMBIENT_OCCLUSION_VANILLA_AND_SSAO || AMBIENT_OCCLUSION == AMBIENT_OCCLUSION_PURE_SSAO
-    #define SSAO_ENABLED
+	#define SSAO_ENABLED
 #endif
 
 #if AMBIENT_OCCLUSION == AMBIENT_OCCLUSION_VANILLA || AMBIENT_OCCLUSION == AMBIENT_OCCLUSION_VANILLA_AND_SSAO
-    #define VANILLA_AO_ENABLED
+	#define VANILLA_AO_ENABLED
 #endif
 
 const float USER_GODRAYS_INTENSITY = LIGHTRAYS_INTENSITY * 0.1;

@@ -6,7 +6,7 @@
 #include lumi:shaders/lib/util.glsl
 
 /*******************************************************
- *  lumi:shaders/post/hdr.vert                         *
+ *  lumi:shaders/post/hdr.vert
  *******************************************************/
 
 out vec2 v_invSize;
@@ -14,11 +14,11 @@ out float v_blindness;
 
 void main()
 {
-    basicFrameSetup();
-    atmos_generateAtmosphereModel();
+	basicFrameSetup();
+	atmos_generateAtmosphereModel();
 
-    v_invSize = 1.0/frxu_size;
-    v_blindness = frx_playerHasEffect(FRX_EFFECT_BLINDNESS)
-        ? l2_clampScale(0.5, 1.0, 1.0 - frx_luminance(frx_vanillaClearColor()))
-        : 0.0;
+	v_invSize = 1.0/frxu_size;
+	v_blindness = frx_playerHasEffect(FRX_EFFECT_BLINDNESS)
+		? l2_clampScale(0.5, 1.0, 1.0 - frx_luminance(frx_vanillaClearColor()))
+		: 0.0;
 }

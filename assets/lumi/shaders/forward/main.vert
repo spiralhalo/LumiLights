@@ -8,12 +8,12 @@
 #include lumi:shaders/lib/taa_jitter.glsl
 
 /*******************************************************
- *  lumi:shaders/forward/main.vert                    *
+ *  lumi:shaders/forward/main.vert
  *******************************************************
- *  Copyright (c) 2020-2021 spiralhalo                 *
- *  Released WITHOUT WARRANTY under the terms of the   *
- *  GNU Lesser General Public License version 3 as     *
- *  published by the Free Software Foundation, Inc.    *
+ *  Copyright (c) 2020-2021 spiralhalo
+ *  Released WITHOUT WARRANTY under the terms of the
+ *  GNU Lesser General Public License version 3 as
+ *  published by the Free Software Foundation, Inc.
  *******************************************************/
 
 out vec2 pv_lightcoord;
@@ -23,46 +23,46 @@ out float pv_ortho;
 
 // Grondag's vanilla diffuse but different
 float p_diffuseGui(vec3 normal) {
-    // disable diffuse for front facing GUI item
-    if (normal.z == 1.0) return 1.;
+	// disable diffuse for front facing GUI item
+	if (normal.z == 1.0) return 1.;
 
-    float light = 0.5
-    + 0.3 * clamp(dot(normal.xyz, vec3(0.96104145, 0.078606814, 0.2593495)), 0.0, 1.0)
-    + 0.5 * clamp(dot(normal.xyz, vec3(0.26765957, 0.95667744, -0.100838766)), 0.0, 1.0);
-    return min(light, 1.0);
+	float light = 0.5
+	+ 0.3 * clamp(dot(normal.xyz, vec3(0.96104145, 0.078606814, 0.2593495)), 0.0, 1.0)
+	+ 0.5 * clamp(dot(normal.xyz, vec3(0.26765957, 0.95667744, -0.100838766)), 0.0, 1.0);
+	return min(light, 1.0);
 }
 
 vec2 inv_size = 1.0 / vec2(frx_viewWidth(), frx_viewHeight());
 void frx_writePipelineVertex(inout frx_VertexData data) {
 
-    if (frx_modelOriginType() == MODEL_ORIGIN_SCREEN) {
-        mat4 t = frx_guiViewProjectionMatrix();
-        pv_ortho = t[3][3];
-        gl_Position = frx_guiViewProjectionMatrix() * data.vertex;
+	if (frx_modelOriginType() == MODEL_ORIGIN_SCREEN) {
+		mat4 t = frx_guiViewProjectionMatrix();
+		pv_ortho = t[3][3];
+		gl_Position = frx_guiViewProjectionMatrix() * data.vertex;
 
-        #ifdef TAA_ENABLED
-            float fragZ = gl_Position.z / gl_Position.w;
-            if (pv_ortho == 0.) { // hack to include only hand
-                gl_Position.st += taa_jitter(inv_size) * gl_Position.w;
-            }
-        #endif
-    } else {
-        data.vertex += frx_modelToCamera();
-        gl_Position = frx_viewProjectionMatrix() * data.vertex;
+		#ifdef TAA_ENABLED
+			float fragZ = gl_Position.z / gl_Position.w;
+			if (pv_ortho == 0.) { // hack to include only hand
+				gl_Position.st += taa_jitter(inv_size) * gl_Position.w;
+			}
+		#endif
+	} else {
+		data.vertex += frx_modelToCamera();
+		gl_Position = frx_viewProjectionMatrix() * data.vertex;
 
-        #ifdef TAA_ENABLED
-            gl_Position.st += taa_jitter(inv_size) * gl_Position.w;
-        #endif
-    }
+		#ifdef TAA_ENABLED
+			gl_Position.st += taa_jitter(inv_size) * gl_Position.w;
+		#endif
+	}
 
 #ifdef VANILLA_LIGHTING
-    pv_lightcoord = data.light;
+	pv_lightcoord = data.light;
 #ifdef VANILLA_AO_ENABLED
-    pv_ao = data.aoShade;
+	pv_ao = data.aoShade;
 #else
-    pv_ao = 1.0;
+	pv_ao = 1.0;
 #endif
 #endif
 
-    pv_diffuse = p_diffuseGui(data.normal);
+	pv_diffuse = p_diffuseGui(data.normal);
 }

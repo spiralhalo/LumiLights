@@ -7,45 +7,49 @@
 #include lumi:shaders/api/pbr_ext.glsl
 #include lumi:shaders/lib/water.glsl
 
+/**********************************************
+	lumi:shaders/material/water.frag
+***********************************************/
+
 const float stretch = 1.2;
 
 void frx_startFragment(inout frx_FragmentData fragData)
 {
 #ifdef LUMI_PBRX
-    /* PBR PARAMS */
-    pbr_f0 = 0.02;
-    pbr_roughness = 0.05;
-    pbr_isWater = true;
+	/* PBR PARAMS */
+	pbr_f0 = 0.02;
+	pbr_roughness = 0.05;
+	pbr_isWater = true;
 #else
-    /* HACK */
-    fragData.light.y += 0.077 * smoothstep(1.0, 0.99, fragData.vertexNormal.y);
-    fragData.light.y = min(0.96875, fragData.light.y);
+	/* HACK */
+	fragData.light.y += 0.077 * smoothstep(1.0, 0.99, fragData.vertexNormal.y);
+	fragData.light.y = min(0.96875, fragData.light.y);
 
-    /* LUMI PARAMS */
-    phong_specular = 500.0;
+	/* LUMI PARAMS */
+	phong_specular = 500.0;
 #endif
 
-    /* WATER RECOLOR */
-    fragData.vertexColor.rb *= fragData.vertexColor.rb;
+	/* WATER RECOLOR */
+	fragData.vertexColor.rb *= fragData.vertexColor.rb;
 #ifdef LUMI_NoWaterTexture
-    fragData.spriteColor.rgb = vec3(1.0);
-    fragData.spriteColor.a = 0.3;
+	fragData.spriteColor.rgb = vec3(1.0);
+	fragData.spriteColor.a = 0.3;
 #else
-    fragData.spriteColor.a *= 0.6;
+	fragData.spriteColor.a *= 0.6;
 #endif
 #ifdef LUMI_NoWaterColor
-    fragData.vertexColor.rgb = vec3(0.0);
+	fragData.vertexColor.rgb = vec3(0.0);
 #endif
 
-    /* WAVY NORMALS */
-    // wave movement doesn't necessarily follow flow direction for the time being
-    float waveSpeed = frx_var2.x;
-    float scale = frx_var2.y;
-    float amplitude = frx_var2.z;
-    vec3 moveSpeed = frx_var1.xyz * waveSpeed;
-    vec3 up = fragData.vertexNormal.xyz;
-    vec3 samplePos = frx_var0.xyz;
-    vec3 noisyNormal = ww_normals(up, l2_tangent, cross(up, l2_tangent), samplePos, waveSpeed, scale, amplitude, stretch, moveSpeed);
+	/* WAVY NORMALS */
+	// wave movement doesn't necessarily follow flow direction for the time being
+	float waveSpeed = frx_var2.x;
+	float scale = frx_var2.y;
+	float amplitude = frx_var2.z;
+	vec3 moveSpeed = frx_var1.xyz * waveSpeed;
+	vec3 up = fragData.vertexNormal.xyz;
+	vec3 samplePos = frx_var0.xyz;
+	vec3 noisyNormal = ww_normals(up, l2_tangent, cross(up, l2_tangent), samplePos, waveSpeed, scale, amplitude, stretch, moveSpeed);
 
-    pbr_normalMicro = mix(noisyNormal, fragData.vertexNormal, pow(gl_FragCoord.z, 500.0));
+	pbr_normalMicro = mix(noisyNormal, fragData.vertexNormal, pow(gl_FragCoord.z, 500.0));
 }

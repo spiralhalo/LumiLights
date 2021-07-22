@@ -5,12 +5,12 @@
 #include lumi:shaders/common/userconfig.glsl
 
 /*******************************************************
- *  lumi:shaders/post/ssao.frag               *
+ *  lumi:shaders/post/ssao.frag
  *******************************************************
- *  Copyright (c) 2020-2021 spiralhalo                 *
- *  Released WITHOUT WARRANTY under the terms of the   *
- *  GNU Lesser General Public License version 3 as     *
- *  published by the Free Software Foundation, Inc.    *
+ *  Copyright (c) 2020-2021 spiralhalo
+ *  Released WITHOUT WARRANTY under the terms of the
+ *  GNU Lesser General Public License version 3 as
+ *  published by the Free Software Foundation, Inc.
  *******************************************************/
 
 uniform sampler2D u_normal;
@@ -30,29 +30,29 @@ const float INTENSITY = SSAO_INTENSITY;
 void main()
 {
 #ifdef SSAO_ENABLED
-    #ifdef SSAO_USE_ATTENUATION
-        const bool useAttenuation = true;
-    #else
-        const bool useAttenuation = false;
-    #endif
+	#ifdef SSAO_USE_ATTENUATION
+		const bool useAttenuation = true;
+	#else
+		const bool useAttenuation = false;
+	#endif
 
-    #ifdef SSAO_GLOW
-        const bool glowOcclusion = true;
-    #else
-        const bool glowOcclusion = false;
-    #endif
+	#ifdef SSAO_GLOW
+		const bool glowOcclusion = true;
+	#else
+		const bool glowOcclusion = false;
+	#endif
 
-    // Modest performance saving by skipping the sky
-    if (texture(u_depth, v_texcoord).r == 1.0) {
-        fragColor = vec4(0.0, 0.0, 0.0, 1.0);
-    } else {
-        fragColor = calcSSAO(
-            u_normal, u_depth, u_light, u_color, u_blue_noise,
-            frx_normalModelMatrix(), frx_inverseProjectionMatrix(), frxu_size, 
-            v_texcoord, RADIUS, RADIUS * 0.5, BIAS, INTENSITY,
-            useAttenuation, glowOcclusion);
-    }
+	// Modest performance saving by skipping the sky
+	if (texture(u_depth, v_texcoord).r == 1.0) {
+		fragColor = vec4(0.0, 0.0, 0.0, 1.0);
+	} else {
+		fragColor = calcSSAO(
+			u_normal, u_depth, u_light, u_color, u_blue_noise,
+			frx_normalModelMatrix(), frx_inverseProjectionMatrix(), frxu_size, 
+			v_texcoord, RADIUS, RADIUS * 0.5, BIAS, INTENSITY,
+			useAttenuation, glowOcclusion);
+	}
 #else
-    fragColor = vec4(0.0, 0.0, 0.0, 1.0);
+	fragColor = vec4(0.0, 0.0, 0.0, 1.0);
 #endif
 }

@@ -11,5 +11,5 @@ out vec4 fragColor;
 
 void main()
 {
-    fragColor = textureLod(u_input, v_texcoord, frxu_lod);
+	fragColor = textureLod(u_input, v_texcoord, frxu_lod);
 }

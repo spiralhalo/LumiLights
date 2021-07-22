@@ -6,16 +6,16 @@
 #include lumi:shaders/common/userconfig.glsl
 
 /*******************************************************
- *  lumi:shaders/post/clouds_texture.frag              *
+ *  lumi:shaders/post/clouds_texture.frag
  *******************************************************/
 
 out vec4 fragColor;
 
 void main()
 {
-    #if CLOUD_RENDERING == CLOUD_RENDERING_VOLUMETRIC
-    if (frx_worldFlag(FRX_WORLD_IS_OVERWORLD)) {
-        fragColor = generateCloudTexture(v_texcoord);
-    }
-    #endif
+	#if CLOUD_RENDERING == CLOUD_RENDERING_VOLUMETRIC
+	if (frx_worldFlag(FRX_WORLD_IS_OVERWORLD)) {
+		fragColor = generateCloudTexture(v_texcoord);
+	}
+	#endif
 }

@@ -4,13 +4,13 @@
 #include lumi:shaders/lib/util.glsl
 
 /*******************************************************
- *  lumi:shaders/post/simple.vert                      *
+ *  lumi:shaders/post/simple.vert
  *******************************************************/
 
 out vec2 v_invSize;
 
 void main()
 {
-    v_invSize = 1.0 / frxu_size;
-    basicFrameSetup();
+	v_invSize = 1.0 / frxu_size;
+	basicFrameSetup();
 }

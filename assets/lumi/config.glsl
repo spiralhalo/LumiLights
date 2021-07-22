@@ -1,16 +1,16 @@
 /*******************************
- *  lumi:config.glsl           *
+ *  lumi:config.glsl
  *******************************/
 
 /*******************************
- *  SYSTEM -DO NOT EDIT-       *
+ *  SYSTEM -DO NOT EDIT-
  *******************************/
 
 #include respackopts:config_supplier
 #ifndef respackopts_loaded
 
 /*******************************
- * vv CONFIGURATIONS START vv  *
+ * vv CONFIGURATIONS START vv
  *******************************/
 
 /* NOTE: These configurations are ignored if Respackopts is present. */
@@ -29,14 +29,14 @@
 #define LUMI_WavyWaterIntensity 7
 
 /*******************************
- * ^^ CONFIGURATIONS END ^^    *
+ * ^^ CONFIGURATIONS END ^^
  *******************************/
 
 
 
 
 /*******************************
- *  SYSTEM -DO NOT EDIT-       *
+ *  SYSTEM -DO NOT EDIT-
  *******************************/
 
 #endif

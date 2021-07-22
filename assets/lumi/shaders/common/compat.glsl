@@ -1,8 +1,10 @@
 /*******************************************************
- *  lumi:shaders/common/compat.glsl                    *
+ *  lumi:shaders/common/compat.glsl
  *******************************************************
- *  This file isn't supposed to exist.                 *
+ *  This file isn't supposed to exist.
  *******************************************************/
+
+// NOTE: compat with 1.16 is currently broken due to using > 16 textures
 
 // Compatibility with 1.16 / GLSL 1.3
 // NOT compatibility with GLSL 1.2

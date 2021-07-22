@@ -20,10 +20,10 @@ out vec4 fragColor;
 // http://www.iryoku.com/next-generation-post-processing-in-call-of-duty-advanced-warfare
 void main()
 {
-    vec4 base = texture(u_base, v_texcoord);
-    vec4 bloom = textureLod(u_bloom, v_texcoord, 0) * BLOOM_INTENSITY_FLOAT;
+	vec4 base = texture(u_base, v_texcoord);
+	vec4 bloom = textureLod(u_bloom, v_texcoord, 0) * BLOOM_INTENSITY_FLOAT;
 
-    vec3 color = hdr_fromGamma(base.rgb) + bloom.rgb;
+	vec3 color = hdr_fromGamma(base.rgb) + bloom.rgb;
 
-    fragColor = vec4(hdr_toSRGB(color), 1.0);
+	fragColor = vec4(hdr_toSRGB(color), 1.0);
 }

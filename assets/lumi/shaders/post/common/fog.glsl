@@ -1,12 +1,12 @@
 #include lumi:shaders/common/userconfig.glsl
 
 /*******************************************************
- *  lumi:shaders/post/common/fog.glsl                  *
+ *  lumi:shaders/post/common/fog.glsl
  *******************************************************
- *  Copyright (c) 2020-2021 spiralhalo                 *
- *  Released WITHOUT WARRANTY under the terms of the   *
- *  GNU Lesser General Public License version 3 as     *
- *  published by the Free Software Foundation, Inc.    *
+ *  Copyright (c) 2020-2021 spiralhalo
+ *  Released WITHOUT WARRANTY under the terms of the
+ *  GNU Lesser General Public License version 3 as
+ *  published by the Free Software Foundation, Inc.
  *******************************************************/
 
 /* DEVNOTE: on high skyscrapers, high fog look good
