@@ -128,6 +128,8 @@ vec4 fog(float skyLight, float ec, vec4 a, vec3 modelPos, vec3 worldPos, inout f
     vec3 worldVec = normalize(modelPos);
     vec4 fogColor = vec4(atmos_hdrFogColorRadiance(worldVec), 1.0);
 
+    vec4 blended;
+
     if (useAdditive) {
         float darkenFactor = 1.0;
 
@@ -141,13 +143,14 @@ vec4 fog(float skyLight, float ec, vec4 a, vec3 modelPos, vec3 worldPos, inout f
 
         fogColor.rgb = mix(fogColor.rgb, atmos_hdrCaveFogRadiance(), darkness);
 
-        return vec4(a.rgb + fogColor.rgb * fogFactor, a.a + max(0.0, 1.0 - a.a) * fogFactor);
+        blended = vec4(a.rgb + fogColor.rgb * fogFactor, a.a + max(0.0, 1.0 - a.a) * fogFactor);
+    } else {
+        blended = mix(a, fogColor, fogFactor);
     }
 
-    // no need to reduce bloom with additive blending
     bloom = mix(bloom, 0.0, fogFactor);
 
-    return mix(a, fogColor, fogFactor);
+    return blended;
 }
 
 void custom_sky(in vec3 modelPos, in float blindnessFactor, in bool maybeUnderwater, inout vec4 a, inout float bloom_out)
