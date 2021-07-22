@@ -1,5 +1,8 @@
 #include lumi:shaders/post/common/header.glsl
 
+#include frex:shaders/api/player.glsl
+#include frex:shaders/api/world.glsl
+
 /*******************************************************
  *  lumi:shaders/post/exposure_merge.frag              *
  *******************************************************
@@ -16,10 +19,14 @@ out vec4 fragColor;
 #define SMOOTHING_FRAMES 50.
 
 void main() {
-    const float a = 1. - exp(-1. / SMOOTHING_FRAMES);
+    if (frx_renderFrames() < 2u) {
+        fragColor = vec4(max(0.5, frx_eyeBrightness().y));
+    } else {
+        const float a = 1. - exp(-1. / SMOOTHING_FRAMES);
 
-    float new = textureLod(u_exposure, vec2(0.0), 2).r;
-    float history = textureLod(u_exposure, vec2(0.0), 0).r;
+        float new = textureLod(u_exposure, vec2(0.0), 2).r;
+        float history = textureLod(u_exposure, vec2(0.0), 0).r;
 
-    fragColor = vec4(history * (1. - a) + a * new);
+        fragColor = vec4(history * (1. - a) + a * new);
+    }
 }

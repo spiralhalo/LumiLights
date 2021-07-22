@@ -181,6 +181,29 @@
 		},
 	],
 
+	beforeWorldRender: {
+		passes: [
+			{
+				name: "exposure_merge",
+				program: "exposure_merge",
+				framebuffer: "exposure_1",
+				samplerImages: [
+					"exposure",
+				],
+				lod: 1,
+			},
+			{
+				name: "exposure_copy",
+				program: "exposure_copy",
+				framebuffer: "exposure_0",
+				samplerImages: [
+					"exposure",
+				],
+				lod: 0,
+			},
+		]
+	},
+
 	fabulous: {
 		passes: [
 			{
@@ -262,24 +285,6 @@
 					"solid_main",
 				],
 				lod: 2,
-			},
-			{
-				name: "exposure_merge",
-				program: "exposure_merge",
-				framebuffer: "exposure_1",
-				samplerImages: [
-					"exposure",
-				],
-				lod: 1,
-			},
-			{
-				name: "exposure_copy",
-				program: "exposure_copy",
-				framebuffer: "exposure_0",
-				samplerImages: [
-					"exposure",
-				],
-				lod: 0,
 			},
 		]
 	}
