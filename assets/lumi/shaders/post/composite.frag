@@ -4,7 +4,6 @@
 #include frex:shaders/api/world.glsl
 #include lumi:shaders/func/tile_noise.glsl
 #include lumi:shaders/func/tonemap.glsl
-#include lumi:shaders/func/volumetrics.glsl
 #include lumi:shaders/lib/util.glsl
 #include lumi:shaders/lib/fast_gaussian_blur.glsl
 #include lumi:shaders/common/userconfig.glsl

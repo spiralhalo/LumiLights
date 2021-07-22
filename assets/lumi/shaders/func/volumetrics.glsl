@@ -1,5 +1,6 @@
 #include frex:shaders/api/view.glsl
 #include frex:shaders/api/world.glsl
+#include lumi:shaders/common/atmosphere.glsl
 #include lumi:shaders/common/shadow.glsl
 #include lumi:shaders/lib/caustics.glsl
 

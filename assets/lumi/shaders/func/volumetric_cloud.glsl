@@ -3,6 +3,7 @@
 #include frex:shaders/lib/math.glsl
 #include frex:shaders/lib/noise/cellular2x2.glsl
 #include frex:shaders/lib/noise/noise2d.glsl
+#include lumi:shaders/common/atmosphere.glsl
 #include lumi:shaders/common/userconfig.glsl
 #include lumi:shaders/lib/util.glsl
 #include lumi:shaders/func/tile_noise.glsl
