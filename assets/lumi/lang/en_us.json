@@ -1,15 +1,15 @@
 {
-	"pipeline.lumi_lights.name": "Lumi Lights",
-	"pipeline.lumi_lights.desc": "Cool sunrise and shiny stuff methinks",
+	"pipeline.lumi_lights.name": "Lumi Lights LITE",
+	"pipeline.lumi_lights.desc": "Lumi Lights without shadows",
 
-	"pipeline.lumi_shadow_1x.name": "Lumi Shadow 1x",
-	"pipeline.lumi_shadow_1x.desc": "Cool sunrise and ok shadows",
+	"pipeline.lumi_shadow_1x.name": "Lumi Lights 1x",
+	"pipeline.lumi_shadow_1x.desc": "Lumi Lights with 1x shadow resolution",
 
-	"pipeline.lumi_shadow_2x.name": "Lumi Shadow 2x",
-	"pipeline.lumi_shadow_2x.desc": "Cool sunrise and ok shadows",
+	"pipeline.lumi_shadow_2x.name": "Lumi Lights 2x",
+	"pipeline.lumi_shadow_2x.desc": "Lumi Lights with 2x shadow resolution",
 
-	"pipeline.lumi_shadow_4x.name": "Lumi Shadow 4x",
-	"pipeline.lumi_shadow_4x.desc": "Cool sunrise and ok shadows",
+	"pipeline.lumi_shadow_4x.name": "Lumi Lights 4x",
+	"pipeline.lumi_shadow_4x.desc": "Lumi Lights with 4x shadow resolution",
 
 	"config.lumi_lights.category.aesthetics": "Aesthetics",
 	"config.lumi_lights.value.tone_profile": "Tone profile",
