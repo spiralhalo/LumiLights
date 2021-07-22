@@ -31,12 +31,21 @@
 			vertexSource: "lumi:shaders/post/godrays.vert",
 			fragmentSource: "lumi:shaders/post/godrays.frag",
 			samplers: [
-				"u_color",
 				"u_depth",
 				"u_depth_translucent",
 				"u_exposure",
 				"u_shadow",
 				"u_blue_noise",
+			]
+		},
+		{
+			name: "godrays_composite",
+			vertexSource: "lumi:shaders/post/simple.vert",
+			fragmentSource: "lumi:shaders/post/godrays_composite.frag",
+			samplers: [
+				"u_depth",
+				"u_color",
+				"u_godrays",
 			]
 		},
 		{
@@ -94,7 +103,19 @@
                 {name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"},
                 {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
             ]
-        }
+        },
+        {
+            name: "godrays",
+            lod: 3,
+            pixelFormat: "RGBA",
+            target: "TEXTURE_2D",
+            texParams: [
+                {name: "TEXTURE_MIN_FILTER", val: "LINEAR_MIPMAP_LINEAR"},
+                {name: "TEXTURE_MAG_FILTER", val: "LINEAR"},
+                {name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"},
+                {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
+            ]
+        },
 	],
 
 	framebuffers: [
@@ -109,9 +130,33 @@
 			]
 		},
 		{
-			name: "godrays",
+			name: "godrays_composite",
 			colorAttachments: [
 				{image: "solid_main"},
+			]
+		},
+		{
+			name: "godrays",
+			colorAttachments: [
+				{image: "godrays"},
+			]
+		},
+		{
+			name: "godrays_1",
+			colorAttachments: [
+				{image: "godrays", lod: 1},
+			]
+		},
+		{
+			name: "godrays_2",
+			colorAttachments: [
+				{image: "godrays", lod: 2},
+			]
+		},
+		{
+			name: "godrays_3",
+			colorAttachments: [
+				{image: "godrays", lod: 3},
 			]
 		},
 		{
@@ -167,12 +212,42 @@
 				program: "godrays",
 				framebuffer: "godrays",
 				samplerImages: [
-					"main_copy",
 					"composite_depth",
 					"translucent_depth",
 					"exposure",
 					"shadow_map",
 					"lumi:textures/filter_pattern/bluenoise256.png",
+				],
+			},
+			{
+                name: "godrays_downsample_1",
+                program: "downsample",
+                framebuffer: "godrays_1",
+                samplerImages: ["godrays"],
+                lod: 1
+            },
+			{
+                name: "godrays_downsample_2",
+                program: "downsample",
+                framebuffer: "godrays_2",
+                samplerImages: ["godrays"],
+                lod: 2
+            },
+			{
+                name: "godrays_downsample_3",
+                program: "downsample",
+                framebuffer: "godrays_3",
+                samplerImages: ["godrays"],
+                lod: 3
+            },
+			{
+				name: "godrays_composite",
+				program: "godrays_composite",
+				framebuffer: "godrays_composite",
+				samplerImages: [
+					"composite_depth",
+					"main_copy",
+					"godrays",
 				],
 			},
 			{

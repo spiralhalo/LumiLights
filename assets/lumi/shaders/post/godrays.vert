@@ -14,8 +14,6 @@
  *  published by the Free Software Foundation, Inc.    *
  *******************************************************/
 
-uniform sampler2D u_color;
-
 out float v_godray_intensity;
 out vec2 v_invSize;
 out vec2 v_skylightpos;
