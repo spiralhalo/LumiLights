@@ -174,15 +174,15 @@ void custom_sky(in vec3 modelPos, in float blindnessFactor, in bool maybeUnderwa
 
             starry *= l2_clampScale(-0.6, -0.5, skyDotUp); //prevent star near the void core
 
-            float milkyness = l2_clampScale(0.5, 0.0, abs(dot(nonMilkyAxis, worldSkyVec.xyz)));
+            float milkyness = l2_clampScale(0.7, 0.0, abs(dot(nonMilkyAxis, worldSkyVec.xyz)));
             float rainOcclusion = (1.0 - frx_rainGradient());
             vec4  starVec = v_star_rotator * vec4(worldSkyVec, 0.0);
             float zoomFactor = l2_clampScale(90, 30, v_fov); // zoom sharpening
-            float star = starry * smoothstep(0.12 + milkyness * 0.15, 0.0, cellular2x2x2(starVec.xyz * 100).x);
-
-            star = l2_clampScale(0.3 * zoomFactor, 1.0 - 0.6 * zoomFactor, star) * rainOcclusion;
-
             float milkyHaze = starry * rainOcclusion * milkyness * 0.4 * l2_clampScale(-1.0, 1.0, snoise(starVec.xyz * 2.0));
+            float star = starry * l2_clampScale(0.12 + milkyness * milkyness * 0.15, 0.0, cellular2x2x2(starVec.xyz * mix(40, 60, milkyness)).x);
+            float notHorizon = l2_clampScale(0.0, 0.1, worldSkyVec.y);
+
+            star = l2_clampScale(0.0, 1.0 - 0.6 * zoomFactor, star) * rainOcclusion * notHorizon;
 
             #if SKY_MODE == SKY_MODE_LUMI
                 star -= star * starEraser;
