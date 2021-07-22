@@ -156,7 +156,7 @@ const vec3 CAVEFOG_C = DEF_DAY_SKY_COLOR;
 const vec3 CAVEFOG_DEEPC = SUNRISE_LIGHT_COLOR;
 const float CAVEFOG_MAXY = 16.0;
 const float CAVEFOG_MINY = 0.0;
-const float CAVEFOG_STR = 0.1;
+const float CAVEFOG_STR = DEF_CAVEFOG_STR;
 
 
 const int SRISC = 0;
