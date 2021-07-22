@@ -60,7 +60,7 @@
 		},
 		{
 			name: "exposure_merge",
-			vertexSource: "lumi:shaders/post/simple.vert",
+			vertexSource: "lumi:shaders/post/exposure_write.vert",
 			fragmentSource: "lumi:shaders/post/exposure_merge.frag",
 			samplers: [
 				"u_exposure",
@@ -68,7 +68,7 @@
 		},
 		{
 			name: "exposure_copy",
-			vertexSource: "lumi:shaders/post/simple.vert",
+			vertexSource: "lumi:shaders/post/exposure_write.vert",
 			fragmentSource: "lumi:shaders/post/exposure_copy.frag",
 			samplers: [
 				"u_exposure",
@@ -100,8 +100,8 @@
             pixelDataType: "FLOAT",
             target: "TEXTURE_2D",
             texParams: [
-                {name: "TEXTURE_MIN_FILTER", val: "LINEAR_MIPMAP_NEAREST"},
-                {name: "TEXTURE_MAG_FILTER", val: "LINEAR"},
+                {name: "TEXTURE_MIN_FILTER", val: "NEAREST_MIPMAP_NEAREST"},
+                {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
                 {name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"},
                 {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
             ]

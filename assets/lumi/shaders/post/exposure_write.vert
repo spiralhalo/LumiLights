@@ -1,7 +1,7 @@
 #include lumi:shaders/post/common/header.glsl
 
 /*******************************************************
- *  lumi:shaders/post/exposure_copy.frag               *
+ *  lumi:shaders/post/exposure_write.vert              *
  *******************************************************
  *  Copyright (c) 2020-2021 spiralhalo                 *
  *  Released WITHOUT WARRANTY under the terms of the   *
@@ -9,10 +9,17 @@
  *  published by the Free Software Foundation, Inc.    *
  *******************************************************/
 
-uniform sampler2D u_exposure;
+void main()
+{
+    basicFrameSetup();
 
-out vec4 fragColor;
+    vec2 onePixel = pow(2.0, max(0.0, float(frxu_lod) - 1.0)) / frxu_size;
 
-void main() {
-    fragColor = textureLod(u_exposure, vec2(0.0), 1);
+    if (v_texcoord == vec2(0.0)) {
+        gl_Position.xy += onePixel * 0.5;
+    } else {
+        gl_Position.xy += 1.0;
+        gl_Position.xy *= onePixel;
+        gl_Position.xy -= 1.0;
+    }
 }

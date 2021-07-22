@@ -14,7 +14,7 @@
 uniform sampler2D u_exposure;
 
 float exposureCompensation() {
-    return texture(u_exposure, vec2(0.5)).r;
+    return texture(u_exposure, vec2(0.0)).r;
 }
 
 #ifdef POST_SHADER

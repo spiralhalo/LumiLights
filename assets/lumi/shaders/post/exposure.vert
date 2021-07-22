@@ -22,27 +22,38 @@ void main()
 
     v_exposure = 0.;
 
-    int x = 0;
-    for (int i = 0; i < 100; i ++) {
-        for (int j = 0; j < 100; j ++) {
-            x ++;
-            vec2 coord = vec2(i, j) / 100.;
+    vec2 onePixel = pow(2.0, max(0.0, float(frxu_lod) - 1.0)) / frxu_size;
 
-            // scale down in center (fovea)
-            // coord -= 0.5;
+    // Calculate exposure in one OR two vertexes and precisely one pixel
+    if (v_texcoord == vec2(0.0)) {
+        gl_Position.xy += onePixel * 0.5;
 
-            // vec2 scaling = 0.25 + smoothstep(0.0, 0.5, abs(coord)) * 0.75; // more scaling down the closer to center
+        int x = 0;
+        for (int i = 0; i < 100; i ++) {
+            for (int j = 0; j < 100; j ++) {
+                x ++;
+                vec2 coord = vec2(i, j) / 100.;
 
-            // coord *= scaling;
-            // coord += 0.5;
+                // scale down in center (fovea)
+                // coord -= 0.5;
 
-            v_exposure += frx_luminance(texture(u_color, coord).rgb);
+                // vec2 scaling = 0.25 + smoothstep(0.0, 0.5, abs(coord)) * 0.75; // more scaling down the closer to center
+
+                // coord *= scaling;
+                // coord += 0.5;
+
+                v_exposure += frx_luminance(texture(u_color, coord).rgb);
+            }
         }
+
+        v_exposure /= float(x);
+
+        // a bunch of magic based on experiment
+        v_exposure = smoothstep(0.0, 0.5, v_exposure);
+        // v_exposure = pow(v_exposure, 0.5);
+    } else {
+        gl_Position.xy += 1.0;
+        gl_Position.xy *= onePixel;
+        gl_Position.xy -= 1.0;
     }
-
-    v_exposure /= float(x);
-
-    // a bunch of magic based on experiment
-    v_exposure = smoothstep(0.0, 0.5, v_exposure);
-    // v_exposure = pow(v_exposure, 0.5);
 }
