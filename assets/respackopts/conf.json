@@ -2,13 +2,13 @@
   "id": "LUMI",
   "version": 1,
   "conf": {
-    "NoWaterColor": false,
-    "NoWaterTexture": false,
-    "WavyWaterModel": true,
-    "WavyWaterIntensity": {
-      "default": 7,
-      "min": 1,
-      "max": 15
-    }
+	"NoWaterColor": false,
+	"NoWaterTexture": false,
+	"WavyWaterModel": true,
+	"WavyWaterIntensity": {
+	  "default": 7,
+	  "min": 1,
+	  "max": 15
+	}
   }
 }

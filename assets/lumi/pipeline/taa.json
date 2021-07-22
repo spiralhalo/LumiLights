@@ -16,15 +16,15 @@
 	images: [
 		// velocity is computed in taa right away
 		// {
-		//     name: "velocity",
-		//     internalFormat: "GL_RG16_SNORM",
-		//     pixelFormat: "GL_RG",
-		//     pixelDataType: "GL_FLOAT",
-		//     target: "TEXTURE_2D",
-		//     texParams: [
-		//         {name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
-		//         {name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
-		//     ]
+		//	 name: "velocity",
+		//	 internalFormat: "GL_RG16_SNORM",
+		//	 pixelFormat: "GL_RG",
+		//	 pixelDataType: "GL_FLOAT",
+		//	 target: "TEXTURE_2D",
+		//	 texParams: [
+		//		 {name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
+		//		 {name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
+		//	 ]
 		// },
 		{
 			name: "history0",
@@ -36,19 +36,19 @@
 			]
 		},
 		// {
-		//     name: "history_depth0",
-		//     lod: 0,
-		//     internalFormat: "GL_R32F",
-		//     pixelFormat: "GL_RED",
-		//     pixelDataType: "FLOAT",
-		//     target: "TEXTURE_2D",
-		//     texParams: [
-		//         { "name": "TEXTURE_MIN_FILTER", "val": "NEAREST" },
-		//         { "name": "TEXTURE_MAG_FILTER", "val": "NEAREST" },
-		//         { "name": "TEXTURE_WRAP_S", "val": "CLAMP_TO_EDGE" },
-		//         { "name": "TEXTURE_WRAP_T", "val": "CLAMP_TO_EDGE" },
-		//         { "name": "TEXTURE_COMPARE_MODE", "val": "NONE" }
-		//     ]
+		//	 name: "history_depth0",
+		//	 lod: 0,
+		//	 internalFormat: "GL_R32F",
+		//	 pixelFormat: "GL_RED",
+		//	 pixelDataType: "FLOAT",
+		//	 target: "TEXTURE_2D",
+		//	 texParams: [
+		//		 { "name": "TEXTURE_MIN_FILTER", "val": "NEAREST" },
+		//		 { "name": "TEXTURE_MAG_FILTER", "val": "NEAREST" },
+		//		 { "name": "TEXTURE_WRAP_S", "val": "CLAMP_TO_EDGE" },
+		//		 { "name": "TEXTURE_WRAP_T", "val": "CLAMP_TO_EDGE" },
+		//		 { "name": "TEXTURE_COMPARE_MODE", "val": "NONE" }
+		//	 ]
 		// },
 	],
 
@@ -58,8 +58,8 @@
 			colorAttachments: [{image: "history0"}]
 		}, 
 		// {
-		//     name: "history_depth_copy_0",
-		//     colorAttachments: [{image: "history_depth0"}]
+		//	 name: "history_depth_copy_0",
+		//	 colorAttachments: [{image: "history_depth0"}]
 		// }, 
 		{
 			name: "taa_fb",
@@ -87,10 +87,10 @@
 				samplerImages: ["main_copy"]
 			},
 			// {
-			//     name: "history_depth_copy_0",
-			//     program: "copy",
-			//     framebuffer: "history_depth_copy_0",
-			//     samplerImages: ["composite_depth"]
+			//	 name: "history_depth_copy_0",
+			//	 program: "copy",
+			//	 framebuffer: "history_depth_copy_0",
+			//	 samplerImages: ["composite_depth"]
 			// }
 		]
 	}

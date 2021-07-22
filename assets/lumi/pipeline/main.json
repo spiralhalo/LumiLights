@@ -1,7 +1,7 @@
 {
 	// Managed draw targets
 	drawTargets: {
-		solidTerrain: "solid",             // terrain and entities
+		solidTerrain: "solid",			 // terrain and entities
 		translucentTerrain: "translucent", // translucent terrain
 		translucentEntity: "translucent",  // translucent ITEM entities
 		translucentParticles: "particles", // TODO: segregate solid particles
@@ -13,7 +13,7 @@
 	defaultFramebuffer: "default",
 	fabulousTargets: {
 		translucent: "fab_translucent", // translucent terrain
-		entity: "fab_translucent",      // translucent ITEM entities
+		entity: "fab_translucent",	  // translucent ITEM entities
 		particles: "fab_particles",
 		weather: "fab_weather",
 		clouds: "fab_clouds",
@@ -39,7 +39,7 @@
 		"lumi:pipeline/common.json",
 		// PASSES IN CORRECT ORDER
 		// NB: Passes need to be in the same "include" level to be ordered correctly.
-		//     Passes in higher "include" level will always come before passes in lower level.
+		//	 Passes in higher "include" level will always come before passes in lower level.
 		"lumi:pipeline/clear.json",
 		"lumi:pipeline/custom_clouds.json",
 		"lumi:pipeline/ao.json",

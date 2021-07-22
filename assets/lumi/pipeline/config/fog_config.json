@@ -1,38 +1,38 @@
 {
-    options: [
-        {
-            includeToken: "lumi:fog_config",
-            categoryKey: "config.lumi_lights.category.fog",
-            options: {
-                fog_far_chunks: {
-                    default: 8,
-                    min: 4,
-                    max: 32,
-                    nameKey: "config.lumi_lights.value.fog_far_chunks",
-                    descriptionKey: "config.lumi_lights.help.fog_far_chunks"
-                },
-                fog_density_relative: {
-                    default: 10,
-                    min: 0,
-                    max: 20,
-                    nameKey: "config.lumi_lights.value.fog_density_relative",
-                    descriptionKey: "config.lumi_lights.help.fog_density_relative"
-                },
-                underwater_fog_far_chunks: {
-                    default: 1,
-                    min: 0,
-                    max: 4,
-                    nameKey: "config.lumi_lights.value.underwater_fog_far_chunks",
-                    descriptionKey: "config.lumi_lights.help.underwater_fog_far_chunks"
-                },
-                underwater_fog_density_relative: {
-                    default: 15,
-                    min: 0,
-                    max: 20,
-                    nameKey: "config.lumi_lights.value.underwater_fog_density_relative",
-                    descriptionKey: "config.lumi_lights.help.underwater_fog_density_relative"
-                }
-            }
-        }
-    ]
+	options: [
+		{
+			includeToken: "lumi:fog_config",
+			categoryKey: "config.lumi_lights.category.fog",
+			options: {
+				fog_far_chunks: {
+					default: 8,
+					min: 4,
+					max: 32,
+					nameKey: "config.lumi_lights.value.fog_far_chunks",
+					descriptionKey: "config.lumi_lights.help.fog_far_chunks"
+				},
+				fog_density_relative: {
+					default: 10,
+					min: 0,
+					max: 20,
+					nameKey: "config.lumi_lights.value.fog_density_relative",
+					descriptionKey: "config.lumi_lights.help.fog_density_relative"
+				},
+				underwater_fog_far_chunks: {
+					default: 1,
+					min: 0,
+					max: 4,
+					nameKey: "config.lumi_lights.value.underwater_fog_far_chunks",
+					descriptionKey: "config.lumi_lights.help.underwater_fog_far_chunks"
+				},
+				underwater_fog_density_relative: {
+					default: 15,
+					min: 0,
+					max: 20,
+					nameKey: "config.lumi_lights.value.underwater_fog_density_relative",
+					descriptionKey: "config.lumi_lights.help.underwater_fog_density_relative"
+				}
+			}
+		}
+	]
 }

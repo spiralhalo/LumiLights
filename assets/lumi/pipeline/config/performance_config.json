@@ -1,138 +1,138 @@
 {
-  options: [
-    {
-      includeToken: "lumi:performance_config",
-      categoryKey: "config.lumi_lights.category.performance",
-      options: {
-        antialiasing: {
-            default: "taa",
-            choices: ["none", "taa", "taa_blurry"],
-            enum: true,
-            prefix: "antialiasing_",
-            nameKey: "config.lumi_lights.value.antialiasing",
-            descriptionKey: "config.lumi_lights.help.antialiasing"
-        },
-        ambient_occlusion: {
-          default: "ssao",
-          choices: ["no_ao", "vanilla", "vanilla_and_ssao", "pure_ssao"],
-          enum: true,
-          prefix: "ambient_occlusion_",
-          nameKey: "config.lumi_lights.value.ambient_occlusion",
-          descriptionKey: "config.lumi_lights.help.ambient_occlusion"
-        },
-        blocklight_specular_mode: {
-          default: "fancy",
-          choices: ["fast", "fancy"],
-          enum: true,
-          prefix: "blocklight_specular_mode_",
-          nameKey: "config.lumi_lights.value.blocklight_specular_mode",
-          descriptionKey: "config.lumi_lights.help.blocklight_specular_mode"
-        },
-        reflection_profile: {
-          default: "low",
-          choices: ["none", "low", "medium", "high", "extreme"],
-          enum: true,
-          prefix: "reflection_profile_",
-          nameKey: "config.lumi_lights.value.reflection_profile",
-          descriptionKey: "config.lumi_lights.help.reflection_profile"
-        },
-        reflection_maximum_roughness_relative: {
-          default: 7,
-          min: 1,
-          max: 10,
-          nameKey: "config.lumi_lights.value.reflection_maximum_roughness_relative",
-          descriptionKey: "config.lumi_lights.help.reflection_maximum_roughness_relative"
-        },
-        reflection_on_hand: {
-          default: true,
-          nameKey: "config.lumi_lights.value.reflection_on_hand",
-          descriptionKey: "config.lumi_lights.help.reflection_on_hand"
-        },
-        cloud_reflection: {
-          default: true,
-          nameKey: "config.lumi_lights.value.cloud_reflection",
-          descriptionKey: "config.lumi_lights.help.cloud_reflection"
-        },
-        cloud_rendering: {
-          default: "volumetric",
-          choices: ["vanilla", "flat", "parallax", "volumetric"],
-          enum: true,
-          prefix: "cloud_rendering_",
-          nameKey: "config.lumi_lights.value.cloud_rendering",
-          descriptionKey: "config.lumi_lights.help.cloud_rendering"
-        },
-        water_caustics: {
-          default: true,
-          prefix: "water_caustics_",
-          nameKey: "config.lumi_lights.value.water_caustics",
-          descriptionKey: "config.lumi_lights.help.water_caustics"
-        },
-      }
-    },
-    {
-      includeToken: "lumi:ssao_config",
-      categoryKey: "config.lumi_lights.category.ssao",
-      options: {
-        ssao_radius: {
-          default: 2.0,
-          min: 0.01,
-          max: 100.0,
-          nameKey: "config.lumi_lights.value.ssao_radius",
-          descriptionKey: "config.lumi_lights.help.ssao_radius"
-        },
-        ssao_bias: {
-          default: 0.3,
-          min: 0.01,
-          max: 100.0,
-          nameKey: "config.lumi_lights.value.ssao_bias",
-          descriptionKey: "config.lumi_lights.help.ssao_bias"
-        },
-        ssao_intensity: {
-          default: 2.5,
-          min: 0.01,
-          max: 100.0,
-          nameKey: "config.lumi_lights.value.ssao_intensity",
-          descriptionKey: "config.lumi_lights.help.ssao_intensity"
-        },
-        ssao_use_attenuation: {
-          default: true,
-          nameKey: "config.lumi_lights.value.ssao_use_attenuation",
-          descriptionKey: "config.lumi_lights.help.ssao_use_attenuation"
-        },
-        ssao_glow: {
-          default: true,
-          nameKey: "config.lumi_lights.value.ssao_glow",
-          descriptionKey: "config.lumi_lights.help.ssao_glow"
-        },
-      }
-    }
-    {
-      includeToken: "lumi:clouds_config",
-      categoryKey: "config.lumi_lights.category.clouds",
-      options: {
-        parallax_cloud_altitude: {
-          default: 100,
-          min: 0,
-          max: 1000,
-          nameKey: "config.lumi_lights.value.parallax_cloud_altitude",
-          descriptionKey: "config.lumi_lights.help.parallax_cloud_altitude"
-        },
-        parallax_cloud_thickness: {
-          default: 40,
-          min: 0,
-          max: 1000,
-          nameKey: "config.lumi_lights.value.parallax_cloud_thickness",
-          descriptionKey: "config.lumi_lights.help.parallax_cloud_thickness"
-        },
-        volumetric_cloud_mode: {
-          default: "skybox",
-          choices: ["skybox", "world"],
-          enum: true,
-          prefix: "volumetric_cloud_mode_",
-          nameKey: "config.lumi_lights.value.volumetric_cloud_mode",
-          descriptionKey: "config.lumi_lights.help.volumetric_cloud_mode"
-        },
-      }
-    },
-  ]
+	options: [
+		{
+			includeToken: "lumi:performance_config",
+			categoryKey: "config.lumi_lights.category.performance",
+			options: {
+				antialiasing: {
+						default: "taa",
+						choices: ["none", "taa", "taa_blurry"],
+						enum: true,
+						prefix: "antialiasing_",
+						nameKey: "config.lumi_lights.value.antialiasing",
+						descriptionKey: "config.lumi_lights.help.antialiasing"
+				},
+				ambient_occlusion: {
+					default: "ssao",
+					choices: ["no_ao", "vanilla", "vanilla_and_ssao", "pure_ssao"],
+					enum: true,
+					prefix: "ambient_occlusion_",
+					nameKey: "config.lumi_lights.value.ambient_occlusion",
+					descriptionKey: "config.lumi_lights.help.ambient_occlusion"
+				},
+				blocklight_specular_mode: {
+					default: "fancy",
+					choices: ["fast", "fancy"],
+					enum: true,
+					prefix: "blocklight_specular_mode_",
+					nameKey: "config.lumi_lights.value.blocklight_specular_mode",
+					descriptionKey: "config.lumi_lights.help.blocklight_specular_mode"
+				},
+				reflection_profile: {
+					default: "low",
+					choices: ["none", "low", "medium", "high", "extreme"],
+					enum: true,
+					prefix: "reflection_profile_",
+					nameKey: "config.lumi_lights.value.reflection_profile",
+					descriptionKey: "config.lumi_lights.help.reflection_profile"
+				},
+				reflection_maximum_roughness_relative: {
+					default: 7,
+					min: 1,
+					max: 10,
+					nameKey: "config.lumi_lights.value.reflection_maximum_roughness_relative",
+					descriptionKey: "config.lumi_lights.help.reflection_maximum_roughness_relative"
+				},
+				reflection_on_hand: {
+					default: true,
+					nameKey: "config.lumi_lights.value.reflection_on_hand",
+					descriptionKey: "config.lumi_lights.help.reflection_on_hand"
+				},
+				cloud_reflection: {
+					default: true,
+					nameKey: "config.lumi_lights.value.cloud_reflection",
+					descriptionKey: "config.lumi_lights.help.cloud_reflection"
+				},
+				cloud_rendering: {
+					default: "volumetric",
+					choices: ["vanilla", "flat", "parallax", "volumetric"],
+					enum: true,
+					prefix: "cloud_rendering_",
+					nameKey: "config.lumi_lights.value.cloud_rendering",
+					descriptionKey: "config.lumi_lights.help.cloud_rendering"
+				},
+				water_caustics: {
+					default: true,
+					prefix: "water_caustics_",
+					nameKey: "config.lumi_lights.value.water_caustics",
+					descriptionKey: "config.lumi_lights.help.water_caustics"
+				},
+			}
+		},
+		{
+			includeToken: "lumi:ssao_config",
+			categoryKey: "config.lumi_lights.category.ssao",
+			options: {
+				ssao_radius: {
+					default: 2.0,
+					min: 0.01,
+					max: 100.0,
+					nameKey: "config.lumi_lights.value.ssao_radius",
+					descriptionKey: "config.lumi_lights.help.ssao_radius"
+				},
+				ssao_bias: {
+					default: 0.3,
+					min: 0.01,
+					max: 100.0,
+					nameKey: "config.lumi_lights.value.ssao_bias",
+					descriptionKey: "config.lumi_lights.help.ssao_bias"
+				},
+				ssao_intensity: {
+					default: 2.5,
+					min: 0.01,
+					max: 100.0,
+					nameKey: "config.lumi_lights.value.ssao_intensity",
+					descriptionKey: "config.lumi_lights.help.ssao_intensity"
+				},
+				ssao_use_attenuation: {
+					default: true,
+					nameKey: "config.lumi_lights.value.ssao_use_attenuation",
+					descriptionKey: "config.lumi_lights.help.ssao_use_attenuation"
+				},
+				ssao_glow: {
+					default: true,
+					nameKey: "config.lumi_lights.value.ssao_glow",
+					descriptionKey: "config.lumi_lights.help.ssao_glow"
+				},
+			}
+		}
+		{
+			includeToken: "lumi:clouds_config",
+			categoryKey: "config.lumi_lights.category.clouds",
+			options: {
+				parallax_cloud_altitude: {
+					default: 100,
+					min: 0,
+					max: 1000,
+					nameKey: "config.lumi_lights.value.parallax_cloud_altitude",
+					descriptionKey: "config.lumi_lights.help.parallax_cloud_altitude"
+				},
+				parallax_cloud_thickness: {
+					default: 40,
+					min: 0,
+					max: 1000,
+					nameKey: "config.lumi_lights.value.parallax_cloud_thickness",
+					descriptionKey: "config.lumi_lights.help.parallax_cloud_thickness"
+				},
+				volumetric_cloud_mode: {
+					default: "skybox",
+					choices: ["skybox", "world"],
+					enum: true,
+					prefix: "volumetric_cloud_mode_",
+					nameKey: "config.lumi_lights.value.volumetric_cloud_mode",
+					descriptionKey: "config.lumi_lights.help.volumetric_cloud_mode"
+				},
+			}
+		},
+	]
 }

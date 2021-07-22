@@ -1,8 +1,8 @@
 {
-    "transparency": "none",
-    "vertexSource": "lumi:shaders/material/noop.vert",
-    "fragmentSource": "lumi:shaders/material/oculi.frag",
-    "disableAo": true,
-    "emissive": true,
-    "transform": true
+	"transparency": "none",
+	"vertexSource": "lumi:shaders/material/noop.vert",
+	"fragmentSource": "lumi:shaders/material/oculi.frag",
+	"disableAo": true,
+	"emissive": true,
+	"transform": true
 }

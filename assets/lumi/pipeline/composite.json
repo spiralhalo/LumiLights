@@ -77,47 +77,47 @@
 	],
 
 	images: [
-        {
-            name: "composite_depth",
-            lod: 0,
-            internalFormat: "GL_R32F",
-            pixelFormat: "GL_RED",
-            pixelDataType: "FLOAT",
-            target: "TEXTURE_2D",
-            texParams: [
-                { "name": "TEXTURE_MIN_FILTER", "val": "NEAREST" },
-                { "name": "TEXTURE_MAG_FILTER", "val": "NEAREST" },
-                { "name": "TEXTURE_WRAP_S", "val": "CLAMP_TO_EDGE" },
-                { "name": "TEXTURE_WRAP_T", "val": "CLAMP_TO_EDGE" },
-                { "name": "TEXTURE_COMPARE_MODE", "val": "NONE" }
-            ]
-        },
-        {
-            name: "exposure",
-            lod: 2,
-            internalFormat: "GL_R32F", // exponential smoothing is a serious business >B(
-            pixelFormat: "GL_RED",
-            pixelDataType: "FLOAT",
-            target: "TEXTURE_2D",
-            texParams: [
-                {name: "TEXTURE_MIN_FILTER", val: "NEAREST_MIPMAP_NEAREST"},
-                {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
-                {name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"},
-                {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
-            ]
-        },
-        {
-            name: "godrays",
-            lod: 3,
-            pixelFormat: "RGBA",
-            target: "TEXTURE_2D",
-            texParams: [
-                {name: "TEXTURE_MIN_FILTER", val: "LINEAR_MIPMAP_LINEAR"},
-                {name: "TEXTURE_MAG_FILTER", val: "LINEAR"},
-                {name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"},
-                {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
-            ]
-        },
+		{
+			name: "composite_depth",
+			lod: 0,
+			internalFormat: "GL_R32F",
+			pixelFormat: "GL_RED",
+			pixelDataType: "FLOAT",
+			target: "TEXTURE_2D",
+			texParams: [
+				{ "name": "TEXTURE_MIN_FILTER", "val": "NEAREST" },
+				{ "name": "TEXTURE_MAG_FILTER", "val": "NEAREST" },
+				{ "name": "TEXTURE_WRAP_S", "val": "CLAMP_TO_EDGE" },
+				{ "name": "TEXTURE_WRAP_T", "val": "CLAMP_TO_EDGE" },
+				{ "name": "TEXTURE_COMPARE_MODE", "val": "NONE" }
+			]
+		},
+		{
+			name: "exposure",
+			lod: 2,
+			internalFormat: "GL_R32F", // exponential smoothing is a serious business >B(
+			pixelFormat: "GL_RED",
+			pixelDataType: "FLOAT",
+			target: "TEXTURE_2D",
+			texParams: [
+				{name: "TEXTURE_MIN_FILTER", val: "NEAREST_MIPMAP_NEAREST"},
+				{name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
+				{name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"},
+				{name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
+			]
+		},
+		{
+			name: "godrays",
+			lod: 3,
+			pixelFormat: "RGBA",
+			target: "TEXTURE_2D",
+			texParams: [
+				{name: "TEXTURE_MIN_FILTER", val: "LINEAR_MIPMAP_LINEAR"},
+				{name: "TEXTURE_MAG_FILTER", val: "LINEAR"},
+				{name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"},
+				{name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
+			]
+		},
 	],
 
 	framebuffers: [
@@ -247,26 +247,26 @@
 				],
 			},
 			{
-                name: "godrays_downsample_1",
-                program: "downsample",
-                framebuffer: "godrays_1",
-                samplerImages: ["godrays"],
-                lod: 1
-            },
+				name: "godrays_downsample_1",
+				program: "downsample",
+				framebuffer: "godrays_1",
+				samplerImages: ["godrays"],
+				lod: 1
+			},
 			{
-                name: "godrays_downsample_2",
-                program: "downsample",
-                framebuffer: "godrays_2",
-                samplerImages: ["godrays"],
-                lod: 2
-            },
+				name: "godrays_downsample_2",
+				program: "downsample",
+				framebuffer: "godrays_2",
+				samplerImages: ["godrays"],
+				lod: 2
+			},
 			{
-                name: "godrays_downsample_3",
-                program: "downsample",
-                framebuffer: "godrays_3",
-                samplerImages: ["godrays"],
-                lod: 3
-            },
+				name: "godrays_downsample_3",
+				program: "downsample",
+				framebuffer: "godrays_3",
+				samplerImages: ["godrays"],
+				lod: 3
+			},
 			{
 				name: "godrays_composite",
 				program: "godrays_composite",
