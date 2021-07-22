@@ -11,6 +11,7 @@
 uniform sampler2D u_current;
 uniform sampler2D u_history0;
 uniform sampler2D u_depthCurrent;
+uniform sampler2D u_debugText;
 
 in vec2 v_invSize;
 
@@ -30,6 +31,14 @@ void main()
         vec2 velocity = 0.5 + calcVelocity(u_depthCurrent, v_texcoord, v_invSize) * 50.0;
         fragColor = vec4(velocity, 0.0, 1.0);
     #endif
+    
+    vec2 coord = vec2(clamp(v_texcoord.x, 0.35, 0.65), clamp(v_texcoord.y, 0.92, 1.0));
+
+    if (v_texcoord == coord) {
+        coord -= vec2(0.35, 0.92);
+        coord *= vec2(1.0/0.3, -1.0/0.08);
+        fragColor = texture(u_debugText, coord);
+    }
 #else
 
     // PROGRESS:
