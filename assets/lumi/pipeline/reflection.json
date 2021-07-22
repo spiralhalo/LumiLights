@@ -266,6 +266,7 @@
                     "emissive_reflection_translucent",
 
 					"lumi:textures/filter_pattern/bluenoise256.png",
+					"exposure",
 				]
 			},
 		]

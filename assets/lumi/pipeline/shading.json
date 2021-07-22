@@ -69,6 +69,7 @@
 				"u_emissive_reflection_translucent",
 
 				"u_blue_noise",
+				"u_exposure",
 			]
 		},
 	],

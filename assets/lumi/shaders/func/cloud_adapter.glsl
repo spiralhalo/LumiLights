@@ -1,6 +1,5 @@
 #include lumi:shaders/func/flat_cloud.glsl
 #include lumi:shaders/func/parallax_cloud.glsl
-#include lumi:shaders/func/tonemap.glsl
 #include lumi:shaders/func/volumetric_cloud.glsl
 #include lumi:shaders/lib/fast_gaussian_blur.glsl
 
