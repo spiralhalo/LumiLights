@@ -60,6 +60,7 @@
 				"u_hdr_solid",
 				"u_material_solid",
 				"u_hdr_solid_swap",
+				"u_solid_depth",
 
 				"u_hdr_translucent",
 				"u_material_translucent",
@@ -141,9 +142,8 @@
 		{
 			name: "solid_combine",
 			lod: 0,
-			internalFormat: "RGBA16F",
-			pixelFormat: "RGBA",
-			pixelDataType: "FLOAT",
+			internalFormat: "RGB8",
+			pixelFormat: "RGB",
 			target: "TEXTURE_2D",
 			texParams: [
 				{name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
@@ -152,9 +152,8 @@
 		}, {
 			name: "translucent_combine",
 			lod: 0,
-			internalFormat: "RGBA16F",
+			internalFormat: "RGBA8",
 			pixelFormat: "RGBA",
-			pixelDataType: "FLOAT",
 			target: "TEXTURE_2D",
 			texParams: [
 				{name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},

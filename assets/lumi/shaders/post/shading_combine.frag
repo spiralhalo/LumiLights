@@ -18,6 +18,7 @@
 uniform sampler2D u_hdr_solid;
 uniform sampler2D u_material_solid;
 uniform sampler2D u_hdr_solid_swap;
+uniform sampler2D u_solid_depth;
 
 uniform sampler2D u_hdr_translucent;
 uniform sampler2D u_material_translucent;
@@ -55,12 +56,26 @@ vec4 hdr_combine(sampler2D a, sampler2D matA, sampler2D b, vec2 uv)
 
 void main()
 {
-    fragColor[0] = hdr_combine(u_hdr_solid, u_material_solid, u_hdr_solid_swap, v_texcoord);
-    fragColor[1] = hdr_combine(u_hdr_translucent, u_material_translucent, u_hdr_translucent_swap, v_texcoord);
+    vec4 solid = hdr_combine(u_hdr_solid, u_material_solid, u_hdr_solid_swap, v_texcoord);
+    vec4 translucent = hdr_combine(u_hdr_translucent, u_material_translucent, u_hdr_translucent_swap, v_texcoord);
 
     float reflectionBloom = texture(u_emissive_reflection_translucent, v_texcoord).r;
     vec3 reflectionAntiBanding = texture(u_hdr_translucent_swap, v_texcoord).rgb;
     float reflectionLuminance = frx_luminance(reflectionAntiBanding * reflectionAntiBanding);
 
-    fragColor[1].a = min(1.0, fragColor[1].a + BLOOM_ALPHA_ADD * reflectionBloom * reflectionLuminance);
+    translucent.a = min(1.0, translucent.a + BLOOM_ALPHA_ADD * reflectionBloom * reflectionLuminance);
+
+    float depth_solid = texture(u_solid_depth, v_texcoord).r;
+    bool tonemapTheSky = frx_worldFlag(FRX_WORLD_IS_NETHER);
+
+#if SKY_MODE == SKY_MODE_LUMI
+    tonemapTheSky = tonemapTheSky || frx_worldFlag(FRX_WORLD_IS_OVERWORLD);
+#endif
+
+    if ((depth_solid != 1.0 || tonemapTheSky) && solid.a > 0) {
+        solid.rgb = ldr_tonemap3(solid.rgb);
+    }
+
+    fragColor[0] = solid;
+    fragColor[1] = ldr_tonemap(translucent);
 }

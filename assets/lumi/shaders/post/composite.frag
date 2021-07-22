@@ -73,17 +73,9 @@ void main()
 {
     float depth_solid = texture(u_solid_depth, v_texcoord).r;
     vec4 solid = texture(u_combine_solid, v_texcoord);
-    bool tonemapTheSky = frx_worldFlag(FRX_WORLD_IS_NETHER);
-    #if SKY_MODE == SKY_MODE_LUMI
-        tonemapTheSky = tonemapTheSky || frx_worldFlag(FRX_WORLD_IS_OVERWORLD);
-    #endif
-    if ((depth_solid != 1.0 || tonemapTheSky) && solid.a > 0) {
-        solid.rgb = ldr_tonemap3(solid.rgb);
-    }
 
     float depth_translucent = texture(u_translucent_depth, v_texcoord).r;
     vec4 translucent = texture(u_combine_translucent, v_texcoord);
-    translucent.rgb = ldr_tonemap3(translucent.rgb);
 
     float depth_particles = texture(u_particles_depth, v_texcoord).r;
     vec4 particles = texture(u_particles, v_texcoord);

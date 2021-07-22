@@ -257,6 +257,7 @@
 					"solid_shaded",
 					"material_solid",
 					"solid_reflection_merge",
+					"solid_depth",
 
 					"translucent_shaded",
 					"material_translucent",
