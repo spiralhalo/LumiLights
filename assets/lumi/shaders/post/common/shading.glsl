@@ -7,6 +7,7 @@
 #include frex:shaders/api/view.glsl
 #include frex:shaders/api/world.glsl
 #include lumi:shaders/common/atmosphere.glsl
+#include lumi:shaders/common/contrast.glsl
 #include lumi:shaders/common/shadow.glsl
 #include lumi:shaders/common/userconfig.glsl
 #include lumi:shaders/func/glintify2.glsl
@@ -72,7 +73,7 @@ vec2 coords_uv(vec3 view, mat4 projection)
     return clip.xy * 0.5 + 0.5;
 }
 
-vec4 fog(float skyLight, vec4 a, vec3 modelPos, vec3 worldPos, inout float bloom)
+vec4 fog(float skyLight, float ec, vec4 a, vec3 modelPos, vec3 worldPos, inout float bloom)
 {
     float pFogDensity = frx_viewFlag(FRX_CAMERA_IN_FLUID) ? UNDERWATER_FOG_DENSITY : FOG_DENSITY;
     float pFogFar     = frx_viewFlag(FRX_CAMERA_IN_FLUID) ? UNDERWATER_FOG_FAR     : FOG_FAR;
@@ -122,21 +123,25 @@ vec4 fog(float skyLight, vec4 a, vec3 modelPos, vec3 worldPos, inout float bloom
     distFactor *= distFactor;
 
     fogFactor = clamp(fogFactor * distFactor, 0.0, 1.0);
+    fogFactor *= (EXPOSURE_CANCELLATION, 1.0, ec);
 
-    vec4 fogColor = vec4(atmos_hdrFogColorRadiance(normalize(modelPos)), 1.0);
+    vec3 worldVec = normalize(modelPos);
+    vec4 fogColor = vec4(atmos_hdrFogColorRadiance(worldVec), 1.0);
 
     if (useAdditive) {
-        #ifdef RGB_CAVES
-            float darkness = (1.0 - skyLight);
-        #else
-            float darkness = l2_clampScale(0.1, 0.0, skyLight);
-        #endif
-        pfCave *= min(1.0, distToCamera / FOG_FAR) * darkness;
-        pfCave *= pfCave;
+        float darkenFactor = 1.0;
 
-        vec3 caveFog = atmos_hdrCaveFogRadiance() * pfCave;
+        if (frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) && !frx_viewFlag(FRX_CAMERA_IN_FLUID)) {
+            darkenFactor = 1.0 - abs(worldVec.y) * 0.7;
+        }
 
-        return vec4(a.rgb + fogColor.rgb * fogFactor + caveFog, a.a + max(0.0, 1.0 - a.a) * fogFactor);
+        fogFactor *= darkenFactor;
+
+        float darkness = frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? l2_clampScale(0.1, 0.0, skyLight) : 0.0;
+
+        fogColor.rgb = mix(fogColor.rgb, atmos_hdrCaveFogRadiance(), darkness);
+
+        return vec4(a.rgb + fogColor.rgb * fogFactor, a.a + max(0.0, 1.0 - a.a) * fogFactor);
     }
 
     // no need to reduce bloom with additive blending
@@ -236,7 +241,8 @@ const float INTENSITY = 10.0;
 
 vec4 hdr_shaded_color(
     vec2 uv, sampler2D sdepth, sampler2D slight, sampler2D snormal, sampler2D smaterial, sampler2D smisc,
-    vec4 albedo_alpha, vec3 emissionRadiance, float aoval, bool translucent, bool translucentIsWater, float translucentDepth, out float bloom_out)
+    vec4 albedo_alpha, vec3 emissionRadiance, float aoval, bool translucent, bool translucentIsWater, float translucentDepth,
+    float exposureCompensation, out float bloom_out)
 {
     vec4  a = albedo_alpha;
 
@@ -365,7 +371,7 @@ vec4 hdr_shaded_color(
     #endif
 
     if (a.a != 0.0 && depth != 1.0) {
-        a = fog(light.y, a, modelPos, worldPos, bloom_out);
+        a = fog(light.y, exposureCompensation, a, modelPos, worldPos, bloom_out);
     }
 
     return a;

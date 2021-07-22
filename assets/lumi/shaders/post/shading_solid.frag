@@ -30,6 +30,8 @@ out vec4[2] fragColor;
 
 void main()
 {
+    float ec = exposureCompensation();
+
     tileJitter = getRandomFloat(u_blue_noise, v_texcoord, frxu_size); //JITTER_STRENGTH;
     float bloom1;
 #ifdef SSAO_ENABLED
@@ -44,7 +46,7 @@ void main()
 
     vec4 a1 = hdr_shaded_color(
         v_texcoord, u_solid_depth, u_light_solid, u_normal_solid, u_material_solid, u_misc_solid,
-        solidAlbedoAlpha, ssao.rgb, ssao.a, false, translucentIsWater, translucentDepth, bloom1);
+        solidAlbedoAlpha, ssao.rgb, ssao.a, false, translucentIsWater, translucentDepth, ec, bloom1);
 
     fragColor[0] = a1;
 

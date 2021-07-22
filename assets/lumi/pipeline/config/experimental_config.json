@@ -76,12 +76,6 @@
                     nameKey: "config.lumi_lights.value.kaleidoskop",
                     descriptionKey: "config.lumi_lights.help.kaleidoskop"
                 },
-                // DEPRECATED - marked for removal
-                rgb_caves: {
-                    default: false,
-                    nameKey: "config.lumi_lights.value.rgb_caves",
-                    descriptionKey: "config.lumi_lights.help.rgb_caves"
-                },
                 rain_puddles: {
                     default: false,
                     nameKey: "config.lumi_lights.value.rain_puddles",

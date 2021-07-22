@@ -33,7 +33,7 @@ out vec4[3] fragColor;
 
 #include lumi:shaders/post/common/shading.glsl
 
-vec4 ldr_shaded_particle(vec2 uv, sampler2D scolor, sampler2D sdepth, sampler2D slight, out float bloom_out)
+vec4 ldr_shaded_particle(vec2 uv, sampler2D scolor, sampler2D sdepth, sampler2D slight, float ec, out float bloom_out)
 {
     vec4 a = texture(scolor, uv);
     if (a.a == 0.) return vec4(0.);
@@ -50,13 +50,13 @@ vec4 ldr_shaded_particle(vec2 uv, sampler2D scolor, sampler2D sdepth, sampler2D 
     a.a = min(1.0, a.a);
 
     if (a.a != 0.0 && depth != 1.0) {
-        a = fog(frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? light.y * frx_ambientIntensity() : 1.0, a, viewPos, worldPos, bloom_out);
+        a = fog(frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? light.y * frx_ambientIntensity() : 1.0, ec, a, viewPos, worldPos, bloom_out);
     }
 
     return ldr_tonemap(a);
 }
 
-vec4 advancedTranslucentShading(out float bloom_out) {
+vec4 advancedTranslucentShading(float ec, out float bloom_out) {
     vec4 light = texture(u_light_translucent, v_texcoord);
 
     if (light.x == 0.0) {
@@ -79,7 +79,7 @@ vec4 advancedTranslucentShading(out float bloom_out) {
 
     vec4 frontColor = hdr_shaded_color(
         v_texcoord, u_translucent_depth, u_light_translucent, u_normal_translucent, u_material_translucent, u_misc_translucent,
-        frontAlbedo, vec3(0.0), 1.0, true, true, 1.0, bloom_out);
+        frontAlbedo, vec3(0.0), 1.0, true, true, 1.0, ec, bloom_out);
 
     vec4 backColor = texture(u_translucent_color, v_texcoord);
 
@@ -125,17 +125,17 @@ vec4 advancedTranslucentShading(out float bloom_out) {
 
 void main()
 {
+    float ec = exposureCompensation();
+
     tileJitter = getRandomFloat(u_blue_noise, v_texcoord, frxu_size);
 
     float bloom1;
     float bloom2;
 
-    vec4 a1 = advancedTranslucentShading(bloom1);
-    vec4 a2 = ldr_shaded_particle(v_texcoord, u_particles_color, u_particles_depth, u_light_particles, bloom2);
+    vec4 a1 = advancedTranslucentShading(ec, bloom1);
+    vec4 a2 = ldr_shaded_particle(v_texcoord, u_particles_color, u_particles_depth, u_light_particles, ec, bloom2);
 
     fragColor[0] = a1;
     fragColor[1] = a2;
     fragColor[2] = vec4(bloom1 + bloom2, 0.0, 0.0, 1.0);
 }
-
-

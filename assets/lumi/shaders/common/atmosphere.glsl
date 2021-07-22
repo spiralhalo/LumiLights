@@ -83,16 +83,10 @@ float twilightCalc(vec3 world_toSky) {
 vec3 atmos_hdrFogColorRadiance(vec3 world_toSky)
 {
     //TODO: test non-overworld has_sky_light custom dimension and broaden if fits
-    if (!frx_worldFlag(FRX_WORLD_IS_OVERWORLD)) // this is for nether performance increase mostly
+    if (!frx_worldFlag(FRX_WORLD_IS_OVERWORLD))
         return atmosv_hdrFogColorRadiance;
 
-    float darkenFactor = 1.0;
-
-    if (frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) && !frx_viewFlag(FRX_CAMERA_IN_FLUID)) {
-        darkenFactor = 1.0 - abs(world_toSky.y) * 0.7;
-    }
-
-    return mix(atmosv_hdrFogColorRadiance, atmosv_hdrOWTwilightSkyRadiance, twilightCalc(world_toSky) * atmosv_hdrOWTwilightFogFactor) * darkenFactor;
+    return mix(atmosv_hdrFogColorRadiance, atmosv_hdrOWTwilightSkyRadiance, twilightCalc(world_toSky) * atmosv_hdrOWTwilightFogFactor);
 }
 
 vec3 atmos_hdrSkyColorRadiance(vec3 world_toSky)
@@ -156,7 +150,7 @@ const vec3 CAVEFOG_C = DEF_DAY_SKY_COLOR;
 const vec3 CAVEFOG_DEEPC = SUNRISE_LIGHT_COLOR;
 const float CAVEFOG_MAXY = 16.0;
 const float CAVEFOG_MINY = 0.0;
-const float CAVEFOG_STR = DEF_CAVEFOG_STR;
+const float CAVEFOG_STR = 0.1;
 
 
 const int SRISC = 0;
@@ -253,7 +247,6 @@ void atmos_generateAtmosphereModel()
 
     if (customOWFog) {
         atmosv_hdrFogColorRadiance = atmosv_hdrSkyColorRadiance;
-        atmosv_hdrCaveFogRadiance = mix(CAVEFOG_C, CAVEFOG_DEEPC, l2_clampScale(CAVEFOG_MAXY, CAVEFOG_MINY, frx_cameraPos().y)) * CAVEFOG_STR;
         atmosv_hdrOWTwilightFogFactor = atmosv_hdrOWTwilightFactor;
     } else {
         vec3 vanillaFog = frx_vanillaClearColor();
@@ -269,7 +262,6 @@ void atmos_generateAtmosphereModel()
             atmosv_hdrFogColorRadiance = hdr_fromGamma(mix(vanillaFog / l2_max3(vanillaFog), vanillaFog, 0.75));
         }
 
-        atmosv_hdrCaveFogRadiance = vec3(0.0);
         atmosv_hdrOWTwilightFogFactor = 0.0;
     }
 
@@ -320,6 +312,17 @@ void atmos_generateAtmosphereModel()
         atmosv_hdrOWTwilightSkyRadiance = mix(atmosv_hdrOWTwilightSkyRadiance, graySky, toGray) * rainBrightness;
     }
     #endif
+    /**********/
+
+
+    /** CAVE FOG **/
+    
+    atmosv_hdrCaveFogRadiance = mix(CAVEFOG_C, CAVEFOG_DEEPC, l2_clampScale(CAVEFOG_MAXY, CAVEFOG_MINY, frx_cameraPos().y));
+
+    float fogL = frx_luminance(atmosv_hdrFogColorRadiance);
+    float caveL = frx_luminance(atmosv_hdrCaveFogRadiance);
+
+    atmosv_hdrCaveFogRadiance *= max(fogL, CAVEFOG_STR) / caveL;
     /**********/
 }
 #endif

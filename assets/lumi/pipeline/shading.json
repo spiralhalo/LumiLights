@@ -22,6 +22,8 @@
 				"u_sun",
 				"u_moon",
 				"u_blue_noise",
+
+				"u_exposure",
 			]
 		}, {
 			name: "shading_translucent",
@@ -185,6 +187,8 @@
 					"minecraft:textures/environment/sun.png",
 					"minecraft:textures/environment/moon_phases.png",
 					"lumi:textures/filter_pattern/bluenoise256.png",
+
+					"exposure",
 				]
 			},
 			{
