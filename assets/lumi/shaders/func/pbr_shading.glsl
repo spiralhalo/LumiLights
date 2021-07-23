@@ -206,11 +206,11 @@ void pbr_shading(inout vec4 a, inout float bloom, vec3 modelPos, vec3 light, vec
 
 	vec3 held_light  = hdr_calcHeldLight(data);
 	vec3 block_light = hdr_calcBlockLight(data);
-	vec3 sky_light   = hdr_calcSkyLight(data) * CELESTIAL_LIGHT_MULTIPLIER;
+	vec3 sky_light   = hdr_calcSkyLight(data);
 
 	vec3 ndRadiance = baseAmbientRadiance(atmosv_hdrFogColorRadiance);
 
-	ndRadiance += atmos_hdrSkyAmbientRadiance() * lightmapRemap(data.light.y) * SKY_AMBIENT_MULTIPLIER;
+	ndRadiance += atmos_hdrSkyAmbientRadiance() * lightmapRemap(data.light.y);
 	ndRadiance += emissiveRadiance(data.albedo, bloom);
 
 	vec3 nd_light = pbr_nonDirectional(data.albedo, data.metallic, ndRadiance);

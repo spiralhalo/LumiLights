@@ -4,22 +4,6 @@
 			includeToken: "lumi:experimental_config",
 			categoryKey: "config.lumi_lights.category.experimental",
 			options: {
-				// DEPRECATED - marked for removal
-				celestial_light_multiplier: {
-					default: 1.0,
-					min: 0.01,
-					max: 1000000000.0,
-					nameKey: "config.lumi_lights.value.celestial_light_multiplier",
-					descriptionKey: "config.lumi_lights.help.celestial_light_multiplier"
-				},
-				// DEPRECATED - marked for removal
-				sky_ambient_multiplier: {
-					default: 1.0,
-					min: 0.01,
-					max: 1000000000.0,
-					nameKey: "config.lumi_lights.value.sky_ambient_multiplier",
-					descriptionKey: "config.lumi_lights.help.sky_ambient_multiplier"
-				},
 				translucent_layering: {
 					default: "fancy",
 					choices: ["fast", "fancy"],

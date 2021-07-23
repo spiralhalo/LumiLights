@@ -20,6 +20,13 @@
 					nameKey: "config.lumi_lights.value.block_light_mode",
 					descriptionKey: "config.lumi_lights.help.block_light_mode"
 				},
+				outdoors_brightness: {
+					default: 10,
+					min: 10,
+					max: 50,
+					nameKey: "config.lumi_lights.value.outdoors_brightness",
+					descriptionKey: "config.lumi_lights.help.outdoors_brightness"
+				},
 				bloom_intensity: {
 					default: 20,
 					min: 1,

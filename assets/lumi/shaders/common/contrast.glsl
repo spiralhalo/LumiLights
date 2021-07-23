@@ -11,6 +11,9 @@
  *  published by the Free Software Foundation, Inc.
  *******************************************************/
 
+const float USER_CELESTIAL_MULTIPLIER = clamp(OUTDOORS_BRIGHTNESS, 10, 50) / 10.;
+const float USER_SKY_MULTIPLIER = 1. + (clamp(OUTDOORS_BRIGHTNESS, 10, 50) / 10. - 1.) * .5;
+
 // PROFILE-AGNOSTIC
 // ******************************
 
@@ -25,10 +28,10 @@
 	#define LIGHT_RAYS_STR 1.0 // this was never meant to go above 1.0 due to sdr blending
 
 	// ATMOS STRENGTHS
-	#define DEF_SUNLIGHT_STR 1.5
-	#define DEF_SKY_STR 0.5
-	#define DEF_SKY_AMBIENT_STR 0.5
-	#define _0_DEF_MOONLIGHT_STR 0.25
+	#define DEF_SUNLIGHT_STR 1.5 * USER_CELESTIAL_MULTIPLIER
+	#define DEF_SKY_STR 0.5 * USER_SKY_MULTIPLIER
+	#define DEF_SKY_AMBIENT_STR 0.5 * USER_SKY_MULTIPLIER
+	#define _0_DEF_MOONLIGHT_STR 0.25 * USER_CELESTIAL_MULTIPLIER
 
 	// ATMOS COLORS
 	#define _0_DEF_NIGHT_AMBIENT vec3(0.65, 0.65, 0.8)
