@@ -14,6 +14,8 @@
  *  published by the Free Software Foundation, Inc.
  *******************************************************/
 
+#define ATMOS_SEA_LEVEL 62.0
+
 #ifdef VERTEX_SHADER
 
 	out vec3 atmosv_hdrCelestialRadiance;
@@ -105,7 +107,7 @@ vec3 atmos_hdrSkyGradientRadiance(vec3 world_toSky)
 		return atmosv_hdrSkyColorRadiance;
 
 	// horizonBrightening can't be used on reflections yet due to clamping I think
-	float skyHorizon = 1.0 - abs(world_toSky.y);
+	float skyHorizon = l2_clampScale(1.0, -l2_clampScale(ATMOS_SEA_LEVEL, 512., frx_cameraPos().y), world_toSky.y);
 	float brighteningCancel = min(1., atmosv_hdrOWTwilightFactor * .6 + frx_rainGradient() * .6);
 	float brightenFactor = pow(skyHorizon, 20.) * (1. - brighteningCancel);
 	float darkenFactor = abs(world_toSky.y);
