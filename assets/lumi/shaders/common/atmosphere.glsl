@@ -111,7 +111,7 @@ vec3 atmos_hdrSkyGradientRadiance(vec3 world_toSky)
 	float brighteningCancel = min(1., atmosv_hdrOWTwilightFactor * .6 + frx_rainGradient() * .6);
 	float brightenFactor = pow(skyHorizon, 20.) * (1. - brighteningCancel);
 	float darkenFactor = abs(world_toSky.y);
-	float horizonBrightening = 1. + 2. * brightenFactor - darkenFactor * .7;
+	float horizonBrightening = 1. + 2. * brightenFactor - darkenFactor * .6;
 
 	return mix(atmosv_hdrSkyColorRadiance, atmosv_hdrOWTwilightSkyRadiance, twilightCalc(world_toSky)) * horizonBrightening;
 }

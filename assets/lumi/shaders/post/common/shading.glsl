@@ -190,9 +190,8 @@ void custom_sky(in vec3 modelPos, in float blindnessFactor, in bool maybeUnderwa
 			float zoomFactor = l2_clampScale(90, 30, v_fov); // zoom sharpening
 			float milkyHaze = starry * rainOcclusion * milkyness * 0.4 * l2_clampScale(-1.0, 1.0, snoise(starVec.xyz * 2.0));
 			float star = starry * l2_clampScale(0.12 + milkyness * milkyness * 0.15, 0.0, cellular2x2x2(starVec.xyz * mix(40, 60, milkyness)).x);
-			float notHorizon = l2_clampScale(0.0, 0.1, worldSkyVec.y);
 
-			star = l2_clampScale(0.0, 1.0 - 0.6 * zoomFactor, star) * rainOcclusion * notHorizon;
+			star = l2_clampScale(0.0, 1.0 - 0.6 * zoomFactor, star) * rainOcclusion;
 
 			#if SKY_MODE == SKY_MODE_LUMI
 				star -= star * starEraser;
