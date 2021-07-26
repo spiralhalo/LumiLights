@@ -57,9 +57,17 @@ vec4 ldr_shaded_particle(vec2 uv, sampler2D scolor, sampler2D sdepth, sampler2D 
 }
 
 vec4 advancedTranslucentShading(float ec, out float bloom_out) {
+	vec4 frontAlbedo = vec4(texture(u_albedo_translucent, v_texcoord).rgb, texture(u_alpha_translucent, v_texcoord).r);
 	vec4 light = texture(u_light_translucent, v_texcoord);
+	vec3 normal = texture(u_normal_translucent, v_texcoord).xyz;
 
-	if (light.x == 0.0) {
+	bool isUnmanaged = light.x == 0.0;
+
+	// workaround for end portal glitch
+	// do two checks for false positve prevention
+	isUnmanaged = isUnmanaged || distance(light.rgb + frontAlbedo.rgb, normal.rgb * 2) < 0.015;
+
+	if (isUnmanaged) {
 	// fake TAA that just makes things blurry
 	// #ifdef TAA_ENABLED
 	//	 vec2 taaJitter = taa_jitter(v_invSize);
@@ -73,9 +81,7 @@ vec4 advancedTranslucentShading(float ec, out float bloom_out) {
 		return unmanaged(color, bloom_out, true);
 	}
 
-	vec3 normal =  2.0 * texture(u_normal_translucent, v_texcoord).xyz - 1.0;
-
-	vec4 frontAlbedo = vec4(texture(u_albedo_translucent, v_texcoord).rgb, texture(u_alpha_translucent, v_texcoord).r);
+	normal = 2.0 * normal - 1.0;
 
 	vec4 frontColor = hdr_shaded_color(
 		v_texcoord, u_translucent_depth, u_light_translucent, u_normal_translucent, u_material_translucent, u_misc_translucent,

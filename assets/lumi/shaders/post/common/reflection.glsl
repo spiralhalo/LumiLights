@@ -244,15 +244,22 @@ rt_ColorDepthBloom work_on_pair(
 	bool compute_colors
 )
 {
-	vec4 material   = texture(reflector_material, v_texcoord);
-	float roughness = material.x == 0.0 ? 1.0 : min(1.0, 1.0203 * material.x - 0.01);
-	if (roughness == 1.0) return rt_ColorDepthBloom(vec4(0.0), 1.0, 0.0); // unmanaged draw
-
+	vec4 material    = texture(reflector_material, v_texcoord);
+	float roughness  = material.x == 0.0 ? 1.0 : min(1.0, 1.0203 * material.x - 0.01);
+	vec3 light       = texture(reflector_light, v_texcoord).xyz;
 	vec3 worldNormal = sample_worldNormal(v_texcoord, reflector_micro_normal);
+
+	bool isUnmanaged = roughness == 1.0;
+
+	// workaround for end portal glitch
+	// do two checks for false positve prevention
+	isUnmanaged = isUnmanaged || distance(light.rgb + material.rgb, worldNormal.rgb + 1.0) < 0.015;
+
+	if (isUnmanaged) return rt_ColorDepthBloom(vec4(0.0), 1.0, 0.0); // unmanaged draw
+
 	vec3 ray_view	= uv2view(v_texcoord, frx_inverseProjectionMatrix(), reflector_depth);
 	vec3 ray_world   = view2world(ray_view, frx_inverseViewMatrix());
 	// TODO: optimize puddle by NOT calling it twice in shading and in reflection
-	vec2 light	   = texture(reflector_light, v_texcoord).xy;
 	vec4 fake = vec4(0.0);
 	#ifdef RAIN_PUDDLES
 		ww_puddle_pbr(fake, roughness, light.y, worldNormal, ray_world);
@@ -326,7 +333,7 @@ rt_ColorDepthBloom work_on_pair(
 	// nb: compute_colors is currently unused as of the commmit it was added in ¯\_(ツ)_/¯
 	if (compute_colors) {
 		vec3 unitMarch_world = unitMarch_view * frx_normalModelMatrix();
-		vec4 calcFaclback	= calcFallbackColor(reflector_depth, unitMarch_world, light);
+		vec4 calcFaclback	= calcFallbackColor(reflector_depth, unitMarch_world, light.xy);
 		vec4 fallbackColor   = fallback > 0.0 ? vec4(calcFaclback.rgb, fallback) : vec4(0.0);
 		vec4 reflected_final = mix(reflected, fallbackColor, fallbackMix);
 		vec3 unit_world	  = unit_view * frx_normalModelMatrix();
