@@ -73,8 +73,10 @@ vec3 atmos_hdrCaveFogRadiance()
 	return atmosv_hdrCaveFogRadiance;
 }
 
+#define calcHorizon(worldVec) l2_clampScale(1.0, -l2_clampScale(ATMOS_SEA_LEVEL, 512., frx_cameraPos().y), worldVec.y)
+
 float twilightCalc(vec3 world_toSky) {
-	float isHorizon = (1.0 - abs (world_toSky.y));
+	float isHorizon = calcHorizon(world_toSky);
 	//NB: only works if sun always rise from dead East instead of NE/SE etc.
 	float isTwilight = l2_clampScale(-1.5, .5, world_toSky.x * sign(frx_skyLightVector().x));
 	float result = isTwilight * isHorizon * isHorizon * atmosv_hdrOWTwilightFactor;
@@ -88,7 +90,7 @@ vec3 atmos_hdrFogColorRadiance(vec3 world_toSky)
 	if (!frx_worldFlag(FRX_WORLD_IS_OVERWORLD))
 		return atmosv_hdrFogColorRadiance;
 
-	return mix(atmosv_hdrFogColorRadiance, atmosv_hdrOWTwilightSkyRadiance, twilightCalc(world_toSky) * atmosv_hdrOWTwilightFogFactor);
+	return mix(atmosv_hdrFogColorRadiance, atmosv_hdrOWTwilightSkyRadiance, 0.8 * twilightCalc(world_toSky) * atmosv_hdrOWTwilightFogFactor);
 }
 
 vec3 atmos_hdrSkyColorRadiance(vec3 world_toSky)
@@ -107,7 +109,7 @@ vec3 atmos_hdrSkyGradientRadiance(vec3 world_toSky)
 		return atmosv_hdrSkyColorRadiance;
 
 	// horizonBrightening can't be used on reflections yet due to clamping I think
-	float skyHorizon = l2_clampScale(1.0, -l2_clampScale(ATMOS_SEA_LEVEL, 512., frx_cameraPos().y), world_toSky.y);
+	float skyHorizon = calcHorizon(world_toSky);
 	float brighteningCancel = min(1., atmosv_hdrOWTwilightFactor * .6 + frx_rainGradient() * .6);
 	float brightenFactor = pow(skyHorizon, 20.) * (1. - brighteningCancel);
 	float darkenFactor = abs(world_toSky.y);
@@ -122,7 +124,7 @@ vec3 atmos_hdrCloudColorRadiance(vec3 world_toSky)
 	if (!frx_worldFlag(FRX_WORLD_IS_OVERWORLD)) // this is for nether performance increase mostly
 		return atmosv_hdrCloudColorRadiance;
 
-	return mix(atmosv_hdrCloudColorRadiance, atmosv_hdrOWTwilightSkyRadiance, twilightCalc(world_toSky));
+	return mix(atmosv_hdrCloudColorRadiance, atmosv_hdrOWTwilightSkyRadiance, 0.8 * twilightCalc(world_toSky));
 }
 #endif
 
