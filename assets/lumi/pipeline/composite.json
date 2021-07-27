@@ -22,6 +22,7 @@
 
 				"u_emissive_solid",
 				"u_emissive_transparent",
+				"u_light_particles",
 
 				"u_exposure",
 			]
@@ -228,6 +229,7 @@
 
 					"emissive_solid",
 					"emissive_translucent",
+					"light_particles",
 
 					"exposure",
 				]

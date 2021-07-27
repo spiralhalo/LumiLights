@@ -2,7 +2,7 @@
 	programs: [
 		{
 			name: "hand_process",
-			vertexSource: "lumi:shaders/post/hdr.vert",
+			vertexSource: "lumi:shaders/post/shading.vert",
 			fragmentSource: "lumi:shaders/post/hand_process.frag",
 			samplers: [
 				"u_color",

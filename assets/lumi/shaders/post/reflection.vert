@@ -8,7 +8,7 @@
 #include lumi:shaders/lib/util.glsl
 
 /*******************************************************
- *  lumi:shaders/post/hdr_half.vert
+ *  lumi:shaders/post/reflection.vert
  *******************************************************/
 
 #if CLOUD_RENDERING == CLOUD_RENDERING_FLAT

@@ -1,5 +1,6 @@
 #include lumi:shaders/post/common/header.glsl
 
+#include lumi:shaders/post/common/shading_includes.glsl
 #include lumi:shaders/lib/translucent_layering.glsl
 
 /*******************************************************
@@ -23,38 +24,14 @@ uniform sampler2D u_alpha_translucent;
 uniform sampler2D u_solid_depth;
 uniform sampler2D u_light_solid;
 
-uniform sampler2D u_particles_color;
-uniform sampler2D u_particles_depth;
-uniform sampler2D u_light_particles;
+out vec4[2] fragColor;
 
-/* More samplers in /common/shading.glsl */
+void custom_sky(in vec3 modelPos, in float blindnessFactor, in bool maybeUnderwater, inout vec4 a, inout float bloom_out)
+{
 
-out vec4[3] fragColor;
+}
 
 #include lumi:shaders/post/common/shading.glsl
-
-vec4 ldr_shaded_particle(vec2 uv, sampler2D scolor, sampler2D sdepth, sampler2D slight, float ec, out float bloom_out)
-{
-	vec4 a = texture(scolor, uv);
-	if (a.a == 0.) return vec4(0.);
-
-	float depth	 = texture(sdepth, uv).r;
-	vec3  viewPos   = coords_view(uv, frx_inverseProjectionMatrix(), depth);
-	vec3  normal	= normalize(-viewPos) * frx_normalModelMatrix();
-	vec4  light	 = texture(slight, uv);
-	vec3  worldPos  = frx_cameraPos() + (frx_inverseViewMatrix() * vec4(viewPos, 1.0)).xyz;
-
-	bloom_out = light.z;
-	pbr_shading(a, bloom_out, viewPos, light.xyy, normal, 1.0, 0.0, 0.0, false, false);
-
-	a.a = min(1.0, a.a);
-
-	if (a.a != 0.0 && depth != 1.0) {
-		a = fog(frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? light.y * frx_ambientIntensity() : 1.0, ec, a, viewPos, worldPos, bloom_out);
-	}
-
-	return ldr_tonemap(a);
-}
 
 vec4 advancedTranslucentShading(float ec, out float bloom_out) {
 	vec4 frontAlbedo = vec4(texture(u_albedo_translucent, v_texcoord).rgb, texture(u_alpha_translucent, v_texcoord).r);
@@ -131,17 +108,12 @@ vec4 advancedTranslucentShading(float ec, out float bloom_out) {
 
 void main()
 {
-	float ec = exposureCompensation();
-
 	tileJitter = getRandomFloat(u_blue_noise, v_texcoord, frxu_size);
 
+	float ec = exposureCompensation();
 	float bloom1;
-	float bloom2;
-
 	vec4 a1 = advancedTranslucentShading(ec, bloom1);
-	vec4 a2 = ldr_shaded_particle(v_texcoord, u_particles_color, u_particles_depth, u_light_particles, ec, bloom2);
 
 	fragColor[0] = a1;
-	fragColor[1] = a2;
-	fragColor[2] = vec4(bloom1 + bloom2, 0.0, 0.0, 1.0);
+	fragColor[1] = vec4(bloom1, 0.0, 0.0, 1.0);
 }

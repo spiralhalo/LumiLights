@@ -26,6 +26,7 @@ uniform sampler2D u_weather_depth;
 
 uniform sampler2D u_emissive_solid;
 uniform sampler2D u_emissive_transparent;
+uniform sampler2D u_light_particles;
 
 in vec2 v_invSize;
 
@@ -130,6 +131,11 @@ void main()
 
 	// no need to check for solid depth because translucent behind solid are culled in GL depth test
 	float bloom = max(texture(u_emissive_solid, v_texcoord).r, texture(u_emissive_transparent, v_texcoord).r);
+
+	if (depth_particles <= min_depth) {
+		bloom = max(bloom, texture(u_light_particles, v_texcoord).z);
+	}
+
 	float min_occluder = min(depth_clouds, depth_weather);
 	float occluder_alpha = min_occluder == depth_clouds ? clouds.a : weather.a;
 
