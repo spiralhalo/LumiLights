@@ -12,7 +12,7 @@
 				"u_normal_micro",
 				"u_material",
 				"u_misc",
-				
+
 				"u_translucent_depth",
 
 				"u_glint",
@@ -20,6 +20,11 @@
 				"u_blue_noise",
 
 				"u_exposure",
+
+				"u_clouds",
+				"u_clouds_texture",
+				"u_sun",
+				"u_moon",
 			]
 		}
 	],
@@ -61,7 +66,7 @@
 					"normal_micro_solid",
 					"material_solid",
 					"misc_solid",
-					
+
 					"translucent_depth",
 
 					"minecraft:textures/misc/enchanted_item_glint.png",
@@ -69,6 +74,11 @@
 					"lumi:textures/filter_pattern/bluenoise256.png",
 
 					"exposure",
+
+					"clouds",
+					"clouds_texture",
+					"minecraft:textures/environment/sun.png",
+					"minecraft:textures/environment/moon_phases.png",
 				]
 			},
 		]
