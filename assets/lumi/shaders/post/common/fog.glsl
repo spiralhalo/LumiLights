@@ -99,6 +99,8 @@ vec4 fog(float skyLight, float ec, float vblindness, vec4 a, vec3 modelPos, inou
 
 		float darkness = frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? l2_clampScale(0.1, 0.0, skyLight) : 0.0;
 
+		darkness *= smoothstep(0.5, 0.25, ec);
+
 		fogColor.rgb = mix(fogColor.rgb, atmos_hdrCaveFogRadiance(), darkness);
 
 		blended = vec4(a.rgb + fogColor.rgb * fogFactor, a.a + max(0.0, 1.0 - a.a) * fogFactor);
