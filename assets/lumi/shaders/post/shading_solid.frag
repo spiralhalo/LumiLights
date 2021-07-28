@@ -55,7 +55,7 @@ void custom_sky(in vec3 modelPos, in float blindnessFactor, in bool maybeUnderwa
 			float starEraser = celestColor.a;
 			float celestStr = mix(1.0, STARS_STR, v_night);
 
-			bloom_out += celestColor.a;
+			bloom_out += celestColor.a * 2.0;
 			a.rgb = atmos_hdrSkyGradientRadiance(worldSkyVec);
 			a.rgb += celestColor.rgb * (1. - frx_rainGradient()) * celestStr;
 		#else
