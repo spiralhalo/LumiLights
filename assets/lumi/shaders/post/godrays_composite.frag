@@ -26,13 +26,5 @@ void main() {
 	vec4 a = texture(u_color, v_texcoord);
 	vec4 b = textureLod(u_godrays, v_texcoord, (1.0 - ldepth(d)) * (3. - blurAdj));
 
-	a.rgb = hdr_fromGamma(a.rgb);
-	b.rgb = hdr_fromGamma(b.rgb);
-
-	// a.rgb = a.rgb * (1.0 - b.a) + b.rgb * b.a;
-	a.rgb = a.rgb + b.rgb * b.a;
-
-	a.rgb = hdr_toSRGB(a.rgb);
-
-	fragColor = vec4(a.rgb, a.a);
+	fragColor = vec4(a.rgb * (1.0 - b.a) + b.rgb * b.a, a.a);
 }
