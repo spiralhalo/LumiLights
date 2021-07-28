@@ -11,6 +11,7 @@
 uniform sampler2D u_current;
 uniform sampler2D u_history0;
 uniform sampler2D u_depthCurrent;
+uniform sampler2D u_depthHand;
 uniform sampler2D u_debugText;
 
 in vec2 v_invSize;
@@ -48,16 +49,26 @@ void main()
 	// [o] terrain distortion is reduced by reducing feedback factor when camera moves
 
 	#ifdef TAA_ENABLED
+		float realCameraMove = length(frx_cameraPos() - frx_lastCameraPos());
 		#if ANTIALIASING == ANTIALIASING_TAA_BLURRY
 			float cameraMove = 0.0;
 			vec2 velocity = vec2(0.0);
 		#else
-			float cameraMove = length(frx_cameraPos() - frx_lastCameraPos());
+			float cameraMove = realCameraMove;
 			vec2 velocity = fastVelocity(u_depthCurrent, v_texcoord);
 		#endif
+
 		float depth = texture(u_depthCurrent, v_texcoord).r;
-		if (depth == 1. && frx_worldFlag(FRX_WORLD_IS_END)) {
-			fragColor = texture(u_current, v_texcoord); // the end sky is noisy so don't apply TAA (note: true for vanilla)
+		float depthHand = texture(u_depthHand, v_texcoord).r;
+		float topMidDepth = texture(u_depthHand, vec2(0.5, 1.0)).r; // skip if hand render is disabled (F1)
+		bool isHand = depthHand != 1.0 && topMidDepth == 1.0;
+
+		bool skip = depth == 1. && frx_worldFlag(FRX_WORLD_IS_END); // the end sky is noisy so don't apply TAA (note: true for vanilla)
+
+		skip = skip || (isHand && (abs(velocity.x) > v_invSize.x || abs(velocity.y) > v_invSize.y));
+
+		if (skip) {
+			fragColor = texture(u_current, v_texcoord);
 		} else {
 			fragColor = TAA(u_current, u_history0, u_depthCurrent, v_texcoord, velocity, v_invSize, cameraMove);
 		}

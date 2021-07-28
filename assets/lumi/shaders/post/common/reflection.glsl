@@ -27,28 +27,28 @@ in vec3 v_celest1;
 in vec3 v_celest2;
 in vec3 v_celest3;
 
-#if REFLECTION_PROFILE == REFLECTION_PROFILE_EXTREME
+#if PASS_REFLECTION_PROFILE == REFLECTION_PROFILE_EXTREME
 	const float HITBOX = 0.0625;
 	const int MAXSTEPS = 109;
 	const int PERIOD = 14;
 	const int REFINE = 16;
 #endif
 
-#if REFLECTION_PROFILE == REFLECTION_PROFILE_HIGH
+#if PASS_REFLECTION_PROFILE == REFLECTION_PROFILE_HIGH
 	const float HITBOX = 0.125;
 	const int MAXSTEPS = 55;
 	const int PERIOD = 7;
 	const int REFINE = 16;
 #endif
 
-#if REFLECTION_PROFILE == REFLECTION_PROFILE_MEDIUM
+#if PASS_REFLECTION_PROFILE == REFLECTION_PROFILE_MEDIUM
 	const float HITBOX = 0.125;
 	const int MAXSTEPS = 35;
 	const int PERIOD = 4;
 	const int REFINE = 8;
 #endif
 
-#if REFLECTION_PROFILE == REFLECTION_PROFILE_LOW
+#if PASS_REFLECTION_PROFILE == REFLECTION_PROFILE_LOW
 	const float HITBOX = 0.125;
 	const int MAXSTEPS = 20;
 	const int PERIOD = 2;
@@ -130,7 +130,7 @@ vec3 pbr_lightCalc(float roughness, vec3 f0, vec3 radiance, vec3 lightDir, vec3 
 	return clamp(fresnel * radiance * smoothness * smoothness, 0.0, 1.0);
 }
 
-#if REFLECTION_PROFILE != REFLECTION_PROFILE_NONE
+#if PASS_REFLECTION_PROFILE != REFLECTION_PROFILE_NONE
 struct rt_Result
 {
 	vec2 reflected_uv;
@@ -241,7 +241,7 @@ rt_ColorDepthBloom work_on_pair(
 	in sampler2D reflected_light,
 	in sampler2D reflected_normal,
 	float fallback,
-	bool compute_colors
+	bool isHDR
 )
 {
 	vec4 material    = texture(reflector_material, v_texcoord);
@@ -276,7 +276,7 @@ rt_ColorDepthBloom work_on_pair(
 
 	vec3 unitMarch_view = normalize(reflect(-unit_view, normal) + mix(vec3(0.0, 0.0, 0.0), rJitter * JITTER_STRENGTH, roughness2));
 
-	#if REFLECTION_PROFILE != REFLECTION_PROFILE_NONE
+	#if PASS_REFLECTION_PROFILE != REFLECTION_PROFILE_NONE
 	rt_Result result;
 
 	vec3 rawNormal_view   = frx_normalModelMatrix() * sample_worldNormal(v_texcoord, reflector_normal);
@@ -290,12 +290,12 @@ rt_ColorDepthBloom work_on_pair(
 	}
 	#endif
 
-	vec4 reflected = vec4(0.);
+	vec4 reflectedColor = vec4(0.);
 	float reflectedBloom = 0.;
 	float reflected_depth_value;
 	float fallbackMix = 0.;
 
-	#if REFLECTION_PROFILE != REFLECTION_PROFILE_NONE
+	#if PASS_REFLECTION_PROFILE != REFLECTION_PROFILE_NONE
 	reflected_depth_value = sample_depth(result.reflected_uv, reflected_depth);
 	if (reflected_depth_value == 1.0 || !result.hit || result.reflected_uv != clamp(result.reflected_uv, 0.0, 1.0)) {
 		float occlusionFactor = result.hits > 1 ? 0.1 : 1.0;
@@ -306,49 +306,42 @@ rt_ColorDepthBloom work_on_pair(
 		fallbackMix = occlusionFactor;
 		reflected_depth_value = 1.0;
 
-	#if REFLECTION_PROFILE != REFLECTION_PROFILE_NONE
+	#if PASS_REFLECTION_PROFILE != REFLECTION_PROFILE_NONE
 	} else {
-		if (compute_colors) {
 		#ifdef KALEIDOSKOP
-			reflected = texture(reflected_combine, result.reflected_uv);
+			reflectedColor = texture(reflected_combine, result.reflected_uv);
 		#elif defined(MULTI_BOUNCE_REFLECTION)
 			// TODO: velocity reprojection. this method creates reflection that lags behind and somehow I overlooked this :/
 			vec4 reflectedShaded = texture(reflected_color, result.reflected_uv);
 			vec4 reflectedCombine = texture(reflected_combine, result.reflected_uv);
 			vec3 reflectedNormal = sample_worldNormal(result.reflected_uv, reflected_normal);
 			float combineFactor = l2_clampScale(0.5, 1.0, -dot(worldNormal, reflectedNormal));
-			reflected = mix(reflectedShaded, reflectedCombine, combineFactor);
+			reflectedColor = mix(reflectedShaded, reflectedCombine, combineFactor);
 		#else
-			reflected = texture(reflected_color, result.reflected_uv);
+			reflectedColor = texture(reflected_color, result.reflected_uv);
 		#endif
 
-			reflectedBloom = max(0.0, texture(reflected_light, result.reflected_uv).z - 0.5) * 2.0;
-		}
+		reflectedBloom = max(0.0, texture(reflected_light, result.reflected_uv).z - 0.5) * 2.0;
 		// fade to fallback on edges
 		vec2 uvFade = smoothstep(0.5, 0.45, abs(result.reflected_uv - 0.5));
 		fallbackMix = 1.0 - min(uvFade.x, uvFade.y);
+
+		if (!isHDR) {
+			reflectedColor.rgb = hdr_fromGamma(reflectedColor.rgb);
+		}
 	}
 	#endif
 
-	// nb: compute_colors is currently unused as of the commmit it was added in ¯\_(ツ)_/¯
-	if (compute_colors) {
-		vec3 unitMarch_world = unitMarch_view * frx_normalModelMatrix();
-		vec4 calcFaclback	= calcFallbackColor(reflector_depth, unitMarch_world, light.xy);
-		vec4 fallbackColor   = fallback > 0.0 ? vec4(calcFaclback.rgb, fallback) : vec4(0.0);
-		vec4 reflected_final = mix(reflected, fallbackColor, fallbackMix);
-		vec3 unit_world	  = unit_view * frx_normalModelMatrix();
-		float sunBloom	   = calcFaclback.a * fallbackMix * (1.0 - roughness);
+	vec3 unitMarch_world = unitMarch_view * frx_normalModelMatrix();
+	vec4 calcdFallback = calcFallbackColor(reflector_depth, unitMarch_world, light.xy);
+	vec4 fallbackColor = fallback > 0.0 ? vec4(calcdFallback.rgb, fallback) : vec4(0.0);
+	vec4 reflected_final = mix(reflectedColor, fallbackColor, fallbackMix);
+	vec3 unit_world = unit_view * frx_normalModelMatrix();
+	float sunBloom = calcdFallback.a * fallbackMix * (1.0 - roughness);
 
-		f0 += (vec3(1.0) - f0) * sunBloom * 0.5; // magic hax
+	f0 += (vec3(1.0) - f0) * sunBloom * 0.5; // magic hax
 
-		vec4 pbr_color = vec4(pbr_lightCalc(roughness, f0, reflected_final.rgb * base_color.a, unitMarch_world, unit_world), reflected_final.a);
+	vec4 pbr_color = vec4(pbr_lightCalc(roughness, f0, reflected_final.rgb * base_color.a, unitMarch_world, unit_world), reflected_final.a);
 
-		return rt_ColorDepthBloom(pbr_color, reflected_depth_value, max(sunBloom, reflectedBloom));
-	} else {
-	#if REFLECTION_PROFILE != REFLECTION_PROFILE_NONE
-		return rt_ColorDepthBloom(vec4(result.reflected_uv, fallbackMix, 1.0), reflected_depth_value, 0.0);
-	#else
-		return rt_ColorDepthBloom(vec4(0., 0., fallbackMix, 1.0), reflected_depth_value, 0.0);
-	#endif
-	}
+	return rt_ColorDepthBloom(pbr_color, reflected_depth_value, max(sunBloom, reflectedBloom));
 }

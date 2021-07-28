@@ -8,6 +8,7 @@
 				"u_current",
 				"u_history0",
 				"u_depthCurrent",
+				"u_depthHand",
 				"u_debugText",
 			]
 		},
@@ -77,6 +78,7 @@
 					"solid_main",
 					"history0",
 					"composite_depth",
+					"solid_depth",
 					"lumi:textures/etc/debug.png",
 				]
 			},

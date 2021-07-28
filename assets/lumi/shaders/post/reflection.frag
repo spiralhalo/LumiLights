@@ -1,5 +1,8 @@
 #include lumi:shaders/post/common/header.glsl
 #include lumi:shaders/common/userconfig.glsl
+
+#define PASS_REFLECTION_PROFILE REFLECTION_PROFILE
+
 #include lumi:shaders/post/common/reflection.glsl
 
 /*******************************************************

@@ -10,10 +10,13 @@
 #include lumi:shaders/lib/taa_jitter.glsl
 #include lumi:shaders/lib/util.glsl
 
-// load last so other libs are still loaded
 #ifdef REFLECTION_ON_HAND
-#include lumi:shaders/post/common/reflection.glsl
+	#define PASS_REFLECTION_PROFILE REFLECTION_PROFILE
+#else
+	#define PASS_REFLECTION_PROFILE REFLECTION_PROFILE_NONE
 #endif
+
+#include lumi:shaders/post/common/reflection.glsl
 
 /******************************************************
  * lumi:shaders/post/hand_process.frag
@@ -89,8 +92,6 @@ void main()
 		a.rgb += hdr_fromGamma(texture_glint(u_glint, misc.xy, bit_unpack(misc.z, 2)));
 	#endif
 
-
-	#ifdef REFLECTION_ON_HAND
 	vec4 source_base = a;
 	vec3 source_albedo = texture(u_color, v_texcoord).rgb;
 	float source_roughness = mat.x;
@@ -108,10 +109,8 @@ void main()
 		u_light,
 		u_normal,
 		1.0,
-		true);
+		false);
 	a.rgb += source_source.color.rgb;
-	#endif
-
 
 	fragColor[0] = ldr_tonemap(a);
 	fragColor[1] = vec4(bloom_out, 0.0, 0.0, 1.0);
