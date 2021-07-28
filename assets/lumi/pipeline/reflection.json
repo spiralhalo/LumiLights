@@ -6,7 +6,6 @@
 			fragmentSource: "lumi:shaders/post/reflection.frag",
 			samplers: [
 				"u_source_color",
-				"u_source_combine",
 				"u_source_albedo",
 				"u_source_depth",
 				"u_light_source",
@@ -15,7 +14,6 @@
 				"u_material_source",
 
 				"u_target_color",
-				"u_target_combine",
 				"u_target_depth",
 				"u_light_target",
 				"u_normal_target",
@@ -165,7 +163,6 @@
 				framebuffer: "reflection_solid",
 				samplerImages: [
 					"solid_shaded",
-					"solid_combine",
 					"solid_main",
 					"solid_depth",
 					"light_solid",
@@ -174,7 +171,6 @@
 					"material_solid",
 
 					"translucent_shaded",
-					"translucent_combine",
 					"translucent_depth",
 					"light_translucent",
 					"normal_translucent",
@@ -183,6 +179,8 @@
 					"clouds_texture",
 
 					"lumi:textures/filter_pattern/bluenoise256.png",
+					"minecraft:textures/environment/sun.png",
+					"minecraft:textures/environment/moon_phases.png",
 				]
 			},
 			{
@@ -191,7 +189,6 @@
 				framebuffer: "reflection_translucent",
 				samplerImages: [
 					"translucent_shaded",
-					"translucent_combine",
 					"prime_albedo_translucent",
 					"translucent_depth",
 					"light_translucent",
@@ -200,7 +197,6 @@
 					"material_translucent",
 
 					"solid_shaded",
-					"solid_combine",
 					"solid_depth",
 					"light_solid",
 					"normal_solid",

@@ -22,16 +22,16 @@
 					nameKey: "config.lumi_lights.value.half_reflection_resolution",
 					descriptionKey: "config.lumi_lights.help.half_reflection_resolution"
 				},
-				multi_bounce_reflection: {
-					default: false,
-					nameKey: "config.lumi_lights.value.multi_bounce_reflection",
-					descriptionKey: "config.lumi_lights.help.multi_bounce_reflection"
-				},
-				kaleidoskop: {
-					default: false,
-					nameKey: "config.lumi_lights.value.kaleidoskop",
-					descriptionKey: "config.lumi_lights.help.kaleidoskop"
-				},
+				// multi_bounce_reflection: {
+				// 	default: false,
+				// 	nameKey: "config.lumi_lights.value.multi_bounce_reflection",
+				// 	descriptionKey: "config.lumi_lights.help.multi_bounce_reflection"
+				// },
+				// kaleidoskop: {
+				// 	default: false,
+				// 	nameKey: "config.lumi_lights.value.kaleidoskop",
+				// 	descriptionKey: "config.lumi_lights.help.kaleidoskop"
+				// },
 				rain_puddles: {
 					default: false,
 					nameKey: "config.lumi_lights.value.rain_puddles",

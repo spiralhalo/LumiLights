@@ -104,7 +104,6 @@ void main()
 		u_normal_micro,
 		u_material,
 		u_color,
-		u_color,
 		u_translucent_depth,
 		u_light,
 		u_normal,

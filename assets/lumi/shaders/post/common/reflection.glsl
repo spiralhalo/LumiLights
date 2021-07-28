@@ -236,7 +236,6 @@ rt_ColorDepthBloom work_on_pair(
 	in sampler2D reflector_material,
 
 	in sampler2D reflected_color,
-	in sampler2D reflected_combine,
 	in sampler2D reflected_depth,
 	in sampler2D reflected_light,
 	in sampler2D reflected_normal,
@@ -308,18 +307,17 @@ rt_ColorDepthBloom work_on_pair(
 
 	#if PASS_REFLECTION_PROFILE != REFLECTION_PROFILE_NONE
 	} else {
-		#ifdef KALEIDOSKOP
-			reflectedColor = texture(reflected_combine, result.reflected_uv);
-		#elif defined(MULTI_BOUNCE_REFLECTION)
-			// TODO: velocity reprojection. this method creates reflection that lags behind and somehow I overlooked this :/
-			vec4 reflectedShaded = texture(reflected_color, result.reflected_uv);
-			vec4 reflectedCombine = texture(reflected_combine, result.reflected_uv);
-			vec3 reflectedNormal = sample_worldNormal(result.reflected_uv, reflected_normal);
-			float combineFactor = l2_clampScale(0.5, 1.0, -dot(worldNormal, reflectedNormal));
-			reflectedColor = mix(reflectedShaded, reflectedCombine, combineFactor);
-		#else
-			reflectedColor = texture(reflected_color, result.reflected_uv);
-		#endif
+		// #ifdef KALEIDOSKOP
+		// 	reflectedColor = texture(reflected_combine, result.reflected_uv);
+		// #elif defined(MULTI_BOUNCE_REFLECTION)
+		// 	// TODO: velocity reprojection. this method creates reflection that lags behind and somehow I overlooked this :/
+		// 	vec4 reflectedShaded = texture(reflected_color, result.reflected_uv);
+		// 	vec4 reflectedCombine = texture(reflected_combine, result.reflected_uv);
+		// 	vec3 reflectedNormal = sample_worldNormal(result.reflected_uv, reflected_normal);
+		// 	float combineFactor = l2_clampScale(0.5, 1.0, -dot(worldNormal, reflectedNormal));
+		// 	reflectedColor = mix(reflectedShaded, reflectedCombine, combineFactor);
+		// #else
+		reflectedColor = texture(reflected_color, result.reflected_uv);
 
 		reflectedBloom = max(0.0, texture(reflected_light, result.reflected_uv).z - 0.5) * 2.0;
 		// fade to fallback on edges
