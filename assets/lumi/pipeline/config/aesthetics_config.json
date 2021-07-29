@@ -48,6 +48,18 @@
 					nameKey: "config.lumi_lights.value.lightrays_intensity",
 					descriptionKey: "config.lumi_lights.help.lightrays_intensity"
 				},
+				compute_exposure: {
+					default: true,
+					nameKey: "config.lumi_lights.value.compute_exposure",
+					descriptionKey: "config.lumi_lights.help.compute_exposure"
+				},
+				manual_exposure_relative: {
+					default: 5,
+					min: 0,
+					max: 10,
+					nameKey: "config.lumi_lights.value.manual_exposure_relative",
+					descriptionKey: "config.lumi_lights.help.manual_exposure_relative"
+				},
 				sky_mode: {
 					default: "lumi",
 					choices: ["vanilla", "vanilla_starry", "lumi"],

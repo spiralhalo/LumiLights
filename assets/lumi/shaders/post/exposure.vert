@@ -18,6 +18,7 @@ out float v_exposure;
 
 void main()
 {
+#ifdef COMPUTE_EXPOSURE
 	basicFrameSetup();
 
 	v_exposure = 0.;
@@ -56,4 +57,7 @@ void main()
 		gl_Position.xy *= onePixel;
 		gl_Position.xy -= 1.0;
 	}
+#else
+	gl_Position = vec4(0.0);
+#endif
 }

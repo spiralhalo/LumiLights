@@ -19,6 +19,7 @@ out vec4 fragColor;
 #define SMOOTHING_FRAMES 50.
 
 void main() {
+#ifdef COMPUTE_EXPOSURE
 	if (frx_renderFrames() < 2u) {
 		fragColor = vec4(max(0.5, frx_eyeBrightness().y));
 	} else {
@@ -29,4 +30,7 @@ void main() {
 
 		fragColor = vec4(history * (1. - a) + a * new);
 	}
+#else
+	discard;
+#endif
 }

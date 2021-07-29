@@ -14,5 +14,9 @@ uniform sampler2D u_exposure;
 out vec4 fragColor;
 
 void main() {
+#ifdef COMPUTE_EXPOSURE
 	fragColor = textureLod(u_exposure, vec2(0.0), 1);
+#else
+	fragColor = vec4(float(MANUAL_EXPOSURE_RELATIVE) / 10.);
+#endif
 }

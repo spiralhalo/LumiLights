@@ -16,5 +16,9 @@ in float v_exposure;
 out vec4 fragColor;
 
 void main() {
+#ifdef COMPUTE_EXPOSURE
 	fragColor = vec4(v_exposure, v_exposure, v_exposure, 1.0);
+#else
+	discard;
+#endif
 }
