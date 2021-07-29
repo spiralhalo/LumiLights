@@ -99,6 +99,9 @@ vec4 advancedTranslucentShading(float ec, out float bloom_out) {
 		finalAlpha += gelatinOpacity * (1.0 - finalAlpha);
 	}
 
+	// exposure cancellation ???
+	backColor.rgb *= (EXPOSURE_CANCELLATION, 1.0, ec);
+
 	// blend front and back
 	frontColor.rgb = backColor.rgb * (1.0 - frontColor.a) + frontColor.rgb * frontColor.a * (1.0 - excess);
 	frontColor.a = finalAlpha;
