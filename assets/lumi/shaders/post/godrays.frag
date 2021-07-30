@@ -49,15 +49,15 @@ void main() {
 
 		float tileJitter = getRandomFloat(u_blue_noise, v_texcoord, frxu_size);
 
-		bool ssFallback = false;
+		bool screenSpace = false;
 
-	#ifndef SHADOW_MAP_PRESENT
-		ssFallback = !frx_viewFlag(FRX_CAMERA_IN_WATER);
+	#if !defined(SHADOW_MAP_PRESENT) || LIGHTRAYS_MODE == LIGHTRAYS_MODE_SCREENSPACE
+		screenSpace = !frx_viewFlag(FRX_CAMERA_IN_WATER);
 	#endif
 
 		float exposure =  mix(1.0, 0.05, ec) * LIGHT_RAYS_STR;
 
-		if (ssFallback) {
+		if (screenSpace) {
 			float scatter = smoothstep(-1.0, 0.5, dot(normalize(worldPos.xyz), frx_skyLightVector()));
 
 			scatter *= max(0.0, dot(frx_cameraView(), frx_skyLightVector()));

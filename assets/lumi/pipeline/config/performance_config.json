@@ -61,6 +61,33 @@
 					nameKey: "config.lumi_lights.value.cloud_rendering",
 					descriptionKey: "config.lumi_lights.help.cloud_rendering"
 				},
+				lightrays_mode: {
+					default: "volumetric",
+					choices: ["screenspace", "volumetric"],
+					enum: true,
+					prefix: "lightrays_mode_",
+					nameKey: "config.lumi_lights.value.lightrays_mode",
+					descriptionKey: "config.lumi_lights.help.lightrays_mode"
+				},
+				lightrays_intensity: {
+					default: 10,
+					min: 0,
+					max: 10,
+					nameKey: "config.lumi_lights.value.lightrays_intensity",
+					descriptionKey: "config.lumi_lights.help.lightrays_intensity"
+				},
+				compute_exposure: {
+					default: true,
+					nameKey: "config.lumi_lights.value.compute_exposure",
+					descriptionKey: "config.lumi_lights.help.compute_exposure"
+				},
+				manual_exposure_relative: {
+					default: 5,
+					min: 0,
+					max: 10,
+					nameKey: "config.lumi_lights.value.manual_exposure_relative",
+					descriptionKey: "config.lumi_lights.help.manual_exposure_relative"
+				},
 				water_caustics: {
 					default: true,
 					prefix: "water_caustics_",
