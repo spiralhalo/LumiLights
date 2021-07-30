@@ -29,13 +29,12 @@ void main()
 	if (v_texcoord == vec2(0.0)) {
 		gl_Position.xy += onePixel * 0.5;
 
-		int x = 0;
-		for (int i = 0; i < 100; i ++) {
-			for (int j = 0; j < 100; j ++) {
-				x ++;
-				vec2 coord = vec2(i, j) / 100.;
+		const int limit = 50;
 
-				// scale down in center (fovea)
+		for (int i = 0; i < limit; i ++) {
+			for (int j = 0; j < limit; j ++) {
+				vec2 coord = vec2(i, j) * 0.5 / limit; // scale down in center (fovea)
+
 				// coord -= 0.5;
 
 				// vec2 scaling = 0.25 + smoothstep(0.0, 0.5, abs(coord)) * 0.75; // more scaling down the closer to center
@@ -47,7 +46,7 @@ void main()
 			}
 		}
 
-		v_exposure /= float(x);
+		v_exposure /= float(limit * limit);
 
 		// a bunch of magic based on experiment
 		v_exposure = smoothstep(0.0, 0.5, v_exposure);
