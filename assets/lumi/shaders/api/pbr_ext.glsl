@@ -19,19 +19,19 @@
 
 #ifndef VERTEX_SHADER
 
-/* Roughness property -- ALL VERSIONS */
+/* Roughness property -- Since version 1 */
 float pbr_roughness = 1.0;
 
-/* Metalness property -- ALL VERSIONS */
+/* Metalness property -- Since version 1 */
 float pbr_metallic = 0.0;
 
-/* Initial reflectivity -- Require version 2 */
+/* Initial reflectivity -- Since version 2 */
 float pbr_f0 = -1.0;
 
-/* Microfacet normal -- Require version 3 */
+/* Microfacet normal -- Since version 3 */
 vec3  pbr_normalMicro = vec3(99., 99., 99.);
 
-/* Water flag. Lumi Lights handle water exceptionally -- Require version 4 */
+/* Water flag. Lumi Lights handle water exceptionally -- Since version 4 */
 bool  pbr_isWater = false;
 
 #endif
