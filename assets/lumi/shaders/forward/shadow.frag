@@ -9,7 +9,9 @@
   lumi:shaders/forward/shadow.frag
 ******************************************************/
 
+#ifndef NAME_TAG_SHADOW
 in float v_managed;
+#endif
 
 frx_FragmentData frx_createPipelineFragment() {
 	return frx_FragmentData (
@@ -19,11 +21,11 @@ frx_FragmentData frx_createPipelineFragment() {
 }
 
 void frx_writePipelineFragment(in frx_FragmentData fragData) {
-	#ifndef NAME_TAG_SHADOW
+#ifndef NAME_TAG_SHADOW
 	if (v_managed == 0.) {
 		discard;
 	}
-	#endif
+#endif
 
 	gl_FragDepth = gl_FragCoord.z;
 }
