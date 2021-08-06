@@ -50,8 +50,8 @@
 					descriptionKey: "config.lumi_lights.help.sky_mode"
 				},
 				lumi_sky_color: {
-					default: "bright_cyan",
-					choices: ["bright_cyan", "deep_cerulean"],
+					default: "muted_azure",
+					choices: ["muted_azure", "bright_cyan", "deep_cerulean"],
 					enum: true,
 					prefix: "lumi_sky_color_",
 					nameKey: "config.lumi_lights.value.lumi_sky_color",
