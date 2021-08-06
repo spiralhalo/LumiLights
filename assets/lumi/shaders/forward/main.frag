@@ -88,6 +88,40 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
 
 	} else {
 
+		// TODO: do in deferred
+		if (pbr_isWater) {
+			/* WATER RECOLOR */
+		#if WATER_COLOR == WATER_COLOR_NO_TEXTURE
+			a.rgb = fragData.vertexColor.rgb;
+			a.rb *= fragData.vertexColor.rb;
+			float blue = fragData.vertexColor.b * fragData.vertexColor.b;
+			a.rgb += blue * 0.5;
+			a.rgb *= (1.0 - 0.75 * blue);
+			fragData.spriteColor.a = 0.3;
+		#elif WATER_COLOR == WATER_COLOR_NO_COLOR
+			a.rgb = vec3(0.0);
+			fragData.spriteColor.a = 0.2;
+		#else
+			a.rb *= fragData.vertexColor.rb;
+			float blue = fragData.vertexColor.b * fragData.vertexColor.b;
+			a.rgb += blue * 0.5;
+			a.rgb *= (1.0 - 0.75 * blue);
+			a.a *= 0.6;
+		#endif
+
+			/* WAVY NORMALS */
+			// wave movement doesn't necessarily follow flow direction for the time being
+			float waveSpeed = frx_var2.x;
+			float scale = frx_var2.y;
+			float amplitude = frx_var2.z;
+			vec3 moveSpeed = frx_var1.xyz * waveSpeed;
+			vec3 up = fragData.vertexNormal.xyz;
+			vec3 samplePos = frx_var0.xyz;
+			vec3 noisyNormal = ww_normals(up, l2_tangent, cross(up, l2_tangent), samplePos, waveSpeed, scale, amplitude, stretch, moveSpeed);
+
+			pbr_normalMicro = mix(noisyNormal, fragData.vertexNormal, pow(gl_FragCoord.z, 500.0));
+		}
+
 		bool maybeHand = frx_modelOriginType() == MODEL_ORIGIN_SCREEN;
 		bool isParticle = (frx_renderTarget() == TARGET_PARTICLES);
 

@@ -57,6 +57,14 @@
 					nameKey: "config.lumi_lights.value.lumi_sky_color",
 					descriptionKey: "config.lumi_lights.help.lumi_sky_color"
 				},
+				water_color: {
+					default: "muted",
+					choices: ["muted", "vanilla", "no_texture", "no_color"],
+					enum: true,
+					prefix: "water_color_",
+					nameKey: "config.lumi_lights.value.water_color",
+					descriptionKey: "config.lumi_lights.help.water_color"
+				},
 				glint_mode: {
 					default: "glint_texture",
 					choices: ["glint_texture", "glint_shader"],
