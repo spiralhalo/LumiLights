@@ -7,7 +7,7 @@
 			samplers: [
 				"u_normal_solid0",
 				"u_normal_micro_solid0",
-				"u_misc_solid",
+				// "u_misc_solid",
 
 				"u_normal_translucent0",
 				"u_normal_micro_translucent0",
@@ -40,7 +40,7 @@
 				samplerImages: [
 					"normal_solid0",
 					"normal_micro_solid0",
-					"misc_solid",
+					// "misc_solid",
 
 					"normal_translucent0",
 					"normal_micro_translucent0",

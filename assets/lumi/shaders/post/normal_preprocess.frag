@@ -20,7 +20,7 @@
 
 uniform sampler2D u_normal_solid0;
 uniform sampler2D u_normal_micro_solid0;
-uniform sampler2D u_misc_solid;
+// uniform sampler2D u_misc_solid;
 
 uniform sampler2D u_normal_translucent0;
 uniform sampler2D u_normal_micro_translucent0;
@@ -36,10 +36,33 @@ const float beeg_waveSpeed = 0.8;
 const float beeg_scale = 10.0;
 const float beeg_amplitude = 0.25;
 
-void processNormalMap(in vec3 normal, in vec3 tangent, inout vec3 microNormal) {
+void processNormalMap(in vec3 normal, in vec3 tangent, bool isWater, inout vec3 microNormal) {
 	// normal map processing requires tangent to be set
 	bool useNormalMap = dot(tangent, tangent) > 0.1;
 
+	if (!useNormalMap) return;
+
+	if (isWater) {
+		/* WAVY NORMALS */
+		// wave movement doesn't necessarily follow flow direction for the time being
+		const float stretch = 1.2;
+		float waveSpeed = mix(smol_waveSpeed, beeg_waveSpeed, abs(normal.y));
+		float scale = mix(smol_scale, beeg_scale, abs(normal.y));
+		float amplitude = mix(smol_amplitude, beeg_amplitude, abs(normal.y));
+
+		float depth = texture(u_depth_translucent, v_texcoord).r;
+		vec4 worldPos = frx_inverseViewProjectionMatrix() * vec4(2. * v_texcoord - 1., 2. * depth - 1., 1.);
+		worldPos.xyz /= worldPos.w;
+		worldPos.xyz += frx_cameraPos();
+
+		vec3 moveSpeed = vec3(0.5, 3.0, -1.0) * (0.5 + 0.5 - normal * 0.5) * waveSpeed;
+		vec3 samplePos = worldPos.xyz;
+		vec3 noisyNormal = ww_normals(normal, tangent, cross(normal, tangent), samplePos, waveSpeed, scale, amplitude, stretch, moveSpeed);
+
+		microNormal = noisyNormal;
+	}
+
+	// else
 	// TODO: actually apply normal map or whatever
 }
 
@@ -53,32 +76,11 @@ void main()
 	vec3 solidMicroNormal = 2.0 * texture(u_normal_micro_solid0, v_texcoord).rgb - 1.0;
 	vec3 translucentMicroNormal = 2.0 * texture(u_normal_micro_translucent0, v_texcoord).rgb - 1.0;
 
-	// TODO: implement when supported
-	// processNormalMap(solidNormal, solidTangent, solidMicroNormal);
-	// processNormalMap(translucentNormal, translucentTangent, translucentMicroNormal);
-
 	bool translucentIsWater = bit_unpack(texture(u_misc_translucent, v_texcoord).b, 7) == 1.;
 
-	if (translucentIsWater) {
-		/* WAVY NORMALS */
-		// wave movement doesn't necessarily follow flow direction for the time being
-		const float stretch = 1.2;
-		float waveSpeed = mix(smol_waveSpeed, beeg_waveSpeed, abs(translucentNormal.y));
-		float scale = mix(smol_scale, beeg_scale, abs(translucentNormal.y));
-		float amplitude = mix(smol_amplitude, beeg_amplitude, abs(translucentNormal.y));
-
-		float depth = texture(u_depth_translucent, v_texcoord).r;
-		vec4 worldPos = frx_inverseViewProjectionMatrix() * vec4(2. * v_texcoord - 1., 2. * depth - 1., 1.);
-		worldPos.xyz /= worldPos.w;
-		worldPos.xyz += frx_cameraPos();
-
-		vec3 moveSpeed = vec3(0.5, 3.0, -1.0) * (0.5 + 0.5 - translucentNormal * 0.5) * waveSpeed;
-		vec3 up = translucentNormal;
-		vec3 samplePos = worldPos.xyz;
-		vec3 noisyNormal = ww_normals(up, translucentTangent, cross(up, translucentTangent), samplePos, waveSpeed, scale, amplitude, stretch, moveSpeed);
-
-		translucentMicroNormal = noisyNormal;
-	}
+	// TODO: implement when supported
+	// processNormalMap(solidNormal, solidTangent, false, solidMicroNormal);
+	processNormalMap(translucentNormal, translucentTangent, translucentIsWater, translucentMicroNormal);
 
 	// TODO: apply rain normals
 

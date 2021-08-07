@@ -117,6 +117,7 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
 
 		if (pbr_normalMicro.x > 90.) {
 			pbr_normalMicro = normal;
+		} else {
 			pbr_tangent = vec3(0.);
 		}
 
