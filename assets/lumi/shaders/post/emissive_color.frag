@@ -24,8 +24,13 @@ void main()
 	// vec2 unjitteredTexcoord = v_texcoord - taa_jitter(v_invSize) * 0.5;
 
 	// TODO: elaborate hand blending? (requires hand alpha)
+	vec2 reflectionUV = v_texcoord;
+#if defined(HALF_REFLECTION_RESOLUTION)
+	reflectionUV *= 0.5;
+#endif
+
 	float solidDepth = texture(u_solid_depth, v_texcoord).r;
-	float ref = max(texture(u_emissive_reflection_solid, v_texcoord).r, texture(u_emissive_reflection_translucent, v_texcoord).r);
+	float ref = max(texture(u_emissive_reflection_solid, reflectionUV).r, texture(u_emissive_reflection_translucent, reflectionUV).r);
 	float ems = solidDepth == 1.0 ? max(texture(u_emissive_composite, v_texcoord).r, ref) : texture(u_emissive_solid, v_texcoord).r;
 	vec4 c = texture(u_base_composite, v_texcoord);
 

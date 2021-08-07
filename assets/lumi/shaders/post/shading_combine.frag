@@ -59,8 +59,13 @@ void main()
 	vec4 solid = hdr_combine(u_hdr_solid, u_material_solid, u_hdr_solid_swap, v_texcoord);
 	vec4 translucent = hdr_combine(u_hdr_translucent, u_material_translucent, u_hdr_translucent_swap, v_texcoord);
 
-	float reflectionBloom = texture(u_emissive_reflection_translucent, v_texcoord).r;
-	vec3 reflectionAntiBanding = texture(u_hdr_translucent_swap, v_texcoord).rgb;
+	vec2 reflectionUV = v_texcoord;
+#if defined(HALF_REFLECTION_RESOLUTION)
+	reflectionUV *= 0.5;
+#endif
+
+	float reflectionBloom = texture(u_emissive_reflection_translucent, reflectionUV).r;
+	vec3 reflectionAntiBanding = texture(u_hdr_translucent_swap, reflectionUV).rgb;
 	float reflectionLuminance = frx_luminance(reflectionAntiBanding * reflectionAntiBanding);
 
 	translucent.a = min(1.0, translucent.a + BLOOM_ALPHA_ADD * reflectionBloom * reflectionLuminance);
