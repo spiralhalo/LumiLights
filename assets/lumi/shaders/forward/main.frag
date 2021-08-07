@@ -89,6 +89,12 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
 
 	} else {
 
+		// Support vanilla emissive
+		if (fragData.light.x > 0.93625) {
+			fragData.light.x = 0.93625;
+			fragData.emissivity = 1.0;
+		}
+
 		if (pbr_isWater) {
 			/* WATER RECOLOR */
 		#if WATER_COLOR == WATER_COLOR_NO_TEXTURE

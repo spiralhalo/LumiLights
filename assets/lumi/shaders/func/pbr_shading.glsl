@@ -70,14 +70,15 @@ struct light_data{
 	float translucency;
 };
 
-vec3 hdr_calcBlockLight(inout light_data data)
+vec3 hdr_calcBlockLight(inout light_data data, in float bloom)
 {
 	float bl = smoothstep(0.03125, 0.96875, data.light.x);
 	float brightness = frx_viewBrightness();
 
 	bl *= pow(bl, 3.0 + brightness * 2.0) * (2.0 - brightness * 0.5); // lyfe hax
-
-	vec3 radiance = BLOCK_LIGHT_COLOR * BLOCK_LIGHT_STR * bl;
+	
+	vec3 color = mix(BLOCK_LIGHT_COLOR, data.albedo / l2_max3(data.albedo), bloom);
+	vec3 radiance = color * BLOCK_LIGHT_STR * bl;
 
 	bool useFancySpecular = data.diffuse;
 	#if BLOCKLIGHT_SPECULAR_MODE == BLOCKLIGHT_SPECULAR_MODE_FAST
@@ -205,7 +206,7 @@ void pbr_shading(inout vec4 a, inout float bloom, vec3 modelPos, vec3 light, vec
 	);
 
 	vec3 held_light  = hdr_calcHeldLight(data);
-	vec3 block_light = hdr_calcBlockLight(data);
+	vec3 block_light = hdr_calcBlockLight(data, bloom);
 	vec3 sky_light   = hdr_calcSkyLight(data);
 
 	vec3 ndRadiance = baseAmbientRadiance(atmosv_hdrFogColorRadiance);

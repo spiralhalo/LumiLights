@@ -37,8 +37,9 @@ const float USER_SKY_MULTIPLIER = 1. + (clamp(OUTDOORS_BRIGHTNESS, 10, 50) / 10.
 	#define _0_DEF_NIGHT_AMBIENT vec3(0.65, 0.65, 0.8)
 
 	// LIGHT COLORS
+	const vec3 BLOCK_LIGHT_NEUTRAL = hdr_fromGamma(vec3(0.7555)); // luminance of warm BL color
 #if BLOCK_LIGHT_MODE == BLOCK_LIGHT_MODE_NEUTRAL
-	const vec3 BLOCK_LIGHT_COLOR = hdr_fromGamma(vec3(0.7555)); // luminance of warm BL color
+	const vec3 BLOCK_LIGHT_COLOR = BLOCK_LIGHT_NEUTRAL;
 #else
 	const vec3 BLOCK_LIGHT_COLOR = hdr_fromGamma(vec3(1.0, 0.7, 0.4));
 #endif
