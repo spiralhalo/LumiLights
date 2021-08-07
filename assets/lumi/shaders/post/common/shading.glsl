@@ -111,6 +111,12 @@ vec4 hdr_shaded_color(
 	float mathurt   = bit_unpack(misc.z, 1);
 	// return vec4(coords_view(uv, frx_inverseProjectionMatrix(), depth), 1.0);
 
+	// Support vanilla emissive
+	if (light.x > 0.93625) {
+		light.x = 0.93625;
+		bloom_raw = 1.0;
+	}
+
 	light.y = lightmapRemap(light.y);
 
 	#ifdef SHADOW_MAP_PRESENT
