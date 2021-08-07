@@ -32,6 +32,10 @@ vec3 packNormal(vec3 normal, vec3 tangent) {
 	return vec3(packVec2(normal.rg), packVec2(tangent.rg), packVec2(vec2(normal.b, tangent.b)));
 }
 
+/**
+ *	Unpacks packed normal and tangent vectors.
+ *  Must output without normalization.
+ */
 void unpackNormal(in vec3 source, out vec3 normal, out vec3 tangent) {
 	normal.rg = unpackVec2(source.r);
 	tangent.rg = unpackVec2(source.g);
@@ -41,6 +45,7 @@ void unpackNormal(in vec3 source, out vec3 normal, out vec3 tangent) {
 	normal.b = bb.r;
 	tangent.b = bb.g;
 
-	normal = normalize(2.0 * normal - 1.0);
-	tangent = normalize(2.0 * tangent - 1.0);
+	// Don't normalize
+	normal = 2.0 * normal - 1.0;
+	tangent = 2.0 * tangent - 1.0;
 }

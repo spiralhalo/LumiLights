@@ -114,11 +114,11 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
 		bool isParticle = (frx_renderTarget() == TARGET_PARTICLES);
 
 		vec3 normal = fragData.vertexNormal;
-	#if TRANSLUCENT_LAYERING == TRANSLUCENT_LAYERING_FANCY
-		vec3 cleanNormal = normal;
-	#endif
 
-		pbr_normalMicro = pbr_normalMicro.x > 90. ? normal : pbr_normalMicro;
+		if (pbr_normalMicro.x > 90.) {
+			pbr_normalMicro = normal;
+			pbr_tangent = vec3(0.);
+		}
 
 		float bloom = fragData.emissivity * a.a;
 		float ao = fragData.ao ? (1.0 - fragData.aoShade) * a.a : 0.0;
@@ -156,7 +156,7 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
 
 		#if TRANSLUCENT_LAYERING == TRANSLUCENT_LAYERING_FANCY
 			// apply semi-real diffuse in forward
-			a.rgb *= calcLuminosity(cleanNormal, fragData.light, a.a);
+			a.rgb *= calcLuminosity(normal, fragData.light, a.a);
 		#endif
 		}
 	}

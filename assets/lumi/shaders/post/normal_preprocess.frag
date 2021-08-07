@@ -36,6 +36,13 @@ const float beeg_waveSpeed = 0.8;
 const float beeg_scale = 10.0;
 const float beeg_amplitude = 0.25;
 
+void processNormalMap(in vec3 normal, in vec3 tangent, inout microNormal) {
+	// normal map processing requires tangent to be set
+	bool useNormalMap = dot(tangent, tangent) > 0.1;
+
+	// TODO: actually apply normal map or whatever
+}
+
 void main()
 {
 	vec3 solidNormal, solidTangent, translucentNormal, translucentTangent;
@@ -46,7 +53,9 @@ void main()
 	vec3 solidMicroNormal = 2.0 * texture(u_normal_micro_solid0, v_texcoord).rgb - 1.0;
 	vec3 translucentMicroNormal = 2.0 * texture(u_normal_micro_translucent0, v_texcoord).rgb - 1.0;
 
-	// TODO: apply normal map or whatever
+	// TODO: implement when supported
+	// processNormalMap(solidNormal, solidTangent, solidMicroNormal);
+	// processNormalMap(translucentNormal, translucentTangent, translucentMicroNormal);
 
 	bool translucentIsWater = bit_unpack(texture(u_misc_translucent, v_texcoord).b, 7) == 1.;
 
