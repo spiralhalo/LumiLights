@@ -60,7 +60,7 @@ void main()
 	vec4 translucent = hdr_combine(u_hdr_translucent, u_material_translucent, u_hdr_translucent_swap, v_texcoord);
 
 	vec2 reflectionUV = v_texcoord;
-#if defined(HALF_REFLECTION_RESOLUTION)
+#if defined(HALF_REFLECTION_RESOLUTION) && REFLECTION_PROFILE != REFLECTION_PROFILE_NONE
 	reflectionUV *= 0.5;
 #endif
 

@@ -25,7 +25,7 @@ void main()
 
 	// TODO: elaborate hand blending? (requires hand alpha)
 	vec2 reflectionUV = v_texcoord;
-#if defined(HALF_REFLECTION_RESOLUTION)
+#if defined(HALF_REFLECTION_RESOLUTION) && REFLECTION_PROFILE != REFLECTION_PROFILE_NONE
 	reflectionUV *= 0.5;
 #endif
 
