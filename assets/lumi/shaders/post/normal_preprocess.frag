@@ -36,7 +36,7 @@ const float beeg_waveSpeed = 0.8;
 const float beeg_scale = 10.0;
 const float beeg_amplitude = 0.25;
 
-void processNormalMap(in vec3 normal, in vec3 tangent, inout microNormal) {
+void processNormalMap(in vec3 normal, in vec3 tangent, inout vec3 microNormal) {
 	// normal map processing requires tangent to be set
 	bool useNormalMap = dot(tangent, tangent) > 0.1;
 

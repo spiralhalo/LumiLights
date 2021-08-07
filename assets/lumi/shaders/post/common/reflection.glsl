@@ -121,11 +121,13 @@ vec4 calcFallbackColor(in sampler2D sdepth, vec3 unitMarch_world, vec2 light)
 	return vec4(sky * skyLightFactor * upFactor * aboveWaterFactor * 1.5, specular.x);
 }
 
-vec3 pbr_lightCalc(float roughness, vec3 f0, vec3 radiance, vec3 lightDir, vec3 viewDir)
+vec3 pbr_lightCalc(float roughness, vec3 f0, vec3 radiance, vec3 lightDir, vec3 viewDir, inout float bloom)
 {
 	vec3 halfway = normalize(viewDir + lightDir);
 	vec3 fresnel = pbr_fresnelSchlick(pbr_dot(viewDir, halfway), f0);
 	float smoothness = (1. - roughness);
+
+	bloom *= frx_luminance(fresnel);
 
 	return clamp(fresnel * radiance * smoothness * smoothness, 0.0, 1.0);
 }
@@ -339,7 +341,9 @@ rt_ColorDepthBloom work_on_pair(
 
 	f0 += (vec3(1.0) - f0) * sunBloom * 0.5; // magic hax
 
-	vec4 pbr_color = vec4(pbr_lightCalc(roughness, f0, reflected_final.rgb * base_color.a, unitMarch_world, unit_world), reflected_final.a);
+	vec3 lightCalc = pbr_lightCalc(roughness, f0, reflected_final.rgb * base_color.a, unitMarch_world, unit_world, reflectedBloom);
+
+	vec4 pbr_color = vec4(lightCalc, reflected_final.a);
 
 	return rt_ColorDepthBloom(pbr_color, reflected_depth_value, max(sunBloom, reflectedBloom));
 }
