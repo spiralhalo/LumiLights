@@ -36,6 +36,18 @@
 			]
 		},
 		{
+			name: "normal_translucent0",
+			lod: 0,
+			internalFormat: "RGB16",
+			pixelFormat: "RGB",
+			pixelDataType: "UNSIGNED_BYTE",
+			target: "TEXTURE_2D",
+			texParams: [
+				{name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
+				{name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
+			]
+		},
+		{
 			name: "normal_translucent",
 			lod: 0,
 			internalFormat: "RGB8",
@@ -48,11 +60,35 @@
 			]
 		},
 		{
+			name: "normal_micro_translucent0",
+			lod: 0,
+			internalFormat: "RGB16",
+			pixelFormat: "RGB",
+			pixelDataType: "UNSIGNED_BYTE",
+			target: "TEXTURE_2D",
+			texParams: [
+				{name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
+				{name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
+			]
+		},
+		{
 			name: "normal_micro_translucent",
 			lod: 0,
-			internalFormat: "RGB32F",
+			internalFormat: "RGB16",
 			pixelFormat: "RGB",
-			pixelDataType: "FLOAT",
+			pixelDataType: "UNSIGNED_BYTE",
+			target: "TEXTURE_2D",
+			texParams: [
+				{name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
+				{name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
+			]
+		},
+		{
+			name: "tangent_translucent",
+			lod: 0,
+			internalFormat: "RGB8",
+			pixelFormat: "RGB",
+			pixelDataType: "UNSIGNED_BYTE",
 			target: "TEXTURE_2D",
 			texParams: [
 				{name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
@@ -118,8 +154,8 @@
 			colorAttachments: [
 				{image: "translucent_main", clearColor: 0x00000000},
 				{image: "light_translucent", clearColor: 0x00000000},
-				{image: "normal_translucent", clearColor: 0x00000000},
-				{image: "normal_micro_translucent", clearColor: 0x00000000},
+				{image: "normal_translucent0", clearColor: 0x00000000},
+				{image: "normal_micro_translucent0", clearColor: 0x00000000},
 				{image: "material_translucent", clearColor: 0x00000000},
 				{image: "misc_translucent", clearColor: 0x00000000},
 				{image: "prime_albedo_translucent", clearColor: 0x00000000},

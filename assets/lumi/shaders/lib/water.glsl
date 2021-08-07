@@ -38,5 +38,6 @@ vec3 ww_normals(vec3 up, vec3 tgt, vec3 btgt, vec3 samplePos, float waveSpeed, f
 	vec3 bitangent = bmove + ww_noise(samplePos + bmove, waveMove, invScale, amplitude, stretch) * up - origin;
 
 	vec3 noisyNormal = normalize(cross(tangent, bitangent));
+
 	return noisyNormal;
 }

@@ -62,8 +62,8 @@
 					"main_copy",
 					"solid_depth",
 					"light_solid",
-					"normal_solid",
-					"normal_micro_solid",
+					"normal_solid0",
+					"normal_micro_solid0",
 					"material_solid",
 					"misc_solid",
 

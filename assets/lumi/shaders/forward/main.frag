@@ -8,6 +8,7 @@
 #include lumi:shaders/common/userconfig.glsl
 #include lumi:shaders/func/glintify2.glsl
 #include lumi:shaders/lib/bitpack.glsl
+#include lumi:shaders/lib/pack_normal.glsl
 #include lumi:shaders/lib/translucent_layering.glsl
 #include lumi:shaders/lib/util.glsl
 
@@ -88,7 +89,6 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
 
 	} else {
 
-		// TODO: do in deferred
 		if (pbr_isWater) {
 			/* WATER RECOLOR */
 		#if WATER_COLOR == WATER_COLOR_NO_TEXTURE
@@ -108,18 +108,6 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
 			a.rgb *= (1.0 - 0.5 * blue);
 			a.a *= 0.6;
 		#endif
-
-			/* WAVY NORMALS */
-			// wave movement doesn't necessarily follow flow direction for the time being
-			float waveSpeed = frx_var2.x;
-			float scale = frx_var2.y;
-			float amplitude = frx_var2.z;
-			vec3 moveSpeed = frx_var1.xyz * waveSpeed;
-			vec3 up = fragData.vertexNormal.xyz;
-			vec3 samplePos = frx_var0.xyz;
-			vec3 noisyNormal = ww_normals(up, l2_tangent, cross(up, l2_tangent), samplePos, waveSpeed, scale, amplitude, stretch, moveSpeed);
-
-			pbr_normalMicro = mix(noisyNormal, fragData.vertexNormal, pow(gl_FragCoord.z, 500.0));
 		}
 
 		bool maybeHand = frx_modelOriginType() == MODEL_ORIGIN_SCREEN;
@@ -136,12 +124,16 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
 		float ao = fragData.ao ? (1.0 - fragData.aoShade) * a.a : 0.0;
 		float normalizedBloom = (bloom - ao) * 0.5 + 0.5;
 
+		vec3 packedNormal;
+
 		if (maybeHand) {
-			normal = normal * frx_normalModelMatrix();
+			packedNormal = normal * frx_normalModelMatrix();
+			packedNormal = 0.5 + 0.5 * packedNormal;
 			pbr_normalMicro = pbr_normalMicro * frx_normalModelMatrix();
+		} else {
+			packedNormal = packNormal(normal, pbr_tangent);
 		}
 
-		normal = normal * 0.5 + 0.5;
 		pbr_normalMicro = pbr_normalMicro * 0.5 + 0.5;
 
 		//pad with 0.01 to prevent conflation with unmanaged draw
@@ -153,7 +145,7 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
 
 		// PERF: view normal, more useful than world normal
 		fragColor[1] = vec4(fragData.light.xy, (isParticle || maybeHand) ? bloom : normalizedBloom, 1.0);
-		fragColor[2] = vec4(normal, 1.0);
+		fragColor[2] = vec4(packedNormal, 1.0);
 		fragColor[3] = vec4(pbr_normalMicro, 1.0);
 		fragColor[4] = vec4(roughness, pbr_metallic, pbr_f0, 1.0);
 		fragColor[5] = vec4(frx_normalizeMappedUV(frx_texcoord), bitFlags, 1.0);

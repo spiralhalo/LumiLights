@@ -15,7 +15,7 @@
  */
 
 /* API version */
-#define LUMI_PBR_API 5
+#define LUMI_PBR_API 6
 
 #ifndef VERTEX_SHADER
 
@@ -33,6 +33,20 @@ vec3  pbr_normalMicro = vec3(99., 99., 99.);
 
 /* Water flag. Lumi Lights handle water exceptionally -- Since version 4 */
 bool  pbr_isWater = false;
+
+/* Normal map flag. -- Since version 6
+ *
+ * Set to true if pbr_normalMicro is in tangent space so the real microfacet
+ * normal will be computed using frx_FragmentData.vertexNormal as the normal
+ * and pbr_tangent as the tangent vector.
+ */
+bool  pbr_usingNormalMap = false;
+
+/* Tangent vector -- Since version 6
+ *
+ * In the future, will be replaced by Frex fragment API tangent vector.
+ */
+vec3  pbr_tangent = vec3(0., 0., 0.);
 
 #endif
 

@@ -11,14 +11,12 @@
 	lumi:shaders/material/water.frag
 ***********************************************/
 
-const float stretch = 1.2;
-
 void frx_startFragment(inout frx_FragmentData fragData)
 {
-#ifdef LUMI_PBRX
-	/* PBR PARAMS */
+#if LUMI_PBR_API >= 6
 	pbr_f0 = 0.02;
 	pbr_roughness = 0.05;
 	pbr_isWater = true;
+	pbr_tangent = l2_tangent;
 #endif
 }
