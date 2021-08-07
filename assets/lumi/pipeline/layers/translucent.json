@@ -74,8 +74,8 @@
 		{
 			name: "normal_micro_translucent",
 			lod: 0,
-			internalFormat: "RGB16",
-			pixelFormat: "RGB",
+			internalFormat: "RGBA16",
+			pixelFormat: "RGBA",
 			pixelDataType: "UNSIGNED_BYTE",
 			target: "TEXTURE_2D",
 			texParams: [

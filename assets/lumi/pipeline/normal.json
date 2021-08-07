@@ -7,12 +7,14 @@
 			samplers: [
 				"u_normal_solid0",
 				"u_normal_micro_solid0",
-				// "u_misc_solid",
+				"u_light_solid",
+				"u_depth_solid",
 
 				"u_normal_translucent0",
 				"u_normal_micro_translucent0",
-				"u_misc_translucent",
+				"u_light_translucent",
 				"u_depth_translucent",
+				"u_misc_translucent",
 			]
 		},
 	],
@@ -30,7 +32,7 @@
 			]
 		},
 	],
-	
+
 	fabulous: {
 		passes: [
 			{
@@ -40,12 +42,14 @@
 				samplerImages: [
 					"normal_solid0",
 					"normal_micro_solid0",
-					// "misc_solid",
+					"light_solid",
+					"solid_depth",
 
 					"normal_translucent0",
 					"normal_micro_translucent0",
-					"misc_translucent",
+					"light_translucent",
 					"translucent_depth",
+					"misc_translucent",
 				]
 			},
 		]

@@ -260,11 +260,12 @@ rt_ColorDepthBloom work_on_pair(
 
 	vec3 ray_view	= uv2view(v_texcoord, frx_inverseProjectionMatrix(), reflector_depth);
 	vec3 ray_world   = view2world(ray_view, frx_inverseViewMatrix());
-	// TODO: optimize puddle by NOT calling it twice in shading and in reflection
-	vec4 fake = vec4(0.0);
-	#ifdef RAIN_PUDDLES
-		ww_puddle_pbr(fake, roughness, light.y, worldNormal, ray_world);
-	#endif
+
+#ifdef RAIN_PUDDLES
+	float packedPuddle = texture(reflector_micro_normal, v_texcoord).a;
+
+	puddle_processRoughness(roughness, packedPuddle);
+#endif
 
 	vec3 unit_view = normalize(-ray_view);
 	

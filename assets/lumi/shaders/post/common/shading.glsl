@@ -58,7 +58,7 @@ const float BIAS = 0.4;
 const float INTENSITY = 10.0;
 
 vec4 hdr_shaded_color(
-	vec2 uv, sampler2D sdepth, sampler2D slight, sampler2D snormal, sampler2D smaterial, sampler2D smisc,
+	vec2 uv, sampler2D sdepth, sampler2D slight, sampler2D smicronormal, sampler2D smaterial, sampler2D smisc,
 	vec4 albedo_alpha, vec3 emissionRadiance, float aoval, bool translucent, bool translucentIsWater, float translucentDepth,
 	float exposureCompensation, out float bloom_out)
 {
@@ -99,7 +99,8 @@ vec4 hdr_shaded_color(
 		return unmanaged(a, bloom_out, translucent);
 	}
 
-	vec3  normal	= texture(snormal, uv).xyz * 2.0 - 1.0;
+	vec4  rawMicroNormal = texture(smicronormal, uv);
+	vec3  normal	= rawMicroNormal.xyz * 2.0 - 1.0;
 	vec3  material  = texture(smaterial, uv).xyz;
 	float roughness = material.x == 0.0 ? 1.0 : min(1.0, 1.0203 * material.x - 0.01);
 	float metallic  = material.y;
@@ -162,9 +163,14 @@ vec4 hdr_shaded_color(
 	light.z += causticLight;
 
 	bloom_out = max(0.0, bloom_raw);
-	#ifdef RAIN_PUDDLES
-		ww_puddle_pbr(a, roughness, light.y, normal, worldPos);
-	#endif
+
+#ifdef RAIN_PUDDLES
+	float packedPuddle = rawMicroNormal.a;
+
+	puddle_processRoughness(roughness, packedPuddle);
+	puddle_processColor(a, packedPuddle);
+#endif
+
 	#if BLOCKLIGHT_SPECULAR_MODE == BLOCKLIGHT_SPECULAR_MODE_FANTASTIC
 		preCalc_blockDir = calcBlockDir(slight, uv, v_invSize, normal, viewPos, sdepth);
 	#endif
