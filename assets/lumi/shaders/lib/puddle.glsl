@@ -31,5 +31,5 @@ void puddle_processRoughness(inout float roughness, float wet) {
 }
 
 void puddle_processColor(inout vec4 color, float wet) {
-	color.rgb *= 1.0 - 0.3 * pow(wet, 5.);
+	color.rgb *= 1.0 - 0.3 * pow(wet, 5.) * (1.0 - color.rgb);
 }
