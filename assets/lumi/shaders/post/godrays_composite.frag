@@ -26,5 +26,16 @@ void main() {
 	vec4 a = texture(u_color, v_texcoord);
 	vec4 b = textureLod(u_godrays, v_texcoord, (1.0 - ldepth(d)) * (3. - blurAdj));
 
-	fragColor = vec4(a.rgb * (1.0 - b.a) + b.rgb * b.a, a.a);
+	// vec3 aa = hdr_fromGamma(a.rgb);
+	// vec3 bb = hdr_fromGamma(b.rgb);
+
+	// vec3 cc = aa + bb * a.rgb * b.a; // TOO GLITCHY
+	// vec3 cc = aa + bb * b.a; // WAY TOO WASHED OUT
+
+	// vec3 c = hdr_toSRGB(cc);
+	// vec3 c = a.rgb * (1.0 - b.a) + b.rgb * b.a; // TOO WASHED OUT
+	// vec3 c = a.rgb + b.rgb * a.rgb * b.a; // TOO GLITCHY
+	vec3 c = a.rgb + b.rgb * b.a; // ORIGINAL BLENDING
+
+	fragColor = vec4(c, a.a);
 }
