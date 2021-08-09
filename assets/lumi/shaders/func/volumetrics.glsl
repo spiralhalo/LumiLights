@@ -25,7 +25,9 @@ vec4 celestialLightRays(sampler2DArrayShadow sshadow, vec3 modelPos, float expos
 	} else { 
 		float sunHorizon = smoothstep(1.5, 0.0, frx_skyLightVector().y);
 
-		scatter = smoothstep(-1.0, 0.5, scatter) * sunHorizon;
+		scatter = l2_clampScale(-1.0, 0.5, scatter);
+		scatter = pow(scatter, 0.25);
+		scatter *= sunHorizon;
 
 	#ifdef SHADOW_WORKAROUND
 		// Workaround to fix patches in shadow map until it's FLAWLESS
