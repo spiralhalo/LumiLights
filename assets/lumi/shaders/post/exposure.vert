@@ -14,6 +14,10 @@
 
 uniform sampler2D u_color;
 
+const int BIN_SIZE = 64;
+
+int bin[BIN_SIZE];
+
 out float v_exposure;
 
 void main()
@@ -31,22 +35,41 @@ void main()
 
 		const int limit = 50;
 
+		for (int i = 0; i < BIN_SIZE; i ++) {
+			bin[i] = 0;
+		}
+
 		for (int i = 0; i < limit; i ++) {
 			for (int j = 0; j < limit; j ++) {
-				vec2 coord = vec2(i, j) * 0.5 / limit; // scale down in center (fovea)
+				vec2 coord = vec2(i, j) / limit;
 
-				// coord -= 0.5;
-
+ 				// scale down in center (fovea)
+				coord -= 0.5;
 				// vec2 scaling = 0.25 + smoothstep(0.0, 0.5, abs(coord)) * 0.75; // more scaling down the closer to center
+				coord *= 0.5; //scaling;
+				coord += 0.5;
 
-				// coord *= scaling;
-				// coord += 0.5;
+				int index = int(floor(clamp(frx_luminance(texture(u_color, coord).rgb), 0.0, 1.0) * BIN_SIZE));
 
-				v_exposure += frx_luminance(texture(u_color, coord).rgb);
+				bin[index] ++;
 			}
 		}
 
-		v_exposure /= float(limit * limit);
+		const int total = (limit * limit);
+		const int medianIndex = total / 2;
+
+		int count = 0;
+		int k;
+		for (k = 0; k < BIN_SIZE; k ++) {
+			count += bin[k];
+
+			if (count >= medianIndex) {
+				break;
+			}
+		}
+
+		v_exposure = float(k) / float(BIN_SIZE);
+		// v_exposure /= float(limit * limit);
 
 		// a bunch of magic based on experiment
 		v_exposure = smoothstep(0.0, 0.5, v_exposure);
