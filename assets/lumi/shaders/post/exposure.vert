@@ -49,7 +49,12 @@ void main()
 				coord *= 0.5; //scaling;
 				coord += 0.5;
 
-				int index = int(floor(clamp(frx_luminance(texture(u_color, coord).rgb), 0.0, 1.0) * BIN_SIZE));
+				float luminance = frx_luminance(texture(u_color, coord).rgb);
+
+				// clamp luminance to half
+				luminance = clamp(luminance, 0.0, 0.5) * 2.0;
+
+				int index = int(floor(luminance * BIN_SIZE));
 
 				bin[index] ++;
 			}
@@ -72,7 +77,7 @@ void main()
 		// v_exposure /= float(limit * limit);
 
 		// a bunch of magic based on experiment
-		v_exposure = smoothstep(0.0, 0.5, v_exposure);
+		// v_exposure = smoothstep(0.0, 0.5, v_exposure); // not required since luminance are clamped to half already
 		// v_exposure = pow(v_exposure, 0.5);
 	} else {
 		gl_Position.xy += 1.0;
