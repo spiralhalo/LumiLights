@@ -130,6 +130,8 @@
 	"config.lumi_lights.help.kaleidoskop": "K a l e i d o s k o p i k	r e f l e k t i f	m e t a l i k	b l o k.",
 	"config.lumi_lights.value.rain_puddles": "Rain puddles effect",
 	"config.lumi_lights.help.rain_puddles": "Wet ground during rain",
+	"config.lumi_lights.value.exposure_func": "Exposure function",
+	"config.lumi_lights.help.exposure_func": "Exposure compute function;Default is median.",
 
 	"config.lumi_lights.category.debug": "Debug",
 	"config.lumi_lights.value.dithering_mode": "Dithering mode",

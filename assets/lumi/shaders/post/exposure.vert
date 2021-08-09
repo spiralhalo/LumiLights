@@ -14,9 +14,13 @@
 
 uniform sampler2D u_color;
 
+#if EXPOSURE_FUNC == EXPOSURE_FUNC_MEDIAN
+
 const int BIN_SIZE = 64;
 
 int bin[BIN_SIZE];
+
+#endif
 
 out float v_exposure;
 
@@ -35,9 +39,11 @@ void main()
 
 		const int limit = 50;
 
+#if EXPOSURE_FUNC == EXPOSURE_FUNC_MEDIAN
 		for (int i = 0; i < BIN_SIZE; i ++) {
 			bin[i] = 0;
 		}
+#endif
 
 		for (int i = 0; i < limit; i ++) {
 			for (int j = 0; j < limit; j ++) {
@@ -54,13 +60,19 @@ void main()
 				// clamp luminance to half
 				luminance = clamp(luminance, 0.0, 0.5) * 2.0;
 
+#if EXPOSURE_FUNC == EXPOSURE_FUNC_MEDIAN
 				int index = int(floor(luminance * BIN_SIZE));
 
 				bin[index] ++;
+#else
+				v_exposure += luminance;
+#endif
 			}
 		}
 
 		const int total = (limit * limit);
+
+#if EXPOSURE_FUNC == EXPOSURE_FUNC_MEDIAN
 		const int medianIndex = total / 2;
 
 		int count = 0;
@@ -74,7 +86,9 @@ void main()
 		}
 
 		v_exposure = float(k) / float(BIN_SIZE);
-		// v_exposure /= float(limit * limit);
+#else
+		v_exposure /= float(total);
+#endif
 
 		// a bunch of magic based on experiment
 		// v_exposure = smoothstep(0.0, 0.5, v_exposure); // not required since luminance are clamped to half already
