@@ -30,7 +30,7 @@ const float CLOUD_MARCH_JITTER_STRENGTH = 1.0;
 const float CLOUD_TEXTURE_ZOOM = 1.0;
 const float TEXTURE_RADIUS = 512.0;
 const float TEXTURE_RADIUS_RCP = 1.0 / TEXTURE_RADIUS;
-const int NUM_SAMPLE = 12;
+const int NUM_SAMPLE = 6;
 const int LIGHT_SAMPLE = 5; 
 const float LIGHT_ABSORPTION = 0.9;
 const float LIGHT_SAMPLE_SIZE = 1.0;
@@ -153,7 +153,11 @@ cloud_result rayMarchCloud(in sampler2D scloudTex, in sampler2D sdepth, in sampl
 		traveled += gotoBorder;
 	#endif
 
-	float sampleSize = (maxDist - traveled) / float(numSample);
+	float toTravel = (maxDist - traveled);
+
+	numSample *= 4.0 - 3.0 * CLOUD_HEIGHT / toTravel;
+
+	float sampleSize = toTravel / float(numSample);
 	vec3 unitSample = worldVec * sampleSize;
 	float tileJitter = getRandomFloat(sbluenoise, texcoord, frxu_size) * CLOUD_MARCH_JITTER_STRENGTH;
 
