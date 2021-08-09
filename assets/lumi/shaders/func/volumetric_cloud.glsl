@@ -30,7 +30,7 @@ const float CLOUD_MARCH_JITTER_STRENGTH = 1.0;
 const float CLOUD_TEXTURE_ZOOM = 1.0;
 const float TEXTURE_RADIUS = 512.0;
 const float TEXTURE_RADIUS_RCP = 1.0 / TEXTURE_RADIUS;
-const int NUM_SAMPLE = 48;
+const int NUM_SAMPLE = 12;
 const int LIGHT_SAMPLE = 5; 
 const float LIGHT_ABSORPTION = 0.9;
 const float LIGHT_SAMPLE_SIZE = 1.0;
@@ -94,7 +94,6 @@ cloud_result rayMarchCloud(in sampler2D scloudTex, in sampler2D sdepth, in sampl
 {
 	float rainFactor = frx_rainGradient() * 0.67 + frx_thunderGradient() * 0.33; // TODO: optimize
 	float depth = (texcoord == clamp(texcoord, 0.0, 1.0)) ? texture(sdepth, texcoord).r : 1.0;
-	float sampleSize = TEXTURE_RADIUS / float(numSample);
 	float maxDist;
 
 	cloud_result placeholder = cloud_result(0.0, 1.0, vec3(0.0));
@@ -110,26 +109,28 @@ cloud_result rayMarchCloud(in sampler2D scloudTex, in sampler2D sdepth, in sampl
 		#endif
 	}
 
-	vec3 unitSample = worldVec * sampleSize;
 	vec3 toLight = frx_skyLightVector() * LIGHT_SAMPLE_SIZE;
 
 	// Adapted from Sebastian Lague's code (technically not the same, but just in case his code was MIT Licensed)
 
-	float tileJitter = getRandomFloat(sbluenoise, texcoord, frxu_size) * CLOUD_MARCH_JITTER_STRENGTH;
-	float traveled = sampleSize * tileJitter;
+	float traveled = 0.0;
 
 	// Optimization block
 	#if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
+		vec3 currentWorldPos = vec3(0.0);
+
 		if (worldVec.y <= 0) {
 			return placeholder;
 		}
 
 		float gotoBottom = CLOUD_MIN_Y / worldVec.y;
-		vec3 currentWorldPos = worldVec * gotoBottom;/*frx_cameraPos()*/
 
+		maxDist = CLOUD_MAX_Y / worldVec.y;
+		currentWorldPos += worldVec * gotoBottom;
 		traveled += gotoBottom;
 	#else
 		vec3 currentWorldPos = frx_cameraPos();
+
 		float gotoBorder = 0.0;
 
 		if (currentWorldPos.y >= CLOUD_MAX_Y) {
@@ -138,18 +139,25 @@ cloud_result rayMarchCloud(in sampler2D scloudTex, in sampler2D sdepth, in sampl
 			}
 
 			gotoBorder = (currentWorldPos.y - CLOUD_MAX_Y) / -worldVec.y;
+			maxDist = (currentWorldPos.y - CLOUD_MIN_Y) / -worldVec.y;
 		} else if (currentWorldPos.y <= CLOUD_MIN_Y) {
 			if (worldVec.y <= 0) {
 				return placeholder;
 			}
 
 			gotoBorder = (CLOUD_MIN_Y - currentWorldPos.y) / worldVec.y;
+			maxDist = (CLOUD_MAX_Y - currentWorldPos.y) / worldVec.y;
 		}
 
 		currentWorldPos += worldVec * gotoBorder;
 		traveled += gotoBorder;
 	#endif
-	
+
+	float sampleSize = (maxDist - traveled) / float(numSample);
+	vec3 unitSample = worldVec * sampleSize;
+	float tileJitter = getRandomFloat(sbluenoise, texcoord, frxu_size) * CLOUD_MARCH_JITTER_STRENGTH;
+
+	traveled = sampleSize * tileJitter;
 	currentWorldPos += unitSample * tileJitter;
 
 	float lightEnergy = 0.0;
@@ -163,7 +171,7 @@ cloud_result rayMarchCloud(in sampler2D scloudTex, in sampler2D sdepth, in sampl
 	// vec3 firstDensePos = worldPos - worldVec * 0.1;
 
 	int i = 0;
-	while (traveled < maxDist && currentWorldPos.y >= CLOUD_MIN_Y && currentWorldPos.y <= CLOUD_MAX_Y && i < numSample) {
+	while (/*traveled < maxDist && currentWorldPos.y >= CLOUD_MIN_Y && currentWorldPos.y <= CLOUD_MAX_Y &&*/ i < numSample) {
 		i ++;
 		traveled += sampleSize;
 		currentWorldPos += unitSample;
