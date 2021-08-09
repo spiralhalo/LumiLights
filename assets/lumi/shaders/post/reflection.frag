@@ -3,6 +3,10 @@
 
 #define PASS_REFLECTION_PROFILE REFLECTION_PROFILE
 
+#ifdef REFLECT_CLOUDS
+	#define PASS_REFLECT_CLOUDS
+#endif
+
 #include lumi:shaders/post/common/reflection.glsl
 
 /*******************************************************

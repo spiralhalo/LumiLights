@@ -32,6 +32,11 @@
 				// 	nameKey: "config.lumi_lights.value.kaleidoskop",
 				// 	descriptionKey: "config.lumi_lights.help.kaleidoskop"
 				// },
+				reflection_on_hand: {
+					default: false,
+					nameKey: "config.lumi_lights.value.reflection_on_hand",
+					descriptionKey: "config.lumi_lights.help.reflection_on_hand"
+				},
 				rain_puddles: {
 					default: false,
 					nameKey: "config.lumi_lights.value.rain_puddles",

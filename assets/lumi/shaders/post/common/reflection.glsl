@@ -97,7 +97,7 @@ vec4 calcFallbackColor(in sampler2D sdepth, vec3 unitMarch_world, vec2 light)
 	float skyLightFactor = frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? (skyLight * skyLight) : SKYLESS_FACTOR;
 	vec3 sky = atmos_hdrSkyColorRadiance(unitMarch_world);
 
-#ifdef REFLECT_CLOUDS
+#ifdef PASS_REFLECT_CLOUDS
 	// PERF: optimize by roughness
 	// WIP: elaborate depth samplers
 	vec4 cloud = cloudColor(sdepth, sdepth, u_blue_noise, unitMarch_world, true);
