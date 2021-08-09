@@ -57,12 +57,15 @@ frx_FragmentData frx_createPipelineFragment()
 
 void frx_writePipelineFragment(in frx_FragmentData fragData)
 {
-	vec4 a = fragData.spriteColor * fragData.vertexColor;
-	
+	// no pitch black material allowed
+	fragData.spriteColor = max(fragData.spriteColor, vec4(0.004, 0.004, 0.004, 0.0));
+
 	// cutout_zero by default. remove if causing unwanted consequences.
 	if (fragData.spriteColor.a == 0.0) {
 		discard;
 	}
+
+	vec4 a = fragData.spriteColor * fragData.vertexColor;
 
 	if (pbr_f0 < 0.0) {
 		pbr_f0 = 1./256. + frx_luminance(a.rgb) * 0.04;
