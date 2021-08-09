@@ -36,6 +36,14 @@
 					nameKey: "config.lumi_lights.value.reflection_profile",
 					descriptionKey: "config.lumi_lights.help.reflection_profile"
 				},
+				sky_reflection_profile: {
+					default: "fancy",
+					choices: ["minimum", "fast", "fancy"],
+					enum: true,
+					prefix: "sky_reflection_profile_",
+					nameKey: "config.lumi_lights.value.sky_reflection_profile",
+					descriptionKey: "config.lumi_lights.help.sky_reflection_profile"
+				},
 				reflection_maximum_roughness_relative: {
 					default: 7,
 					min: 1,
@@ -47,11 +55,6 @@
 					default: true,
 					nameKey: "config.lumi_lights.value.reflection_on_hand",
 					descriptionKey: "config.lumi_lights.help.reflection_on_hand"
-				},
-				cloud_reflection: {
-					default: true,
-					nameKey: "config.lumi_lights.value.cloud_reflection",
-					descriptionKey: "config.lumi_lights.help.cloud_reflection"
 				},
 				cloud_rendering: {
 					default: "volumetric",

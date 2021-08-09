@@ -97,7 +97,7 @@ vec4 calcFallbackColor(in sampler2D sdepth, vec3 unitMarch_world, vec2 light)
 	float skyLightFactor = frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? (skyLight * skyLight) : SKYLESS_FACTOR;
 	vec3 sky = atmos_hdrSkyColorRadiance(unitMarch_world);
 
-#ifdef CLOUD_REFLECTION
+#ifdef REFLECT_CLOUDS
 	// PERF: optimize by roughness
 	// WIP: elaborate depth samplers
 	vec4 cloud = cloudColor(sdepth, sdepth, u_blue_noise, unitMarch_world, true);
@@ -110,6 +110,7 @@ vec4 calcFallbackColor(in sampler2D sdepth, vec3 unitMarch_world, vec2 light)
 	float occluder = 0.0;
 #endif
 
+#ifdef REFLECT_SUN
 	vec2 specular = celestSpecular(Rect(v_celest1, v_celest2, v_celest3), u_sun, u_moon, unitMarch_world);
 
 	specular *= (1. - occluder);
@@ -118,7 +119,12 @@ vec4 calcFallbackColor(in sampler2D sdepth, vec3 unitMarch_world, vec2 light)
 
 	sky += celestColor;
 
-	return vec4(sky * skyLightFactor * upFactor * aboveWaterFactor * 1.5, specular.x);
+	float celestBloom = specular.x;
+#else
+	float celestBloom = 0.0;
+#endif
+
+	return vec4(sky * skyLightFactor * upFactor * aboveWaterFactor * 1.5, celestBloom);
 }
 
 vec3 pbr_lightCalc(float roughness, vec3 f0, vec3 radiance, vec3 lightDir, vec3 viewDir, inout float bloom)
