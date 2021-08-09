@@ -96,12 +96,13 @@ cloud_result rayMarchCloud(in sampler2D scloudTex, in sampler2D sdepth, in sampl
 	float depth = (texcoord == clamp(texcoord, 0.0, 1.0)) ? texture(sdepth, texcoord).r : 1.0;
 	float maxDist;
 
-	cloud_result placeholder = cloud_result(0.0, 1.0, vec3(0.0));
+	const cloud_result nullcloud = cloud_result(0.0, 1.0, vec3(0.0));
+
 	if (depth == 1.0) {
 		maxDist = 1024.0;
 	} else {
 		#if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
-			return placeholder; // Some sort of culling
+			return nullcloud; // Some sort of culling
 		#else
 			vec4 viewPos = frx_inverseProjectionMatrix() * vec4(2.0 * texcoord - 1.0, 2.0 * depth - 1.0, 1.0);
 			viewPos.xyz /= viewPos.w;
@@ -120,7 +121,7 @@ cloud_result rayMarchCloud(in sampler2D scloudTex, in sampler2D sdepth, in sampl
 		vec3 currentWorldPos = vec3(0.0);
 
 		if (worldVec.y <= 0) {
-			return placeholder;
+			return nullcloud;
 		}
 
 		float gotoBottom = CLOUD_MIN_Y / worldVec.y;
@@ -135,14 +136,14 @@ cloud_result rayMarchCloud(in sampler2D scloudTex, in sampler2D sdepth, in sampl
 
 		if (currentWorldPos.y >= CLOUD_MAX_Y) {
 			if (worldVec.y >= 0) {
-				return placeholder;
+				return nullcloud;
 			}
 
 			gotoBorder = (currentWorldPos.y - CLOUD_MAX_Y) / -worldVec.y;
 			maxDist = (currentWorldPos.y - CLOUD_MIN_Y) / -worldVec.y;
 		} else if (currentWorldPos.y <= CLOUD_MIN_Y) {
 			if (worldVec.y <= 0) {
-				return placeholder;
+				return nullcloud;
 			}
 
 			gotoBorder = (CLOUD_MIN_Y - currentWorldPos.y) / worldVec.y;
@@ -154,8 +155,10 @@ cloud_result rayMarchCloud(in sampler2D scloudTex, in sampler2D sdepth, in sampl
 	#endif
 
 	float toTravel = (maxDist - traveled);
+	float maxN = 4.0 * numSample;
 
 	numSample *= 4.0 - 3.0 * CLOUD_HEIGHT / toTravel;
+	numSample = clamp(numSample, 0., maxN);
 
 	float sampleSize = toTravel / float(numSample);
 	vec3 unitSample = worldVec * sampleSize;
