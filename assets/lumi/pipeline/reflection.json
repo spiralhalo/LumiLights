@@ -259,6 +259,10 @@
 					"material_translucent",
 					"translucent_reflection_merge",
 
+					"translucent_depth",
+					"normal_translucent",
+					"normal_micro_translucent",
+
 					"emissive_reflection_translucent",
 
 					"lumi:textures/filter_pattern/bluenoise256.png",
