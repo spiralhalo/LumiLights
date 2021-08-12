@@ -35,7 +35,7 @@ const float smol_waveSpeed = 1;
 const float smol_scale = 1.5;
 const float smol_amplitude = 0.01;
 const float beeg_waveSpeed = 0.8;
-const float beeg_scale = 10.0;
+const float beeg_scale = 6.0;
 const float beeg_amplitude = 0.25;
 
 void processNormalMap(sampler2D slight, sampler2D sdepth, in vec3 normal, in vec3 tangent, bool isWater, inout vec3 microNormal, out float packedPuddle) {
@@ -60,7 +60,7 @@ void processNormalMap(sampler2D slight, sampler2D sdepth, in vec3 normal, in vec
 			vec3 samplePos = worldPos.xyz;
 			vec3 noisyNormal = ww_normals(normal, tangent, cross(normal, tangent), samplePos, waveSpeed, scale, amplitude, stretch, moveSpeed);
 
-			microNormal = noisyNormal;
+			microNormal = normalize(mix(noisyNormal, normal, pow(depth, 500.0)));
 		}
 		// else
 		// TODO: actually apply normal map or whatever
