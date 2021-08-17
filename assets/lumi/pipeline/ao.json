@@ -2,7 +2,7 @@
 	programs:[
 		{
 			name: "ssao",
-			vertexSource: "lumi:shaders/post/simple.vert",
+			vertexSource: "lumi:shaders/post/ssao.vert",
 			fragmentSource: "lumi:shaders/post/ssao.frag",
 			samplers: [
 				"u_normal",

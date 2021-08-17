@@ -8,9 +8,23 @@
  * https://gist.github.com/transitive-bullshit/6770346
  *******************************************************/
 
-// 5 for each is smoother but this setup has double the performance
-#define NUM_SAMPLE_DIRECTIONS 3
-#define NUM_SAMPLE_STEPS	  3
+#ifdef VERTEX_SHADER
+
+const float TWO_PI = 2.0 * PI;
+
+mat2 calcDeltaRotator(int nDirections) {
+	float theta = TWO_PI / float(nDirections);
+	float cosTheta = cos(theta);
+	float sinTheta = sin(theta);
+	mat2 deltaRotator = mat2(
+		cosTheta, -sinTheta,
+		sinTheta, cosTheta
+	);
+
+	return deltaRotator;
+}
+
+#else
 
 vec3 coords_view(vec2 uv, mat4 inv_projection, in sampler2D target)
 {
@@ -26,19 +40,10 @@ vec3 coords_normal(vec2 uv, mat3 normal_mat, in sampler2D target)
 	return normal_mat * (2.0 * texture(target, uv).xyz - 1.0);
 }
 
-const float TWO_PI = 2.0 * PI;
-const float theta = TWO_PI / float(NUM_SAMPLE_DIRECTIONS);
-const float cosTheta = cos(theta);
-const float sinTheta = sin(theta);
-const mat2 deltaRotationMatrix = mat2(
-	cosTheta, -sinTheta,
-	sinTheta, cosTheta
-);
-
 vec4 calcSSAO(
 	in sampler2D snormal, in sampler2D sdepth, in sampler2D slight, in sampler2D scolor, in sampler2D sbluenoise,
-	mat3 normal_mat, mat4 inv_projection, vec2 tex_size, vec2 uv,
-	float radius_screen, float attenuation_radius, float angle_bias, float intensity,
+	mat3 normal_mat, mat4 inv_projection, mat2 deltaRotator, vec2 tex_size, vec2 uv,
+	int nSteps, int nDirections, float radius_screen, float attenuation_radius, float angle_bias, float intensity,
 	bool useAttenuation, bool glowOcclusion)
 {
 	vec3 origin_view = coords_view(uv, inv_projection, sdepth);
@@ -47,7 +52,7 @@ vec4 calcSSAO(
 	float attenuation_rad2 = attenuation_radius * attenuation_radius;
 	float attenuation2_rad2 = attenuation_radius * attenuation_radius * 4.0;
 
-	vec2 deltaUV = vec2(1.0, 0.0) * (radius_view / (float(NUM_SAMPLE_DIRECTIONS * NUM_SAMPLE_STEPS) + 1.0));
+	vec2 deltaUV = vec2(1.0, 0.0) * (radius_view / (float(nDirections * nSteps) + 1.0));
 
 	// PERF: Use noise texture?
 	vec3 sampleNoise = normalize(2.0 * getRandomVec(sbluenoise, uv, tex_size) - 1.0);
@@ -62,13 +67,13 @@ vec4 calcSSAO(
 	float occlusion = 0.0;
 	vec3 emission = vec3(0.0);
 
-	for (int i = 0; i < NUM_SAMPLE_DIRECTIONS; ++i) {
-		deltaUV = deltaRotationMatrix * deltaUV;
+	for (int i = 0; i < nDirections; ++i) {
+		deltaUV = deltaRotator * deltaUV;
 
 		vec2 sampleDirUV = deltaUV;
 		float oldAngle   = angle_bias;
 
-		for (int j = 0; j < NUM_SAMPLE_STEPS; ++j) {
+		for (int j = 0; j < nSteps; ++j) {
 			vec2 sample_uv	  = uv + (jitter + float(j)) * sampleDirUV;
 			vec3 sample_view	= coords_view(sample_uv, inv_projection, sdepth);
 			vec3 sampleDir_view = (sample_view - origin_view);
@@ -97,7 +102,7 @@ vec4 calcSSAO(
 		}
 	}
 
-	float averager = 1.0 / float(NUM_SAMPLE_DIRECTIONS);
+	float averager = 1.0 / float(nDirections);
 	float dampener = 1.0 - frx_luminance(min(emission, vec3(1.0)));
 
 	emission *= averager;
@@ -107,3 +112,5 @@ vec4 calcSSAO(
 
 	return vec4(emission, occlusion);
 }
+
+#endif

@@ -19,9 +19,13 @@ uniform sampler2D u_light;
 uniform sampler2D u_color;
 uniform sampler2D u_blue_noise;
 
+in mat2 v_deltaRotator;
+
 out vec4 fragColor;
 
 #ifdef SSAO_ENABLED
+const int STEPS = clamp(SSAO_NUM_STEPS, 1, 10);
+const int DIRECTIONS = clamp(SSAO_NUM_DIRECTIONS, 1, 10);
 const float RADIUS = SSAO_RADIUS;
 const float BIAS = SSAO_BIAS;
 const float INTENSITY = SSAO_INTENSITY;
@@ -48,8 +52,8 @@ void main()
 	} else {
 		fragColor = calcSSAO(
 			u_normal, u_depth, u_light, u_color, u_blue_noise,
-			frx_normalModelMatrix(), frx_inverseProjectionMatrix(), frxu_size, 
-			v_texcoord, RADIUS, RADIUS * 0.5, BIAS, INTENSITY,
+			frx_normalModelMatrix(), frx_inverseProjectionMatrix(), v_deltaRotator, frxu_size, 
+			v_texcoord, STEPS, DIRECTIONS, RADIUS, RADIUS * 0.5, BIAS, INTENSITY,
 			useAttenuation, glowOcclusion);
 	}
 #else

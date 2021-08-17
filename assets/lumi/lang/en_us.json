@@ -70,6 +70,10 @@
 	"config.lumi_lights.help.water_caustics": "Emulate water caustics",
 
 	"config.lumi_lights.category.ssao": "SSAO",
+	"config.lumi_lights.value.ssao_num_steps": "Precision",
+	"config.lumi_lights.help.ssao_num_steps": "Number of sampling steps, affects precision.;(HIGH performance impact)",
+	"config.lumi_lights.value.ssao_num_directions": "Quality",
+	"config.lumi_lights.help.ssao_num_directions": "Number of sampling directions, affects quality.;(HIGH performance impact)",
 	"config.lumi_lights.value.ssao_radius": "Radius",
 	"config.lumi_lights.help.ssao_radius": "Radius of SSAO in blocks",
 	"config.lumi_lights.value.ssao_bias": "Angle Bias",
