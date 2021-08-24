@@ -264,6 +264,7 @@
 					"normal_micro_translucent",
 
 					"emissive_reflection_translucent",
+					"refraction_uv",
 
 					"lumi:textures/filter_pattern/bluenoise256.png",
 					"exposure",

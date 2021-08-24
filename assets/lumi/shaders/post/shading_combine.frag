@@ -29,6 +29,7 @@ uniform sampler2D u_normal_translucent;
 uniform sampler2D u_normal_micro_translucent;
 
 uniform sampler2D u_emissive_reflection_translucent;
+uniform sampler2D u_refraction_uv;
 
 uniform sampler2D u_blue_noise;
 
@@ -36,8 +37,6 @@ in vec2 v_invSize;
 
 out vec4[2] fragColor;
 
-const float REFRACTION_MIN = 1.0;
-const float REFRACTION_RANGE = 99.0;
 const float BLOOM_ALPHA_ADD = 1.0;
 
 vec4 hdr_combine(sampler2D a, sampler2D matA, sampler2D b, vec2 uv)
@@ -65,19 +64,8 @@ void main()
 	float depth_solid = texture(u_solid_depth, v_texcoord).r;
 	float depth_translucent = texture(u_translucent_depth, v_texcoord).r;
 
-	vec2 uvSolid = v_texcoord;
-
-	// TODO: move to normal preprocess stage, probably
-	if (depth_translucent < depth_solid) {
-		vec3 normal_translucent = normalize(texture(u_normal_translucent, v_texcoord).rgb * 2.0 - 1.0);
-		vec3 microNormal_translucent = normalize(texture(u_normal_micro_translucent, v_texcoord).rgb * 2.0 - 1.0);
-
-		float ldepth_range = ldepth(depth_solid) - ldepth(depth_translucent);
-		float divergence = 1.0 - dot(normal_translucent, microNormal_translucent);
-
-		uvSolid += vec2(REFRACTION_MIN + REFRACTION_RANGE * ldepth_range) * divergence * 0.5;
-		uvSolid = clamp(uvSolid, 0.0, 1.0);
-	}
+	vec2 uvSolid = v_texcoord + texture(u_refraction_uv, v_texcoord).r; //- 0.5;
+	uvSolid = clamp(uvSolid, 0.0, 1.0);
 
 	vec4 solid = hdr_combine(u_hdr_solid, u_material_solid, u_hdr_solid_swap, uvSolid);
 	vec4 translucent = hdr_combine(u_hdr_translucent, u_material_translucent, u_hdr_translucent_swap, v_texcoord);

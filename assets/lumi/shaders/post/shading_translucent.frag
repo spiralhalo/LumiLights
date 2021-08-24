@@ -24,6 +24,8 @@ uniform sampler2D u_alpha_translucent;
 uniform sampler2D u_solid_depth;
 uniform sampler2D u_light_solid;
 
+uniform sampler2D u_refraction_uv;
+
 out vec4[2] fragColor;
 
 void custom_sky(in vec3 modelPos, in float blindnessFactor, in bool maybeUnderwater, inout vec4 a, inout float bloom_out)
@@ -92,7 +94,10 @@ vec4 advancedTranslucentShading(float ec, out float bloom_out) {
 	bool isWater = bit_unpack(texture(u_misc_translucent, v_texcoord).z, 7) == 1.;
 
 	if (isWater && !frx_viewFlag(FRX_CAMERA_IN_WATER)) {
-		float solidDepth = ldepth(texture(u_solid_depth, v_texcoord).r);
+		vec2 uvSolid = v_texcoord + texture(u_refraction_uv, v_texcoord).r; //- 0.5;
+		uvSolid = clamp(uvSolid, 0.0, 1.0);
+
+		float solidDepth = ldepth(texture(u_solid_depth, uvSolid).r);
 		float transDepth = ldepth(texture(u_translucent_depth, v_texcoord).r);
 		float gelatinOpacity = l2_clampScale(0.0, 0.1, solidDepth - transDepth);
 		backColor.rgb = mix(backColor.rgb, frontColor.rgb, gelatinOpacity);

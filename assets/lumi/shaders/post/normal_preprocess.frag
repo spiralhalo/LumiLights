@@ -29,7 +29,7 @@ uniform sampler2D u_light_translucent;
 uniform sampler2D u_depth_translucent;
 uniform sampler2D u_misc_translucent;
 
-out vec4 fragColor[6];
+out vec4 fragColor[7];
 
 const float smol_waveSpeed = 1;
 const float smol_scale = 1.5;
@@ -38,7 +38,10 @@ const float beeg_waveSpeed = 0.8;
 const float beeg_scale = 6.0;
 const float beeg_amplitude = 0.25;
 
-void processNormalMap(sampler2D slight, sampler2D sdepth, inout vec3 normal, inout vec3 tangent, bool isWater, inout vec3 microNormal, out float packedPuddle)
+const float REFRACTION_MIN = 1.0;
+const float REFRACTION_RANGE = 99.0;
+
+void processNormalMap(sampler2D slight, in float depth, inout vec3 normal, inout vec3 tangent, bool isWater, inout vec3 microNormal, out float packedPuddle)
 {
 	normal = normalize(normal);
 	microNormal = normalize(microNormal);
@@ -46,7 +49,6 @@ void processNormalMap(sampler2D slight, sampler2D sdepth, inout vec3 normal, ino
 	// normal map processing requires tangent to be set
 	bool useNormalMap = dot(tangent, tangent) > 0.1;
 
-	float depth = texture(sdepth, v_texcoord).r;
 	vec4 worldPos = frx_inverseViewProjectionMatrix() * vec4(2. * v_texcoord - 1., 2. * depth - 1., 1.);
 	worldPos.xyz /= worldPos.w;
 	worldPos.xyz += frx_cameraPos();
@@ -91,8 +93,27 @@ void main()
 
 	float solidPackedPuddle, translucentPackedPuddle;
 
-	processNormalMap(u_light_solid, u_depth_solid, solidNormal, solidTangent, false, solidMicroNormal, solidPackedPuddle);
-	processNormalMap(u_light_translucent, u_depth_translucent, translucentNormal, translucentTangent, translucentIsWater, translucentMicroNormal, translucentPackedPuddle);
+	float solidDepth = texture(u_depth_solid, v_texcoord).r;
+	float translucentDepth = texture(u_depth_translucent, v_texcoord).r;
+
+	processNormalMap(u_light_solid, solidDepth, solidNormal, solidTangent, false, solidMicroNormal, solidPackedPuddle);
+	processNormalMap(u_light_translucent, translucentDepth, translucentNormal, translucentTangent, translucentIsWater, translucentMicroNormal, translucentPackedPuddle);
+
+	float refraction_uv = 0.0; //0.5;
+
+	if (translucentDepth < solidDepth) {
+		float ldepth_range = ldepth(solidDepth) - ldepth(translucentDepth);
+		float divergence = 1.0 - dot(translucentNormal, translucentMicroNormal);
+
+		refraction_uv = /*clamp(*/(REFRACTION_MIN + REFRACTION_RANGE * ldepth_range) * divergence/*, 0.0, 1.0)*/ * 0.5;
+
+		// This just makes it discontinuous
+		// if (dot(translucentTangent, translucentTangent) > 0.1) {
+		// 	refraction_uv *= sign(dot(translucentTangent, translucentMicroNormal));
+		// }
+
+		// refraction_uv += 0.5;
+	}
 
 	fragColor[0] = vec4(0.5 + 0.5 * solidNormal, 1.0);
 	fragColor[1] = vec4(0.5 + 0.5 * solidTangent, 1.0);
@@ -100,4 +121,5 @@ void main()
 	fragColor[3] = vec4(0.5 + 0.5 * translucentNormal, 1.0);
 	fragColor[4] = vec4(0.5 + 0.5 * translucentTangent, 1.0);
 	fragColor[5] = vec4(0.5 + 0.5 * translucentMicroNormal, translucentPackedPuddle);
+	fragColor[6] = vec4(refraction_uv, 0.0, 0.0, 1.0);
 }
