@@ -254,7 +254,7 @@ rt_ColorDepthBloom work_on_pair(
 	vec4 material    = texture(reflector_material, v_texcoord);
 	float roughness  = material.x == 0.0 ? 1.0 : min(1.0, 1.0203 * material.x - 0.01);
 	vec3 light       = texture(reflector_light, v_texcoord).xyz;
-	vec3 worldNormal = sample_worldNormal(v_texcoord, reflector_micro_normal);
+	vec3 worldNormal = normalize(sample_worldNormal(v_texcoord, reflector_micro_normal));
 
 	bool isUnmanaged = roughness == 1.0;
 
@@ -264,37 +264,40 @@ rt_ColorDepthBloom work_on_pair(
 
 	if (isUnmanaged) return rt_ColorDepthBloom(vec4(0.0), 1.0, 0.0); // unmanaged draw
 
-	vec3 ray_view	= uv2view(v_texcoord, frx_inverseProjectionMatrix(), reflector_depth);
-	vec3 ray_world   = view2world(ray_view, frx_inverseViewMatrix());
-
 #ifdef RAIN_PUDDLES
 	float packedPuddle = texture(reflector_micro_normal, v_texcoord).a;
-
 	puddle_processRoughness(roughness, packedPuddle);
 #endif
 
-	vec3 unit_view = normalize(-ray_view);
-	
-	vec3 rJitter   = getRandomVec(u_blue_noise, v_texcoord, frxu_size) * 2.0 - 1.0;
-	vec3 normal	= frx_normalModelMatrix() * normalize(worldNormal);
-	float roughness2 = roughness * roughness;
-	// if (ray_view.y < normal.y) return noreturn;
-	vec3 reg_f0	 = vec3(material.z);
-	vec3 f0		 = mix(reg_f0, albedo, material.y);
+	vec3 jitterRaw = getRandomVec(u_blue_noise, v_texcoord, frxu_size) * 2.0 - 1.0;
+	vec3 jitterPrc = jitterRaw * JITTER_STRENGTH * roughness * roughness;
 
-	vec3 unitMarch_view = normalize(reflect(-unit_view, normal) + mix(vec3(0.0, 0.0, 0.0), rJitter * JITTER_STRENGTH, roughness2));
+	vec3 ray_view  = uv2view(v_texcoord, frx_inverseProjectionMatrix(), reflector_depth);
+	vec3 unit_view = normalize(-ray_view);
+	vec3 normal	   = frx_normalModelMatrix() * worldNormal;
+	vec3 unitMarch_view = normalize(reflect(-unit_view, normal) + jitterPrc);
 
 	#if PASS_REFLECTION_PROFILE != REFLECTION_PROFILE_NONE
 	rt_Result result;
 
-	vec3 rawNormal_view   = frx_normalModelMatrix() * sample_worldNormal(v_texcoord, reflector_normal);
+	// Impossible Ray Resultion:
+	vec3 rawNormal = sample_worldNormal(v_texcoord, reflector_normal);
+	vec3 rawNormal_view = frx_normalModelMatrix() * rawNormal;
 	bool impossibleRay	= dot(rawNormal_view, unitMarch_view) < 0;
+
+	if (impossibleRay) {
+		worldNormal = rawNormal;
+		normal = rawNormal_view;
+		unitMarch_view = normalize(reflect(-unit_view, normal) + jitterPrc);
+	}
+
+	// Roughness Threshold Resolution: 
 	bool exceedsThreshold = roughness > REFLECTION_MAXIMUM_ROUGHNESS;
 
-	if (impossibleRay || exceedsThreshold) {
+	if (exceedsThreshold) {
 		result.hit = false;
 	} else {
-		result = rt_reflection(ray_view + unitMarch_view * rJitter.x * HITBOX, unit_view, normal, unitMarch_view, frx_normalModelMatrix(), frx_projectionMatrix(), frx_inverseProjectionMatrix(), reflected_depth, reflected_normal);
+		result = rt_reflection(ray_view + unitMarch_view * jitterRaw.x * HITBOX, unit_view, normal, unitMarch_view, frx_normalModelMatrix(), frx_projectionMatrix(), frx_inverseProjectionMatrix(), reflected_depth, reflected_normal);
 	}
 	#endif
 
@@ -345,6 +348,9 @@ rt_ColorDepthBloom work_on_pair(
 	vec4 reflected_final = mix(reflectedColor, fallbackColor, fallbackMix);
 	vec3 unit_world = unit_view * frx_normalModelMatrix();
 	float sunBloom = calcdFallback.a * fallbackMix * (1.0 - roughness);
+
+	vec3 reg_f0	= vec3(material.z);
+	vec3 f0		= mix(reg_f0, albedo, material.y);
 
 	f0 += (vec3(1.0) - f0) * sunBloom * 0.5; // magic hax
 
