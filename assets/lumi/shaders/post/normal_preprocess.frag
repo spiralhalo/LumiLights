@@ -38,7 +38,11 @@ const float beeg_waveSpeed = 0.8;
 const float beeg_scale = 6.0;
 const float beeg_amplitude = 0.25;
 
-void processNormalMap(sampler2D slight, sampler2D sdepth, in vec3 normal, in vec3 tangent, bool isWater, inout vec3 microNormal, out float packedPuddle) {
+void processNormalMap(sampler2D slight, sampler2D sdepth, inout vec3 normal, inout vec3 tangent, bool isWater, inout vec3 microNormal, out float packedPuddle)
+{
+	normal = normalize(normal);
+	microNormal = normalize(microNormal);
+
 	// normal map processing requires tangent to be set
 	bool useNormalMap = dot(tangent, tangent) > 0.1;
 
@@ -48,6 +52,8 @@ void processNormalMap(sampler2D slight, sampler2D sdepth, in vec3 normal, in vec
 	worldPos.xyz += frx_cameraPos();
 
 	if (useNormalMap) {
+		tangent = normalize(tangent);
+
 		if (isWater) {
 			/* WAVY NORMALS */
 			// wave movement doesn't necessarily follow flow direction for the time being
