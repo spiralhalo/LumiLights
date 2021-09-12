@@ -23,8 +23,8 @@
 		{
 			name: "refraction_uv",
 			lod: 0,
-			internalFormat: "GL_R16",
-			pixelFormat: "GL_R",
+			internalFormat: "GL_RG16",
+			pixelFormat: "GL_RG",
 			pixelDataType: "UNSIGNED_BYTE",
 			target: "TEXTURE_2D",
 			texParams: [

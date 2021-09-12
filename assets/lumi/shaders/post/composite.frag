@@ -15,18 +15,23 @@
 
 uniform sampler2D u_combine_solid;
 uniform sampler2D u_solid_depth;
+
 uniform sampler2D u_combine_translucent;
 uniform sampler2D u_translucent_depth;
+
 uniform sampler2D u_particles;
 uniform sampler2D u_particles_depth;
+
 uniform sampler2D u_clouds;
 uniform sampler2D u_clouds_depth;
+
 uniform sampler2D u_weather;
 uniform sampler2D u_weather_depth;
 
 uniform sampler2D u_emissive_solid;
 uniform sampler2D u_emissive_transparent;
 uniform sampler2D u_light_particles;
+uniform sampler2D u_refraction_uv;
 
 in vec2 v_invSize;
 
@@ -68,21 +73,43 @@ vec3 blend(vec3 dst, vec4 src)
 	return (dst * (1.0 - src.a)) + src.rgb * src.a;
 }
 
+void computeDistorted(in sampler2D sdepth, in sampler2D scolor, in vec2 origUV, in float translucentDepth, out float depth, out vec4 color) {
+	depth = texture(sdepth, origUV).r;
+	vec2 trueUV = origUV;
+
+	if (translucentDepth <= depth) {
+		trueUV = origUV + (texture(u_refraction_uv, origUV).rg * 2.0 - 1.0);
+		depth = texture(sdepth, trueUV).r;
+
+		if (translucentDepth > depth) {
+			// impossible refraction. abort!
+			trueUV = origUV;
+			depth = texture(sdepth, trueUV).r;
+		}
+	}
+
+	color = texture(scolor, trueUV);
+}
+
 // arbitrary chosen depth threshold
 #define blurDepthThreshold 0.01
 void main()
 {
-	float depth_solid = texture(u_solid_depth, v_texcoord).r;
-	vec4 solid = texture(u_combine_solid, v_texcoord);
-
 	float depth_translucent = texture(u_translucent_depth, v_texcoord).r;
 	vec4 translucent = texture(u_combine_translucent, v_texcoord);
 
-	float depth_particles = texture(u_particles_depth, v_texcoord).r;
-	vec4 particles = texture(u_particles, v_texcoord);
+	float depth_solid;// = texture(u_solid_depth, v_texcoord).r;
+	vec4 solid;// texture(u_combine_solid, v_texcoord);
 
-	float depth_clouds = texture(u_clouds_depth, v_texcoord).r;
-	vec4 clouds = texture(u_clouds, v_texcoord);
+	float depth_particles;// = texture(u_particles_depth, v_texcoord).r;
+	vec4 particles;// = texture(u_particles, v_texcoord);
+
+	float depth_clouds;// = texture(u_clouds_depth, v_texcoord).r;
+	vec4 clouds;// = texture(u_clouds, v_texcoord);
+
+	computeDistorted(u_solid_depth,	u_combine_solid, v_texcoord, depth_translucent, depth_solid, solid);
+	computeDistorted(u_particles_depth,	u_particles, v_texcoord, depth_translucent, depth_particles, particles);
+	computeDistorted(u_clouds_depth,	u_clouds, v_texcoord, depth_translucent, depth_clouds, clouds);
 
 	float depth_weather = texture(u_weather_depth, v_texcoord).r;
 	vec4 weather = texture(u_weather, v_texcoord);

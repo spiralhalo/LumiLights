@@ -29,7 +29,6 @@ uniform sampler2D u_normal_translucent;
 uniform sampler2D u_normal_micro_translucent;
 
 uniform sampler2D u_emissive_reflection_translucent;
-uniform sampler2D u_refraction_uv;
 
 uniform sampler2D u_blue_noise;
 
@@ -64,10 +63,7 @@ void main()
 	float depth_solid = texture(u_solid_depth, v_texcoord).r;
 	float depth_translucent = texture(u_translucent_depth, v_texcoord).r;
 
-	vec2 uvSolid = v_texcoord + texture(u_refraction_uv, v_texcoord).r; //- 0.5;
-	uvSolid = clamp(uvSolid, 0.0, 1.0);
-
-	vec4 solid = hdr_combine(u_hdr_solid, u_material_solid, u_hdr_solid_swap, uvSolid);
+	vec4 solid = hdr_combine(u_hdr_solid, u_material_solid, u_hdr_solid_swap, v_texcoord);
 	vec4 translucent = hdr_combine(u_hdr_translucent, u_material_translucent, u_hdr_translucent_swap, v_texcoord);
 
 	vec2 reflectionUV = v_texcoord;
@@ -81,7 +77,7 @@ void main()
 
 	translucent.a = min(1.0, translucent.a + BLOOM_ALPHA_ADD * reflectionBloom * reflectionLuminance);
 
-	depth_solid = texture(u_solid_depth, uvSolid).r;
+	depth_solid = texture(u_solid_depth, v_texcoord).r;
 	bool tonemapTheSky = frx_worldFlag(FRX_WORLD_IS_NETHER);
 
 #if SKY_MODE == SKY_MODE_LUMI

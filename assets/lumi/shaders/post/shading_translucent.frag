@@ -94,7 +94,8 @@ vec4 advancedTranslucentShading(float ec, out float bloom_out) {
 	bool isWater = bit_unpack(texture(u_misc_translucent, v_texcoord).z, 7) == 1.;
 
 	if (isWater && !frx_viewFlag(FRX_CAMERA_IN_WATER)) {
-		vec2 uvSolid = v_texcoord + texture(u_refraction_uv, v_texcoord).r; //- 0.5;
+		// TODO: use same algorithm as the one used in composite
+		vec2 uvSolid = v_texcoord + (texture(u_refraction_uv, v_texcoord).rg * 2.0 - 1.0);
 		uvSolid = clamp(uvSolid, 0.0, 1.0);
 
 		float solidDepth = ldepth(texture(u_solid_depth, uvSolid).r);

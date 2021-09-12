@@ -38,8 +38,7 @@ const float beeg_waveSpeed = 0.8;
 const float beeg_scale = 6.0;
 const float beeg_amplitude = 0.25;
 
-const float REFRACTION_MIN = 1.0;
-const float REFRACTION_RANGE = 99.0;
+const float REFRACTION_STR = .1;
 
 void processNormalMap(sampler2D slight, in float depth, inout vec3 normal, inout vec3 tangent, bool isWater, inout vec3 microNormal, out float packedPuddle)
 {
@@ -99,20 +98,16 @@ void main()
 	processNormalMap(u_light_solid, solidDepth, solidNormal, solidTangent, false, solidMicroNormal, solidPackedPuddle);
 	processNormalMap(u_light_translucent, translucentDepth, translucentNormal, translucentTangent, translucentIsWater, translucentMicroNormal, translucentPackedPuddle);
 
-	float refraction_uv = 0.0; //0.5;
+	vec2 refraction_uv = vec2(0.5);
 
 	if (translucentDepth < solidDepth) {
 		float ldepth_range = ldepth(solidDepth) - ldepth(translucentDepth);
-		float divergence = 1.0 - dot(translucentNormal, translucentMicroNormal);
 
-		refraction_uv = /*clamp(*/(REFRACTION_MIN + REFRACTION_RANGE * ldepth_range) * divergence/*, 0.0, 1.0)*/ * 0.5;
+		vec3 viewVNormal = frx_normalModelMatrix() * translucentNormal;
+		vec3 viewMNormal = frx_normalModelMatrix() * translucentMicroNormal;
 
-		// This just makes it discontinuous
-		// if (dot(translucentTangent, translucentTangent) > 0.1) {
-		// 	refraction_uv *= sign(dot(translucentTangent, translucentMicroNormal));
-		// }
-
-		// refraction_uv += 0.5;
+		refraction_uv = REFRACTION_STR * l2_clampScale(0.0, 0.005, ldepth_range) * (viewMNormal.xy - viewVNormal.xy);
+		refraction_uv = clamp(refraction_uv, -1.0, 1.0) * 0.5 + 0.5;
 	}
 
 	fragColor[0] = vec4(0.5 + 0.5 * solidNormal, 1.0);
@@ -121,5 +116,5 @@ void main()
 	fragColor[3] = vec4(0.5 + 0.5 * translucentNormal, 1.0);
 	fragColor[4] = vec4(0.5 + 0.5 * translucentTangent, 1.0);
 	fragColor[5] = vec4(0.5 + 0.5 * translucentMicroNormal, translucentPackedPuddle);
-	fragColor[6] = vec4(refraction_uv, 0.0, 0.0, 1.0);
+	fragColor[6] = vec4(refraction_uv, 0.0, 1.0);
 }
