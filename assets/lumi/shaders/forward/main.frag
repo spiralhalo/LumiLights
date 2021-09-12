@@ -104,7 +104,7 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
 		#elif WATER_COLOR == WATER_COLOR_NO_COLOR
 			a.rgb = vec3(0.0);
 			fragData.spriteColor.a = 0.2;
-		#else
+		#elif WATER_COLOR == WATER_COLOR_NATURAL_BLUE
 			a.rb *= fragData.vertexColor.rb;
 			float blue = fragData.vertexColor.b * fragData.vertexColor.b;
 			a.rgb += blue * 0.25;

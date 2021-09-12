@@ -50,16 +50,16 @@
 					descriptionKey: "config.lumi_lights.help.sky_mode"
 				},
 				lumi_sky_color: {
-					default: "muted_azure",
-					choices: ["muted_azure", "bright_cyan", "deep_cerulean"],
+					default: "natural_azure",
+					choices: ["natural_azure", "bright_cyan", "deep_cerulean"],
 					enum: true,
 					prefix: "lumi_sky_color_",
 					nameKey: "config.lumi_lights.value.lumi_sky_color",
 					descriptionKey: "config.lumi_lights.help.lumi_sky_color"
 				},
 				water_color: {
-					default: "muted",
-					choices: ["muted", "vanilla", "no_texture", "no_color"],
+					default: "natural",
+					choices: ["natural_blue", "vanilla", "no_texture", "no_color"],
 					enum: true,
 					prefix: "water_color_",
 					nameKey: "config.lumi_lights.value.water_color",
