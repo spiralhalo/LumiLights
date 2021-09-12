@@ -77,6 +77,7 @@ void computeDistorted(in sampler2D sdepth, in sampler2D scolor, in vec2 origUV, 
 	depth = texture(sdepth, origUV).r;
 	vec2 trueUV = origUV;
 
+#ifdef REFRACTION_EFFECT
 	if (translucentDepth <= depth) {
 		trueUV = origUV + (texture(u_refraction_uv, origUV).rg * 2.0 - 1.0);
 		depth = texture(sdepth, trueUV).r;
@@ -87,6 +88,7 @@ void computeDistorted(in sampler2D sdepth, in sampler2D scolor, in vec2 origUV, 
 			depth = texture(sdepth, trueUV).r;
 		}
 	}
+#endif
 
 	color = texture(scolor, trueUV);
 }

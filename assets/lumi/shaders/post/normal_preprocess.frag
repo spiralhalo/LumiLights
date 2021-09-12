@@ -100,6 +100,7 @@ void main()
 
 	vec2 refraction_uv = vec2(0.5);
 
+#ifdef REFRACTION_EFFECT
 	if (translucentDepth < solidDepth) {
 		float ldepth_range = ldepth(solidDepth) - ldepth(translucentDepth);
 
@@ -109,6 +110,7 @@ void main()
 		refraction_uv = REFRACTION_STR * l2_clampScale(0.0, 0.005, ldepth_range) * (viewMNormal.xy - viewVNormal.xy);
 		refraction_uv = clamp(refraction_uv, -1.0, 1.0) * 0.5 + 0.5;
 	}
+#endif
 
 	fragColor[0] = vec4(0.5 + 0.5 * solidNormal, 1.0);
 	fragColor[1] = vec4(0.5 + 0.5 * solidTangent, 1.0);

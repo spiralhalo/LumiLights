@@ -4,30 +4,6 @@
 			includeToken: "lumi:performance_config",
 			categoryKey: "config.lumi_lights.category.performance",
 			options: {
-				antialiasing: {
-						default: "taa",
-						choices: ["none", "taa", "taa_blurry"],
-						enum: true,
-						prefix: "antialiasing_",
-						nameKey: "config.lumi_lights.value.antialiasing",
-						descriptionKey: "config.lumi_lights.help.antialiasing"
-				},
-				ambient_occlusion: {
-					default: "ssao",
-					choices: ["no_ao", "vanilla", "vanilla_and_ssao", "pure_ssao"],
-					enum: true,
-					prefix: "ambient_occlusion_",
-					nameKey: "config.lumi_lights.value.ambient_occlusion",
-					descriptionKey: "config.lumi_lights.help.ambient_occlusion"
-				},
-				blocklight_specular_mode: {
-					default: "fancy",
-					choices: ["fast", "fancy"],
-					enum: true,
-					prefix: "blocklight_specular_mode_",
-					nameKey: "config.lumi_lights.value.blocklight_specular_mode",
-					descriptionKey: "config.lumi_lights.help.blocklight_specular_mode"
-				},
 				reflection_profile: {
 					default: "low",
 					choices: ["none", "low", "medium", "high", "extreme"],
@@ -59,6 +35,14 @@
 					nameKey: "config.lumi_lights.value.cloud_rendering",
 					descriptionKey: "config.lumi_lights.help.cloud_rendering"
 				},
+				ambient_occlusion: {
+					default: "ssao",
+					choices: ["no_ao", "vanilla", "vanilla_and_ssao", "pure_ssao"],
+					enum: true,
+					prefix: "ambient_occlusion_",
+					nameKey: "config.lumi_lights.value.ambient_occlusion",
+					descriptionKey: "config.lumi_lights.help.ambient_occlusion"
+				},
 				lightrays_mode: {
 					default: "volumetric",
 					choices: ["screenspace", "volumetric"],
@@ -88,9 +72,29 @@
 				},
 				water_caustics: {
 					default: true,
-					prefix: "water_caustics_",
 					nameKey: "config.lumi_lights.value.water_caustics",
 					descriptionKey: "config.lumi_lights.help.water_caustics"
+				},
+				refraction_effect: {
+					default: true,
+					nameKey: "config.lumi_lights.value.refraction_effect",
+					descriptionKey: "config.lumi_lights.help.refraction_effect"
+				},
+				blocklight_specular_mode: {
+					default: "fancy",
+					choices: ["fast", "fancy"],
+					enum: true,
+					prefix: "blocklight_specular_mode_",
+					nameKey: "config.lumi_lights.value.blocklight_specular_mode",
+					descriptionKey: "config.lumi_lights.help.blocklight_specular_mode"
+				},
+				antialiasing: {
+					default: "taa",
+					choices: ["none", "taa", "taa_blurry"],
+					enum: true,
+					prefix: "antialiasing_",
+					nameKey: "config.lumi_lights.value.antialiasing",
+					descriptionKey: "config.lumi_lights.help.antialiasing"
 				},
 			}
 		},
