@@ -43,7 +43,7 @@
 		},
 		{
 			name: "godrays_composite",
-			vertexSource: "lumi:shaders/post/simple.vert",
+			vertexSource: "lumi:shaders/post/hdr.vert",
 			fragmentSource: "lumi:shaders/post/godrays_composite.frag",
 			samplers: [
 				"u_depth",
@@ -110,7 +110,9 @@
 		{
 			name: "godrays",
 			lod: 3,
-			pixelFormat: "RGBA",
+			internalFormat: "GL_R16",
+			pixelFormat: "GL_R",
+			pixelDataType: "UNSIGNED_BYTE",
 			target: "TEXTURE_2D",
 			texParams: [
 				{name: "TEXTURE_MIN_FILTER", val: "LINEAR_MIPMAP_LINEAR"},

@@ -3,7 +3,6 @@
 #include frex:shaders/api/world.glsl
 #include frex:shaders/lib/math.glsl
 #include lumi:shaders/lib/util.glsl
-#include lumi:shaders/common/atmosphere.glsl
 
 /*******************************************************
  *  lumi:shaders/post/godrays.vert
@@ -23,8 +22,6 @@ void main()
 	basicFrameSetup();
 	v_invSize = 1. / frxu_size;
 
-	atmos_generateAtmosphereModel();
-
 	// TODO: rain factor but only above water
 	float dimensionFactor = frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? 1.0 : 0.0;
 	float blindnessFactor = frx_playerHasEffect(FRX_EFFECT_BLINDNESS) ? 0.0 : 1.0;
@@ -34,7 +31,6 @@ void main()
 	// float brightnessFactor = 1.0 - 0.3 * frx_viewBrightness(); // adjust because godrays are added after tonemap
 
 	v_godray_intensity = 1.0
-		* atmosv_celestIntensity
 		* dimensionFactor
 		* blindnessFactor
 		* notInVoidFactor

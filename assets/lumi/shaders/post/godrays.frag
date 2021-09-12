@@ -2,7 +2,6 @@
 
 #include frex:shaders/api/view.glsl
 #include frex:shaders/api/world.glsl
-#include lumi:shaders/common/atmosphere.glsl
 #include lumi:shaders/common/contrast.glsl
 #include lumi:shaders/common/userconfig.glsl
 #include lumi:shaders/func/tile_noise.glsl
@@ -39,7 +38,7 @@ void main() {
 	float min_depth = texture(u_depth, v_texcoord).r;
 	float depth_translucent = texture(u_depth_translucent, v_texcoord).r;
 
-	vec4 godBeam = vec4(0.0);
+	float godBeam = 0.0;
 	float ec = exposureCompensation();
 
 	if (v_godray_intensity > 0.0) {
@@ -63,8 +62,7 @@ void main() {
 			scatter *= max(0.0, dot(frx_cameraView(), frx_skyLightVector()));
 
 			// note: kinda buggy, flickers in some scenes
-			godBeam.a = godrays(16, u_depth, tileJitter, v_skylightpos, v_texcoord, frxu_size) * exposure * scatter;
-			godBeam.rgb = atmos_hdrCelestialRadiance();
+			godBeam = godrays(16, u_depth, tileJitter, v_skylightpos, v_texcoord, frxu_size) * exposure * scatter;
 		} else {
 			float yLight = texture(u_light_solid, v_texcoord).y;
 
@@ -73,15 +71,14 @@ void main() {
 			godBeam = celestialLightRays(u_shadow, worldPos.xyz, exposure, yLight, tileJitter, depth_translucent, min_depth);
 		}
 
-		godBeam = ldr_tonemap(godBeam) * v_godray_intensity;
+		godBeam *= v_godray_intensity;
 	}
 
 #ifdef EXPOSURE_DEBUG
 	if (abs(v_texcoord.x - ec) < v_invSize.x * 10.0 && abs(v_texcoord.y - 0.5) < v_invSize.x * 10.0 ) {
-		godBeam.g = 1.0;
-		godBeam.a = 1.0;
+		godBeam = 1.0;
 	}
 #endif
 
-	fragColor = godBeam;
+	fragColor = vec4(godBeam);
 }

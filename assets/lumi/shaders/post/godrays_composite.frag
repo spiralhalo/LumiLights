@@ -1,6 +1,9 @@
 #include lumi:shaders/post/common/header.glsl
 
 #include frex:shaders/api/view.glsl
+#include frex:shaders/lib/math.glsl
+#include lumi:shaders/common/atmosphere.glsl
+#include lumi:shaders/func/tonemap.glsl
 #include lumi:shaders/lib/util.glsl
 
 /*******************************************************
@@ -22,9 +25,25 @@ void main() {
 	// underwater rays are already kind of thin
 	float blurAdj = frx_viewFlag(FRX_CAMERA_IN_FLUID) ? 2.0 : 0.0;
 
+	vec3 scatterColor = vec3(1.0);
+	
+	if (frx_viewFlag(FRX_CAMERA_IN_WATER)) {
+		scatterColor = atmos_hdrFogColorRadiance(vec3(0.0, 0.0, 1.0));
+		scatterColor /= l2_max3(scatterColor);
+	}
+
+	float scatterLuminance = frx_luminance(scatterColor);
+
+	scatterColor = scatterLuminance == 0.0 ? vec3(1.0) : scatterColor / scatterLuminance;
+
+	vec3 godraysRadiance = atmos_hdrCelestialRadiance() * scatterColor;
+
 	float d = texture(u_depth, v_texcoord).r;
 	vec4 a = texture(u_color, v_texcoord);
 	vec4 b = textureLod(u_godrays, v_texcoord, (1.0 - ldepth(d)) * (3. - blurAdj));
+
+	b.a = b.r;
+	b.rgb = ldr_tonemap3(godraysRadiance);
 
 	// vec3 aa = hdr_fromGamma(a.rgb);
 	// vec3 bb = hdr_fromGamma(b.rgb);

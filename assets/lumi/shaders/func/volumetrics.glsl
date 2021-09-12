@@ -13,7 +13,7 @@
  *  published by the Free Software Foundation, Inc.
  *******************************************************/
 
-vec4 celestialLightRays(sampler2DArrayShadow sshadow, vec3 modelPos, float exposure, float yLightmap, float tileJitter, float translucentDepth, float depth)
+float celestialLightRays(sampler2DArrayShadow sshadow, vec3 modelPos, float exposure, float yLightmap, float tileJitter, float translucentDepth, float depth)
 {
 	bool doUnderwaterRays = frx_viewFlag(FRX_CAMERA_IN_WATER) && translucentDepth >= depth && frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT);
 	vec3 unit = normalize(modelPos);
@@ -36,7 +36,7 @@ vec4 celestialLightRays(sampler2DArrayShadow sshadow, vec3 modelPos, float expos
 	}
 
 	if (scatter <= 0.0) {
-		return vec4(0.0);
+		return 0.0;
 	}
 
 	float maxDist = length(modelPos);
@@ -79,16 +79,5 @@ vec4 celestialLightRays(sampler2DArrayShadow sshadow, vec3 modelPos, float expos
 
 	power = power / float(maxSteps) * scatter * basePower;
 
-	vec3 scatterColor = vec3(1.0);
-	
-	if (doUnderwaterRays) {
-		scatterColor = atmos_hdrFogColorRadiance(unit);
-		scatterColor /= l2_max3(scatterColor);
-	}
-
-	float scatterLuminance = frx_luminance(scatterColor);
-
-	scatterColor = scatterLuminance == 0.0 ? vec3(1.0) : scatterColor / scatterLuminance;
-
-	return vec4(atmos_hdrCelestialRadiance() * scatterColor, power);
+	return power;
 }
