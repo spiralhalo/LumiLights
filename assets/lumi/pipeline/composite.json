@@ -95,6 +95,7 @@
 		},
 		{
 			name: "exposure",
+			size: 4,
 			lod: 2,
 			internalFormat: "GL_R32F", // exponential smoothing is a serious business >B(
 			pixelFormat: "GL_RED",
