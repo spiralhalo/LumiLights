@@ -26,7 +26,7 @@ void main() {
 	float blurAdj = frx_viewFlag(FRX_CAMERA_IN_FLUID) ? 2.0 : 0.0;
 
 	vec3 scatterColor = vec3(1.0);
-	
+
 	if (frx_viewFlag(FRX_CAMERA_IN_WATER)) {
 		scatterColor = atmos_hdrFogColorRadiance(vec3(0.0, 0.0, 1.0));
 		scatterColor /= l2_max3(scatterColor);
@@ -37,6 +37,11 @@ void main() {
 	scatterColor = scatterLuminance == 0.0 ? vec3(1.0) : scatterColor / scatterLuminance;
 
 	vec3 godraysRadiance = atmos_hdrCelestialRadiance() * scatterColor;
+
+	// moonlight is too bright because exposure is low at night
+	// TODO: Do better than this
+	// TODO: might as well do godrays in HDR space
+	godraysRadiance *= 0.1 + atmosv_celestIntensity * 0.9;
 
 	float d = texture(u_depth, v_texcoord).r;
 	vec4 a = texture(u_color, v_texcoord);
