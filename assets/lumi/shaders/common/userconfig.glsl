@@ -1,4 +1,5 @@
 #include lumi:aesthetics_config
+#include lumi:sky_config
 #include lumi:clouds_config
 #include lumi:debug_config
 #include lumi:experimental_config

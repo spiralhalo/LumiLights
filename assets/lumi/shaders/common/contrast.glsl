@@ -59,9 +59,12 @@ const float USER_SKY_MULTIPLIER = 1. + (clamp(OUTDOORS_BRIGHTNESS, 10, 50) / 10.
 	#elif LUMI_SKY_COLOR == LUMI_SKY_COLOR_BRIGHT_CYAN
 		#define DEF_DAY_SKY_COLOR hdr_fromGamma(vec3(0.33, 0.7, 1.0))
 		#define DEF_DAY_CLOUD_COLOR hdr_fromGamma(vec3(0.40, 0.69, 1.0))
-	#else
+	#elif LUMI_SKY_COLOR == LUMI_SKY_COLOR_DEEP_CERULEAN
 		#define DEF_DAY_SKY_COLOR hdr_fromGamma(vec3(0.3, 0.5, 1.0))
 		#define DEF_DAY_CLOUD_COLOR DEF_VANILLA_DAY_SKY_COLOR
+	#else
+		#define DEF_DAY_SKY_COLOR hdr_fromGamma(vec3(LUMI_SKY_RED, LUMI_SKY_GREEN, LUMI_SKY_BLUE))
+		#define DEF_DAY_CLOUD_COLOR hdr_fromGamma(vec3(LUMI_SKY_RED, LUMI_SKY_GREEN, LUMI_SKY_BLUE))
 	#endif
 
 #else
