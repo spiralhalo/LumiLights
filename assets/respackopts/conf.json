@@ -1,6 +1,6 @@
 {
   "id": "LUMI",
-  "version": 1,
+  "version": 5,
   "conf": {
 	"WavyWaterModel": true,
 	"WavyWaterIntensity": {
