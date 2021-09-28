@@ -50,6 +50,22 @@
 					nameKey: "config.lumi_lights.value.exposure_func",
 					descriptionKey: "config.lumi_lights.help.exposure_func"
 				},
+				blocklight_specular_mode: {
+					default: "fancy",
+					choices: ["fast", "fancy"],
+					enum: true,
+					prefix: "blocklight_specular_mode_",
+					nameKey: "config.lumi_lights.value.blocklight_specular_mode",
+					descriptionKey: "config.lumi_lights.help.blocklight_specular_mode"
+				},
+				antialiasing: {
+					default: "taa",
+					choices: ["none", "taa", "taa_blurry"],
+					enum: true,
+					prefix: "antialiasing_",
+					nameKey: "config.lumi_lights.value.antialiasing",
+					descriptionKey: "config.lumi_lights.help.antialiasing"
+				},
 			}
 		},
 		{

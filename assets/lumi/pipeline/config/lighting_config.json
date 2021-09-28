@@ -1,0 +1,72 @@
+{
+	options: [
+		{
+			includeToken: "lumi:lighting_config",
+			categoryKey: "config.lumi_lights.category.lighting",
+			options: {
+				compute_exposure: {
+					default: true,
+					nameKey: "config.lumi_lights.value.compute_exposure",
+					descriptionKey: "config.lumi_lights.help.compute_exposure"
+				},
+				manual_exposure_relative: {
+					default: 5,
+					min: 0,
+					max: 10,
+					nameKey: "config.lumi_lights.value.manual_exposure_relative",
+					descriptionKey: "config.lumi_lights.help.manual_exposure_relative"
+				},
+				tone_profile: {
+					default: "standard",
+					choices: ["standard", "high_contrast"],
+					enum: true,
+					prefix: "tone_profile_",
+					nameKey: "config.lumi_lights.value.tone_profile",
+					descriptionKey: "config.lumi_lights.help.tone_profile"
+				},
+				block_light_mode: {
+					default: "warm",
+					choices: ["warm", "neutral"],
+					enum: true,
+					prefix: "block_light_mode_",
+					nameKey: "config.lumi_lights.value.block_light_mode",
+					descriptionKey: "config.lumi_lights.help.block_light_mode"
+				},
+				outdoors_brightness: {
+					default: 10,
+					min: 10,
+					max: 50,
+					nameKey: "config.lumi_lights.value.outdoors_brightness",
+					descriptionKey: "config.lumi_lights.help.outdoors_brightness"
+				},
+				handheld_light_radius: {
+					default: 10,
+					min: 0,
+					max: 14,
+					nameKey: "config.lumi_lights.value.handheld_light_radius",
+					descriptionKey: "config.lumi_lights.help.handheld_light_radius"
+				},
+				true_darkness_default: {
+					default: false,
+					nameKey: "config.lumi_lights.value.true_darkness_default",
+					descriptionKey: "config.lumi_lights.help.true_darkness_default"
+				},
+				true_darkness_nether: {
+					default: false,
+					nameKey: "config.lumi_lights.value.true_darkness_nether",
+					descriptionKey: "config.lumi_lights.help.true_darkness_nether"
+				},
+				true_darkness_end: {
+					default: false,
+					nameKey: "config.lumi_lights.value.true_darkness_end",
+					descriptionKey: "config.lumi_lights.help.true_darkness_end"
+				},
+				true_darkness_moonlight: {
+					default: false,
+					nameKey: "config.lumi_lights.value.true_darkness_moonlight",
+					descriptionKey: "config.lumi_lights.help.true_darkness_moonlight"
+				}
+			}
+		}
+	]
+}

@@ -21,6 +21,51 @@ uniform sampler2D u_godrays;
 
 out vec4 fragColor;
 
+// blending func from https://github.com/jamieowen/glsl-blend/blob/master/linear-dodge.glsl
+// (c) 2015 Jamie Owen, MIT License
+
+float blendLinearBurn(float base, float blend) {
+	// Note : Same implementation as BlendSubtractf
+	return max(base+blend-1.0,0.0);
+}
+
+vec3 blendLinearBurn(vec3 base, vec3 blend) {
+	// Note : Same implementation as BlendSubtract
+	return max(base+blend-vec3(1.0),vec3(0.0));
+}
+
+vec3 blendLinearBurn(vec3 base, vec3 blend, float opacity) {
+	return (blendLinearBurn(base, blend) * opacity + base * (1.0 - opacity));
+}
+
+float blendLinearDodge(float base, float blend) {
+	// Note : Same implementation as BlendAddf
+	return min(base+blend,1.0);
+}
+
+vec3 blendLinearDodge(vec3 base, vec3 blend) {
+	// Note : Same implementation as BlendAdd
+	return min(base+blend,vec3(1.0));
+}
+
+vec3 blendLinearDodge(vec3 base, vec3 blend, float opacity) {
+	return (blendLinearDodge(base, blend) * opacity + base * (1.0 - opacity));
+}
+
+float blendLinearLight(float base, float blend) {
+	return blend<0.5?blendLinearBurn(base,(2.0*blend)):blendLinearDodge(base,(2.0*(blend-0.5)));
+}
+
+vec3 blendLinearLight(vec3 base, vec3 blend) {
+	return vec3(blendLinearLight(base.r,blend.r),blendLinearLight(base.g,blend.g),blendLinearLight(base.b,blend.b));
+}
+
+vec3 blendLinearLight(vec3 base, vec3 blend, float opacity) {
+	return (blendLinearLight(base, blend) * opacity + base * (1.0 - opacity));
+}
+
+// end blending func
+
 void main() {
 	// underwater rays are already kind of thin
 	float blurAdj = frx_viewFlag(FRX_CAMERA_IN_FLUID) ? 2.0 : 0.0;
@@ -59,7 +104,11 @@ void main() {
 	// vec3 c = hdr_toSRGB(cc);
 	// vec3 c = a.rgb * (1.0 - b.a) + b.rgb * b.a; // TOO WASHED OUT
 	// vec3 c = a.rgb + b.rgb * a.rgb * b.a; // TOO GLITCHY
+#if LIGHTRAYS_BLENDING == LIGHTRAYS_BLENDING_LINEAR_DODGE
 	vec3 c = a.rgb + b.rgb * b.a; // ORIGINAL BLENDING
+#else
+	vec3 c = blendLinearLight(a.rgb, b.rgb, b.a);
+#endif
 
 	fragColor = vec4(c, a.a);
 }

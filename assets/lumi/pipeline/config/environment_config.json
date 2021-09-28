@@ -1,0 +1,157 @@
+{
+	options: [
+		{
+			includeToken: "lumi:sky_config",
+			categoryKey: "config.lumi_lights.category.sky",
+			options: {
+				sky_mode: {
+					default: "lumi",
+					choices: ["vanilla", "vanilla_starry", "lumi"],
+					enum: true,
+					prefix: "sky_mode_",
+					nameKey: "config.lumi_lights.value.sky_mode",
+					descriptionKey: "config.lumi_lights.help.sky_mode"
+				},
+				lumi_sky_color: {
+					default: "natural_azure",
+					choices: ["natural_azure", "bright_cyan", "deep_cerulean", "custom"],
+					enum: true,
+					prefix: "lumi_sky_color_",
+					nameKey: "config.lumi_lights.value.lumi_sky_color",
+					descriptionKey: "config.lumi_lights.help.lumi_sky_color"
+				},
+				lumi_sky_red: {
+					default: 0.375,
+					min: 0.0,
+					max: 1.0,
+					nameKey: "config.lumi_lights.value.lumi_sky_red",
+					descriptionKey: "config.lumi_lights.help.lumi_sky_red"
+				},
+				lumi_sky_green: {
+					default: 0.55,
+					min: 0.0,
+					max: 1.0,
+					nameKey: "config.lumi_lights.value.lumi_sky_green",
+					descriptionKey: "config.lumi_lights.help.lumi_sky_green"
+				},
+				lumi_sky_blue: {
+					default: 0.75,
+					min: 0.0,
+					max: 1.0,
+					nameKey: "config.lumi_lights.value.lumi_sky_blue",
+					descriptionKey: "config.lumi_lights.help.lumi_sky_blue"
+				},
+				lumi_star_size: {
+					default: 10,
+					min: 0,
+					max: 20,
+					nameKey: "config.lumi_lights.value.lumi_star_size",
+					descriptionKey: "config.lumi_lights.help.lumi_star_size"
+				},
+				lumi_star_density: {
+					default: 10,
+					min: 0,
+					max: 20,
+					nameKey: "config.lumi_lights.value.lumi_star_density",
+					descriptionKey: "config.lumi_lights.help.lumi_star_density"
+				},
+				lumi_star_brightness: {
+					default: 10,
+					min: 0,
+					max: 20,
+					nameKey: "config.lumi_lights.value.lumi_star_brightness",
+					descriptionKey: "config.lumi_lights.help.lumi_star_brightness"
+				},
+			}
+		},
+		{
+			includeToken: "lumi:clouds_config",
+			categoryKey: "config.lumi_lights.category.clouds",
+			options: {
+				cloud_rendering: {
+					default: "volumetric",
+					choices: ["vanilla", "flat", "parallax", "volumetric"],
+					enum: true,
+					prefix: "cloud_rendering_",
+					nameKey: "config.lumi_lights.value.cloud_rendering",
+					descriptionKey: "config.lumi_lights.help.cloud_rendering"
+				},
+				parallax_cloud_altitude: {
+					default: 100,
+					min: 0,
+					max: 1000,
+					nameKey: "config.lumi_lights.value.parallax_cloud_altitude",
+					descriptionKey: "config.lumi_lights.help.parallax_cloud_altitude"
+				},
+				parallax_cloud_thickness: {
+					default: 40,
+					min: 0,
+					max: 1000,
+					nameKey: "config.lumi_lights.value.parallax_cloud_thickness",
+					descriptionKey: "config.lumi_lights.help.parallax_cloud_thickness"
+				},
+				volumetric_cloud_mode: {
+					default: "skybox",
+					choices: ["skybox", "world"],
+					enum: true,
+					prefix: "volumetric_cloud_mode_",
+					nameKey: "config.lumi_lights.value.volumetric_cloud_mode",
+					descriptionKey: "config.lumi_lights.help.volumetric_cloud_mode"
+				},
+			}
+		},
+		{
+			includeToken: "lumi:fog_config",
+			categoryKey: "config.lumi_lights.category.fog",
+			options: {
+				fog_far_chunks: {
+					default: 8,
+					min: 4,
+					max: 32,
+					nameKey: "config.lumi_lights.value.fog_far_chunks",
+					descriptionKey: "config.lumi_lights.help.fog_far_chunks"
+				},
+				fog_density_relative: {
+					default: 10,
+					min: 0,
+					max: 20,
+					nameKey: "config.lumi_lights.value.fog_density_relative",
+					descriptionKey: "config.lumi_lights.help.fog_density_relative"
+				},
+				underwater_fog_far_chunks: {
+					default: 1,
+					min: 0,
+					max: 4,
+					nameKey: "config.lumi_lights.value.underwater_fog_far_chunks",
+					descriptionKey: "config.lumi_lights.help.underwater_fog_far_chunks"
+				},
+				underwater_fog_density_relative: {
+					default: 15,
+					min: 0,
+					max: 20,
+					nameKey: "config.lumi_lights.value.underwater_fog_density_relative",
+					descriptionKey: "config.lumi_lights.help.underwater_fog_density_relative"
+				}
+			}
+		},
+		{
+			includeToken: "lumi:water_config",
+			categoryKey: "config.lumi_lights.category.water",
+			options: {
+				water_color: {
+					default: "natural",
+					choices: ["natural_blue", "vanilla", "no_texture", "no_color"],
+					enum: true,
+					prefix: "water_color_",
+					nameKey: "config.lumi_lights.value.water_color",
+					descriptionKey: "config.lumi_lights.help.water_color"
+				},
+				water_caustics: {
+					default: true,
+					nameKey: "config.lumi_lights.value.water_caustics",
+					descriptionKey: "config.lumi_lights.help.water_caustics"
+				},
+			}
+		}
+	]
+}
