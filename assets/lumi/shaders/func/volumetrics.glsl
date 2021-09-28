@@ -22,13 +22,9 @@ float celestialLightRays(sampler2DArrayShadow sshadow, vec3 modelPos, float expo
 	if (doUnderwaterRays) {
 		scatter = 0.5 - abs(scatter - 0.5);
 		scatter *= 2.0;
-	} else { 
-		float sunHorizon = smoothstep(1.5, 0.0, frx_skyLightVector().y);
-
+	} else {
 		scatter = l2_clampScale(-1.0, 0.5, scatter);
-		scatter = pow(scatter, 0.25);
-		scatter *= sunHorizon;
-
+		// scatter = pow(scatter, 0.25);
 	#ifdef SHADOW_WORKAROUND
 		// Workaround to fix patches in shadow map until it's FLAWLESS
 		scatter *= l2_clampScale(0.03125, 0.0625, yLightmap);

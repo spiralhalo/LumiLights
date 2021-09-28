@@ -54,7 +54,9 @@ void main() {
 		screenSpace = !frx_viewFlag(FRX_CAMERA_IN_WATER);
 	#endif
 
-		float exposure =  mix(1.0, 0.05, ec) * LIGHT_RAYS_STR;
+		float sunHorizon = smoothstep(0.3, 0.2, frx_skyLightVector().y);
+		float modEC = smoothstep(0.0, 0.25 + sunHorizon * 0.75, ec);
+		float exposure =  (1.0 - modEC) * LIGHT_RAYS_STR;
 
 		if (screenSpace) {
 			float scatter = smoothstep(-1.0, 0.5, dot(normalize(worldPos.xyz), frx_skyLightVector()));
