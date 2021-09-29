@@ -106,6 +106,8 @@
 	"config.lumi_lights.help.parallax_cloud_thickness": "How much the parallax clouds fill the sky",
 	"config.lumi_lights.value.volumetric_cloud_mode": "Volumetric cloud - Render mode",
 	"config.lumi_lights.help.volumetric_cloud_mode": "Skybox clouds are generally faster",
+	"config.lumi_lights.value.raincloud_canopy": "Raincloud coverage",
+	"config.lumi_lights.help.raincloud_canopy": "Amount of additional cloud coverage during rain",
 
 	"config.lumi_lights.category.water": "Environment - Water",
 	"config.lumi_lights.value.water_color": "Water color mode",

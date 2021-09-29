@@ -98,6 +98,13 @@
 					nameKey: "config.lumi_lights.value.volumetric_cloud_mode",
 					descriptionKey: "config.lumi_lights.help.volumetric_cloud_mode"
 				},
+				raincloud_canopy: {
+					default: 4,
+					min: 0,
+					max: 10,
+					nameKey: "config.lumi_lights.value.raincloud_canopy",
+					descriptionKey: "config.lumi_lights.help.raincloud_canopy"
+				},
 			}
 		},
 		{
