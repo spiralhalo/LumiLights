@@ -22,7 +22,7 @@ void main()
 	basicFrameSetup();
 	v_invSize = 1. / frxu_size;
 
-	// TODO: rain factor but only above water
+	float weatherFactor = frx_viewFlag(FRX_CAMERA_IN_FLUID) ? 1.0 : (1.0 - frx_rainGradient());
 	float dimensionFactor = frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? 1.0 : 0.0;
 	float blindnessFactor = frx_playerHasEffect(FRX_EFFECT_BLINDNESS) ? 0.0 : 1.0;
 	float notInVoidFactor = l2_clampScale(-1.0, 0.0, frx_cameraPos().y);
@@ -31,6 +31,7 @@ void main()
 	// float brightnessFactor = 1.0 - 0.3 * frx_viewBrightness(); // adjust because godrays are added after tonemap
 
 	v_godray_intensity = 1.0
+		* weatherFactor
 		* dimensionFactor
 		* blindnessFactor
 		* notInVoidFactor
