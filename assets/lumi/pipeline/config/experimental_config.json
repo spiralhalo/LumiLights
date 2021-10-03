@@ -43,7 +43,7 @@
 					descriptionKey: "config.lumi_lights.help.rain_puddles"
 				},
 				exposure_func: {
-					default: "median",
+					default: "average",
 					choices: ["median", "average"],
 					enum: true,
 					prefix: "exposure_func_",
