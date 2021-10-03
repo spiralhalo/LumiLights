@@ -34,7 +34,7 @@
 			categoryKey: "config.lumi_lights.category.ssao",
 			options: {
 				ambient_occlusion: {
-					default: "ssao",
+					default: "pure_ssao",
 					choices: ["no_ao", "vanilla", "vanilla_and_ssao", "pure_ssao"],
 					enum: true,
 					prefix: "ambient_occlusion_",
