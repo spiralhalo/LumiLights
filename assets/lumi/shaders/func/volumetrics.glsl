@@ -23,7 +23,11 @@ float celestialLightRays(sampler2DArrayShadow sshadow, vec3 modelPos, float expo
 		scatter = 0.5 - abs(scatter - 0.5);
 		scatter *= 2.0;
 	} else {
-		scatter = l2_clampScale(-1.0, 0.5, scatter);
+		if (frx_worldFlag(FRX_WORLD_IS_MOONLIT)) {
+			scatter = l2_clampScale(0.7, 1.0, scatter);
+		} else {
+			scatter = l2_clampScale(-1.0, 0.5, scatter);
+		}
 		// scatter = pow(scatter, 0.25);
 	#ifdef SHADOW_WORKAROUND
 		// Workaround to fix patches in shadow map until it's FLAWLESS
