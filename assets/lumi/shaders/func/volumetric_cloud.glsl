@@ -84,7 +84,11 @@ float sampleCloud(in vec3 worldPos, in sampler2D scloudTex)
 
 	vec2 tex = texture(scloudTex, uv).rg; 
 	float tF = tex.r;
+#ifdef VOLUMETRIC_CLOUD_ULTRAPUFF
+	float hF = sqrt(tex.g);
+#else
 	float hF = tex.g;
+#endif
 	float yF = smoothstep(CLOUD_MID_ALTITUDE + CLOUD_TOP_HEIGHT * hF, CLOUD_MID_ALTITUDE, worldPos.y);
 
 	yF *= smoothstep(CLOUD_MID_ALTITUDE - CLOUD_MID_HEIGHT * hF, CLOUD_MID_ALTITUDE, worldPos.y);
