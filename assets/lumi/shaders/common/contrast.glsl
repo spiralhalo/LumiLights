@@ -11,8 +11,13 @@
  *  published by the Free Software Foundation, Inc.
  *******************************************************/
 
-const float USER_CELESTIAL_MULTIPLIER = clamp(OUTDOORS_BRIGHTNESS, 10, 50) / 10.;
-const float USER_SKY_MULTIPLIER = 1. + (clamp(OUTDOORS_BRIGHTNESS, 10, 50) / 10. - 1.) * .5;
+const float USER_CELESTIAL_MULTIPLIER      = clamp(OUTDOORS_BRIGHTNESS, 10, 50) / 10.;
+const float USER_SKY_MULTIPLIER            = (clamp(INDOORS_BRIGHTNESS, 10, 50) / 10. - 1.) * .5 + 1.;
+const float USER_BLOCK_MULTIPLIER          = clamp(OUTDOORS_BRIGHTNESS, 10, 50) / 10.;
+const float USER_AMBIENT_MULTIPLIER        = clamp(AMBIENT_BRIGHTNESS, 0, 50) / 10.;
+const float USER_NETHER_AMBIENT_MULTIPLIER = clamp(NETHER_AMBIENT_BRIGHTNESS, 0, 50) / 10.;
+const float USER_END_AMBIENT_MULTIPLIER    = clamp(END_AMBIENT_BRIGHTNESS, 0, 50) / 10.;
+const float USER_NIGHT_AMBIENT_MULTIPLIER  = clamp(NIGHT_AMBIENT_BRIGHTNESS, 0, 50) / 10.;
 
 // PROFILE-AGNOSTIC
 // ******************************

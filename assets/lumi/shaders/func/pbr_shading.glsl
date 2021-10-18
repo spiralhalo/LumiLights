@@ -137,18 +137,12 @@ vec3 hdr_calcSkyLight(inout light_data data)
 		vec3 celestialRad = data.light.z * atmos_hdrCelestialRadiance() * (1. - frx_rainGradient()); // no direct sunlight during rain
 		return pbr_lightCalc(data.albedo, data.roughness, data.metallic, data.f0, celestialRad, frx_skyLightVector(), data.viewDir, data.normal, data.translucency, data.diffuse, data.specularAccu);
 	} else {
-
-	#ifdef TRUE_DARKNESS_END
-		if (frx_worldFlag(FRX_WORLD_IS_END)) return vec3(0.0);
-	#endif
-
-		vec3 color = SKYLESS_LIGHT_COLOR;
+		vec3 color;
 
 		if (frx_worldFlag(FRX_WORLD_IS_NETHER)) {
-		#ifdef TRUE_DARKNESS_NETHER
-			return vec3(0.0);
-		#endif
-			color = NETHER_SKYLESS_LIGHT_COLOR;
+			color = NETHER_SKYLESS_LIGHT_COLOR * USER_NETHER_AMBIENT_MULTIPLIER;
+		} else {
+			color = SKYLESS_LIGHT_COLOR * USER_END_AMBIENT_MULTIPLIER;
 		}
 
 		float darkenedFactor = frx_isSkyDarkened() ? 0.6 : 1.0;
@@ -170,11 +164,7 @@ vec3 emissiveRadiance(vec3 hdrFragColor, float emissivity)
 
 vec3 baseAmbientRadiance(vec3 fogRadiance)
 {
-	vec3 bar = vec3(0.0);
-
-	#ifndef TRUE_DARKNESS_DEFAULT
-		bar += vec3(BASE_AMBIENT_STR);
-	#endif
+	vec3 bar = vec3(BASE_AMBIENT_STR * USER_AMBIENT_MULTIPLIER);
 
 	if (frx_playerHasNightVision()) {
 		bar += hdr_fromGamma(NIGHT_VISION_COLOR) * NIGHT_VISION_STR;
