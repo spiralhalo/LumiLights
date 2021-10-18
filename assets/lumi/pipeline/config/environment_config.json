@@ -90,6 +90,13 @@
 					nameKey: "config.lumi_lights.value.parallax_cloud_thickness",
 					descriptionKey: "config.lumi_lights.help.parallax_cloud_thickness"
 				},
+				volumetric_cloud_altitude: {
+					default: 110,
+					min: 0,
+					max: 1000,
+					nameKey: "config.lumi_lights.value.volumetric_cloud_altitude",
+					descriptionKey: "config.lumi_lights.help.volumetric_cloud_altitude"
+				},
 				volumetric_cloud_mode: {
 					default: "skybox",
 					choices: ["skybox", "world"],
