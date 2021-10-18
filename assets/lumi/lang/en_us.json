@@ -18,10 +18,6 @@
 	"config.lumi_lights.help.name_tag_shadow": "Render name tag shadow",
 
 	"config.lumi_lights.category.lighting": "Lighting",
-	"config.lumi_lights.value.compute_exposure": "Auto-exposure",
-	"config.lumi_lights.help.compute_exposure": "Compute exposure compensation automatically",
-	"config.lumi_lights.value.manual_exposure_relative": "Manual exposure fallback",
-	"config.lumi_lights.help.manual_exposure_relative": "Exposure value to use when auto-exposure is OFF",
 	"config.lumi_lights.value.tone_profile": "Contrast profile",
 	"config.lumi_lights.help.tone_profile": "Affects the contrast range between various light sources.;Auto-exposure is recommended for High Contrast profile.",
 	"config.lumi_lights.value.outdoors_brightness": "Sky light brightness",
@@ -49,7 +45,11 @@
 	"config.lumi_lights.value.reflection_maximum_roughness_relative": "Reflection roughness threshold",
 	"config.lumi_lights.help.reflection_maximum_roughness_relative": "Limits amount of reflective surface based on roughness;(water=1, dirt=10) Lower to improve performance.",
 
-	"config.lumi_lights.category.effects": "Special Effects",
+	"config.lumi_lights.category.effects": "Optical Effects",
+	"config.lumi_lights.value.compute_exposure": "Auto-exposure",
+	"config.lumi_lights.help.compute_exposure": "Compute exposure compensation automatically",
+	"config.lumi_lights.value.manual_exposure_relative": "Manual exposure fallback",
+	"config.lumi_lights.help.manual_exposure_relative": "Exposure value to use when auto-exposure is OFF",
 	"config.lumi_lights.value.bloom_intensity": "Bloom intensity",
 	"config.lumi_lights.help.bloom_intensity": "Intensity of bloom effect around light sources",
 	"config.lumi_lights.value.bloom_scale": "Bloom scale",
@@ -81,7 +81,7 @@
 	"config.lumi_lights.value.ssao_glow": "SSAO - Glow occlusion",
 	"config.lumi_lights.help.ssao_glow": "Also calculate color imparted by glowing objects",
 
-	"config.lumi_lights.category.sky": "Environment - Sky",
+	"config.lumi_lights.category.sky": "Sky",
 	"config.lumi_lights.value.sky_mode": "Sky mode",
 	"config.lumi_lights.help.sky_mode": "Choose between different skybox rendering modes",
 	"config.lumi_lights.value.lumi_sky_color": "Lumi Sky - Color",
@@ -99,7 +99,7 @@
 	"config.lumi_lights.value.lumi_star_brightness": "Lumi Sky - Star Brightness",
 	"config.lumi_lights.help.lumi_star_brightness": "Brightness of stars (Lumi or starry sky mode)",
 
-	"config.lumi_lights.category.clouds": "Environment - Clouds",
+	"config.lumi_lights.category.clouds": "Clouds",
 	"config.lumi_lights.value.cloud_rendering": "Cloud rendering mode",
 	"config.lumi_lights.help.cloud_rendering": "Cloud rendering mode. Performance varies.",
 	"config.lumi_lights.value.parallax_cloud_altitude": "Parallax clouds - Altitude",
@@ -117,13 +117,13 @@
 	"config.lumi_lights.value.raincloud_canopy": "Raincloud coverage",
 	"config.lumi_lights.help.raincloud_canopy": "Amount of additional cloud coverage during rain",
 
-	"config.lumi_lights.category.water": "Environment - Water",
+	"config.lumi_lights.category.water": "Water",
 	"config.lumi_lights.value.water_color": "Water color mode",
 	"config.lumi_lights.help.water_color": "Whether to retain water texture and color",
 	"config.lumi_lights.value.water_caustics": "Water caustics effect",
 	"config.lumi_lights.help.water_caustics": "Emulate water caustics",
 
-	"config.lumi_lights.category.fog": "Environment - Fog",
+	"config.lumi_lights.category.fog": "Fog",
 	"config.lumi_lights.value.fog_far_chunks": "Fog chunks distance",
 	"config.lumi_lights.help.fog_far_chunks": "Distance where fog gets the thickest in chunks",
 	"config.lumi_lights.value.fog_density_relative": "Fog density",
