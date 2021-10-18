@@ -57,9 +57,9 @@ vec2 modelXz2Uv(vec2 modelXz)
 }
 
 #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
-	const float CLOUD_ALTITUDE = 50.0;
+	const float CLOUD_ALTITUDE = VOLUMETRIC_CLOUD_ALTITUDE - 60;
 #else
-	const float CLOUD_ALTITUDE = 110.0;
+	const float CLOUD_ALTITUDE = VOLUMETRIC_CLOUD_ALTITUDE;
 #endif
 const float CLOUD_HEIGHT = 50.0 / CLOUD_TEXTURE_ZOOM;
 const float CLOUD_MID_HEIGHT = 20.0;
@@ -67,6 +67,9 @@ const float CLOUD_TOP_HEIGHT = CLOUD_HEIGHT - CLOUD_MID_HEIGHT;
 const float CLOUD_MID_ALTITUDE = CLOUD_ALTITUDE + CLOUD_MID_HEIGHT;
 const float CLOUD_MIN_Y = CLOUD_ALTITUDE;
 const float CLOUD_MAX_Y = CLOUD_ALTITUDE + CLOUD_HEIGHT;
+
+const float CLOUD_COVERAGE = clamp(CLOUD_COVERAGE_RELATIVE * 0.1, 0.0, 1.0);
+const float CLOUD_PUFFINESS = clamp(CLOUD_PUFFINESS_RELATIVE * 0.1, 0.0, 1.0);
 
 float sampleCloud(in vec3 worldPos, in sampler2D scloudTex)
 {
@@ -81,18 +84,21 @@ float sampleCloud(in vec3 worldPos, in sampler2D scloudTex)
 
 	vec2 tex = texture(scloudTex, uv).rg; 
 	float tF = tex.r;
+#ifdef VOLUMETRIC_CLOUD_ULTRAPUFF
 	float hF = sqrt(tex.g);
+#else
+	float hF = tex.g;
+#endif
 	float yF = smoothstep(CLOUD_MID_ALTITUDE + CLOUD_TOP_HEIGHT * hF, CLOUD_MID_ALTITUDE, worldPos.y);
 
 	yF *= smoothstep(CLOUD_MID_ALTITUDE - CLOUD_MID_HEIGHT * hF, CLOUD_MID_ALTITUDE, worldPos.y);
 
-	return smoothstep(0.0, 0.3, yF * tF * eF);
+	return smoothstep(0.0, 1.0 - 0.7 * CLOUD_PUFFINESS, yF * tF * eF);
 	// return smoothstep(0.1, 0.11, yF * tF * eF);
 }
 
 cloud_result rayMarchCloud(in sampler2D scloudTex, in sampler2D sdepth, in sampler2D sbluenoise, in vec2 texcoord, in vec3 worldVec, in float numSample)
 {
-	float rainFactor = frx_rainGradient() * 0.67 + frx_thunderGradient() * 0.33; // TODO: optimize
 	float depth = (texcoord == clamp(texcoord, 0.0, 1.0)) ? texture(sdepth, texcoord).r : 1.0;
 	float maxDist;
 
@@ -235,28 +241,31 @@ cloud_result rayMarchCloud(in sampler2D scloudTex, in sampler2D sdepth, in sampl
 }
 
 vec4 generateCloudTexture(vec2 texcoord) {
-	 // TODO: optimize?
-	float rainFactor = frx_rainGradient() * 0.37;// + frx_thunderGradient() * 0.33;
+	float rainCanopy = RAINCLOUD_CANOPY * 0.1;
+	//OLD rainFactor = frx_rainGradient() * 0.37;// + frx_thunderGradient() * 0.33;
+	float rainFactor = frx_rainGradient() * 0.8 * rainCanopy + frx_thunderGradient() * 0.2 * rainCanopy;
 	vec2 worldXz = uv2worldXz(texcoord);
-	#if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
-		worldXz -= frx_cameraPos().xz * 0.8;
-	#endif
-	#if CLOUD_TIME == CLOUD_TIME_WORLD
-	vec2 cloudCoord = worldXz + (frx_worldDay() + frx_worldTime()) * 1200.0;
-	#elif CLOUD_TIME == CLOUD_TIME_CLIENT
-	vec2 cloudCoord = worldXz + frx_renderSeconds();
-	#else
+
+#if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
+	worldXz -= frx_cameraPos().xz * 0.8;
+#endif
+
 	vec2 cloudCoord = worldXz;
-	#endif
+#if CLOUD_TIME == CLOUD_TIME_WORLD
+	cloudCoord += (frx_worldDay() + frx_worldTime()) * 1200.0;
+#elif CLOUD_TIME == CLOUD_TIME_CLIENT
+	cloudCoord += frx_renderSeconds();
+#endif
 	cloudCoord *= CLOUD_TEXTURE_ZOOM;
 
 	float animatonator = frx_renderSeconds() * 0.05;
-	float cloudBase = l2_clampScale(0.0, 0.7 - rainFactor, snoise(cloudCoord * 0.005));
+	//OLD cloudBase = l2_clampScale(0.0, 0.7 - rainFactor, snoise(cloudCoord * 0.005));
+	float cloudBase = l2_clampScale(0.0 - CLOUD_COVERAGE, 0.7 + 0.3 * rainCanopy - rainFactor, snoise(cloudCoord * 0.005) + rainFactor * rainCanopy);
 	float cloud1 = cloudBase * l2_clampScale(0.0, 1.0, wnoise2(cloudCoord * 0.015 + animatonator));
 	float cloud2 = cloud1 * l2_clampScale(-1.0, 1.0, snoise(cloudCoord * 0.04));
 	float cloud3 = cloud2 * l2_clampScale(-1.0, 1.0, snoise(cloudCoord * 0.1));
 
-	float cloud = cloud1 * 0.5 + cloud2 * 0.75 + cloud3;
+	float cloud = cloud1 * 0.5 + cloud2 * 0.75 + cloud3 + rainFactor * 0.5 * rainCanopy;
 
 	cloud = l2_clampScale(0.1, 1.0, cloud);
 

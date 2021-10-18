@@ -1,0 +1,93 @@
+{
+	options: [
+		{
+			includeToken: "lumi:reflection_config",
+			categoryKey: "config.lumi_lights.category.reflection",
+			options: {
+				reflection_profile: {
+					default: "low",
+					choices: ["none", "low", "medium", "high", "extreme"],
+					enum: true,
+					prefix: "reflection_profile_",
+					nameKey: "config.lumi_lights.value.reflection_profile",
+					descriptionKey: "config.lumi_lights.help.reflection_profile"
+				},
+				sky_reflection_profile: {
+					default: "fancy",
+					choices: ["minimum", "fast", "fancy"],
+					enum: true,
+					prefix: "sky_reflection_profile_",
+					nameKey: "config.lumi_lights.value.sky_reflection_profile",
+					descriptionKey: "config.lumi_lights.help.sky_reflection_profile"
+				},
+				reflection_maximum_roughness_relative: {
+					default: 7,
+					min: 1,
+					max: 10,
+					nameKey: "config.lumi_lights.value.reflection_maximum_roughness_relative",
+					descriptionKey: "config.lumi_lights.help.reflection_maximum_roughness_relative"
+				},
+			}
+		},
+		{
+			includeToken: "lumi:effects_config",
+			categoryKey: "config.lumi_lights.category.effects",
+			options: {
+				compute_exposure: {
+					default: true,
+					nameKey: "config.lumi_lights.value.compute_exposure",
+					descriptionKey: "config.lumi_lights.help.compute_exposure"
+				},
+				manual_exposure_relative: {
+					default: 5,
+					min: 0,
+					max: 10,
+					nameKey: "config.lumi_lights.value.manual_exposure_relative",
+					descriptionKey: "config.lumi_lights.help.manual_exposure_relative"
+				},
+				bloom_intensity: {
+					default: 20,
+					min: 1,
+					max: 40,
+					nameKey: "config.lumi_lights.value.bloom_intensity",
+					descriptionKey: "config.lumi_lights.help.bloom_intensity"
+				},
+				bloom_scale: {
+					default: 25,
+					min: 3,
+					max: 50,
+					nameKey: "config.lumi_lights.value.bloom_scale",
+					descriptionKey: "config.lumi_lights.help.bloom_scale"
+				},
+				lightrays_mode: {
+					default: "volumetric",
+					choices: ["screenspace", "volumetric"],
+					enum: true,
+					prefix: "lightrays_mode_",
+					nameKey: "config.lumi_lights.value.lightrays_mode",
+					descriptionKey: "config.lumi_lights.help.lightrays_mode"
+				},
+				lightrays_blending: {
+					default: "linear_light",
+					choices: ["linear_dodge", "linear_light"],
+					enum: true,
+					prefix: "lightrays_blending_",
+					nameKey: "config.lumi_lights.value.lightrays_blending",
+					descriptionKey: "config.lumi_lights.help.lightrays_blending"
+				},
+				lightrays_intensity: {
+					default: 10,
+					min: 0,
+					max: 10,
+					nameKey: "config.lumi_lights.value.lightrays_intensity",
+					descriptionKey: "config.lumi_lights.help.lightrays_intensity"
+				},
+				refraction_effect: {
+					default: true,
+					nameKey: "config.lumi_lights.value.refraction_effect",
+					descriptionKey: "config.lumi_lights.help.refraction_effect"
+				},
+			}
+		},
+	]
+}

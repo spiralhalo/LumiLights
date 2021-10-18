@@ -4,67 +4,6 @@
 			includeToken: "lumi:aesthetics_config",
 			categoryKey: "config.lumi_lights.category.aesthetics",
 			options: {
-				tone_profile: {
-					default: "standard",
-					choices: ["standard", "high_contrast"],
-					enum: true,
-					prefix: "tone_profile_",
-					nameKey: "config.lumi_lights.value.tone_profile",
-					descriptionKey: "config.lumi_lights.help.tone_profile"
-				},
-				block_light_mode: {
-					default: "warm",
-					choices: ["warm", "neutral"],
-					enum: true,
-					prefix: "block_light_mode_",
-					nameKey: "config.lumi_lights.value.block_light_mode",
-					descriptionKey: "config.lumi_lights.help.block_light_mode"
-				},
-				outdoors_brightness: {
-					default: 10,
-					min: 10,
-					max: 50,
-					nameKey: "config.lumi_lights.value.outdoors_brightness",
-					descriptionKey: "config.lumi_lights.help.outdoors_brightness"
-				},
-				bloom_intensity: {
-					default: 20,
-					min: 1,
-					max: 40,
-					nameKey: "config.lumi_lights.value.bloom_intensity",
-					descriptionKey: "config.lumi_lights.help.bloom_intensity"
-				},
-				bloom_scale: {
-					default: 25,
-					min: 3,
-					max: 50,
-					nameKey: "config.lumi_lights.value.bloom_scale",
-					descriptionKey: "config.lumi_lights.help.bloom_scale"
-				},
-				sky_mode: {
-					default: "lumi",
-					choices: ["vanilla", "vanilla_starry", "lumi"],
-					enum: true,
-					prefix: "sky_mode_",
-					nameKey: "config.lumi_lights.value.sky_mode",
-					descriptionKey: "config.lumi_lights.help.sky_mode"
-				},
-				lumi_sky_color: {
-					default: "natural_azure",
-					choices: ["natural_azure", "bright_cyan", "deep_cerulean"],
-					enum: true,
-					prefix: "lumi_sky_color_",
-					nameKey: "config.lumi_lights.value.lumi_sky_color",
-					descriptionKey: "config.lumi_lights.help.lumi_sky_color"
-				},
-				water_color: {
-					default: "natural",
-					choices: ["natural_blue", "vanilla", "no_texture", "no_color"],
-					enum: true,
-					prefix: "water_color_",
-					nameKey: "config.lumi_lights.value.water_color",
-					descriptionKey: "config.lumi_lights.help.water_color"
-				},
 				glint_mode: {
 					default: "glint_texture",
 					choices: ["glint_texture", "glint_shader"],
@@ -108,6 +47,6 @@
 					descriptionKey: "config.lumi_lights.help.toon_outline"
 				},
 			}
-		}
+		},
 	],
 }

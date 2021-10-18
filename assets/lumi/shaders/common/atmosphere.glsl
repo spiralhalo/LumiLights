@@ -160,8 +160,8 @@ const float CAVEFOG_STR = 0.05;
 const int SRISC = 0;
 const int SNONC = 1;
 const int SMONC = 2;
-const vec3[3] CELEST_COLOR =  vec3[](SUNRISE_LIGHT_COLOR, NOON_SUNLIGHT_COLOR, vec3(1.0)	);
-	 float[3] CELEST_STR   = float[](SUNLIGHT_STR	   , SUNLIGHT_STR	   , MOONLIGHT_STR);
+const vec3[3] CELEST_COLOR =  vec3[](SUNRISE_LIGHT_COLOR, NOON_SUNLIGHT_COLOR, vec3(1.0));
+     float[3] CELEST_STR   = float[](SUNLIGHT_STR       , SUNLIGHT_STR       , MOONLIGHT_STR * USER_NIGHT_AMBIENT_MULTIPLIER);
 const float[3] TWG_FACTOR  = float[](1.0, 0.0, 0.0); // maps celest color to twilight factor
 const int CELEST_LEN = 8;
 const int[CELEST_LEN] CELEST_INDICES = int[]  (SMONC, SRISC, SRISC, SNONC, SNONC, SRISC, SRISC, SMONC);
@@ -174,7 +174,7 @@ const int CLDC = 3;
 #ifdef POST_SHADER
 const vec3[4] SKY_COLOR   = vec3[](DAY_SKY_COLOR, NIGHT_SKY_COLOR, SUNRISE_LIGHT_COLOR, DAY_CLOUD_COLOR);
 #endif
-	  vec3[2] SKY_AMBIENT = vec3[](NOON_AMBIENT,  NIGHT_AMBIENT  );
+const vec3[2] SKY_AMBIENT = vec3[](NOON_AMBIENT,  NIGHT_AMBIENT * USER_NIGHT_AMBIENT_MULTIPLIER);
 const int SKY_LEN = 4;
 const int[SKY_LEN] SKY_INDICES = int[]  ( NGTC, DAYC, DAYC, NGTC);
 const int[SKY_LEN] CLOUD_INDICES = int[]( NGTC, CLDC, CLDC, NGTC);
@@ -182,14 +182,6 @@ const float[SKY_LEN] SKY_TIMES = float[](-0.04, -0.01, 0.51, 0.54);
 
 void atmos_generateAtmosphereModel()
 {
-	/** TRUE DARKNESS **/
-	#ifdef TRUE_DARKNESS_MOONLIGHT
-		CELEST_STR[SMONC] = 0.0;
-		SKY_AMBIENT[NGTC] = vec3(0.0);
-	#endif
-	/*******************/
-
-
 	CELEST_STR[SMONC] *= 0.5 + 0.5 * frx_moonSize();
 	// SKY_AMBIENT[NGTC] *= 0.5 + 0.5 * frx_moonSize();
 	

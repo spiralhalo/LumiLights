@@ -75,7 +75,8 @@ void custom_sky(in vec3 modelPos, in float blindnessFactor, in bool maybeUnderwa
 			vec4  starVec = v_star_rotator * vec4(worldSkyVec, 0.0);
 			float zoomFactor = l2_clampScale(90, 30, v_fov); // zoom sharpening
 			float milkyHaze = starry * rainOcclusion * milkyness * 0.4 * l2_clampScale(-1.0, 1.0, snoise(starVec.xyz * 2.0));
-			float star = starry * l2_clampScale(0.12 + milkyness * milkyness * 0.15, 0.0, cellular2x2x2(starVec.xyz * mix(40, 60, milkyness)).x);
+			float starNoise = cellular2x2x2(starVec.xyz * mix(20 + 2 * LUMI_STAR_DENSITY, 40 + 2 * LUMI_STAR_DENSITY, milkyness)).x;
+			float star = starry * l2_clampScale(0.025 + 0.0095 * LUMI_STAR_SIZE + milkyness * milkyness * 0.15, 0.0, starNoise);
 
 			star = l2_clampScale(0.0, 1.0 - 0.6 * zoomFactor, star) * rainOcclusion;
 
@@ -85,7 +86,7 @@ void custom_sky(in vec3 modelPos, in float blindnessFactor, in bool maybeUnderwa
 				milkyHaze *= milkyHaze;
 			#endif
 
-			vec3 starRadiance = vec3(star) * STARS_STR + NEBULAE_COLOR * milkyHaze;
+			vec3 starRadiance = vec3(star) * STARS_STR * 0.1 * LUMI_STAR_BRIGHTNESS + NEBULAE_COLOR * milkyHaze;
 
 			a.rgb += starRadiance;
 			bloom_out += (star + milkyHaze);
