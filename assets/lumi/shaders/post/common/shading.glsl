@@ -191,8 +191,16 @@ vec4 hdr_shaded_color(
 	a.rgb += emissionRadiance * EMISSIVE_LIGHT_STR;
 	a.rgb *= ao_shaded * ssao;
 #endif
+
 	if (matflash == 1.0) a.rgb += 1.0;
+
+#if HURT_MODE == HURT_MODE_VAPORDEATH
+	if (mathurt == 1.0) a.rb += vec2(0.2, 0.05);
+#elif HURT_MODE == HURT_MODE_GLITCH_CITY
+	if (mathurt == 1.0) a.rgb += min(vec3(0.0), 1.0 - a.rgb);
+#else
 	if (mathurt == 1.0) a.r += 0.5;
+#endif
 
 	a.a = min(1.0, a.a);
 

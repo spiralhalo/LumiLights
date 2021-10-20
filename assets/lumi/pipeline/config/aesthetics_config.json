@@ -4,6 +4,14 @@
 			includeToken: "lumi:aesthetics_config",
 			categoryKey: "config.lumi_lights.category.aesthetics",
 			options: {
+				hurt_mode: {
+					default: "classic_red",
+					choices: ["classic_red", "vapordeath", "glitch_city"],
+					enum: true,
+					prefix: "hurt_mode_",
+					nameKey: "config.lumi_lights.value.hurt_mode",
+					descriptionKey: "config.lumi_lights.help.hurt_mode"
+				},
 				glint_mode: {
 					default: "glint_texture",
 					choices: ["glint_texture", "glint_shader"],

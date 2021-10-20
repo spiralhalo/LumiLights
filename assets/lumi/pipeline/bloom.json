@@ -18,7 +18,12 @@
 			name: "bloom",
 			vertexSource: "lumi:shaders/post/simple.vert",
 			fragmentSource: "lumi:shaders/post/bloom.frag",
-			samplers: ["u_base", "u_bloom"]
+			samplers: [
+				"u_base",
+				"u_bloom",
+				"u_base_misc",
+				"u_blue_noise",
+			]
 		}, {
 			// uses a fancy sampling algo for higher quality, not a conventional mipmap
 			name: "downsample",
@@ -147,7 +152,12 @@
 				program: "bloom",
 				framebuffer: "bloom",
 				// main_copy = from taa
-				samplerImages: ["main_copy", "bloom_upsample"]
+				samplerImages: [
+					"main_copy",
+					"bloom_upsample",
+					"misc_solid",
+					"lumi:textures/filter_pattern/bluenoise256.png",
+				]
 			}
 		]
 	},

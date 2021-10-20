@@ -136,6 +136,8 @@
 	"config.lumi_lights.help.underwater_fog_density_relative": "Overall density of underwater fog",
 
 	"config.lumi_lights.category.aesthetics": "Miscellaneous",
+	"config.lumi_lights.value.hurt_mode": "Hurt entity rendering",
+	"config.lumi_lights.help.hurt_mode": "Different ways to convey violence",
 	"config.lumi_lights.value.glint_mode": "Enchantment glint mode",
 	"config.lumi_lights.help.glint_mode": "Switch between texture-based or shader-based;enchantment glint",
 	"config.lumi_lights.value.glint_style": "Glint Shader - Style",
