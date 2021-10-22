@@ -2,14 +2,17 @@
 	"pipeline.lumi_lights.name": "Lumi Lights LITE",
 	"pipeline.lumi_lights.desc": "Lumi Lights without shadows",
 
+	"pipeline.lumi_shadow_0x.name": "Lumi Lights 0.3x",
+	"pipeline.lumi_shadow_0x.desc": "Lumi Lights with low shadow resolution",
+
 	"pipeline.lumi_shadow_1x.name": "Lumi Lights 1x",
-	"pipeline.lumi_shadow_1x.desc": "Lumi Lights with 1x shadow resolution",
+	"pipeline.lumi_shadow_1x.desc": "Lumi Lights with medium shadow resolution",
 
 	"pipeline.lumi_shadow_2x.name": "Lumi Lights 2x",
-	"pipeline.lumi_shadow_2x.desc": "Lumi Lights with 2x shadow resolution",
+	"pipeline.lumi_shadow_2x.desc": "Lumi Lights with high shadow resolution",
 
 	"pipeline.lumi_shadow_4x.name": "Lumi Lights 4x",
-	"pipeline.lumi_shadow_4x.desc": "Lumi Lights with 4x shadow resolution",
+	"pipeline.lumi_shadow_4x.desc": "Lumi Lights with ultra high shadow resolution",
 
 	"config.lumi_lights.category.shadow": "Shadows",
 	"config.lumi_lights.value.shadow_filtering": "Shadow filtering",
