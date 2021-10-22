@@ -254,7 +254,7 @@ rt_ColorDepthBloom work_on_pair(
 	vec4 material    = texture(reflector_material, v_texcoord);
 	float roughness  = material.x == 0.0 ? 1.0 : min(1.0, 1.0203 * material.x - 0.01);
 	vec3 light       = texture(reflector_light, v_texcoord).xyz;
-	vec3 worldNormal = normalize(sample_worldNormal(v_texcoord, reflector_micro_normal));
+	vec3 worldNormal = sample_worldNormal(v_texcoord, reflector_micro_normal);
 
 	bool isUnmanaged = roughness == 1.0;
 
@@ -263,6 +263,8 @@ rt_ColorDepthBloom work_on_pair(
 	isUnmanaged = isUnmanaged || distance(light.rgb + material.rgb, worldNormal.rgb + 1.0) < 0.015;
 
 	if (isUnmanaged) return rt_ColorDepthBloom(vec4(0.0), 1.0, 0.0); // unmanaged draw
+
+	worldNormal = normalize(worldNormal);
 
 #ifdef RAIN_PUDDLES
 	float packedPuddle = texture(reflector_micro_normal, v_texcoord).a;

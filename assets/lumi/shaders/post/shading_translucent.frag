@@ -39,12 +39,13 @@ vec4 advancedTranslucentShading(float ec, out float bloom_out) {
 	vec4 frontAlbedo = vec4(texture(u_albedo_translucent, v_texcoord).rgb, texture(u_alpha_translucent, v_texcoord).r);
 	vec4 light = texture(u_light_translucent, v_texcoord);
 	vec3 normal = texture(u_normal_translucent, v_texcoord).xyz;
+	vec4 backColor = texture(u_translucent_color, v_texcoord);
 
 	bool isUnmanaged = light.x == 0.0;
 
 	// workaround for end portal glitch
 	// do two checks for false positve prevention
-	isUnmanaged = isUnmanaged || distance(light.rgb + frontAlbedo.rgb, normal.rgb * 2) < 0.015;
+	isUnmanaged = isUnmanaged || distance(light.rgb + frontAlbedo.rgb, backColor.rgb * 2) < 0.015;
 
 	if (isUnmanaged) {
 	// fake TAA that just makes things blurry
@@ -65,8 +66,6 @@ vec4 advancedTranslucentShading(float ec, out float bloom_out) {
 	vec4 frontColor = hdr_shaded_color(
 		v_texcoord, u_translucent_depth, u_light_translucent, u_normal_translucent, u_material_translucent, u_misc_translucent,
 		frontAlbedo, vec3(0.0), 1.0, true, true, 1.0, ec, bloom_out);
-
-	vec4 backColor = texture(u_translucent_color, v_texcoord);
 
 	// reverse forward gl_blend with foreground layer (lossy if clipping)
 	vec3 unblend = frontAlbedo.rgb * frontAlbedo.a;
