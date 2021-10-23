@@ -171,9 +171,11 @@ vec4 hdr_shaded_color(
 	puddle_processColor(a, packedPuddle);
 #endif
 
-	#if BLOCKLIGHT_SPECULAR_MODE == BLOCKLIGHT_SPECULAR_MODE_FANTASTIC
-		preCalc_blockDir = calcBlockDir(slight, uv, v_invSize, normal, viewPos, sdepth);
-	#endif
+#if BLOCKLIGHT_SPECULAR_MODE == BLOCKLIGHT_SPECULAR_MODE_FANTASTIC
+	preCalc_blockDir = calcBlockDir(slight, uv, v_invSize, normal, viewPos, sdepth);
+#endif
+
+	light.y += max(0.0, 1.0 - light.y) * exposureCompensation * 0.8;
 	pbr_shading(a, bloom_out, modelPos, light.xyz, normal, roughness, metallic, f0, diffuse, translucent);
 
 

@@ -16,14 +16,12 @@ uniform sampler2D u_exposure;
 
 out vec4 fragColor;
 
-#define SMOOTHING_FRAMES 50.
-
 void main() {
 #ifdef COMPUTE_EXPOSURE
 	if (frx_renderFrames() < 2u) {
 		fragColor = vec4(max(0.5, frx_eyeBrightness().y));
 	} else {
-		const float a = 1. - exp(-1. / SMOOTHING_FRAMES);
+		const float a = 1. - exp(-1. / EXPOSURE_SMOOTHING_FRAMES);
 
 		float new = textureLod(u_exposure, vec2(0.0), 2).r;
 		float history = textureLod(u_exposure, vec2(0.0), 0).r;

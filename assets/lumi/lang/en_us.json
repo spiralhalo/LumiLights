@@ -53,6 +53,8 @@
 	"config.lumi_lights.help.compute_exposure": "Compute exposure compensation automatically",
 	"config.lumi_lights.value.manual_exposure_relative": "Manual exposure fallback",
 	"config.lumi_lights.help.manual_exposure_relative": "Exposure value to use when auto-exposure is OFF",
+	"config.lumi_lights.value.exposure_smoothing_frames": "Exposure smoothing",
+	"config.lumi_lights.help.exposure_smoothing_frames": "Amount of frames to smoothen the exposure over",
 	"config.lumi_lights.value.bloom_intensity": "Bloom intensity",
 	"config.lumi_lights.help.bloom_intensity": "Intensity of bloom effect around light sources",
 	"config.lumi_lights.value.bloom_scale": "Bloom scale",

@@ -45,6 +45,13 @@
 					nameKey: "config.lumi_lights.value.manual_exposure_relative",
 					descriptionKey: "config.lumi_lights.help.manual_exposure_relative"
 				},
+				exposure_smoothing_frames: {
+					default: 50.0,
+					min: 1.0,
+					max: 200.0,
+					nameKey: "config.lumi_lights.value.exposure_smoothing_frames",
+					descriptionKey: "config.lumi_lights.help.exposure_smoothing_frames"
+				},
 				bloom_intensity: {
 					default: 20,
 					min: 1,
