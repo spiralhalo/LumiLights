@@ -27,12 +27,12 @@ struct cloud_result {
 };
 
 const float CLOUD_MARCH_JITTER_STRENGTH = 1.0;
-const float CLOUD_TEXTURE_ZOOM = 1.0;
+const float CLOUD_TEXTURE_ZOOM = 0.25;
 const float TEXTURE_RADIUS = 512.0;
 const float TEXTURE_RADIUS_RCP = 1.0 / TEXTURE_RADIUS;
-const int NUM_SAMPLE = 6;
+const int NUM_SAMPLE = 8;
 const int LIGHT_SAMPLE = 5; 
-const float LIGHT_ABSORPTION = 0.7;
+const float LIGHT_ABSORPTION = 0.9;
 const float LIGHT_SAMPLE_SIZE = 1.0;
 
 // coordinate helper functions because it won't work properly
@@ -56,8 +56,8 @@ vec2 worldXz2Uv(vec2 worldXz)
 #else
 	const float CLOUD_ALTITUDE = VOLUMETRIC_CLOUD_ALTITUDE;
 #endif
-const float CLOUD_HEIGHT = 50.0 / CLOUD_TEXTURE_ZOOM;
-const float CLOUD_MID_HEIGHT = 20.0;
+const float CLOUD_HEIGHT = 20.0 / CLOUD_TEXTURE_ZOOM;
+const float CLOUD_MID_HEIGHT = CLOUD_HEIGHT * .4;
 const float CLOUD_TOP_HEIGHT = CLOUD_HEIGHT - CLOUD_MID_HEIGHT;
 const float CLOUD_MID_ALTITUDE = CLOUD_ALTITUDE + CLOUD_MID_HEIGHT;
 const float CLOUD_MIN_Y = CLOUD_ALTITUDE;
@@ -72,11 +72,6 @@ float sampleCloud(in vec3 worldPos, in sampler2D scloudTex)
 	vec2 tex = texture(scloudTex, uv).rg; 
 	float tF = tex.r;
 	float hF = tex.g;
-
-#ifdef VOLUMETRIC_CLOUD_ULTRAPUFF
-	hF = sqrt(hF);
-#endif
-
 	float yF = smoothstep(CLOUD_MID_ALTITUDE + CLOUD_TOP_HEIGHT * hF, CLOUD_MID_ALTITUDE, worldPos.y);
 	yF *= smoothstep(CLOUD_MID_ALTITUDE - CLOUD_MID_HEIGHT * hF, CLOUD_MID_ALTITUDE, worldPos.y);
 
@@ -228,7 +223,7 @@ cloud_result rayMarchCloud(in sampler2D scloudTex, in sampler2D sdepth, in sampl
 
 vec4 generateCloudTexture(vec2 texcoord) {
 	float rainCanopy = RAINCLOUD_CANOPY * 0.1;
-	float rainFactor = frx_rainGradient() * 0.8 * rainCanopy + frx_thunderGradient() * 0.2 * rainCanopy;
+	float rainFactor = (frx_rainGradient() * 0.8 + frx_thunderGradient() * 0.2) * rainCanopy;
 	vec2 worldXz = uv2worldXz(texcoord);
 
 #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
@@ -243,20 +238,26 @@ vec4 generateCloudTexture(vec2 texcoord) {
 #endif
 	cloudCoord *= CLOUD_TEXTURE_ZOOM;
 
-	float animatonator = frx_renderSeconds() * 0.05;
-	float cloudBase = l2_clampScale(0.0 - CLOUD_COVERAGE, 0.7 + 0.3 * rainCanopy - rainFactor, snoise(cloudCoord * 0.005) + rainFactor * rainCanopy);
-	float cloud1 = cloudBase * l2_clampScale(0.0, 1.0, wnoise2(cloudCoord * 0.015 + animatonator));
-	float cloud2 = cloud1 * l2_clampScale(-1.0, 1.0, snoise(cloudCoord * 0.04));
-	float cloud3 = cloud2 * l2_clampScale(-1.0, 1.0, snoise(cloudCoord * 0.1));
+	float animatonator = frx_renderSeconds() * 0.01 * CLOUD_TEXTURE_ZOOM;
 
-	float cloud = cloud1 * 0.5 + cloud2 * 0.75 + cloud3 + rainFactor * 0.5 * rainCanopy;
+	const int ITERATIONS = 7;
+	float noiseVal = 0.0;
+	float sum = 0.0;
+	float multiplier = 1.0;
+	for (int i = 0; i < ITERATIONS; i++) {
+		vec2 noisePos = vec2((1 + i * 0.1)/multiplier);
+		noiseVal += multiplier * abs(snoise((cloudCoord * 0.015 + animatonator) * noisePos));
+		sum += multiplier;
+		multiplier *= 0.6;
+	}
+	noiseVal /= sum;
 
-	cloud = l2_clampScale(0.1, 1.0, cloud);
+	float cloud = l2_clampScale(0.35 * (1.0 - rainFactor), 1.0, noiseVal);
 
 	vec2 edge = smoothstep(0.5, 0.4, abs(texcoord - 0.5));
 	float eF = edge.x * edge.y;
 
-	return vec4(cloud * eF, sqrt(1.0 - pow(1.0 - cloud1 * cloud2, 2.0)), 0.0, 1.0);
+	return vec4(cloud * eF, cloud, 0.0, 1.0);
 }
 
 vec4 volumetricCloud(
@@ -281,7 +282,7 @@ vec4 volumetricCloud(
 	float energy = volumetric.lightEnergy;
 
 	float rainBrightness = mix(0.13, 0.05, hdr_fromGammaf(frx_rainGradient())); // simulate dark clouds
-	vec3 cloudShading = atmos_hdrCloudColorRadiance(worldVec) * mix(1.0, smoothstep(-0.5, 0.5, energy), abs(worldVec.y));
+	vec3 cloudShading = atmos_hdrCloudColorRadiance(worldVec);
 	vec3 celestRadiance = atmos_hdrCelestialRadiance();
 
 	if (frx_worldFlag(FRX_WORLD_IS_MOONLIT)) {
@@ -290,7 +291,7 @@ vec4 volumetricCloud(
 
 	vec3 color;
 
-	celestRadiance = celestRadiance * energy * rainBrightness * 0.5;
+	celestRadiance = celestRadiance * energy * rainBrightness * 0.3;
 	color = celestRadiance + cloudShading;
 
 	#if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX

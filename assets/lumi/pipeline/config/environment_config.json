@@ -119,11 +119,6 @@
 					nameKey: "config.lumi_lights.value.cloud_puffiness_relative",
 					descriptionKey: "config.lumi_lights.help.cloud_puffiness_relative"
 				},
-				volumetric_cloud_ultrapuff: {
-					default: false,
-					nameKey: "config.lumi_lights.value.volumetric_cloud_ultrapuff",
-					descriptionKey: "config.lumi_lights.help.volumetric_cloud_ultrapuff"
-				},
 				raincloud_canopy: {
 					default: 4,
 					min: 0,

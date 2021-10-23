@@ -121,10 +121,10 @@ vec3 atmos_hdrSkyGradientRadiance(vec3 world_toSky)
 vec3 atmos_hdrCloudColorRadiance(vec3 world_toSky)
 {
 	//TODO: test non-overworld has_sky_light custom dimension and broaden if fits
-	if (!frx_worldFlag(FRX_WORLD_IS_OVERWORLD)) // this is for nether performance increase mostly
+	if (!frx_worldFlag(FRX_WORLD_IS_OVERWORLD))
 		return atmosv_hdrCloudColorRadiance;
 
-	return mix(atmosv_hdrCloudColorRadiance, atmosv_hdrOWTwilightSkyRadiance, 0.8 * twilightCalc(world_toSky));
+	return mix(atmosv_hdrCloudColorRadiance, atmosv_hdrOWTwilightSkyRadiance, 0.6 * twilightCalc(world_toSky));
 }
 #endif
 
