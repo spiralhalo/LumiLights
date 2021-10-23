@@ -212,7 +212,7 @@ vec4 hdr_shaded_color(
 		a.rgb += hdr_fromGamma(texture_glint(u_glint, misc.xy, bit_unpack(misc.z, 2)));
 	#endif
 
-	if (a.a != 0.0 && depth != 1.0) {
+	if (a.a != 0.0 && depth != 1.0 && (!frx_viewFlag(FRX_CAMERA_IN_WATER) || mostlikelyUnderwater)) {
 		a = fog(light.y, exposureCompensation, v_blindness, a, modelPos, bloom_out);
 	}
 
