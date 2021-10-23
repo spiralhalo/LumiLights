@@ -97,9 +97,10 @@ vec4 advancedTranslucentShading(float ec, out float bloom_out) {
 		vec2 uvSolid = v_texcoord + (texture(u_refraction_uv, v_texcoord).rg * 2.0 - 1.0);
 		uvSolid = clamp(uvSolid, 0.0, 1.0);
 
-		float solidDepth = ldepth(texture(u_solid_depth, uvSolid).r);
+		float solidDepthRaw = texture(u_solid_depth, uvSolid).r;
+		float solidDepth = ldepth(solidDepthRaw);
 		float transDepth = ldepth(texture(u_translucent_depth, v_texcoord).r);
-		float gelatinOpacity = l2_clampScale(0.0, 0.1, solidDepth - transDepth);
+		float gelatinOpacity = solidDepthRaw == 1.0 ? 0.0 : l2_clampScale(0.0, 0.1, solidDepth - transDepth);
 		backColor.rgb = mix(backColor.rgb, frontColor.rgb, gelatinOpacity);
 		finalAlpha += gelatinOpacity * (1.0 - finalAlpha);
 	}

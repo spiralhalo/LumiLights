@@ -255,6 +255,15 @@ rt_ColorDepthBloom work_on_pair(
 	float roughness  = material.x == 0.0 ? 1.0 : min(1.0, 1.0203 * material.x - 0.01);
 	vec3 light       = texture(reflector_light, v_texcoord).xyz;
 	vec3 worldNormal = sample_worldNormal(v_texcoord, reflector_micro_normal);
+	vec3 ray_view  = uv2view(v_texcoord, frx_inverseProjectionMatrix(), reflector_depth);
+
+	// ugly ??
+	if (frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT)) {
+		float vd2 = frx_viewDistance() * frx_viewDistance();
+		float blendToSky = l2_clampScale(vd2 * 0.92, vd2 * 0.96, dot(ray_view, ray_view));
+		roughness += (1.0 - roughness) * blendToSky;
+		fallback *= 1.0 - blendToSky;
+	}
 
 	bool isUnmanaged = roughness == 1.0;
 
@@ -274,7 +283,6 @@ rt_ColorDepthBloom work_on_pair(
 	vec3 jitterRaw = getRandomVec(u_blue_noise, v_texcoord, frxu_size) * 2.0 - 1.0;
 	vec3 jitterPrc = jitterRaw * JITTER_STRENGTH * roughness * roughness;
 
-	vec3 ray_view  = uv2view(v_texcoord, frx_inverseProjectionMatrix(), reflector_depth);
 	vec3 unit_view = normalize(-ray_view);
 	vec3 normal	   = frx_normalModelMatrix() * worldNormal;
 	vec3 unitMarch_view = normalize(reflect(-unit_view, normal) + jitterPrc);
