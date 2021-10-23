@@ -165,7 +165,7 @@ const vec3[3] CELEST_COLOR =  vec3[](SUNRISE_LIGHT_COLOR, NOON_SUNLIGHT_COLOR, v
 const float[3] TWG_FACTOR  = float[](1.0, 0.0, 0.0); // maps celest color to twilight factor
 const int CELEST_LEN = 8;
 const int[CELEST_LEN] CELEST_INDICES = int[]  (SMONC, SRISC, SRISC, SNONC, SNONC, SRISC, SRISC, SMONC);
-const float[CELEST_LEN] CELEST_TIMES = float[](-0.04, -0.03, -0.01,  0.02,  0.48,  0.51,  0.53,  0.54);
+const float[CELEST_LEN] CELEST_TIMES = float[](-0.04, -0.03,  0.01,  0.02,  0.48,  0.49,  0.53,  0.54);
 
 const int DAYC = 0;
 const int NGTC = 1;
