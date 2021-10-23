@@ -35,7 +35,7 @@ const float UNDERWATER_FOG_DENSITY = UNDERWATER_FOG_DENSITY_RELATIVE / 20.0;
 vec4 fog(float skyLight, float ec, float vblindness, vec4 a, vec3 modelPos, inout float bloom)
 {
 	float pFogDensity = frx_viewFlag(FRX_CAMERA_IN_FLUID) ? UNDERWATER_FOG_DENSITY : FOG_DENSITY;
-	float pFogFar	 = frx_viewFlag(FRX_CAMERA_IN_FLUID) ? UNDERWATER_FOG_FAR	 : FOG_FAR;
+	float pFogFar     = frx_viewFlag(FRX_CAMERA_IN_FLUID) ? UNDERWATER_FOG_FAR     : FOG_FAR;
 
 	pFogFar = min(frx_viewDistance(), pFogFar); // clamp to render distance
 

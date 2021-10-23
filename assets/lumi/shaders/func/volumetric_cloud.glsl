@@ -32,7 +32,7 @@ const float TEXTURE_RADIUS = 512.0;
 const float TEXTURE_RADIUS_RCP = 1.0 / TEXTURE_RADIUS;
 const int NUM_SAMPLE = 6;
 const int LIGHT_SAMPLE = 5; 
-const float LIGHT_ABSORPTION = 0.9;
+const float LIGHT_ABSORPTION = 0.7;
 const float LIGHT_SAMPLE_SIZE = 1.0;
 
 // coordinate helper functions because it won't work properly
