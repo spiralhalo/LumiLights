@@ -66,8 +66,7 @@ vec4 fog(float skyLight, float ec, float vblindness, vec4 a, vec3 modelPos, inou
 	fogColor = mix(fogColor, atmos_hdrSkyGradientRadiance(worldVecMod), smoothSkyBlend);
 
 	vec4 blended;
-	blended.rgb = mix(a.rgb, fogColor, fogFactor);
-	blended.a = mix(a.a, 1.0, sqrt(fogFactor));
+	blended = mix(a, vec4(fogColor, 1.0), fogFactor);
 	bloom *= l2_clampScale(0.5, 0.1, fogFactor);
 
 	return blended;
