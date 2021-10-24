@@ -59,8 +59,8 @@ const float USER_NIGHT_AMBIENT_MULTIPLIER  = clamp(NIGHT_AMBIENT_BRIGHTNESS, 0, 
 #if SKY_MODE == SKY_MODE_LUMI
 
 	#if LUMI_SKY_COLOR == LUMI_SKY_COLOR_NATURAL_AZURE
-		#define DEF_DAY_SKY_COLOR hdr_fromGamma(vec3(0.375, 0.55, 0.75))
-		#define DEF_DAY_CLOUD_COLOR hdr_fromGamma(vec3(0.375, 0.55, 0.75))
+		#define DEF_DAY_SKY_COLOR hdr_fromGamma(vec3(0.425, 0.623333, 0.85))
+		#define DEF_DAY_CLOUD_COLOR hdr_fromGamma(vec3(0.425, 0.623333, 0.85))
 	#elif LUMI_SKY_COLOR == LUMI_SKY_COLOR_BRIGHT_CYAN
 		#define DEF_DAY_SKY_COLOR hdr_fromGamma(vec3(0.33, 0.7, 1.0))
 		#define DEF_DAY_CLOUD_COLOR hdr_fromGamma(vec3(0.40, 0.69, 1.0))

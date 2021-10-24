@@ -78,7 +78,7 @@ vec3 atmos_hdrCaveFogRadiance()
 float twilightCalc(vec3 world_toSky) {
 	float isHorizon = calcHorizon(world_toSky);
 	//NB: only works if sun always rise from dead East instead of NE/SE etc.
-	float isTwilight = l2_clampScale(-1.5, .5, world_toSky.x * sign(frx_skyLightVector().x));
+	float isTwilight = l2_clampScale(-1.0, 1.0, world_toSky.x * sign(frx_skyLightVector().x));
 	float result = isTwilight * isHorizon * isHorizon * atmosv_hdrOWTwilightFactor;
 
 	return frx_smootherstep(0., 1., result);
@@ -112,8 +112,7 @@ vec3 atmos_hdrSkyGradientRadiance(vec3 world_toSky)
 	float skyHorizon = calcHorizon(world_toSky);
 	float brighteningCancel = min(1., atmosv_hdrOWTwilightFactor * .6 + frx_rainGradient() * .6);
 	float brightenFactor = pow(skyHorizon, 20.) * (1. - brighteningCancel);
-	float darkenFactor = abs(world_toSky.y);
-	float horizonBrightening = 1. + 2. * brightenFactor - darkenFactor * .6;
+	float horizonBrightening = 1. + 5. * brightenFactor;
 
 	return mix(atmosv_hdrSkyColorRadiance, atmosv_hdrOWTwilightSkyRadiance, twilightCalc(world_toSky)) * horizonBrightening;
 }
@@ -312,13 +311,16 @@ void atmos_generateAtmosphereModel()
 
 
 	/** CAVE FOG **/
-	
-	atmosv_hdrCaveFogRadiance = mix(CAVEFOG_C, CAVEFOG_DEEPC, l2_clampScale(CAVEFOG_MAXY, CAVEFOG_MINY, frx_cameraPos().y));
+	if (frx_worldFlag(FRX_WORLD_IS_OVERWORLD)) {
+		atmosv_hdrCaveFogRadiance = mix(CAVEFOG_C, CAVEFOG_DEEPC, l2_clampScale(CAVEFOG_MAXY, CAVEFOG_MINY, frx_cameraPos().y));
 
-	float fogL = frx_luminance(atmosv_hdrFogColorRadiance);
-	float caveL = frx_luminance(atmosv_hdrCaveFogRadiance);
+		float fogL = frx_luminance(atmosv_hdrFogColorRadiance);
+		float caveL = frx_luminance(atmosv_hdrCaveFogRadiance);
 
-	atmosv_hdrCaveFogRadiance *= max(fogL, CAVEFOG_STR) / caveL;
+		atmosv_hdrCaveFogRadiance *= max(fogL, CAVEFOG_STR) / caveL;
+	} else {
+		atmosv_hdrCaveFogRadiance = atmosv_hdrFogColorRadiance;
+	}
 	/**********/
 }
 #endif

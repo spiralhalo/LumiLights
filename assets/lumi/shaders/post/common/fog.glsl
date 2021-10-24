@@ -10,23 +10,10 @@
  *  published by the Free Software Foundation, Inc.
  *******************************************************/
 
-/* DEVNOTE: on high skyscrapers, high fog look good
- * on low forests however, the high fog looks atrocious.
- * the ideal solution would be a fog that is "highest block-conscious"
- * but how is that possible? Make sky bloom cancel out the fog, perhaps?
- *
- * There is also the idea of making the fog depend on where
- * you look vertically, but that would be NAUSEATINGLY BAD.
- */
-
-#define SEA_LEVEL 62.0
-
 // #define FOG_NOISE_SCALE 0.125
 // #define FOG_NOISE_SPEED 0.25
 // #define FOG_NOISE_HEIGHT 4.0
 
-const float FOG_TOP = SEA_LEVEL + 64.0;
-const float FOG_TOP_THICK = SEA_LEVEL + 128.0;
 const float FOG_FAR = FOG_FAR_CHUNKS * 16.0;
 const float FOG_DENSITY = FOG_DENSITY_RELATIVE / 20.0;
 const float UNDERWATER_FOG_FAR = UNDERWATER_FOG_FAR_CHUNKS * 16.0;
@@ -54,61 +41,34 @@ vec4 fog(float skyLight, float ec, float vblindness, vec4 a, vec3 modelPos, inou
 		pFogDensity = mix(min(1.0, pFogDensity * 2.0), min(0.8, pFogDensity), inverseThickener);
 	}
 
-
 	float fogFactor = pFogDensity;
 
-	// additive fog when it's not blindness or fluid related
-	bool useAdditive = !frx_viewFlag(FRX_CAMERA_IN_WATER);
-
 	if (frx_playerHasEffect(FRX_EFFECT_BLINDNESS)) {
-		useAdditive = false;
 		pFogFar = mix(pFogFar, 3.0, vblindness);
 		fogFactor = mix(fogFactor, 1.0, vblindness);
 	}
 
 	if (frx_viewFlag(FRX_CAMERA_IN_LAVA)) {
-		useAdditive = false;
 		pFogFar = frx_playerHasEffect(FRX_EFFECT_FIRE_RESISTANCE) ? 2.5 : 0.5;
 		fogFactor = 1.0;
 	}
 
 	float distToCamera = length(modelPos);
-	float pfCave = 1.0;
-
-	float distFactor;
-
-	distFactor = min(1.0, distToCamera / pFogFar);
-	distFactor *= distFactor;
-
+	float distFactor = min(1.0, distToCamera / pFogFar);
 	fogFactor = clamp(fogFactor * distFactor, 0.0, 1.0);
-	fogFactor *= (EXPOSURE_CANCELLATION, 1.0, ec);
 
+	float aboveGround = l2_clampScale(0.0, 0.2, max(skyLight, frx_eyeBrightness().y));
 	vec3 worldVec = normalize(modelPos);
-	vec4 fogColor = vec4(atmos_hdrFogColorRadiance(worldVec), 1.0);
+	vec3 fogColor = mix(atmos_hdrCaveFogRadiance(), atmos_hdrFogColorRadiance(worldVec), aboveGround);
+	float smoothSkyBlend = frx_viewFlag(FRX_CAMERA_IN_FLUID) ? 0.0 : min(distToCamera, frx_viewDistance()) / frx_viewDistance() * aboveGround;
+	vec3 worldVecMod = worldVec;
+	worldVecMod.y = mix(1.0, worldVecMod.y, pow(smoothSkyBlend, 0.3));
+	fogColor = mix(fogColor, atmos_hdrSkyGradientRadiance(worldVecMod), smoothSkyBlend);
 
 	vec4 blended;
-
-	if (useAdditive) {
-		float darkenFactor = 1.0;
-
-		if (frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) && !frx_viewFlag(FRX_CAMERA_IN_FLUID)) {
-			darkenFactor = 1.0 - abs(worldVec.y) * 0.7;
-		}
-
-		fogFactor *= darkenFactor;
-
-		float darkness = frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? l2_clampScale(0.1, 0.0, skyLight) : 0.0;
-
-		darkness *= smoothstep(0.5, 0.25, ec);
-
-		fogColor.rgb = mix(fogColor.rgb, atmos_hdrCaveFogRadiance(), darkness);
-
-		blended = vec4(a.rgb + fogColor.rgb * fogFactor, a.a + max(0.0, 1.0 - a.a) * fogFactor);
-	} else {
-		blended = mix(a, fogColor, fogFactor);
-	}
-
-	bloom = mix(bloom, 0.0, fogFactor);
+	blended.rgb = mix(a.rgb, fogColor, fogFactor);
+	blended.a = mix(a.a, 1.0, sqrt(fogFactor));
+	bloom *= l2_clampScale(0.5, 0.1, fogFactor);
 
 	return blended;
 }
