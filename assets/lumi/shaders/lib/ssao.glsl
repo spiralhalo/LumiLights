@@ -110,7 +110,9 @@ vec4 calcSSAO(
 	occlusion *= averager;
 	occlusion = clamp(pow(1.0 - occlusion, 1.0 + intensity), 0.0, 1.0);
 
-	return vec4(emission, occlusion);
+	float antiDarkening = (1.0 - occlusion) * abs(normal_view.y) * l2_clampScale(8.0, 16.0, -origin_view.z);
+
+	return vec4(emission, occlusion + antiDarkening);
 }
 
 #endif
