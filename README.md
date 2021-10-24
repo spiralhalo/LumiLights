@@ -1,22 +1,23 @@
 # Lumi Lights 
-![Lumi Lights](https://github.com/spiralhalo/spiralhalo.github.io/raw/main/img/screen0.png)
+![Lumi Lights](https://github.com/spiralhalo/spiralhalo.github.io/raw/main/img/screen2.jpg)
 
 A custom rendering pipeline for Canvas for improved visual fidelity.
 
 ## Features
 
-- Bloom
-- Canvas features support
-- Enchantment glint shader
-- Improved lighting
-- Realistic water
+- Animated reflective water
+- Bloom effect
+- Customizable colors
+- Directional sun lighting
+- PBR/HDR shading
+- Procedural sky
+- Refraction and caustics effect
 - Screenspace AO
-- Screenspace godrays
 - Screenspace reflections
 - Temporal AA
-- True darkness option
-- Volumetric fog
+- Toon outline and other novelty effects
 - Volumetric clouds
+- Volumetric light rays
 
 ## Downloads
 
