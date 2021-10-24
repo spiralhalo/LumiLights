@@ -260,7 +260,7 @@ rt_ColorDepthBloom work_on_pair(
 	// ugly ??
 	if (frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT)) {
 		float vd2 = frx_viewDistance() * frx_viewDistance();
-		float blendToSky = l2_clampScale(vd2 * 0.92, vd2 * 0.96, dot(ray_view, ray_view));
+		float blendToSky = l2_clampScale(vd2 * 0.85, vd2 * (0.86 +  0.14 * HORIZON_BLEND), dot(ray_view, ray_view));
 		roughness += (1.0 - roughness) * blendToSky;
 		fallback *= 1.0 - blendToSky;
 	}

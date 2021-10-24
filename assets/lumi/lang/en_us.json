@@ -121,6 +121,8 @@
 	"config.lumi_lights.help.cloud_puffiness_relative": "Volumetric clouds puffiness",
 	"config.lumi_lights.value.volumetric_cloud_ultrapuff": "Volumetric clouds - Ultra puff",
 	"config.lumi_lights.help.volumetric_cloud_ultrapuff": "When regular puffiness don't suffice",
+	"config.lumi_lights.value.cloud_brightness_relative": "Clouds brightness",
+	"config.lumi_lights.help.cloud_brightness_relative": "Brightness of the clouds",
 	"config.lumi_lights.value.raincloud_canopy": "Raincloud coverage",
 	"config.lumi_lights.help.raincloud_canopy": "Amount of additional cloud coverage during rain",
 
@@ -139,6 +141,8 @@
 	"config.lumi_lights.help.underwater_fog_far_chunks": "Distance where fog gets the thickest in chunks (underwater)",
 	"config.lumi_lights.value.underwater_fog_density_relative": "Underwater fog density",
 	"config.lumi_lights.help.underwater_fog_density_relative": "Overall density of underwater fog",
+	"config.lumi_lights.value.horizon_blend_relative": "Horizon blending",
+	"config.lumi_lights.help.horizon_blend_relative": "Smoothness of blending with the sky on the horizon",
 
 	"config.lumi_lights.category.aesthetics": "Miscellaneous",
 	"config.lumi_lights.value.hurt_mode": "Hurt entity rendering",

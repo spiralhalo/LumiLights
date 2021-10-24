@@ -65,6 +65,7 @@ const float CLOUD_MAX_Y = CLOUD_ALTITUDE + CLOUD_HEIGHT;
 
 const float CLOUD_COVERAGE = clamp(CLOUD_COVERAGE_RELATIVE * 0.1, 0.0, 1.0);
 const float CLOUD_PUFFINESS = clamp(CLOUD_PUFFINESS_RELATIVE * 0.1, 0.0, 1.0);
+const float CLOUD_BRIGHTNESS = clamp(CLOUD_BRIGHTNESS_RELATIVE * 0.1, 0.0, 1.0);
 
 float sampleCloud(in vec3 worldPos, in sampler2D scloudTex)
 {
@@ -291,7 +292,7 @@ vec4 volumetricCloud(
 
 	vec3 color;
 
-	celestRadiance = celestRadiance * energy * rainBrightness * 0.3;
+	celestRadiance = celestRadiance * energy * rainBrightness * CLOUD_BRIGHTNESS;
 	color = celestRadiance + cloudShading;
 
 	#if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
