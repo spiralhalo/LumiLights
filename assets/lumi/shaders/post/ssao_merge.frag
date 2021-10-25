@@ -22,9 +22,9 @@ out vec4 fragColor;
 void main()
 {
 #ifdef SSAO_ENABLED
-	vec2 deltaRes = v_invSize;
+	vec2 deltaRes  = v_invSize;
 	vec2 currentUv = v_texcoord;
-	vec2 velocity = fastVelocity(u_depth, v_texcoord);
+	vec2 velocity  = fastVelocity(u_depth, v_texcoord);
 
 	vec4 min2 = vec4(1.0);
 	vec4 max2 = vec4(0.0);
@@ -37,8 +37,7 @@ void main()
 
 	vec4 current = texture(u_input, currentUv);
 	vec4 history = texture(u_history, currentUv - velocity);
-
-	history = clip_aabb_rgba(min2, max2, current, history);
+	     history = clip_aabb_rgba(min2, max2, current, history);
 
 	fragColor = mix(current, history, 0.9);
 #else

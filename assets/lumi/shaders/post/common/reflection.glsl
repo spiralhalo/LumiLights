@@ -255,7 +255,7 @@ rt_ColorDepthBloom work_on_pair(
 	float roughness  = material.x == 0.0 ? 1.0 : min(1.0, 1.0203 * material.x - 0.01);
 	vec3 light       = texture(reflector_light, v_texcoord).xyz;
 	vec3 worldNormal = sample_worldNormal(v_texcoord, reflector_micro_normal);
-	vec3 ray_view  = uv2view(v_texcoord, frx_inverseProjectionMatrix(), reflector_depth);
+	vec3 ray_view    = uv2view(v_texcoord, frx_inverseProjectionMatrix(), reflector_depth);
 
 	// ugly ??
 	if (frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT)) {

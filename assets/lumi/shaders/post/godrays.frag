@@ -43,32 +43,28 @@ void main() {
 
 	if (v_godray_intensity > 0.0) {
 		vec4 worldPos = frx_inverseViewProjectionMatrix() * vec4(v_texcoord * 2.0 - 1.0, min_depth * 2.0 - 1.0, 1.0);
-
 		worldPos.xyz /= worldPos.w;
 
 		float tileJitter = getRandomFloat(u_blue_noise, v_texcoord, frxu_size);
-
 		bool screenSpace = false;
 
-	#if !defined(SHADOW_MAP_PRESENT) || LIGHTRAYS_MODE == LIGHTRAYS_MODE_SCREENSPACE
+		#if !defined(SHADOW_MAP_PRESENT) || LIGHTRAYS_MODE == LIGHTRAYS_MODE_SCREENSPACE
 		screenSpace = !frx_viewFlag(FRX_CAMERA_IN_WATER);
-	#endif
+		#endif
 
 		float sunHorizon = smoothstep(0.3, 0.2, frx_skyLightVector().y);
-		float modEC = smoothstep(0.0, 0.25 + sunHorizon * 0.75, ec);
-		float exposure =  (1.0 - modEC) * LIGHT_RAYS_STR;
+		float modEC      = smoothstep(0.0, 0.25 + sunHorizon * 0.75, ec);
+		float exposure   = (1.0 - modEC) * LIGHT_RAYS_STR;
 
 		if (screenSpace) {
 			float scatter = smoothstep(-1.0, 0.5, dot(normalize(worldPos.xyz), frx_skyLightVector()));
-
-			scatter *= max(0.0, dot(frx_cameraView(), frx_skyLightVector()));
+				 scatter *= max(0.0, dot(frx_cameraView(), frx_skyLightVector()));
 
 			// note: kinda buggy, flickers in some scenes
 			godBeam = godrays(16, u_depth, tileJitter, v_skylightpos, v_texcoord, frxu_size) * exposure * scatter;
 		} else {
 			float yLight = texture(u_light_solid, v_texcoord).y;
-
-			yLight = max(yLight, texture(u_light_translucent, v_texcoord).y);
+				  yLight = max(yLight, texture(u_light_translucent, v_texcoord).y);
 
 			godBeam = celestialLightRays(u_shadow, worldPos.xyz, exposure, yLight, tileJitter, depth_translucent, min_depth);
 		}

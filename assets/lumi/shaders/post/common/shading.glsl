@@ -27,27 +27,22 @@ vec3 coords_view(vec2 uv, mat4 inv_projection, float depth)
 	return view.xyz / view.w;
 }
 
-vec2 coords_uv(vec3 view, mat4 projection)
-{
-	vec4 clip = projection * vec4(view, 1.0);
-	clip.xyz /= clip.w;
-	return clip.xy * 0.5 + 0.5;
-}
-
 vec4 unmanaged(in vec4 a, out float bloom_out, bool translucent) {
 	// bypass unmanaged translucent draw (LITEMATICA WORKAROUND)
 	// bypass unmanaged solid sky draw (fix debug rendering color)
 	// rationale: light.x is always at least 0.03125 for managed draws
 	//			this might not always hold up in the future.
 	#if OVERLAY_DEBUG == OVERLAY_DEBUG_NEON || OVERLAY_DEBUG == OVERLAY_DEBUG_DISCO
-		bloom_out = step(0.01, a.a);
-		a.r += a.g * 0.25;
-		a.b += a.g * 0.5;
-		a.g *= 0.25;
+	bloom_out = step(0.01, a.a);
+	a.r += a.g * 0.25;
+	a.b += a.g * 0.5;
+	a.g *= 0.25;
 	#endif
+
 	#if OVERLAY_DEBUG == OVERLAY_DEBUG_DISCO
-		a.rgb *= 0.25 + 0.75 * fract(frx_renderSeconds()*2.0);
+	a.rgb *= 0.25 + 0.75 * fract(frx_renderSeconds()*2.0);
 	#endif
+
 	// marker for unmanaged draw
 	a.a = translucent ? a.a : 0.0;
 	return a;
@@ -62,17 +57,18 @@ vec4 hdr_shaded_color(
 	vec4 albedo_alpha, vec3 emissionRadiance, float aoval, bool translucent, bool translucentIsWater, float translucentDepth,
 	float exposureCompensation, out float bloom_out)
 {
-	vec4  a = albedo_alpha;
+	vec4 a = albedo_alpha;
 
 	if (translucent && a.a == 0.) return vec4(0.);
 
-	float depth   = texture(sdepth, uv).r;
-	vec3  viewPos = coords_view(uv, frx_inverseProjectionMatrix(), depth);
+	float depth    = texture(sdepth, uv).r;
+	vec3  viewPos  = coords_view(uv, frx_inverseProjectionMatrix(), depth);
 	vec3  modelPos = coords_view(uv, frx_inverseViewProjectionMatrix(), depth);
-	vec3  worldPos  = frx_cameraPos() + modelPos;
-	bool maybeUnderwater = false;
+	vec3  worldPos = frx_cameraPos() + modelPos;
+
+	bool maybeUnderwater      = false;
 	bool mostlikelyUnderwater = false;
-	
+
 	if (frx_viewFlag(FRX_CAMERA_IN_WATER)) {
 		if (translucent) {
 			maybeUnderwater = true;
@@ -81,7 +77,7 @@ vec4 hdr_shaded_color(
 		}
 		mostlikelyUnderwater = maybeUnderwater;
 	} else {
-		maybeUnderwater = translucentDepth < depth;
+		maybeUnderwater      = translucentDepth < depth;
 		mostlikelyUnderwater = maybeUnderwater && translucentIsWater;
 	}
 
@@ -93,26 +89,26 @@ vec4 hdr_shaded_color(
 		return vec4(a.rgb * 1.0 - v_blindness, 1.0);
 	}
 
-	vec4  light = texture(slight, uv);
+	vec4 light = texture(slight, uv);
 
 	if (light.x == 0.0) {
 		return unmanaged(a, bloom_out, translucent);
 	}
 
-	vec4  rawMicroNormal = texture(smicronormal, uv);
-	vec3  normal	= rawMicroNormal.xyz * 2.0 - 1.0;
+	vec4  rawMicroN = texture(smicronormal, uv);
+	vec3  normal	= rawMicroN.xyz * 2.0 - 1.0;
 	vec3  material  = texture(smaterial, uv).xyz;
 	float roughness = material.x == 0.0 ? 1.0 : min(1.0, 1.0203 * material.x - 0.01);
 	float metallic  = material.y;
 	float f0		= material.z;
 	float bloom_raw = light.z * 2.0 - 1.0;
 	bool  diffuse   = material.x < 1.0;
-	vec3  misc	  = texture(smisc, uv).xyz;
+	vec3  misc      = texture(smisc, uv).xyz;
 	float matflash  = bit_unpack(misc.z, 0);
 	float mathurt   = bit_unpack(misc.z, 1);
 	// return vec4(coords_view(uv, frx_inverseProjectionMatrix(), depth), 1.0);
 
-	// Support vanilla emissive
+	// Support vanilla emissive // TODO: make configurable
 	if (light.x > 0.93625) {
 		light.x = 0.93625;
 		bloom_raw = 1.0;
@@ -120,53 +116,52 @@ vec4 hdr_shaded_color(
 
 	light.y = lightmapRemap(light.y);
 
-	#ifdef SHADOW_MAP_PRESENT
-		#ifdef TAA_ENABLED
-			vec2 uvJitter = taa_jitter(v_invSize);
-			vec4 unjitteredModelPos = frx_inverseViewProjectionMatrix() * vec4(2.0 * uv - uvJitter - 1.0, 2.0 * depth - 1.0, 1.0);
-			vec4 shadowViewPos = frx_shadowViewMatrix() * vec4(unjitteredModelPos.xyz/unjitteredModelPos.w, 1.0);
-		#else
-			vec4 shadowViewPos = frx_shadowViewMatrix() * vec4(worldPos - frx_cameraPos(), 1.0);
-		#endif
-
-		float shadowFactor = calcShadowFactor(u_shadow, shadowViewPos);
-		// workaround for janky shadow on edges of things (hardly perfect, better than nothing)
-		shadowFactor = mix(shadowFactor, simpleShadowFactor(u_shadow, shadowViewPos), step(0.99, shadowFactor));
-
-		light.z = shadowFactor;
-	#ifdef SHADOW_WORKAROUND
-		// Workaround to fix patches in shadow map until it's FLAWLESS
-		light.z *= l2_clampScale(0.03125, 0.04, light.y);
-	#endif
+#ifdef SHADOW_MAP_PRESENT
+	#ifdef TAA_ENABLED
+	vec2 uvJitter	   = taa_jitter(v_invSize);
+	vec4 unjitteredPos = frx_inverseViewProjectionMatrix() * vec4(2.0 * uv - uvJitter - 1.0, 2.0 * depth - 1.0, 1.0);
+	vec4 shadowViewPos = frx_shadowViewMatrix() * vec4(unjitteredPos.xyz / unjitteredPos.w, 1.0);
 	#else
-		light.z = hdr_fromGammaf(light.y);
+	vec4 shadowViewPos = frx_shadowViewMatrix() * vec4(worldPos - frx_cameraPos(), 1.0);
 	#endif
+
+	float shadowFactor = calcShadowFactor(u_shadow, shadowViewPos);
+	// workaround for janky shadow on edges of things (hardly perfect, better than nothing)
+	      shadowFactor = mix(shadowFactor, simpleShadowFactor(u_shadow, shadowViewPos), step(0.99, shadowFactor));
+
+	light.z = shadowFactor;
+
+	#ifdef SHADOW_WORKAROUND
+	// Workaround to fix patches in shadow map until it's FLAWLESS
+	light.z *= l2_clampScale(0.03125, 0.04, light.y);
+	#endif
+#else
+	light.z = hdr_fromGammaf(light.y);
+#endif
 
 	float causticLight = 0.0;
 
-	#ifdef WATER_CAUSTICS
-		if (mostlikelyUnderwater && frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT)) {
-			causticLight = caustics(worldPos);
-			causticLight = pow(causticLight, 15.0);
-			causticLight *= smoothstep(0.0, 1.0, light.y);
-		}
-	#endif
+#ifdef WATER_CAUSTICS
+	if (mostlikelyUnderwater && frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT)) {
+		causticLight  = caustics(worldPos);
+		causticLight  = pow(causticLight, 15.0);
+		causticLight *= smoothstep(0.0, 1.0, light.y);
+	}
+#endif
 
-	#ifdef SHADOW_MAP_PRESENT
-		causticLight *= light.z;
+#ifdef SHADOW_MAP_PRESENT
+	causticLight *= light.z; // TODO: can improve?
 
-		if (maybeUnderwater || frx_viewFlag(FRX_CAMERA_IN_WATER)) {
-			light.z *= hdr_fromGammaf(light.y);
-		}
-	#endif
+	if (maybeUnderwater || frx_viewFlag(FRX_CAMERA_IN_WATER)) {
+		light.z *= hdr_fromGammaf(light.y);
+	}
+#endif
 
 	light.z += causticLight;
-
 	bloom_out = max(0.0, bloom_raw);
 
 #ifdef RAIN_PUDDLES
-	float packedPuddle = rawMicroNormal.a;
-
+	float packedPuddle = rawMicroN.a;
 	puddle_processRoughness(roughness, packedPuddle);
 	puddle_processColor(a, packedPuddle);
 #endif
@@ -182,16 +177,18 @@ vec4 hdr_shaded_color(
 
 
 #if AMBIENT_OCCLUSION != AMBIENT_OCCLUSION_NO_AO
-	#if AMBIENT_OCCLUSION != AMBIENT_OCCLUSION_PURE_SSAO
-		float ao_shaded = 1.0 + min(0.0, bloom_raw);
+	#if AMBIENT_OCCLUSION != AMBIENT_OCCLUSION_PURE_SSAO //TODO: change to VANILA_AO_ENABLED
+	float ao_shaded = 1.0 + min(0.0, bloom_raw);
 	#else
-		float ao_shaded = 1.0;
+	float ao_shaded = 1.0;
 	#endif
-#ifdef SSAO_ENABLED
+
+	#ifdef SSAO_ENABLED
 	float ssao = mix(aoval, 1.0, min(bloom_out, 1.0));
-#else
+	#else
 	float ssao = 1.;
-#endif
+	#endif
+
 	a.rgb += emissionRadiance * EMISSIVE_LIGHT_STR;
 	a.rgb *= ao_shaded * ssao;
 #endif
@@ -208,17 +205,17 @@ vec4 hdr_shaded_color(
 
 	a.a = min(1.0, a.a);
 
-	#if GLINT_MODE == GLINT_MODE_GLINT_SHADER
-		a.rgb += hdr_fromGamma(noise_glint(misc.xy, bit_unpack(misc.z, 2)));
-	#else
-		a.rgb += hdr_fromGamma(texture_glint(u_glint, misc.xy, bit_unpack(misc.z, 2)));
-	#endif
+#if GLINT_MODE == GLINT_MODE_GLINT_SHADER
+	a.rgb += hdr_fromGamma(noise_glint(misc.xy, bit_unpack(misc.z, 2)));
+#else
+	a.rgb += hdr_fromGamma(texture_glint(u_glint, misc.xy, bit_unpack(misc.z, 2)));
+#endif
 
 	if (a.a != 0.0 && depth != 1.0 && (!frx_viewFlag(FRX_CAMERA_IN_WATER) || mostlikelyUnderwater)) {
 		a = fog(light.y, exposureCompensation, v_blindness, a, modelPos, bloom_out);
 	}
 
-	// ugly ??
+	// ugly ?? TODO: make common function
 	if (frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) && !frx_viewFlag(FRX_CAMERA_IN_FLUID)) {
 		float vd2 = frx_viewDistance() * frx_viewDistance();
 		float blendToSky = l2_clampScale(vd2 * 0.85, vd2 * (0.86 +  0.14 * HORIZON_BLEND), dot(modelPos, modelPos)) * (1.0 - v_blindness);

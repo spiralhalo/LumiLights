@@ -35,24 +35,54 @@ out vec4 fragColor[2];
 
 void main()
 {
-	vec4 source_base = texture(u_source_color, v_texcoord);
-	vec3 source_albedo = hdr_fromGamma(texture(u_source_albedo, v_texcoord).rgb);
+	vec4 source_base	   = texture(u_source_color, v_texcoord);
+	vec3 source_albedo     = hdr_fromGamma(texture(u_source_albedo, v_texcoord).rgb);
 	float source_roughness = texture(u_material_source, v_texcoord).x;
-	rt_ColorDepthBloom source_source = work_on_pair(source_base, source_albedo, u_source_depth, u_light_source, u_normal_source, u_normal_micro_source, u_material_source, u_source_color, u_source_depth, u_light_source, u_normal_source, 1.0, true);
-	#if REFLECTION_PROFILE != REFLECTION_PROFILE_NONE
-		rt_ColorDepthBloom source_target = work_on_pair(source_base, source_albedo, u_source_depth, u_light_source, u_normal_source, u_normal_micro_source, u_material_source, u_target_color, u_target_depth, u_light_target, u_normal_target, 0.0, true);
-		// blend
-		vec4 reflection_color = (source_source.depth < source_target.depth)
-			? (vec4(source_source.color.rgb, source_source.bloom) * source_source.color.a
-				+ vec4(source_target.color.rgb, source_target.bloom) * (1.0 - source_source.color.a))
-			: (vec4(source_source.color.rgb, source_source.bloom) * (1.0 - source_target.color.a)
-				+ vec4(source_target.color.rgb, source_target.bloom) * source_target.color.a);
-		// with anti-banding
-		fragColor[0] = vec4(sqrt(clamp(reflection_color.rgb, 0., 1.)), source_roughness);
-		fragColor[1] = vec4(reflection_color.a, 0.0, 0.0, 1.0);
-	#else
-		// with anti-banding
-		fragColor[0] = vec4(sqrt(clamp(source_source.color.rgb, 0., 1.)), source_roughness);
-		fragColor[1] = vec4(source_source.bloom, 0.0, 0.0, 1.0);
-	#endif
+
+	rt_ColorDepthBloom source_source = work_on_pair(
+		source_base,
+		source_albedo,
+		u_source_depth,
+		u_light_source,
+		u_normal_source,
+		u_normal_micro_source,
+		u_material_source,
+
+		u_source_color,
+		u_source_depth,
+		u_light_source,
+		u_normal_source,
+		1.0,
+		true);
+
+#if REFLECTION_PROFILE != REFLECTION_PROFILE_NONE
+	rt_ColorDepthBloom source_target = work_on_pair(source_base,
+		source_albedo,
+		u_source_depth,
+		u_light_source,
+		u_normal_source,
+		u_normal_micro_source,
+		u_material_source,
+
+		u_target_color,
+		u_target_depth,
+		u_light_target,
+		u_normal_target,
+		0.0,
+		true);
+
+	// blend
+	vec4 reflection_color = (source_source.depth < source_target.depth)
+						  ? ( vec4(source_source.color.rgb, source_source.bloom) * source_source.color.a +
+						      vec4(source_target.color.rgb, source_target.bloom) * (1.0 - source_source.color.a))
+						  : ( vec4(source_source.color.rgb, source_source.bloom) * (1.0 - source_target.color.a) +
+						      vec4(source_target.color.rgb, source_target.bloom) * source_target.color.a);
+	// with anti-banding
+	fragColor[0] = vec4(sqrt(clamp(reflection_color.rgb, 0., 1.)), source_roughness);
+	fragColor[1] = vec4(reflection_color.a, 0.0, 0.0, 1.0);
+#else
+	// with anti-banding
+	fragColor[0] = vec4(sqrt(clamp(source_source.color.rgb, 0., 1.)), source_roughness);
+	fragColor[1] = vec4(source_source.bloom, 0.0, 0.0, 1.0);
+#endif
 }

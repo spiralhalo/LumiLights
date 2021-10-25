@@ -83,38 +83,41 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
 		float diffuse = mix(pv_diffuse, 1, fragData.emissivity);
 		// diffuse = frx_isGui() ? diffuse : min(1.0, 1.5 - diffuse);
 		diffuse = fragData.diffuse ? diffuse : 1.0;
-		a.rgb *= diffuse;
+		a.rgb  *= diffuse;
+
 		#if GLINT_MODE == GLINT_MODE_GLINT_SHADER
-			a.rgb += noise_glint(frx_normalizeMappedUV(frx_texcoord), frx_matGlint());
+		a.rgb += noise_glint(frx_normalizeMappedUV(frx_texcoord), frx_matGlint());
 		#else
-			a.rgb += texture_glint(u_glint, frx_normalizeMappedUV(frx_texcoord), frx_matGlint());
+		a.rgb += texture_glint(u_glint, frx_normalizeMappedUV(frx_texcoord), frx_matGlint());
 		#endif
 
 	} else {
 
 		if (pbr_isWater) {
 			/* WATER RECOLOR */
-		#if WATER_COLOR == WATER_COLOR_NO_TEXTURE
-			a.rgb = fragData.vertexColor.rgb;
-			a.rb *= fragData.vertexColor.rb;
+			#if WATER_COLOR == WATER_COLOR_NO_TEXTURE
+			a.rgb  = fragData.vertexColor.rgb;
+			a.rb  *= fragData.vertexColor.rb;
 			float blue = fragData.vertexColor.b * fragData.vertexColor.b;
 			a.rgb += blue * 0.25;
 			a.rgb *= (1.0 - 0.5 * blue);
-			fragData.spriteColor.a = 0.3;
-		#elif WATER_COLOR == WATER_COLOR_NO_COLOR
+			fragData.spriteColor.a = 0.3; //TODO: broken; fix
+
+			#elif WATER_COLOR == WATER_COLOR_NO_COLOR
 			a.rgb = vec3(0.0);
-			fragData.spriteColor.a = 0.2;
-		#elif WATER_COLOR == WATER_COLOR_NATURAL_BLUE
-			a.rb *= fragData.vertexColor.rb;
+			fragData.spriteColor.a = 0.2; //TODO: broken; fix
+
+			#elif WATER_COLOR == WATER_COLOR_NATURAL_BLUE
+			a.rb  *= fragData.vertexColor.rb;
 			float blue = fragData.vertexColor.b * fragData.vertexColor.b;
 			a.rgb += blue * 0.25;
 			a.rgb *= (1.0 - 0.5 * blue);
-			a.a *= 0.6;
-		#endif
+			a.a   *= 0.6;
+			#endif
 		}
 
-		bool maybeHand = frx_modelOriginType() == MODEL_ORIGIN_SCREEN;
-		bool isParticle = (frx_renderTarget() == TARGET_PARTICLES);
+		bool maybeHand  = frx_modelOriginType() == MODEL_ORIGIN_SCREEN;
+		bool isParticle = frx_renderTarget()    == TARGET_PARTICLES;
 
 		vec3 normal = fragData.vertexNormal;
 
@@ -124,9 +127,9 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
 			pbr_tangent = vec3(0.);
 		}
 
-		float bloom = fragData.emissivity * a.a;
-		float ao = fragData.ao ? (1.0 - fragData.aoShade) * a.a : 0.0;
-		float normalizedBloom = (bloom - ao) * 0.5 + 0.5;
+		float bloom   = fragData.emissivity * a.a;
+		float ao	  = fragData.ao ? (1.0 - fragData.aoShade) * a.a : 0.0;
+		float bloomAo = (bloom - ao) * 0.5 + 0.5;
 
 		vec3 packedNormal;
 
@@ -148,7 +151,7 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
 		float bitFlags = bit_pack(frx_matFlash() ? 1. : 0., frx_matHurt() ? 1. : 0., frx_matGlint(), 0., 0., 0., 0., pbr_isWater ? 1. : 0.);
 
 		// PERF: view normal, more useful than world normal
-		fragColor[1] = vec4(fragData.light.xy, (isParticle || maybeHand) ? bloom : normalizedBloom, 1.0);
+		fragColor[1] = vec4(fragData.light.xy, (isParticle || maybeHand) ? bloom : bloomAo, 1.0);
 		fragColor[2] = vec4(packedNormal, 1.0);
 		fragColor[3] = vec4(pbr_normalMicro, 1.0);
 		fragColor[4] = vec4(roughness, pbr_metallic, pbr_f0, 1.0);
@@ -158,10 +161,10 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
 			fragColor[6] = vec4(a.rgb, 1.0);
 			fragColor[7] = vec4(a.a, 0.0, 0.0, 1.0);
 
-		#if TRANSLUCENT_LAYERING == TRANSLUCENT_LAYERING_FANCY
+			#if TRANSLUCENT_LAYERING == TRANSLUCENT_LAYERING_FANCY
 			// apply semi-real diffuse in forward
 			a.rgb *= calcLuminosity(normal, fragData.light, a.a);
-		#endif
+			#endif
 		}
 	}
 

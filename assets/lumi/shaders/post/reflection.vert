@@ -42,8 +42,10 @@ void main()
 	v_cloud_rotator = computeCloudRotator();
 #endif
 
-	v_invSize = 1.0/frxu_size;
+	v_invSize = 1.0 / frxu_size;
+
+	// TODO: multiple instances found; make common?
 	v_blindness = frx_playerHasEffect(FRX_EFFECT_BLINDNESS)
-		? l2_clampScale(0.5, 1.0, 1.0 - frx_luminance(frx_vanillaClearColor()))
-		: 0.0;
+				? l2_clampScale(0.5, 1.0, 1.0 - frx_luminance(frx_vanillaClearColor()))
+				: 0.0;
 }

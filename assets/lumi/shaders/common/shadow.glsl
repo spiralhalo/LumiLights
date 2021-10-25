@@ -31,6 +31,7 @@ float simpleShadowFactor(in sampler2DArrayShadow shadowMap, in vec4 shadowViewPo
 	vec3 d1 = shadowDist(1, shadowViewPos);
 	int cascade = 0;
 	float bias = 0.002;
+
 	if (d3.x < 1.0 && d3.y < 1.0 && d3.z < 1.0) {
 		cascade = 3;
 		bias = 0.0;
@@ -41,9 +42,11 @@ float simpleShadowFactor(in sampler2DArrayShadow shadowMap, in vec4 shadowViewPo
 		cascade = 1;
 		bias = 0.0;
 	}
+
 	vec4 shadowCoords = frx_shadowProjectionMatrix(cascade) * shadowViewPos;
 	if (shadowCoords.xy != clamp(shadowCoords.xy, -1.0, 1.0)) return 1.0; // clamp to border
 	shadowCoords.xyz = shadowCoords.xyz * 0.5 + 0.5; // Transform from screen coordinates to texture coordinates
+
 	return texture(shadowMap, vec4(shadowCoords.xy, float(cascade), shadowCoords.z - bias));
 }
 
@@ -52,6 +55,7 @@ float calcShadowFactor(in sampler2DArrayShadow shadowMap, vec4 shadowViewPos) {
 	vec3 d2 = shadowDist(2, shadowViewPos);
 	vec3 d1 = shadowDist(1, shadowViewPos);
 	int cascade = 0;
+
 	if (d3.x < 1.0 && d3.y < 1.0 && d3.z < 1.0) {
 		cascade = 3;
 	} else if (d2.x < 1.0 && d2.y < 1.0 && d2.z < 1.0) {
@@ -64,12 +68,12 @@ float calcShadowFactor(in sampler2DArrayShadow shadowMap, vec4 shadowViewPos) {
 	if (shadowCoords.xy != clamp(shadowCoords.xy, -1.0, 1.0)) return 1.0; // clamp to border
 	shadowCoords.xyz = shadowCoords.xyz * 0.5 + 0.5; // Transform from screen coordinates to texture coordinates
 
-	#if SHADOW_FILTERING == SHADOW_FILTERING_NONE
-		float shadowFactor = texture(shadowMap, vec4(shadowCoords.xy, float(cascade), shadowCoords.z));
-	#else
-		float shadowFactor = sampleShadowPCF(shadowMap, shadowCoords.xyz, float(cascade));
-	#endif
-	
+#if SHADOW_FILTERING == SHADOW_FILTERING_NONE
+	float shadowFactor = texture(shadowMap, vec4(shadowCoords.xy, float(cascade), shadowCoords.z));
+#else
+	float shadowFactor = sampleShadowPCF(shadowMap, shadowCoords.xyz, float(cascade));
+#endif
+
 	return shadowFactor;
 }
 

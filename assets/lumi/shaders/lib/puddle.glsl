@@ -23,7 +23,7 @@ void ww_puddle(in float lightY, in vec3 normal, in vec3 worldPos, inout vec3 mic
 	vec2 splashJitter = vec2(snoise(worldPos.xyz * 4.0 + mov), snoise(worldPos.zyx * 4.0 + mov));
 
 	microNormal.xz += splashJitter * wet * 0.05;
-	microNormal = normalize(microNormal);
+	microNormal		= normalize(microNormal);
 }
 
 void puddle_processRoughness(inout float roughness, float wet) {

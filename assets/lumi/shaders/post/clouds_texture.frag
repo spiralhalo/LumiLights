@@ -13,9 +13,9 @@ out vec4 fragColor;
 
 void main()
 {
-	#if CLOUD_RENDERING == CLOUD_RENDERING_VOLUMETRIC
+#if CLOUD_RENDERING == CLOUD_RENDERING_VOLUMETRIC
 	if (frx_worldFlag(FRX_WORLD_IS_OVERWORLD)) {
 		fragColor = generateCloudTexture(v_texcoord);
 	}
-	#endif
+#endif
 }

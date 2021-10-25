@@ -13,9 +13,10 @@
 const float TWO_PI = 2.0 * PI;
 
 mat2 calcDeltaRotator(int nDirections) {
-	float theta = TWO_PI / float(nDirections);
+	float theta    = TWO_PI / float(nDirections);
 	float cosTheta = cos(theta);
 	float sinTheta = sin(theta);
+
 	mat2 deltaRotator = mat2(
 		cosTheta, -sinTheta,
 		sinTheta, cosTheta
@@ -29,8 +30,8 @@ mat2 calcDeltaRotator(int nDirections) {
 vec3 coords_view(vec2 uv, mat4 inv_projection, in sampler2D target)
 {
 	float depth = texture(target, uv).r;
-	vec3 clip = vec3(2.0 * uv - 1.0, 2.0 * depth - 1.0);
-	vec4 view = inv_projection * vec4(clip, 1.0);
+	vec3  clip	= vec3(2.0 * uv - 1.0, 2.0 * depth - 1.0);
+	vec4  view	= inv_projection * vec4(clip, 1.0);
 
 	return view.xyz / view.w;
 }
@@ -46,10 +47,10 @@ vec4 calcSSAO(
 	int nSteps, int nDirections, float radius_screen, float attenuation_radius, float angle_bias, float intensity,
 	bool useAttenuation, bool glowOcclusion)
 {
-	vec3 origin_view = coords_view(uv, inv_projection, sdepth);
-	vec3 normal_view = coords_normal(uv, normal_mat, snormal);
-	float radius_view = radius_screen / abs(origin_view.z - 1);
-	float attenuation_rad2 = attenuation_radius * attenuation_radius;
+	vec3  origin_view		= coords_view(uv, inv_projection, sdepth);
+	vec3  normal_view		= coords_normal(uv, normal_mat, snormal);
+	float radius_view		= radius_screen / abs(origin_view.z - 1);
+	float attenuation_rad2	= attenuation_radius * attenuation_radius;
 	float attenuation2_rad2 = attenuation_radius * attenuation_radius * 4.0;
 
 	vec2 deltaUV = vec2(1.0, 0.0) * (radius_view / (float(nDirections * nSteps) + 1.0));
@@ -74,7 +75,7 @@ vec4 calcSSAO(
 		float oldAngle   = angle_bias;
 
 		for (int j = 0; j < nSteps; ++j) {
-			vec2 sample_uv	  = uv + (jitter + float(j)) * sampleDirUV;
+			vec2 sample_uv		= uv + (jitter + float(j)) * sampleDirUV;
 			vec3 sample_view	= coords_view(sample_uv, inv_projection, sdepth);
 			vec3 sampleDir_view = (sample_view - origin_view);
 
@@ -86,14 +87,14 @@ vec4 calcSSAO(
 
 				if (bloom <= 0.0) {
 					float attenuation = useAttenuation ? clamp(1.0 - sampleDir_view2 / attenuation_rad2, 0.0, 1.0) : 1.0;
-					float value = sin(gamma) - sin(oldAngle);
+					float value		  = sin(gamma) - sin(oldAngle);
 
 					occlusion += attenuation * value;
 				} else if (glowOcclusion) {
 					float attenuation = clamp(1.0 - sampleDir_view2 / attenuation2_rad2, 0.0, 1.0);
-					vec3 bloomColor = hdr_fromGamma(texture(scolor, sample_uv).rgb);
+					vec3  bloomColor  = hdr_fromGamma(texture(scolor, sample_uv).rgb);
 
-					bloom *= attenuation;
+					bloom	 *= attenuation;
 					emission += bloomColor * bloom;
 				}
 
@@ -105,10 +106,10 @@ vec4 calcSSAO(
 	float averager = 1.0 / float(nDirections);
 	float dampener = 1.0 - frx_luminance(min(emission, vec3(1.0)));
 
-	emission *= averager;
-	emission *= dampener;
+	emission  *= averager;
+	emission  *= dampener;
 	occlusion *= averager;
-	occlusion = clamp(pow(1.0 - occlusion, 1.0 + intensity), 0.0, 1.0);
+	occlusion  = clamp(pow(1.0 - occlusion, 1.0 + intensity), 0.0, 1.0);
 
 	float antiDarkening = (1.0 - occlusion) * abs(normal_view.y) * l2_clampScale(8.0, 16.0, -origin_view.z);
 

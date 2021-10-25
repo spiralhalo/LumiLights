@@ -24,6 +24,7 @@ out vec4 fragColor;
 vec4 ldr_shaded_particle(vec2 uv, sampler2D scolor, sampler2D sdepth, sampler2D slight, float ec)
 {
 	vec4 a = texture(scolor, uv);
+
 	if (a.a == 0.) return vec4(0.);
 
 	float depth = texture(sdepth, uv).r;
@@ -32,8 +33,8 @@ vec4 ldr_shaded_particle(vec2 uv, sampler2D scolor, sampler2D sdepth, sampler2D 
 	viewPos.xyz /= viewPos.w;
 	viewPos.w = 1.0;
 
-	vec3  normal = normalize(-viewPos.xyz) * frx_normalModelMatrix();
-	vec4  light = texture(slight, uv);
+	vec3  normal   = normalize(-viewPos.xyz) * frx_normalModelMatrix();
+	vec4  light    = texture(slight, uv);
 	vec3  modelPos = (frx_inverseViewMatrix() * viewPos).xyz;
 	float bloom_ignored = 0.0;
 
@@ -51,7 +52,7 @@ vec4 ldr_shaded_particle(vec2 uv, sampler2D scolor, sampler2D sdepth, sampler2D 
 void main()
 {
 	float ec = exposureCompensation();
-	vec4 a2 = ldr_shaded_particle(v_texcoord, u_particles_color, u_particles_depth, u_light_particles, ec);
+	vec4 a2  = ldr_shaded_particle(v_texcoord, u_particles_color, u_particles_depth, u_light_particles, ec);
 
 	fragColor = a2;
 }

@@ -93,8 +93,6 @@ void computeDistorted(in sampler2D sdepth, in sampler2D scolor, in vec2 origUV, 
 	color = texture(scolor, trueUV);
 }
 
-// arbitrary chosen depth threshold
-#define blurDepthThreshold 0.01
 void main()
 {
 	float depth_translucent = texture(u_translucent_depth, v_texcoord).r;
@@ -115,7 +113,7 @@ void main()
 
 	float depth_weather = texture(u_weather_depth, v_texcoord).r;
 	vec4 weather = texture(u_weather, v_texcoord);
-	weather.rgb = ldr_tonemap3(hdr_fromGamma(weather.rgb));
+	 weather.rgb = ldr_tonemap3(hdr_fromGamma(weather.rgb));
 
 	color_layers[0] = vec4(solid. rgb, 1.0);
 	depth_layers[0] = depth_solid;
@@ -137,26 +135,29 @@ void main()
 	fragColor[0] = vec4(c, 1.0); //frx_luminance(c.rgb)); // FXAA 3 would need this
 	fragColor[1] = vec4(min_depth, 0., 0., 1.);
 
-	#ifdef TOON_OUTLINE
-		float d1 = ldepth(min_depth);
-		float maxDiff = 0.;
-		float maxD = 0;
-		const vec2[4] check = vec2[](vec2( 1.,  1.), vec2( 1., -1.), vec2(-1.,  1.), vec2(-1., -1.));
-		for (int i = 0; i < 4; i++) {
-			vec2 coord = v_texcoord + v_invSize * check[i];
-			float minD = ldepth(min(texture(u_translucent_depth, coord).x, texture(u_particles_depth, coord).x));
-			float diff = d1 - minD;
-			if (diff > maxDiff) {
-				maxDiff = diff;
-				maxD = minD;
-			}
+#ifdef TOON_OUTLINE
+	float d1      = ldepth(min_depth);
+	float maxDiff = 0.;
+	float maxD    = 0;
+	const vec2[4] check = vec2[](vec2( 1.,  1.), vec2( 1., -1.), vec2(-1.,  1.), vec2(-1., -1.));
+
+	for (int i = 0; i < 4; i++) {
+		vec2 coord = v_texcoord + v_invSize * check[i];
+		float minD = ldepth(min(texture(u_translucent_depth, coord).x, texture(u_particles_depth, coord).x));
+		float diff = d1 - minD;
+		if (diff > maxDiff) {
+			maxDiff = diff;
+			maxD = minD;
 		}
-		float threshold = mix(.0, .3, d1);
-		float lineness = l2_clampScale(threshold, threshold * .5, maxDiff);
-		lineness += (1.0 - lineness) * min(1.0, maxD * 2.0);
-		lineness += (1.0 - lineness) * (maxD > ldepth(depth_layers[active_layers-1]) ? color_layers[active_layers-1].a : 0.0);
-		fragColor[0] *= lineness;
-	#endif
+	}
+
+	float threshold = mix(.0, .3, d1);
+	float lineness = l2_clampScale(threshold, threshold * .5, maxDiff);
+		 lineness += (1.0 - lineness) * min(1.0, maxD * 2.0);
+		 lineness += (1.0 - lineness) * (maxD > ldepth(depth_layers[active_layers-1]) ? color_layers[active_layers-1].a : 0.0);
+
+	fragColor[0] *= lineness;
+#endif
 
 	// no need to check for solid depth because translucent behind solid are culled in GL depth test
 	float bloom = max(texture(u_emissive_solid, v_texcoord).r, texture(u_emissive_transparent, v_texcoord).r);
@@ -165,10 +166,9 @@ void main()
 		bloom = max(bloom, texture(u_light_particles, v_texcoord).z);
 	}
 
-	float min_occluder = min(depth_clouds, depth_weather);
+	float min_occluder   = min(depth_clouds, depth_weather);
 	float occluder_alpha = min_occluder == depth_clouds ? clouds.a : weather.a;
-
-	occluder_alpha = min_occluder <= min_depth ? occluder_alpha : 0.0;
+		  occluder_alpha = min_occluder <= min_depth ? occluder_alpha : 0.0;
 
 	bloom *= max(0.0, 1.0 - occluder_alpha);
 

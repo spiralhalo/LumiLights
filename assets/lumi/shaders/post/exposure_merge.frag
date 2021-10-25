@@ -23,7 +23,7 @@ void main() {
 	} else {
 		const float a = 1. - exp(-1. / EXPOSURE_SMOOTHING_FRAMES);
 
-		float new = textureLod(u_exposure, vec2(0.0), 2).r;
+		float new	  = textureLod(u_exposure, vec2(0.0), 2).r;
 		float history = textureLod(u_exposure, vec2(0.0), 0).r;
 
 		fragColor = vec4(history * (1. - a) + a * new);

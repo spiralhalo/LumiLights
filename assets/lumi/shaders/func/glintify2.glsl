@@ -35,32 +35,35 @@ float generate_noise(vec2 uv, float zoom, vec2 skew, vec2 speed, vec2 detail, ve
 vec3 noise_glint(vec2 normalizedUV, float glint)
 {
 #if GLINT_STYLE == GLINT_STYLE_GLINT_A
-	const float zoom = 0.5;
-	const vec2 skew = vec2(0.0, 0.4);
-	const vec2 speed = vec2(0.4, -1.0);
+	const float zoom  = 0.5;
+	const vec2 skew   = vec2(0.0, 0.4);
+	const vec2 speed  = vec2(0.4, -1.0);
 	const vec2 detail = vec2(10.0, 8.0);
-	const vec2 taper = vec2(0.4, 0.9);
+	const vec2 taper  = vec2(0.4, 0.9);
 #elif GLINT_STYLE == GLINT_STYLE_GLINT_B
-	const float zoom = 0.5;
-	const vec2 skew = vec2(0.0, 0.4);
-	const vec2 speed = vec2(0.2, -0.5);
+	const float zoom  = 0.5;
+	const vec2 skew   = vec2(0.0, 0.4);
+	const vec2 speed  = vec2(0.2, -0.5);
 	const vec2 detail = vec2(5.0, 4.0);
-	const vec2 taper = vec2(0.0, 0.9);
+	const vec2 taper  = vec2(0.0, 0.9);
 #else
-	const float zoom = 2.0;
-	const vec2 skew = vec2(0.4, 0.0);
-	const vec2 speed = vec2(0.8, 0.8);
+	const float zoom  = 2.0;
+	const vec2 skew   = vec2(0.4, 0.0);
+	const vec2 speed  = vec2(0.8, 0.8);
 	const vec2 detail = vec2(10.0, 8.0);
-	const vec2 taper = vec2(0.3, 0.9);
+	const vec2 taper  = vec2(0.3, 0.9);
 	normalizedUV.x = normalizedUV.x * 2.0;
 #endif
+
 	if (glint == 1.0) {
 		float n = generate_noise(normalizedUV, zoom, skew, speed, detail, taper);
+
 		#if GLINT_STYLE == GLINT_STYLE_GLINT_B
 		float o = 0.5 - n * 0.2;
 		o *= generate_noise(normalizedUV + 0.5, zoom, skew, speed * 0.5, detail * 10.0, vec2(0.2, 0.7));
 		n += o;
 		#endif
+
 		return n * GLINT_COLOR;
 	} else {
 		return vec3(0.0);

@@ -45,14 +45,17 @@ vec4 hdr_combine(sampler2D a, sampler2D matA, sampler2D b, vec2 uv)
 #else
 	vec2 buv = uv;
 #endif
+
 	vec4 a1 = texture(a, uv);
 	vec4 b1 = texture(b, buv);
 	bool filtered = b1.a == 0.0; // unmanaged
+
 #if defined(HALF_REFLECTION_RESOLUTION) && REFLECTION_PROFILE != REFLECTION_PROFILE_NONE
 	const float ROUGHNESS_TOLERANCE = 0.1;
 	float a1r = texture(matA, uv).r;
 	filtered = filtered || abs(b1.a - a1r) > ROUGHNESS_TOLERANCE; // roughness mismatch
 #endif
+
 	b1 = filtered ? vec4(0.0) : b1;
 	b1.rgb *= b1.rgb; // anti-banding
 	return vec4(a1.rgb + b1.rgb, a1.a);
@@ -67,17 +70,19 @@ void main()
 	vec4 translucent = hdr_combine(u_hdr_translucent, u_material_translucent, u_hdr_translucent_swap, v_texcoord);
 
 	vec2 reflectionUV = v_texcoord;
+
 #if defined(HALF_REFLECTION_RESOLUTION) && REFLECTION_PROFILE != REFLECTION_PROFILE_NONE
 	reflectionUV *= 0.5;
 #endif
 
-	float reflectionBloom = texture(u_emissive_reflection_translucent, reflectionUV).r;
+	float reflectionBloom      = texture(u_emissive_reflection_translucent, reflectionUV).r;
 	vec3 reflectionAntiBanding = texture(u_hdr_translucent_swap, reflectionUV).rgb;
-	float reflectionLuminance = frx_luminance(reflectionAntiBanding * reflectionAntiBanding);
+	float reflectionLuminance  = frx_luminance(reflectionAntiBanding * reflectionAntiBanding);
 
 	translucent.a = min(1.0, translucent.a + BLOOM_ALPHA_ADD * reflectionBloom * reflectionLuminance);
 
 	depth_solid = texture(u_solid_depth, v_texcoord).r;
+
 	bool tonemapTheSky = frx_worldFlag(FRX_WORLD_IS_NETHER);
 
 #if SKY_MODE == SKY_MODE_LUMI

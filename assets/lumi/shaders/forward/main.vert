@@ -27,8 +27,9 @@ float p_diffuseGui(vec3 normal) {
 	if (normal.z == 1.0) return 1.;
 
 	float light = 0.5
-	+ 0.3 * clamp(dot(normal.xyz, vec3(0.96104145, 0.078606814, 0.2593495)), 0.0, 1.0)
-	+ 0.5 * clamp(dot(normal.xyz, vec3(0.26765957, 0.95667744, -0.100838766)), 0.0, 1.0);
+				+ 0.3 * clamp(dot(normal.xyz, vec3(0.96104145, 0.078606814, 0.2593495)), 0.0, 1.0)
+				+ 0.5 * clamp(dot(normal.xyz, vec3(0.26765957, 0.95667744, -0.100838766)), 0.0, 1.0);
+
 	return min(light, 1.0);
 }
 
@@ -36,22 +37,23 @@ vec2 inv_size = 1.0 / vec2(frx_viewWidth(), frx_viewHeight());
 void frx_writePipelineVertex(inout frx_VertexData data) {
 
 	if (frx_modelOriginType() == MODEL_ORIGIN_SCREEN) {
-		mat4 t = frx_guiViewProjectionMatrix();
+		mat4 t   = frx_guiViewProjectionMatrix();
 		pv_ortho = t[3][3];
+
 		gl_Position = frx_guiViewProjectionMatrix() * data.vertex;
 
 		#ifdef TAA_ENABLED
-			float fragZ = gl_Position.z / gl_Position.w;
-			if (pv_ortho == 0.) { // hack to include only hand
-				gl_Position.st += taa_jitter(inv_size) * gl_Position.w;
-			}
+		float fragZ = gl_Position.z / gl_Position.w;
+		if (pv_ortho == 0.) { // hack to include only hand
+			gl_Position.st += taa_jitter(inv_size) * gl_Position.w;
+		}
 		#endif
 	} else {
 		data.vertex += frx_modelToCamera();
-		gl_Position = frx_viewProjectionMatrix() * data.vertex;
+		gl_Position  = frx_viewProjectionMatrix() * data.vertex;
 
 		#ifdef TAA_ENABLED
-			gl_Position.st += taa_jitter(inv_size) * gl_Position.w;
+		gl_Position.st += taa_jitter(inv_size) * gl_Position.w;
 		#endif
 	}
 

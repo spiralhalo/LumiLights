@@ -26,10 +26,10 @@ void rect_applyMatrix(mat4 matrix, inout Rect rectangle, float w)
 
 vec2 rect_innerUV(in Rect rectangle, vec3 point)
 {
-	vec3 bLP = point - rectangle.bottomLeft;
+	vec3 bLP  = point - rectangle.bottomLeft;
 	vec3 bLbR = rectangle.bottomRight - rectangle.bottomLeft;
 	vec3 bLtL = rectangle.topLeft - rectangle.bottomLeft;
-	
+
 	float normbRrcp = 1. / length(bLbR);
 	float normtLrcp = 1. / length(bLtL);
 

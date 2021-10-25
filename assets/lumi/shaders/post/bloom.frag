@@ -31,15 +31,17 @@ void main()
 
 	if (mathurt == 1.0) {
 		const vec2 mul = vec2(1.0, 0.0);
-#if HURT_MODE == HURT_MODE_GLITCH_CITY
+
+		#if HURT_MODE == HURT_MODE_GLITCH_CITY
 		float t = fract(floor(frx_renderSeconds() * 30.0) * 0.1);
 		vec2 noise = texture(u_blue_noise, vec2(t, 0.0)).rg;
 		vec4 one = texture(u_base, v_texcoord + noise * vec2(-0.05,  0.05));
 		vec4 two = texture(u_base, v_texcoord + noise * vec2( 0.05, -0.05));
-#else
+		#else
 		vec4 one = texture(u_base, v_texcoord + vec2(-0.005, 0.0));
 		vec4 two = texture(u_base, v_texcoord + vec2( 0.005, 0.0));
-#endif
+		#endif
+
 		base = one * mul.yxxx + two * mul.xyxx;
 	} else {
 		base = texture(u_base, v_texcoord);
@@ -49,7 +51,6 @@ void main()
 #endif
 
 	vec4 bloom = textureLod(u_bloom, v_texcoord, 0) * BLOOM_INTENSITY_FLOAT;
-
 	vec3 color = hdr_fromGamma(base.rgb) + bloom.rgb;
 
 	fragColor = vec4(hdr_toSRGB(color), 1.0);

@@ -45,8 +45,9 @@ out vec4 fragColor[3];
 
 void main()
 {
-	float depth = texture(u_depth, v_texcoord).r;
+	float depth		  = texture(u_depth, v_texcoord).r;
 	float topMidDepth = texture(u_depth, vec2(0.5, 1.0)).r; // skip if hand render is disabled (F1)
+
 	if (depth == 1.0 || topMidDepth != 1.0) {
 		discard;
 	}
@@ -59,40 +60,40 @@ void main()
 	vec3 light  = texture(u_light, v_texcoord).xyz;
 	vec3 normal = normalize(2.0 * texture(u_normal_micro, v_texcoord).xyz - 1.0);
 	vec3 mat	= texture(u_material, v_texcoord).xyz;
-	
+
 	float roughness = mat.x == 0.0 ? 1.0 : min(1.0, 1.0203 * mat.x - 0.01);
 	float bloom_out = light.z;
-	
-	#if defined(SHADOW_MAP_PRESENT)
-		#ifdef TAA_ENABLED
-			vec2 uvJitter = taa_jitter(v_invSize);
-			vec4 unjitteredModelPos = frx_inverseViewProjectionMatrix() * vec4(2.0 * v_texcoord - uvJitter - 1.0, 2.0 * depth - 1.0, 1.0);
-			vec4 shadowViewPos = frx_shadowViewMatrix() * vec4(unjitteredModelPos.xyz / unjitteredModelPos.w, 1.0);
-		#else
-			vec4 shadowViewPos = frx_shadowViewMatrix() * vec4(modelPos, 1.0);
-		#endif
 
-		float shadowFactor = calcShadowFactor(u_shadow, shadowViewPos);
-		// workaround for janky shadow on edges of things (hardly perfect, better than nothing)
-		shadowFactor = mix(shadowFactor, simpleShadowFactor(u_shadow, shadowViewPos), step(0.99, shadowFactor));
-
-		light.z = shadowFactor;
-	#ifdef SHADOW_WORKAROUND
-		// Workaround to fix patches in shadow map until it's FLAWLESS
-		light.z *= l2_clampScale(0.03125, 0.04, light.y);
-	#endif
+#if defined(SHADOW_MAP_PRESENT)
+	#ifdef TAA_ENABLED
+	vec2 uvJitter	   = taa_jitter(v_invSize);
+	vec4 unjitteredPos = frx_inverseViewProjectionMatrix() * vec4(2.0 * v_texcoord - uvJitter - 1.0, 2.0 * depth - 1.0, 1.0);
+	vec4 shadowViewPos = frx_shadowViewMatrix() * vec4(unjitteredPos.xyz / unjitteredPos.w, 1.0);
 	#else
-		light.z = lightmapRemap(light.y);
+	vec4 shadowViewPos = frx_shadowViewMatrix() * vec4(modelPos, 1.0);
 	#endif
+
+	float shadowFactor = calcShadowFactor(u_shadow, shadowViewPos);
+	// workaround for janky shadow on edges of things (hardly perfect, better than nothing)
+	shadowFactor = mix(shadowFactor, simpleShadowFactor(u_shadow, shadowViewPos), step(0.99, shadowFactor));
+	light.z = shadowFactor;
+
+	#ifdef SHADOW_WORKAROUND
+	// Workaround to fix patches in shadow map until it's FLAWLESS
+	light.z *= l2_clampScale(0.03125, 0.04, light.y);
+	#endif
+#else
+	light.z = lightmapRemap(light.y);
+#endif
 
 	pbr_shading(a, bloom_out, modelPos, light, normal, roughness, mat.y, mat.z, /*diffuse=*/true, true);
 
 	vec3 misc = texture(u_misc, v_texcoord).xyz;
 
 	#if GLINT_MODE == GLINT_MODE_GLINT_SHADER
-		a.rgb += hdr_fromGamma(noise_glint(misc.xy, bit_unpack(misc.z, 2)));
+	a.rgb += hdr_fromGamma(noise_glint(misc.xy, bit_unpack(misc.z, 2)));
 	#else
-		a.rgb += hdr_fromGamma(texture_glint(u_glint, misc.xy, bit_unpack(misc.z, 2)));
+	a.rgb += hdr_fromGamma(texture_glint(u_glint, misc.xy, bit_unpack(misc.z, 2)));
 	#endif
 
 	vec4 source_base = a;

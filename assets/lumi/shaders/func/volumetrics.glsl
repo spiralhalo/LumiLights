@@ -16,7 +16,8 @@
 float celestialLightRays(sampler2DArrayShadow sshadow, vec3 modelPos, float exposure, float yLightmap, float tileJitter, float translucentDepth, float depth)
 {
 	bool doUnderwaterRays = frx_viewFlag(FRX_CAMERA_IN_WATER) && translucentDepth >= depth && frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT);
-	vec3 unit = normalize(modelPos);
+
+	vec3  unit	  = normalize(modelPos);
 	float scatter = dot(unit, frx_skyLightVector());
 
 	if (doUnderwaterRays) {
@@ -39,21 +40,21 @@ float celestialLightRays(sampler2DArrayShadow sshadow, vec3 modelPos, float expo
 		return 0.0;
 	}
 
-	float maxDist = length(modelPos);
-	int maxSteps = doUnderwaterRays ? 10 : 16;
-	float sample = doUnderwaterRays ? 2.0 : maxDist / float(maxSteps);
-	float basePower = doUnderwaterRays ? 1.0 : exposure;
+	float maxDist	 = length(modelPos);
+	int   maxSteps	 = doUnderwaterRays ? 10 : 16;
+	float sample	 = doUnderwaterRays ? 2.0 : maxDist / float(maxSteps);
+	float basePower	 = doUnderwaterRays ? 1.0 : exposure;
 	float deadRadius = doUnderwaterRays ? 4.0 : 0.0;
 	// const float range = 10.0;
 
-	vec3 ray = frx_cameraPos();
+	vec3 ray   = frx_cameraPos();
 	vec3 march = unit * sample;
 
 	ray += tileJitter * march + unit * deadRadius;
 
-	float power = 0.0;
+	float power    = 0.0;
 	float traveled = tileJitter * sample + deadRadius;
-	int steps = 0;
+	int   steps	   = 0;
 
 	while (traveled < maxDist && steps < maxSteps) {
 		float e = 0.0;
@@ -66,14 +67,15 @@ float celestialLightRays(sampler2DArrayShadow sshadow, vec3 modelPos, float expo
 		}
 		// e *= traveled / range;
 
-	#ifdef SHADOW_MAP_PRESENT
+		#ifdef SHADOW_MAP_PRESENT
 		vec4 ray_shadow = (frx_shadowViewMatrix() * vec4(ray - frx_cameraPos(), 1.0));
 		e *= simpleShadowFactor(sshadow, ray_shadow);
-	#endif
+		#endif
 
-		power += e;
-		ray += march;
+		power	 += e;
+		ray		 += march;
 		traveled += sample;
+
 		steps ++;
 	}
 

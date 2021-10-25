@@ -37,15 +37,16 @@ void main()
 	v_invSize = 1.0 / frxu_size;
 
 	v_star_rotator = l2_rotationMatrix(vec3(1.0, 0.0, 1.0), frx_worldTime() * PI);
-	v_fov = 2.0 * atan(1.0 / frx_projectionMatrix()[1][1]) * 180.0 / PI;
-	v_night = min(smoothstep(0.50, 0.54, frx_worldTime()), smoothstep(1.0, 0.96, frx_worldTime()));
+	v_fov		   = 2.0 * atan(1.0 / frx_projectionMatrix()[1][1]) * 180.0 / PI;
+	v_night		   = min(smoothstep(0.50, 0.54, frx_worldTime()), smoothstep(1.0, 0.96, frx_worldTime()));
 
-	v_not_in_void = l2_clampScale(-1.0,   0.0, frx_cameraPos().y);
+	v_not_in_void	 = l2_clampScale(-1.0,   0.0, frx_cameraPos().y);
 	v_near_void_core = l2_clampScale(10.0, -90.0, frx_cameraPos().y) * 1.8;
 
+	// TODO: multiple instances found; make common?
 	v_blindness = frx_playerHasEffect(FRX_EFFECT_BLINDNESS)
-				  ? l2_clampScale(0.5, 1.0, 1.0 - frx_luminance(frx_vanillaClearColor()))
-				  : 0.0;
+				? l2_clampScale(0.5, 1.0, 1.0 - frx_luminance(frx_vanillaClearColor()))
+				: 0.0;
 
 	// jitter celest
 	#ifdef TAA_ENABLED

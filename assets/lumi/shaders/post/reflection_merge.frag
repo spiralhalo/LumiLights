@@ -22,15 +22,15 @@ out vec4 fragColor;
 void main()
 {
 #if REFLECTION_PROFILE != REFLECTION_PROFILE_NONE
-	vec2 deltaRes = v_invSize;
+	vec2 deltaRes  = v_invSize;
 	vec2 currentUv = v_texcoord;
-	vec2 velocity = fastVelocity(u_depth, v_texcoord) * 0.75; // magic anti-ghosting hack
+	vec2 velocity  = fastVelocity(u_depth, v_texcoord) * 0.75; // magic anti-ghosting hack
 
-#ifdef HALF_REFLECTION_RESOLUTION
+	#ifdef HALF_REFLECTION_RESOLUTION
 	deltaRes *= 4.;
 	currentUv *= 0.5;
 	velocity *= 0.5;
-#endif
+	#endif
 
 	vec4 current = texture(u_input, currentUv);
 	vec4 history = texture(u_history, currentUv - velocity);

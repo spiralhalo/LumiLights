@@ -21,7 +21,6 @@ float exposureCompensation() {
 
 vec3 ldr_tonemap3noGamma(vec3 a)
 {
-	vec3 c = a.rgb;
 	float exposure = 1.0;
 
 #ifdef HIGH_CONTRAST_ENABLED
@@ -29,20 +28,21 @@ vec3 ldr_tonemap3noGamma(vec3 a)
 	exposure = getExposure(eyeBrightness);
 #endif
 
-	c = acesNarkowicz(c * exposure);
+	vec3 c = a.rgb;
+		 c = acesNarkowicz(c * exposure);
+		 c = clamp(c, 0.0, 1.0); // In the past ACES requires clamping for some reason
 
-	// In the past ACES requires clamping for some reason
-	c = clamp(c, 0.0, 1.0);
 	return c;
 }
 
 vec3 ldr_tonemap3(vec3 a)
 {
-	vec3 c = ldr_tonemap3noGamma(a);
-	float capBrightness = min(1.5, frx_viewBrightness());
-	float viewGamma = hdr_gamma + capBrightness;
+	float brightness = min(1.5, frx_viewBrightness());
+	float viewGamma  = hdr_gamma + brightness;
 
-	c = pow(c, vec3(1.0 / viewGamma));
+	vec3 c = ldr_tonemap3noGamma(a);
+		 c = pow(c, vec3(1.0 / viewGamma));
+
 	return c;
 }
 

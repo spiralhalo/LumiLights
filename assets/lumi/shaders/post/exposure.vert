@@ -15,11 +15,8 @@
 uniform sampler2D u_color;
 
 #if EXPOSURE_FUNC == EXPOSURE_FUNC_MEDIAN
-
 const int BIN_SIZE = 64;
-
 int bin[BIN_SIZE];
-
 #endif
 
 out float v_exposure;
@@ -37,17 +34,17 @@ void main()
 	if (v_texcoord == vec2(0.0)) {
 		gl_Position.xy += onePixel * 0.5;
 
-		const int limit = 50;
+		const int LIMIT = 50;
 
-#if EXPOSURE_FUNC == EXPOSURE_FUNC_MEDIAN
+		#if EXPOSURE_FUNC == EXPOSURE_FUNC_MEDIAN
 		for (int i = 0; i < BIN_SIZE; i ++) {
 			bin[i] = 0;
 		}
-#endif
+		#endif
 
-		for (int i = 0; i < limit; i ++) {
-			for (int j = 0; j < limit; j ++) {
-				vec2 coord = vec2(i, j) / limit;
+		for (int i = 0; i < LIMIT; i ++) {
+			for (int j = 0; j < LIMIT; j ++) {
+				vec2 coord = vec2(i, j) / LIMIT;
 
  				// scale down in center (fovea)
 				coord -= 0.5;
@@ -60,35 +57,33 @@ void main()
 				// clamp luminance to half
 				luminance = clamp(luminance, 0.0, 0.5) * 2.0;
 
-#if EXPOSURE_FUNC == EXPOSURE_FUNC_MEDIAN
+				#if EXPOSURE_FUNC == EXPOSURE_FUNC_MEDIAN
 				int index = int(floor(luminance * BIN_SIZE));
-
 				bin[index] ++;
-#else
+				#else
 				v_exposure += luminance;
-#endif
+				#endif
 			}
 		}
 
-		const int total = (limit * limit);
+		const int TOTAL = (LIMIT * LIMIT);
 
-#if EXPOSURE_FUNC == EXPOSURE_FUNC_MEDIAN
-		const int medianIndex = total / 2;
+		#if EXPOSURE_FUNC == EXPOSURE_FUNC_MEDIAN
+		const int MEDIAN_INDEX = TOTAL / 2;
 
 		int count = 0;
 		int k;
 		for (k = 0; k < BIN_SIZE; k ++) {
 			count += bin[k];
-
-			if (count >= medianIndex) {
+			if (count >= MEDIAN_INDEX) {
 				break;
 			}
 		}
 
 		v_exposure = float(k) / float(BIN_SIZE);
-#else
-		v_exposure /= float(total);
-#endif
+		#else
+		v_exposure /= float(TOTAL);
+		#endif
 
 		// a bunch of magic based on experiment
 		// v_exposure = smoothstep(0.0, 0.5, v_exposure); // not required since luminance are clamped to half already

@@ -279,34 +279,31 @@ vec4 volumetricCloud(
 								: rayMarchCloud(scloudTex, stranslucentDepth, sbluenoise, texcoord, worldVec, numSample);
 	#endif
 
-	float alpha = 1.0 - min(1.0, volumetric.transmittance);
+	float alpha  = 1.0 - min(1.0, volumetric.transmittance);
 	float energy = volumetric.lightEnergy;
 
 	float rainBrightness = mix(0.13, 0.05, hdr_fromGammaf(frx_rainGradient())); // simulate dark clouds
-	vec3 cloudShading = atmos_hdrCloudColorRadiance(worldVec);
-	vec3 celestRadiance = atmos_hdrCelestialRadiance();
+	vec3  cloudShading	 = atmos_hdrCloudColorRadiance(worldVec);
+	vec3  celestRadiance = atmos_hdrCelestialRadiance();
 
 	if (frx_worldFlag(FRX_WORLD_IS_MOONLIT)) {
 		celestRadiance *= 0.2;
 	}
 
-	vec3 color;
-
 	celestRadiance = celestRadiance * energy * rainBrightness * CLOUD_BRIGHTNESS;
-	color = celestRadiance + cloudShading;
+	vec3 color	   = celestRadiance + cloudShading;
 
 	#if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
-		out_depth = alpha > 0. ? 0.9999 : 1.0;
+	out_depth = alpha > 0. ? 0.9999 : 1.0;
 	#else
-		vec3 reverseModelPos = volumetric.worldPos - frx_cameraPos();
-		vec4 reverseClipPos = frx_viewProjectionMatrix() * vec4(reverseModelPos, 1.0);
+	vec3 reverseModelPos = volumetric.worldPos - frx_cameraPos();
+	vec4 reverseClipPos  = frx_viewProjectionMatrix() * vec4(reverseModelPos, 1.0);
+	   reverseClipPos.z /= reverseClipPos.w;
 
-		reverseClipPos.z /= reverseClipPos.w;
+	float backgroundDepth = texture(stranslucentDepth, texcoord).r;
+	float alphaThreshold  = backgroundDepth == 1. ? 0.5 : 0.; 
 
-		float backgroundDepth = texture(stranslucentDepth, texcoord).r;
-		float alphaThreshold = backgroundDepth == 1. ? 0.5 : 0.; 
-
-		out_depth = alpha > alphaThreshold ? reverseClipPos.z : 1.0;
+	out_depth = alpha > alphaThreshold ? reverseClipPos.z : 1.0;
 	#endif
 
 	return vec4(color, alpha);

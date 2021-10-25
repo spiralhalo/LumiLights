@@ -71,10 +71,10 @@ void main() {
 	godraysRadiance *= 0.1 + atmosv_celestIntensity * 0.9;
 
 	float d = texture(u_depth, v_texcoord).r;
-	vec4 a = texture(u_color, v_texcoord);
-	vec4 b = textureLod(u_godrays, v_texcoord, (1.0 - ldepth(d)) * (3. - blurAdj));
+	vec4 a  = texture(u_color, v_texcoord);
+	vec4 b  = textureLod(u_godrays, v_texcoord, (1.0 - ldepth(d)) * (3. - blurAdj));
 
-	b.a = b.r;
+	b.a   = b.r;
 	b.rgb = ldr_tonemap3(godraysRadiance);
 
 	// vec3 aa = hdr_fromGamma(a.rgb);
@@ -86,6 +86,7 @@ void main() {
 	// vec3 c = hdr_toSRGB(cc);
 	// vec3 c = a.rgb * (1.0 - b.a) + b.rgb * b.a; // TOO WASHED OUT
 	// vec3 c = a.rgb + b.rgb * a.rgb * b.a; // TOO GLITCHY
+
 #if LIGHTRAYS_BLENDING == LIGHTRAYS_BLENDING_LINEAR_DODGE
 	vec3 c = a.rgb + b.rgb * b.a; // ORIGINAL BLENDING
 #else

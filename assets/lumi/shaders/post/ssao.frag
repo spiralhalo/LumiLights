@@ -24,10 +24,10 @@ in mat2 v_deltaRotator;
 out vec4 fragColor;
 
 #ifdef SSAO_ENABLED
-const int STEPS = clamp(SSAO_NUM_STEPS, 1, 10);
-const int DIRECTIONS = clamp(SSAO_NUM_DIRECTIONS, 1, 10);
-const float RADIUS = SSAO_RADIUS;
-const float BIAS = SSAO_BIAS;
+const int STEPS		  = clamp(SSAO_NUM_STEPS, 1, 10);
+const int DIRECTIONS  = clamp(SSAO_NUM_DIRECTIONS, 1, 10);
+const float RADIUS	  = SSAO_RADIUS;
+const float BIAS	  = SSAO_BIAS;
 const float INTENSITY = SSAO_INTENSITY;
 #endif
 
@@ -35,15 +35,15 @@ void main()
 {
 #ifdef SSAO_ENABLED
 	#ifdef SSAO_USE_ATTENUATION
-		const bool useAttenuation = true;
+	const bool useAttenuation = true;
 	#else
-		const bool useAttenuation = false;
+	const bool useAttenuation = false;
 	#endif
 
 	#ifdef SSAO_GLOW
-		const bool glowOcclusion = true;
+	const bool glowOcclusion = true;
 	#else
-		const bool glowOcclusion = false;
+	const bool glowOcclusion = false;
 	#endif
 
 	// Modest performance saving by skipping the sky

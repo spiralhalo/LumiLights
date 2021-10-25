@@ -41,18 +41,24 @@ vec3 pbr_nonDirectional(vec3 albedo, float metallic, vec3 radiance)
 vec3 pbr_lightCalc(vec3 albedo, float roughness, float metallic, vec3 pbr_f0, vec3 radiance, vec3 lightDir, vec3 viewDir, vec3 normal, float translucency, bool diffuseOn, inout vec3 specularAccu)
 {
 	vec3 halfway = normalize(viewDir + lightDir);
+
 	// disableDiffuse hack
 	if (!diffuseOn) {
 		return albedo / PI * radiance * pbr_dot(lightDir, vec3(.0, 1.0, .0));
 	}
+
 	vec3 fresnel = pbr_fresnelSchlick(pbr_dot(viewDir, halfway), pbr_f0);
-	float NdotL = pbr_dot(normal, lightDir);
+	float NdotL  = pbr_dot(normal, lightDir);
+
 	vec3 specularRadiance = pbr_specularBRDF(roughness, radiance, halfway, lightDir, viewDir, normal, fresnel, NdotL);
+
 	//Fake metallic diffuse applied
-	float diffuseNdotL = mix(NdotL, 1.0, translucency); // let more light pass through translucent objects
-	vec3 diffuse = (1.0 - fresnel);
+	float diffuseNdotL	 = mix(NdotL, 1.0, translucency); // let more light pass through translucent objects
+	vec3 diffuse		 = (1.0 - fresnel);
 	vec3 diffuseRadiance = albedo * pbr_fakeMetallicDiffuseMultiplier(albedo, metallic, radiance) / PI * radiance * diffuseNdotL;
+
 	specularAccu += specularRadiance;
+
 	return specularRadiance + diffuseRadiance;
 }
 
@@ -72,29 +78,30 @@ struct light_data{
 
 vec3 hdr_calcBlockLight(inout light_data data, in float bloom)
 {
-	float bl = smoothstep(0.03125, 0.96875, data.light.x);
 	float brightness = frx_viewBrightness();
+	float bl = smoothstep(0.03125, 0.96875, data.light.x);
+		 bl *= pow(bl, 3.0 + brightness * 2.0) * (2.0 - brightness * 0.5); // lyfe hax
 
-	bl *= pow(bl, 3.0 + brightness * 2.0) * (2.0 - brightness * 0.5); // lyfe hax
-	
-	vec3 color = mix(BLOCK_LIGHT_COLOR, data.albedo / l2_max3(data.albedo), bloom);
+	vec3 color	  = mix(BLOCK_LIGHT_COLOR, data.albedo / l2_max3(data.albedo), bloom);
 	vec3 radiance = color * BLOCK_LIGHT_STR * bl;
 
 	bool useFancySpecular = data.diffuse;
+
 	#if BLOCKLIGHT_SPECULAR_MODE == BLOCKLIGHT_SPECULAR_MODE_FAST
-		useFancySpecular = useFancySpecular && data.metallic > 0.0;
+	useFancySpecular = useFancySpecular && data.metallic > 0.0;
 	#endif
 	
 	if (!useFancySpecular) return pbr_nonDirectional(data.albedo, data.metallic, radiance);
 	
 	#if BLOCKLIGHT_SPECULAR_MODE == BLOCKLIGHT_SPECULAR_MODE_FANTASTIC
-		vec3 lightDir = preCalc_blockDir;
+	vec3 lightDir = preCalc_blockDir;
 	#else
-		vec3 lightDir = data.normal;
+	vec3 lightDir = data.normal;
 	#endif
 
 	// low fancy specular smoothness for metals
 	float roughness = mix(data.roughness, max(0.4, data.roughness), data.metallic);
+
 	// harshly lower f0 the further away from light source for non-metal
 	vec3 f0 = data.f0 * mix(l2_clampScale(0.5, 0.96875, data.light.x), 1.0, data.metallic);
 	
@@ -107,14 +114,14 @@ vec3 hdr_calcHeldLight(inout light_data data)
 	if (frx_heldLight().w > 0) {
 		vec3 handHeldDir = data.viewDir;
 
-		vec4 heldLight = frx_heldLight();
-		float coneInner = clamp(frx_heldLightInnerRadius(), 0.0, 3.14159265359) / 3.14159265359;
-		float coneOuter = max(coneInner, clamp(frx_heldLightOuterRadius(), 0.0, 3.14159265359) / 3.14159265359);
-		float cosView = max(dot(handHeldDir, -frx_cameraView()), 0.0);
-		float cone = l2_clampScale(1.0 - coneOuter, 1.0 - coneInner, cosView);
-		float distSq = dot(data.modelPos, data.modelPos);
-		float hlRadSq = heldLight.w * HANDHELD_LIGHT_RADIUS * heldLight.w * HANDHELD_LIGHT_RADIUS;
-		float hl = l2_clampScale(hlRadSq, 0.0, distSq);
+		vec4 heldLight	 = frx_heldLight();
+		float coneInner  = clamp(frx_heldLightInnerRadius(), 0.0, 3.14159265359) / 3.14159265359;
+		float coneOuter  = max(coneInner, clamp(frx_heldLightOuterRadius(), 0.0, 3.14159265359) / 3.14159265359);
+		float cosView	 = max(dot(handHeldDir, -frx_cameraView()), 0.0);
+		float cone		 = l2_clampScale(1.0 - coneOuter, 1.0 - coneInner, cosView);
+		float distSq	 = dot(data.modelPos, data.modelPos);
+		float hlRadSq	 = heldLight.w * HANDHELD_LIGHT_RADIUS * heldLight.w * HANDHELD_LIGHT_RADIUS;
+		float hl		 = l2_clampScale(hlRadSq, 0.0, distSq);
 		float brightness = frx_viewBrightness();
 
 		hl *= pow(hl, 3.0 + brightness * 2.0) * (2.0 - brightness * 0.5); // lyfe hax
@@ -147,7 +154,7 @@ vec3 hdr_calcSkyLight(inout light_data data)
 
 		float darkenedFactor = frx_isSkyDarkened() ? 0.6 : 1.0;
 		vec3 skylessRadiance = darkenedFactor * SKYLESS_LIGHT_STR * color;
-		vec3 skylessLight = pbr_lightCalc(data.albedo, data.roughness, data.metallic, data.f0, skylessRadiance, skylessDir, data.viewDir, data.normal, data.translucency, data.diffuse, data.specularAccu);
+		vec3 skylessLight	 = pbr_lightCalc(data.albedo, data.roughness, data.metallic, data.f0, skylessRadiance, skylessDir, data.viewDir, data.normal, data.translucency, data.diffuse, data.specularAccu);
 
 		if (frx_isSkyDarkened()) {
 			skylessLight += pbr_lightCalc(data.albedo, data.roughness, data.metallic, data.f0, skylessRadiance, skylessDarkenedDir, data.viewDir, data.normal, data.translucency, data.diffuse, data.specularAccu);
@@ -211,13 +218,14 @@ void pbr_shading(inout vec4 a, inout float bloom, vec3 modelPos, vec3 light, vec
 	float specularLuminance = frx_luminance(data.specularAccu);
 	float smoothness = 1 - data.roughness;
 	bloom += specularLuminance * PBR_SPECULAR_BLOOM_ADD * smoothness * smoothness; 
+
 	if (translucent && data.diffuse) {
 		float opacityLerp = a.a > 0.0 ? pow(1.0 - pbr_dot(data.viewDir, data.normal), 5.0) : 0.0;
 		// make sure opacity interpolation doesn't make it excessively brighter.
 		float luminanceCompensation = (1.0 - a.a) * opacityLerp;
-		a.a += (1.0 - a.a) * opacityLerp;
-		a.rgb *= hdr_fromGammaf(1.0 - luminanceCompensation);
 
-		a.a += specularLuminance * PBR_SPECULAR_ALPHA_ADD;
+		a.a   += (1.0 - a.a) * opacityLerp;
+		a.rgb *= hdr_fromGammaf(1.0 - luminanceCompensation);
+		a.a   += specularLuminance * PBR_SPECULAR_ALPHA_ADD;
 	}
 }

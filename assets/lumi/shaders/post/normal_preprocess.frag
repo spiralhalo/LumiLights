@@ -42,16 +42,16 @@ const float REFRACTION_STR = .1;
 
 bool testTranslucentUnmanaged()
 {
-	vec4 misc = texture(u_misc_translucent, v_texcoord);
+	vec4 misc   = texture(u_misc_translucent, v_texcoord);
 	vec4 mnorm0 = texture(u_normal_micro_translucent0, v_texcoord);
-	vec4 norm0 = texture(u_normal_translucent0, v_texcoord);
+	vec4 norm0  = texture(u_normal_translucent0, v_texcoord);
 
 	return (norm0.x + norm0.y + norm0.z == 0.0) || distance(mnorm0.rgb + misc.rgb, norm0.rgb * 2) < 0.015;
 }
 
 void processNormalMap(sampler2D slight, in float depth, inout vec3 normal, inout vec3 tangent, bool isWater, inout vec3 microNormal, out float packedPuddle)
 {
-	normal = normalize(normal);
+	normal      = normalize(normal);
 	microNormal = normalize(microNormal);
 
 	// normal map processing requires tangent to be set
@@ -69,7 +69,7 @@ void processNormalMap(sampler2D slight, in float depth, inout vec3 normal, inout
 			// wave movement doesn't necessarily follow flow direction for the time being
 			const float stretch = 1.2;
 			float waveSpeed = mix(smol_waveSpeed, beeg_waveSpeed, abs(normal.y));
-			float scale = mix(smol_scale, beeg_scale, abs(normal.y));
+			float scale     = mix(smol_scale, beeg_scale, abs(normal.y));
 			float amplitude = mix(smol_amplitude, beeg_amplitude, abs(normal.y));
 
 			vec3 moveSpeed = vec3(0.5, 3.0, -1.0) * (0.5 + 0.5 - normal * 0.5) * waveSpeed;

@@ -45,40 +45,36 @@ void doCloudStuff()
 	modelPos.xyz /= modelPos.w;
 	vec3 worldVec = normalize(modelPos.xyz);
 
-	#if CLOUD_RENDERING == CLOUD_RENDERING_FLAT
-		vec4 cloudColor = flatCloud(worldVec, v_cloud_rotator, v_up);
+#if CLOUD_RENDERING == CLOUD_RENDERING_FLAT
+	vec4 cloudColor = flatCloud(worldVec, v_cloud_rotator, v_up);
+	 cloudColor.rgb = ldr_tonemap3(cloudColor.rgb);
 
-		cloudColor.rgb = ldr_tonemap3(cloudColor.rgb);
+	fragColor[0] = mix(cloudColor, vec4(0.0), v_blindness);
+	fragColor[1] = vec4(cloudColor.a > 0. ? 0.99999 : 1.0);
 
-		fragColor[0] = mix(cloudColor, vec4(0.0), v_blindness);
-		fragColor[1] = vec4(cloudColor.a > 0. ? 0.99999 : 1.0);
+#elif CLOUD_RENDERING == CLOUD_RENDERING_PARALLAX
+	vec4 cloudColor = parallaxCloud(u_blue_noise, v_texcoord, worldVec);
+	 cloudColor.rgb = ldr_tonemap3(cloudColor.rgb);
 
-	#elif CLOUD_RENDERING == CLOUD_RENDERING_PARALLAX
-		vec4 cloudColor = parallaxCloud(u_blue_noise, v_texcoord, worldVec);
+	fragColor[0] = mix(cloudColor, vec4(0.0), v_blindness);
+	fragColor[1] = vec4(cloudColor.a > 0. ? 0.99999 : 1.0);
 
-		cloudColor.rgb = ldr_tonemap3(cloudColor.rgb);
+#elif CLOUD_RENDERING == CLOUD_RENDERING_VOLUMETRIC
+	float out_depth = 1.0;
+	vec4 cloudColor = volumetricCloud(u_clouds_texture, u_solid_depth, u_translucent_depth, u_blue_noise, v_texcoord, worldVec, NUM_SAMPLE, out_depth);
+	 cloudColor.rgb = ldr_tonemap3(cloudColor.rgb);
 
-		fragColor[0] = mix(cloudColor, vec4(0.0), v_blindness);
-		fragColor[1] = vec4(cloudColor.a > 0. ? 0.99999 : 1.0);
+	fragColor[0] = mix(cloudColor, vec4(0.0), v_blindness);
+	fragColor[1] = vec4(out_depth);
 
-	#elif CLOUD_RENDERING == CLOUD_RENDERING_VOLUMETRIC
-		float out_depth = 1.0;
-		vec4 cloudColor = volumetricCloud(u_clouds_texture, u_solid_depth, u_translucent_depth, u_blue_noise, v_texcoord, worldVec, NUM_SAMPLE, out_depth);
+#else
+	vec4 clouds = blur13(u_clouds, v_texcoord, frxu_size, vec2(1.0, 1.0));
+	 clouds.rgb = clouds.a == 0.0 ? clouds.rgb : (clouds.rgb / clouds.a);
 
-		cloudColor.rgb = ldr_tonemap3(cloudColor.rgb);
-
-		fragColor[0] = mix(cloudColor, vec4(0.0), v_blindness);
-		fragColor[1] = vec4(out_depth);
-
-	#else
-		vec4 clouds = blur13(u_clouds, v_texcoord, frxu_size, vec2(1.0, 1.0));
-
-		clouds.rgb = clouds.a == 0.0 ? clouds.rgb : (clouds.rgb / clouds.a);
-
-		fragColor[0] = clouds;
-		fragColor[1] = texture(u_clouds_depth, v_texcoord);
-		// Thanks to fewizz for the inspiration on depth copying in Lomo
-	#endif
+	fragColor[0] = clouds;
+	fragColor[1] = texture(u_clouds_depth, v_texcoord);
+	// Thanks to fewizz for the inspiration on depth copying in Lomo
+#endif
 }
 
 void main()

@@ -37,9 +37,9 @@ void custom_sky(in vec3 modelPos, in float blindnessFactor, in bool maybeUnderwa
 
 vec4 advancedTranslucentShading(float ec, out float bloom_out) {
 	vec4 frontAlbedo = vec4(texture(u_albedo_translucent, v_texcoord).rgb, texture(u_alpha_translucent, v_texcoord).r);
-	vec4 light = texture(u_light_translucent, v_texcoord);
-	vec3 normal = texture(u_normal_translucent, v_texcoord).xyz;
-	vec4 backColor = texture(u_translucent_color, v_texcoord);
+	vec4 light       = texture(u_light_translucent, v_texcoord);
+	vec3 normal      = texture(u_normal_translucent, v_texcoord).xyz;
+	vec4 backColor   = texture(u_translucent_color, v_texcoord);
 
 	bool isUnmanaged = light.x == 0.0;
 
@@ -55,9 +55,7 @@ vec4 advancedTranslucentShading(float ec, out float bloom_out) {
 	//	 vec2 taaJitter = vec2(0.0);
 	// #endif
 		vec4 color = texture(u_translucent_color, v_texcoord);
-
-		color.rgb = hdr_fromGamma(color.rgb);
-
+		 color.rgb = hdr_fromGamma(color.rgb);
 		return unmanaged(color, bloom_out, true);
 	}
 
@@ -69,20 +67,21 @@ vec4 advancedTranslucentShading(float ec, out float bloom_out) {
 
 	// reverse forward gl_blend with foreground layer (lossy if clipping)
 	vec3 unblend = frontAlbedo.rgb * frontAlbedo.a;
+
 #if TRANSLUCENT_LAYERING == TRANSLUCENT_LAYERING_FANCY
 	float luminosity2 = calcLuminosity(normal, light.xy, frontAlbedo.a);
-
 	unblend *= luminosity2 * luminosity2;
 #endif
+
 	backColor.rgb = max(vec3(0.0), backColor.rgb - unblend);
 	// backColor.rgb /= (frontAlbedo.a < 1.0) ? (1.0 - frontAlbedo.a) : 1.0;
 
 #if TRANSLUCENT_LAYERING == TRANSLUCENT_LAYERING_FAST
 	// fake shading for back color
 	vec2 fakeLight = texture(u_light_solid, v_texcoord).xy;
-	fakeLight = fakeLight * 0.25 + texture(u_light_translucent, v_texcoord).xy * 0.75;
+		 fakeLight = fakeLight * 0.25 + texture(u_light_translucent, v_texcoord).xy * 0.75;
 	float luminosity = hdr_fromGammaf(max(lightmapRemap(fakeLight.x), lightmapRemap(fakeLight.y) * atmosv_celestIntensity));
-	luminosity = luminosity * (1.0 - BASE_AMBIENT_STR) + BASE_AMBIENT_STR;
+		  luminosity = luminosity * (1.0 - BASE_AMBIENT_STR) + BASE_AMBIENT_STR;
 	backColor.rgb = backColor.rgb * luminosity * 0.5;
 #endif
 
@@ -95,14 +94,15 @@ vec4 advancedTranslucentShading(float ec, out float bloom_out) {
 	if (isWater && !frx_viewFlag(FRX_CAMERA_IN_WATER)) {
 		// TODO: use same algorithm as the one used in composite
 		vec2 uvSolid = v_texcoord + (texture(u_refraction_uv, v_texcoord).rg * 2.0 - 1.0);
-		uvSolid = clamp(uvSolid, 0.0, 1.0);
+			 uvSolid = clamp(uvSolid, 0.0, 1.0);
 
-		float solidDepthRaw = texture(u_solid_depth, uvSolid).r;
-		float solidDepth = ldepth(solidDepthRaw);
-		float transDepth = ldepth(texture(u_translucent_depth, v_texcoord).r);
+		float solidDepthRaw  = texture(u_solid_depth, uvSolid).r;
+		float solidDepth     = ldepth(solidDepthRaw);
+		float transDepth     = ldepth(texture(u_translucent_depth, v_texcoord).r);
 		float gelatinOpacity = solidDepthRaw == 1.0 ? 0.0 : l2_clampScale(0.0, 0.1, solidDepth - transDepth);
+
 		backColor.rgb = mix(backColor.rgb, frontColor.rgb, gelatinOpacity);
-		finalAlpha += gelatinOpacity * (1.0 - finalAlpha);
+		finalAlpha   += gelatinOpacity * (1.0 - finalAlpha);
 	}
 
 	// exposure cancellation ???
@@ -110,7 +110,7 @@ vec4 advancedTranslucentShading(float ec, out float bloom_out) {
 
 	// blend front and back
 	frontColor.rgb = backColor.rgb * (1.0 - frontColor.a) + frontColor.rgb * frontColor.a * (1.0 - excess);
-	frontColor.a = finalAlpha;
+	frontColor.a   = finalAlpha;
 
 	return frontColor;
 }
