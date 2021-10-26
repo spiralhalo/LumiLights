@@ -73,7 +73,7 @@ vec3 atmos_hdrCaveFogRadiance()
 	return atmosv_hdrCaveFogRadiance;
 }
 
-#define calcHorizon(worldVec) l2_clampScale(1.0, -l2_clampScale(ATMOS_SEA_LEVEL, 512., frx_cameraPos().y), worldVec.y)
+#define calcHorizon(worldVec) sqrt(l2_clampScale(1.0, -l2_clampScale(ATMOS_SEA_LEVEL, 512., frx_cameraPos().y), worldVec.y))
 
 float twilightCalc(vec3 world_toSky) {
 	float isHorizon = calcHorizon(world_toSky);

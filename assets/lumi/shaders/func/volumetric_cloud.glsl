@@ -306,6 +306,8 @@ vec4 volumetricCloud(
 	out_depth = alpha > alphaThreshold ? reverseClipPos.z : 1.0;
 	#endif
 
+	alpha *= energy + alpha - alpha * energy; // reduce dark border while minimizing loss of detail
+
 	return vec4(color, alpha);
 }
 #endif
