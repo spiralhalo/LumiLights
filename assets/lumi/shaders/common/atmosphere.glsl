@@ -14,7 +14,8 @@
  *  published by the Free Software Foundation, Inc.
  *******************************************************/
 
-#define ATMOS_SEA_LEVEL 62.0
+#define ATMOS_SEA_LEVEL		62.0
+#define ATMOS_STRATOSPHERE	512.0 // directly proportional to render distance. this setup is best for 32 rd
 
 #ifdef VERTEX_SHADER
 
@@ -73,7 +74,7 @@ vec3 atmos_hdrCaveFogRadiance()
 	return atmosv_hdrCaveFogRadiance;
 }
 
-#define calcHorizon(worldVec) sqrt(l2_clampScale(1.0, -l2_clampScale(ATMOS_SEA_LEVEL, 512., frx_cameraPos().y), worldVec.y))
+#define calcHorizon(worldVec) sqrt(l2_clampScale(1.0, -l2_clampScale(ATMOS_SEA_LEVEL, ATMOS_STRATOSPHERE, frx_cameraPos().y), worldVec.y))
 
 float twilightCalc(vec3 world_toSky) {
 	float isHorizon = calcHorizon(world_toSky);
