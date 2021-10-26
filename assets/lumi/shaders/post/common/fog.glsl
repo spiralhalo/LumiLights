@@ -68,6 +68,7 @@ vec4 fog(float skyLight, float ec, float vblindness, vec4 a, vec3 modelPos, inou
 
 	vec4 blended;
 
+	// NB: additive fog blending looks bad in this setup. don't use.
 	blended = mix(a, vec4(fogColor, 1.0), fogFactor);
 	bloom  *= l2_clampScale(0.5, 0.1, fogFactor);
 
