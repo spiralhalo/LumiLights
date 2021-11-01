@@ -312,7 +312,7 @@ void atmos_generateAtmosphereModel()
 
 
 	/** CAVE FOG **/
-	if (frx_worldFlag(FRX_WORLD_IS_OVERWORLD)) {
+	if (frx_worldFlag(FRX_WORLD_IS_OVERWORLD) && !frx_worldFlag(FRX_CAMERA_IN_FLUID)) {
 		atmosv_hdrCaveFogRadiance = mix(CAVEFOG_C, CAVEFOG_DEEPC, l2_clampScale(CAVEFOG_MAXY, CAVEFOG_MINY, frx_cameraPos().y));
 
 		float fogL  = frx_luminance(atmosv_hdrFogColorRadiance);
