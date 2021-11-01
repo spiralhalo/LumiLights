@@ -113,7 +113,7 @@ vec3 atmos_hdrSkyGradientRadiance(vec3 world_toSky)
 	float skyHorizon = calcHorizon(world_toSky);
 	float brighteningCancel = min(1., atmosv_hdrOWTwilightFactor * .6 + frx_rainGradient() * .6);
 	float brightenFactor = pow(skyHorizon, 20.) * (1. - brighteningCancel);
-	float horizonBrightening = 1. + 5. * brightenFactor;
+	float horizonBrightening = mix(1., HORIZON_MULT, brightenFactor);
 
 	return mix(atmosv_hdrSkyColorRadiance, atmosv_hdrOWTwilightSkyRadiance, twilightCalc(world_toSky)) * horizonBrightening;
 }
@@ -241,7 +241,8 @@ void atmos_generateAtmosphereModel()
 		&& !frx_playerHasEffect(FRX_EFFECT_BLINDNESS);
 
 	if (customOWFog) {
-		atmosv_hdrFogColorRadiance    = atmosv_hdrSkyColorRadiance;
+		// night fog are as bright as the horizon
+		atmosv_hdrFogColorRadiance    = atmosv_hdrSkyColorRadiance * mix(1.0, frx_worldFlag(FRX_WORLD_IS_MOONLIT) ? HORIZON_MULT : 1.0, frx_skyLightTransitionFactor());
 		atmosv_hdrOWTwilightFogFactor = atmosv_hdrOWTwilightFactor;
 	} else {
 		vec3 vanillaFog = frx_vanillaClearColor();
