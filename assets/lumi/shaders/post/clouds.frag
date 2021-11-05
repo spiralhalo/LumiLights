@@ -79,7 +79,11 @@ void doCloudStuff()
 
 void main()
 {
-	if (!frx_worldFlag(FRX_WORLD_IS_OVERWORLD) || v_blindness == 1.0) {
+	// with exception of worldspace volclouds (rare case), clouds should never render in skybox underwater
+	float depth = min(texture(u_solid_depth, v_texcoord).r, texture(u_translucent_depth, v_texcoord).r);
+	bool cancel = frx_viewFlag(FRX_CAMERA_IN_FLUID) && depth == 1.0;
+
+	if (!frx_worldFlag(FRX_WORLD_IS_OVERWORLD) || v_blindness == 1.0 || cancel) {
 		fragColor[0] = vec4(0.);
 		fragColor[1] = vec4(1.);
 	} else {
