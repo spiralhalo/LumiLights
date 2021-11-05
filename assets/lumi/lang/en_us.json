@@ -196,11 +196,11 @@
 	"config.lumi_lights.value.overlay_debug": "Overlay debug",
 	"config.lumi_lights.help.overlay_debug": "Separate overlays by rendering them differently",
 
-	"respackopts.title.LUMI": "Lumi Lights",
-	"respackopts.field.LUMI.WavyWaterModel": "Wavy water animation",
-	"respackopts.tooltip.LUMI.WavyWaterModel": "Enable wavy water animation",
-	"respackopts.field.LUMI.WavyWaterIntensity": "Wavy water intensity",
-	"respackopts.tooltip.LUMI.WavyWaterIntensity": "Set the speed and intensity of wavy water animation",
+	"rpo.LUMI": "Lumi Lights",
+	"rpo.LUMI.WavyWaterModel": "Wavy water animation",
+	"rpo.tooltip.LUMI.WavyWaterModel": "Enable wavy water animation",
+	"rpo.LUMI.WavyWaterIntensity": "Wavy water intensity",
+	"rpo.tooltip.LUMI.WavyWaterIntensity": "Set the speed and intensity of wavy water animation",
 
 	"_comment_": "No trailing comma."
 }

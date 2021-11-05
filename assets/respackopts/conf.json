@@ -1,6 +1,7 @@
 {
   "id": "LUMI",
-  "version": 1,
+  "version": 5,
+  "capabilities": ["FileFilter"],
   "conf": {
 	"WavyWaterModel": true,
 	"WavyWaterIntensity": {
