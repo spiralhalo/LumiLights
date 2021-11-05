@@ -42,30 +42,30 @@
 					descriptionKey: "config.lumi_lights.help.outdoors_brightness"
 				},
 				ambient_brightness: {
-					default: 10,
+					default: 5,
 					min: 0,
-					max: 50,
+					max: 30,
 					nameKey: "config.lumi_lights.value.ambient_brightness",
 					descriptionKey: "config.lumi_lights.help.ambient_brightness"
 				},
 				night_ambient_brightness: {
-					default: 10,
+					default: 5,
 					min: 0,
-					max: 50,
+					max: 30,
 					nameKey: "config.lumi_lights.value.night_ambient_brightness",
 					descriptionKey: "config.lumi_lights.help.night_ambient_brightness"
 				},
 				nether_ambient_brightness: {
 					default: 10,
 					min: 0,
-					max: 50,
+					max: 30,
 					nameKey: "config.lumi_lights.value.nether_ambient_brightness",
 					descriptionKey: "config.lumi_lights.help.nether_ambient_brightness"
 				},
 				end_ambient_brightness: {
 					default: 10,
 					min: 0,
-					max: 50,
+					max: 30,
 					nameKey: "config.lumi_lights.value.end_ambient_brightness",
 					descriptionKey: "config.lumi_lights.help.end_ambient_brightness"
 				},
