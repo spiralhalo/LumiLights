@@ -120,11 +120,7 @@ vec3 atmos_hdrSkyGradientRadiance(vec3 world_toSky)
 
 vec3 atmos_hdrCloudColorRadiance(vec3 world_toSky)
 {
-	//TODO: test non-overworld has_sky_light custom dimension and broaden if fits
-	if (!frx_worldFlag(FRX_WORLD_IS_OVERWORLD))
-		return atmosv_hdrCloudColorRadiance;
-
-	return mix(atmosv_hdrCloudColorRadiance, atmosv_hdrOWTwilightSkyRadiance, 0.6 * twilightCalc(world_toSky));
+	return mix(atmosv_hdrCloudColorRadiance, atmos_hdrSkyGradientRadiance(world_toSky), 0.6);
 }
 #endif
 
@@ -135,14 +131,15 @@ vec3 atmos_hdrCloudColorRadiance(vec3 world_toSky)
 const float SKY_LIGHT_RAINING_MULT    = 0.5;
 const float SKY_LIGHT_THUNDERING_MULT = 0.2;
 
-const float SUNLIGHT_STR  = DEF_SUNLIGHT_STR;
-const float MOONLIGHT_STR = DEF_MOONLIGHT_STR;
-const float SKY_STR = DEF_SKY_STR;
-const float SKY_AMBIENT_STR = DEF_SKY_AMBIENT_STR;
+const float SUNLIGHT_STR	= DEF_SUNLIGHT_STR;
+const float MOONLIGHT_STR	= DEF_MOONLIGHT_STR;
+const float SKY_STR			= DEF_SKY_STR;
+const float SKY_AMBIENT_STR	= DEF_SKY_AMBIENT_STR;
 
-const vec3 DAY_SKY_COLOR   = DEF_DAY_SKY_COLOR;
-const vec3 NIGHT_SKY_COLOR = DEF_NIGHT_SKY_COLOR;
-const vec3 DAY_CLOUD_COLOR = DEF_DAY_CLOUD_COLOR;
+const vec3 DAY_SKY_COLOR	 = DEF_DAY_SKY_COLOR;
+const vec3 NIGHT_SKY_COLOR	 = DEF_NIGHT_SKY_COLOR;
+const vec3 NIGHT_CLOUD_COLOR = DEF_NIGHT_CLOUD_COLOR;
+const vec3 DAY_CLOUD_COLOR	 = DEF_DAY_CLOUD_COLOR;
 
 const vec3 NOON_SUNLIGHT_COLOR = hdr_fromGamma(vec3(1.0, 1.0, 1.0));
 const vec3 SUNRISE_LIGHT_COLOR = hdr_fromGamma(vec3(1.0, 0.7, 0.4));
@@ -150,11 +147,11 @@ const vec3 SUNRISE_LIGHT_COLOR = hdr_fromGamma(vec3(1.0, 0.7, 0.4));
 const vec3 NOON_AMBIENT  = hdr_fromGamma(vec3(1.0));
 const vec3 NIGHT_AMBIENT = hdr_fromGamma(DEF_NIGHT_AMBIENT);
 
-const vec3 CAVEFOG_C = DEF_DAY_SKY_COLOR;
+const vec3 CAVEFOG_C	 = DEF_DAY_SKY_COLOR;
 const vec3 CAVEFOG_DEEPC = SUNRISE_LIGHT_COLOR;
 const float CAVEFOG_MAXY = 16.0;
 const float CAVEFOG_MINY = 0.0;
-const float CAVEFOG_STR = 0.05;
+const float CAVEFOG_STR	 = 0.05;
 
 
 const int SRISC = 0;
@@ -171,13 +168,14 @@ const int DAYC = 0;
 const int NGTC = 1;
 const int TWGC = 2;
 const int CLDC = 3;
+const int NCLC = 4;
 #ifdef POST_SHADER
-const vec3[4] SKY_COLOR   = vec3[](DAY_SKY_COLOR, NIGHT_SKY_COLOR, SUNRISE_LIGHT_COLOR, DAY_CLOUD_COLOR);
+const vec3[5] SKY_COLOR   = vec3[](DAY_SKY_COLOR, NIGHT_SKY_COLOR, SUNRISE_LIGHT_COLOR, DAY_CLOUD_COLOR, NIGHT_CLOUD_COLOR);
 #endif
 const vec3[2] SKY_AMBIENT = vec3[](NOON_AMBIENT,  NIGHT_AMBIENT * USER_NIGHT_AMBIENT_MULTIPLIER);
 const int SKY_LEN = 4;
 const int[SKY_LEN] SKY_INDICES = int[]  ( NGTC, DAYC, DAYC, NGTC);
-const int[SKY_LEN] CLOUD_INDICES = int[]( NGTC, CLDC, CLDC, NGTC);
+const int[SKY_LEN] CLOUD_INDICES = int[]( NCLC, CLDC, CLDC, NCLC);
 const float[SKY_LEN] SKY_TIMES = float[](-0.04, -0.01, 0.51, 0.54);
 
 void atmos_generateAtmosphereModel()
