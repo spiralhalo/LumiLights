@@ -171,7 +171,7 @@ vec4 hdr_shaded_color(
 #endif
 
 	vec3 shadingLight = light.xyz;
-	shadingLight.y += max(0.0, 1.0 - light.y) * exposureCompensation * 0.8;
+	shadingLight.y += max(0.0, 1.0 - light.y) * exposureCompensation * l2_clampScale(0.01, 0.1, frx_eyeBrightness().y) * 0.8;
 
 	pbr_shading(a, bloom_out, modelPos, shadingLight, normal, roughness, metallic, f0, diffuse, translucent);
 
