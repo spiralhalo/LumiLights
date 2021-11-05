@@ -216,10 +216,13 @@ vec4 hdr_shaded_color(
 	}
 
 	// ugly ?? TODO: make common function
-	if (frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) && !frx_viewFlag(FRX_CAMERA_IN_FLUID)) {
+	if (frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT)) {
 		float vd2 = frx_viewDistance() * frx_viewDistance();
 		float blendToSky = l2_clampScale(vd2 * 0.85, vd2 * (0.86 +  0.14 * HORIZON_BLEND), dot(modelPos, modelPos)) * (1.0 - v_blindness);
-		a = mix(a, vec4(atmos_hdrSkyGradientRadiance(normalize(modelPos)), 1.0), blendToSky);
+		vec3 modelVec = normalize(modelPos);
+		vec3 color = frx_viewFlag(FRX_CAMERA_IN_FLUID) ? atmos_hdrFogColorRadiance(modelVec) : atmos_hdrSkyGradientRadiance(modelVec);
+
+		a = mix(a, vec4(color, 1.0), blendToSky);
 	}
 
 	return a;
