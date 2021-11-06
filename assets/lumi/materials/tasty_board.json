@@ -1,7 +1,6 @@
 {
-	"transparency": "none",
 	"vertexSource": "lumi:shaders/material/noop.vert",
 	"fragmentSource": "lumi:shaders/material/glow.frag",
-	"emissive": false,
+	"emissive": true,
 	"transform": true
 }

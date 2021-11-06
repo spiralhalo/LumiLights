@@ -1,0 +1,12 @@
+{
+    "map": [
+        {
+            "predicate": {
+                "materialPredicate": {
+                    "renderLayerName": "text"
+                }
+            },
+            "material": "lumi:tasty_board"
+        }
+    ]
+}

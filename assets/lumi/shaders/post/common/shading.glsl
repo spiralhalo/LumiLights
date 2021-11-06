@@ -108,11 +108,9 @@ vec4 hdr_shaded_color(
 	float mathurt   = bit_unpack(misc.z, 1);
 	// return vec4(coords_view(uv, frx_inverseProjectionMatrix(), depth), 1.0);
 
-	// Support vanilla emissive // TODO: make configurable
-	if (light.x > 0.93625) {
-		light.x = 0.93625;
-		bloom_raw = 1.0;
-	}
+	// Basic vanilla emissive
+	float al = frx_luminance(a.rgb);
+	bloom_raw += step(0.93625, light.x) * al * al;
 
 	light.y = lightmapRemap(light.y);
 

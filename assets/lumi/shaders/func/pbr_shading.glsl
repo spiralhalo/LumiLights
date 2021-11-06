@@ -82,7 +82,9 @@ vec3 hdr_calcBlockLight(inout light_data data, in float bloom)
 	float bl = smoothstep(0.03125, 0.96875, data.light.x);
 		 bl *= pow(bl, 3.0 + brightness * 2.0) * (2.0 - brightness * 0.5); // lyfe hax
 
-	vec3 color	  = mix(BLOCK_LIGHT_COLOR, data.albedo / l2_max3(data.albedo), bloom);
+	float white = max(bloom, step(0.93625, data.light.x));
+
+	vec3 color	  = mix(BLOCK_LIGHT_COLOR, BLOCK_LIGHT_NEUTRAL, white);
 	vec3 radiance = color * BLOCK_LIGHT_STR * bl;
 
 	bool useFancySpecular = data.diffuse;
