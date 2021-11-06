@@ -20,6 +20,14 @@
 const vec3 skylessDarkenedDir = vec3(0, -0.977358, 0.211593);
 const vec3 skylessDir = vec3(0, 0.977358, 0.211593);
 
+/*******************************************************
+ *  vertexShader: lumi:shaders/post/shading.vert
+ *******************************************************/
+
+in float pbrv_coneInner;
+in float pbrv_coneOuter;
+in vec3  pbrv_flashLightView;
+
 float lightmapRemap(float lightMapCoords)
 {
 	return hdr_fromGammaf(l2_clampScale(0.03125, 0.96875, lightMapCoords));
@@ -117,10 +125,8 @@ vec3 hdr_calcHeldLight(inout light_data data)
 		vec3 handHeldDir = data.viewDir;
 
 		vec4 heldLight	 = frx_heldLight();
-		float coneInner  = clamp(frx_heldLightInnerRadius(), 0.0, 3.14159265359) / 3.14159265359;
-		float coneOuter  = max(coneInner, clamp(frx_heldLightOuterRadius(), 0.0, 3.14159265359) / 3.14159265359);
-		float cosView	 = max(dot(handHeldDir, -frx_cameraView()), 0.0);
-		float cone		 = l2_clampScale(1.0 - coneOuter, 1.0 - coneInner, cosView);
+		float cosView	 = max(dot(handHeldDir, pbrv_flashLightView), 0.0);
+		float cone		 = l2_clampScale(1.0 - pbrv_coneOuter, 1.0 - pbrv_coneInner, cosView);
 		float distSq	 = dot(data.modelPos, data.modelPos);
 		float hlRadSq	 = heldLight.w * HANDHELD_LIGHT_RADIUS * heldLight.w * HANDHELD_LIGHT_RADIUS;
 		float hl		 = l2_clampScale(hlRadSq, 0.0, distSq);
