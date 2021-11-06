@@ -29,11 +29,8 @@ vec4 fog(float skyLight, float ec, float vblindness, vec4 a, vec3 modelPos, inou
 	// float fog_noise = snoise(worldPos.xz * FOG_NOISE_SCALE + frx_renderSeconds() * FOG_NOISE_SPEED) * FOG_NOISE_HEIGHT;
 
 	if (!frx_viewFlag(FRX_CAMERA_IN_FLUID) && frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT)) {
-		float zigZagTime = abs(frx_worldTime()-0.5);
-		float timeFactor = (l2_clampScale(0.45, 0.5, zigZagTime) + l2_clampScale(0.05, 0.0, zigZagTime));
 		float inverseThickener = 1.0;
 
-		inverseThickener -= 0.25 * timeFactor;
 		inverseThickener -= 0.5 * inverseThickener * frx_rainGradient();
 		inverseThickener -= 0.5 * inverseThickener * frx_thunderGradient();
 
