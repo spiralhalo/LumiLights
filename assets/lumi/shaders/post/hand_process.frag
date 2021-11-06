@@ -82,6 +82,10 @@ void main()
 	// Workaround to fix patches in shadow map until it's FLAWLESS
 	light.z *= l2_clampScale(0.03125, 0.04, light.y);
 	#endif
+
+	if (frx_viewFlag(FRX_CAMERA_IN_FLUID)) {
+		light.z *= lightmapRemap(light.y);
+	}
 #else
 	light.z = lightmapRemap(light.y);
 #endif
