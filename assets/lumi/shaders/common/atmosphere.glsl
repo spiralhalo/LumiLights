@@ -207,7 +207,7 @@ void atmos_generateAtmosphereModel()
 	}
 
 	atmosv_hdrCelestialRadiance *= frx_skyLightTransitionFactor();
-	atmosv_hdrCelestialRadiance.gb *= frx_skyLightTransitionFactor();
+	atmosv_hdrCelestialRadiance.gb *= vec2(max(frx_skyLightTransitionFactor(), 0.5), frx_skyLightTransitionFactor());
 
 
 
@@ -261,7 +261,7 @@ void atmos_generateAtmosphereModel()
 	}
 
 	atmosv_hdrOWTwilightSkyRadiance = SKY_COLOR[TWGC];
-	atmosv_hdrOWTwilightSkyRadiance.gb *= frx_skyLightTransitionFactor();
+	atmosv_hdrOWTwilightSkyRadiance.gb *= vec2(max(frx_skyLightTransitionFactor(), 0.5), frx_skyLightTransitionFactor());
 
 	// prevent custom overworld sky reflection in non-overworld dimension or when the sky mode is not Lumi
 	bool customOWSkyAndFallback =
