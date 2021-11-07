@@ -111,13 +111,13 @@
 		},
 		{
 			name: "godrays",
-			lod: 3,
+			lod: 0,
 			internalFormat: "GL_R16",
 			pixelFormat: "GL_RED",
 			pixelDataType: "UNSIGNED_BYTE",
 			target: "TEXTURE_2D",
 			texParams: [
-				{name: "TEXTURE_MIN_FILTER", val: "LINEAR_MIPMAP_LINEAR"},
+				{name: "TEXTURE_MIN_FILTER", val: "LINEAR"},
 				{name: "TEXTURE_MAG_FILTER", val: "LINEAR"},
 				{name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"},
 				{name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
@@ -146,24 +146,6 @@
 			name: "godrays",
 			colorAttachments: [
 				{image: "godrays"},
-			]
-		},
-		{
-			name: "godrays_1",
-			colorAttachments: [
-				{image: "godrays", lod: 1},
-			]
-		},
-		{
-			name: "godrays_2",
-			colorAttachments: [
-				{image: "godrays", lod: 2},
-			]
-		},
-		{
-			name: "godrays_3",
-			colorAttachments: [
-				{image: "godrays", lod: 3},
 			]
 		},
 		{
@@ -252,27 +234,6 @@
 					"shadow_map",
 					"lumi:textures/filter_pattern/bluenoise256.png",
 				],
-			},
-			{
-				name: "godrays_downsample_1",
-				program: "downsample",
-				framebuffer: "godrays_1",
-				samplerImages: ["godrays"],
-				lod: 1
-			},
-			{
-				name: "godrays_downsample_2",
-				program: "downsample",
-				framebuffer: "godrays_2",
-				samplerImages: ["godrays"],
-				lod: 2
-			},
-			{
-				name: "godrays_downsample_3",
-				program: "downsample",
-				framebuffer: "godrays_3",
-				samplerImages: ["godrays"],
-				lod: 3
 			},
 			{
 				name: "godrays_composite",

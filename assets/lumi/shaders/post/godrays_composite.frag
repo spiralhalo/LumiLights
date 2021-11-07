@@ -49,9 +49,6 @@ vec3 blendLinearLight(vec3 base, vec3 blend, float opacity) {
 // end blending func
 
 void main() {
-	// underwater rays are already kind of thin
-	float blurAdj = frx_viewFlag(FRX_CAMERA_IN_FLUID) ? 2.0 : 0.0;
-
 	vec3 scatterColor = vec3(1.0);
 
 	if (frx_viewFlag(FRX_CAMERA_IN_WATER)) {
@@ -70,12 +67,10 @@ void main() {
 	// TODO: might as well do godrays in HDR space
 	godraysRadiance *= 0.1 + atmosv_celestIntensity * 0.9;
 
-	float d = texture(u_depth, v_texcoord).r;
-	vec4 a  = texture(u_color, v_texcoord);
-	vec4 b  = textureLod(u_godrays, v_texcoord, (1.0 - ldepth(d)) * (3. - blurAdj));
+	// float vanillaFar = frx_viewDistance() * 4.0;
 
-	b.a   = b.r;
-	b.rgb = ldr_tonemap3(godraysRadiance);
+	vec4 a = texture(u_color, v_texcoord);
+	vec4 b = vec4(ldr_tonemap3(godraysRadiance), texture(u_godrays, v_texcoord).r);
 
 	// vec3 aa = hdr_fromGamma(a.rgb);
 	// vec3 bb = hdr_fromGamma(b.rgb);
