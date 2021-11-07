@@ -16,6 +16,7 @@
 
 #define ATMOS_SEA_LEVEL		62.0
 #define ATMOS_STRATOSPHERE	512.0 // directly proportional to render distance. this setup is best for 32 rd
+#define ATMOS_OUTER_SPACE	1024.0 // directly proportional to render distance. this setup is best for 32 rd
 
 #ifdef VERTEX_SHADER
 
@@ -76,6 +77,11 @@ vec3 atmos_hdrCaveFogRadiance()
 
 #define calcHorizon(worldVec) sqrt(l2_clampScale(1.0, -l2_clampScale(ATMOS_SEA_LEVEL, ATMOS_STRATOSPHERE, frx_cameraPos().y), worldVec.y))
 
+float atmos_outerSpace() {
+	float v = l2_clampScale(ATMOS_STRATOSPHERE, ATMOS_OUTER_SPACE, frx_cameraPos().y);
+	return v * v;
+}
+
 float twilightCalc(vec3 world_toSky) {
 	float isHorizon = calcHorizon(world_toSky);
 	//NB: only works if sun always rise from dead East instead of NE/SE etc.
@@ -91,7 +97,7 @@ vec3 atmos_hdrFogColorRadiance(vec3 world_toSky)
 	if (!frx_worldFlag(FRX_WORLD_IS_OVERWORLD))
 		return atmosv_hdrFogColorRadiance;
 
-	return mix(atmosv_hdrFogColorRadiance, atmosv_hdrOWTwilightSkyRadiance, 0.8 * twilightCalc(world_toSky) * atmosv_hdrOWTwilightFogFactor);
+	return mix(atmosv_hdrFogColorRadiance, atmosv_hdrOWTwilightSkyRadiance, 0.8 * twilightCalc(world_toSky) * atmosv_hdrOWTwilightFogFactor) * (1.0 - atmos_outerSpace());
 }
 
 vec3 atmos_hdrSkyColorRadiance(vec3 world_toSky)
@@ -100,7 +106,7 @@ vec3 atmos_hdrSkyColorRadiance(vec3 world_toSky)
 	if (!frx_worldFlag(FRX_WORLD_IS_OVERWORLD)) // this is for nether performance increase mostly
 		return atmosv_hdrSkyColorRadiance;
 
-	return mix(atmosv_hdrSkyColorRadiance, atmosv_hdrOWTwilightSkyRadiance, twilightCalc(world_toSky));
+	return mix(atmosv_hdrSkyColorRadiance, atmosv_hdrOWTwilightSkyRadiance, twilightCalc(world_toSky)) * (1.0 - atmos_outerSpace());
 }
 
 vec3 atmos_hdrSkyGradientRadiance(vec3 world_toSky)
@@ -115,12 +121,12 @@ vec3 atmos_hdrSkyGradientRadiance(vec3 world_toSky)
 	float brightenFactor = pow(skyHorizon, 20.) * (1. - brighteningCancel);
 	float horizonBrightening = mix(1., HORIZON_MULT, brightenFactor);
 
-	return mix(atmosv_hdrSkyColorRadiance, atmosv_hdrOWTwilightSkyRadiance, twilightCalc(world_toSky)) * horizonBrightening;
+	return mix(atmosv_hdrSkyColorRadiance, atmosv_hdrOWTwilightSkyRadiance, twilightCalc(world_toSky)) * horizonBrightening * min(1.0, 1.0 - atmos_outerSpace() + pow(skyHorizon, 5.0));
 }
 
 vec3 atmos_hdrCloudColorRadiance(vec3 world_toSky)
 {
-	return mix(atmosv_hdrCloudColorRadiance, atmos_hdrSkyGradientRadiance(world_toSky), 0.6);
+	return mix(atmosv_hdrCloudColorRadiance, atmos_hdrSkyGradientRadiance(world_toSky), 0.6) * (1.0 - atmos_outerSpace());
 }
 #endif
 

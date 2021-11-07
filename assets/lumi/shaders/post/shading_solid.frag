@@ -66,7 +66,7 @@ void custom_sky(in vec3 modelPos, in float blindnessFactor, in bool maybeUnderwa
 		// Stars
 		const vec3 NON_MILKY_AXIS = vec3(-0.598964, 0.531492, 0.598964);
 
-		float starry = l2_clampScale(0.4, 0.0, frx_luminance(a.rgb)) * v_night;
+		float starry = l2_clampScale(0.4, 0.0, frx_luminance(a.rgb)) * max(v_night, atmos_outerSpace());
 			 starry *= l2_clampScale(-0.6, -0.5, skyDotUp); //prevent star near the void core
 
 		float milkyness   = l2_clampScale(0.7, 0.0, abs(dot(NON_MILKY_AXIS, worldSkyVec.xyz)));

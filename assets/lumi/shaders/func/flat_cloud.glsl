@@ -42,5 +42,5 @@ vec4 flatCloud(in vec3 worldVec, in mat4 cloudRotator, in vec3 up)
 	cloud = l2_clampScale(0.1, 0.4, cloud);
 
 	vec3 color = atmos_hdrCelestialRadiance() * 0.1 + atmos_hdrCloudColorRadiance(worldVec);
-	return vec4(color, cloud);
+	return vec4(color, cloud * (1.0 - atmos_outerSpace()));
 }

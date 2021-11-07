@@ -308,6 +308,6 @@ vec4 volumetricCloud(
 
 	alpha *= energy + alpha - alpha * energy; // reduce dark border while minimizing loss of detail
 
-	return vec4(color, alpha);
+	return vec4(color, alpha * (1.0 - atmos_outerSpace()));
 }
 #endif

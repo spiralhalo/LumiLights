@@ -68,6 +68,6 @@ vec4 parallaxCloud(in sampler2D sbluenoise, in vec2 texcoord, in vec3 worldVec)
 	globalCloud  = min(1., globalCloud * PARALLAX_AVG);
 	globalCloud *= l2_clampScale(0.05, 0.15, skyDotUp);
 
-	return vec4(globalColor, globalCloud);
+	return vec4(globalColor, globalCloud * (1.0 - atmos_outerSpace()));
 }
 #endif
