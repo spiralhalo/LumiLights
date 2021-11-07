@@ -148,7 +148,7 @@ vec4 hdr_shaded_color(
 #endif
 
 #ifdef SHADOW_MAP_PRESENT
-	causticLight *= light.z; // TODO: can improve?
+	causticLight *= max(0.15, light.z); // TODO: can improve even more?
 
 	if (maybeUnderwater || frx_viewFlag(FRX_CAMERA_IN_WATER)) {
 		light.z *= hdr_fromGammaf(light.y);
