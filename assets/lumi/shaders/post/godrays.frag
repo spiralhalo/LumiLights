@@ -78,5 +78,5 @@ void main() {
 	}
 #endif
 
-	fragColor = vec4(godBeam);
+	fragColor = vec4(godBeam * godBeam); // looks better with the squaring
 }

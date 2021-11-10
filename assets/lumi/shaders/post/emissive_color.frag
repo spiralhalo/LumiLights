@@ -45,7 +45,7 @@ void main()
 
 #if LIGHTRAYS_BLENDING == LIGHTRAYS_BLENDING_BLOOM
 	float godray = texture(u_godrays, v_texcoord).r;
-		  ems	+= godray * godray * cap_intensity(0.5);
+		  ems	+= godray * cap_intensity(0.5);
 #endif
 
 	vec4 c		 = texture(u_base_composite, v_texcoord);
