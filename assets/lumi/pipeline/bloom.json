@@ -11,6 +11,7 @@
 				"u_emissive_composite",
 				"u_emissive_reflection_solid",
 				"u_emissive_reflection_translucent",
+				"u_godrays",
 				"u_solid_depth"
 			]
 		}, {
@@ -58,6 +59,7 @@
 					"emissive_composite",
 					"emissive_reflection_solid",
 					"emissive_reflection_translucent",
+					"godrays",
 					"solid_depth" // depth after hand render for filtering
 				]
 			}, {

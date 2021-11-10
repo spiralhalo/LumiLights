@@ -75,8 +75,8 @@
 					descriptionKey: "config.lumi_lights.help.lightrays_mode"
 				},
 				lightrays_blending: {
-					default: "linear_light",
-					choices: ["linear_dodge", "linear_light"],
+					default: "bloom",
+					choices: ["linear_dodge", "lumi_blend_a", "bloom"],
 					enum: true,
 					prefix: "lightrays_blending_",
 					nameKey: "config.lumi_lights.value.lightrays_blending",

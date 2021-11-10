@@ -5,6 +5,7 @@
 #include lumi:shaders/common/atmosphere.glsl
 #include lumi:shaders/func/tonemap.glsl
 #include lumi:shaders/lib/util.glsl
+#include lumi:shaders/post/common/bloom.glsl
 
 /*******************************************************
  *  lumi:shaders/post/godrays.frag
@@ -20,33 +21,6 @@ uniform sampler2D u_color;
 uniform sampler2D u_godrays;
 
 out vec4 fragColor;
-
-// blending func from https://github.com/jamieowen/glsl-blend/blob/master/linear-dodge.glsl
-// (c) 2015 Jamie Owen, MIT License
-
-float blendLinearBurnModded(float base, float blend) { //modified linear burn
-	// Note : Same implementation as BlendSubtractf
-	return max(base+blend-1.0,base);
-}
-
-float blendLinearDodge(float base, float blend) {
-	// Note : Same implementation as BlendAddf
-	return min(base+blend,1.0);
-}
-
-float blendLinearLight(float base, float blend) {
-	return blend<0.5?blendLinearBurnModded(base,(2.0*blend)):blendLinearDodge(base,(2.0*(blend-0.5)));
-}
-
-vec3 blendLinearLight(vec3 base, vec3 blend) {
-	return vec3(blendLinearLight(base.r,blend.r),blendLinearLight(base.g,blend.g),blendLinearLight(base.b,blend.b));
-}
-
-vec3 blendLinearLight(vec3 base, vec3 blend, float opacity) {
-	return (blendLinearLight(base, blend) * opacity + base * (1.0 - opacity));
-}
-
-// end blending func
 
 void main() {
 	vec3 scatterColor = vec3(1.0);
@@ -67,10 +41,10 @@ void main() {
 	// TODO: might as well do godrays in HDR space
 	godraysRadiance *= 0.1 + atmosv_celestIntensity * 0.9;
 
-	// float vanillaFar = frx_viewDistance() * 4.0;
+	vec3 tmapped = ldr_tonemap3(godraysRadiance);
 
 	vec4 a = texture(u_color, v_texcoord);
-	vec4 b = vec4(ldr_tonemap3(godraysRadiance), texture(u_godrays, v_texcoord).r);
+	vec4 b = vec4(tmapped, texture(u_godrays, v_texcoord).r);
 
 	// vec3 aa = hdr_fromGamma(a.rgb);
 	// vec3 bb = hdr_fromGamma(b.rgb);
@@ -82,11 +56,23 @@ void main() {
 	// vec3 c = a.rgb * (1.0 - b.a) + b.rgb * b.a; // TOO WASHED OUT
 	// vec3 c = a.rgb + b.rgb * a.rgb * b.a; // TOO GLITCHY
 
-#if LIGHTRAYS_BLENDING == LIGHTRAYS_BLENDING_LINEAR_DODGE
-	vec3 c = a.rgb + b.rgb * b.a; // ORIGINAL BLENDING
+#if LIGHTRAYS_BLENDING == LIGHTRAYS_BLENDING_BLOOM
+	vec3 c = mix(a.rgb, b.rgb, b.a * l2_clampScale(0.0, 0.5, BLOOM_INTENSITY_FLOAT));
 #else
-	vec3 c = blendLinearLight(a.rgb, b.rgb, b.a);
+	// vec3 c = blendLinearLight(a.rgb, b.rgb, b.a); // linear light is only capable of comprehending turmeric yellow
+	vec3 c = a.rgb + b.rgb * b.a;
+
+#if LIGHTRAYS_BLENDING == LIGHTRAYS_BLENDING_LUMI_BLEND_A
+	c = min(c, max(a.rgb, b.rgb)); // like linear light but understands the color orange
 #endif
+#endif
+
+// #if LIGHTRAYS_BLENDING == LIGHTRAYS_BLENDING_LUMI_BLEND_B
+// 	vec3 c2  = min(c, max(a.rgb, b.rgb));
+// 	float l1 = frx_luminance(c);
+// 	float l2 = frx_luminance(c2);
+// 	c = mix(c, c2, l1); // BAD: this mixing causes grayish zone
+// #endif
 
 	fragColor = vec4(c, a.a);
 }
