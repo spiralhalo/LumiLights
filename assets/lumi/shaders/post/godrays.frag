@@ -39,7 +39,7 @@ void main() {
 	float depth_translucent = texture(u_depth_translucent, v_texcoord).r;
 
 	float godBeam = 0.0;
-	float ec = exposureCompensation();
+	float exposure = exposureCompensation();
 
 	if (v_godray_intensity > 0.0) {
 		vec4 worldPos = frx_inverseViewProjectionMatrix() * vec4(v_texcoord * 2.0 - 1.0, min_depth * 2.0 - 1.0, 1.0);
@@ -53,20 +53,20 @@ void main() {
 		#endif
 
 		float sunHorizon = smoothstep(0.3, 0.2, frx_skyLightVector().y);
-		float modEC      = smoothstep(0.0, 0.25 + sunHorizon * 0.75, ec);
-		float exposure   = (1.0 - modEC) * LIGHT_RAYS_STR;
+		float modEx      = smoothstep(0.0, 0.5 + sunHorizon * 1.25, exposure);
+		float strength   = (1.0 - modEx) * LIGHT_RAYS_STR;
 
 		if (screenSpace) {
 			float scatter = smoothstep(-1.0, 0.5, dot(normalize(worldPos.xyz), frx_skyLightVector()));
 				 scatter *= max(0.0, dot(frx_cameraView(), frx_skyLightVector()));
 
 			// note: kinda buggy, flickers in some scenes
-			godBeam = godrays(16, u_depth, tileJitter, v_skylightpos, v_texcoord, frxu_size) * exposure * scatter;
+			godBeam = godrays(16, u_depth, tileJitter, v_skylightpos, v_texcoord, frxu_size) * strength * scatter;
 		} else {
 			float yLight = texture(u_light_solid, v_texcoord).y;
 				  yLight = max(yLight, texture(u_light_translucent, v_texcoord).y);
 
-			godBeam = celestialLightRays(u_shadow, worldPos.xyz, exposure, yLight, tileJitter, depth_translucent, min_depth);
+			godBeam = celestialLightRays(u_shadow, worldPos.xyz, strength, yLight, tileJitter, depth_translucent, min_depth);
 		}
 
 		godBeam *= v_godray_intensity;

@@ -44,7 +44,8 @@ void main()
 	float ems	 = solidD == 1.0 ? max(texture(u_emissive_composite, v_texcoord).r, ref) : texture(u_emissive_solid, v_texcoord).r;
 
 #if LIGHTRAYS_BLENDING == LIGHTRAYS_BLENDING_BLOOM
-		  ems	+= texture(u_godrays, v_texcoord).r * cap_intensity(0.5);
+	float godray = texture(u_godrays, v_texcoord).r;
+		  ems	+= godray * godray * cap_intensity(0.5);
 #endif
 
 	vec4 c		 = texture(u_base_composite, v_texcoord);

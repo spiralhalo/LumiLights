@@ -13,7 +13,7 @@
  *  published by the Free Software Foundation, Inc.
  *******************************************************/
 
-float celestialLightRays(sampler2DArrayShadow sshadow, vec3 modelPos, float exposure, float yLightmap, float tileJitter, float translucentDepth, float depth)
+float celestialLightRays(sampler2DArrayShadow sshadow, vec3 modelPos, float strength, float yLightmap, float tileJitter, float translucentDepth, float depth)
 {
 	bool doUnderwaterRays = frx_viewFlag(FRX_CAMERA_IN_WATER) && translucentDepth >= depth && frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT);
 
@@ -43,8 +43,10 @@ float celestialLightRays(sampler2DArrayShadow sshadow, vec3 modelPos, float expo
 	float maxDist	 = length(modelPos);
 	int   maxSteps	 = doUnderwaterRays ? 10 : 16;
 	float sample	 = doUnderwaterRays ? 2.0 : maxDist / float(maxSteps);
-	float basePower	 = doUnderwaterRays ? 1.0 : exposure;
+	float basePower	 = doUnderwaterRays ? 1.0 : strength;
 	float deadRadius = doUnderwaterRays ? 4.0 : 0.0;
+	float nearLands	 = frx_viewDistance();
+	float farLands	 = frx_viewDistance() * 4.0;
 	// const float range = 10.0;
 
 	vec3 ray   = vec3(0.);
@@ -63,7 +65,7 @@ float celestialLightRays(sampler2DArrayShadow sshadow, vec3 modelPos, float expo
 			e = caustics(ray);
 			e = pow(e, 30.0);
 		} else {
-			e = 1.0;
+			e = l2_clampScale(256, 64., ray.y) * l2_clampScale(farLands, nearLands, traveled);
 		}
 		// e *= traveled / range;
 
