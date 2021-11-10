@@ -32,7 +32,7 @@ float celestialLightRays(sampler2DArrayShadow sshadow, vec3 modelPos, float expo
 		// scatter = pow(scatter, 0.25);
 	#ifdef SHADOW_WORKAROUND
 		// Workaround to fix patches in shadow map until it's FLAWLESS
-		scatter *= l2_clampScale(0.03125, 0.0625, yLightmap);
+		scatter *= depth == 1.0 ? 1.0 : l2_clampScale(0.03125, 0.0625, yLightmap);
 	#endif
 	}
 
@@ -47,7 +47,7 @@ float celestialLightRays(sampler2DArrayShadow sshadow, vec3 modelPos, float expo
 	float deadRadius = doUnderwaterRays ? 4.0 : 0.0;
 	// const float range = 10.0;
 
-	vec3 ray   = frx_cameraPos();
+	vec3 ray   = vec3(0.);
 	vec3 march = unit * sample;
 
 	ray += tileJitter * march + unit * deadRadius;
@@ -68,7 +68,7 @@ float celestialLightRays(sampler2DArrayShadow sshadow, vec3 modelPos, float expo
 		// e *= traveled / range;
 
 		#ifdef SHADOW_MAP_PRESENT
-		vec4 ray_shadow = (frx_shadowViewMatrix() * vec4(ray - frx_cameraPos(), 1.0));
+		vec4 ray_shadow = (frx_shadowViewMatrix() * vec4(ray, 1.0));
 		e *= simpleShadowFactor(sshadow, ray_shadow);
 		#endif
 
