@@ -17,6 +17,11 @@
 					nameKey: "config.lumi_lights.value.shadow_workaround",
 					descriptionKey: "config.lumi_lights.help.shadow_workaround"
 				},
+				gelatin_material: {
+					default: false,
+					nameKey: "config.lumi_lights.value.gelatin_material",
+					descriptionKey: "config.lumi_lights.help.gelatin_material"
+				},
 				half_reflection_resolution: {
 					default: false,
 					nameKey: "config.lumi_lights.value.half_reflection_resolution",

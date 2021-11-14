@@ -88,7 +88,9 @@ vec4 advancedTranslucentShading(float ec, out float bloom_out) {
 	float finalAlpha = max(frontColor.a, backColor.a);
 	float excess = sqrt(finalAlpha - frontColor.a); //hacks
 
+#ifdef GELATIN_MATERIAL
 	// gelatin material (tentative name)
+	// OBSOLETE: marked for removal. similar effect can be achieved better with reflection-based transmittance reduction
 	bool isWater = bit_unpack(texture(u_misc_translucent, v_texcoord).z, 7) == 1.;
 
 	if (isWater && !frx_viewFlag(FRX_CAMERA_IN_WATER)) {
@@ -104,6 +106,7 @@ vec4 advancedTranslucentShading(float ec, out float bloom_out) {
 		backColor.rgb = mix(backColor.rgb, frontColor.rgb, gelatinOpacity);
 		finalAlpha   += gelatinOpacity * (1.0 - finalAlpha);
 	}
+#endif
 
 	// exposure cancellation ???
 	backColor.rgb *= (EXPOSURE_CANCELLATION, 1.0, ec);
