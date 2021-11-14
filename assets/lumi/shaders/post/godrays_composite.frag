@@ -8,7 +8,7 @@
 #include lumi:shaders/post/common/bloom.glsl
 
 /*******************************************************
- *  lumi:shaders/post/godrays.frag
+ *  lumi:shaders/post/godrays_composite.frag
  *******************************************************
  *  Copyright (c) 2020-2021 spiralhalo
  *  Released WITHOUT WARRANTY under the terms of the

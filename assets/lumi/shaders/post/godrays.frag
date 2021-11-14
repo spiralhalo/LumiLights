@@ -53,8 +53,9 @@ void main() {
 		#endif
 
 		float sunHorizon = smoothstep(0.3, 0.2, frx_skyLightVector().y);
-		float modEx      = smoothstep(0.0, 0.5 + sunHorizon * 1.25, exposure);
-		float strength   = (1.0 - modEx) * LIGHT_RAYS_STR;
+		float modExA     = smoothstep(0.0, 0.5 + sunHorizon * 1.25, exposure);
+		float modExB	 = exposure * exposure;
+		float strength   = (1.0 - modExA) * LIGHT_RAYS_STR;
 
 		if (screenSpace) {
 			float scatter = smoothstep(-1.0, 0.5, dot(normalize(worldPos.xyz), frx_skyLightVector()));
@@ -66,7 +67,7 @@ void main() {
 			float yLight = texture(u_light_solid, v_texcoord).y;
 				  yLight = max(yLight, texture(u_light_translucent, v_texcoord).y);
 
-			godBeam = celestialLightRays(u_shadow, worldPos.xyz, strength, yLight, tileJitter, depth_translucent, min_depth);
+			godBeam = celestialLightRays(u_shadow, worldPos.xyz, strength, yLight, tileJitter, depth_translucent, min_depth, modExB);
 		}
 
 		godBeam *= v_godray_intensity;
@@ -78,5 +79,5 @@ void main() {
 	}
 #endif
 
-	fragColor = vec4(godBeam * godBeam); // looks better with the squaring
+	fragColor = vec4(godBeam); // looks better with the squaring
 }

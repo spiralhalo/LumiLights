@@ -13,7 +13,9 @@
  *  published by the Free Software Foundation, Inc.
  *******************************************************/
 
-float celestialLightRays(sampler2DArrayShadow sshadow, vec3 modelPos, float strength, float yLightmap, float tileJitter, float translucentDepth, float depth)
+#define RAYS_MIN_DIST 32
+
+float celestialLightRays(sampler2DArrayShadow sshadow, vec3 modelPos, float strength, float yLightmap, float tileJitter, float translucentDepth, float depth, float exposure)
 {
 	bool doUnderwaterRays = frx_viewFlag(FRX_CAMERA_IN_WATER) && translucentDepth >= depth && frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT);
 
@@ -65,7 +67,7 @@ float celestialLightRays(sampler2DArrayShadow sshadow, vec3 modelPos, float stre
 			e = caustics(ray);
 			e = pow(e, 30.0);
 		} else {
-			e = l2_clampScale(256, 64., ray.y) * l2_clampScale(farLands, nearLands, traveled);
+			e = l2_clampScale(256, 64., ray.y) * l2_clampScale(farLands, nearLands, traveled) * l2_clampScale(RAYS_MIN_DIST * exposure * 0.5, RAYS_MIN_DIST * exposure, traveled);
 		}
 		// e *= traveled / range;
 
