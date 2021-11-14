@@ -176,20 +176,22 @@ vec4 hdr_shaded_color(
 
 
 #if AMBIENT_OCCLUSION != AMBIENT_OCCLUSION_NO_AO
-	#if AMBIENT_OCCLUSION != AMBIENT_OCCLUSION_PURE_SSAO //TODO: change to VANILA_AO_ENABLED
+#ifdef VANILLA_AO_ENABLED
 	float ao_shaded = 1.0 + min(0.0, bloom_raw);
-	#else
+#else
 	float ao_shaded = 1.0;
-	#endif
+#endif
 
-	#ifdef SSAO_ENABLED
+#ifdef SSAO_ENABLED
 	float ssao = mix(aoval, 1.0, min(bloom_out, 1.0));
-	#else
+#else
 	float ssao = 1.;
-	#endif
+#endif
+
+	bool disableAo = bit_unpack(misc.z, 3) == 1.0;
 
 	a.rgb += emissionRadiance * EMISSIVE_LIGHT_STR;
-	a.rgb *= ao_shaded * ssao;
+	a.rgb *= disableAo ? 1.0 : (ao_shaded * ssao);
 #endif
 
 	if (matflash == 1.0) a.rgb += 1.0;
