@@ -9,7 +9,6 @@
 #include lumi:shaders/func/glintify2.glsl
 #include lumi:shaders/lib/bitpack.glsl
 #include lumi:shaders/lib/pack_normal.glsl
-#include lumi:shaders/lib/translucent_layering.glsl
 #include lumi:shaders/lib/util.glsl
 
 /*******************************************************
@@ -28,7 +27,7 @@ in float pv_ao;
 in float pv_diffuse;
 in float pv_ortho;
 
-out vec4[8] fragColor;
+out vec4[6] fragColor;
 
 frx_FragmentData frx_createPipelineFragment()
 {
@@ -157,16 +156,11 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
 		fragColor[3] = vec4(pbr_normalMicro, 1.0);
 		fragColor[4] = vec4(roughness, pbr_metallic, pbr_f0, 1.0);
 		fragColor[5] = vec4(frx_normalizeMappedUV(frx_texcoord), bitFlags, 1.0);
+	}
 
-		if (frx_renderTarget() == TARGET_TRANSLUCENT || frx_renderTarget() == TARGET_ENTITY) {
-			fragColor[6] = vec4(a.rgb, 1.0);
-			fragColor[7] = vec4(a.a, 0.0, 0.0, 1.0);
-
-			#if TRANSLUCENT_LAYERING == TRANSLUCENT_LAYERING_FANCY
-			// apply semi-real diffuse in forward
-			a.rgb *= calcLuminosity(normal, fragData.light, a.a);
-			#endif
-		}
+	// Advanced translucency 2.0
+	if (frx_renderTarget() == TARGET_TRANSLUCENT) {
+		a.a = pow(a.a, 10.0);
 	}
 
 	gl_FragDepth = gl_FragCoord.z;

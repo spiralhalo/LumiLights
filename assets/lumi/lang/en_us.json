@@ -163,8 +163,6 @@
 	"config.lumi_lights.help.toon_outline": "Render \"toon\" style object outline",
 
 	"config.lumi_lights.category.experimental": "Experiments",
-	"config.lumi_lights.value.translucent_layering": "Advanced translucency",
-	"config.lumi_lights.help.translucent_layering": "Translucency algorithm. See if `fast` is actually faster.",
 	"config.lumi_lights.value.shadow_workaround": "Shadow workaround",
 	"config.lumi_lights.help.shadow_workaround": "Workaround to fix patches in shadow map",
 	"config.lumi_lights.value.half_reflection_resolution": "Half reflection resolution",

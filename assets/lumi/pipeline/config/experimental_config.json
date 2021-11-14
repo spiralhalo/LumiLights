@@ -4,14 +4,6 @@
 			includeToken: "lumi:experimental_config",
 			categoryKey: "config.lumi_lights.category.experimental",
 			options: {
-				translucent_layering: {
-					default: "fancy",
-					choices: ["fast", "fancy"],
-					enum: true,
-					prefix: "translucent_layering_",
-					nameKey: "config.lumi_lights.value.translucent_layering",
-					descriptionKey: "config.lumi_lights.help.translucent_layering"
-				},
 				shadow_workaround: {
 					default: false,
 					nameKey: "config.lumi_lights.value.shadow_workaround",
