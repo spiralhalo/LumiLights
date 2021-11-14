@@ -240,8 +240,8 @@ void atmos_generateAtmosphereModel()
 		&& !frx_playerHasEffect(FRX_EFFECT_BLINDNESS);
 
 	if (customOWFog) {
-		// night fog are as bright as the horizon
-		atmosv_hdrFogColorRadiance    = atmosv_hdrSkyColorRadiance * mix(1.0, frx_worldFlag(FRX_WORLD_IS_MOONLIT) ? HORIZON_MULT : 1.0, frx_skyLightTransitionFactor());
+		// night fog are as bright as the horizon unless it's raining
+		atmosv_hdrFogColorRadiance    = atmosv_hdrSkyColorRadiance * mix(1.0, frx_worldFlag(FRX_WORLD_IS_MOONLIT) ? HORIZON_MULT : 1.0, frx_skyLightTransitionFactor() * (1.0 - frx_rainGradient()));
 		atmosv_hdrOWTwilightFogFactor = atmosv_hdrOWTwilightFactor;
 	} else {
 		vec3 vanillaFog = frx_vanillaClearColor();
