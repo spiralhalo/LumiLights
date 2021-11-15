@@ -86,7 +86,7 @@ struct light_data{
 
 vec3 hdr_calcBlockLight(inout light_data data, in float bloom)
 {
-	float brightness = frx_viewBrightness();
+	float brightness = frx_viewBrightness;
 	float bl = smoothstep(0.03125, 0.96875, data.light.x);
 		 bl *= pow(bl, 3.0 + brightness * 2.0) * (2.0 - brightness * 0.5); // lyfe hax
 
@@ -121,16 +121,16 @@ vec3 hdr_calcBlockLight(inout light_data data, in float bloom)
 vec3 hdr_calcHeldLight(inout light_data data)
 {
 #if HANDHELD_LIGHT_RADIUS != 0
-	if (frx_heldLight().w > 0) {
+	if (frx_heldLight.w > 0) {
 		vec3 handHeldDir = data.viewDir;
 
-		vec4 heldLight	 = frx_heldLight();
+		vec4 heldLight	 = frx_heldLight;
 		float cosView	 = max(dot(handHeldDir, pbrv_flashLightView), 0.0);
 		float cone		 = l2_clampScale(1.0 - pbrv_coneOuter, 1.0 - pbrv_coneInner, cosView);
 		float distSq	 = dot(data.modelPos, data.modelPos);
 		float hlRadSq	 = heldLight.w * HANDHELD_LIGHT_RADIUS * heldLight.w * HANDHELD_LIGHT_RADIUS;
 		float hl		 = l2_clampScale(hlRadSq, 0.0, distSq);
-		float brightness = frx_viewBrightness();
+		float brightness = frx_viewBrightness;
 
 		hl *= pow(hl, 3.0 + brightness * 2.0) * (2.0 - brightness * 0.5); // lyfe hax
 		hl *= cone;
@@ -148,23 +148,23 @@ vec3 hdr_calcHeldLight(inout light_data data)
 
 vec3 hdr_calcSkyLight(inout light_data data)
 {
-	if (frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT)) {
-		vec3 celestialRad = data.light.z * atmos_hdrCelestialRadiance() * (1. - frx_rainGradient()); // no direct sunlight during rain
-		return pbr_lightCalc(data.albedo, data.roughness, data.metallic, data.f0, celestialRad, frx_skyLightVector(), data.viewDir, data.normal, data.translucency, data.diffuse, data.specularAccu);
+	if (frx_worldHasSkylight == 1) {
+		vec3 celestialRad = data.light.z * atmos_hdrCelestialRadiance() * (1. - frx_rainGradient); // no direct sunlight during rain
+		return pbr_lightCalc(data.albedo, data.roughness, data.metallic, data.f0, celestialRad, frx_skyLightVector, data.viewDir, data.normal, data.translucency, data.diffuse, data.specularAccu);
 	} else {
 		vec3 color;
 
-		if (frx_worldFlag(FRX_WORLD_IS_NETHER)) {
+		if (frx_worldIsNether == 1) {
 			color = NETHER_SKYLESS_LIGHT_COLOR * USER_NETHER_AMBIENT_MULTIPLIER;
 		} else {
 			color = SKYLESS_LIGHT_COLOR * USER_END_AMBIENT_MULTIPLIER;
 		}
 
-		float darkenedFactor = frx_isSkyDarkened() ? 0.6 : 1.0;
+		float darkenedFactor = 1.0 - 0.4 * frx_worldIsSkyDarkened;
 		vec3 skylessRadiance = darkenedFactor * SKYLESS_LIGHT_STR * color;
 		vec3 skylessLight	 = pbr_lightCalc(data.albedo, data.roughness, data.metallic, data.f0, skylessRadiance, skylessDir, data.viewDir, data.normal, data.translucency, data.diffuse, data.specularAccu);
 
-		if (frx_isSkyDarkened()) {
+		if (frx_worldIsSkyDarkened == 1) {
 			skylessLight += pbr_lightCalc(data.albedo, data.roughness, data.metallic, data.f0, skylessRadiance, skylessDarkenedDir, data.viewDir, data.normal, data.translucency, data.diffuse, data.specularAccu);
 		}
 
@@ -181,11 +181,9 @@ vec3 baseAmbientRadiance(vec3 fogRadiance)
 {
 	vec3 bar = vec3(BASE_AMBIENT_STR * USER_AMBIENT_MULTIPLIER);
 
-	if (frx_playerHasNightVision()) {
-		bar += hdr_fromGamma(NIGHT_VISION_COLOR) * NIGHT_VISION_STR;
-	}
+	bar += hdr_fromGamma(NIGHT_VISION_COLOR) * NIGHT_VISION_STR * frx_effectNightVision;
 
-	if (!frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT)) {
+	if (frx_worldHasSkylight == 0) {
 		bar += fogRadiance * SKYLESS_AMBIENT_STR * 0.5;
 		bar += vec3(SKYLESS_AMBIENT_STR) * 0.5;
 	}

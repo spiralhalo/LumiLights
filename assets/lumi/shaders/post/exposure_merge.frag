@@ -18,8 +18,8 @@ out vec4 fragColor;
 
 void main() {
 #ifdef COMPUTE_EXPOSURE
-	if (frx_renderFrames() < 2u) {
-		fragColor = vec4(max(0.5, frx_eyeBrightness().y));
+	if (frx_renderFrames < 2u) {
+		fragColor = vec4(max(0.5, frx_eyeBrightness.y));
 	} else {
 		const float a = 1. - exp(-1. / EXPOSURE_SMOOTHING_FRAMES);
 

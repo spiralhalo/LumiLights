@@ -26,7 +26,7 @@ vec3 ww_normals(vec3 up, vec3 tgt, vec3 btgt, vec3 samplePos, float waveSpeed, f
 	float microSample = 0.01 * scale;
 	float invScale	  = 1 / scale;
 	float upFactor	  = abs(up.y);
-	vec3 waveMove	  = moveSpeed * frx_renderSeconds() * waveSpeed;
+	vec3 waveMove	  = moveSpeed * frx_renderSeconds * waveSpeed;
 		 waveMove.xz *= upFactor;
 		 waveMove.y  *= 1.0 - upFactor * 0.8;
 

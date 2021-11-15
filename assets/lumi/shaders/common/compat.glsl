@@ -11,10 +11,10 @@
 // but including it just in case because OpenGL is weird.
 
 #if __VERSION__ <= 130
-#define frx_guiViewProjectionMatrix() gl_ProjectionMatrix * gl_ModelViewMatrix
+#define frx_guiViewProjectionMatrix gl_ProjectionMatrix * gl_ModelViewMatrix
 #define frxu_frameProjectionMatrix gl_ProjectionMatrix
-#define frx_heldLightInnerRadius() 3.14159265359
-#define frx_heldLightOuterRadius() 3.14159265359
+#define frx_heldLightInnerRadius 3.14159265359
+#define frx_heldLightOuterRadius 3.14159265359
 #define in_vertex gl_Vertex
 #define USE_LEGACY_FREX_COMPAT
 #endif

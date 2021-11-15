@@ -6,21 +6,21 @@
 	lumi:shaders/material/glow.frag
 ***********************************************/
 
-void frx_startFragment(inout frx_FragmentData fragData) {
-	if (fragData.emissivity == 0.0) {
+void frx_materialFragment() {
+	if (frx_fragEmissive == 0.0) {
 		//glowsquid
-		fragData.emissivity = frx_luminance(fragData.spriteColor.rgb * 3.0);
+		frx_fragEmissive = frx_luminance(frx_fragColor.rgb * 3.0);
 
 		#ifdef VANILLA_LIGHTING
-		fragData.emissivity *= fragData.light.x;
-		fragData.light.x *= 0.5;
+		frx_fragEmissive *= frx_fragLight.x;
+		frx_fragLight.x *= 0.5;
 		#endif
 	} else {
 		//glowing text
 		#ifdef VANILLA_LIGHTING
-		float glow = step(0.93625, fragData.light.x);
-		fragData.light.y *= (1.0 - glow * 0.5);
-		fragData.emissivity = glow;
+		float glow = step(0.93625, frx_fragLight.x);
+		frx_fragLight.y *= (1.0 - glow * 0.5);
+		frx_fragEmissive = glow;
 		#endif
 	}
 }

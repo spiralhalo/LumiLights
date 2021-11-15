@@ -80,7 +80,7 @@ vec3 uv2view(vec2 uv, mat4 inv_projection, in sampler2D sdepth)
 
 vec3 view2world(vec3 view, mat4 inv_view)
 {
-	return frx_cameraPos() + (inv_view * vec4(view, 1.0)).xyz;
+	return frx_cameraPos + (inv_view * vec4(view, 1.0)).xyz;
 }
 
 vec3 sample_worldNormal(vec2 uv, in sampler2D snormal)
@@ -92,9 +92,9 @@ const float SKYLESS_FACTOR = 0.5;
 vec4 calcFallbackColor(in sampler2D sdepth, vec3 unitMarch_world, vec2 light)
 {
 	float skyLight = l2_clampScale(0.03125, 0.96875, light.y);
-	float aboveWaterFactor = frx_viewFlag(FRX_CAMERA_IN_WATER) ? 0.0 : 1.0;
-	float upFactor = frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? l2_clampScale(-0.3, 0.1, unitMarch_world.y) : 1.0;
-	float skyLightFactor = frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? (skyLight * skyLight) : SKYLESS_FACTOR;
+	float aboveWaterFactor = frx_cameraInWater == 1 ? 0.0 : 1.0;
+	float upFactor = frx_worldHasSkylight == 1 ? l2_clampScale(-0.3, 0.1, unitMarch_world.y) : 1.0;
+	float skyLightFactor = frx_worldHasSkylight == 1 ? (skyLight * skyLight) : SKYLESS_FACTOR;
 	vec3 sky = atmos_hdrSkyColorRadiance(unitMarch_world);
 
 #ifdef PASS_REFLECT_CLOUDS
@@ -255,11 +255,11 @@ rt_ColorDepthBloom work_on_pair(
 	float roughness  = material.x == 0.0 ? 1.0 : min(1.0, 1.0203 * material.x - 0.01);
 	vec3 light       = texture(reflector_light, v_texcoord).xyz;
 	vec3 worldNormal = sample_worldNormal(v_texcoord, reflector_micro_normal);
-	vec3 ray_view    = uv2view(v_texcoord, frx_inverseProjectionMatrix(), reflector_depth);
+	vec3 ray_view    = uv2view(v_texcoord, frx_inverseProjectionMatrix, reflector_depth);
 
 	// ugly ??
-	if (frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT)) {
-		float vd2 = frx_viewDistance() * frx_viewDistance();
+	if (frx_worldHasSkylight == 1) {
+		float vd2 = frx_viewDistance * frx_viewDistance;
 		float blendToSky = l2_clampScale(vd2 * 0.85, vd2 * (0.86 +  0.14 * HORIZON_BLEND), dot(ray_view, ray_view));
 		roughness += (1.0 - roughness) * blendToSky;
 		fallback *= 1.0 - blendToSky;
@@ -284,7 +284,7 @@ rt_ColorDepthBloom work_on_pair(
 	vec3 jitterPrc = jitterRaw * JITTER_STRENGTH * roughness * roughness;
 
 	vec3 unit_view = normalize(-ray_view);
-	vec3 normal	   = frx_normalModelMatrix() * worldNormal;
+	vec3 normal	   = _cv_aDirtyHackModelMatrix * worldNormal;
 	vec3 unitMarch_view = normalize(reflect(-unit_view, normal) + jitterPrc);
 
 	#if PASS_REFLECTION_PROFILE != REFLECTION_PROFILE_NONE
@@ -292,7 +292,7 @@ rt_ColorDepthBloom work_on_pair(
 
 	// Impossible Ray Resultion:
 	vec3 rawNormal = sample_worldNormal(v_texcoord, reflector_normal);
-	vec3 rawNormal_view = frx_normalModelMatrix() * rawNormal;
+	vec3 rawNormal_view = _cv_aDirtyHackModelMatrix * rawNormal;
 	bool impossibleRay	= dot(rawNormal_view, unitMarch_view) < 0;
 
 	if (impossibleRay) {
@@ -307,7 +307,7 @@ rt_ColorDepthBloom work_on_pair(
 	if (exceedsThreshold) {
 		result.hit = false;
 	} else {
-		result = rt_reflection(ray_view + unitMarch_view * jitterRaw.x * HITBOX, unit_view, normal, unitMarch_view, frx_normalModelMatrix(), frx_projectionMatrix(), frx_inverseProjectionMatrix(), reflected_depth, reflected_normal);
+		result = rt_reflection(ray_view + unitMarch_view * jitterRaw.x * HITBOX, unit_view, normal, unitMarch_view, _cv_aDirtyHackModelMatrix, frx_projectionMatrix, frx_inverseProjectionMatrix, reflected_depth, reflected_normal);
 	}
 	#endif
 
@@ -352,11 +352,11 @@ rt_ColorDepthBloom work_on_pair(
 	}
 	#endif
 
-	vec3 unitMarch_world = unitMarch_view * frx_normalModelMatrix();
+	vec3 unitMarch_world = unitMarch_view * _cv_aDirtyHackModelMatrix;
 	vec4 calcdFallback = calcFallbackColor(reflector_depth, unitMarch_world, light.xy);
 	vec4 fallbackColor = fallback > 0.0 ? vec4(calcdFallback.rgb, fallback) : vec4(0.0);
 	vec4 reflected_final = mix(reflectedColor, fallbackColor, fallbackMix);
-	vec3 unit_world = unit_view * frx_normalModelMatrix();
+	vec3 unit_world = unit_view * _cv_aDirtyHackModelMatrix;
 	float sunBloom = calcdFallback.a * fallbackMix * (1.0 - roughness);
 
 	vec3 reg_f0	= vec3(material.z);

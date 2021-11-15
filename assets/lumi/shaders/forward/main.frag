@@ -22,72 +22,43 @@
 
 uniform sampler2D u_glint;
 
-in vec2 pv_lightcoord;
-in float pv_ao;
 in float pv_diffuse;
 in float pv_ortho;
 
 out vec4[7] fragColor;
 
-frx_FragmentData frx_createPipelineFragment()
-{
-#ifdef VANILLA_LIGHTING
-	return frx_FragmentData (
-		texture(frxs_baseColor, frx_texcoord, frx_matUnmippedFactor() * -4.0),
-		frx_color,
-		frx_matEmissive() ? 1.0 : 0.0,
-		!frx_matDisableDiffuse(),
-		!frx_matDisableAo(),
-		frx_normal,
-		pv_lightcoord,
-		pv_ao
-	);
-#else
-	return frx_FragmentData (
-		texture(frxs_baseColor, frx_texcoord, frx_matUnmippedFactor() * -4.0),
-		frx_color,
-		frx_matEmissive() ? 1.0 : 0.0,
-		!frx_matDisableDiffuse(),
-		!frx_matDisableAo(),
-		frx_normal
-	);
-#endif
-}
-
-void frx_writePipelineFragment(in frx_FragmentData fragData)
+void frx_pipelineFragment()
 {
 	// no pitch black material allowed
-	fragData.spriteColor = max(fragData.spriteColor, vec4(0.004, 0.004, 0.004, 0.0));
+	frx_fragColor = max(frx_fragColor, vec4(0.004, 0.004, 0.004, 0.0));
 
 	// cutout_zero by default. remove if causing unwanted consequences.
-	if (fragData.spriteColor.a == 0.0) {
+	if (frx_fragColor.a == 0.0) {
 		discard;
 	}
 
-	vec4 a = fragData.spriteColor * fragData.vertexColor;
-
 	if (pbr_f0 < 0.0) {
-		pbr_f0 = 1./256. + frx_luminance(a.rgb) * 0.04;
+		pbr_f0 = 1./256. + frx_luminance(frx_fragColor.rgb) * 0.04;
 	}
 
 	// Vanilla AO never make sense for anything other than terrain
-	if (frx_modelOriginType() != MODEL_ORIGIN_REGION) {
-		fragData.ao = false;
+	if (!frx_modelOriginRegion) {
+		frx_fragEnableAo = false;
 	}
 
-	bool maybeGUI = frx_modelOriginType() == MODEL_ORIGIN_SCREEN && pv_ortho == 1.;
+	bool maybeGUI = frx_modelOriginScreen && pv_ortho == 1.;
 
 	if (maybeGUI) {
 
-		float diffuse = mix(pv_diffuse, 1, fragData.emissivity);
-		// diffuse = frx_isGui() ? diffuse : min(1.0, 1.5 - diffuse);
-		diffuse = fragData.diffuse ? diffuse : 1.0;
-		a.rgb  *= diffuse;
+		float diffuse = mix(pv_diffuse, 1, frx_fragEmissive);
+		// diffuse = frx_isGui ? diffuse : min(1.0, 1.5 - diffuse);
+		diffuse = frx_fragEnableDiffuse ? diffuse : 1.0;
+		frx_fragColor.rgb  *= diffuse;
 
 		#if GLINT_MODE == GLINT_MODE_GLINT_SHADER
-		a.rgb += noise_glint(frx_normalizeMappedUV(frx_texcoord), frx_matGlint());
+		frx_fragColor.rgb += noise_glint(frx_normalizeMappedUV(frx_texcoord), frx_matGlint);
 		#else
-		a.rgb += texture_glint(u_glint, frx_normalizeMappedUV(frx_texcoord), frx_matGlint());
+		frx_fragColor.rgb += texture_glint(u_glint, frx_normalizeMappedUV(frx_texcoord), frx_matGlint);
 		#endif
 
 	} else {
@@ -95,30 +66,30 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
 		if (pbr_isWater) {
 			/* WATER RECOLOR */
 			#if WATER_COLOR == WATER_COLOR_NO_TEXTURE
-			a.rgb  = fragData.vertexColor.rgb;
-			a.rb  *= fragData.vertexColor.rb;
-			float blue = fragData.vertexColor.b * fragData.vertexColor.b;
-			a.rgb += blue * 0.25;
-			a.rgb *= (1.0 - 0.5 * blue);
-			fragData.spriteColor.a = 0.3; //TODO: broken; fix
+			frx_fragColor.rgb  = frx_vertexColor.rgb;
+			frx_fragColor.rb  *= frx_vertexColor.rb;
+			float blue = frx_vertexColor.b * frx_vertexColor.b;
+			frx_fragColor.rgb += blue * 0.25;
+			frx_fragColor.rgb *= (1.0 - 0.5 * blue);
+			frx_spriteColor.a = 0.3; //TODO: broken; fix
 
 			#elif WATER_COLOR == WATER_COLOR_NO_COLOR
-			a.rgb = vec3(0.0);
-			fragData.spriteColor.a = 0.2; //TODO: broken; fix
+			frx_fragColor.rgb = vec3(0.0);
+			frx_spriteColor.a = 0.2; //TODO: broken; fix
 
 			#elif WATER_COLOR == WATER_COLOR_NATURAL_BLUE
-			a.rb  *= fragData.vertexColor.rb;
-			float blue = fragData.vertexColor.b * fragData.vertexColor.b;
-			a.rgb += blue * 0.25;
-			a.rgb *= (1.0 - 0.5 * blue);
-			a.a   *= 0.77;
+			frx_fragColor.rb  *= frx_vertexColor.rb;
+			float blue = frx_vertexColor.b * frx_vertexColor.b;
+			frx_fragColor.rgb += blue * 0.25;
+			frx_fragColor.rgb *= (1.0 - 0.5 * blue);
+			frx_fragColor.a   *= 0.77;
 			#endif
 		}
 
-		bool maybeHand  = frx_modelOriginType() == MODEL_ORIGIN_SCREEN;
-		bool isParticle = frx_renderTarget()    == TARGET_PARTICLES;
+		bool maybeHand  = frx_modelOriginScreen;
+		bool isParticle = frx_renderTargetParticles;
 
-		vec3 normal = fragData.vertexNormal;
+		vec3 normal = frx_vertexNormal;
 
 		if (pbr_normalMicro.x > 90.) {
 			pbr_normalMicro = normal;
@@ -126,16 +97,16 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
 			pbr_tangent = vec3(0.);
 		}
 
-		float bloom   = fragData.emissivity * a.a;
-		float ao	  = fragData.ao ? (1.0 - fragData.aoShade) * a.a : 0.0;
+		float bloom   = frx_fragEmissive * frx_fragColor.a;
+		float ao	  = frx_fragEnableAo ? (1.0 - frx_fragLight.z) * frx_fragColor.a : 0.0;
 		float bloomAo = (bloom - ao) * 0.5 + 0.5;
 
 		vec3 packedNormal;
 
 		if (maybeHand) {
-			packedNormal = normal * frx_normalModelMatrix();
+			packedNormal = normal * _cv_aDirtyHackModelMatrix;
 			packedNormal = 0.5 + 0.5 * packedNormal;
-			pbr_normalMicro = pbr_normalMicro * frx_normalModelMatrix();
+			pbr_normalMicro = pbr_normalMicro * _cv_aDirtyHackModelMatrix;
 		} else {
 			packedNormal = packNormal(normal, pbr_tangent);
 		}
@@ -144,14 +115,14 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
 
 		//pad with 0.01 to prevent conflation with unmanaged draw
 		// NB: diffuse is forced true for hand
-		float roughness = (fragData.diffuse || maybeHand) ? 0.01 + clamp(pbr_roughness, 0.0, 1.0) * 0.98 : 1.0;
+		float roughness = (frx_fragEnableDiffuse || maybeHand) ? 0.01 + clamp(pbr_roughness, 0.0, 1.0) * 0.98 : 1.0;
 
-		float disableAo = fragData.ao ? 0.0 : 1.0;
+		float disableAo = frx_fragEnableAo ? 0.0 : 1.0;
 		// put water flag last because it makes the material buffer looks blue :D easier to debug
-		float bitFlags = bit_pack(frx_matFlash() ? 1. : 0., frx_matHurt() ? 1. : 0., frx_matGlint(), disableAo, 0., 0., 0., pbr_isWater ? 1. : 0.);
+		float bitFlags = bit_pack(frx_matFlash, frx_matHurt, frx_matGlint, disableAo, 0., 0., 0., pbr_isWater ? 1. : 0.);
 
 		// PERF: view normal, more useful than world normal
-		fragColor[1] = vec4(fragData.light.xy, (isParticle || maybeHand) ? bloom : bloomAo, 1.0);
+		fragColor[1] = vec4(frx_fragLight.xy, (isParticle || maybeHand) ? bloom : bloomAo, 1.0);
 		fragColor[2] = vec4(packedNormal, 1.0);
 		fragColor[3] = vec4(pbr_normalMicro, 1.0);
 		fragColor[4] = vec4(roughness, pbr_metallic, pbr_f0, 1.0);
@@ -159,11 +130,11 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
 	}
 
 	// Advanced translucency 2.2
-	if (frx_renderTarget() == TARGET_TRANSLUCENT) {
-		fragColor[6] = vec4(packVec2(a.rg), packVec2(a.ba), 0.0, 1.0);
-		a.a = pow(min(a.a, 1.0), 10.0);
+	if (frx_renderTargetTranslucent) {
+		fragColor[6] = vec4(packVec2(frx_fragColor.rg), packVec2(frx_fragColor.ba), 0.0, 1.0);
+		frx_fragColor.a = pow(min(frx_fragColor.a, 1.0), 10.0);
 	}
 
 	gl_FragDepth = gl_FragCoord.z;
-	fragColor[0] = a;
+	fragColor[0] = frx_fragColor;
 }

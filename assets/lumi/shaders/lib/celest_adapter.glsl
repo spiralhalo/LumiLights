@@ -21,9 +21,9 @@ Rect celestSetup()
 
 	Rect result = Rect(o + vec3(.0, -size, -size), o + vec3(.0, -size,  size), o + vec3(.0,  size, -size));
 	
-	vec3  zenithAxis  = cross(frx_skyLightVector(), vec3( 0.,  0., -1.));
-	float zenithAngle = asin(frx_skyLightVector().z);
-	float dayAngle	  = frx_skyAngleRadians() + PI * 0.5;
+	vec3  zenithAxis  = cross(frx_skyLightVector, vec3( 0.,  0., -1.));
+	float zenithAngle = asin(frx_skyLightVector.z);
+	float dayAngle	  = frx_skyAngleRadians + PI * 0.5;
 
 	mat4 transformation = l2_rotationMatrix(zenithAxis, zenithAngle);
 		transformation *= l2_rotationMatrix(dayAxis, dayAngle);
@@ -40,7 +40,7 @@ vec4 celestFrag(in Rect celestRect, sampler2D ssun, sampler2D smoon, vec3 worldV
 	vec3 celestColor = vec3(0.);
 	float opacity	 = 0.0;
 
-	bool isMoon = dot(worldVec, frx_skyLightVector()) < 0. ? !frx_worldFlag(FRX_WORLD_IS_MOONLIT) : frx_worldFlag(FRX_WORLD_IS_MOONLIT);
+	bool isMoon = dot(worldVec, frx_skyLightVector) < 0. ? frx_worldIsMoonlit == 0 : frx_worldIsMoonlit == 1;
 
 	if (celestUV == clamp(celestUV, 0.0, 1.0)) {
 		if (isMoon){
@@ -56,8 +56,8 @@ vec4 celestFrag(in Rect celestRect, sampler2D ssun, sampler2D smoon, vec3 worldV
 
 				celestUV.x *= 0.25;
 				celestUV.y *= 0.5;
-				celestUV.x += mod(frx_worldDay(), 4.) * 0.25;
-				celestUV.y += (mod(frx_worldDay(), 8.) >= 4.) ? 0.5 : 0.0;
+				celestUV.x += mod(frx_worldDay, 4.) * 0.25;
+				celestUV.y += (mod(frx_worldDay, 8.) >= 4.) ? 0.5 : 0.0;
 
 				celestColor  = hdr_fromGamma(texture(smoon, celestUV).rgb) * 3.0;
 				celestColor += vec3(0.01) * hdr_fromGamma(fullMoonColor);
@@ -74,7 +74,7 @@ vec4 celestFrag(in Rect celestRect, sampler2D ssun, sampler2D smoon, vec3 worldV
 
 vec2 celestSpecular(in Rect celestRect, sampler2D ssun, sampler2D smoon, vec3 worldVec) {
 	float top = max(0.0, worldVec.y);
-	// float size = frx_worldFlag(FRX_WORLD_IS_MOONLIT) ? 0.0025 : 0.005;
+	// float size = frx_worldIsMoonlit == 1 ? 0.0025 : 0.005;
 
 	if (top <= 0.) return vec2(0.0);
 

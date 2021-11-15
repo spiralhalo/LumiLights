@@ -11,11 +11,11 @@
 const vec4 wavyWater_loParams = vec4(2.0, 0.5, 2.0, 0.03);
 const vec4 wavyWater_hiParams = vec4(1.0, 1.0, 1.0, 0.05);
 
-void frx_startVertex(inout frx_VertexData data) {
-	pbrExt_tangentSetup(data.normal);
+void frx_materialVertex() {
+	pbrExt_tangentSetup(frx_vertexNormal);
 	#ifdef LUMI_WavyWaterModel
-		vec3 worldPos = data.vertex.xyz + frx_modelOriginWorldPos();
+		vec3 worldPos = frx_vertex.xyz + frx_modelToWorld.xyz;
 		vec4 params = mix(wavyWater_loParams, wavyWater_hiParams, clamp((LUMI_WavyWaterIntensity - 1) * 0.1, 0.0, 1.5));
-		data.vertex.y += snoise(vec3(worldPos.x, frx_renderSeconds(), worldPos.z) * params.xyz) * params.w;
+		frx_vertex.y += snoise(vec3(worldPos.x, frx_renderSeconds, worldPos.z) * params.xyz) * params.w;
 	#endif
 }

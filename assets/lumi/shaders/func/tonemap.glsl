@@ -37,7 +37,7 @@ vec3 ldr_tonemap3noGamma(vec3 a)
 
 vec3 ldr_tonemap3(vec3 a)
 {
-	float brightness = min(1.5, frx_viewBrightness());
+	float brightness = min(1.5, frx_viewBrightness);
 	float viewGamma  = hdr_gamma + brightness;
 
 	vec3 c = ldr_tonemap3noGamma(a);

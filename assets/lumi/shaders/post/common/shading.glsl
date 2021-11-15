@@ -40,7 +40,7 @@ vec4 unmanaged(in vec4 a, out float bloom_out, bool translucent) {
 	#endif
 
 	#if OVERLAY_DEBUG == OVERLAY_DEBUG_DISCO
-	a.rgb *= 0.25 + 0.75 * fract(frx_renderSeconds()*2.0);
+	a.rgb *= 0.25 + 0.75 * fract(frx_renderSeconds * 2.0);
 	#endif
 
 	// marker for unmanaged draw
@@ -62,14 +62,14 @@ vec4 hdr_shaded_color(
 	if (translucent && a.a == 0.) return vec4(0.);
 
 	float depth    = texture(sdepth, uv).r;
-	vec3  viewPos  = coords_view(uv, frx_inverseProjectionMatrix(), depth);
-	vec3  modelPos = coords_view(uv, frx_inverseViewProjectionMatrix(), depth);
-	vec3  worldPos = frx_cameraPos() + modelPos;
+	vec3  viewPos  = coords_view(uv, frx_inverseProjectionMatrix, depth);
+	vec3  modelPos = coords_view(uv, frx_inverseViewProjectionMatrix, depth);
+	vec3  worldPos = frx_cameraPos + modelPos;
 
 	bool maybeUnderwater      = false;
 	bool mostlikelyUnderwater = false;
 
-	if (frx_viewFlag(FRX_CAMERA_IN_WATER)) {
+	if (frx_cameraInWater == 1) {
 		if (translucent) {
 			maybeUnderwater = true;
 		} else {
@@ -106,7 +106,7 @@ vec4 hdr_shaded_color(
 	vec3  misc      = texture(smisc, uv).xyz;
 	float matflash  = bit_unpack(misc.z, 0);
 	float mathurt   = bit_unpack(misc.z, 1);
-	// return vec4(coords_view(uv, frx_inverseProjectionMatrix(), depth), 1.0);
+	// return vec4(coords_view(uv, frx_inverseProjectionMatrix, depth), 1.0);
 
 	// Basic vanilla emissive
 	float al = frx_luminance(a.rgb);
@@ -117,10 +117,10 @@ vec4 hdr_shaded_color(
 #ifdef SHADOW_MAP_PRESENT
 	#ifdef TAA_ENABLED
 	vec2 uvJitter	   = taa_jitter(v_invSize);
-	vec4 unjitteredPos = frx_inverseViewProjectionMatrix() * vec4(2.0 * uv - uvJitter - 1.0, 2.0 * depth - 1.0, 1.0);
-	vec4 shadowViewPos = frx_shadowViewMatrix() * vec4(unjitteredPos.xyz / unjitteredPos.w, 1.0);
+	vec4 unjitteredPos = frx_inverseViewProjectionMatrix * vec4(2.0 * uv - uvJitter - 1.0, 2.0 * depth - 1.0, 1.0);
+	vec4 shadowViewPos = frx_shadowViewMatrix * vec4(unjitteredPos.xyz / unjitteredPos.w, 1.0);
 	#else
-	vec4 shadowViewPos = frx_shadowViewMatrix() * vec4(worldPos - frx_cameraPos(), 1.0);
+	vec4 shadowViewPos = frx_shadowViewMatrix * vec4(worldPos - frx_cameraPos, 1.0);
 	#endif
 
 	float shadowFactor = calcShadowFactor(u_shadow, shadowViewPos);
@@ -140,7 +140,7 @@ vec4 hdr_shaded_color(
 	float causticLight = 0.0;
 
 #ifdef WATER_CAUSTICS
-	if (mostlikelyUnderwater && frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT)) {
+	if (mostlikelyUnderwater && frx_worldHasSkylight == 1) {
 		causticLight  = caustics(worldPos);
 		causticLight  = pow(causticLight, 15.0);
 		causticLight *= smoothstep(0.0, 1.0, light.y);
@@ -150,7 +150,7 @@ vec4 hdr_shaded_color(
 #ifdef SHADOW_MAP_PRESENT
 	causticLight *= max(0.15, light.z); // TODO: can improve even more?
 
-	if (maybeUnderwater || frx_viewFlag(FRX_CAMERA_IN_WATER)) {
+	if (maybeUnderwater || frx_cameraInWater == 1) {
 		light.z *= hdr_fromGammaf(light.y);
 	}
 #endif
@@ -170,7 +170,7 @@ vec4 hdr_shaded_color(
 
 	vec3 shadingLight = light.xyz;
 	// sky light diffusion
-	shadingLight.y += mostlikelyUnderwater ? 0.0 : max(0.0, 1.0 - light.y) * exposureCompensation * l2_clampScale(0.01, 0.1, frx_eyeBrightness().y) * 0.7;
+	shadingLight.y += mostlikelyUnderwater ? 0.0 : max(0.0, 1.0 - light.y) * exposureCompensation * l2_clampScale(0.01, 0.1, frx_eyeBrightness.y) * 0.7;
 
 	pbr_shading(a, bloom_out, modelPos, shadingLight, normal, roughness, metallic, f0, diffuse, translucent);
 
@@ -212,16 +212,16 @@ vec4 hdr_shaded_color(
 	a.rgb += hdr_fromGamma(texture_glint(u_glint, misc.xy, bit_unpack(misc.z, 2)));
 #endif
 
-	if (a.a != 0.0 && depth != 1.0 && (!frx_viewFlag(FRX_CAMERA_IN_WATER) || mostlikelyUnderwater)) {
+	if (a.a != 0.0 && depth != 1.0 && (frx_cameraInWater == 0 || mostlikelyUnderwater)) {
 		a = fog(light.y, exposureCompensation, v_blindness, a, modelPos, bloom_out);
 	}
 
 	// ugly ?? TODO: make common function
-	if (frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT)) {
-		float vd2 = frx_viewDistance() * frx_viewDistance();
+	if (frx_worldHasSkylight == 1) {
+		float vd2 = frx_viewDistance * frx_viewDistance;
 		float blendToSky = l2_clampScale(vd2 * 0.85, vd2 * (0.86 +  0.14 * HORIZON_BLEND), dot(modelPos, modelPos)) * (1.0 - v_blindness);
 		vec3 modelVec = normalize(modelPos);
-		vec3 color = frx_viewFlag(FRX_CAMERA_IN_FLUID) ? atmos_hdrFogColorRadiance(modelVec) : atmos_hdrSkyGradientRadiance(modelVec);
+		vec3 color = frx_cameraInFluid == 1 ? atmos_hdrFogColorRadiance(modelVec) : atmos_hdrSkyGradientRadiance(modelVec);
 
 		a = mix(a, vec4(color, 1.0), blendToSky);
 	}

@@ -1,17 +1,11 @@
 #include frex:shaders/api/fragment.glsl
-#include frex:shaders/api/world.glsl
-#include frex:shaders/lib/noise/noise3d.glsl
-#include frex:shaders/lib/color.glsl
-#include frex:shaders/lib/math.glsl
-#include lumi:config.glsl
 #include lumi:shaders/api/pbr_ext.glsl
-#include lumi:shaders/lib/water.glsl
 
 /**********************************************
 	lumi:shaders/material/water.frag
 ***********************************************/
 
-void frx_startFragment(inout frx_FragmentData fragData)
+void frx_materialFragment()
 {
 #if LUMI_PBR_API >= 6
 	pbr_f0 = 0.02;

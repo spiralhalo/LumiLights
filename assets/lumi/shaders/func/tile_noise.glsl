@@ -39,8 +39,8 @@ const float BLUE_RES_RCP = 1. / float(BLUE_RES);
 
 vec3 getRandomVec(sampler2D blueNoiseTex, vec2 uv, vec2 texSize)
 {
-	uint mult = (frx_renderFrames() % 2u) * 2u - 1u;
-	uvec2 texelPos = uvec2(uv * texSize) + uvec2((frx_renderFrames() % BLUE_RES) * mult * _MSPD, 0u); 
+	uint mult = (frx_renderFrames % 2u) * 2u - 1u;
+	uvec2 texelPos = uvec2(uv * texSize) + uvec2((frx_renderFrames % BLUE_RES) * mult * _MSPD, 0u); 
 #if DITHERING_MODE == DITHERING_MODE_HALTON
 	texelPos %= uvec2(4);
 	return tile_randomVec[texelPos.x + texelPos.y * 4u];
@@ -52,8 +52,8 @@ vec3 getRandomVec(sampler2D blueNoiseTex, vec2 uv, vec2 texSize)
 
 float getRandomFloat(sampler2D blueNoiseTex, vec2 uv, vec2 texSize)
 {
-	uint mult = (frx_renderFrames() % 2u) * 2u - 1u;
-	uvec2 texelPos = uvec2(uv * texSize) + uvec2((frx_renderFrames() % BLUE_RES) * mult * _MSPD, 0u); 
+	uint mult = (frx_renderFrames % 2u) * 2u - 1u;
+	uvec2 texelPos = uvec2(uv * texSize) + uvec2((frx_renderFrames % BLUE_RES) * mult * _MSPD, 0u); 
 #if DITHERING_MODE == DITHERING_MODE_HALTON
 	texelPos %= uvec2(4);
 	return tile_randomVec[texelPos.x + texelPos.y * 4u].x;

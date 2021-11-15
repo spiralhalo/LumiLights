@@ -12,14 +12,14 @@ uniform int frxu_cascade;
 out float v_managed;
 #endif
 
-void frx_writePipelineVertex(in frx_VertexData data) {
+void frx_pipelineVertex() {
 #ifndef NAME_TAG_SHADOW
 	// this approach might also exclude particles and diffuse-disabled entities
-	v_managed = (frx_matDisableDiffuse() && frx_modelOriginType() == MODEL_ORIGIN_CAMERA) ? 0. : 1.;
+	v_managed = (frx_matDisableDiffuse == 1 && frx_modelOriginCamera) ? 0. : 1.;
 #endif
 
 	// move to camera origin
-	vec4 shadowVertex = data.vertex + frx_modelToCamera();
+	vec4 shadowVertex = frx_vertex + frx_modelToCamera;
 
 	gl_Position = frx_shadowViewProjectionMatrix(frxu_cascade) * shadowVertex;
 }

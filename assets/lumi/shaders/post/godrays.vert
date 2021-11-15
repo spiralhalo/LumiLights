@@ -22,12 +22,12 @@ void main()
 	basicFrameSetup();
 	v_invSize = 1. / frxu_size;
 
-	float weatherFactor    = frx_viewFlag(FRX_CAMERA_IN_FLUID) ? 1.0 : (1.0 - frx_rainGradient());
-	float dimensionFactor  = frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT) ? 1.0 : 0.0;
-	float blindnessFactor  = frx_playerHasEffect(FRX_EFFECT_BLINDNESS) ? 0.0 : 1.0;
-	float notInVoidFactor  = l2_clampScale(-1.0, 0.0, frx_cameraPos().y);
-	float notInFluidFactor = frx_viewFlag(FRX_CAMERA_IN_FLUID) ? (frx_viewFlag(FRX_CAMERA_IN_WATER) ? 1.0 : 0.0) : 1.0;
-	float transitionFactor = smoothstep(0.25, 0.5, frx_skyLightTransitionFactor()); // work in progress?
+	float weatherFactor    = frx_cameraInFluid == 1 ? 1.0 : (1.0 - frx_rainGradient);
+	float dimensionFactor  = frx_worldHasSkylight == 1 ? 1.0 : 0.0;
+	float blindnessFactor  = 1.0 - frx_effectBlindness;
+	float notInVoidFactor  = l2_clampScale(-1.0, 0.0, frx_cameraPos.y);
+	float notInFluidFactor = frx_cameraInFluid == 1 ? (frx_cameraInWater == 1 ? 1.0 : 0.0) : 1.0;
+	float transitionFactor = smoothstep(0.25, 0.5, frx_skyLightTransitionFactor); // work in progress?
 
 	v_godray_intensity = 1.0
 						 * weatherFactor
@@ -39,13 +39,13 @@ void main()
 						 * USER_GODRAYS_INTENSITY;
 
 #if SKY_MODE == SKY_MODE_LUMI
-	vec3 skyLightVector = frx_skyLightVector();
+	vec3 skyLightVector = frx_skyLightVector;
 #else
 	// Remove zenith angle tilt until Canvas implements it on vanilla celestial object
-	vec3 skyLightVector = normalize(vec3(frx_skyLightVector().xy, 0.0));
+	vec3 skyLightVector = normalize(vec3(frx_skyLightVector.xy, 0.0));
 #endif
 
-	vec4 skylight_clip = frx_projectionMatrix() * vec4(frx_normalModelMatrix() * skyLightVector * 1000, 1.0);
+	vec4 skylight_clip = frx_projectionMatrix * vec4(_cv_aDirtyHackModelMatrix * skyLightVector * 1000, 1.0);
 
 	v_skylightpos = (skylight_clip.xy / skylight_clip.w) * 0.5 + 0.5;
 }

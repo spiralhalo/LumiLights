@@ -21,13 +21,13 @@ mat4 computeCloudRotator() {
 
 vec4 flatCloud(in vec3 worldVec, in mat4 cloudRotator, in vec3 up)
 {
-	float rainFactor = frx_rainGradient() * 0.67 + frx_thunderGradient() * 0.33;
+	float rainFactor = frx_rainGradient * 0.67 + frx_thunderGradient * 0.33;
 	float cloud = 0.0;
 	float skyDotUp = worldVec.y;
 
 	// convert hemisphere to plane centered around cameraPos
 	vec2 cloudPlane = worldVec.xz / (0.1 + worldVec.y) * 100.0
-		+ frx_cameraPos().xz + vec2(4.0) * frx_renderSeconds();//(frx_worldDay() + frx_worldTime());
+		+ frx_cameraPos.xz + vec2(4.0) * frx_renderSeconds;//(frx_worldDay + frx_worldTime);
 	vec2 rotatedCloudPlane = (cloudRotator * vec4(cloudPlane.x, 0.0, cloudPlane.y, 0.0)).xz;
 	cloudPlane *= 0.1;
 

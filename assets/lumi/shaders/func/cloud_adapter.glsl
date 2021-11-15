@@ -23,7 +23,7 @@ vec4 cloudColor(in sampler2D ssolidDepth, in sampler2D stranslucentDepth, in sam
 {
 #if CLOUD_RENDERING != CLOUD_RENDERING_FLAT
 	vec4 cloudPos = vec4(worldVec * 1024., 1.0);
-		 cloudPos = frx_viewProjectionMatrix() * cloudPos;
+		 cloudPos = frx_viewProjectionMatrix * cloudPos;
 	cloudPos.xyz /= cloudPos.w;
 
 #if CLOUD_RENDERING == CLOUD_RENDERING_VANILLA

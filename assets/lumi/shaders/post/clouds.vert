@@ -26,7 +26,5 @@ void main()
 #endif
 
 	// TODO: multiple instances found; make common?
-	v_blindness = frx_playerHasEffect(FRX_EFFECT_BLINDNESS)
-				? l2_clampScale(0.5, 1.0, 1.0 - frx_luminance(frx_vanillaClearColor()))
-				: 0.0;
+	v_blindness = l2_clampScale(0.5, 1.0, 1.0 - frx_luminance(frx_vanillaClearColor)) * float(frx_effectBlindness);
 }

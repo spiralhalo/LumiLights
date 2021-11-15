@@ -17,16 +17,16 @@
 
 float celestialLightRays(sampler2DArrayShadow sshadow, vec3 modelPos, float strength, float yLightmap, float tileJitter, float translucentDepth, float depth, float exposure)
 {
-	bool doUnderwaterRays = frx_viewFlag(FRX_CAMERA_IN_WATER) && translucentDepth >= depth && frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT);
+	bool doUnderwaterRays = frx_cameraInWater == 1 && translucentDepth >= depth && frx_worldHasSkylight == 1;
 
 	vec3  unit	  = normalize(modelPos);
-	float scatter = dot(unit, frx_skyLightVector());
+	float scatter = dot(unit, frx_skyLightVector);
 
 	if (doUnderwaterRays) {
 		scatter = 0.5 - abs(scatter - 0.5);
 		scatter *= 2.0;
 	} else {
-		if (frx_worldFlag(FRX_WORLD_IS_MOONLIT)) {
+		if (frx_worldIsMoonlit == 1) {
 			scatter = l2_clampScale(0.7, 1.0, scatter);
 		} else {
 			scatter = l2_clampScale(-1.0, 0.5, scatter);
@@ -47,8 +47,8 @@ float celestialLightRays(sampler2DArrayShadow sshadow, vec3 modelPos, float stre
 	float sample	 = doUnderwaterRays ? 2.0 : maxDist / float(maxSteps);
 	float basePower	 = doUnderwaterRays ? 1.0 : strength;
 	float deadRadius = doUnderwaterRays ? 4.0 : 0.0;
-	float nearLands	 = frx_viewDistance();
-	float farLands	 = frx_viewDistance() * 4.0;
+	float nearLands	 = frx_viewDistance;
+	float farLands	 = frx_viewDistance * 4.0;
 	// const float range = 10.0;
 
 	vec3 ray   = vec3(0.);
@@ -72,7 +72,7 @@ float celestialLightRays(sampler2DArrayShadow sshadow, vec3 modelPos, float stre
 		// e *= traveled / range;
 
 		#ifdef SHADOW_MAP_PRESENT
-		vec4 ray_shadow = (frx_shadowViewMatrix() * vec4(ray, 1.0));
+		vec4 ray_shadow = (frx_shadowViewMatrix * vec4(ray, 1.0));
 		e *= simpleShadowFactor(sshadow, ray_shadow);
 		#endif
 

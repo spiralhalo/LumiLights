@@ -39,13 +39,13 @@ const float LIGHT_SAMPLE_SIZE = 1.0;
 vec2 uv2worldXz(vec2 uv)
 {
 	vec2 ndc = uv * 2.0 - 1.0;
-	return frx_cameraPos().xz + ndc * TEXTURE_RADIUS;
+	return frx_cameraPos.xz + ndc * TEXTURE_RADIUS;
 }
 
 vec2 worldXz2Uv(vec2 worldXz)
 {
 #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_WORLD
-	worldXz -= frx_cameraPos().xz;
+	worldXz -= frx_cameraPos.xz;
 #endif
 	vec2 ndc = worldXz * TEXTURE_RADIUS_RCP;
 	return ndc * 0.5 + 0.5;
@@ -92,13 +92,13 @@ cloud_result rayMarchCloud(in sampler2D scloudTex, in sampler2D sdepth, in sampl
 		#if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
 			return nullcloud; // Some sort of culling
 		#else
-			vec4 viewPos = frx_inverseProjectionMatrix() * vec4(2.0 * texcoord - 1.0, 2.0 * depth - 1.0, 1.0);
+			vec4 viewPos = frx_inverseProjectionMatrix * vec4(2.0 * texcoord - 1.0, 2.0 * depth - 1.0, 1.0);
 			viewPos.xyz /= viewPos.w;
 			maxDist = length(viewPos.xyz);
 		#endif
 	}
 
-	vec3 toLight = frx_skyLightVector() * LIGHT_SAMPLE_SIZE;
+	vec3 toLight = frx_skyLightVector * LIGHT_SAMPLE_SIZE;
 
 	// Adapted from Sebastian Lague's code (technically not the same, but just in case his code was MIT Licensed)
 
@@ -116,7 +116,7 @@ cloud_result rayMarchCloud(in sampler2D scloudTex, in sampler2D sdepth, in sampl
 	maxDist = CLOUD_MAX_Y / worldVec.y;
 #else
 	float borderDist = maxDist;
-	currentWorldPos = frx_cameraPos();
+	currentWorldPos = frx_cameraPos;
 
 	if (currentWorldPos.y >= CLOUD_MAX_Y) {
 		if (worldVec.y >= 0) {
@@ -196,7 +196,7 @@ cloud_result rayMarchCloud(in sampler2D scloudTex, in sampler2D sdepth, in sampl
 			//	 firstDensePos = currentWorldPos;
 			// }
 
-			// vec3 lightPos = frx_skyLightVector() * 512.0 + frx_cameraPos();
+			// vec3 lightPos = frx_skyLightVector * 512.0 + frx_cameraPos;
 			vec3 occlusionWorldPos = currentWorldPos;
 			float occlusionDensity = 0.0;
 			int j = 0;
@@ -224,22 +224,22 @@ cloud_result rayMarchCloud(in sampler2D scloudTex, in sampler2D sdepth, in sampl
 
 vec4 generateCloudTexture(vec2 texcoord) {
 	float rainCanopy = RAINCLOUD_CANOPY * 0.1;
-	float rainFactor = (frx_rainGradient() * 0.8 + frx_thunderGradient() * 0.2) * rainCanopy;
+	float rainFactor = (frx_rainGradient * 0.8 + frx_thunderGradient * 0.2) * rainCanopy;
 	vec2 worldXz = uv2worldXz(texcoord);
 
 #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
-	worldXz -= frx_cameraPos().xz * 0.8;
+	worldXz -= frx_cameraPos.xz * 0.8;
 #endif
 
 	vec2 cloudCoord = worldXz;
 #if CLOUD_TIME == CLOUD_TIME_WORLD
-	cloudCoord += (frx_worldDay() + frx_worldTime()) * 1200.0;
+	cloudCoord += (frx_worldDay + frx_worldTime) * 1200.0;
 #elif CLOUD_TIME == CLOUD_TIME_CLIENT
-	cloudCoord += frx_renderSeconds();
+	cloudCoord += frx_renderSeconds;
 #endif
 	cloudCoord *= CLOUD_TEXTURE_ZOOM;
 
-	float animatonator = frx_renderSeconds() * 0.01 * CLOUD_TEXTURE_ZOOM;
+	float animatonator = frx_renderSeconds * 0.01 * CLOUD_TEXTURE_ZOOM;
 
 	const int ITERATIONS = 7;
 	float noiseVal = 0.0;
@@ -274,7 +274,7 @@ vec4 volumetricCloud(
 	#if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
 		cloud_result volumetric = rayMarchCloud(scloudTex, ssolidDepth, sbluenoise, texcoord, worldVec, numSample);
 	#else
-		cloud_result volumetric = frx_viewFlag(FRX_CAMERA_IN_FLUID)
+		cloud_result volumetric = frx_cameraInFluid == 1
 								? rayMarchCloud(scloudTex, ssolidDepth, sbluenoise, texcoord, worldVec, numSample)
 								: rayMarchCloud(scloudTex, stranslucentDepth, sbluenoise, texcoord, worldVec, numSample);
 	#endif
@@ -282,11 +282,11 @@ vec4 volumetricCloud(
 	float alpha  = 1.0 - min(1.0, volumetric.transmittance);
 	float energy = volumetric.lightEnergy;
 
-	float rainBrightness = mix(0.13, 0.05, hdr_fromGammaf(frx_rainGradient())); // simulate dark clouds
+	float rainBrightness = mix(0.13, 0.05, hdr_fromGammaf(frx_rainGradient)); // simulate dark clouds
 	vec3  cloudShading	 = atmos_hdrCloudColorRadiance(worldVec);
 	vec3  celestRadiance = atmos_hdrCelestialRadiance();
 
-	if (frx_worldFlag(FRX_WORLD_IS_MOONLIT)) {
+	if (frx_worldIsMoonlit == 1) {
 		celestRadiance *= 0.2;
 	}
 
@@ -296,8 +296,8 @@ vec4 volumetricCloud(
 	#if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
 	out_depth = alpha > 0. ? 0.9999 : 1.0;
 	#else
-	vec3 reverseModelPos = volumetric.worldPos - frx_cameraPos();
-	vec4 reverseClipPos  = frx_viewProjectionMatrix() * vec4(reverseModelPos, 1.0);
+	vec3 reverseModelPos = volumetric.worldPos - frx_cameraPos;
+	vec4 reverseClipPos  = frx_viewProjectionMatrix * vec4(reverseModelPos, 1.0);
 	   reverseClipPos.z /= reverseClipPos.w;
 
 	float backgroundDepth = texture(stranslucentDepth, texcoord).r;

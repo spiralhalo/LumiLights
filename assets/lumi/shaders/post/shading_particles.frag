@@ -29,13 +29,13 @@ vec4 ldr_shaded_particle(vec2 uv, sampler2D scolor, sampler2D sdepth, sampler2D 
 
 	float depth = texture(sdepth, uv).r;
 
-	vec4  viewPos = frx_inverseProjectionMatrix() * vec4(uv * 2.0 - 1.0, depth * 2.0 - 1.0, 1.0);
+	vec4  viewPos = frx_inverseProjectionMatrix * vec4(uv * 2.0 - 1.0, depth * 2.0 - 1.0, 1.0);
 	viewPos.xyz /= viewPos.w;
 	viewPos.w = 1.0;
 
-	vec3  normal   = normalize(-viewPos.xyz) * frx_normalModelMatrix();
+	vec3  normal   = normalize(-viewPos.xyz) * _cv_aDirtyHackModelMatrix;
 	vec4  light    = texture(slight, uv);
-	vec3  modelPos = (frx_inverseViewMatrix() * viewPos).xyz;
+	vec3  modelPos = (frx_inverseViewMatrix * viewPos).xyz;
 	float bloom_ignored = 0.0;
 
 	pbr_shading(a, bloom_ignored, viewPos.xyz, light.xyy, normal, 1.0, 0.0, 0.0, false, false);

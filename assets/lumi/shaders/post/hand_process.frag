@@ -54,7 +54,7 @@ void main()
 
 	vec4  a = texture(u_color, v_texcoord);
 
-	vec4 temp = frx_inverseViewProjectionMatrix() * vec4(2.0 * v_texcoord - 1.0, 2.0 * depth - 1.0, 1.0);
+	vec4 temp = frx_inverseViewProjectionMatrix * vec4(2.0 * v_texcoord - 1.0, 2.0 * depth - 1.0, 1.0);
 	vec3 modelPos = temp.xyz / temp.w;
 
 	vec3 light  = texture(u_light, v_texcoord).xyz;
@@ -67,10 +67,10 @@ void main()
 #if defined(SHADOW_MAP_PRESENT)
 	#ifdef TAA_ENABLED
 	vec2 uvJitter	   = taa_jitter(v_invSize);
-	vec4 unjitteredPos = frx_inverseViewProjectionMatrix() * vec4(2.0 * v_texcoord - uvJitter - 1.0, 2.0 * depth - 1.0, 1.0);
-	vec4 shadowViewPos = frx_shadowViewMatrix() * vec4(unjitteredPos.xyz / unjitteredPos.w, 1.0);
+	vec4 unjitteredPos = frx_inverseViewProjectionMatrix * vec4(2.0 * v_texcoord - uvJitter - 1.0, 2.0 * depth - 1.0, 1.0);
+	vec4 shadowViewPos = frx_shadowViewMatrix * vec4(unjitteredPos.xyz / unjitteredPos.w, 1.0);
 	#else
-	vec4 shadowViewPos = frx_shadowViewMatrix() * vec4(modelPos, 1.0);
+	vec4 shadowViewPos = frx_shadowViewMatrix * vec4(modelPos, 1.0);
 	#endif
 
 	float shadowFactor = calcShadowFactor(u_shadow, shadowViewPos);
@@ -83,7 +83,7 @@ void main()
 	light.z *= l2_clampScale(0.03125, 0.04, light.y);
 	#endif
 
-	if (frx_viewFlag(FRX_CAMERA_IN_FLUID)) {
+	if (frx_cameraInFluid == 1) {
 		light.z *= lightmapRemap(light.y);
 	}
 #else

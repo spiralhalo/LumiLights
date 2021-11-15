@@ -12,14 +12,14 @@
  *******************************************************/
 
 void ww_puddle(in float lightY, in vec3 normal, in vec3 worldPos, inout vec3 microNormal, out float wet) {
-	float rainExposure = smoothstep(0.88, 0.94, lightY) * frx_rainGradient() * smoothstep(0.7, 1.0, normal.y);
+	float rainExposure = smoothstep(0.88, 0.94, lightY) * frx_rainGradient * smoothstep(0.7, 1.0, normal.y);
 
 	if (rainExposure == 0.0) return;
 
 	wet = rainExposure * (0.5 + 0.5 * snoise(0.1 * worldPos.xz));
 	wet = 0.5 * rainExposure + 0.5 * smoothstep(0.1, 0.7, wet);
 
-	vec3 mov = vec3(0.0, frx_renderSeconds() * 6.0, 0.0);
+	vec3 mov = vec3(0.0, frx_renderSeconds * 6.0, 0.0);
 	vec2 splashJitter = vec2(snoise(worldPos.xyz * 4.0 + mov), snoise(worldPos.zyx * 4.0 + mov));
 
 	microNormal.xz += splashJitter * wet * 0.05;

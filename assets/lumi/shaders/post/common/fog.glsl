@@ -21,18 +21,18 @@ const float UNDERWATER_FOG_DENSITY = UNDERWATER_FOG_DENSITY_RELATIVE / 20.0;
 
 vec4 fog(float skyLight, float ec, float vblindness, vec4 a, vec3 modelPos, inout float bloom)
 {
-	float pFogDensity = frx_viewFlag(FRX_CAMERA_IN_FLUID) ? UNDERWATER_FOG_DENSITY : FOG_DENSITY;
-	float pFogFar     = frx_viewFlag(FRX_CAMERA_IN_FLUID) ? UNDERWATER_FOG_FAR     : FOG_FAR;
+	float pFogDensity = frx_cameraInFluid == 1 ? UNDERWATER_FOG_DENSITY : FOG_DENSITY;
+	float pFogFar     = frx_cameraInFluid == 1 ? UNDERWATER_FOG_FAR     : FOG_FAR;
 
-	pFogFar = min(frx_viewDistance(), pFogFar); // clamp to render distance
+	pFogFar = min(frx_viewDistance, pFogFar); // clamp to render distance
 
-	// float fog_noise = snoise(worldPos.xz * FOG_NOISE_SCALE + frx_renderSeconds() * FOG_NOISE_SPEED) * FOG_NOISE_HEIGHT;
+	// float fog_noise = snoise(worldPos.xz * FOG_NOISE_SCALE + frx_renderSeconds * FOG_NOISE_SPEED) * FOG_NOISE_HEIGHT;
 
-	if (!frx_viewFlag(FRX_CAMERA_IN_FLUID) && frx_worldFlag(FRX_WORLD_HAS_SKYLIGHT)) {
+	if (frx_cameraInFluid == 0 && frx_worldHasSkylight == 1) {
 		float inverseThickener = 1.0;
 
-		inverseThickener -= 0.5 * inverseThickener * frx_rainGradient();
-		inverseThickener -= 0.5 * inverseThickener * frx_thunderGradient();
+		inverseThickener -= 0.5 * inverseThickener * frx_rainGradient;
+		inverseThickener -= 0.5 * inverseThickener * frx_thunderGradient;
 
 		pFogFar *= inverseThickener;
 		pFogDensity = mix(min(1.0, pFogDensity * 2.0), min(0.8, pFogDensity), inverseThickener);
@@ -40,13 +40,13 @@ vec4 fog(float skyLight, float ec, float vblindness, vec4 a, vec3 modelPos, inou
 
 	float fogFactor = pFogDensity;
 
-	if (frx_playerHasEffect(FRX_EFFECT_BLINDNESS)) {
+	if (frx_effectBlindness == 1) {
 		pFogFar   = mix(pFogFar, 3.0, vblindness);
 		fogFactor = mix(fogFactor, 1.0, vblindness);
 	}
 
-	if (frx_viewFlag(FRX_CAMERA_IN_LAVA)) {
-		pFogFar   = frx_playerHasEffect(FRX_EFFECT_FIRE_RESISTANCE) ? 2.5 : 0.5;
+	if (frx_cameraInLava == 1) {
+		pFogFar   = float(frx_effectFireResistance) * 2.0 + 0.5;
 		fogFactor = 1.0;
 	}
 
@@ -55,10 +55,10 @@ vec4 fog(float skyLight, float ec, float vblindness, vec4 a, vec3 modelPos, inou
 
 	fogFactor = clamp(fogFactor * distFactor, 0.0, 1.0);
 
-	float aboveGround	 = l2_clampScale(0.0, 0.2, max(skyLight, frx_eyeBrightness().y));
+	float aboveGround	 = l2_clampScale(0.0, 0.2, max(skyLight, frx_eyeBrightness.y));
 	vec3  worldVec		 = normalize(modelPos);
 	vec3  fogColor		 = mix(atmos_hdrCaveFogRadiance(), atmos_hdrFogColorRadiance(worldVec), aboveGround);
-	float smoothSkyBlend = frx_viewFlag(FRX_CAMERA_IN_FLUID) ? 0.0 : min(distToCamera, frx_viewDistance()) / frx_viewDistance() * aboveGround;
+	float smoothSkyBlend = frx_cameraInFluid == 1 ? 0.0 : min(distToCamera, frx_viewDistance) / frx_viewDistance * aboveGround;
 	vec3  worldVecMod	 = worldVec;
 		  worldVecMod.y	 = mix(1.0, worldVecMod.y, pow(smoothSkyBlend, 0.3));
 		  fogColor		 = mix(fogColor, atmos_hdrSkyGradientRadiance(worldVecMod), smoothSkyBlend);

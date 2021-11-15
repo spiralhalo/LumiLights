@@ -28,7 +28,7 @@ void main()
 
 	#elif TAA_DEBUG_RENDER == TAA_DEBUG_RENDER_FRAMES
 	float d		= ldepth(texture(u_depthCurrent, v_texcoord).r);
-	uint frames = frx_renderFrames() % uint(frxu_size.x); 
+	uint frames = frx_renderFrames % uint(frxu_size.x); 
 	float on	= frames == uint(frxu_size.x * v_texcoord.x) ? 1.0 : 0.0;
 
 	fragColor = vec4(on, 0.0, 0.25 + d * 0.5, 1.0);
@@ -54,7 +54,7 @@ void main()
 	// [o] ghosting reduction is decent
 	// [o] terrain distortion is reduced by reducing feedback factor when camera moves
 
-	float realCameraMove = length(frx_cameraPos() - frx_lastCameraPos());
+	float realCameraMove = length(frx_cameraPos - frx_lastCameraPos);
 
 	#if ANTIALIASING == ANTIALIASING_TAA_BLURRY
 	float cameraMove = 0.0;
@@ -69,7 +69,7 @@ void main()
 	float topMidDepth = texture(u_depthHand, vec2(0.5, 1.0)).r; // skip if hand render is disabled (F1)
 	bool isHand		  = depthHand != 1.0 && topMidDepth == 1.0;
 
-	bool skip = depth == 1. && frx_worldFlag(FRX_WORLD_IS_END); // the end sky is noisy so don't apply TAA (note: true for vanilla)
+	bool skip = depth == 1. && frx_worldIsEnd == 1; // the end sky is noisy so don't apply TAA (note: true for vanilla)
 		 skip = skip || (isHand && (abs(velocity.x) > v_invSize.x || abs(velocity.y) > v_invSize.y));
 
 	if (skip) {

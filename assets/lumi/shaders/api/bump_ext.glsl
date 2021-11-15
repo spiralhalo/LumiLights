@@ -211,13 +211,13 @@ vec3 bumpExt_luminance_v1(sampler2D tex, vec3 normal, vec2 uvn, vec2 uvt, vec2 u
 	if (uvn.x > topRight.x) { uvt = uvn; }
 	if (uvn.y < topRight.y) { uvb = uvn; }
 
-	vec3 texel = _bumpExt_texture(tex, uvn, frx_matUnmippedFactor() * -4.0).rgb;
+	vec3 texel = _bumpExt_texture(tex, uvn, frx_matUnmipped * -4.0).rgb;
 	float hn = _bumpExt_height2(texel);
 	vec3 origin = hn * normal;
-	texel = _bumpExt_texture(tex, uvt, frx_matUnmippedFactor() * -4.0).rgb;
+	texel = _bumpExt_texture(tex, uvt, frx_matUnmipped * -4.0).rgb;
 	float ht = _bumpExt_height2(texel);
 	vec3 tangent = tangentMove + ht * normal - origin;
-	texel = _bumpExt_texture(tex, uvb, frx_matUnmippedFactor() * -4.0).rgb;
+	texel = _bumpExt_texture(tex, uvb, frx_matUnmipped * -4.0).rgb;
 	float hb = _bumpExt_height2(texel);
 	vec3 bitangent = bitangentMove + hb * normal - origin;
 
@@ -301,19 +301,19 @@ vec3 bumpExt_stepSaturation_v1(sampler2D tex, vec3 normal, vec2 uvn, vec2 uvt, v
 	if (uvn.x > topRight.x) { uvt = uvn; }
 	if (uvn.y < topRight.y) { uvb = uvn; }
 	
-	vec4  c         = _bumpExt_texture(tex, uvn, frx_matUnmippedFactor() * -4.0);
+	vec4  c         = _bumpExt_texture(tex, uvn, frx_matUnmipped * -4.0);
 	float min_      = min( min(c.r, c.g), c.b );
 	float max_      = max( max(c.r, c.g), c.b );
 	float s         = (max_ > 0 ? (max_ - min_) / max_ : 0) + (1 - c.a);
 	vec3  origin    = (s > step_ ? strength : 0.0) * normal;
 	
-		  c         = _bumpExt_texture(tex, uvt, frx_matUnmippedFactor() * -4.0);
+		  c         = _bumpExt_texture(tex, uvt, frx_matUnmipped * -4.0);
 		  min_      = min( min(c.r, c.g), c.b );
 		  max_      = max( max(c.r, c.g), c.b );
 		  s         = (max_ > 0 ? (max_ - min_) / max_ : 0) + (1 - c.a);
 	vec3  tangent   = tangentMove + (s > step_ ? strength : 0.0) * normal - origin;
 	
-		  c         = _bumpExt_texture(tex, uvb, frx_matUnmippedFactor() * -4.0);
+		  c         = _bumpExt_texture(tex, uvb, frx_matUnmipped * -4.0);
 		  min_      = min( min(c.r, c.g), c.b );
 		  max_      = max( max(c.r, c.g), c.b );
 		  s         = (max_ > 0 ? (max_ - min_) / max_ : 0) + (1 - c.a);
@@ -331,9 +331,9 @@ vec3 bumpExt_stepLuminance_v1(sampler2D tex, vec3 normal, vec2 uvn, vec2 uvt, ve
 	if (uvn.x > topRight.x) { uvt = uvn; }
 	if (uvn.y < topRight.y) { uvb = uvn; }
 
-	vec3 origin = _bumpExt_height1(frx_luminance(_bumpExt_texture(tex, uvn, frx_matUnmippedFactor() * -4.0).rgb) > step_ ? strength : 0.0) * normal;
-	vec3 tangent = tangentMove + _bumpExt_height1(frx_luminance(_bumpExt_texture(tex, uvt, frx_matUnmippedFactor() * -4.0).rgb) > step_ ? strength : 0.0) * normal - origin;
-	vec3 bitangent = bitangentMove + _bumpExt_height1(frx_luminance(_bumpExt_texture(tex, uvb, frx_matUnmippedFactor() * -4.0).rgb) > step_ ? strength : 0.0) * normal - origin;
+	vec3 origin = _bumpExt_height1(frx_luminance(_bumpExt_texture(tex, uvn, frx_matUnmipped * -4.0).rgb) > step_ ? strength : 0.0) * normal;
+	vec3 tangent = tangentMove + _bumpExt_height1(frx_luminance(_bumpExt_texture(tex, uvt, frx_matUnmipped * -4.0).rgb) > step_ ? strength : 0.0) * normal - origin;
+	vec3 bitangent = bitangentMove + _bumpExt_height1(frx_luminance(_bumpExt_texture(tex, uvb, frx_matUnmipped * -4.0).rgb) > step_ ? strength : 0.0) * normal - origin;
 
 	return normalize(cross(tangent, bitangent));
 }
@@ -347,9 +347,9 @@ vec3 bumpExt_alpha_v1(sampler2D tex, vec3 normal, vec2 uvn, vec2 uvt, vec2 uvb, 
 	if (uvn.x > topRight.x) { uvt = uvn; }
 	if (uvn.y < topRight.y) { uvb = uvn; }
 
-	vec3 origin = _bumpExt_height1(_bumpExt_texture(tex, uvn, frx_matUnmippedFactor() * -4.0).a) * normal;
-	vec3 tangent = tangentMove + _bumpExt_height1(_bumpExt_texture(tex, uvt, frx_matUnmippedFactor() * -4.0).a) * normal - origin;
-	vec3 bitangent = bitangentMove + _bumpExt_height1(_bumpExt_texture(tex, uvb, frx_matUnmippedFactor() * -4.0).a) * normal - origin;
+	vec3 origin = _bumpExt_height1(_bumpExt_texture(tex, uvn, frx_matUnmipped * -4.0).a) * normal;
+	vec3 tangent = tangentMove + _bumpExt_height1(_bumpExt_texture(tex, uvt, frx_matUnmipped * -4.0).a) * normal - origin;
+	vec3 bitangent = bitangentMove + _bumpExt_height1(_bumpExt_texture(tex, uvb, frx_matUnmipped * -4.0).a) * normal - origin;
 
 	return normalize(cross(tangent, bitangent));
 }

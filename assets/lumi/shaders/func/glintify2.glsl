@@ -17,7 +17,7 @@ const vec3 GLINT_COLOR = vec3(GLINT_RED, GLINT_GREEN, GLINT_BLUE);
 float generate_noise(vec2 uv, float zoom, vec2 skew, vec2 speed, vec2 detail, vec2 taper) {
 	uv += uv.yx * skew;
 	uv *= zoom;
-	vec2 t = mod(uv + speed * frx_renderSeconds(), 1.0);
+	vec2 t = mod(uv + speed * frx_renderSeconds, 1.0);
 	t *= detail;
 	vec2 f = fract(t);
 	t -= f;
@@ -73,7 +73,7 @@ vec3 noise_glint(vec2 normalizedUV, float glint)
 vec3 texture_glint(sampler2D glint_sampler, vec2 normalizedUV, float glint)
 {
 	if (glint == 1.0) {
-		vec4 glint_tex_c = texture(glint_sampler, mod(normalizedUV * 0.5 + frx_renderSeconds() * 0.4, 1.0));
+		vec4 glint_tex_c = texture(glint_sampler, mod(normalizedUV * 0.5 + frx_renderSeconds * 0.4, 1.0));
 		return glint_tex_c.rgb * glint_tex_c.a;
 	} else {
 		return vec3(0.0);

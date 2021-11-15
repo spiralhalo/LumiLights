@@ -21,7 +21,7 @@
 #define wnoise3(a) cellular2x2x2(a).x
 vec4 parallaxCloud(in sampler2D sbluenoise, in vec2 texcoord, in vec3 worldVec)
 {
-	float rainFactor = frx_rainGradient() * 0.67 + frx_thunderGradient() * 0.33;
+	float rainFactor = frx_rainGradient * 0.67 + frx_thunderGradient * 0.33;
 	float skyDotUp	 = worldVec.y;
 
 	if (skyDotUp <= 0.05) {
@@ -38,13 +38,13 @@ vec4 parallaxCloud(in sampler2D sbluenoise, in vec2 texcoord, in vec3 worldVec)
 	vec3 move   = (finish - start) * PARALLAX_AVG;
 
 	float tileJitter = getRandomFloat(sbluenoise, texcoord, frxu_size);
-	float animatonator = frx_renderSeconds() * 0.1;
+	float animatonator = frx_renderSeconds * 0.1;
 
 	vec3  globalColor = vec3(0.0);
 	float globalCloud = 0.0;
 	vec3  current	  = start + move * tileJitter;
 
-	current.xz += frx_cameraPos().xz + frx_renderSeconds() * 2.0;
+	current.xz += frx_cameraPos.xz + frx_renderSeconds * 2.0;
 
 	for (int i = PARALLAX_SAMPLE; i > 0; i --) {
 		vec3 cloudBox = current;

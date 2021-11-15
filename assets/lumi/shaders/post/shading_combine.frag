@@ -83,10 +83,10 @@ void main()
 
 	depth_solid = texture(u_solid_depth, v_texcoord).r;
 
-	bool tonemapTheSky = frx_worldFlag(FRX_WORLD_IS_NETHER);
+	bool tonemapTheSky = frx_worldIsNether == 1;
 
 #if SKY_MODE == SKY_MODE_LUMI
-	tonemapTheSky = tonemapTheSky || frx_worldFlag(FRX_WORLD_IS_OVERWORLD);
+	tonemapTheSky = tonemapTheSky || frx_worldIsOverworld == 1;
 #endif
 
 	if ((depth_solid != 1.0 || tonemapTheSky) && solid.a > 0) {

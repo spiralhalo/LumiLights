@@ -47,9 +47,9 @@ void custom_sky(in vec3 modelPos, in float blindnessFactor, in bool maybeUnderwa
 
 	bloom_out = 0.0;
 
-	if ((frx_viewFlag(FRX_CAMERA_IN_WATER) && maybeUnderwater) || frx_worldFlag(FRX_WORLD_IS_NETHER)) {
+	if ((frx_cameraInWater == 1 && maybeUnderwater) || frx_worldIsNether == 1) {
 		a.rgb = atmosv_hdrFogColorRadiance;
-	} else if (frx_worldFlag(FRX_WORLD_IS_OVERWORLD) && v_not_in_void > 0.0) {
+	} else if (frx_worldIsOverworld == 1 && v_not_in_void > 0.0) {
 		// Sky, sun and moon
 		#if SKY_MODE == SKY_MODE_LUMI
 		vec4 celestColor = celestFrag(Rect(v_celest1, v_celest2, v_celest3), u_sun, u_moon, worldSkyVec);
@@ -59,7 +59,7 @@ void custom_sky(in vec3 modelPos, in float blindnessFactor, in bool maybeUnderwa
 		bloom_out += celestColor.a * 2.0;
 
 		a.rgb  = atmos_hdrSkyGradientRadiance(worldSkyVec);
-		a.rgb += celestColor.rgb * (1. - frx_rainGradient()) * celestStr;
+		a.rgb += celestColor.rgb * (1. - frx_rainGradient) * celestStr;
 		#endif
 
 		#if SKY_MODE == SKY_MODE_LUMI || SKY_MODE == SKY_MODE_VANILLA_STARRY
@@ -70,7 +70,7 @@ void custom_sky(in vec3 modelPos, in float blindnessFactor, in bool maybeUnderwa
 			 starry *= l2_clampScale(-0.6, -0.5, skyDotUp); //prevent star near the void core
 
 		float milkyness   = l2_clampScale(0.7, 0.0, abs(dot(NON_MILKY_AXIS, worldSkyVec.xyz)));
-		float rainOcclude = (1.0 - frx_rainGradient());
+		float rainOcclude = (1.0 - frx_rainGradient);
 		vec4  starVec     = v_star_rotator * vec4(worldSkyVec, 0.0);
 		float zoomFactor  = l2_clampScale(90, 30, v_fov); // zoom sharpening
 		float milkyHaze   = starry * rainOcclude * milkyness * 0.4 * l2_clampScale(-1.0, 1.0, snoise(starVec.xyz * 2.0));
@@ -94,7 +94,7 @@ void custom_sky(in vec3 modelPos, in float blindnessFactor, in bool maybeUnderwa
 	}
 
 	//prevent sky in the void for extra immersion
-	if (frx_worldFlag(FRX_WORLD_IS_OVERWORLD)) {
+	if (frx_worldIsOverworld == 1) {
 		// VOID CORE
 		float voidCore = l2_clampScale(-0.8 + v_near_void_core, -1.0 + v_near_void_core, skyDotUp); 
 		vec3 voidColor = mix(vec3(0.0), VOID_CORE_COLOR, voidCore);

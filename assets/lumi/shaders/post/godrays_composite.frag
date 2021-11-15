@@ -25,7 +25,7 @@ out vec4 fragColor;
 void main() {
 	vec3 scatterColor = vec3(1.0);
 
-	if (frx_viewFlag(FRX_CAMERA_IN_WATER)) {
+	if (frx_cameraInWater == 1) {
 		scatterColor = atmos_hdrFogColorRadiance(vec3(0.0, 0.0, 1.0));
 		scatterColor /= l2_max3(scatterColor);
 	}
