@@ -66,6 +66,7 @@ vec4 advancedTranslucentShading(float ec, out float bloom_out) {
 		 truePrime.a = sqrt(truePrime.a); // I have no idea why this is needed; is there a sqrt somewhere in composite someone please tell me
 
 	albedo.rgb = albedo.rgb * (1.0 - truePrime.a) + truePrime.rgb * truePrime.a;
+	albedo.a  *= albedo.a; // like cheap gamma correction or something
 
 #ifdef GELATIN_MATERIAL
 	// gelatin material (tentative name)
