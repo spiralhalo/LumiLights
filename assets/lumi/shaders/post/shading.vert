@@ -54,7 +54,7 @@ void main()
 	// float cAngle		= asin(frx_cameraView.y);
 	// float hlAngle		= clamp(HANDHELD_LIGHT_ANGLE, -45, 45) * PI / 180.0;
 	// pbrv_flashLightView = (l2_rotationMatrix(vec3(1.0, 0.0, 0.0), l2_clampScale(abs(hlAngle), 0.0, abs(cAngle)) * hlAngle) * vec4(-view_CV, 0.0)).xyz;
-	// pbrv_flashLightView = normalize(pbrv_flashLightView * _cv_aDirtyHackModelMatrix);
+	// pbrv_flashLightView = normalize(pbrv_flashLightView * frx_normalModelMatrix());
 
 	pbrv_flashLightView = -frx_cameraView;
 

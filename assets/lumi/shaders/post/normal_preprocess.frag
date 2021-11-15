@@ -117,8 +117,8 @@ void main()
 	if (translucentDepth < solidDepth) {
 		float ldepth_range = ldepth(solidDepth) - ldepth(translucentDepth);
 
-		vec3 viewVNormal = _cv_aDirtyHackModelMatrix * translucentNormal;
-		vec3 viewMNormal = _cv_aDirtyHackModelMatrix * translucentMicroNormal;
+		vec3 viewVNormal = frx_normalModelMatrix() * translucentNormal;
+		vec3 viewMNormal = frx_normalModelMatrix() * translucentMicroNormal;
 
 		refraction_uv = REFRACTION_STR * l2_clampScale(0.0, 0.005, ldepth_range) * (viewMNormal.xy - viewVNormal.xy);
 		refraction_uv = clamp(refraction_uv, -1.0, 1.0) * 0.5 + 0.5;

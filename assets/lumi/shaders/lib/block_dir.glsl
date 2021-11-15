@@ -60,7 +60,7 @@ vec3 calcBlockDir(in sampler2D slight, in vec2 uv, vec2 inv_size, in vec3 normal
 		vec2 mUV = uv + BLOCK_DIR_TEST[m] * pixel_size;
 		vec4 mViewPos = frx_inverseProjectionMatrix * vec4(2.0 * mUV - 1.0, 2.0 * texture(sdepth, mUV).r - 1.0, 1.0);
 		mViewPos.xyz /= mViewPos.w;
-		vec3 mDir = normalize(mViewPos.xyz - viewPos) * _cv_aDirtyHackModelMatrix;
+		vec3 mDir = normalize(mViewPos.xyz - viewPos) * frx_normalModelMatrix();
 		return normalize(normal+mDir);
 	}
 }

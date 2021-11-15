@@ -284,7 +284,7 @@ rt_ColorDepthBloom work_on_pair(
 	vec3 jitterPrc = jitterRaw * JITTER_STRENGTH * roughness * roughness;
 
 	vec3 unit_view = normalize(-ray_view);
-	vec3 normal	   = _cv_aDirtyHackModelMatrix * worldNormal;
+	vec3 normal	   = frx_normalModelMatrix() * worldNormal;
 	vec3 unitMarch_view = normalize(reflect(-unit_view, normal) + jitterPrc);
 
 	#if PASS_REFLECTION_PROFILE != REFLECTION_PROFILE_NONE
@@ -292,7 +292,7 @@ rt_ColorDepthBloom work_on_pair(
 
 	// Impossible Ray Resultion:
 	vec3 rawNormal = sample_worldNormal(v_texcoord, reflector_normal);
-	vec3 rawNormal_view = _cv_aDirtyHackModelMatrix * rawNormal;
+	vec3 rawNormal_view = frx_normalModelMatrix() * rawNormal;
 	bool impossibleRay	= dot(rawNormal_view, unitMarch_view) < 0;
 
 	if (impossibleRay) {
@@ -307,7 +307,7 @@ rt_ColorDepthBloom work_on_pair(
 	if (exceedsThreshold) {
 		result.hit = false;
 	} else {
-		result = rt_reflection(ray_view + unitMarch_view * jitterRaw.x * HITBOX, unit_view, normal, unitMarch_view, _cv_aDirtyHackModelMatrix, frx_projectionMatrix, frx_inverseProjectionMatrix, reflected_depth, reflected_normal);
+		result = rt_reflection(ray_view + unitMarch_view * jitterRaw.x * HITBOX, unit_view, normal, unitMarch_view, frx_normalModelMatrix(), frx_projectionMatrix, frx_inverseProjectionMatrix, reflected_depth, reflected_normal);
 	}
 	#endif
 
@@ -352,11 +352,11 @@ rt_ColorDepthBloom work_on_pair(
 	}
 	#endif
 
-	vec3 unitMarch_world = unitMarch_view * _cv_aDirtyHackModelMatrix;
+	vec3 unitMarch_world = unitMarch_view * frx_normalModelMatrix();
 	vec4 calcdFallback = calcFallbackColor(reflector_depth, unitMarch_world, light.xy);
 	vec4 fallbackColor = fallback > 0.0 ? vec4(calcdFallback.rgb, fallback) : vec4(0.0);
 	vec4 reflected_final = mix(reflectedColor, fallbackColor, fallbackMix);
-	vec3 unit_world = unit_view * _cv_aDirtyHackModelMatrix;
+	vec3 unit_world = unit_view * frx_normalModelMatrix();
 	float sunBloom = calcdFallback.a * fallbackMix * (1.0 - roughness);
 
 	vec3 reg_f0	= vec3(material.z);

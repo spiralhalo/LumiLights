@@ -45,7 +45,7 @@ void main()
 	vec3 skyLightVector = normalize(vec3(frx_skyLightVector.xy, 0.0));
 #endif
 
-	vec4 skylight_clip = frx_projectionMatrix * vec4(_cv_aDirtyHackModelMatrix * skyLightVector * 1000, 1.0);
+	vec4 skylight_clip = frx_projectionMatrix * vec4(frx_normalModelMatrix() * skyLightVector * 1000, 1.0);
 
 	v_skylightpos = (skylight_clip.xy / skylight_clip.w) * 0.5 + 0.5;
 }
