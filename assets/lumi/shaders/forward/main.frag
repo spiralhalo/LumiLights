@@ -82,7 +82,7 @@ void frx_pipelineFragment()
 			float blue = frx_vertexColor.b * frx_vertexColor.b;
 			frx_fragColor.rgb += blue * 0.25;
 			frx_fragColor.rgb *= (1.0 - 0.5 * blue);
-			frx_fragColor.a   *= 0.77;
+			frx_fragColor.a   *= 0.6;
 			#endif
 		}
 
