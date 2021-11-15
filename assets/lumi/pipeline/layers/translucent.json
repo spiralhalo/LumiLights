@@ -3,9 +3,9 @@
 		{
 			name: "translucent_main",
 			lod: 0,
-			internalFormat: "RGBA8",
+			internalFormat: "RGBA16F", //TODO: balance memory usage from somewhere else
 			pixelFormat: "RGBA",
-			pixelDataType: "UNSIGNED_BYTE",
+			pixelDataType: "FLOAT",
 			target: "TEXTURE_2D",
 			texParams: [
 				{name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},

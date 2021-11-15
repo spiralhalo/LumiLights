@@ -111,7 +111,7 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
 			float blue = fragData.vertexColor.b * fragData.vertexColor.b;
 			a.rgb += blue * 0.25;
 			a.rgb *= (1.0 - 0.5 * blue);
-			a.a   *= 0.9;
+			a.a   *= 0.77;
 			#endif
 		}
 
@@ -158,11 +158,10 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
 		fragColor[5] = vec4(frx_normalizeMappedUV(frx_texcoord), bitFlags, 1.0);
 	}
 
-	// Advanced translucency 2.1
+	// Advanced translucency 2.2
 	if (frx_renderTarget() == TARGET_TRANSLUCENT) {
 		fragColor[6] = vec4(packVec2(a.rg), packVec2(a.ba), 0.0, 1.0);
-		a.a = pow(a.a, 10.0);
-		a.a = a.a == 0.0 ? 0.0 : clamp(a.a, 1./255., 1.0);
+		a.a = pow(min(a.a, 1.0), 10.0);
 	}
 
 	gl_FragDepth = gl_FragCoord.z;
