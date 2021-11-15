@@ -111,7 +111,7 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
 			float blue = fragData.vertexColor.b * fragData.vertexColor.b;
 			a.rgb += blue * 0.25;
 			a.rgb *= (1.0 - 0.5 * blue);
-			a.a   *= 0.77;
+			a.a   *= 0.6;
 			#endif
 		}
 
