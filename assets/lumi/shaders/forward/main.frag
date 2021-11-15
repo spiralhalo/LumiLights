@@ -27,7 +27,7 @@ in float pv_ao;
 in float pv_diffuse;
 in float pv_ortho;
 
-out vec4[6] fragColor;
+out vec4[7] fragColor;
 
 frx_FragmentData frx_createPipelineFragment()
 {
@@ -158,9 +158,11 @@ void frx_writePipelineFragment(in frx_FragmentData fragData)
 		fragColor[5] = vec4(frx_normalizeMappedUV(frx_texcoord), bitFlags, 1.0);
 	}
 
-	// Advanced translucency 2.0
+	// Advanced translucency 2.1
 	if (frx_renderTarget() == TARGET_TRANSLUCENT) {
+		fragColor[6] = vec4(packVec2(a.rg), packVec2(a.ba), 0.0, 1.0);
 		a.a = pow(a.a, 10.0);
+		a.a = a.a == 0.0 ? 0.0 : clamp(a.a, 1./255., 1.0);
 	}
 
 	gl_FragDepth = gl_FragCoord.z;

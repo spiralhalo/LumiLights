@@ -1,6 +1,7 @@
 #include lumi:shaders/post/common/header.glsl
 
 #include lumi:shaders/post/common/shading_includes.glsl
+#include lumi:shaders/lib/pack_normal.glsl
 
 /*******************************************************
  *  lumi:shaders/post/shading_translucent.frag
@@ -18,6 +19,7 @@ uniform sampler2D u_normal_translucent;
 uniform sampler2D u_material_translucent;
 uniform sampler2D u_misc_translucent;
 
+uniform sampler2D u_albedo_translucent;
 uniform sampler2D u_solid_depth;
 uniform sampler2D u_light_solid;
 
@@ -58,6 +60,12 @@ vec4 advancedTranslucentShading(float ec, out float bloom_out) {
 
 	albedo.rgb /= albedo.a;
 	albedo.a = pow(albedo.a, 1. / 10.);
+
+	vec2 prime		 = texture(u_albedo_translucent, v_texcoord).rg;
+	vec4 truePrime	 = vec4(unpackVec2(prime.r), unpackVec2(prime.g));
+		 truePrime.a = sqrt(truePrime.a); // I have no idea why this is needed; is there a sqrt somewhere in composite someone please tell me
+
+	albedo.rgb = albedo.rgb * (1.0 - truePrime.a) + truePrime.rgb * truePrime.a;
 
 #ifdef GELATIN_MATERIAL
 	// gelatin material (tentative name)

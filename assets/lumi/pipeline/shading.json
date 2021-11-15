@@ -38,6 +38,7 @@
 				"u_material_translucent",
 				"u_misc_translucent",
 
+				"u_albedo_translucent",
 				"u_solid_depth",
 				"u_light_solid",
 
@@ -222,7 +223,8 @@
 					"material_translucent",
 					"misc_translucent",
 
-					"solid_depth"
+					"prime_albedo_translucent",
+					"solid_depth",
 					"light_solid",
 
 					"refraction_uv",
