@@ -52,7 +52,7 @@ void main()
 	} else {
 		fragColor = calcSSAO(
 			u_normal, u_depth, u_light, u_color, u_blue_noise,
-			frx_normalModelMatrix(), frx_inverseProjectionMatrix, v_deltaRotator, frxu_size, 
+			frx_normalModelMatrix, frx_inverseProjectionMatrix, v_deltaRotator, frxu_size, 
 			v_texcoord, STEPS, DIRECTIONS, RADIUS, RADIUS, BIAS, INTENSITY,
 			useAttenuation, glowOcclusion);
 	}

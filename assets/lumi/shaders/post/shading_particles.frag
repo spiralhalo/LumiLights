@@ -33,7 +33,7 @@ vec4 ldr_shaded_particle(vec2 uv, sampler2D scolor, sampler2D sdepth, sampler2D 
 	viewPos.xyz /= viewPos.w;
 	viewPos.w = 1.0;
 
-	vec3  normal   = normalize(-viewPos.xyz) * frx_normalModelMatrix();
+	vec3  normal   = normalize(-viewPos.xyz) * frx_normalModelMatrix;
 	vec4  light    = texture(slight, uv);
 	vec3  modelPos = (frx_inverseViewMatrix * viewPos).xyz;
 	float bloom_ignored = 0.0;

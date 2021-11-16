@@ -48,12 +48,12 @@ vec3 coords_view(vec2 uv, mat4 inv_projection)
 
 vec3 coords_normal_source(vec2 uv)
 {
-	return frx_normalModelMatrix() * (2.0 * texture(u_normal_translucent, uv).xyz - 1.0);
+	return frx_normalModelMatrix * (2.0 * texture(u_normal_translucent, uv).xyz - 1.0);
 }
 
 vec3 coords_normal(vec2 uv)
 {
-	return frx_normalModelMatrix() * (2.0 * texture(u_normal_solid, uv).xyz - 1.0);
+	return frx_normalModelMatrix * (2.0 * texture(u_normal_solid, uv).xyz - 1.0);
 }
 
 float skylight_adjust(float skyLight, float intensity)

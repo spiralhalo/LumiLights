@@ -104,9 +104,9 @@ void frx_pipelineFragment()
 		vec3 packedNormal;
 
 		if (maybeHand) {
-			packedNormal = normal * frx_normalModelMatrix();
+			packedNormal = normal * frx_normalModelMatrix;
 			packedNormal = 0.5 + 0.5 * packedNormal;
-			pbr_normalMicro = pbr_normalMicro * frx_normalModelMatrix();
+			pbr_normalMicro = pbr_normalMicro * frx_normalModelMatrix;
 		} else {
 			packedNormal = packNormal(normal, pbr_tangent);
 		}
