@@ -6,12 +6,10 @@
 			fragmentSource: "lumi:shaders/post/normal_preprocess.frag",
 			samplers: [
 				"u_normal_solid0",
-				"u_normal_micro_solid0",
 				"u_light_solid",
 				"u_depth_solid",
 
 				"u_normal_translucent0",
-				"u_normal_micro_translucent0",
 				"u_light_translucent",
 				"u_depth_translucent",
 				"u_misc_translucent",
@@ -39,10 +37,10 @@
 			name: "normal_preprocess",
 			colorAttachments: [
 				{image: "normal_solid", clearColor: 0x00000000},
-				{image: "tangent_solid", clearColor: 0x00000000},
+				// {image: "tangent_solid", clearColor: 0x00000000},
 				{image: "normal_micro_solid", clearColor: 0x00000000},
 				{image: "normal_translucent", clearColor: 0x00000000},
-				{image: "tangent_translucent", clearColor: 0x00000000},
+				// {image: "tangent_translucent", clearColor: 0x00000000},
 				{image: "normal_micro_translucent", clearColor: 0x00000000},
 				{image: "refraction_uv", clearColor: 0x00000000},
 			]
@@ -57,12 +55,10 @@
 				framebuffer: "normal_preprocess",
 				samplerImages: [
 					"normal_solid0",
-					"normal_micro_solid0",
 					"light_solid",
 					"solid_depth",
 
 					"normal_translucent0",
-					"normal_micro_translucent0",
 					"light_translucent",
 					"translucent_depth",
 					"misc_translucent",

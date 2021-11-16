@@ -18,18 +18,16 @@
  *  published by the Free Software Foundation, Inc.
  *******************************************************/
 
-uniform sampler2D u_normal_solid0;
-uniform sampler2D u_normal_micro_solid0;
+uniform sampler2DArray u_normal_solid0;
 uniform sampler2D u_light_solid;
 uniform sampler2D u_depth_solid;
 
-uniform sampler2D u_normal_translucent0;
-uniform sampler2D u_normal_micro_translucent0;
+uniform sampler2DArray u_normal_translucent0;
 uniform sampler2D u_light_translucent;
 uniform sampler2D u_depth_translucent;
 uniform sampler2D u_misc_translucent;
 
-out vec4 fragColor[7];
+out vec4 fragColor[5];
 
 const float smol_waveSpeed = 1;
 const float smol_scale = 1.5;
@@ -43,8 +41,8 @@ const float REFRACTION_STR = .1;
 bool testTranslucentUnmanaged()
 {
 	vec4 misc   = texture(u_misc_translucent, v_texcoord);
-	vec4 mnorm0 = texture(u_normal_micro_translucent0, v_texcoord);
-	vec4 norm0  = texture(u_normal_translucent0, v_texcoord);
+	vec4 norm0  = texture(u_normal_translucent0, vec3(v_texcoord, 0.));
+	vec4 mnorm0 = texture(u_normal_translucent0, vec3(v_texcoord, 1.));
 
 	return (norm0.x + norm0.y + norm0.z == 0.0) || distance(mnorm0.rgb + misc.rgb, norm0.rgb * 2) < 0.015;
 }
@@ -92,10 +90,10 @@ void main()
 	vec3 solidNormal, solidTangent, solidMicroNormal, translucentNormal, translucentTangent, translucentMicroNormal;
 	float solidPackedPuddle, translucentPackedPuddle, solidDepth, translucentDepth;
 
-	unpackNormal(texture(u_normal_solid0, v_texcoord).rgb, solidNormal, solidTangent);
+	unpackNormal(texture(u_normal_solid0, vec3(v_texcoord, 0.)).rgb, solidNormal, solidTangent);
 
-	solidMicroNormal = 2.0 * texture(u_normal_micro_solid0, v_texcoord).rgb - 1.0;
-	translucentMicroNormal = 2.0 * texture(u_normal_micro_translucent0, v_texcoord).rgb - 1.0;
+	solidMicroNormal	   = 2.0 * texture(u_normal_solid0, vec3(v_texcoord, 1.)).rgb - 1.0;
+	translucentMicroNormal = 2.0 * texture(u_normal_translucent0, vec3(v_texcoord, 1.)).rgb - 1.0;
 
 	solidDepth = texture(u_depth_solid, v_texcoord).r;
 	processNormalMap(u_light_solid, solidDepth, solidNormal, solidTangent, false, solidMicroNormal, solidPackedPuddle);
@@ -104,7 +102,7 @@ void main()
 		translucentPackedPuddle = 0.;
 		translucentDepth = 1.0;
 	} else {
-		unpackNormal(texture(u_normal_translucent0, v_texcoord).rgb, translucentNormal, translucentTangent);
+		unpackNormal(texture(u_normal_translucent0, vec3(v_texcoord, 0.)).rgb, translucentNormal, translucentTangent);
 
 		bool translucentIsWater = bit_unpack(texture(u_misc_translucent, v_texcoord).b, 7) == 1.;
 		translucentDepth = texture(u_depth_translucent, v_texcoord).r;
@@ -126,10 +124,10 @@ void main()
 #endif
 
 	fragColor[0] = vec4(0.5 + 0.5 * solidNormal, 1.0);
-	fragColor[1] = vec4(0.5 + 0.5 * solidTangent, 1.0);
-	fragColor[2] = vec4(0.5 + 0.5 * solidMicroNormal, solidPackedPuddle);
-	fragColor[3] = vec4(0.5 + 0.5 * translucentNormal, 1.0);
-	fragColor[4] = vec4(0.5 + 0.5 * translucentTangent, 1.0);
-	fragColor[5] = vec4(0.5 + 0.5 * translucentMicroNormal, translucentPackedPuddle);
-	fragColor[6] = vec4(refraction_uv, 0.0, 1.0);
+	// fragColor[1] = vec4(0.5 + 0.5 * solidTangent, 1.0);
+	fragColor[1] = vec4(0.5 + 0.5 * solidMicroNormal, solidPackedPuddle);
+	fragColor[2] = vec4(0.5 + 0.5 * translucentNormal, 1.0);
+	// fragColor[4] = vec4(0.5 + 0.5 * translucentTangent, 1.0);
+	fragColor[3] = vec4(0.5 + 0.5 * translucentMicroNormal, translucentPackedPuddle);
+	fragColor[4] = vec4(refraction_uv, 0.0, 1.0);
 }
