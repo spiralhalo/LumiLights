@@ -18,6 +18,8 @@ uniform int	frxu_layer;
 uniform mat4 frxu_frameProjectionMatrix;
 
 #ifdef VERTEX_SHADER
+#define lumi_vary out
+
 out vec2 v_texcoord;
 
 void basicFrameSetup()
@@ -27,6 +29,8 @@ void basicFrameSetup()
 	v_texcoord  = in_uv;
 }
 #else
+#define lumi_vary in
+
 in vec2 v_texcoord;
 #endif
 

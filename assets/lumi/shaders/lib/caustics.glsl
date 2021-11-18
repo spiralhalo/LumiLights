@@ -3,11 +3,6 @@
 
 /*******************************************************
  *  lumi:shaders/lib/caustics.glsl
- *******************************************************
- *  Copyright (c) 2020-2021 spiralhalo
- *  Released WITHOUT WARRANTY under the terms of the
- *  GNU Lesser General Public License version 3 as
- *  published by the Free Software Foundation, Inc.
  *******************************************************/
 
 #define CAUSTICS_SEA_LEVEL 62.0

@@ -1,7 +1,12 @@
 #include lumi:shaders/pass/header.glsl
 
+#include lumi:shaders/lib/bitpack.glsl
+#include lumi:shaders/lib/caustics.glsl
 #include lumi:shaders/lib/pack_normal.glsl
+#include lumi:shaders/lib/taa_jitter.glsl
 #include lumi:shaders/prog/shading.glsl
+#include lumi:shaders/prog/shadow.glsl
+#include lumi:shaders/prog/sky.glsl
 #include lumi:shaders/prog/tonemap.glsl
 
 /*******************************************************
@@ -16,14 +21,51 @@ uniform sampler2D u_weather_depth;
 uniform sampler2DArray u_gbuffer_main_etc;
 uniform sampler2DArray u_gbuffer_depth;
 uniform sampler2DArray u_gbuffer_normal;
-// uniform sampler2DArray u_gbuffer_shadow;
+uniform sampler2DArrayShadow u_gbuffer_shadow;
 
-// uniform sampler2D u_sun;
-// uniform sampler2D u_moon;
-// uniform sampler2D u_cloud;
-// uniform sampler2D u_noise;
+uniform sampler2D u_tex_sun;
+uniform sampler2D u_tex_moon;
+uniform sampler2D u_tex_cloud;
+uniform sampler2D u_tex_glint;
+uniform sampler2D u_tex_noise;
+
+in vec2 v_invSize;
 
 out vec4 fragColor;
+
+float denoisedShadowFactor(vec3 eyePos, float depth, float lighty) {
+#ifdef SHADOW_MAP_PRESENT
+#ifdef TAA_ENABLED
+	vec2 uvJitter	   = taa_jitter(v_invSize);
+	vec4 unjitteredPos = frx_inverseViewProjectionMatrix * vec4(2.0 * v_texcoord - uvJitter - 1.0, 2.0 * depth - 1.0, 1.0);
+	vec4 shadowViewPos = frx_shadowViewMatrix * vec4(unjitteredPos.xyz / unjitteredPos.w, 1.0);
+#else
+	vec4 shadowViewPos = frx_shadowViewMatrix * vec4(eyePos, 1.0);
+#endif
+
+	float val = simpleShadowFactor(u_gbuffer_shadow, shadowViewPos);
+
+	#ifdef SHADOW_WORKAROUND
+	val *= l2_clampScale(0.03125, 0.04, lighty);
+	#endif
+
+	return val;
+#else
+	return lighty;
+#endif
+}
+
+bool decideUnderwater(float depth, float dTrans, bool transIsWater, bool translucent) {
+	if (frx_cameraInWater == 1) {
+		if (translucent) {
+			return true;
+		} else {
+			return dTrans >= depth;
+		}
+	} else {
+		return dTrans < depth && transIsWater; 
+	}
+}
 
 void main()
 {
@@ -40,18 +82,20 @@ void main()
 	cParts.rgb /= cParts.a == 0.0 ? 1.0 : cParts.a;
 	cRains.rgb /= cRains.a == 0.0 ? 1.0 : cRains.a;
 
-	vec4 worldPos = frx_inverseViewProjectionMatrix * vec4(2.0 * v_texcoord - 1.0, 2.0 * dSolid - 1.0, 1.0);
-		 worldPos.xyz /= worldPos.w;
+	vec4 tempPos = frx_inverseViewProjectionMatrix * vec4(2.0 * v_texcoord - 1.0, 2.0 * dSolid - 1.0, 1.0);
+	vec3 eyePos  = tempPos.xyz / tempPos.w;
 
 	vec4 light    = texture(u_gbuffer_main_etc, vec3(v_texcoord, ID_SOLID_LIGT));
 	vec3 material = texture(u_gbuffer_main_etc, vec3(v_texcoord, ID_SOLID_MATS)).xyz;
 	vec3 normal   = texture(u_gbuffer_normal, vec3(v_texcoord, 1.)).xyz * 2.0 - 1.0;
 
-	// TODO: sample shadow
-	light.w = light.z;
-	light.z = light.y;
+	light.w = denoisedShadowFactor(eyePos, dSolid, light.y);
 
-	vec4 base = dSolid == 1.0 ? hdr_fromGamma4(cSolid) : shading(cSolid, light, material, worldPos.xyz, normal);
+	vec3 miscTrans = texture(u_gbuffer_main_etc, vec3(v_texcoord, ID_TRANS_MISC)).xyz;
+	bool transIsWater = bit_unpack(miscTrans.z, 7) == 1.;
+	bool solidIsUnderwater = decideUnderwater(dSolid, dTrans, transIsWater, false);
+
+	vec4 base = dSolid == 1.0 ? customSky(u_tex_sun, u_tex_moon, normalize(eyePos), solidIsUnderwater) : shading(cSolid, light, material, eyePos, normal, solidIsUnderwater);
 	vec4 next = (dSolid < dTrans && dSolid < dParts) ? vec4(0.0) : (dParts > dTrans ? cParts : cTrans);
 	vec4 last = (dSolid < dTrans && dSolid < dParts) ? vec4(0.0) : (dParts > dTrans ? cTrans : cParts);
 
@@ -67,8 +111,8 @@ void main()
 
 	next = vec4(next.rgb * (1.0 - last.a) + last.rgb * last.a, min(1.0, next.a + last.a));
 
-	worldPos = frx_inverseViewProjectionMatrix * vec4(2.0 * v_texcoord - 1.0, 2.0 * dMin - 1.0, 1.0);
-	worldPos.xyz /= worldPos.w;
+	tempPos = frx_inverseViewProjectionMatrix * vec4(2.0 * v_texcoord - 1.0, 2.0 * dMin - 1.0, 1.0);
+	eyePos  = tempPos.xyz / tempPos.w;
 
 	light	 = vec4(0.0, 1.0, 0.0, 0.0);
 	material = vec3(1.0, 0.0, 0.04);
@@ -82,12 +126,12 @@ void main()
 		light    = texture(u_gbuffer_main_etc, vec3(v_texcoord, ID_PARTS_LIGT));
 	}
 
-	// TODO: sample shadow?
-	light.w = light.z;
-	light.z = light.y;
+	bool nextIsUnderwater = decideUnderwater(dMin, dTrans, transIsWater, true);
+
+	light.w = transIsWater ? lightmapRemap (light.y) : denoisedShadowFactor(eyePos, dMin, light.y);
 
 	if (next.a != 0.0) {
-		next = shading(next, light, material, worldPos.xyz, normal);
+		next = shading(next, light, material, eyePos, normal, nextIsUnderwater);
 	}
 
 	base.rgb = base.rgb * (1.0 - next.a) + next.rgb * next.a;
