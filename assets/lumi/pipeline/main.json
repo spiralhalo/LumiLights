@@ -10,13 +10,13 @@
 	},
 
 	// Unmanaged draw targets
-	defaultFramebuffer: "default",
+	defaultFramebuffer: "vanilla",
 	fabulousTargets: {
-		translucent: "fab_translucent", // translucent terrain
-		entity: "fab_translucent",	  // translucent ITEM entities
-		particles: "fab_particles",
-		weather: "fab_weather",
-		clouds: "fab_clouds",
+		translucent: "vanilla_transl", // translucent terrain
+		entity: "vanilla_transl",	  // translucent ITEM entities
+		particles: "vanilla_transl",
+		weather: "weather",
+		clouds: "clouds",
 	},
 
 	materialProgram: {
@@ -31,25 +31,21 @@
 	smoothBrightnessBidirectionaly: true,
 
 	include: [
-		"lumi:pipeline/layers/solid.json",
-		"lumi:pipeline/layers/translucent.json",
-		"lumi:pipeline/layers/clouds.json",
-		"lumi:pipeline/layers/particles.json",
-		"lumi:pipeline/layers/weather.json",
-		"lumi:pipeline/common.json",
+		"lumi:pipeline/layers.json",
+		// "lumi:pipeline/common.json",
 		// PASSES IN CORRECT ORDER
 		// NB: Passes need to be in the same "include" level to be ordered correctly.
 		//	 Passes in higher "include" level will always come before passes in lower level.
 		"lumi:pipeline/clear.json",
-		"lumi:pipeline/normal.json",
-		"lumi:pipeline/custom_clouds.json",
-		"lumi:pipeline/ao.json",
-		"lumi:pipeline/shading.json",
-		"lumi:pipeline/reflection.json",
-		"lumi:pipeline/composite.json",
-		"lumi:pipeline/hand.json",
-		"lumi:pipeline/taa.json",
-		"lumi:pipeline/bloom.json",
+		// "lumi:pipeline/normal.json",
+		// "lumi:pipeline/custom_clouds.json",
+		// "lumi:pipeline/ao.json",
+		// "lumi:pipeline/shading.json",
+		// "lumi:pipeline/reflection.json",
+		// "lumi:pipeline/composite.json",
+		// "lumi:pipeline/hand.json",
+		// "lumi:pipeline/taa.json",
+		// "lumi:pipeline/bloom.json",
 	],
 
 }
