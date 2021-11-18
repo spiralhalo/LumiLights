@@ -1,4 +1,4 @@
-#include lumi:shaders/post/common/header.glsl
+#include lumi:shaders/pass/header.glsl
 
 #include frex:shaders/api/world.glsl
 #include frex:shaders/api/view.glsl
@@ -10,7 +10,7 @@
 #include lumi:shaders/lib/util.glsl
 
 /*******************************************************
- *  lumi:shaders/post/shading.vert
+ *  lumi:shaders/pass/shading.vert
  *******************************************************/
 
 out vec3 v_celest1;
@@ -62,11 +62,11 @@ void main()
 	pbrv_coneOuter = max(pbrv_coneInner, clamp(frx_heldLightOuterRadius, 0.0, PI) / PI);
 
 	// jitter celest
-	#ifdef TAA_ENABLED
-		vec2 taa_jitterValue = taa_jitter(v_invSize);
-		vec4 celest_clip = frx_projectionMatrix * vec4(v_celest1, 1.0);
-		v_celest1.xy += taa_jitterValue * celest_clip.w;
-		v_celest2.xy += taa_jitterValue * celest_clip.w;
-		v_celest3.xy += taa_jitterValue * celest_clip.w;
-	#endif
+	// #ifdef TAA_ENABLED
+	// 	vec2 taa_jitterValue = taa_jitter(v_invSize);
+	// 	vec4 celest_clip = frx_projectionMatrix * vec4(v_celest1, 1.0);
+	// 	v_celest1.xy += taa_jitterValue * celest_clip.w;
+	// 	v_celest2.xy += taa_jitterValue * celest_clip.w;
+	// 	v_celest3.xy += taa_jitterValue * celest_clip.w;
+	// #endif
 }

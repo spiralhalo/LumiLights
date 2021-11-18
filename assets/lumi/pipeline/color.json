@@ -1,0 +1,56 @@
+{
+	programs: [
+		{
+			name: "color",
+			vertexSource: "lumi:shaders/pass/shading.vert",
+			fragmentSource: "lumi:shaders/pass/color.frag",
+			samplers: [
+				"u_vanilla_color",
+				"u_vanilla_depth",
+				"u_weather_color",
+				"u_weather_depth",
+
+				"u_gbuffer_main_etc",
+				"u_gbuffer_depth",
+				"u_gbuffer_normal",
+			]
+		},
+	],
+
+	framebuffers: [
+		{
+			name: "color",
+			colorAttachments: [
+				{image: "swap_color"}
+			]
+		},
+	],
+
+	fabulous: {
+		passes: [
+			{
+				name: "color",
+				program: "color",
+				framebuffer: "color",
+				samplerImages: [
+					"vanilla_color",
+					"vanilla_depth",
+					"weather_color",
+					"weather_depth",
+
+					"gbuffer_main_etc",
+					"gbuffer_depth",
+					"gbuffer_normal",
+				]
+			},
+			{
+				name: "copy_swap",
+				program: "copy",
+				framebuffer: "vanilla",
+				samplerImages: [
+					"swap_color",
+				]
+			}
+		]
+	}
+}

@@ -1,8 +1,9 @@
-#include lumi:shaders/post/common/header.glsl
+#include lumi:shaders/pass/header.glsl
 
 /******************************************************
-  lumi:shaders/post/copy.frag
+  lumi:shaders/pass/copy.frag
 ******************************************************/
+
 uniform sampler2D u_input;
 
 out vec4 fragColor;

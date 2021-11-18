@@ -3,12 +3,7 @@
 #include lumi:shaders/lib/util.glsl
 
 /*******************************************************
- *  lumi:shaders/func/tonemap.glsl
- *******************************************************
- *  Copyright (c) 2020-2021 spiralhalo
- *  Released WITHOUT WARRANTY under the terms of the
- *  GNU Lesser General Public License version 3 as
- *  published by the Free Software Foundation, Inc.
+ *  lumi:shaders/prog/tonemap.glsl
  *******************************************************/
 
 uniform sampler2D u_exposure;
