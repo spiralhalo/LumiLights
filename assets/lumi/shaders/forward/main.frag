@@ -70,8 +70,8 @@ void frx_pipelineFragment()
 		}
 
 		#ifdef VANILLA_AO_ENABLED
-		float ao = frx_fragEnableAo ? frx_fragLight.z * (1.0 - frx_fragColor.a) : 1.0;
-		light.xy = max(vec2(0.03125), light.xy * ao);
+		float ao = frx_fragEnableAo ? frx_fragLight.z : 1.0;
+		frx_fragLight.xy = max(vec2(0.03125), frx_fragLight.xy * ao);
 		#endif
 
 		float roughness = max(0.01, pbr_roughness);
