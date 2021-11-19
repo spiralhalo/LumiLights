@@ -2,14 +2,14 @@
 
 #define POST_SHADER
 
-#include lumi:shaders/lib/util.glsl
-#include lumi:shaders/common/userconfig.glsl
 #include frex:shaders/api/world.glsl
 #include frex:shaders/api/player.glsl
 #include frex:shaders/api/view.glsl
+#include lumi:shaders/lib/util.glsl
+#include lumi:shaders/common/userconfig.glsl
 
 /*******************************************************
- *  lumi:shaders/post/header.glsl
+ *  lumi:shaders/pass/header.glsl
  *******************************************************/
 
 uniform ivec2 frxu_size;

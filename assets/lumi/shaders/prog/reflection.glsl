@@ -103,7 +103,6 @@ vec3 reflectionMarch(sampler2D depthBuffer, sampler2DArray normalBuffer, float i
 
 	return vec3(uvRayHitPos, 0.0);
 }
-#endif
 
 const float JITTER_STRENGTH = 0.6;
 

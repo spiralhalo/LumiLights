@@ -3,6 +3,7 @@
 #include lumi:shaders/lib/bitpack.glsl
 #include lumi:shaders/lib/pack_normal.glsl
 #include lumi:shaders/lib/taa_jitter.glsl
+#include lumi:shaders/prog/clouds.glsl
 #include lumi:shaders/prog/fog.glsl
 #include lumi:shaders/prog/shading.glsl
 #include lumi:shaders/prog/shadow.glsl
@@ -145,6 +146,10 @@ void main()
 	}
 
 	base.rgb = base.rgb * (1.0 - next.a) + next.rgb * next.a;
+
+	vec4 clouds = volumetricCloud(u_tex_cloud, u_tex_noise, dSolid, dMin, v_texcoord, toFrag, NUM_SAMPLE);
+
+	base.rgb = base.rgb * (1.0 - clouds.a) + clouds.rgb * clouds.a;
 
 	fragColor = base;
 	fragDepth = dMin;
