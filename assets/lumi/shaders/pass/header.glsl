@@ -46,3 +46,8 @@ in vec2 v_invSize;
 #define ID_TRANS_MISC 6
 #define ID_PARTS_COLR 7
 #define ID_PARTS_LIGT 8
+
+#define ID_SOLID_NORM 0
+#define ID_SOLID_MNORM 1
+#define ID_TRANS_NORM 2
+#define ID_TRANS_MNORM 3

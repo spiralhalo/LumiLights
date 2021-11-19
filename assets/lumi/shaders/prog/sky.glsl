@@ -1,7 +1,7 @@
 #include frex:shaders/lib/noise/cellular2x2x2.glsl
 #include frex:shaders/lib/noise/noise3d.glsl
 #include lumi:shaders/lib/rectangle.glsl
-#include lumi:shaders/prog/reflection.glsl
+#include lumi:shaders/lib/pbr.glsl
 
 /*******************************************************
  *  lumi:shaders/prog/sky.glsl
@@ -176,7 +176,7 @@ vec4 customSky(sampler2D sunTexture, sampler2D moonTexture, vec3 toSky, bool isU
 }
 
 vec4 skyReflection(sampler2D sunTexture, sampler2D moonTexture, vec3 albedo, vec3 material, vec3 toFrag, vec3 normal) {
-	vec3 toSky = reflect(toFrag, normal);
+	vec3 toSky = reflect(toFrag, normalize(normal));
 	vec3 radiance = customSky(sunTexture, moonTexture, toSky, false).rgb;
 	return vec4(reflectionPbr(albedo, material, radiance, toSky, -toFrag), 0.0);
 }

@@ -4,12 +4,7 @@
 #include lumi:shaders/lib/util.glsl
 
 /*******************************************************
- *  lumi:shaders/func/tile_noise.glsl
- *******************************************************
- *  Copyright (c) 2020-2021 spiralhalo
- *  Released WITHOUT WARRANTY under the terms of the
- *  GNU Lesser General Public License version 3 as
- *  published by the Free Software Foundation, Inc.
+ *  lumi:shaders/prog/tile_noise.glsl
  *******************************************************/
 
 #if DITHERING_MODE == DITHERING_MODE_HALTON

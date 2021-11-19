@@ -117,7 +117,6 @@ vec4 shading(vec4 color, vec4 light, vec3 material, vec3 eyePos, vec3 normal, bo
 	vec3 toLight = (frx_worldHasSkylight == 1) ? frx_skyLightVector : ((frx_worldIsSkyDarkened == 1) ? skylessDarkenedDir : skylessDir);
 
 	shaded += pbr_lightCalc(albedo, color.a, skyLight, material.x, material.y, f0, toLight, toEye, normal);
-	color.a += color.a > 0.0 ? (1.0 - color.a) * pow(1.0 - pbr_dot(toEye, normal), 5.0) : 0.0;
 
 	return vec4(shaded, color.a);
 }

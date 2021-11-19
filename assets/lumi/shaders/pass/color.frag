@@ -31,6 +31,7 @@ uniform sampler2D u_tex_noise;
 
 layout(location = 0) out vec4 fragColor;
 layout(location = 1) out float fragDepth;
+layout(location = 2) out vec4 fragAlbedo;
 
 float denoisedShadowFactor(vec3 eyePos, float depth, float lighty) {
 #ifdef SHADOW_MAP_PRESENT
@@ -95,14 +96,15 @@ void main()
 	bool solidIsUnderwater = decideUnderwater(dSolid, dTrans, transIsWater, false);
 	vec3 toFrag = normalize(eyePos);
 
+	// TODO: end portal glitch?
+
 	vec4 base = dSolid == 1.0 ? customSky(u_tex_sun, u_tex_moon, toFrag, solidIsUnderwater) : shading(cSolid, light, material, eyePos, normal, solidIsUnderwater);
 	vec4 next = (dSolid < dTrans && dSolid < dParts) ? vec4(0.0) : (dParts > dTrans ? cParts : cTrans);
 	vec4 last = (dSolid < dTrans && dSolid < dParts) ? vec4(0.0) : (dParts > dTrans ? cTrans : cParts);
 
 	float dMin = min(dSolid, min(dTrans, min(dParts, dRains)));
 
-	if (dSolid < 1.0 /*&& dSolid > dMin*/) {
-		// TODO: behind translucent only, move rest after reflection
+	if (dSolid < 1.0 && dSolid > dMin) {
 		base += skyReflection(u_tex_sun, u_tex_moon, cSolid.rgb, material, toFrag, normal);
 		base = fog(base, eyePos, light.y);
 	}
@@ -139,13 +141,19 @@ void main()
 	if (next.a != 0.0) {
 		vec3 albedo = next.rgb;
 		next = shading(next, light, material, eyePos, normal, nextIsUnderwater);
-		// TODO: move these after reflection
-		next += skyReflection(u_tex_sun, u_tex_moon, albedo, material, toFrag, normal);
-		next = fog(next, eyePos, light.y);
+		next.a = sqrt(next.a);
 	}
 
 	base.rgb = base.rgb * (1.0 - next.a) + next.rgb * next.a;
 
-	fragColor = ldr_tonemap(base);
+	fragColor = base;
 	fragDepth = dMin;
+
+	if (dMin == dSolid) {
+		fragAlbedo = vec4(cSolid.rgb, 0.0);
+	} else if (dMin == dTrans) {
+		fragAlbedo = vec4(cTrans.rgb, 0.5);
+	} else {
+		fragAlbedo = vec4(cParts.rgb, 1.0);
+	}
 }
