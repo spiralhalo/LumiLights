@@ -1,7 +1,6 @@
 #include lumi:shaders/pass/header.glsl
 
 #include lumi:shaders/lib/bitpack.glsl
-#include lumi:shaders/lib/caustics.glsl
 #include lumi:shaders/lib/pack_normal.glsl
 #include lumi:shaders/lib/taa_jitter.glsl
 #include lumi:shaders/prog/fog.glsl

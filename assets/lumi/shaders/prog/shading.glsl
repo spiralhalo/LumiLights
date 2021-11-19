@@ -5,6 +5,7 @@
 #include lumi:shaders/common/atmosphere.glsl
 #include lumi:shaders/common/contrast.glsl
 #include lumi:shaders/common/userconfig.glsl
+#include lumi:shaders/lib/caustics.glsl
 #include lumi:shaders/lib/pbr.glsl
 #include lumi:shaders/lib/util.glsl
 

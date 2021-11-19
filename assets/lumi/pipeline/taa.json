@@ -33,7 +33,7 @@
 		},
 		{
 			name: "taa_fb",
-			colorAttachments: [{image: "swap_color"}]
+			colorAttachments: [{image: "vanilla_color"}]
 		}
 	],
 
@@ -44,7 +44,7 @@
 				program: "taa_program",
 				framebuffer: "taa_fb",
 				samplerImages: [
-					"vanilla_color",
+					"swap_color",
 					"taa_history0",
 					"color_depth",
 					"vanilla_depth",
@@ -55,16 +55,8 @@
 				name: "taa_history",
 				program: "copy",
 				framebuffer: "taa_history",
-				samplerImages: ["swap_color"]
+				samplerImages: ["vanilla_color"]
 			},
-			{
-				name: "copy_swap2",
-				program: "copy",
-				framebuffer: "vanilla",
-				samplerImages: [
-					"swap_color",
-				]
-			}
 		]
 	}
 }
