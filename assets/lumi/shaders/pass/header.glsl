@@ -21,17 +21,20 @@ uniform mat4 frxu_frameProjectionMatrix;
 #define lumi_vary out
 
 out vec2 v_texcoord;
+out vec2 v_invSize;
 
 void basicFrameSetup()
 {
 	vec4 screen = frxu_frameProjectionMatrix * vec4(in_vertex.xy * frxu_size, 0.0, 1.0);
 	gl_Position = vec4(screen.xy, 0.2, 1.0);
 	v_texcoord  = in_uv;
+	v_invSize = 1.0 / frxu_size;
 }
 #else
 #define lumi_vary in
 
 in vec2 v_texcoord;
+in vec2 v_invSize;
 #endif
 
 #define ID_SOLID_LIGT 0

@@ -1,0 +1,70 @@
+{
+	programs: [
+		{
+			name: "taa_program",
+			vertexSource: "lumi:shaders/pass/basic.vert",
+			fragmentSource: "lumi:shaders/pass/taa.frag",
+			samplers: [
+				"u_current",
+				"u_history0",
+				"u_depthCurrent",
+				"u_depthHand",
+				"u_debugText",
+			]
+		},
+	],
+
+	images: [
+		{
+			name: "taa_history0",
+			internalFormat: "RGBA8",
+			target: "TEXTURE_2D",
+			texParams: [
+				{name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
+				{name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
+			]
+		},
+	],
+
+	framebuffers: [
+		{
+			name: "taa_history",
+			colorAttachments: [{image: "taa_history0"}]
+		},
+		{
+			name: "taa_fb",
+			colorAttachments: [{image: "swap_color"}]
+		}
+	],
+
+	afterRenderHand: {
+		passes: [
+			{
+				name: "taa_pass",
+				program: "taa_program",
+				framebuffer: "taa_fb",
+				samplerImages: [
+					"vanilla_color",
+					"taa_history0",
+					"color_depth",
+					"vanilla_depth",
+					"lumi:textures/etc/debug.png",
+				]
+			},
+			{
+				name: "taa_history",
+				program: "copy",
+				framebuffer: "taa_history",
+				samplerImages: ["swap_color"]
+			},
+			{
+				name: "copy_swap2",
+				program: "copy",
+				framebuffer: "vanilla",
+				samplerImages: [
+					"swap_color",
+				]
+			}
+		]
+	}
+}

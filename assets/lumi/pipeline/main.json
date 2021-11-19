@@ -39,6 +39,7 @@
 		//	 Passes in higher "include" level will always come before passes in lower level.
 		"lumi:pipeline/clear.json",
 		"lumi:pipeline/color.json",
+		"lumi:pipeline/taa.json",
 		// "lumi:pipeline/normal.json",
 		// "lumi:pipeline/custom_clouds.json",
 		// "lumi:pipeline/ao.json",
@@ -46,7 +47,6 @@
 		// "lumi:pipeline/reflection.json",
 		// "lumi:pipeline/composite.json",
 		// "lumi:pipeline/hand.json",
-		// "lumi:pipeline/taa.json",
 		// "lumi:pipeline/bloom.json",
 	],
 

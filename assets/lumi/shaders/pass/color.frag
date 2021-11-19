@@ -4,6 +4,7 @@
 #include lumi:shaders/lib/caustics.glsl
 #include lumi:shaders/lib/pack_normal.glsl
 #include lumi:shaders/lib/taa_jitter.glsl
+#include lumi:shaders/prog/fog.glsl
 #include lumi:shaders/prog/shading.glsl
 #include lumi:shaders/prog/shadow.glsl
 #include lumi:shaders/prog/sky.glsl
@@ -29,9 +30,8 @@ uniform sampler2D u_tex_cloud;
 uniform sampler2D u_tex_glint;
 uniform sampler2D u_tex_noise;
 
-in vec2 v_invSize;
-
-out vec4 fragColor;
+layout(location = 0) out vec4 fragColor;
+layout(location = 1) out float fragDepth;
 
 float denoisedShadowFactor(vec3 eyePos, float depth, float lighty) {
 #ifdef SHADOW_MAP_PRESENT
@@ -101,6 +101,10 @@ void main()
 
 	float dMin = min(dSolid, min(dTrans, min(dParts, dRains)));
 
+	// if (dSolid < 1.0 && dSolid > dMin) {
+	base = fog(base, eyePos, light.y); // TODO: behind translucent only, move rest after reflection
+	// }
+
 	if (dRains <= dSolid) {
 		if (dRains == dMin) {
 			last = vec4(last.rgb * (1.0 - cRains.a) + cRains.rgb * cRains.a, min(1.0, last.a + cRains.a));
@@ -132,9 +136,11 @@ void main()
 
 	if (next.a != 0.0) {
 		next = shading(next, light, material, eyePos, normal, nextIsUnderwater);
+		next = fog(next, eyePos, light.y); // TODO: move after reflection
 	}
 
 	base.rgb = base.rgb * (1.0 - next.a) + next.rgb * next.a;
 
 	fragColor = ldr_tonemap(base);
+	fragDepth = dMin;
 }

@@ -13,7 +13,6 @@
  *  lumi:shaders/pass/shading.vert
  *******************************************************/
 
-out vec2 v_invSize;
 out float v_blindness;
 
 out float pbrv_coneInner;
@@ -26,8 +25,6 @@ void main()
 	atmos_generateAtmosphereModel();
 	celestSetup();
 	skySetup();
-
-	v_invSize = 1.0 / frxu_size;
 
 	// TODO: multiple instances found; make common?
 	v_blindness = l2_clampScale(0.5, 1.0, 1.0 - frx_luminance(frx_vanillaClearColor)) * float(frx_effectBlindness);

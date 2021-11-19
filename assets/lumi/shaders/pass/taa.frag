@@ -1,11 +1,10 @@
-#include lumi:shaders/post/common/header.glsl
-#include lumi:shaders/lib/util.glsl
+#include lumi:shaders/pass/header.glsl
 #include lumi:shaders/common/userconfig.glsl
 #include lumi:shaders/lib/taa.glsl
 #include lumi:shaders/lib/taa_velocity.glsl
 
 /******************************************************
- *	lumi:shaders/post/taa.frag
+ *	lumi:shaders/pass/taa.frag
  ******************************************************/
 
 uniform sampler2D u_current;
@@ -13,8 +12,6 @@ uniform sampler2D u_history0;
 uniform sampler2D u_depthCurrent;
 uniform sampler2D u_depthHand;
 uniform sampler2D u_debugText;
-
-in vec2 v_invSize;
 
 out vec4 fragColor;
 

@@ -1,4 +1,19 @@
 {
+	images: [
+		 {
+			name: "color_depth",
+			lod: 0,
+			internalFormat: "R32F",
+			pixelFormat: "GL_RED",
+			pixelDataType: "FLOAT",
+			target: "TEXTURE_2D",
+			texParams: [ 
+				{name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
+				{name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"},
+			]
+		}, 
+	],
+
 	programs: [
 		{
 			name: "color",
@@ -28,7 +43,8 @@
 		{
 			name: "color",
 			colorAttachments: [
-				{image: "swap_color"}
+				{image: "swap_color"},
+				{image: "color_depth"}
 			]
 		},
 	],

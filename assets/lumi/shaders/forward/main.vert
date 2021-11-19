@@ -17,7 +17,6 @@
  *******************************************************/
 
 out float pv_diffuse;
-out float pv_ortho;
 
 // Grondag's vanilla diffuse but different
 float p_diffuseGui(vec3 normal) {
@@ -35,14 +34,10 @@ vec2 inv_size = 1.0 / vec2(frx_viewWidth, frx_viewHeight);
 void frx_pipelineVertex() {
 
 	if (frx_modelOriginScreen) {
-		mat4 t   = frx_guiViewProjectionMatrix;
-		pv_ortho = t[3][3];
-
 		gl_Position = frx_guiViewProjectionMatrix * frx_vertex;
 
 		#ifdef TAA_ENABLED
-		float fragZ = gl_Position.z / gl_Position.w;
-		if (pv_ortho == 0.) { // hack to include only hand
+		if (frx_isHand) {
 			gl_Position.st += taa_jitter(inv_size) * gl_Position.w;
 		}
 		#endif
