@@ -94,16 +94,19 @@ void main()
 	vec3 miscTrans = texture(u_gbuffer_main_etc, vec3(v_texcoord, ID_TRANS_MISC)).xyz;
 	bool transIsWater = bit_unpack(miscTrans.z, 7) == 1.;
 	bool solidIsUnderwater = decideUnderwater(dSolid, dTrans, transIsWater, false);
+	vec3 toFrag = normalize(eyePos);
 
-	vec4 base = dSolid == 1.0 ? customSky(u_tex_sun, u_tex_moon, normalize(eyePos), solidIsUnderwater) : shading(cSolid, light, material, eyePos, normal, solidIsUnderwater);
+	vec4 base = dSolid == 1.0 ? customSky(u_tex_sun, u_tex_moon, toFrag, solidIsUnderwater) : shading(cSolid, light, material, eyePos, normal, solidIsUnderwater);
 	vec4 next = (dSolid < dTrans && dSolid < dParts) ? vec4(0.0) : (dParts > dTrans ? cParts : cTrans);
 	vec4 last = (dSolid < dTrans && dSolid < dParts) ? vec4(0.0) : (dParts > dTrans ? cTrans : cParts);
 
 	float dMin = min(dSolid, min(dTrans, min(dParts, dRains)));
 
-	// if (dSolid < 1.0 && dSolid > dMin) {
-	base = fog(base, eyePos, light.y); // TODO: behind translucent only, move rest after reflection
-	// }
+	if (dSolid < 1.0 /*&& dSolid > dMin*/) {
+		// TODO: behind translucent only, move rest after reflection
+		base += skyReflection(u_tex_sun, u_tex_moon, cSolid.rgb, material, toFrag, normal);
+		base = fog(base, eyePos, light.y);
+	}
 
 	if (dRains <= dSolid) {
 		if (dRains == dMin) {
@@ -135,8 +138,11 @@ void main()
 	light.w = transIsWater ? lightmapRemap (light.y) : denoisedShadowFactor(eyePos, dMin, light.y);
 
 	if (next.a != 0.0) {
+		vec3 albedo = next.rgb;
 		next = shading(next, light, material, eyePos, normal, nextIsUnderwater);
-		next = fog(next, eyePos, light.y); // TODO: move after reflection
+		// TODO: move these after reflection
+		next += skyReflection(u_tex_sun, u_tex_moon, albedo, material, toFrag, normal);
+		next = fog(next, eyePos, light.y);
 	}
 
 	base.rgb = base.rgb * (1.0 - next.a) + next.rgb * next.a;

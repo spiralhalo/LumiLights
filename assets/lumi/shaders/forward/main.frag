@@ -54,6 +54,21 @@ void frx_pipelineFragment()
 		frx_fragColor.rgb += texture_glint(u_glint, frx_normalizeMappedUV(frx_texcoord), frx_matGlint);
 		#endif
 	} else {
+		if (pbr_isWater) {
+			/* WATER RECOLOR */
+			#if WATER_COLOR == WATER_COLOR_NO_TEXTURE
+			frx_fragColor.rgb  = frx_vertexColor.rgb;
+			frx_fragColor.a   *= 0.6;
+
+			#elif WATER_COLOR == WATER_COLOR_NO_COLOR
+			frx_fragColor.rgb = vec3(0.0);
+			frx_fragColor.a   *= 0.6;
+
+			#elif WATER_COLOR == WATER_COLOR_NATURAL_BLUE
+			frx_fragColor.a   *= 0.6;
+			#endif
+		}
+
 		#ifdef VANILLA_AO_ENABLED
 		float ao = frx_fragEnableAo ? frx_fragLight.z * (1.0 - frx_fragColor.a) : 1.0;
 		light.xy = max(vec2(0.03125), light.xy * ao);
