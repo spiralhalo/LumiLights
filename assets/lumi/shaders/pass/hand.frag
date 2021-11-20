@@ -35,6 +35,7 @@ void main()
 		vec3 material = texture(u_gbuffer_main_etc, vec3(v_texcoord, ID_SOLID_MATS)).xyz;
 		vec3 normal   = texture(u_gbuffer_normal, vec3(v_texcoord, 1.)).xyz * 2.0 - 1.0;
 
+		light.w = lightmapRemap(light.y);
 		normal = normal * frx_normalModelMatrix;
 
 		fragColor = shading(cSolid, light, material, eyePos, normal, false);
