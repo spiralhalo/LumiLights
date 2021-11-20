@@ -41,6 +41,7 @@
 		"lumi:pipeline/color.json",
 		"lumi:pipeline/post.json",
 		"lumi:pipeline/taa.json",
+		"lumi:pipeline/bloom.json",
 		// "lumi:pipeline/mtn.json",
 		// "lumi:pipeline/normal.json",
 		// "lumi:pipeline/custom_clouds.json",
@@ -49,7 +50,6 @@
 		// "lumi:pipeline/reflection.json",
 		// "lumi:pipeline/composite.json",
 		// "lumi:pipeline/hand.json",
-		// "lumi:pipeline/bloom.json",
 	],
 
 	programs: [

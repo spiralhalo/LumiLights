@@ -1,6 +1,7 @@
 #include lumi:shaders/pass/header.glsl
 
 #include lumi:shaders/prog/shading.glsl
+#include lumi:shaders/prog/sky.glsl
 #include lumi:shaders/prog/tonemap.glsl
 
 /*******************************************************
@@ -9,9 +10,13 @@
 
 uniform sampler2D u_vanilla_color;
 uniform sampler2D u_vanilla_depth;
+
 uniform sampler2DArray u_gbuffer_main_etc;
 uniform sampler2DArray u_gbuffer_normal;
+
 uniform sampler2D u_tex_glint;
+uniform sampler2D u_tex_sun;
+uniform sampler2D u_tex_moon;
 
 out vec4 fragColor;
 
@@ -32,6 +37,9 @@ void main()
 
 		normal = normal * frx_normalModelMatrix;
 
-		fragColor = ldr_tonemap(shading(cSolid, light, material, eyePos, normal, false));
+		fragColor = shading(cSolid, light, material, eyePos, normal, false);
+		fragColor += skyReflection(u_tex_sun, u_tex_moon, cSolid.rgb, material, normalize(eyePos), normal, light.yy);
+
+		fragColor = ldr_tonemap(fragColor);
 	}
 }

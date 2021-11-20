@@ -116,6 +116,11 @@ vec4 shading(vec4 color, vec4 light, vec3 material, vec3 eyePos, vec3 normal, bo
 
 	light.w += causticLight;
 
+	float luminance = frx_luminance(color.rgb);
+	float vanillaEmissive = step(0.93625, light.x) * luminance * luminance;
+
+	light.z += vanillaEmissive;
+
 	vec3 albedo = hdr_fromGamma(color.rgb);
 	vec3 f0 = mix(vec3(material.z), albedo, material.y); // TODO: multiply metallic f0?
 

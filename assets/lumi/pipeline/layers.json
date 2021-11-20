@@ -161,6 +161,10 @@
 			colorAttachments: [{image: "vanilla_transl_color"}]
 		},
 		{
+			name: "swap",
+			colorAttachments: [{image: "swap_color"}]
+		},
+		{
 			name: "solid",
 			depthAttachment: {image: "vanilla_depth", clearDepth: 1.0},
 			colorAttachments: [

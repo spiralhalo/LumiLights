@@ -42,9 +42,10 @@ void main()
 	vec3 eyePos  = tempPos.xyz / tempPos.w;
 
 	fragColor += reflection(albedo.rgb, u_color, u_gbuffer_main_etc, u_gbuffer_normal, u_depth, u_gbuffer_shadow, u_tex_sun, u_tex_moon, u_tex_noise, idLight, idMaterial, idNormal, idMicroNormal, eyePos);
+	fragColor = fog(fragColor, eyePos, lighty);
 
 	vec4 clouds = volumetricCloud(u_tex_cloud, u_tex_noise, dMin, v_texcoord, eyePos, normalize(eyePos), NUM_SAMPLE);
 	fragColor.rgb = fragColor.rgb * (1.0 - clouds.a) + clouds.rgb * clouds.a;
 
-	fragColor = ldr_tonemap(fog(fragColor, eyePos, lighty));
+	fragColor = ldr_tonemap(fragColor);
 }

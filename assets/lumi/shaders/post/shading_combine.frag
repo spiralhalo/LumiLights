@@ -90,7 +90,7 @@ void main()
 #endif
 
 	if ((depth_solid != 1.0 || tonemapTheSky) && solid.a > 0) {
-		solid.rgb = ldr_tonemap3(solid.rgb);
+		solid.rgb = ldr_tonemap(solid.rgb);
 	}
 
 	fragColor[0] = solid;

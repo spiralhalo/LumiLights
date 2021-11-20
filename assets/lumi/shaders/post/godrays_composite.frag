@@ -41,7 +41,7 @@ void main() {
 	// TODO: might as well do godrays in HDR space
 	godraysRadiance *= 0.1 + atmosv_celestIntensity * 0.9;
 
-	vec3 tmapped = ldr_tonemap3(godraysRadiance);
+	vec3 tmapped = ldr_tonemap(godraysRadiance);
 
 	vec4 a = texture(u_color, v_texcoord);
 	vec4 b = vec4(tmapped, texture(u_godrays, v_texcoord).r);

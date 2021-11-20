@@ -6,46 +6,25 @@
  *  lumi:shaders/prog/tonemap.glsl
  *******************************************************/
 
-uniform sampler2D u_exposure;
+#define l2_tmo(x) acesNarkowicz(x)
+#define l2_inverse_tmo(x) inverse_acesNarkowicz(x)
 
-float exposureCompensation() {
-	return texture(u_exposure, vec2(0.0)).r;
-}
-
-#ifdef POST_SHADER
-
-vec3 ldr_tonemap3noGamma(vec3 a)
+vec3 ldr_tonemap(vec3 color)
 {
-	float exposure = 1.0;
-
-#ifdef HIGH_CONTRAST_ENABLED
-	float eyeBrightness = exposureCompensation();
-	exposure = getExposure(eyeBrightness);
-#endif
-
-	vec3 c = a.rgb;
-		 c = acesNarkowicz(c * exposure);
-		 c = clamp(c, 0.0, 1.0); // In the past ACES requires clamping for some reason
-
-	return c;
+	return hdr_toSRGB(l2_tmo(color));
 }
 
-vec3 ldr_tonemap3(vec3 a)
+vec4 ldr_tonemap(vec4 color)
 {
-	float brightness = min(1.5, frx_viewBrightness);
-	float viewGamma  = hdr_gamma + brightness;
-
-	vec3 c = ldr_tonemap3noGamma(a);
-		 c = pow(c, vec3(1.0 / viewGamma));
-
-	return c;
+	return vec4(ldr_tonemap(color.rgb), color.a);
 }
 
-vec4 ldr_tonemap(vec4 a)
+vec3 hdr_inverseTonemap(vec3 color)
 {
-	vec3 c = ldr_tonemap3(a.rgb);
-
-	return vec4(c, a.a);
+	return l2_inverse_tmo(hdr_fromGamma(color));
 }
 
-#endif
+vec4 hdr_inverseTonemap(vec4 color)
+{
+	return vec4(hdr_inverseTonemap(color.rgb), color.a);
+}
