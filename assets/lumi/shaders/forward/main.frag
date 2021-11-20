@@ -4,9 +4,9 @@
 #include frex:shaders/api/world.glsl
 #include frex:shaders/api/view.glsl
 #include frex:shaders/lib/math.glsl
-#include lumi:shaders/api/pbr_ext.glsl
+#include lumi:shaders/common/forward.glsl
 #include lumi:shaders/common/userconfig.glsl
-#include lumi:shaders/func/glintify2.glsl
+#include lumi:shaders/prog/glintify.glsl
 #include lumi:shaders/lib/bitpack.glsl
 #include lumi:shaders/lib/pack_normal.glsl
 #include lumi:shaders/lib/util.glsl
@@ -69,20 +69,30 @@ void frx_pipelineFragment()
 			#endif
 		}
 
+		bool doTBN = true;
+
+		if (frx_fragRoughness == 0.0) frx_fragRoughness = 1.0; // TODO: fix assumption?
+
+		#if LUMI_PBR_API == 7
+		pbrExt_resolveProperties();
+		doTBN = pbrExt_doTBN;
+		#endif
+
+		// TODO: TBN multiply
+		if (doTBN && frx_fragNormal.z == 1.0) {
+			frx_fragNormal = frx_vertexNormal;
+		}
+
 		#ifdef VANILLA_AO_ENABLED
 		float ao = frx_fragEnableAo ? frx_fragLight.z : 1.0;
 		frx_fragLight.xy = max(vec2(0.03125), frx_fragLight.xy * ao);
 		#endif
 
-		float roughness = max(0.01, pbr_roughness);
+		float roughness = max(0.01, frx_fragRoughness);
 		float disableAo = frx_fragEnableAo ? 0.0 : 1.0;
 
 		// put water flag last because it makes the material buffer looks blue :D easier to debug
 		float bitFlags = bit_pack(frx_matFlash, frx_matHurt, frx_matGlint, disableAo, 0., 0., 0., pbr_isWater ? 1. : 0.);
-
-		if (frx_fragNormal.z == 1.0) {
-			frx_fragNormal = frx_vertexNormal;
-		}
 
 		vec3 vertexNormal = frx_vertexNormal * 0.5 + 0.5;
 		vec3 fragNormal = frx_fragNormal * 0.5 + 0.5;
@@ -91,7 +101,7 @@ void frx_pipelineFragment()
 		fragColor[1] = vec4(frx_fragLight.xy, frx_fragEmissive, 1.0);
 		fragColor[2] = vec4(vertexNormal, 1.0);
 		fragColor[3] = vec4(fragNormal, 1.0);
-		fragColor[4] = vec4(roughness, pbr_metallic, pbr_f0, 1.0);
+		fragColor[4] = vec4(roughness, pbr_metallic, frx_fragReflectance, 1.0);
 		fragColor[5] = vec4(frx_normalizeMappedUV(frx_texcoord), bitFlags, 1.0);
 	}
 

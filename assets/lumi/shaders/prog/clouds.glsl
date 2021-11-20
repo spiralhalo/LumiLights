@@ -2,6 +2,7 @@
 #include frex:shaders/lib/noise/cellular2x2.glsl
 #include frex:shaders/lib/noise/noise2d.glsl
 #include lumi:shaders/common/atmosphere.glsl
+#include lumi:shaders/common/texconst.glsl
 #include lumi:shaders/prog/tile_noise.glsl
 
 /*******************************************************
@@ -10,14 +11,7 @@
 
 #define wnoise2(a) cellular2x2(a).x
 
-struct cloud_result {
-	float lightEnergy;
-	float transmittance;
-	vec3 worldPos;
-};
-
 const float CLOUD_MARCH_JITTER_STRENGTH = 1.0;
-const float CLOUD_TEXTURE_ZOOM = 0.25;
 const float TEXTURE_RADIUS = 512.0;
 const int NUM_SAMPLE = 8;
 const int LIGHT_SAMPLE = 5; 
@@ -26,9 +20,8 @@ const float LIGHT_SAMPLE_SIZE = 1.0;
 
 vec2 worldXz2Uv(vec2 worldXz)
 {
-#if VOLUMETRIC_CLOUD_MODE != VOLUMETRIC_CLOUD_MODE_WORLD
 	worldXz += frx_cameraPos.xz;
-#endif
+	worldXz += frx_renderSeconds;
 	vec2 ndc = worldXz / TEXTURE_RADIUS;
 	return ndc * 0.5 + 0.5;
 }
@@ -38,6 +31,7 @@ vec2 worldXz2Uv(vec2 worldXz)
 #else
 	const float CLOUD_ALTITUDE = VOLUMETRIC_CLOUD_ALTITUDE;
 #endif
+
 const float CLOUD_HEIGHT = 20.0 / CLOUD_TEXTURE_ZOOM;
 const float CLOUD_MID_HEIGHT = CLOUD_HEIGHT * .4;
 const float CLOUD_TOP_HEIGHT = CLOUD_HEIGHT - CLOUD_MID_HEIGHT;
@@ -52,139 +46,104 @@ const float CLOUD_BRIGHTNESS = clamp(CLOUD_BRIGHTNESS_RELATIVE * 0.1, 0.0, 1.0);
 float sampleCloud(vec3 worldPos, sampler2D cloudTexture)
 {
 	vec2 uv = worldXz2Uv(worldPos.xz);
-	float tF = l2_clampScale(0.5 * (1.0 - frx_rainGradient), 1.0, texture(cloudTexture, uv).r);
+	float tF = l2_clampScale(0.35 * (1.0 - frx_rainGradient), 1.0, texture(cloudTexture, uv).r);
 	float hF = tF;
 	float yF = smoothstep(CLOUD_MID_ALTITUDE + CLOUD_TOP_HEIGHT * hF, CLOUD_MID_ALTITUDE, worldPos.y);
 	yF *= smoothstep(CLOUD_MID_ALTITUDE - CLOUD_MID_HEIGHT * hF, CLOUD_MID_ALTITUDE, worldPos.y);
-
 	return smoothstep(0.0, 1.0 - 0.7 * CLOUD_PUFFINESS, yF * tF);
 }
 
-cloud_result rayMarchCloud(sampler2D cloudTexture, sampler2D noiseTexture, float dSampled, vec2 texcoord, vec3 toSky, float numSample)
+bool optimizeStart(float startTravel, float maxDist, vec3 toSky, inout vec3 worldRayPos, inout float numSample, out float sampleSize)
 {
-	float depth = (texcoord == clamp(texcoord, 0.0, 1.0)) ? dSampled : 1.0;
-	float maxDist;
+	if (startTravel > maxDist) return true;
 
-	const cloud_result nullcloud = cloud_result(0.0, 1.0, vec3(0.0));
-
-	if (depth == 1.0) {
-		maxDist = 1024.0;
-	} else {
-		#if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
-			return nullcloud; // Some sort of culling
-		#else
-			vec4 viewPos = frx_inverseProjectionMatrix * vec4(2.0 * texcoord - 1.0, 2.0 * depth - 1.0, 1.0);
-			viewPos.xyz /= viewPos.w;
-			maxDist = length(viewPos.xyz);
-		#endif
-	}
-
-	vec3 toLight = frx_skyLightVector * LIGHT_SAMPLE_SIZE;
-
-	// Adapted from Sebastian Lague's code (technically not the same, but just case his code was MIT Licensed)
-
-	float traveled = 0.0;
-	vec3 currentWorldPos = vec3(0.0);
-	float gotoBorder = 0.0;
+	float preTraveled = 0.0;
+	float nearBorder = 0.0;
 
 	// Optimization block
 #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
-	if (toSky.y <= 0) {
-		return nullcloud;
-	}
-
-	gotoBorder = CLOUD_MIN_Y / toSky.y;
+	nearBorder = CLOUD_MIN_Y / toSky.y;
 	maxDist = CLOUD_MAX_Y / toSky.y;
 #else
-	float borderDist = maxDist;
-	currentWorldPos = frx_cameraPos;
+	float farBorder = maxDist;
 
-	if (currentWorldPos.y >= CLOUD_MAX_Y) {
-		if (toSky.y >= 0) {
-			return nullcloud;
-		}
-
-		gotoBorder = (currentWorldPos.y - CLOUD_MAX_Y) / -toSky.y;
-		borderDist = (currentWorldPos.y - CLOUD_MIN_Y) / -toSky.y;
-	} else if (currentWorldPos.y <= CLOUD_MIN_Y) {
-		if (toSky.y <= 0) {
-			return nullcloud;
-		}
-
-		gotoBorder = (CLOUD_MIN_Y - currentWorldPos.y) / toSky.y;
-		borderDist = (CLOUD_MAX_Y - currentWorldPos.y) / toSky.y;
+	if (worldRayPos.y >= CLOUD_MAX_Y) {
+		if (toSky.y >= 0) return true;
+		nearBorder = (worldRayPos.y - CLOUD_MAX_Y) / -toSky.y;
+		farBorder = (worldRayPos.y - CLOUD_MIN_Y) / -toSky.y;
+	} else if (worldRayPos.y <= CLOUD_MIN_Y) {
+		if (toSky.y <= 0) return true;
+		nearBorder = (CLOUD_MIN_Y - worldRayPos.y) / toSky.y;
+		farBorder = (CLOUD_MAX_Y - worldRayPos.y) / toSky.y;
 	} else if (toSky.y <= 0) {
-		borderDist = (currentWorldPos.y - CLOUD_MIN_Y) / -toSky.y;
+		farBorder = (worldRayPos.y - CLOUD_MIN_Y) / -toSky.y;
 	} else {
-		borderDist = (CLOUD_MAX_Y - currentWorldPos.y) / toSky.y;
+		farBorder = (CLOUD_MAX_Y - worldRayPos.y) / toSky.y;
 	}
 
-	maxDist = min(maxDist, borderDist);
+	maxDist = min(maxDist, farBorder);
 #endif
+	// nearBorder = max(nearBorder, startTravel);
 
-	currentWorldPos += toSky * gotoBorder;
-	traveled += gotoBorder;
+	worldRayPos += toSky * nearBorder;
+	preTraveled += nearBorder;
 
-	float toTravel = max(0.0, maxDist - traveled);
+	float toTravel = max(0.0, maxDist - preTraveled);
 
 #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
 	const float sampleMult = 4.0;
 	numSample *= sampleMult - 3.0 * CLOUD_HEIGHT / toTravel;
 	numSample = clamp(numSample, 0., sampleMult * numSample);
 
-	float sampleSize = toTravel / float(numSample);
+	sampleSize = toTravel / float(numSample);
 #else
 	numSample = 16.0 * numSample;
 
-	float sampleSize = TEXTURE_RADIUS / float(numSample);
+	sampleSize = TEXTURE_RADIUS / float(numSample) * 2.0;
 
 	numSample = min(numSample, toTravel / sampleSize);
 #endif
 
+	return false;
+}
+
+vec2 rayMarchCloud(sampler2D cloudTexture, sampler2D noiseTexture, vec2 texcoord, vec3 eyePos, vec3 toSky, float numSample, float startTravel)
+{
+	vec3 lightUnit = frx_skyLightVector * LIGHT_SAMPLE_SIZE;
+	vec3 worldRayPos = vec3(0.0);
+
+#if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_WORLD
+	worldRayPos.y = frx_cameraPos.y;
+#endif
+
+	float sampleSize = 1.0;
+
+	if (optimizeStart(startTravel, length(eyePos), toSky, worldRayPos, numSample, sampleSize)) return vec2(0.0);
+
 	vec3 unitSample = toSky * sampleSize;
 	float tileJitter = getRandomFloat(noiseTexture, texcoord, frxu_size) * CLOUD_MARCH_JITTER_STRENGTH;
 
-	traveled = sampleSize * tileJitter;
-	currentWorldPos += unitSample * tileJitter;
+	worldRayPos += unitSample * tileJitter;
 
 	float lightEnergy = 0.0;
 	float transmittance = 1.0;
 
-	// ATTEMPT 1
-	bool first = true;
-	vec3 firstHitPos = currentWorldPos + toSky * 1024.0;
-	// ATTEMPT 2
-	// float maxDensity = 0.0;
-	// vec3 firstDensePos = worldPos - toSky * 0.1;
-
+	// Adapted from Sebastian Lague's method
 	int i = 0;
 	while (i < numSample) {
 		i ++;
-		traveled += sampleSize;
-		currentWorldPos += unitSample;
+		worldRayPos += unitSample;
 
-		float sampledDensity = sampleCloud(currentWorldPos, cloudTexture);
+		float sampledDensity = sampleCloud(worldRayPos, cloudTexture);
 
 		if (sampledDensity > 0) {
-			// ATTEMPT 1
-			if (first) {
-				first = false;
-				firstHitPos = currentWorldPos;
-			}
-			// ATTEMPT 2
-			// if (sampledDensity > maxDensity) {
-			//	 maxDensity = sampledDensity;
-			//	 firstDensePos = currentWorldPos;
-			// }
-
-			// vec3 lightPos = frx_skyLightVector * 512.0 + frx_cameraPos;
-			vec3 occlusionWorldPos = currentWorldPos;
+			vec3 occlusionWorldPos = worldRayPos;
 			float occlusionDensity = 0.0;
 			int j = 0;
 
 			while (j < LIGHT_SAMPLE) {
 				j ++;
-				occlusionWorldPos += toLight;
+				occlusionWorldPos += lightUnit;
 				occlusionDensity += sampleCloud(occlusionWorldPos, cloudTexture);
 			}
 
@@ -200,23 +159,19 @@ cloud_result rayMarchCloud(sampler2D cloudTexture, sampler2D noiseTexture, float
 			}
 		}
 	}
-	return cloud_result(lightEnergy, transmittance, firstHitPos);
+
+	return vec2(lightEnergy, 1.0 - min(1.0, transmittance));
 }
 
-vec4 volumetricCloud(sampler2D cloudTexture, sampler2D noiseTexture, float backDepth, float frontDepth, vec2 texcoord, vec3 toSky, int numSample)
+vec4 volumetricCloud(sampler2D cloudTexture, sampler2D noiseTexture, float depth, vec2 texcoord, vec3 eyePos, vec3 toSky, int numSample, float startTravel)
 {
-	#if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
-		cloud_result volumetric = rayMarchCloud(cloudTexture, noiseTexture, backDepth, texcoord, toSky, numSample);
-	#else
-		cloud_result volumetric = frx_cameraInFluid == 1
-								? rayMarchCloud(cloudTexture, noiseTexture, backDepth, texcoord, toSky, numSample)
-								: rayMarchCloud(cloudTexture, noiseTexture, frontDepth, texcoord, toSky, numSample);
-	#endif
+#if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
+	if (depth != 1. || toSky.y <= 0) return vec4(0.0);
+#endif
 
-	float alpha  = 1.0 - min(1.0, volumetric.transmittance);
-	float energy = volumetric.lightEnergy;
+	vec2 result = rayMarchCloud(cloudTexture, noiseTexture,  texcoord, eyePos, toSky, numSample, startTravel);
 
-	float rainBrightness = mix(0.13, 0.05, hdr_fromGammaf(frx_rainGradient)); // simulate dark clouds
+	float rainBrightness = mix(0.13, 0.05, hdr_fromGammaf(frx_rainGradient)); // emulate dark clouds
 	vec3  cloudShading	 = atmos_hdrCloudColorRadiance(toSky);
 	vec3  celestRadiance = atmos_hdrCelestialRadiance();
 
@@ -224,25 +179,17 @@ vec4 volumetricCloud(sampler2D cloudTexture, sampler2D noiseTexture, float backD
 		celestRadiance *= 0.2;
 	}
 
-	celestRadiance = celestRadiance * energy * rainBrightness * CLOUD_BRIGHTNESS;
+	celestRadiance = celestRadiance * result.x * rainBrightness * CLOUD_BRIGHTNESS;
 	vec3 color = celestRadiance + cloudShading;
 
-	float out_depth;
+#if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
+	result.y *= smoothstep(0.0, 0.2, toSky.y);
+#endif
 
-	#if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
-	out_depth = alpha > 0. ? 0.9999 : 1.0;
-	#else
-	vec3 reverseModelPos = volumetric.worldPos - frx_cameraPos;
-	vec4 reverseClipPos  = frx_viewProjectionMatrix * vec4(reverseModelPos, 1.0);
-	   reverseClipPos.z /= reverseClipPos.w;
+	return vec4(color, result.y);
+}
 
-	float backgroundDepth = frontDepth;
-	float alphaThreshold  = backgroundDepth == 1. ? 0.5 : 0.; 
-
-	out_depth = alpha > alphaThreshold ? reverseClipPos.z : 1.0;
-	#endif
-
-	// alpha *= energy + alpha - alpha * energy; // reduce dark border while minimizing loss of detail
-
-	return vec4(color, alpha);
+vec4 volumetricCloud(sampler2D cloudTexture, sampler2D noiseTexture, float depth, vec2 texcoord, vec3 eyePos, vec3 toSky, int numSample)
+{
+	return volumetricCloud(cloudTexture, noiseTexture, depth, texcoord, eyePos, toSky, numSample, 0.0);
 }

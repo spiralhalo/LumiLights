@@ -1,4 +1,4 @@
-#include lumi:shaders/lib/pbr.glsl
+#include lumi:shaders/prog/shading.glsl
 #include lumi:shaders/prog/sky.glsl
 #include lumi:shaders/prog/tile_noise.glsl
 
@@ -106,7 +106,7 @@ vec3 reflectionMarch(sampler2D depthBuffer, sampler2DArray normalBuffer, float i
 
 const float JITTER_STRENGTH = 0.6;
 
-vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer, sampler2DArray normalBuffer, sampler2D depthBuffer, sampler2D sunTexture, sampler2D moonTexture, sampler2D noiseTexture, float idLight, float idMaterial, float idNormal, float idMicroNormal)
+vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer, sampler2DArray normalBuffer, sampler2D depthBuffer, sampler2DArrayShadow shadowMap, sampler2D sunTexture, sampler2D moonTexture, sampler2D noiseTexture, float idLight, float idMaterial, float idNormal, float idMicroNormal, vec3 eyePos)
 {
 	vec3 material = texture(mainEtcBuffer, vec3(v_texcoord, idMaterial)).xyz;
 
@@ -115,15 +115,16 @@ vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer
 	// TODO: end portal glitch?
 
 	if (isUnmanaged) return vec4(0.0); // unmanaged draw
-	
-	vec3 light	= texture(mainEtcBuffer, vec3(v_texcoord, idLight)).xyz;
+
+	vec4 light	= texture(mainEtcBuffer, vec3(v_texcoord, idLight));
 	vec3 normal	= texture(normalBuffer, vec3(v_texcoord, idMicroNormal)).xyz * 2.0 - 1.0;
 	float depth	= texture(depthBuffer, v_texcoord).r;
 
-	vec4 tempPos = frx_inverseProjectionMatrix * vec4(v_texcoord * 2.0 - 1.0, depth * 2.0 - 1.0, 1.0);
-	vec3 viewPos = tempPos.xyz / tempPos.w;
+	light.w = denoisedShadowFactor(shadowMap, eyePos, depth, light.y);
+
+	vec3 viewPos = (frx_viewMatrix * vec4(eyePos, 1.0)).xyz;
 	float roughness = material.x;
-	
+
 	// TODO: rain puddles?
 
 	vec3 jitterRaw = getRandomVec(noiseTexture, v_texcoord, frxu_size) * 2.0 - 1.0;
@@ -159,7 +160,7 @@ vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer
 
 	vec4 reflectedColor = texture(colorBuffer, result.xy);
 	vec3 objLight = reflectionPbr(albedo, material, reflectedColor.rgb, viewMarch, viewToEye).rgb;
-	vec3 skyLight = skyReflection(sunTexture, moonTexture, albedo, material, viewToFrag * frx_normalModelMatrix, normal).rgb;
+	vec3 skyLight = skyReflection(sunTexture, moonTexture, albedo, material, viewToFrag * frx_normalModelMatrix, viewMarch * frx_normalModelMatrix, normal, light.yw).rgb;
 
 	vec3 reflectedLight = skyLight * (1.0 - result.z) * smoothstep(0.0, 1.0, viewNormal.y) + objLight * result.z;
 

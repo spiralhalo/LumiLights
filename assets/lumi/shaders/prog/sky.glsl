@@ -1,20 +1,20 @@
 #include frex:shaders/lib/noise/cellular2x2x2.glsl
 #include frex:shaders/lib/noise/noise3d.glsl
 #include lumi:shaders/lib/rectangle.glsl
-#include lumi:shaders/lib/pbr.glsl
+#include lumi:shaders/prog/shading.glsl
 
 /*******************************************************
  *  lumi:shaders/prog/sky.glsl
  *******************************************************/
 
-lumi_vary vec3 v_celest1;
-lumi_vary vec3 v_celest2;
-lumi_vary vec3 v_celest3;
+l2_vary vec3 v_celest1;
+l2_vary vec3 v_celest2;
+l2_vary vec3 v_celest3;
 
-lumi_vary mat4 v_star_rotator;
-lumi_vary float v_night; //what
-lumi_vary float v_not_in_void;
-lumi_vary float v_near_void_core;
+l2_vary mat4 v_star_rotator;
+l2_vary float v_night; //what
+l2_vary float v_not_in_void;
+l2_vary float v_near_void_core;
 
 #ifdef VERTEX_SHADER
 
@@ -100,24 +100,7 @@ vec4 celestFrag(in Rect celestRect, sampler2D ssun, sampler2D smoon, vec3 worldV
 	return vec4(celestColor, opacity);
 }
 
-vec2 celestSpecular(in Rect celestRect, sampler2D ssun, sampler2D smoon, vec3 worldVec) {
-	float top = max(0.0, worldVec.y);
-	// float size = frx_worldIsMoonlit == 1 ? 0.0025 : 0.005;
-
-	if (top <= 0.) return vec2(0.0);
-
-	top = smoothstep(0.0, 0.01, top);
-
-	vec4 celestColor = celestFrag(celestRect, ssun, smoon, worldVec);
-	 celestColor.rgb = smoothstep(0.0, 1.0, celestColor.rgb);
-
-	float specular = frx_luminance(clamp(celestColor.rgb, 0.0, 1.0)) * top;
-	float opacity  = max(celestColor.a, specular) * top;
-
-	return vec2(specular, opacity);
-}
-
-vec4 customSky(sampler2D sunTexture, sampler2D moonTexture, vec3 toSky, bool isUnderwater)
+vec4 customSky(sampler2D sunTexture, sampler2D moonTexture, vec3 toSky, bool isUnderwater, float skyVisible, float celestVisible)
 {
 	vec4 output;
 	float skyDotUp = dot(toSky, vec3(0.0, 1.0, 0.0));
@@ -131,8 +114,8 @@ vec4 customSky(sampler2D sunTexture, sampler2D moonTexture, vec3 toSky, bool isU
 		float starEraser = celestColor.a;
 		float celestStr  = mix(1.0, STARS_STR, v_night);
 
-		output.rgb  = atmos_hdrSkyGradientRadiance(toSky);
-		output.rgb += celestColor.rgb * (1. - frx_rainGradient) * celestStr;
+		output.rgb  = atmos_hdrSkyGradientRadiance(toSky) * skyVisible;
+		output.rgb += celestColor.rgb * (1. - frx_rainGradient) * celestStr * celestVisible;
 		#endif
 
 		#if SKY_MODE == SKY_MODE_LUMI || SKY_MODE == SKY_MODE_VANILLA_STARRY
@@ -160,7 +143,7 @@ vec4 customSky(sampler2D sunTexture, sampler2D moonTexture, vec3 toSky, bool isU
 
 		vec3 starRadiance = vec3(star) * STARS_STR * 0.1 * LUMI_STAR_BRIGHTNESS + NEBULAE_COLOR * milkyHaze;
 
-		output.rgb     += starRadiance;
+		output.rgb += starRadiance * skyVisible;
 		#endif
 	}
 
@@ -169,16 +152,24 @@ vec4 customSky(sampler2D sunTexture, sampler2D moonTexture, vec3 toSky, bool isU
 		float voidCore = l2_clampScale(-0.8 + v_near_void_core, -1.0 + v_near_void_core, skyDotUp); 
 		vec3 voidColor = mix(vec3(0.0), VOID_CORE_COLOR, voidCore);
 
-		output.rgb = mix(voidColor, output.rgb, v_not_in_void);
+		output.rgb = mix(voidColor, output.rgb, v_not_in_void) * skyVisible;
 	}
 
 	return output;
 }
 
-vec4 skyReflection(sampler2D sunTexture, sampler2D moonTexture, vec3 albedo, vec3 material, vec3 toFrag, vec3 normal) {
-	vec3 toSky = reflect(toFrag, normalize(normal));
-	vec3 radiance = customSky(sunTexture, moonTexture, toSky, false).rgb;
+vec4 customSky(sampler2D sunTexture, sampler2D moonTexture, vec3 toSky, bool isUnderwater) {
+	return customSky(sunTexture, moonTexture, toSky, isUnderwater, 1.0, 1.0);
+}
+
+vec4 skyReflection(sampler2D sunTexture, sampler2D moonTexture, vec3 albedo, vec3 material, vec3 toFrag, vec3 toSky, vec3 normal, vec2 lightyw) {
+	vec3 radiance = customSky(sunTexture, moonTexture, toSky, false, lightmapRemap(lightyw.x), lightyw.y).rgb;
 	return vec4(reflectionPbr(albedo, material, radiance, toSky, -toFrag), 0.0);
+}
+
+vec4 skyReflection(sampler2D sunTexture, sampler2D moonTexture, vec3 albedo, vec3 material, vec3 toFrag, vec3 normal, vec2 lightyw) {
+	vec3 toSky = reflect(toFrag, normalize(normal));
+	return skyReflection(sunTexture, moonTexture, albedo, material, toFrag, toSky, normal, lightyw);
 }
 
 #endif

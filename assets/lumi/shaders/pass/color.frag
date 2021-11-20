@@ -2,11 +2,9 @@
 
 #include lumi:shaders/lib/bitpack.glsl
 #include lumi:shaders/lib/pack_normal.glsl
-#include lumi:shaders/lib/taa_jitter.glsl
 #include lumi:shaders/prog/clouds.glsl
 #include lumi:shaders/prog/fog.glsl
 #include lumi:shaders/prog/shading.glsl
-#include lumi:shaders/prog/shadow.glsl
 #include lumi:shaders/prog/sky.glsl
 #include lumi:shaders/prog/tonemap.glsl
 
@@ -33,28 +31,6 @@ uniform sampler2D u_tex_noise;
 layout(location = 0) out vec4 fragColor;
 layout(location = 1) out float fragDepth;
 layout(location = 2) out vec4 fragAlbedo;
-
-float denoisedShadowFactor(vec3 eyePos, float depth, float lighty) {
-#ifdef SHADOW_MAP_PRESENT
-#ifdef TAA_ENABLED
-	vec2 uvJitter	   = taa_jitter(v_invSize);
-	vec4 unjitteredPos = frx_inverseViewProjectionMatrix * vec4(2.0 * v_texcoord - uvJitter - 1.0, 2.0 * depth - 1.0, 1.0);
-	vec4 shadowViewPos = frx_shadowViewMatrix * vec4(unjitteredPos.xyz / unjitteredPos.w, 1.0);
-#else
-	vec4 shadowViewPos = frx_shadowViewMatrix * vec4(eyePos, 1.0);
-#endif
-
-	float val = simpleShadowFactor(u_gbuffer_shadow, shadowViewPos);
-
-	#ifdef SHADOW_WORKAROUND
-	val *= l2_clampScale(0.03125, 0.04, lighty);
-	#endif
-
-	return val;
-#else
-	return lighty;
-#endif
-}
 
 bool decideUnderwater(float depth, float dTrans, bool transIsWater, bool translucent) {
 	if (frx_cameraInWater == 1) {
@@ -90,7 +66,7 @@ void main()
 	vec3 material = texture(u_gbuffer_main_etc, vec3(v_texcoord, ID_SOLID_MATS)).xyz;
 	vec3 normal   = texture(u_gbuffer_normal, vec3(v_texcoord, 1.)).xyz * 2.0 - 1.0;
 
-	light.w = denoisedShadowFactor(eyePos, dSolid, light.y);
+	light.w = denoisedShadowFactor(u_gbuffer_shadow, eyePos, dSolid, light.y);
 
 	vec3 miscTrans = texture(u_gbuffer_main_etc, vec3(v_texcoord, ID_TRANS_MISC)).xyz;
 	bool transIsWater = bit_unpack(miscTrans.z, 7) == 1.;
@@ -105,9 +81,14 @@ void main()
 
 	float dMin = min(dSolid, min(dTrans, min(dParts, dRains)));
 
-	if (dSolid < 1.0 && dSolid > dMin) {
-		base += skyReflection(u_tex_sun, u_tex_moon, cSolid.rgb, material, toFrag, normal);
-		base = fog(base, eyePos, light.y);
+	if (dSolid > dMin) {
+		if (dSolid < 1.0) {
+			base += skyReflection(u_tex_sun, u_tex_moon, cSolid.rgb, material, toFrag, normal, light.yw);
+			base = fog(base, eyePos, light.y);
+		}
+
+		vec4 clouds = volumetricCloud(u_tex_cloud, u_tex_noise, 1.0, v_texcoord, eyePos, toFrag, NUM_SAMPLE, ldepth(dMin) * frx_viewDistance * 4.);
+		base.rgb = base.rgb * (1.0 - clouds.a) + clouds.rgb * clouds.a;
 	}
 
 	if (dRains <= dSolid) {
@@ -137,7 +118,7 @@ void main()
 
 	bool nextIsUnderwater = decideUnderwater(dMin, dTrans, transIsWater, true);
 
-	light.w = transIsWater ? lightmapRemap (light.y) : denoisedShadowFactor(eyePos, dMin, light.y);
+	light.w = transIsWater ? lightmapRemap (light.y) : denoisedShadowFactor(u_gbuffer_shadow, eyePos, dMin, light.y);
 
 	if (next.a != 0.0) {
 		vec3 albedo = next.rgb;
@@ -146,10 +127,6 @@ void main()
 	}
 
 	base.rgb = base.rgb * (1.0 - next.a) + next.rgb * next.a;
-
-	vec4 clouds = volumetricCloud(u_tex_cloud, u_tex_noise, dSolid, dMin, v_texcoord, toFrag, NUM_SAMPLE);
-
-	base.rgb = base.rgb * (1.0 - clouds.a) + clouds.rgb * clouds.a;
 
 	fragColor = base;
 	fragDepth = dMin;

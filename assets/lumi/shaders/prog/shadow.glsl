@@ -4,7 +4,7 @@
  *  lumi:shaders/prog/shadow.glsl
  *******************************************************/
 
-#if defined(SHADOW_MAP_PRESENT)
+#if defined(SHADOW_MAP_PRESENT) && !defined(VERTEX_SHADER)
 
 float sampleShadowPCF(in sampler2DArrayShadow shadowMap, in vec3 shadowPos, in float cascade);
 const float inc = 1.0 / SHADOW_MAP_SIZE;

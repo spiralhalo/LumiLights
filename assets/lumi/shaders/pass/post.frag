@@ -1,5 +1,6 @@
 #include lumi:shaders/pass/header.glsl
 
+#include lumi:shaders/prog/clouds.glsl
 #include lumi:shaders/prog/fog.glsl
 #include lumi:shaders/prog/reflection.glsl
 #include lumi:shaders/prog/tonemap.glsl
@@ -14,9 +15,11 @@ uniform sampler2D u_depth;
 
 uniform sampler2DArray u_gbuffer_main_etc;
 uniform sampler2DArray u_gbuffer_normal;
+uniform sampler2DArrayShadow u_gbuffer_shadow;
 
 uniform sampler2D u_tex_sun;
 uniform sampler2D u_tex_moon;
+uniform sampler2D u_tex_cloud;
 uniform sampler2D u_tex_noise;
 
 out vec4 fragColor;
@@ -38,6 +41,10 @@ void main()
 	vec4 tempPos = frx_inverseViewProjectionMatrix * vec4(2.0 * v_texcoord - 1.0, 2.0 * dMin - 1.0, 1.0);
 	vec3 eyePos  = tempPos.xyz / tempPos.w;
 
-	fragColor += reflection(albedo.rgb, u_color, u_gbuffer_main_etc, u_gbuffer_normal, u_depth, u_tex_sun, u_tex_moon, u_tex_noise, idLight, idMaterial, idNormal, idMicroNormal);
+	fragColor += reflection(albedo.rgb, u_color, u_gbuffer_main_etc, u_gbuffer_normal, u_depth, u_gbuffer_shadow, u_tex_sun, u_tex_moon, u_tex_noise, idLight, idMaterial, idNormal, idMicroNormal, eyePos);
+
+	vec4 clouds = volumetricCloud(u_tex_cloud, u_tex_noise, dMin, v_texcoord, eyePos, normalize(eyePos), NUM_SAMPLE);
+	fragColor.rgb = fragColor.rgb * (1.0 - clouds.a) + clouds.rgb * clouds.a;
+
 	fragColor = ldr_tonemap(fog(fragColor, eyePos, lighty));
 }

@@ -5,6 +5,7 @@
  *  lumi:shaders/lib/caustics.glsl
  *******************************************************/
 
+#ifndef VERTEX_SHADER
 #define CAUSTICS_SEA_LEVEL 62.0
 
 float caustics(vec3 worldPos)
@@ -23,3 +24,4 @@ float caustics(vec3 worldPos)
 
 	return e;
 }
+#endif

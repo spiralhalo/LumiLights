@@ -7,7 +7,8 @@
 #include lumi:shaders/common/userconfig.glsl
 #include lumi:shaders/lib/caustics.glsl
 #include lumi:shaders/lib/pbr.glsl
-#include lumi:shaders/lib/util.glsl
+#include lumi:shaders/lib/taa_jitter.glsl
+#include lumi:shaders/prog/shadow.glsl
 
 /*******************************************************
  *  lumi:shaders/prog/shading.glsl
@@ -21,17 +22,63 @@ const vec3 skylessDir = vec3(0, 0.977358, 0.211593);
  *  vertexShader: lumi:shaders/post/shading.vert
  *******************************************************/
 
-// TODO: make lumi_vary but optimize includes?
-in float pbrv_coneInner;
-in float pbrv_coneOuter;
-in vec3  pbrv_flashLightView;
+l2_vary float pbrv_coneInner;
+l2_vary float pbrv_coneOuter;
+l2_vary vec3  pbrv_flashLightView;
+
+#ifdef VERTEX_SHADER
+void shadingSetup() {
+	// const vec3 view_CV	= vec3(0.0, 0.0, -1.0); //camera view in view space
+	// float cAngle		= asin(frx_cameraView.y);
+	// float hlAngle		= clamp(HANDHELD_LIGHT_ANGLE, -45, 45) * PI / 180.0;
+	// pbrv_flashLightView = (l2_rotationMatrix(vec3(1.0, 0.0, 0.0), l2_clampScale(abs(hlAngle), 0.0, abs(cAngle)) * hlAngle) * vec4(-view_CV, 0.0)).xyz;
+	// pbrv_flashLightView = normalize(pbrv_flashLightView * frx_normalModelMatrix);
+
+	pbrv_flashLightView = -frx_cameraView;
+	pbrv_coneInner = clamp(frx_heldLightInnerRadius, 0.0, PI) / PI;
+	pbrv_coneOuter = max(pbrv_coneInner, clamp(frx_heldLightOuterRadius, 0.0, PI) / PI);
+}
+#endif
 
 float lightmapRemap(float lightMapCoords)
 {
 	return hdr_fromGammaf(l2_clampScale(0.03125, 0.96875, lightMapCoords));
 }
 
-vec3 pbr_lightCalc(vec3 albedo, float alpha, vec3 radiance, float roughness, float metallic, vec3 f0, vec3 toLight, vec3 toEye, vec3 normal)
+#ifndef VERTEX_SHADER
+float denoisedShadowFactor(sampler2DArrayShadow shadowMap, vec3 eyePos, float depth, float lighty) {
+#ifdef SHADOW_MAP_PRESENT
+#ifdef TAA_ENABLED
+	vec2 uvJitter	   = taa_jitter(v_invSize);
+	vec4 unjitteredPos = frx_inverseViewProjectionMatrix * vec4(2.0 * v_texcoord - uvJitter - 1.0, 2.0 * depth - 1.0, 1.0);
+	vec4 shadowViewPos = frx_shadowViewMatrix * vec4(unjitteredPos.xyz / unjitteredPos.w, 1.0);
+#else
+	vec4 shadowViewPos = frx_shadowViewMatrix * vec4(eyePos, 1.0);
+#endif
+
+	float val = simpleShadowFactor(shadowMap, shadowViewPos);
+
+	#ifdef SHADOW_WORKAROUND
+	val *= l2_clampScale(0.03125, 0.04, lighty);
+	#endif
+
+	return val;
+#else
+	return lighty;
+#endif
+}
+
+vec3 reflectionPbr(vec3 albedo, vec3 material, vec3 radiance, vec3 toLight, vec3 toEye)
+{
+	vec3 f0 = mix(vec3(material.z), albedo, material.y);
+	vec3 halfway = normalize(toEye + toLight);
+	vec3 fresnel = pbr_fresnelSchlick(pbr_dot(toEye, halfway), f0);
+	float smoothness = (1. - material.x);
+
+	return clamp(fresnel * radiance * smoothness * smoothness, 0.0, 1.0);
+}
+
+vec3 lightPbr(vec3 albedo, float alpha, vec3 radiance, float roughness, float metallic, vec3 f0, vec3 toLight, vec3 toEye, vec3 normal)
 {
 	vec3 halfway = normalize(toEye + toLight);
 	vec3 fresnel = pbr_fresnelSchlick(pbr_dot(toEye, halfway), f0);
@@ -88,7 +135,7 @@ vec4 shading(vec4 color, vec4 light, vec3 material, vec3 eyePos, vec3 normal, bo
 	baseLight += atmos_hdrSkyAmbientRadiance() * lightmapRemap(light.y);
 	baseLight += albedo * light.z * EMISSIVE_LIGHT_STR;
 
-	vec3 shaded = pbr_lightCalc(albedo, color.a, baseLight, max(material.x * (1.0 - material.y), 0.5), material.y, f0, normal, toEye, normal);
+	vec3 shaded = lightPbr(albedo, color.a, baseLight, max(material.x * (1.0 - material.y), 0.5), material.y, f0, normal, toEye, normal);
 
 #if HANDHELD_LIGHT_RADIUS != 0
 	if (frx_heldLight.w > 0) {
@@ -106,7 +153,7 @@ vec4 shading(vec4 color, vec4 light, vec3 material, vec3 eyePos, vec3 normal, bo
 
 		vec3 hlLight = hdr_fromGamma(heldLight.rgb) * BLOCK_LIGHT_STR * hl;
 
-		shaded += pbr_lightCalc(albedo, color.a, hlLight, material.x, material.y, f0, toLight, toEye, normal);
+		shaded += lightPbr(albedo, color.a, hlLight, material.x, material.y, f0, toLight, toEye, normal);
 	}
 #endif
 
@@ -116,7 +163,8 @@ vec4 shading(vec4 color, vec4 light, vec3 material, vec3 eyePos, vec3 normal, bo
 
 	vec3 toLight = (frx_worldHasSkylight == 1) ? frx_skyLightVector : ((frx_worldIsSkyDarkened == 1) ? skylessDarkenedDir : skylessDir);
 
-	shaded += pbr_lightCalc(albedo, color.a, skyLight, material.x, material.y, f0, toLight, toEye, normal);
+	shaded += lightPbr(albedo, color.a, skyLight, material.x, material.y, f0, toLight, toEye, normal);
 
 	return vec4(shaded, color.a);
 }
+#endif

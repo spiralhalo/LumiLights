@@ -11,6 +11,5 @@ void frx_materialFragment()
 	pbr_f0 = 0.02;
 	pbr_roughness = 0.05;
 	pbr_isWater = true;
-	pbr_tangent = l2_tangent;
 #endif
 }

@@ -5,6 +5,7 @@
 #include frex:shaders/api/world.glsl
 #include frex:shaders/api/player.glsl
 #include frex:shaders/api/view.glsl
+#include frex:shaders/lib/math.glsl
 #include lumi:shaders/lib/util.glsl
 #include lumi:shaders/common/userconfig.glsl
 
@@ -18,7 +19,7 @@ uniform int	frxu_layer;
 uniform mat4 frxu_frameProjectionMatrix;
 
 #ifdef VERTEX_SHADER
-#define lumi_vary out
+#define l2_vary out
 
 out vec2 v_texcoord;
 out vec2 v_invSize;
@@ -31,7 +32,7 @@ void basicFrameSetup()
 	v_invSize = 1.0 / frxu_size;
 }
 #else
-#define lumi_vary in
+#define l2_vary in
 
 in vec2 v_texcoord;
 in vec2 v_invSize;

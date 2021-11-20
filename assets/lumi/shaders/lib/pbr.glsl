@@ -2,6 +2,7 @@
  *  lumi:shaders/lib/pbr.glsl
  *******************************************************/
 
+#ifndef VERTEX_SHADER
 #define pbr_dot(a, b) clamp(dot(a, b), 0.0, 1.0)
 
 float pbr_distributionGGX(vec3 N, vec3 H, float roughness)
@@ -56,13 +57,4 @@ vec3 pbr_specularBRDF(float roughness, vec3 radiance, vec3 halfway, vec3 lightDi
 	vec3  specular = num / max(denom, 0.001);
 	return specular * radiance * NdotL;
 }
-
-vec3 reflectionPbr(vec3 albedo, vec3 material, vec3 radiance, vec3 toLight, vec3 toEye)
-{
-	vec3 f0 = mix(vec3(material.z), albedo, material.y);
-	vec3 halfway = normalize(toEye + toLight);
-	vec3 fresnel = pbr_fresnelSchlick(pbr_dot(toEye, halfway), f0);
-	float smoothness = (1. - material.x);
-
-	return clamp(fresnel * radiance * smoothness * smoothness, 0.0, 1.0);
-}
+#endif
