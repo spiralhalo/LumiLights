@@ -1,3 +1,7 @@
+#include frex:shaders/api/sampler.glsl
+#include frex:shaders/api/material.glsl
+#include frex:shaders/lib/math.glsl
+
 /*******************************************************
  *  lumi:shaders/api/bump_ext.glsl
  *******************************************************
