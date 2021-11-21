@@ -51,6 +51,7 @@
 
 				"u_gbuffer_main_etc",
 				"u_gbuffer_depth",
+				"u_gbuffer_light",
 				"u_gbuffer_normal",
 				"u_gbuffer_shadow",
 
@@ -70,6 +71,7 @@
 				"u_vanilla_depth",
 
 				"u_gbuffer_main_etc",
+				"u_gbuffer_light",
 				"u_gbuffer_normal",
 
 				"u_tex_sun",
@@ -104,6 +106,7 @@
 
 					"gbuffer_main_etc",
 					"gbuffer_depth",
+					"gbuffer_light",
 					"gbuffer_normal",
 					"gbuffer_shadow",
 
@@ -128,6 +131,7 @@
 					"vanilla_depth",
 
 					"gbuffer_main_etc",
+					"gbuffer_light",
 					"gbuffer_normal",
 
 					"minecraft:textures/environment/sun.png",

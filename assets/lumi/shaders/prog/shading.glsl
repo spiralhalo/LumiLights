@@ -94,7 +94,7 @@ vec3 lightPbr(vec3 albedo, float alpha, vec3 radiance, float roughness, float me
 	return specularLight + diffuseLight;
 }
 
-vec4 shading(vec4 color, vec4 light, vec3 material, vec3 eyePos, vec3 normal, bool isUnderwater)
+vec4 shading(vec4 color, vec4 light, float ao, vec3 material, vec3 eyePos, vec3 normal, bool isUnderwater)
 {
 	float causticLight = 0.0;
 
@@ -115,6 +115,12 @@ vec4 shading(vec4 color, vec4 light, vec3 material, vec3 eyePos, vec3 normal, bo
 #endif
 
 	light.w += causticLight;
+
+	#ifdef VANILLA_AO_ENABLED
+	ao = min(1., fract(light.z / 10.) * 10.);
+	#endif
+	
+	light.z = floor(light.z / 10.) / 100.;
 
 	float luminance = frx_luminance(color.rgb);
 	float vanillaEmissive = step(0.93625, light.x) * luminance * luminance;
@@ -162,6 +168,8 @@ vec4 shading(vec4 color, vec4 light, vec3 material, vec3 eyePos, vec3 normal, bo
 	}
 #endif
 
+	shaded *= ao;
+
 	vec3 skyLight = frx_worldHasSkylight * light.w * atmos_hdrCelestialRadiance() * (1. - frx_rainGradient);
 		 skyLight += frx_worldIsNether * NETHER_SKYLESS_LIGHT_COLOR * USER_NETHER_AMBIENT_MULTIPLIER;
 		 skyLight += (1.0 - max(frx_worldHasSkylight, frx_worldIsNether)) * SKYLESS_LIGHT_COLOR * USER_END_AMBIENT_MULTIPLIER;
@@ -171,5 +179,9 @@ vec4 shading(vec4 color, vec4 light, vec3 material, vec3 eyePos, vec3 normal, bo
 	shaded += lightPbr(albedo, color.a, skyLight, material.x, material.y, f0, toLight, toEye, normal);
 
 	return vec4(shaded, color.a);
+}
+
+vec4 shading(vec4 color, vec4 light, vec3 material, vec3 eyePos, vec3 normal, bool isUnderwater) {
+	return shading(color, light, 1.0, material, eyePos, normal, isUnderwater);
 }
 #endif

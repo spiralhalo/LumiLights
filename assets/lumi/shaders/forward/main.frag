@@ -83,10 +83,10 @@ void frx_pipelineFragment()
 			frx_fragNormal = frx_vertexNormal;
 		}
 
-		#ifdef VANILLA_AO_ENABLED
+		frx_fragEmissive = floor(frx_fragEmissive * 100.) * 10.;
+
 		float ao = frx_fragEnableAo ? frx_fragLight.z : 1.0;
-		frx_fragLight.xy = max(vec2(0.03125), frx_fragLight.xy * ao);
-		#endif
+		frx_fragEmissive += ao;
 
 		float roughness = max(0.01, frx_fragRoughness);
 		float disableAo = frx_fragEnableAo ? 0.0 : 1.0;

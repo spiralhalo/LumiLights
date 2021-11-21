@@ -39,14 +39,15 @@ in vec2 v_invSize;
 #endif
 
 #define ID_SOLID_LIGT 0
-#define ID_SOLID_MATS 1
-#define ID_SOLID_MISC 2
-#define ID_TRANS_COLR 3
-#define ID_TRANS_LIGT 4
-#define ID_TRANS_MATS 5
-#define ID_TRANS_MISC 6
-#define ID_PARTS_COLR 7
-#define ID_PARTS_LIGT 8
+#define ID_TRANS_LIGT 1
+#define ID_PARTS_LIGT 2
+
+#define ID_SOLID_MATS 0
+#define ID_SOLID_MISC 1
+#define ID_TRANS_COLR 2
+#define ID_TRANS_MATS 3
+#define ID_TRANS_MISC 4
+#define ID_PARTS_COLR 5
 
 #define ID_SOLID_NORM 0
 #define ID_SOLID_MNORM 1

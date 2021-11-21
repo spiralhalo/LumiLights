@@ -106,7 +106,7 @@ vec3 reflectionMarch(sampler2D depthBuffer, sampler2DArray normalBuffer, float i
 
 const float JITTER_STRENGTH = 0.6;
 
-vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer, sampler2DArray normalBuffer, sampler2D depthBuffer, sampler2DArrayShadow shadowMap, sampler2D sunTexture, sampler2D moonTexture, sampler2D noiseTexture, float idLight, float idMaterial, float idNormal, float idMicroNormal, vec3 eyePos)
+vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer, sampler2DArray lightBuffer, sampler2DArray normalBuffer, sampler2D depthBuffer, sampler2DArrayShadow shadowMap, sampler2D sunTexture, sampler2D moonTexture, sampler2D noiseTexture, float idLight, float idMaterial, float idNormal, float idMicroNormal, vec3 eyePos)
 {
 	vec3 material = texture(mainEtcBuffer, vec3(v_texcoord, idMaterial)).xyz;
 
@@ -116,7 +116,7 @@ vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer
 
 	if (isUnmanaged) return vec4(0.0); // unmanaged draw
 
-	vec4 light	= texture(mainEtcBuffer, vec3(v_texcoord, idLight));
+	vec4 light	= texture(lightBuffer, vec3(v_texcoord, idLight));
 	vec3 normal	= texture(normalBuffer, vec3(v_texcoord, idMicroNormal)).xyz * 2.0 - 1.0;
 	float depth	= texture(depthBuffer, v_texcoord).r;
 

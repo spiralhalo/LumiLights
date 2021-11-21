@@ -111,10 +111,22 @@
 		{
 			name: "gbuffer_main_etc",
 			lod: 0,
-			depth: 9,
+			depth: 6,
 			internalFormat: "RGBA8",
 			pixelFormat: "RGBA",
 			pixelDataType: "UNSIGNED_BYTE",
+			target: "TEXTURE_2D_ARRAY",
+			texParams: [
+				{name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
+				{name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
+			]
+		}, {
+			name: "gbuffer_light",
+			lod: 0,
+			depth: 3,
+			internalFormat: "RGB16F",
+			pixelFormat: "RGB",
+			pixelDataType: "FLOAT",
 			target: "TEXTURE_2D_ARRAY",
 			texParams: [
 				{name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
@@ -169,31 +181,31 @@
 			depthAttachment: {image: "vanilla_depth", clearDepth: 1.0},
 			colorAttachments: [
 				{image: "vanilla_color", clearColor: 0x00000000},
-				{image: "gbuffer_main_etc",	layer: 0, clearColor: 0x00000000},
+				{image: "gbuffer_light",	layer: 0, clearColor: 0x00000000},
 				{image: "gbuffer_normal",	layer: 0, clearColor: 0x00000000},
 				{image: "gbuffer_normal",	layer: 1, clearColor: 0x00000000},
+				{image: "gbuffer_main_etc",	layer: 0, clearColor: 0x00000000},
 				{image: "gbuffer_main_etc",	layer: 1, clearColor: 0x00000000},
-				{image: "gbuffer_main_etc",	layer: 2, clearColor: 0x00000000},
 			]
 		},
 		{
 			name: "translucent",
 			depthAttachment: {image: "gbuffer_depth", layer: 0, clearDepth: 1.0},
 			colorAttachments: [
-				{image: "gbuffer_main_etc",	layer: 3, clearColor: 0x00000000},
-				{image: "gbuffer_main_etc",	layer: 4, clearColor: 0x00000000},
+				{image: "gbuffer_main_etc",	layer: 2, clearColor: 0x00000000},
+				{image: "gbuffer_light",	layer: 1, clearColor: 0x00000000},
 				{image: "gbuffer_normal",	layer: 2, clearColor: 0x00000000},
 				{image: "gbuffer_normal",	layer: 3, clearColor: 0x00000000},
-				{image: "gbuffer_main_etc",	layer: 5, clearColor: 0x00000000},
-				{image: "gbuffer_main_etc",	layer: 6, clearColor: 0x00000000},
+				{image: "gbuffer_main_etc",	layer: 3, clearColor: 0x00000000},
+				{image: "gbuffer_main_etc",	layer: 4, clearColor: 0x00000000},
 			]
 		},
 		{
 			name: "particles",
 			depthAttachment: {image: "gbuffer_depth", layer: 1, clearDepth: 1.0},
 			colorAttachments: [
-				{image: "gbuffer_main_etc", layer: 7, clearColor: 0x00000000},
-				{image: "gbuffer_main_etc", layer: 8, clearColor: 0x00000000},
+				{image: "gbuffer_main_etc", layer: 5, clearColor: 0x00000000},
+				{image: "gbuffer_light",	layer: 2, clearColor: 0x00000000},
 			]
 		},
 		{
