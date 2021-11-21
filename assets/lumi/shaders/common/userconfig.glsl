@@ -13,17 +13,10 @@
 
 /*******************************************************
  *  lumi:shaders/common/userconfig.glsl
- *******************************************************
- *  One context for "pure" userconfigs defines.
- *  No const allowed here.
  *******************************************************/
 
 #if ANTIALIASING == ANTIALIASING_TAA || ANTIALIASING == ANTIALIASING_TAA_BLURRY
 	#define TAA_ENABLED
-#endif
-
-#if TONE_PROFILE == TONE_PROFILE_HIGH_CONTRAST
-	#define HIGH_CONTRAST_ENABLED
 #endif
 
 #if AMBIENT_OCCLUSION == AMBIENT_OCCLUSION_VANILLA_AND_SSAO || AMBIENT_OCCLUSION == AMBIENT_OCCLUSION_PURE_SSAO
@@ -32,17 +25,6 @@
 
 #if AMBIENT_OCCLUSION == AMBIENT_OCCLUSION_VANILLA || AMBIENT_OCCLUSION == AMBIENT_OCCLUSION_VANILLA_AND_SSAO
 	#define VANILLA_AO_ENABLED
-#endif
-
-const float USER_GODRAYS_INTENSITY = LIGHTRAYS_INTENSITY * 0.1;
-
-#if SKY_REFLECTION_PROFILE != SKY_REFLECTION_PROFILE_MINIMUM
-	#define REFLECT_SUN
-#endif
-
-// vanilla cloud reflection isn't (normally) supported
-#if SKY_REFLECTION_PROFILE == SKY_REFLECTION_PROFILE_FANCY && CLOUD_RENDERING != CLOUD_RENDERING_VANILLA
-	#define REFLECT_CLOUDS
 #endif
 
 const float HORIZON_BLEND = clamp(HORIZON_BLEND_RELATIVE * 0.1, 0.0, 1.0);

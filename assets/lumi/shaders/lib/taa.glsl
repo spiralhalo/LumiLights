@@ -3,18 +3,7 @@
 /*******************************************************
  *  lumi:shaders/lib/taa.glsl
  *******************************************************
- *  Original Work (MIT License):
- *  https://github.com/ziacko/Temporal-AA
- *
- *  The following code is a derivative work licensed
- *  under the LGPL-3.0.
- *
- *  Copyright (c) 2019 Ziyad Barakat
- *  Copyright (c) 2021 spiralhalo
- *
- *  Released WITHOUT WARRANTY under the terms of the
- *  GNU Lesser General Public License version 3 as
- *  published by the Free Software Foundation, Inc.
+ *  adapted from: https://github.com/ziacko/Temporal-AA
  *******************************************************/
 
 #define feedbackFactor 0.9

@@ -2,8 +2,8 @@
 	programs: [
 		{
 			name: "taa_program",
-			vertexSource: "lumi:shaders/post/simple.vert",
-			fragmentSource: "lumi:shaders/post/taa.frag",
+			vertexSource: "lumi:shaders/pass/basic.vert",
+			fragmentSource: "lumi:shaders/pass/taa.frag",
 			samplers: [
 				"u_current",
 				"u_history0",
@@ -15,20 +15,8 @@
 	],
 
 	images: [
-		// velocity is computed in taa right away
-		// {
-		//	 name: "velocity",
-		//	 internalFormat: "GL_RG16_SNORM",
-		//	 pixelFormat: "GL_RG",
-		//	 pixelDataType: "GL_FLOAT",
-		//	 target: "TEXTURE_2D",
-		//	 texParams: [
-		//		 {name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
-		//		 {name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
-		//	 ]
-		// },
 		{
-			name: "history0",
+			name: "taa_history0",
 			internalFormat: "RGBA8",
 			target: "TEXTURE_2D",
 			texParams: [
@@ -36,38 +24,19 @@
 				{name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
 			]
 		},
-		// {
-		//	 name: "history_depth0",
-		//	 lod: 0,
-		//	 internalFormat: "GL_R32F",
-		//	 pixelFormat: "GL_RED",
-		//	 pixelDataType: "FLOAT",
-		//	 target: "TEXTURE_2D",
-		//	 texParams: [
-		//		 { "name": "TEXTURE_MIN_FILTER", "val": "NEAREST" },
-		//		 { "name": "TEXTURE_MAG_FILTER", "val": "NEAREST" },
-		//		 { "name": "TEXTURE_WRAP_S", "val": "CLAMP_TO_EDGE" },
-		//		 { "name": "TEXTURE_WRAP_T", "val": "CLAMP_TO_EDGE" },
-		//		 { "name": "TEXTURE_COMPARE_MODE", "val": "NONE" }
-		//	 ]
-		// },
 	],
 
 	framebuffers: [
 		{
-			name: "history_copy_0",
-			colorAttachments: [{image: "history0"}]
-		}, 
-		// {
-		//	 name: "history_depth_copy_0",
-		//	 colorAttachments: [{image: "history_depth0"}]
-		// }, 
+			name: "taa_history",
+			colorAttachments: [{image: "taa_history0"}]
+		},
 		{
 			name: "taa_fb",
-			colorAttachments: [{image: "main_copy"}]
+			colorAttachments: [{image: "vanilla_color"}]
 		}
 	],
-	
+
 	afterRenderHand: {
 		passes: [
 			{
@@ -75,25 +44,19 @@
 				program: "taa_program",
 				framebuffer: "taa_fb",
 				samplerImages: [
-					"solid_main",
-					"history0",
-					"composite_depth",
-					"solid_depth",
+					"swap_color",
+					"taa_history0",
+					"color_depth",
+					"vanilla_depth",
 					"lumi:textures/etc/debug.png",
 				]
 			},
 			{
-				name: "history_copy_0",
+				name: "taa_history",
 				program: "copy",
-				framebuffer: "history_copy_0",
-				samplerImages: ["main_copy"]
+				framebuffer: "taa_history",
+				samplerImages: ["vanilla_color"]
 			},
-			// {
-			//	 name: "history_depth_copy_0",
-			//	 program: "copy",
-			//	 framebuffer: "history_depth_copy_0",
-			//	 samplerImages: ["composite_depth"]
-			// }
 		]
 	}
 }

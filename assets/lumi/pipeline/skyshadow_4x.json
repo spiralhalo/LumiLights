@@ -22,7 +22,7 @@
 	images: [
 		// depth attachment for shadow map
 		{
-			name: "shadow_map",
+			name: "gbuffer_shadow",
 			size: 4096,
 			// DO NOT CHANGE ANY SETTINGS BELOW
 			internalFormat: "DEPTH_COMPONENT32",
@@ -44,7 +44,7 @@
 	framebuffers: [
 		{
 			name: "shadow",
-			depthAttachment: {image: "shadow_map", clearDepth: 1.0}
+			depthAttachment: {image: "gbuffer_shadow", clearDepth: 1.0}
 		}
 	]
 }

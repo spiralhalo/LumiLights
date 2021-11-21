@@ -1,0 +1,144 @@
+{
+	images: [
+		 {
+			name: "color_depth",
+			lod: 0,
+			internalFormat: "R32F",
+			pixelFormat: "GL_RED",
+			pixelDataType: "FLOAT",
+			target: "TEXTURE_2D",
+			texParams: [ 
+				{name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
+				{name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"},
+			]
+		},
+		{
+			name: "color_result",
+			lod: 0,
+			internalFormat: "RGB16F",
+			pixelFormat: "RGB",
+			pixelDataType: "FLOAT",
+			target: "TEXTURE_2D",
+			texParams: [ 
+				{name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
+				{name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"},
+			]
+		},
+		{
+			name: "color_albedo",
+			lod: 0,
+			internalFormat: "RGBA8",
+			pixelFormat: "RGBA",
+			pixelDataType: "UNSIGNED_BYTE",
+			target: "TEXTURE_2D",
+			texParams: [ 
+				{name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
+				{name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"},
+			]
+		}, 
+	],
+
+	programs: [
+		{
+			name: "color",
+			vertexSource: "lumi:shaders/pass/shading.vert",
+			fragmentSource: "lumi:shaders/pass/color.frag",
+			samplers: [
+				"u_vanilla_color",
+				"u_vanilla_depth",
+				"u_weather_color",
+				"u_weather_depth",
+
+				"u_gbuffer_main_etc",
+				"u_gbuffer_depth",
+				"u_gbuffer_light",
+				"u_gbuffer_normal",
+				"u_gbuffer_shadow",
+
+				"u_tex_sun",
+				"u_tex_moon",
+				"u_tex_cloud",
+				"u_tex_glint",
+				"u_tex_noise",
+			]
+		},
+		{
+			name: "hand",
+			vertexSource: "lumi:shaders/pass/shading.vert",
+			fragmentSource: "lumi:shaders/pass/hand.frag",
+			samplers: [
+				"u_vanilla_color",
+				"u_vanilla_depth",
+
+				"u_gbuffer_main_etc",
+				"u_gbuffer_light",
+				"u_gbuffer_normal",
+
+				"u_tex_sun",
+				"u_tex_moon",
+				"u_tex_glint",
+			]
+		},
+	],
+
+	framebuffers: [
+		{
+			name: "color",
+			colorAttachments: [
+				{image: "color_result"},
+				{image: "color_depth"},
+				{image: "color_albedo"}
+			]
+		},
+	],
+
+	fabulous: {
+		passes: [
+			{
+				name: "color",
+				program: "color",
+				framebuffer: "color",
+				samplerImages: [
+					"vanilla_color",
+					"vanilla_depth",
+					"weather_color",
+					"weather_depth",
+
+					"gbuffer_main_etc",
+					"gbuffer_depth",
+					"gbuffer_light",
+					"gbuffer_normal",
+					"gbuffer_shadow",
+
+					"minecraft:textures/environment/sun.png",
+					"minecraft:textures/environment/moon_phases.png",
+					"lumi:textures/misc/nature.png",
+					"minecraft:textures/misc/enchanted_item_glint.png",
+					"lumi:textures/filter_pattern/bluenoise256.png",
+				]
+			},
+		]
+	},
+
+	afterRenderHand: {
+		passes: [
+			{
+				name: "hand",
+				program: "hand",
+				framebuffer: "swap",
+				samplerImages: [
+					"vanilla_color",
+					"vanilla_depth",
+
+					"gbuffer_main_etc",
+					"gbuffer_light",
+					"gbuffer_normal",
+
+					"minecraft:textures/environment/sun.png",
+					"minecraft:textures/environment/moon_phases.png",
+					"minecraft:textures/misc/enchanted_item_glint.png",
+				]
+			},
+		]
+	}
+}

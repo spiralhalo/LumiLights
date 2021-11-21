@@ -16,10 +16,7 @@
  *  published by the Free Software Foundation, Inc.
  *******************************************************/
 
-out vec2 pv_lightcoord;
-out float pv_ao;
 out float pv_diffuse;
-out float pv_ortho;
 
 // Grondag's vanilla diffuse but different
 float p_diffuseGui(vec3 normal) {
@@ -33,38 +30,25 @@ float p_diffuseGui(vec3 normal) {
 	return min(light, 1.0);
 }
 
-vec2 inv_size = 1.0 / vec2(frx_viewWidth(), frx_viewHeight());
-void frx_writePipelineVertex(inout frx_VertexData data) {
+vec2 inv_size = 1.0 / vec2(frx_viewWidth, frx_viewHeight);
+void frx_pipelineVertex() {
 
-	if (frx_modelOriginType() == MODEL_ORIGIN_SCREEN) {
-		mat4 t   = frx_guiViewProjectionMatrix();
-		pv_ortho = t[3][3];
-
-		gl_Position = frx_guiViewProjectionMatrix() * data.vertex;
+	if (frx_modelOriginScreen) {
+		gl_Position = frx_guiViewProjectionMatrix * frx_vertex;
 
 		#ifdef TAA_ENABLED
-		float fragZ = gl_Position.z / gl_Position.w;
-		if (pv_ortho == 0.) { // hack to include only hand
+		if (frx_isHand) {
 			gl_Position.st += taa_jitter(inv_size) * gl_Position.w;
 		}
 		#endif
 	} else {
-		data.vertex += frx_modelToCamera();
-		gl_Position  = frx_viewProjectionMatrix() * data.vertex;
+		frx_vertex += frx_modelToCamera;
+		gl_Position = frx_viewProjectionMatrix * frx_vertex;
 
 		#ifdef TAA_ENABLED
 		gl_Position.st += taa_jitter(inv_size) * gl_Position.w;
 		#endif
 	}
 
-#ifdef VANILLA_LIGHTING
-	pv_lightcoord = data.light;
-#ifdef VANILLA_AO_ENABLED
-	pv_ao = data.aoShade;
-#else
-	pv_ao = 1.0;
-#endif
-#endif
-
-	pv_diffuse = p_diffuseGui(data.normal);
+	pv_diffuse = p_diffuseGui(frx_vertexNormal);
 }

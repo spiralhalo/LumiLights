@@ -1,0 +1,58 @@
+{
+	framebuffers: [
+		{
+			name: "post",
+			colorAttachments: [
+				{image: "vanilla_color"}
+			]
+		},
+	],
+
+	programs: [
+		{
+			name: "post",
+			vertexSource: "lumi:shaders/pass/shading.vert",
+			fragmentSource: "lumi:shaders/pass/post.frag",
+			samplers: [
+				"u_color",
+				"u_albedo",
+				"u_depth",
+
+				"u_gbuffer_main_etc",
+				"u_gbuffer_light",
+				"u_gbuffer_normal",
+				"u_gbuffer_shadow",
+
+ 				"u_tex_sun",
+ 				"u_tex_moon",
+				"u_tex_cloud",
+ 				"u_tex_noise",
+			]
+		},
+	],
+
+	fabulous: {
+		passes: [
+			{
+				name: "post",
+				program: "post",
+				framebuffer: "post",
+				samplerImages: [
+					"color_result",
+					"color_albedo",
+					"color_depth",
+
+					"gbuffer_main_etc",
+					"gbuffer_light",
+					"gbuffer_normal",
+					"gbuffer_shadow",
+
+					"minecraft:textures/environment/sun.png",
+					"minecraft:textures/environment/moon_phases.png",
+					"lumi:textures/misc/nature.png",
+					"lumi:textures/filter_pattern/bluenoise256.png",
+				]
+			},
+		]
+	}
+}

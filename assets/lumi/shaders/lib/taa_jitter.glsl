@@ -24,5 +24,5 @@ const vec2 halton[4] = vec2[4](
 	);
 
 vec2 taa_jitter(vec2 rcpSize) {
-	return halton[frx_renderFrames() % 4u] * rcpSize;
+	return halton[frx_renderFrames % 4u] * rcpSize;
 }

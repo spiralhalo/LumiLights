@@ -4,10 +4,7 @@
 /*******************************************************
  *  lumi:shaders/lib/glintify.glsl
  *******************************************************
- *  Copyright (c) 2020-2021 spiralhalo
- *  Released WITHOUT WARRANTY under the terms of the
- *  GNU Lesser General Public License version 3 as
- *  published by the Free Software Foundation, Inc.
+ *  Feel free to use this file in any project without restrictions!
  *******************************************************/
 
 const vec3 GLINT_COLOR = vec3(0.655, 0.333, 1.0);
@@ -21,7 +18,7 @@ vec3 noise_glint(vec2 normalizedUV, float glint)
 	if (glint == 1.0) {
 		normalizedUV += normalizedUV.yx * skew;
 		normalizedUV *= zoom;
-		vec2 t = mod(normalizedUV + speed * frx_renderSeconds(), 1.0);
+		vec2 t = mod(normalizedUV + speed * frx_renderSeconds, 1.0);
 		t *= detail;
 		vec2 f = fract(t);
 		t -= f;
@@ -39,7 +36,7 @@ vec3 noise_glint(vec2 normalizedUV, float glint)
 vec3 texture_glint(sampler2D glint_sampler, vec2 normalizedUV, float glint)
 {
 	if (glint == 1.0) {
-		vec4 glint_tex_c = texture(glint_sampler, mod(normalizedUV * 0.5 + frx_renderSeconds() * 0.4, 1.0));
+		vec4 glint_tex_c = texture(glint_sampler, mod(normalizedUV * 0.5 + frx_renderSeconds * 0.4, 1.0));
 		return glint_tex_c.rgb * glint_tex_c.a;
 	} else {
 		return vec3(0.0);

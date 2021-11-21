@@ -1,10 +1,5 @@
 /*******************************************************
  *  lumi:shaders/lib/bitpack.glsl
- *******************************************************
- *  Copyright (c) 2020-2021 spiralhalo
- *  Released WITHOUT WARRANTY under the terms of the
- *  GNU Lesser General Public License version 3 as
- *  published by the Free Software Foundation, Inc.
  *******************************************************/
 
 float bit_pack(float a, float b, float c, float d, float e, float f, float g, float h) {
