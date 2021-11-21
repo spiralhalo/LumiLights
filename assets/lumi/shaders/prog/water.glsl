@@ -5,25 +5,30 @@
  *******************************************************/
 
 #ifndef POST_SHADER
-float sampleWaterNoise(sampler2D natureTexture, vec3 worldPos, vec2 uvMove)
+float sampleWaterNoise(sampler2D natureTexture, vec3 worldPos, vec2 uvMove, float vertexNormaly)
 {
-	vec2 moveA = vec2(1., -1.) * frx_renderSeconds;
-	vec2 moveB = vec2(1.) * frx_renderSeconds;
+	float yMove = 1.0 - vertexNormaly;
+	vec2 moveA = vec2(1. + yMove * 5., 1. - yMove) * frx_renderSeconds;
+	vec2 moveB = vec2(1. + yMove * 5., -1. + yMove) * frx_renderSeconds;
 
 	vec2 uv = worldPos.xz;
-	uv.y += worldPos.y;
+	uv.x += worldPos.y;
 
-	vec4 uvuv = vec4(uv + moveA, uv - moveB);
+	vec4 uvuv = vec4(uv + moveA, uv + moveB);
 	uvuv *= WATER_SAMPLING_ZOOM * WATER_BLOCK_RES / WATER_TEXSIZE;
 
 	float A = texture(natureTexture, uvuv.xy + uvMove).g;
 	float B = texture(natureTexture, uvuv.zw + uvMove).b;
 
-	return 1.0 - (A * 0.75 + B * 0.25);
+	return A * 0.75 + B * 0.25;
 }
 
-vec3 sampleWaterNormal(sampler2D natureTexture, vec3 normal, vec3 tangent, vec3 bitangent, vec3 fragWorldPos)
+vec3 sampleWaterNormal(sampler2D natureTexture, vec3 fragWorldPos, float vertexNormaly)
 {
+	const vec3 normal = vec3(0.0, 0.0, 1.0);
+	const vec3 tangent = vec3(1.0, 0.0, 0.0);
+	const vec3 bitangent = vec3(0.0, 1.0, 0.0);
+
 	const float slope = 1. / 32.;
 	const float oneBlock = WATER_BLOCK_RES / WATER_TEXSIZE;
 	const float amplitude = 0.02;
@@ -32,9 +37,9 @@ vec3 sampleWaterNormal(sampler2D natureTexture, vec3 normal, vec3 tangent, vec3 
 	vec3 bmove = bitangent * slope;
 	vec2 uvMove = vec2(0.0, oneBlock * slope);
 
-	vec3 origin = amplitude * sampleWaterNoise(natureTexture, fragWorldPos, uvMove.xx) * normal;
-	vec3 tside  = amplitude * sampleWaterNoise(natureTexture, fragWorldPos, uvMove.yx) * normal + tmove - origin;
-	vec3 bside  = amplitude * sampleWaterNoise(natureTexture, fragWorldPos, uvMove.xy) * normal + bmove - origin;
+	vec3 origin = amplitude * sampleWaterNoise(natureTexture, fragWorldPos, uvMove.xx, vertexNormaly) * normal;
+	vec3 tside  = amplitude * sampleWaterNoise(natureTexture, fragWorldPos, uvMove.yx, vertexNormaly) * normal + tmove - origin;
+	vec3 bside  = amplitude * sampleWaterNoise(natureTexture, fragWorldPos, uvMove.xy, vertexNormaly) * normal + bmove - origin;
 
 	vec3 eyePos = fragWorldPos - frx_cameraPos;
 	float farBlend = l2_clampScale(0., 512. * 512., dot(eyePos, eyePos));

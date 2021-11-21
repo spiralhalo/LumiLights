@@ -69,8 +69,10 @@ void frx_pipelineFragment()
 			#endif
 
 			vec3 bitangent = cross(frx_vertexNormal, l2_tangent);
+			mat3 TBN = mat3(l2_tangent, bitangent, frx_vertexNormal);
 
-			frx_fragNormal = sampleWaterNormal(u_tex_nature, frx_vertexNormal, l2_tangent, bitangent, frx_var0.xyz);
+			frx_fragNormal = TBN * sampleWaterNormal(u_tex_nature, frx_var0.xyz, frx_vertexNormal.y);
+			doTBN = false;
 		}
 
 		if (frx_fragRoughness == 0.0) frx_fragRoughness = 1.0; // TODO: fix assumption?
