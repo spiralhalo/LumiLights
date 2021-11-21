@@ -1,9 +1,19 @@
 #include lumi:shaders/common/texconst.glsl
-#include frex:shaders/lib/noise/cellular2x2x2.glsl
 
 /*******************************************************
  *  lumi:shaders/prog/water.glsl
  *******************************************************/
+
+#ifndef VERTEX_SHADER
+float textureWater(sampler2D natureTexture, vec4 uvuv, vec2 uvMove)
+{
+	uvuv *= WATER_SAMPLING_ZOOM * WATER_BLOCK_RES / WATER_TEXSIZE;
+
+	float A = texture(natureTexture, uvuv.xy + uvMove).g;
+	float B = texture(natureTexture, uvuv.zw + uvMove).b;
+
+	return A * 0.75 + B * 0.25;
+}
 
 #ifdef POST_SHADER
 bool decideUnderwater(float depth, float dTrans, bool transIsWater, bool translucent) {
@@ -40,24 +50,22 @@ vec2 refractSolidUV(sampler2DArray normalBuffer, sampler2D solidDepthBuffer, flo
 	}
 }
 
-float caustics(vec3 worldPos)
+float caustics(sampler2D natureTexture, vec3 worldPos, float vertexNormaly)
 {
-	const float causticsSeaLevel = 62.0;
-	// turns out, to get accurate coords, a global y-coordinate of water surface is required :S
-	// Sea level is used for the time being..
-	// TODO: might need to prevent division by 0 ?
-	float animator	  = frx_renderSeconds * 0.5;
-	vec2 animatonator = frx_renderSeconds * vec2(1.0);
+	float yMove = 1.0 - vertexNormaly;
+	vec2 moveA = vec2(1. + yMove, 1. - yMove) * frx_renderSeconds;
+	vec2 moveB = vec2(1. + yMove, -1. - yMove) * frx_renderSeconds;
 
-	vec3 pos = vec3(worldPos.xz + animatonator, animator);
-	 pos.xy += (causticsSeaLevel - worldPos.y) * frx_skyLightVector.xz / frx_skyLightVector.y;
+	vec2 uv = worldPos.xz;
+	uv += worldPos.y;
 
-	float e = cellular2x2x2(pos).x;
+	vec4 uvuv = vec4(uv + moveA, uv + moveB);
+
+	float e = textureWater(natureTexture, uvuv, vec2(0.0));
 		  e = smoothstep(-1.0, 1.0, e);
 
 	return e;
 }
-
 #else
 
 float sampleWaterNoise(sampler2D natureTexture, vec3 worldPos, vec2 uvMove, float vertexNormaly)
@@ -70,12 +78,8 @@ float sampleWaterNoise(sampler2D natureTexture, vec3 worldPos, vec2 uvMove, floa
 	uv.x += worldPos.y;
 
 	vec4 uvuv = vec4(uv + moveA, uv + moveB);
-	uvuv *= WATER_SAMPLING_ZOOM * WATER_BLOCK_RES / WATER_TEXSIZE;
 
-	float A = texture(natureTexture, uvuv.xy + uvMove).g;
-	float B = texture(natureTexture, uvuv.zw + uvMove).b;
-
-	return A * 0.75 + B * 0.25;
+	return textureWater(natureTexture, uvuv, uvMove);
 }
 
 vec3 sampleWaterNormal(sampler2D natureTexture, vec3 fragWorldPos, float vertexNormaly)
@@ -102,4 +106,5 @@ vec3 sampleWaterNormal(sampler2D natureTexture, vec3 fragWorldPos, float vertexN
 
 	return noisyNormal;
 }
+#endif
 #endif

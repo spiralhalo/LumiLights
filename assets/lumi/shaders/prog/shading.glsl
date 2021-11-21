@@ -94,13 +94,13 @@ vec3 lightPbr(vec3 albedo, float alpha, vec3 radiance, float roughness, float me
 	return specularLight + diffuseLight;
 }
 
-vec4 shading(vec4 color, vec4 light, float ao, vec3 material, vec3 eyePos, vec3 normal, bool isUnderwater)
+vec4 shading(vec4 color, sampler2D natureTexture, vec4 light, float ao, vec3 material, vec3 eyePos, vec3 normal, bool isUnderwater)
 {
 	float causticLight = 0.0;
 
 #ifdef WATER_CAUSTICS
 	if (isUnderwater && frx_worldHasSkylight == 1) {
-		causticLight  = caustics(eyePos + frx_cameraPos);
+		causticLight  = caustics(natureTexture, eyePos + frx_cameraPos, normal.y);
 		causticLight  = pow(causticLight, 15.0);
 		causticLight *= smoothstep(0.0, 1.0, light.y);
 	}
@@ -181,7 +181,7 @@ vec4 shading(vec4 color, vec4 light, float ao, vec3 material, vec3 eyePos, vec3 
 	return vec4(shaded, color.a);
 }
 
-vec4 shading(vec4 color, vec4 light, vec3 material, vec3 eyePos, vec3 normal, bool isUnderwater) {
-	return shading(color, light, 1.0, material, eyePos, normal, isUnderwater);
+vec4 shading(vec4 color, sampler2D natureTexture, vec4 light, vec3 material, vec3 eyePos, vec3 normal, bool isUnderwater) {
+	return shading(color, natureTexture, light, 1.0, material, eyePos, normal, isUnderwater);
 }
 #endif

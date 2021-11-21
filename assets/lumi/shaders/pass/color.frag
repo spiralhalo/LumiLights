@@ -71,7 +71,7 @@ void main()
 
 	// TODO: end portal glitch?
 
-	vec4 base = dSolid == 1.0 ? customSky(u_tex_sun, u_tex_moon, toFrag, solidIsUnderwater) : shading(cSolid, light, material, eyePos, normal, solidIsUnderwater);
+	vec4 base = dSolid == 1.0 ? customSky(u_tex_sun, u_tex_moon, toFrag, solidIsUnderwater) : shading(cSolid, u_tex_cloud, light, material, eyePos, normal, solidIsUnderwater);
 	vec4 next = (dSolid < dTrans && dSolid < dParts) ? vec4(0.0) : (dParts > dTrans ? cParts : cTrans);
 	vec4 last = (dSolid < dTrans && dSolid < dParts) ? vec4(0.0) : (dParts > dTrans ? cTrans : cParts);
 
@@ -118,7 +118,7 @@ void main()
 
 	if (next.a != 0.0) {
 		vec3 albedo = next.rgb;
-		next = shading(next, light, material, eyePos, normal, nextIsUnderwater);
+		next = shading(next, u_tex_cloud, light, material, eyePos, normal, nextIsUnderwater);
 		next.a = sqrt(next.a);
 	}
 
