@@ -112,7 +112,7 @@
 
 					"minecraft:textures/environment/sun.png",
 					"minecraft:textures/environment/moon_phases.png",
-					"lumi:textures/sky/clouds.png",
+					"lumi:textures/misc/nature.png",
 					"minecraft:textures/misc/enchanted_item_glint.png",
 					"lumi:textures/filter_pattern/bluenoise256.png",
 				]

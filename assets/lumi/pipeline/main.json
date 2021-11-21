@@ -23,9 +23,15 @@
 		vertexSource: "lumi:shaders/forward/main.vert",
 		fragmentSource: "lumi:shaders/forward/main.frag",
 		// glsl names for samplers additive to the FREX pre-defined samplers
-		samplers: ["u_tex_glint"],
+		samplers: [
+			"u_tex_glint",
+			"u_tex_nature"
+		],
 		// image names for samplers additive to the FREX pre-defined samplers
-		samplerImages: ["minecraft:textures/misc/enchanted_item_glint.png"]
+		samplerImages: [
+			"minecraft:textures/misc/enchanted_item_glint.png",
+			"lumi:textures/misc/nature.png"
+		]
 	},
 
 	smoothBrightnessBidirectionaly: true,
@@ -42,14 +48,8 @@
 		"lumi:pipeline/post.json",
 		"lumi:pipeline/taa.json",
 		"lumi:pipeline/bloom.json",
-		// "lumi:pipeline/mtn.json",
-		// "lumi:pipeline/normal.json",
-		// "lumi:pipeline/custom_clouds.json",
+		"lumi:pipeline/mtn.json",
 		// "lumi:pipeline/ao.json",
-		// "lumi:pipeline/shading.json",
-		// "lumi:pipeline/reflection.json",
-		// "lumi:pipeline/composite.json",
-		// "lumi:pipeline/hand.json",
 	],
 
 	programs: [

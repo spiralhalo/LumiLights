@@ -142,11 +142,11 @@ vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer
 	vec3 rawViewNormal = frx_normalModelMatrix * rawNormal;
 	bool impossibleRay	= dot(rawViewNormal, viewMarch) < 0;
 
-	if (impossibleRay) {
-		normal = rawNormal;
-		viewNormal = rawViewNormal;
-		viewMarch = normalize(reflect(viewToFrag, viewNormal) + jitterPrc);
-	}
+	// if (impossibleRay) {
+	// 	normal = rawNormal;
+	// 	viewNormal = rawViewNormal;
+	// 	viewMarch = normalize(reflect(viewToFrag, viewNormal) + jitterPrc);
+	// }
 
 	// Roughness Threshold Resolution: 
 	bool withinThreshold = roughness <= REFLECTION_MAXIMUM_ROUGHNESS;

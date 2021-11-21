@@ -104,12 +104,12 @@ float ww_noise(vec2 pos, float stretch, int iterations, float startMult)
 	float multiplier = startMult;
 	for (int i = 0; i < iterations; i++) {
 		vec2 noisePos = hh / multiplier;
-		noiseVal += multiplier * snoise(noisePos);
+		noiseVal += multiplier * (1.0 - abs(snoise(noisePos)));
 		sum += multiplier;
 		multiplier *= 0.6;
 	}
 	noiseVal /= sum;
-	return noiseVal * 0.5 + 0.5;
+	return noiseVal;// * 0.5 + 0.5;
 	// vec2 hh  = vec2(pos.x, pos.y * stretch);
 	// vec2 pp1 = hh;
 	// vec2 pp2 = hh * 5.0;
@@ -118,13 +118,11 @@ float ww_noise(vec2 pos, float stretch, int iterations, float startMult)
 	// return xx1 + xx2;
 }
 
-const float WATER_BLOCK_RES = 128.0;
-
 float genWaterNoise(vec2 texcoord, float stretch, int iterations, float startMult) 
 {
 	vec2 worldXz = uv2worldXz(texcoord + OFFSET);
 
-	return ww_noise(worldXz / WATER_BLOCK_RES, stretch, iterations, startMult);
+	return ww_noise(worldXz * WATER_TEXTURE_ZOOM / WATER_BLOCK_RES, stretch, iterations, startMult);
 }
 
 vec4 genWaterTexture1()
@@ -166,7 +164,9 @@ vec4 genWaterTexture2()
 
 void main()
 {
-	vec4 generated = genCloudsTexture2();
+	vec4 generated1 = genCloudsTexture2();
+	vec4 generated2 = genWaterTexture2();
+	vec4 generated = vec4(generated1.r, generated2.rg, 1.0);
 
 	fragColor = vec4(generated);
 }

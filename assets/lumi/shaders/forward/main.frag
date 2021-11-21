@@ -4,9 +4,11 @@
 #include frex:shaders/api/world.glsl
 #include frex:shaders/api/view.glsl
 #include frex:shaders/lib/math.glsl
+#include lumi:shaders/api/pbr_ext.glsl
 #include lumi:shaders/common/forward.glsl
 #include lumi:shaders/common/userconfig.glsl
 #include lumi:shaders/prog/overlay.glsl
+#include lumi:shaders/prog/water.glsl
 #include lumi:shaders/lib/bitpack.glsl
 #include lumi:shaders/lib/pack_normal.glsl
 #include lumi:shaders/lib/util.glsl
@@ -21,6 +23,7 @@
  *******************************************************/
 
 uniform sampler2D u_tex_glint;
+uniform sampler2D u_tex_nature;
 
 in float pv_diffuse;
 in float pv_ortho;
@@ -48,7 +51,9 @@ void frx_pipelineFragment()
 		diffuse = frx_fragEnableDiffuse ? diffuse : 1.0;
 		frx_fragColor.rgb *= diffuse;
 		frx_fragColor.rgb += autoGlint(u_tex_glint, frx_normalizeMappedUV(frx_texcoord), frx_matGlint);
-	} else {
+	} else {		
+		bool doTBN = true;
+
 		if (pbr_isWater) {
 			/* WATER RECOLOR */
 			#if WATER_COLOR == WATER_COLOR_NO_TEXTURE
@@ -62,9 +67,11 @@ void frx_pipelineFragment()
 			#elif WATER_COLOR == WATER_COLOR_NATURAL_BLUE
 			frx_fragColor.a   *= 0.6;
 			#endif
-		}
 
-		bool doTBN = true;
+			vec3 bitangent = cross(frx_vertexNormal, l2_tangent);
+
+			frx_fragNormal = sampleWaterNormal(u_tex_nature, frx_vertexNormal, l2_tangent, bitangent, frx_var0.xyz);
+		}
 
 		if (frx_fragRoughness == 0.0) frx_fragRoughness = 1.0; // TODO: fix assumption?
 
