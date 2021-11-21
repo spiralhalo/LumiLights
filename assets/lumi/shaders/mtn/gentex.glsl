@@ -104,12 +104,12 @@ float ww_noise(vec2 pos, float stretch, int iterations, float startMult)
 	float multiplier = startMult;
 	for (int i = 0; i < iterations; i++) {
 		vec2 noisePos = hh / multiplier;
-		noiseVal += multiplier * (1.0 - abs(snoise(noisePos)));
+		noiseVal += multiplier * snoise(noisePos);//(1.0 - abs(snoise(noisePos)));
 		sum += multiplier;
 		multiplier *= 0.6;
 	}
 	noiseVal /= sum;
-	return noiseVal;// * 0.5 + 0.5;
+	return noiseVal * 0.5 + 0.5;
 	// vec2 hh  = vec2(pos.x, pos.y * stretch);
 	// vec2 pp1 = hh;
 	// vec2 pp2 = hh * 5.0;

@@ -5,10 +5,10 @@
 #include lumi:shaders/common/atmosphere.glsl
 #include lumi:shaders/common/contrast.glsl
 #include lumi:shaders/common/userconfig.glsl
-#include lumi:shaders/lib/caustics.glsl
 #include lumi:shaders/lib/pbr.glsl
 #include lumi:shaders/lib/taa_jitter.glsl
 #include lumi:shaders/prog/shadow.glsl
+#include lumi:shaders/prog/water.glsl
 
 /*******************************************************
  *  lumi:shaders/prog/shading.glsl
@@ -46,11 +46,11 @@ float lightmapRemap(float lightMapCoords)
 }
 
 #ifndef VERTEX_SHADER
-float denoisedShadowFactor(sampler2DArrayShadow shadowMap, vec3 eyePos, float depth, float lighty) {
+float denoisedShadowFactor(sampler2DArrayShadow shadowMap, vec2 texcoord, vec3 eyePos, float depth, float lighty) {
 #ifdef SHADOW_MAP_PRESENT
 #ifdef TAA_ENABLED
 	vec2 uvJitter	   = taa_jitter(v_invSize);
-	vec4 unjitteredPos = frx_inverseViewProjectionMatrix * vec4(2.0 * v_texcoord - uvJitter - 1.0, 2.0 * depth - 1.0, 1.0);
+	vec4 unjitteredPos = frx_inverseViewProjectionMatrix * vec4(2.0 * texcoord - uvJitter - 1.0, 2.0 * depth - 1.0, 1.0);
 	vec4 shadowViewPos = frx_shadowViewMatrix * vec4(unjitteredPos.xyz / unjitteredPos.w, 1.0);
 #else
 	vec4 shadowViewPos = frx_shadowViewMatrix * vec4(eyePos, 1.0);

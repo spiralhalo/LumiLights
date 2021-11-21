@@ -48,7 +48,7 @@
 		"lumi:pipeline/post.json",
 		"lumi:pipeline/taa.json",
 		"lumi:pipeline/bloom.json",
-		"lumi:pipeline/mtn.json",
+		// "lumi:pipeline/mtn.json",
 		// "lumi:pipeline/ao.json",
 	],
 

@@ -1,10 +1,65 @@
 #include lumi:shaders/common/texconst.glsl
+#include frex:shaders/lib/noise/cellular2x2x2.glsl
 
 /*******************************************************
  *  lumi:shaders/prog/water.glsl
  *******************************************************/
 
-#ifndef POST_SHADER
+#ifdef POST_SHADER
+bool decideUnderwater(float depth, float dTrans, bool transIsWater, bool translucent) {
+	if (frx_cameraInWater == 1) {
+		if (translucent) {
+			return true;
+		} else {
+			return dTrans >= depth;
+		}
+	} else {
+		return dTrans < depth && transIsWater; 
+	}
+}
+
+vec2 refractSolidUV(sampler2DArray normalBuffer, sampler2D solidDepthBuffer, float dSolid, float dTrans) {
+	if (dTrans < dSolid) {
+		const float refractStr = .1;
+
+		float ldepth_range = ldepth(dSolid) - ldepth(dTrans);
+
+		vec3 viewVNormal = frx_normalModelMatrix * (texture(normalBuffer, vec3(v_texcoord, ID_TRANS_NORM)).xyz * 2.0 - 1.0);
+		vec3 viewMNormal = frx_normalModelMatrix * (texture(normalBuffer, vec3(v_texcoord, ID_TRANS_MNORM)).xyz * 2.0 - 1.0);
+
+		vec2 refractUV = refractStr * l2_clampScale(0.0, 0.005, ldepth_range) * (viewMNormal.xy - viewVNormal.xy);
+		refractUV = clamp(v_texcoord + refractUV, 0.0, 1.0);
+
+		float newDepth = texture(solidDepthBuffer, refractUV).r;
+
+		if (newDepth < dTrans) refractUV = v_texcoord;
+
+		return refractUV;
+	} else {
+		return v_texcoord;
+	}
+}
+
+float caustics(vec3 worldPos)
+{
+	const float causticsSeaLevel = 62.0;
+	// turns out, to get accurate coords, a global y-coordinate of water surface is required :S
+	// Sea level is used for the time being..
+	// TODO: might need to prevent division by 0 ?
+	float animator	  = frx_renderSeconds * 0.5;
+	vec2 animatonator = frx_renderSeconds * vec2(1.0);
+
+	vec3 pos = vec3(worldPos.xz + animatonator, animator);
+	 pos.xy += (causticsSeaLevel - worldPos.y) * frx_skyLightVector.xz / frx_skyLightVector.y;
+
+	float e = cellular2x2x2(pos).x;
+		  e = smoothstep(-1.0, 1.0, e);
+
+	return e;
+}
+
+#else
+
 float sampleWaterNoise(sampler2D natureTexture, vec3 worldPos, vec2 uvMove, float vertexNormaly)
 {
 	float yMove = 1.0 - vertexNormaly;

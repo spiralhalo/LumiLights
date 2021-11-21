@@ -120,7 +120,7 @@ vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer
 	vec3 normal	= texture(normalBuffer, vec3(v_texcoord, idMicroNormal)).xyz * 2.0 - 1.0;
 	float depth	= texture(depthBuffer, v_texcoord).r;
 
-	light.w = denoisedShadowFactor(shadowMap, eyePos, depth, light.y);
+	light.w = denoisedShadowFactor(shadowMap, v_texcoord, eyePos, depth, light.y);
 
 	vec3 viewPos = (frx_viewMatrix * vec4(eyePos, 1.0)).xyz;
 	float roughness = material.x;
