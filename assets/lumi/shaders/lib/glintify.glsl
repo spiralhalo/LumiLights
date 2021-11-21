@@ -4,10 +4,7 @@
 /*******************************************************
  *  lumi:shaders/lib/glintify.glsl
  *******************************************************
- *  Copyright (c) 2020-2021 spiralhalo
- *  Released WITHOUT WARRANTY under the terms of the
- *  GNU Lesser General Public License version 3 as
- *  published by the Free Software Foundation, Inc.
+ *  Feel free to use this file in any project without restrictions!
  *******************************************************/
 
 const vec3 GLINT_COLOR = vec3(0.655, 0.333, 1.0);

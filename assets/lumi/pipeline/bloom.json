@@ -56,43 +56,41 @@
 	afterRenderHand: {
 		passes: [
 			{
-				name: "bloom_copy",
-				program: "copy",
-				framebuffer: "swap",
+				name: "bloom_copy", framebuffer: "swap", program: "copy",
 				samplerImages: ["vanilla_color"],
-			},
-			{
+				toggleConfig: "bloom_effect",
+			}, {
 				name: "bloomdown0", framebuffer: "bloomdown0", program: "bloom",
 				samplerImages: ["swap_color", "swap_color"],
-				layer: 0, lod: 0
+				layer: 0, lod: 0, toggleConfig: "bloom_effect"
 			}, {
 				name: "bloomdown1", framebuffer: "bloomdown1", program: "bloom",
 				samplerImages: ["bloomdown", "bloomdown"],
-				layer: 1, lod: 1
+				layer: 1, lod: 1, toggleConfig: "bloom_effect"
 			}, {
 				name: "bloomdown2", framebuffer: "bloomdown2", program: "bloom",
 				samplerImages: ["bloomdown", "bloomdown"],
-				layer: 1, lod: 2
+				layer: 1, lod: 2, toggleConfig: "bloom_effect"
 			}, {
 				name: "bloomdown3", framebuffer: "bloomdown3", program: "bloom",
 				samplerImages: ["bloomdown", "bloomdown"],
-				layer: 1, lod: 3
+				layer: 1, lod: 3, toggleConfig: "bloom_effect"
 			}, {
 				name: "bloomdown4", framebuffer: "bloomdown4", program: "bloom",
 				samplerImages: ["bloomdown", "bloomdown"],
-				layer: 1, lod: 4
+				layer: 1, lod: 4, toggleConfig: "bloom_effect"
 			}, {
 				name: "bloomdown5", framebuffer: "bloomdown5", program: "bloom",
 				samplerImages: ["bloomdown", "bloomdown"],
-				layer: 1, lod: 5
+				layer: 1, lod: 5, toggleConfig: "bloom_effect"
 			}, {
 				name: "bloomdown6", framebuffer: "bloomdown6", program: "bloom",
 				samplerImages: ["bloomdown", "bloomdown"],
-				layer: 1, lod: 6
+				layer: 1, lod: 6, toggleConfig: "bloom_effect"
 			}, {
 				name: "bloom", framebuffer: "vanilla", program: "bloom",
 				samplerImages: ["swap_color", "bloomdown"],
-				layer: 2
+				layer: 2, toggleConfig: "bloom_effect"
 			},
 		]
 	},

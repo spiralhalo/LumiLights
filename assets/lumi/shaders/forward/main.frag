@@ -68,11 +68,13 @@ void frx_pipelineFragment()
 			frx_fragColor.a   *= 0.6;
 			#endif
 
+			#ifdef WATER_WAVES
 			vec3 bitangent = cross(frx_vertexNormal, l2_tangent);
 			mat3 TBN = mat3(l2_tangent, bitangent, frx_vertexNormal);
 
 			frx_fragNormal = TBN * sampleWaterNormal(u_tex_nature, frx_var0.xyz, frx_vertexNormal.y);
 			doTBN = false;
+			#endif
 		}
 
 		if (frx_fragRoughness == 0.0) frx_fragRoughness = 1.0; // TODO: fix assumption?

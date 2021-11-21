@@ -137,16 +137,17 @@ vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer
 
 	vec3 result = vec3(0.0);
 
+	#ifdef SS_REFLECTION
 	// Impossible Ray Resultion:
 	vec3 rawNormal = texture(normalBuffer, vec3(v_texcoord, idNormal)).xyz * 2.0 - 1.0;
 	vec3 rawViewNormal = frx_normalModelMatrix * rawNormal;
 	bool impossibleRay	= dot(rawViewNormal, viewMarch) < 0;
 
-	// if (impossibleRay) {
-	// 	normal = rawNormal;
-	// 	viewNormal = rawViewNormal;
-	// 	viewMarch = normalize(reflect(viewToFrag, viewNormal) + jitterPrc);
-	// }
+	if (impossibleRay) {
+		normal = rawNormal;
+		viewNormal = rawViewNormal;
+		viewMarch = normalize(reflect(viewToFrag, viewNormal) + jitterPrc);
+	}
 
 	// Roughness Threshold Resolution: 
 	bool withinThreshold = roughness <= REFLECTION_MAXIMUM_ROUGHNESS;
@@ -154,6 +155,7 @@ vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer
 	if (withinThreshold) {
 		result = reflectionMarch(depthBuffer, normalBuffer, idNormal, viewPos, viewToEye, viewMarch);
 	}
+	#endif
 
 	vec2 uvFade = smoothstep(0.5, 0.45, abs(result.xy - 0.5));
 	result.z *= min(uvFade.x, uvFade.y);

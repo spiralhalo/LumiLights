@@ -68,28 +68,6 @@
 			includeToken: "lumi:clouds_config",
 			categoryKey: "config.lumi_lights.category.clouds",
 			options: {
-				cloud_rendering: {
-					default: "volumetric",
-					choices: ["vanilla", "flat", "parallax", "volumetric"],
-					enum: true,
-					prefix: "cloud_rendering_",
-					nameKey: "config.lumi_lights.value.cloud_rendering",
-					descriptionKey: "config.lumi_lights.help.cloud_rendering"
-				},
-				parallax_cloud_altitude: {
-					default: 100,
-					min: 0,
-					max: 1000,
-					nameKey: "config.lumi_lights.value.parallax_cloud_altitude",
-					descriptionKey: "config.lumi_lights.help.parallax_cloud_altitude"
-				},
-				parallax_cloud_thickness: {
-					default: 40,
-					min: 0,
-					max: 1000,
-					nameKey: "config.lumi_lights.value.parallax_cloud_thickness",
-					descriptionKey: "config.lumi_lights.help.parallax_cloud_thickness"
-				},
 				volumetric_cloud_altitude: {
 					default: 110,
 					min: 0,
@@ -125,13 +103,6 @@
 					max: 10,
 					nameKey: "config.lumi_lights.value.cloud_brightness_relative",
 					descriptionKey: "config.lumi_lights.help.cloud_brightness_relative"
-				},
-				raincloud_canopy: {
-					default: 4,
-					min: 0,
-					max: 10,
-					nameKey: "config.lumi_lights.value.raincloud_canopy",
-					descriptionKey: "config.lumi_lights.help.raincloud_canopy"
 				},
 			}
 		},
@@ -176,24 +147,5 @@
 				},
 			}
 		},
-		{
-			includeToken: "lumi:water_config",
-			categoryKey: "config.lumi_lights.category.water",
-			options: {
-				water_color: {
-					default: "natural",
-					choices: ["natural_blue", "vanilla", "no_texture", "no_color"],
-					enum: true,
-					prefix: "water_color_",
-					nameKey: "config.lumi_lights.value.water_color",
-					descriptionKey: "config.lumi_lights.help.water_color"
-				},
-				water_caustics: {
-					default: true,
-					nameKey: "config.lumi_lights.value.water_caustics",
-					descriptionKey: "config.lumi_lights.help.water_caustics"
-				},
-			}
-		}
 	]
 }
