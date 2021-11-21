@@ -35,7 +35,7 @@ uniform sampler2D u_misc;
 				
 uniform sampler2D u_translucent_depth;
 
-uniform sampler2D u_glint;
+uniform sampler2D u_tex_glint;
 uniform sampler2DArrayShadow u_shadow;
 
 in vec2 v_invSize;
@@ -97,7 +97,7 @@ void main()
 	#if GLINT_MODE == GLINT_MODE_GLINT_SHADER
 	a.rgb += hdr_fromGamma(noise_glint(misc.xy, bit_unpack(misc.z, 2)));
 	#else
-	a.rgb += hdr_fromGamma(texture_glint(u_glint, misc.xy, bit_unpack(misc.z, 2)));
+	a.rgb += hdr_fromGamma(texture_glint(u_tex_glint, misc.xy, bit_unpack(misc.z, 2)));
 	#endif
 
 	vec4 source_base = a;

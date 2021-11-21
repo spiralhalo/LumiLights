@@ -23,7 +23,7 @@
 		vertexSource: "lumi:shaders/forward/main.vert",
 		fragmentSource: "lumi:shaders/forward/main.frag",
 		// glsl names for samplers additive to the FREX pre-defined samplers
-		samplers: ["u_glint"],
+		samplers: ["u_tex_glint"],
 		// image names for samplers additive to the FREX pre-defined samplers
 		samplerImages: ["minecraft:textures/misc/enchanted_item_glint.png"]
 	},

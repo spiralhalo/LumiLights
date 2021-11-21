@@ -21,7 +21,7 @@
 					descriptionKey: "config.lumi_lights.help.sky_reflection_profile"
 				},
 				reflection_maximum_roughness_relative: {
-					default: 7,
+					default: 5,
 					min: 1,
 					max: 10,
 					nameKey: "config.lumi_lights.value.reflection_maximum_roughness_relative",
@@ -53,14 +53,14 @@
 					descriptionKey: "config.lumi_lights.help.exposure_smoothing_frames"
 				},
 				bloom_intensity: {
-					default: 20,
+					default: 40,
 					min: 1,
-					max: 40,
+					max: 50,
 					nameKey: "config.lumi_lights.value.bloom_intensity",
 					descriptionKey: "config.lumi_lights.help.bloom_intensity"
 				},
 				bloom_scale: {
-					default: 25,
+					default: 50,
 					min: 3,
 					max: 50,
 					nameKey: "config.lumi_lights.value.bloom_scale",

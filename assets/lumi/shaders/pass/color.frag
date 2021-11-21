@@ -4,6 +4,7 @@
 #include lumi:shaders/lib/pack_normal.glsl
 #include lumi:shaders/prog/clouds.glsl
 #include lumi:shaders/prog/fog.glsl
+#include lumi:shaders/prog/overlay.glsl
 #include lumi:shaders/prog/shading.glsl
 #include lumi:shaders/prog/sky.glsl
 #include lumi:shaders/prog/tonemap.glsl
@@ -128,6 +129,13 @@ void main()
 	}
 
 	base.rgb = base.rgb * (1.0 - next.a) + next.rgb * next.a;
+
+	int idMisc = dMin == dSolid ? ID_SOLID_MISC : (dMin == dTrans ? ID_TRANS_MISC : -1);
+
+	if (idMisc > -1) {
+		vec4 miscAuto = texture(u_gbuffer_main_etc, vec3(v_texcoord, ID_SOLID_MISC));
+		base = overlay(base, u_tex_glint, miscAuto);
+	}
 
 	fragColor = base;
 	fragDepth = dMin;

@@ -1,5 +1,6 @@
 #include lumi:shaders/pass/header.glsl
 
+#include lumi:shaders/prog/overlay.glsl
 #include lumi:shaders/prog/shading.glsl
 #include lumi:shaders/prog/sky.glsl
 #include lumi:shaders/prog/tonemap.glsl
@@ -41,6 +42,9 @@ void main()
 
 		fragColor = shading(cSolid, light, material, eyePos, normal, false);
 		fragColor += skyReflection(u_tex_sun, u_tex_moon, cSolid.rgb, material, normalize(eyePos), normal, light.yy);
+
+		vec4 misc = texture(u_gbuffer_main_etc, vec3(v_texcoord, ID_SOLID_MISC));
+		fragColor = overlay(fragColor, u_tex_glint, misc);
 
 		fragColor = ldr_tonemap(fragColor);
 	}

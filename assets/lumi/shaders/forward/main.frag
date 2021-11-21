@@ -6,7 +6,7 @@
 #include frex:shaders/lib/math.glsl
 #include lumi:shaders/common/forward.glsl
 #include lumi:shaders/common/userconfig.glsl
-#include lumi:shaders/prog/glintify.glsl
+#include lumi:shaders/prog/overlay.glsl
 #include lumi:shaders/lib/bitpack.glsl
 #include lumi:shaders/lib/pack_normal.glsl
 #include lumi:shaders/lib/util.glsl
@@ -20,7 +20,7 @@
  *  published by the Free Software Foundation, Inc.
  *******************************************************/
 
-uniform sampler2D u_glint;
+uniform sampler2D u_tex_glint;
 
 in float pv_diffuse;
 in float pv_ortho;
@@ -46,13 +46,8 @@ void frx_pipelineFragment()
 		float diffuse = mix(pv_diffuse, 1, frx_fragEmissive);
 		// diffuse = frx_isGui ? diffuse : min(1.0, 1.5 - diffuse);
 		diffuse = frx_fragEnableDiffuse ? diffuse : 1.0;
-		frx_fragColor.rgb  *= diffuse;
-
-		#if GLINT_MODE == GLINT_MODE_GLINT_SHADER
-		frx_fragColor.rgb += noise_glint(frx_normalizeMappedUV(frx_texcoord), frx_matGlint);
-		#else
-		frx_fragColor.rgb += texture_glint(u_glint, frx_normalizeMappedUV(frx_texcoord), frx_matGlint);
-		#endif
+		frx_fragColor.rgb *= diffuse;
+		frx_fragColor.rgb += autoGlint(u_tex_glint, frx_normalizeMappedUV(frx_texcoord), frx_matGlint);
 	} else {
 		if (pbr_isWater) {
 			/* WATER RECOLOR */

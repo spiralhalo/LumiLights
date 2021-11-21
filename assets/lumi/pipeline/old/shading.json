@@ -17,7 +17,7 @@
 				"u_misc_translucent",
 
 				"u_ao",
-				"u_glint",
+				"u_tex_glint",
 				"u_shadow",
 				"u_sun",
 				"u_moon",
@@ -44,7 +44,7 @@
 
 				"u_refraction_uv",
 
-				"u_glint",
+				"u_tex_glint",
 				"u_shadow",
 				"u_blue_noise",
 

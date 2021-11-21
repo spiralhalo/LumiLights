@@ -7,7 +7,7 @@
  *  published by the Free Software Foundation, Inc.
  *******************************************************/
 
-uniform sampler2D u_glint;
+uniform sampler2D u_tex_glint;
 uniform sampler2DArrayShadow u_shadow;
 uniform sampler2D u_blue_noise;
 
@@ -209,7 +209,7 @@ vec4 hdr_shaded_color(
 #if GLINT_MODE == GLINT_MODE_GLINT_SHADER
 	a.rgb += hdr_fromGamma(noise_glint(misc.xy, bit_unpack(misc.z, 2)));
 #else
-	a.rgb += hdr_fromGamma(texture_glint(u_glint, misc.xy, bit_unpack(misc.z, 2)));
+	a.rgb += hdr_fromGamma(texture_glint(u_tex_glint, misc.xy, bit_unpack(misc.z, 2)));
 #endif
 
 	if (a.a != 0.0 && depth != 1.0 && (frx_cameraInWater == 0 || mostlikelyUnderwater)) {

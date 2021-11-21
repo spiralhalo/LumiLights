@@ -15,7 +15,7 @@
 
 				"u_translucent_depth",
 
-				"u_glint",
+				"u_tex_glint",
 				"u_shadow",
 				"u_blue_noise",
 
