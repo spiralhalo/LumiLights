@@ -57,7 +57,7 @@ float caustics(sampler2D natureTexture, vec3 worldPos, float vertexNormaly)
 	vec2 moveB = vec2(1. + yMove, -1. - yMove) * frx_renderSeconds;
 
 	vec2 uv = worldPos.xz;
-	uv += worldPos.y;
+	uv += vec2(-1.0, 1.0) * worldPos.y;
 
 	vec4 uvuv = vec4(uv + moveA, uv + moveB);
 
