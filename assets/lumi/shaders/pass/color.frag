@@ -18,6 +18,8 @@ uniform sampler2D u_vanilla_color;
 uniform sampler2D u_vanilla_depth;
 uniform sampler2D u_weather_color;
 uniform sampler2D u_weather_depth;
+uniform sampler2D u_vanilla_clouds;
+uniform sampler2D u_vanilla_clouds_depth;
 
 uniform sampler2DArray u_gbuffer_main_etc;
 uniform sampler2DArray u_gbuffer_depth;
@@ -27,7 +29,7 @@ uniform sampler2DArrayShadow u_gbuffer_shadow;
 
 uniform sampler2D u_tex_sun;
 uniform sampler2D u_tex_moon;
-uniform sampler2D u_tex_cloud;
+uniform sampler2D u_tex_nature;
 uniform sampler2D u_tex_glint;
 uniform sampler2D u_tex_noise;
 
@@ -71,7 +73,7 @@ void main()
 
 	// TODO: end portal glitch?
 
-	vec4 base = dSolid == 1.0 ? customSky(u_tex_sun, u_tex_moon, toFrag, solidIsUnderwater) : shading(cSolid, u_tex_cloud, light, material, eyePos, normal, solidIsUnderwater);
+	vec4 base = dSolid == 1.0 ? customSky(u_tex_sun, u_tex_moon, toFrag, solidIsUnderwater) : shading(cSolid, u_tex_nature, light, material, eyePos, normal, solidIsUnderwater);
 	vec4 next = (dSolid < dTrans && dSolid < dParts) ? vec4(0.0) : (dParts > dTrans ? cParts : cTrans);
 	vec4 last = (dSolid < dTrans && dSolid < dParts) ? vec4(0.0) : (dParts > dTrans ? cTrans : cParts);
 
@@ -83,7 +85,7 @@ void main()
 			base = fog(base, eyePos, light.y);
 		}
 
-		vec4 clouds = volumetricCloud(u_tex_cloud, u_tex_noise, 1.0, uvSolid, eyePos, toFrag, NUM_SAMPLE, ldepth(dMin) * frx_viewDistance * 4.);
+		vec4 clouds = customClouds(u_vanilla_clouds, u_vanilla_clouds_depth, u_tex_nature, u_tex_noise, 1.0, uvSolid, eyePos, toFrag, NUM_SAMPLE, ldepth(dMin) * frx_viewDistance * 4.);
 		base.rgb = base.rgb * (1.0 - clouds.a) + clouds.rgb * clouds.a;
 	}
 
@@ -118,7 +120,7 @@ void main()
 
 	if (next.a != 0.0) {
 		vec3 albedo = next.rgb;
-		next = shading(next, u_tex_cloud, light, material, eyePos, normal, nextIsUnderwater);
+		next = shading(next, u_tex_nature, light, material, eyePos, normal, nextIsUnderwater);
 		next.a = sqrt(next.a);
 	}
 

@@ -102,11 +102,11 @@ vec4 celestFrag(in Rect celestRect, sampler2D ssun, sampler2D smoon, vec3 worldV
 
 vec4 customSky(sampler2D sunTexture, sampler2D moonTexture, vec3 toSky, bool isUnderwater, float skyVisible, float celestVisible)
 {
-	vec4 output;
+	vec4 result = vec4(0.0, 0.0, 0.0, 1.0);
 	float skyDotUp = dot(toSky, vec3(0.0, 1.0, 0.0));
 
 	if (frx_cameraInWater == 1 && isUnderwater || isUnderwater || frx_worldIsNether == 1) {
-		output.rgb = atmosv_hdrFogColorRadiance;
+		result.rgb = atmosv_hdrFogColorRadiance;
 	} else if (frx_worldIsOverworld == 1 && v_not_in_void > 0.0) {
 		// Sky, sun and moon
 		#if SKY_MODE == SKY_MODE_LUMI
@@ -114,15 +114,15 @@ vec4 customSky(sampler2D sunTexture, sampler2D moonTexture, vec3 toSky, bool isU
 		float starEraser = celestColor.a;
 		float celestStr  = mix(1.0, STARS_STR, v_night);
 
-		output.rgb  = atmos_hdrSkyGradientRadiance(toSky) * skyVisible;
-		output.rgb += celestColor.rgb * (1. - frx_rainGradient) * celestStr * celestVisible;
+		result.rgb  = atmos_hdrSkyGradientRadiance(toSky) * skyVisible;
+		result.rgb += celestColor.rgb * (1. - frx_rainGradient) * celestStr * celestVisible;
 		#endif
 
 		#if SKY_MODE == SKY_MODE_LUMI || SKY_MODE == SKY_MODE_VANILLA_STARRY
 		// Stars
 		const vec3 NON_MILKY_AXIS = vec3(-0.598964, 0.531492, 0.598964);
 
-		float starry = l2_clampScale(0.4, 0.0, frx_luminance(output.rgb)) * v_night;
+		float starry = l2_clampScale(0.4, 0.0, frx_luminance(result.rgb)) * v_night;
 			 starry *= l2_clampScale(-0.6, -0.5, skyDotUp); //prevent star near the void core
 
 		float milkyness   = l2_clampScale(0.7, 0.0, abs(dot(NON_MILKY_AXIS, toSky.xyz)));
@@ -143,7 +143,7 @@ vec4 customSky(sampler2D sunTexture, sampler2D moonTexture, vec3 toSky, bool isU
 
 		vec3 starRadiance = vec3(star) * STARS_STR * 0.1 * LUMI_STAR_BRIGHTNESS + NEBULAE_COLOR * milkyHaze;
 
-		output.rgb += starRadiance * skyVisible;
+		result.rgb += starRadiance * skyVisible;
 		#endif
 	}
 
@@ -152,10 +152,10 @@ vec4 customSky(sampler2D sunTexture, sampler2D moonTexture, vec3 toSky, bool isU
 		float voidCore = l2_clampScale(-0.8 + v_near_void_core, -1.0 + v_near_void_core, skyDotUp); 
 		vec3 voidColor = mix(vec3(0.0), VOID_CORE_COLOR, voidCore);
 
-		output.rgb = mix(voidColor, output.rgb, v_not_in_void) * skyVisible;
+		result.rgb = mix(voidColor, result.rgb, v_not_in_void) * skyVisible;
 	}
 
-	return output;
+	return result;
 }
 
 vec4 customSky(sampler2D sunTexture, sampler2D moonTexture, vec3 toSky, bool isUnderwater) {

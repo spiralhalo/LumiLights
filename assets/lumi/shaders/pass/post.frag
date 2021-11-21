@@ -12,6 +12,8 @@
 uniform sampler2D u_color;
 uniform sampler2D u_albedo;
 uniform sampler2D u_depth;
+uniform sampler2D u_vanilla_clouds;
+uniform sampler2D u_vanilla_clouds_depth;
 
 uniform sampler2DArray u_gbuffer_main_etc;
 uniform sampler2DArray u_gbuffer_light;
@@ -20,7 +22,7 @@ uniform sampler2DArrayShadow u_gbuffer_shadow;
 
 uniform sampler2D u_tex_sun;
 uniform sampler2D u_tex_moon;
-uniform sampler2D u_tex_cloud;
+uniform sampler2D u_tex_nature;
 uniform sampler2D u_tex_noise;
 
 out vec4 fragColor;
@@ -45,7 +47,7 @@ void main()
 	fragColor += reflection(albedo.rgb, u_color, u_gbuffer_main_etc, u_gbuffer_light, u_gbuffer_normal, u_depth, u_gbuffer_shadow, u_tex_sun, u_tex_moon, u_tex_noise, idLight, idMaterial, idNormal, idMicroNormal, eyePos);
 	fragColor = fog(fragColor, eyePos, lighty);
 
-	vec4 clouds = volumetricCloud(u_tex_cloud, u_tex_noise, dMin, v_texcoord, eyePos, normalize(eyePos), NUM_SAMPLE);
+	vec4 clouds = customClouds(u_vanilla_clouds, u_vanilla_clouds_depth, u_tex_nature, u_tex_noise, dMin, v_texcoord, eyePos, normalize(eyePos), NUM_SAMPLE);
 	fragColor.rgb = fragColor.rgb * (1.0 - clouds.a) + clouds.rgb * clouds.a;
 
 	fragColor = ldr_tonemap(fragColor);

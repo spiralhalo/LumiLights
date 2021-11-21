@@ -48,6 +48,8 @@
 				"u_vanilla_depth",
 				"u_weather_color",
 				"u_weather_depth",
+				"u_vanilla_clouds",
+				"u_vanilla_clouds_depth",
 
 				"u_gbuffer_main_etc",
 				"u_gbuffer_depth",
@@ -57,7 +59,7 @@
 
 				"u_tex_sun",
 				"u_tex_moon",
-				"u_tex_cloud",
+				"u_tex_nature",
 				"u_tex_glint",
 				"u_tex_noise",
 			]
@@ -103,6 +105,8 @@
 					"vanilla_depth",
 					"weather_color",
 					"weather_depth",
+					"junk_color",
+					"junk_depth",
 
 					"gbuffer_main_etc",
 					"gbuffer_depth",

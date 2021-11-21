@@ -17,6 +17,8 @@
 				"u_color",
 				"u_albedo",
 				"u_depth",
+				"u_vanilla_clouds",
+				"u_vanilla_clouds_depth",
 
 				"u_gbuffer_main_etc",
 				"u_gbuffer_light",
@@ -25,7 +27,7 @@
 
  				"u_tex_sun",
  				"u_tex_moon",
-				"u_tex_cloud",
+				"u_tex_nature",
  				"u_tex_noise",
 			]
 		},
@@ -41,6 +43,8 @@
 					"color_result",
 					"color_albedo",
 					"color_depth",
+					"junk_color",
+					"junk_depth",
 
 					"gbuffer_main_etc",
 					"gbuffer_light",

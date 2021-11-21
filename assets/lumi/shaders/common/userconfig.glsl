@@ -8,7 +8,6 @@
 #include lumi:lighting_config
 #include lumi:reflection_config
 #include lumi:shadow_config
-#include lumi:ssao_config
 #include lumi:water_config
 
 /*******************************************************
