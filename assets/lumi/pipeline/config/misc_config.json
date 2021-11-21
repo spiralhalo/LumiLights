@@ -5,7 +5,7 @@
 			categoryKey: "config.lumi_lights.category.aesthetics",
 			options: {
 				water_color: {
-					default: "natural",
+					default: "natural_blue",
 					choices: ["natural_blue", "vanilla", "no_texture", "no_color"],
 					enum: true,
 					prefix: "water_color_",
