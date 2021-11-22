@@ -49,8 +49,8 @@
 					descriptionKey: "config.lumi_lights.help.bloom_intensity"
 				},
 				bloom_scale: {
-					default: 50,
-					min: 3,
+					default: 10,
+					min: 10,
 					max: 50,
 					nameKey: "config.lumi_lights.value.bloom_scale",
 					descriptionKey: "config.lumi_lights.help.bloom_scale"

@@ -13,8 +13,8 @@ uniform sampler2D u_blend;
 out vec4 fragColor;
 
 const float BLOOM_INTENSITY_FLOAT	 = BLOOM_INTENSITY / 50.0;
-const vec2 BLOOM_DOWNSAMPLE_DIST_VEC = vec2(BLOOM_SCALE / 25.0);
-const vec2 BLOOM_UPSAMPLE_DIST_VEC	 = max(vec2(0.1), BLOOM_DOWNSAMPLE_DIST_VEC * 0.1);
+const vec2 BLOOM_DOWNSAMPLE_DIST_VEC = vec2(BLOOM_SCALE / 10. * 2.); // must be at least one
+const vec2 BLOOM_UPSAMPLE_DIST_VEC	 = BLOOM_DOWNSAMPLE_DIST_VEC / 10.; // not sure why this is
 
 void main()
 {
