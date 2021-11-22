@@ -27,7 +27,9 @@ void main()
 	float dSolid = texture(u_vanilla_depth, v_texcoord).r;
 	vec4  cSolid = texture(u_vanilla_color, v_texcoord);
 
-	if (dSolid == 1.0) {
+	bool f1Pressed = texture(u_vanilla_depth, vec2(0.5, 1.0)).r != 1.0;
+
+	if (dSolid == 1.0 || f1Pressed) {
 		fragColor = cSolid;
 	} else {
 		vec4 tempPos = frx_inverseViewProjectionMatrix * vec4(2.0 * v_texcoord - 1.0, 2.0 * dSolid - 1.0, 1.0);
