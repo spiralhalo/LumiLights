@@ -9,7 +9,7 @@ const float FOG_DENSITY			   = FOG_DENSITY_RELATIVE / 20.0;
 const float UNDERWATER_FOG_FAR	   = UNDERWATER_FOG_FAR_CHUNKS * 16.0;
 const float UNDERWATER_FOG_DENSITY = UNDERWATER_FOG_DENSITY_RELATIVE / 20.0;
 
-vec4 fog(vec4 color, vec3 eyePos, float lighty)
+vec4 fog(vec4 color, vec3 eyePos, vec3 toFrag, float lighty)
 {
 	float pFogDensity = frx_cameraInFluid == 1 ? UNDERWATER_FOG_DENSITY : FOG_DENSITY;
 	float pFogFar     = frx_cameraInFluid == 1 ? UNDERWATER_FOG_FAR     : FOG_FAR;
@@ -33,22 +33,22 @@ vec4 fog(vec4 color, vec3 eyePos, float lighty)
 		fogFactor = 1.0;
 	}
 
-	float distToCamera = length(eyePos);
-	float distFactor   = min(1.0, distToCamera / pFogFar);
+	float distToEye  = length(eyePos);
+	float distFactor = min(1.0, distToEye / pFogFar);
 
 	fogFactor = clamp(fogFactor * distFactor, 0.0, 1.0);
 
-	float aboveGround	 = l2_clampScale(0.0, 0.2, max(lighty, frx_smoothedEyeBrightness.y));
-	vec3  worldVec		 = normalize(eyePos);
-	vec3  fogColor		 = mix(atmos_hdrCaveFogRadiance(), atmos_hdrFogColorRadiance(worldVec), aboveGround);
-	float smoothSkyBlend = frx_cameraInFluid == 1 ? 0.0 : min(distToCamera, frx_viewDistance) / frx_viewDistance * aboveGround;
-	vec3  worldVecMod	 = worldVec;
-		  worldVecMod.y	 = mix(1.0, worldVecMod.y, pow(smoothSkyBlend, 0.3));
-		  fogColor		 = mix(fogColor, atmos_hdrSkyGradientRadiance(worldVecMod), smoothSkyBlend);
+	// resolve horizon blend
+	float skyBlend	  = frx_cameraInFluid == 1 ? 0.0 : min(distToEye, frx_viewDistance) / frx_viewDistance;
+	vec3  toFragMod	  = toFrag;
+		  toFragMod.y = mix(1.0, toFrag.y, pow(skyBlend, 0.3)); // ??
+	vec3  fogColor	  = mix(atmos_hdrFogColorRadiance(toFrag), atmos_hdrSkyGradientRadiance(toFragMod), skyBlend);
 
-	vec4 blended;
+	// resolve cave fog
+	float aboveGround = frx_smoothedEyeBrightness.y;
+	fogColor = mix(atmos_hdrCaveFogRadiance(), fogColor, aboveGround);
 
-	blended = mix(color, vec4(fogColor, 1.0), fogFactor);
+	vec4 blended = mix(color, vec4(fogColor, 1.0), fogFactor);
 
 	return blended;
 }

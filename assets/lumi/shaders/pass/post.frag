@@ -43,11 +43,12 @@ void main()
 
 	vec4 tempPos = frx_inverseViewProjectionMatrix * vec4(2.0 * v_texcoord - 1.0, 2.0 * dMin - 1.0, 1.0);
 	vec3 eyePos  = tempPos.xyz / tempPos.w;
+	vec3 toFrag  = normalize(eyePos);
 
 	fragColor += reflection(albedo.rgb, u_color, u_gbuffer_main_etc, u_gbuffer_light, u_gbuffer_normal, u_depth, u_gbuffer_shadow, u_tex_sun, u_tex_moon, u_tex_noise, idLight, idMaterial, idNormal, idMicroNormal, eyePos);
-	fragColor = fog(fragColor, eyePos, lighty);
+	fragColor = fog(fragColor, eyePos, toFrag, lighty);
 
-	vec4 clouds = customClouds(u_vanilla_clouds, u_vanilla_clouds_depth, u_tex_nature, u_tex_noise, dMin, v_texcoord, eyePos, normalize(eyePos), NUM_SAMPLE);
+	vec4 clouds = customClouds(u_vanilla_clouds, u_vanilla_clouds_depth, u_tex_nature, u_tex_noise, dMin, v_texcoord, eyePos, toFrag, NUM_SAMPLE);
 	fragColor.rgb = fragColor.rgb * (1.0 - clouds.a) + clouds.rgb * clouds.a;
 
 	fragColor = ldr_tonemap(fragColor);

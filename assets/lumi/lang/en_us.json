@@ -15,8 +15,8 @@
 	"pipeline.lumi_shadow_4x.desc": "Lumi Lights with ultra high shadow resolution",
 
 	"config.lumi_lights.category.shadow": "Shadows",
-	"config.lumi_lights.value.shadow_filtering": "Shadow filtering",
-	"config.lumi_lights.help.shadow_filtering": "Shadow filtering mode affects softness and performance",
+	"config.lumi_lights.value.filter_shadows": "Shadow smoothing",
+	"config.lumi_lights.help.filter_shadows": "Smoother shadows",
 	"config.lumi_lights.value.name_tag_shadow": "Name tag shadow",
 	"config.lumi_lights.help.name_tag_shadow": "Render name tag shadow",
 
