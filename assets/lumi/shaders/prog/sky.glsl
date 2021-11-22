@@ -91,10 +91,10 @@ vec4 celestFrag(in Rect celestRect, sampler2D ssun, sampler2D smoon, vec3 worldV
 				celestColor += vec3(0.01) * hdr_fromGamma(fullMoonColor);
 			}
 		} else {
-			celestColor = hdr_fromGamma(texture(ssun, celestUV).rgb) * 2.0;
+			celestColor = hdr_fromGamma(texture(ssun, celestUV).rgb) * EMISSIVE_LIGHT_STR;
 		}
 
-		opacity = max(opacity, frx_luminance(clamp(celestColor, 0.0, 1.0)) * 0.25);
+		opacity = max(opacity, frx_luminance(clamp(celestColor, 0.0, 1.0)));
 	}
 
 	return vec4(celestColor, opacity);
