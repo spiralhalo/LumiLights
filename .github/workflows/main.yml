@@ -49,7 +49,7 @@ jobs:
       - name: Upload Release
         uses: ncipollo/release-action@v1
         with:
-            name: 'Release ${{ steps.tag_version.outputs.new_tag }} - ${{ github.event.inputs.title }}'
+            name: 'Lumi Lights ${{ steps.tag_version.outputs.new_tag }} - ${{ github.event.inputs.title }}'
             body: ${{ steps.tag_version.outputs.changelog }}
             tag: ${{ steps.tag_version.outputs.new_tag }}
             artifacts: "${{ github.event.repository.name }}-${{ steps.tag_version.outputs.new_tag }}.zip"
