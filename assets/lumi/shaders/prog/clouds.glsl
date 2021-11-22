@@ -55,15 +55,13 @@ float sampleCloud(vec3 worldPos, sampler2D natureTexture)
 
 bool optimizeStart(float startTravel, float maxDist, vec3 toSky, inout vec3 worldRayPos, inout float numSample, out float sampleSize)
 {
-	if (startTravel > maxDist) return true;
-
 	float preTraveled = 0.0;
 	float nearBorder = 0.0;
 
 	// Optimization block
 #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
 	nearBorder = CLOUD_MIN_Y / toSky.y;
-	maxDist = CLOUD_MAX_Y / toSky.y;
+	maxDist = min(maxDist, CLOUD_MAX_Y / toSky.y);
 #else
 	float farBorder = maxDist;
 
@@ -83,7 +81,9 @@ bool optimizeStart(float startTravel, float maxDist, vec3 toSky, inout vec3 worl
 
 	maxDist = min(maxDist, farBorder);
 #endif
-	// nearBorder = max(nearBorder, startTravel);
+	nearBorder = max(nearBorder, startTravel);
+
+	if (nearBorder > maxDist) return true;
 
 	worldRayPos += toSky * nearBorder;
 	preTraveled += nearBorder;

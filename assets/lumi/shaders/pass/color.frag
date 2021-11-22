@@ -85,7 +85,7 @@ void main()
 			base = fog(base, eyePos, toFrag, light.y);
 		}
 
-		vec4 clouds = customClouds(u_vanilla_clouds, u_vanilla_clouds_depth, u_tex_nature, u_tex_noise, 1.0, uvSolid, eyePos, toFrag, NUM_SAMPLE, ldepth(dMin) * frx_viewDistance * 4.);
+		vec4 clouds = customClouds(u_vanilla_clouds, u_vanilla_clouds_depth, u_tex_nature, u_tex_noise, dSolid, uvSolid, eyePos, toFrag, NUM_SAMPLE, ldepth(dMin) * frx_viewDistance * 4.);
 		base.rgb = base.rgb * (1.0 - clouds.a) + clouds.rgb * clouds.a;
 	}
 
