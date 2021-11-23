@@ -43,7 +43,7 @@ const float CLOUD_COVERAGE = clamp(CLOUD_COVERAGE_RELATIVE * 0.1, 0.0, 1.0);
 const float CLOUD_PUFFINESS = clamp(CLOUD_PUFFINESS_RELATIVE * 0.1, 0.0, 1.0);
 const float CLOUD_BRIGHTNESS = clamp(CLOUD_BRIGHTNESS_RELATIVE * 0.1, 0.0, 1.0);
 
-float sampleCloud(vec3 worldPos, sampler2D natureTexture)
+float sampleCloud(sampler2D natureTexture, vec3 worldPos)
 {
 	vec2 uv = worldXz2Uv(worldPos.xz);
 	float tF = l2_clampScale(0.35 * (1.0 - frx_rainGradient), 1.0, texture(natureTexture, uv).r);
@@ -107,7 +107,7 @@ bool optimizeStart(float startTravel, float maxDist, vec3 toSky, inout vec3 worl
 	return false;
 }
 
-vec2 rayMarchCloud(sampler2D natureTexture, sampler2D noiseTexture, vec2 texcoord, vec3 eyePos, vec3 toSky, float numSample, float startTravel)
+vec2 rayMarchCloud(sampler2D natureTexture, sampler2D noiseTexture, vec2 texcoord, float maxDist, vec3 toSky, float numSample, float startTravel)
 {
 	vec3 lightUnit = frx_skyLightVector * LIGHT_SAMPLE_SIZE;
 	vec3 worldRayPos = vec3(0.0);
@@ -118,46 +118,36 @@ vec2 rayMarchCloud(sampler2D natureTexture, sampler2D noiseTexture, vec2 texcoor
 
 	float sampleSize = 1.0;
 
-	if (optimizeStart(startTravel, length(eyePos), toSky, worldRayPos, numSample, sampleSize)) return vec2(0.0);
+	if (optimizeStart(startTravel, maxDist, toSky, worldRayPos, numSample, sampleSize)) return vec2(0.0);
 
-	vec3 unitSample = toSky * sampleSize;
+	vec3 unitRay = toSky * sampleSize;
 	float tileJitter = getRandomFloat(noiseTexture, texcoord, frxu_size) * CLOUD_MARCH_JITTER_STRENGTH;
 
-	worldRayPos += unitSample * tileJitter;
+	worldRayPos += unitRay * tileJitter;
 
 	float lightEnergy = 0.0;
 	float transmittance = 1.0;
 
 	// Adapted from Sebastian Lague's method
-	int i = 0;
-	while (i < numSample) {
-		i ++;
-		worldRayPos += unitSample;
+	for (int i = 0; i < numSample; i++) {
+		worldRayPos += unitRay;
 
-		float sampledDensity = sampleCloud(worldRayPos, natureTexture);
+		float atRayDensity = sampleCloud(natureTexture, worldRayPos) * sampleSize;
 
-		if (sampledDensity > 0) {
-			vec3 occlusionWorldPos = worldRayPos;
-			float occlusionDensity = 0.0;
-			int j = 0;
+		vec3 toLightPos = worldRayPos;
+		float toLightDensity = 0.0;
 
-			while (j < LIGHT_SAMPLE) {
-				j ++;
-				occlusionWorldPos += lightUnit;
-				occlusionDensity += sampleCloud(occlusionWorldPos, natureTexture);
-			}
-
-			occlusionDensity *= LIGHT_SAMPLE_SIZE; // this is what *stepSize means
-
-			float lightTransmittance = exp(-occlusionDensity * LIGHT_ABSORPTION);
-
-			lightEnergy += sampledDensity * transmittance * lightTransmittance * sampleSize; // * phaseVal;
-			transmittance *= exp(-sampledDensity * sampleSize);
-
-			if (transmittance < 0.01) {
-				break;
-			}
+		for (int j = 0; j < LIGHT_SAMPLE; j++) {
+			toLightPos += lightUnit;
+			toLightDensity += sampleCloud(natureTexture, toLightPos);
 		}
+
+		toLightDensity *= LIGHT_SAMPLE_SIZE;
+
+		float lightAtRay = exp(-toLightDensity * LIGHT_ABSORPTION);
+
+		lightEnergy += atRayDensity * transmittance * lightAtRay;
+		transmittance *= exp(-atRayDensity);
 	}
 
 	return vec2(lightEnergy, 1.0 - min(1.0, transmittance));
@@ -168,9 +158,13 @@ vec4 customClouds(sampler2D cloudsBuffer, sampler2D cloudsDepthBuffer, sampler2D
 #ifdef VOLUMETRIC_CLOUDS
 #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
 	if (depth != 1. || toSky.y <= 0) return vec4(0.0);
+
+	float maxDist = 1024.; // far plane at 16 rd
+#else
+	float maxDist = min(length(eyePos), frx_viewDistance * 4.); // actual far plane, prevents clipping
 #endif
 
-	vec2 result = rayMarchCloud(natureTexture, noiseTexture,  texcoord, eyePos, toSky, numSample, startTravel);
+	vec2 result = rayMarchCloud(natureTexture, noiseTexture, texcoord, maxDist, toSky, numSample, startTravel);
 
 	float rainBrightness = mix(0.13, 0.05, hdr_fromGammaf(frx_rainGradient)); // emulate dark clouds
 	vec3  cloudShading	 = atmos_hdrCloudColorRadiance(toSky);
@@ -182,10 +176,6 @@ vec4 customClouds(sampler2D cloudsBuffer, sampler2D cloudsDepthBuffer, sampler2D
 
 	celestRadiance = celestRadiance * result.x * rainBrightness * CLOUD_BRIGHTNESS;
 	vec3 color = celestRadiance + cloudShading;
-
-#if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
-	result.y *= smoothstep(0.0, 0.2, toSky.y);
-#endif
 
 	return vec4(color, result.y);
 #else
