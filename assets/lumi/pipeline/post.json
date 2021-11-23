@@ -19,6 +19,8 @@
 				"u_depth",
 				"u_vanilla_clouds",
 				"u_vanilla_clouds_depth",
+				"u_vanilla_transl_color",
+				"u_vanilla_transl_depth",
 
 				"u_gbuffer_main_etc",
 				"u_gbuffer_light",
@@ -45,6 +47,8 @@
 					"color_depth",
 					"junk_color",
 					"junk_depth",
+					"vanilla_transl_color",
+					"vanilla_transl_depth",
 
 					"gbuffer_main_etc",
 					"gbuffer_light",

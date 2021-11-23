@@ -114,7 +114,8 @@ void main()
 		#ifdef WATER_FOAM
 		if (transIsWater) {
 			// vec3 viewVertexNormal = frx_normalModelMatrix * (texture(u_gbuffer_normal, vec3(v_texcoord, ID_TRANS_NORM)).xyz * 2.0 - 1.0);
-			foamPreprocess(next, material, u_tex_nature, eyePos + frx_cameraPos, cSolid.rgb, dVanilla, dTrans);
+			vec3 vertexNormal = texture(u_gbuffer_normal, vec3(v_texcoord, ID_TRANS_NORM)).xyz * 2.0 - 1.0;
+			foamPreprocess(next, material, u_tex_nature, eyePos + frx_cameraPos, vertexNormal.y, cSolid.rgb, dVanilla, dTrans);
 		}
 		#endif
 	} else if (dMin == dParts) {

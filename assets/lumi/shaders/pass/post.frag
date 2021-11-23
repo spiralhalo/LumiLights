@@ -1,5 +1,6 @@
 #include lumi:shaders/pass/header.glsl
 
+#include lumi:shaders/lib/taa_jitter.glsl
 #include lumi:shaders/prog/clouds.glsl
 #include lumi:shaders/prog/fog.glsl
 #include lumi:shaders/prog/reflection.glsl
@@ -14,6 +15,8 @@ uniform sampler2D u_albedo;
 uniform sampler2D u_depth;
 uniform sampler2D u_vanilla_clouds;
 uniform sampler2D u_vanilla_clouds_depth;
+uniform sampler2D u_vanilla_transl_color;
+uniform sampler2D u_vanilla_transl_depth;
 
 uniform sampler2DArray u_gbuffer_main_etc;
 uniform sampler2DArray u_gbuffer_light;
@@ -46,6 +49,12 @@ void main()
 	vec3 toFrag  = normalize(eyePos);
 
 	fragColor += reflection(albedo.rgb, u_color, u_gbuffer_main_etc, u_gbuffer_light, u_gbuffer_normal, u_depth, u_gbuffer_shadow, u_tex_sun, u_tex_moon, u_tex_noise, idLight, idMaterial, idNormal, idMicroNormal, eyePos);
+
+	if (texture(u_vanilla_transl_depth, v_texcoord).r < dMin) {
+		vec4 cVanillaTrans = texture(u_vanilla_transl_color, v_texcoord);
+		fragColor.rgb = fragColor.rgb * (1.0 - cVanillaTrans.a) + hdr_fromGamma(cVanillaTrans.rgb) * cVanillaTrans.a;
+	}
+
 	fragColor = fog(fragColor, eyePos, toFrag, lighty);
 
 	vec4 clouds = customClouds(u_vanilla_clouds, u_vanilla_clouds_depth, u_tex_nature, u_tex_noise, dMin, v_texcoord, eyePos, toFrag, NUM_SAMPLE);

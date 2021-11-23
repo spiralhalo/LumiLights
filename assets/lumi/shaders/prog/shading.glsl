@@ -58,9 +58,9 @@ float denoisedShadowFactor(sampler2DArrayShadow shadowMap, vec2 texcoord, vec3 e
 
 	float val = calcShadowFactor(shadowMap, shadowViewPos);
 
-	#ifdef SHADOW_WORKAROUND
+#ifdef SHADOW_WORKAROUND
 	val *= l2_clampScale(0.03125, 0.04, lighty);
-	#endif
+#endif
 
 	return val;
 #else
