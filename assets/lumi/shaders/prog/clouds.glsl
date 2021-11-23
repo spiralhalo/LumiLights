@@ -155,6 +155,11 @@ vec2 rayMarchCloud(sampler2D natureTexture, sampler2D noiseTexture, vec2 texcoor
 
 vec4 customClouds(sampler2D cloudsBuffer, sampler2D cloudsDepthBuffer, sampler2D natureTexture, sampler2D noiseTexture, float depth, vec2 texcoord, vec3 eyePos, vec3 toSky, int numSample, float startTravel)
 {
+	if (frx_worldHasSkylight != 1) {
+		float dClouds = texture(cloudsDepthBuffer, texcoord).r;
+
+		return dClouds <= depth ? vec4(texture(cloudsBuffer, texcoord).r) : vec4(0.0);
+	}
 #ifdef VOLUMETRIC_CLOUDS
 #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
 	if (depth != 1. || toSky.y <= 0) return vec4(0.0);
