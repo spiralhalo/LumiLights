@@ -29,6 +29,11 @@
 					nameKey: "config.lumi_lights.value.water_caustics",
 					descriptionKey: "config.lumi_lights.help.water_caustics"
 				},
+				water_foam: {
+					default: true,
+					nameKey: "config.lumi_lights.value.water_foam",
+					descriptionKey: "config.lumi_lights.help.water_foam"
+				},
 				refraction_effect: {
 					default: true,
 					nameKey: "config.lumi_lights.value.refraction_effect",

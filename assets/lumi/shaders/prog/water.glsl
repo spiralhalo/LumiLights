@@ -56,8 +56,7 @@ float caustics(sampler2D natureTexture, vec3 worldPos, float vertexNormaly)
 	vec2 moveA = vec2(1. + yMove, 1. - yMove) * frx_renderSeconds;
 	vec2 moveB = vec2(1. + yMove, -1. - yMove) * frx_renderSeconds;
 
-	vec2 uv = worldPos.xz;
-	uv += vec2(-1.0, 1.0) * worldPos.y;
+	vec2 uv = worldPos.xz + vec2(-1.0, 1.0) * worldPos.y;
 
 	vec4 uvuv = vec4(uv + moveA, uv + moveB);
 
@@ -65,6 +64,35 @@ float caustics(sampler2D natureTexture, vec3 worldPos, float vertexNormaly)
 		  e = smoothstep(-1.0, 1.0, e);
 
 	return e;
+}
+
+void foamPreprocess(inout vec4 albedo, inout vec3 material, sampler2D natureTexture, vec3 worldPos, float dSolid, float dTrans)
+{
+	vec2 moveA = vec2(1., 1.) * frx_renderSeconds;
+	vec2 moveB = vec2(1., -1.) * frx_renderSeconds;
+
+	vec2 uv = worldPos.xz + vec2(-1.0, 1.0) * worldPos.y;
+	uv *= vec2(3.0, 3.0 / 1.5); // the / 1.5 part is stretch cancellation. TODO: remove stretch entirely
+
+	vec4 uvuv = vec4(uv + moveA, uv + moveB);
+
+	float tex = textureWater(natureTexture, uvuv, vec2(0.0));
+	tex = smoothstep(0.2, 1.0, tex);
+
+	vec4 foamAlbedo = vec4(1.0);
+	vec3 foamMaterial = vec3(1.0, material.yz);
+
+	// float viewCorrection = pow(viewVertexNormal.y, 5.0); // kinda breaks things near the camera
+	float foam = l2_clampScale(1.0 /*+ viewCorrection*/, 0., (ldepth(dSolid) - ldepth(dTrans)) * frx_viewDistance);
+
+	foam = mix(tex, 1.0, pow(foam, 10.0)) * foam;
+
+	foamAlbedo.rgb *= (foam + (1.0-foam) * (albedo.rgb) / l2_max3(albedo.rgb));
+
+	foam *= 0.7;
+
+	albedo = mix(albedo, foamAlbedo, foam);
+	material = mix(material, foamMaterial, foam);
 }
 #else
 
@@ -74,8 +102,7 @@ float sampleWaterNoise(sampler2D natureTexture, vec3 worldPos, vec2 uvMove, floa
 	vec2 moveA = vec2(1. + yMove * 5., 1. - yMove) * frx_renderSeconds;
 	vec2 moveB = vec2(1. + yMove * 5., -1. + yMove) * frx_renderSeconds;
 
-	vec2 uv = worldPos.xz;
-	uv.x += worldPos.y;
+	vec2 uv = worldPos.xz + vec2(worldPos.y, 0.0);
 
 	vec4 uvuv = vec4(uv + moveA, uv + moveB);
 

@@ -39,12 +39,12 @@ layout(location = 2) out vec4 fragAlbedo;
 
 void main()
 {
-	float dSolid = texture(u_vanilla_depth, v_texcoord).r;
+	float dVanilla = texture(u_vanilla_depth, v_texcoord).r;
 	float dTrans = texture(u_gbuffer_depth, vec3(v_texcoord, 0.)).r;
 
-	vec2 uvSolid = refractSolidUV(u_gbuffer_normal, u_vanilla_depth, dSolid, dTrans);
+	vec2 uvSolid = refractSolidUV(u_gbuffer_normal, u_vanilla_depth, dVanilla, dTrans);
 
-	dSolid = texture(u_vanilla_depth, uvSolid).r;
+	float dSolid = texture(u_vanilla_depth, uvSolid).r;
 
 	vec4  cSolid = texture(u_vanilla_color, uvSolid);
 	vec4  cTrans = texture(u_gbuffer_main_etc, vec3(v_texcoord, ID_TRANS_COLR));
@@ -105,11 +105,19 @@ void main()
 	light	 = vec4(0.0, 1.0, 0.0, 0.0);
 	material = vec3(1.0, 0.0, 0.04);
 	normal	 = -frx_cameraView;
+	vec4 albedoNext = next;
 
 	if (dMin == dTrans) {
 		light    = texture(u_gbuffer_light, vec3(v_texcoord, ID_TRANS_LIGT));
 		material = texture(u_gbuffer_main_etc, vec3(v_texcoord, ID_TRANS_MATS)).xyz;
-		normal   = texture(u_gbuffer_normal, vec3(v_texcoord, 3.)).xyz * 2.0 - 1.0;
+		normal   = texture(u_gbuffer_normal, vec3(v_texcoord, ID_TRANS_MNORM)).xyz * 2.0 - 1.0;
+
+		#ifdef WATER_FOAM
+		if (transIsWater) {
+			// vec3 viewVertexNormal = frx_normalModelMatrix * (texture(u_gbuffer_normal, vec3(v_texcoord, ID_TRANS_NORM)).xyz * 2.0 - 1.0);
+			foamPreprocess(albedoNext, material, u_tex_nature, eyePos + frx_cameraPos, dVanilla, dTrans);
+		}
+		#endif
 	} else if (dMin == dParts) {
 		light    = texture(u_gbuffer_light, vec3(v_texcoord, ID_PARTS_LIGT));
 	}
@@ -119,8 +127,7 @@ void main()
 	light.w = transIsWater ? lightmapRemap (light.y) : denoisedShadowFactor(u_gbuffer_shadow, v_texcoord, eyePos, dMin, light.y);
 
 	if (next.a != 0.0) {
-		vec3 albedo = next.rgb;
-		next = shading(next, u_tex_nature, light, material, eyePos, normal, nextIsUnderwater);
+		next = shading(albedoNext, u_tex_nature, light, material, eyePos, normal, nextIsUnderwater);
 		next.a = sqrt(next.a);
 	}
 

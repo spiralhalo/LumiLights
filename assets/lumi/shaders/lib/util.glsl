@@ -1,3 +1,5 @@
+#include frex:shaders/api/view.glsl
+
 /*******************************************************
  *  lumi:shaders/lib/util.glsl
  *******************************************************/
@@ -16,13 +18,10 @@ float l2_max3(vec3 vec) {
 	return max(vec.x, max(vec.y, vec.z));
 }
 
-// #define ldr_ravel(vec) vec4(1.0/(vec.rgb + 1.0), vec.a)
-// #define hdr_unravel(vec) vec4((1.0/vec.rgb) - 1.0, vec.a)
-
-#define l2_near 0.0001
-#define l2_far 1.0
 float ldepth(float depth) {
-	return 2.0 * (l2_near * l2_far) / (l2_far + l2_near - (depth * 2.0 - 1.0) * (l2_far - l2_near));
+	float nearZ = 0.0001 * (32. * 16.) / frx_viewDistance;
+	const float farZ = 1.0;
+	return 2.0 * (nearZ * farZ) / (farZ + nearZ - (depth * 2.0 - 1.0) * (farZ - nearZ));
 }
 
 float l2_clampScale(float e0, float e1, float v){

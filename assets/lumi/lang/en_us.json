@@ -53,6 +53,8 @@
 	"config.lumi_lights.help.water_waves": "Animated water waves texture",
 	"config.lumi_lights.value.water_caustics": "Water caustics effect",
 	"config.lumi_lights.help.water_caustics": "Emulate water caustics",
+	"config.lumi_lights.value.water_foam": "Water foam effect",
+	"config.lumi_lights.help.water_foam": "Emulate water foam around objects",
 	"config.lumi_lights.value.refraction_effect": "Refraction effect",
 	"config.lumi_lights.help.refraction_effect": "Distort objects behind water and glass",
 	"config.lumi_lights.value.reflection_maximum_roughness_relative": "Reflection roughness threshold",
