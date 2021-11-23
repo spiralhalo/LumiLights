@@ -120,6 +120,8 @@ vec3 atmos_hdrSkyGradientRadiance(vec3 world_toSky)
 
 vec3 atmos_hdrCloudColorRadiance(vec3 world_toSky)
 {
+	// TODO: this whole function is kinda cursed
+	world_toSky.y = abs(world_toSky.y);
 	return mix(atmosv_hdrCloudColorRadiance, atmos_hdrSkyGradientRadiance(world_toSky), 0.6);
 }
 #endif

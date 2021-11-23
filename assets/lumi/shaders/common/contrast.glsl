@@ -27,7 +27,7 @@ const float USER_NIGHT_AMBIENT_MULTIPLIER  = clamp(NIGHT_AMBIENT_BRIGHTNESS, 0, 
 	#define _0_SKYLESS_AMBIENT_STR	0.5
 	#define _0_SKYLESS_LIGHT_STR	1.0
 	#define _0_BLOCK_LIGHT_STR		1.5 * USER_BLOCK_MULTIPLIER
-	#define _0_EMISSIVE_LIGHT_STR	3.0
+	#define _0_EMISSIVE_LIGHT_STR	10.0 // want decent lava bloom
 	const float NIGHT_VISION_STR =	1.5;
 	#define _0_STARS_STR			1.0
 	#define LIGHT_RAYS_STR			1.0 // this was never meant to go above 1.0 due to sdr blending

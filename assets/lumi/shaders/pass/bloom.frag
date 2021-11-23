@@ -21,11 +21,8 @@ void main()
 	if (frxu_layer == 0) {
 		vec4 base = hdr_inverseTonemap(texture(u_input, v_texcoord));
 		float luminance = l2_max3(base.rgb); //use max instead of luminance to get some lava action
-		float estimatedExposure = frx_smoothedEyeBrightness.y;
-		const float LOWER_BOUND = 0.0; // based on indoor lava
-		const float UPPER_BOUND = 0.9; // based on semi-comfortable bloom on snowy scapes
-		float minimumLuminance = mix(LOWER_BOUND, UPPER_BOUND, estimatedExposure);
-		float luminanceGate = smoothstep(minimumLuminance, 1.0, luminance);
+		const float MIN_LUM = 0.9; // based on semi-comfortable bloom on snowy scapes
+		float luminanceGate = smoothstep(MIN_LUM, MIN_LUM + 1.0, luminance);
 		fragColor = base * luminanceGate;
 	} else if (frxu_layer == 1) {
 		fragColor = frx_sample13(u_input, v_texcoord, BLOOM_DOWNSAMPLE_DIST_VEC / frxu_size, max(0, frxu_lod - 1));
