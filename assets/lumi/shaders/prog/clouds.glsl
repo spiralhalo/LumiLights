@@ -99,7 +99,7 @@ bool optimizeStart(float startTravel, float maxDist, vec3 toSky, inout vec3 worl
 #else
 	numSample = 16.0 * numSample;
 
-	sampleSize = TEXTURE_RADIUS / float(numSample) * 2.0;
+	sampleSize = frx_viewDistance / float(numSample);
 
 	numSample = min(numSample, toTravel / sampleSize);
 #endif
@@ -121,15 +121,15 @@ vec2 rayMarchCloud(sampler2D natureTexture, sampler2D noiseTexture, vec2 texcoor
 	if (optimizeStart(startTravel, maxDist, toSky, worldRayPos, numSample, sampleSize)) return vec2(0.0);
 
 	vec3 unitRay = toSky * sampleSize;
-	float tileJitter = getRandomFloat(noiseTexture, texcoord, frxu_size) * CLOUD_MARCH_JITTER_STRENGTH;
+	float i = getRandomFloat(noiseTexture, texcoord, frxu_size) * CLOUD_MARCH_JITTER_STRENGTH;
 
-	worldRayPos += unitRay * tileJitter;
+	worldRayPos += unitRay * i; // start position
 
 	float lightEnergy = 0.0;
 	float transmittance = 1.0;
 
 	// Adapted from Sebastian Lague's method
-	for (int i = 0; i < numSample; i++) {
+	for (; i < numSample; i += 1.0) {
 		worldRayPos += unitRay;
 
 		float atRayDensity = sampleCloud(natureTexture, worldRayPos) * sampleSize;

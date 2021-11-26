@@ -51,9 +51,7 @@ void frx_pipelineFragment()
 		diffuse = frx_fragEnableDiffuse ? diffuse : 1.0;
 		frx_fragColor.rgb *= diffuse;
 		frx_fragColor.rgb += autoGlint(u_tex_glint, frx_normalizeMappedUV(frx_texcoord), frx_matGlint);
-	} else {		
-		bool doTBN = true;
-
+	} else {
 		if (pbr_isWater) {
 			/* WATER RECOLOR */
 			#if WATER_COLOR == WATER_COLOR_NO_TEXTURE
@@ -69,11 +67,13 @@ void frx_pipelineFragment()
 			#endif
 
 			#ifdef WATER_WAVES
+			frx_fragNormal = sampleWaterNormal(u_tex_nature, frx_var0.xyz, frx_vertexNormal.y);
+
 			vec3 bitangent = cross(frx_vertexNormal, l2_tangent);
 			mat3 TBN = mat3(l2_tangent, bitangent, frx_vertexNormal);
 
-			frx_fragNormal = TBN * sampleWaterNormal(u_tex_nature, frx_var0.xyz, frx_vertexNormal.y);
-			doTBN = false;
+			frx_fragNormal = TBN * frx_fragNormal;
+			pbrExt_doTBN = false;
 			#endif
 		}
 
@@ -81,12 +81,15 @@ void frx_pipelineFragment()
 
 		#if LUMI_PBR_API == 7
 		pbrExt_resolveProperties();
-		doTBN = pbrExt_doTBN;
 		#endif
 
-		// TODO: TBN multiply
-		if (doTBN && frx_fragNormal.z == 1.0) {
-			frx_fragNormal = frx_vertexNormal;
+		if (pbrExt_doTBN) {
+			if (frx_fragNormal == vec3(0.0, 0.0, 1.0)) {
+				frx_fragNormal = frx_vertexNormal;
+			}
+			// vec3 bitangent = frx_vertexTangent.w * cross(frx_vertexTangent.xyz, frx_vertexNormal);
+			// mat3 TBN = mat3(frx_vertexTangent.xyz, bitangent, frx_vertexNormal);
+			// frx_fragNormal = TBN * frx_fragNormal;
 		}
 
 		#ifdef VANILLA_AO_ENABLED
