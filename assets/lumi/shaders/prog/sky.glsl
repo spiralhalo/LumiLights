@@ -63,12 +63,16 @@ void skySetup()
 
 const vec3 VOID_CORE_COLOR = hdr_fromGamma(vec3(1.0, 0.7, 0.5));
 
-vec4 celestFrag(in Rect celestRect, sampler2D ssun, sampler2D smoon, vec3 worldVec) {
-	vec2 celestUV	 = rect_innerUV(celestRect, worldVec * 1024.);
-	vec3 celestColor = vec3(0.);
-	float opacity	 = 0.0;
+vec4 celestFrag(in Rect celestRect, sampler2D ssun, sampler2D smoon, vec3 worldVec)
+{
+	if (dot(worldVec, frx_skyLightVector) < 0.) return vec4(0.); // no more both at opposites, sorry
 
-	bool isMoon = dot(worldVec, frx_skyLightVector) < 0. ? frx_worldIsMoonlit == 0 : frx_worldIsMoonlit == 1;
+	vec2 celestUV  = rect_innerUV(celestRect, worldVec * 1024.);
+	vec3 celestCol = vec3(0.);
+	vec3 celestTex = vec3(0.);
+	float opacity  = 0.0;
+
+	bool isMoon = frx_worldIsMoonlit == 1;
 
 	if (celestUV == clamp(celestUV, 0.0, 1.0)) {
 		if (isMoon){
@@ -87,17 +91,19 @@ vec4 celestFrag(in Rect celestRect, sampler2D ssun, sampler2D smoon, vec3 worldV
 				celestUV.x += mod(frx_worldDay, 4.) * 0.25;
 				celestUV.y += (mod(frx_worldDay, 8.) >= 4.) ? 0.5 : 0.0;
 
-				celestColor  = hdr_fromGamma(texture(smoon, celestUV).rgb) * 3.0;
-				celestColor += vec3(0.01) * hdr_fromGamma(fullMoonColor);
+				celestTex = hdr_fromGamma(texture(smoon, celestUV).rgb);
+				celestCol = celestTex + vec3(0.01) * hdr_fromGamma(fullMoonColor);
+				celestCol *= atmosv_hdrCelestialRadiance * EMISSIVE_LIGHT_STR;
 			}
 		} else {
-			celestColor = hdr_fromGamma(texture(ssun, celestUV).rgb) * EMISSIVE_LIGHT_STR;
+			celestTex = texture(ssun, celestUV).rgb;
+			celestCol = hdr_fromGamma(celestTex) * atmosv_hdrCelestialRadiance * EMISSIVE_LIGHT_STR;
 		}
 
-		opacity = max(opacity, frx_luminance(clamp(celestColor, 0.0, 1.0)));
+		opacity = max(opacity, frx_luminance(clamp(celestTex, 0.0, 1.0)));
 	}
 
-	return vec4(celestColor, opacity);
+	return vec4(celestCol, opacity);
 }
 
 vec4 customSky(sampler2D sunTexture, sampler2D moonTexture, vec3 toSky, bool isUnderwater, float skyVisible, float celestVisible)

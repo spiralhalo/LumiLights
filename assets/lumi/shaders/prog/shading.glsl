@@ -197,7 +197,7 @@ vec4 shading(vec4 color, sampler2D natureTexture, vec4 light, float ao, vec3 mat
 	vec3  blColor = mix(BLOCK_LIGHT_COLOR, BLOCK_LIGHT_NEUTRAL, blWhite);
 
 	baseLight += blColor * BLOCK_LIGHT_STR * bl;
-	baseLight += atmos_hdrSkyAmbientRadiance() * lightmapRemap(light.y);
+	baseLight += atmosv_hdrSkyAmbientRadiance * lightmapRemap(light.y);
 	baseLight += albedo * light.z * EMISSIVE_LIGHT_STR;
 
 	vec3 shaded = lightPbr(albedo, color.a, baseLight, max(material.x * (1.0 - material.y), 0.5), material.y, f0, normal, toEye, normal);
@@ -224,7 +224,7 @@ vec4 shading(vec4 color, sampler2D natureTexture, vec4 light, float ao, vec3 mat
 
 	shaded *= ao;
 
-	vec3 skyLight = frx_worldHasSkylight * light.w * atmos_hdrCelestialRadiance() * (1. - frx_rainGradient);
+	vec3 skyLight = frx_worldHasSkylight * light.w * atmosv_hdrCelestialRadiance * (1. - frx_rainGradient);
 		 skyLight += frx_worldIsNether * NETHER_SKYLESS_LIGHT_COLOR * USER_NETHER_AMBIENT_MULTIPLIER;
 		 skyLight += (1.0 - max(frx_worldHasSkylight, frx_worldIsNether)) * SKYLESS_LIGHT_COLOR * USER_END_AMBIENT_MULTIPLIER;
 

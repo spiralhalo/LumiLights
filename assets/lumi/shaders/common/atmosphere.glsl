@@ -53,33 +53,13 @@
 
 #endif
 
-vec3 atmos_hdrCelestialRadiance()
-{
-	return atmosv_hdrCelestialRadiance;
-}
-
-vec3 atmos_hdrSkyAmbientRadiance()
-{
-	return atmosv_hdrSkyAmbientRadiance;
-}
-
 #ifdef POST_SHADER
-float atmos_celestIntensity()
-{
-	return atmosv_celestIntensity;
-}
-
-vec3 atmos_hdrCaveFogRadiance()
-{
-	return atmosv_hdrCaveFogRadiance;
-}
-
 #define calcHorizon(worldVec) sqrt(l2_clampScale(1.0, -l2_clampScale(ATMOS_SEA_LEVEL, ATMOS_STRATOSPHERE, frx_cameraPos.y), worldVec.y))
 
 float twilightCalc(vec3 world_toSky) {
 	float isHorizon = calcHorizon(world_toSky);
 	//NB: only works if sun always rise from dead East instead of NE/SE etc.
-	float isTwilight = l2_clampScale(-1.0, 1.0, world_toSky.x * sign(frx_skyLightVector.x));
+	float isTwilight = l2_clampScale(-1.0, 1.0, world_toSky.x * sign(frx_skyLightVector.x) * (1.0 - frx_worldIsMoonlit * 2.0));
 	float result = isTwilight * pow(isHorizon, 5.0) * atmosv_hdrOWTwilightFactor;
 
 	return frx_smootherstep(0., 1., result);
@@ -117,13 +97,6 @@ vec3 atmos_hdrSkyGradientRadiance(vec3 world_toSky)
 	vec3 horizonColor = mix(atmosv_hdrSkyColorRadiance * horizonBrightening, atmosv_hdrOWTwilightSkyRadiance, twilightCalc(world_toSky));
 
 	return mix(atmosv_hdrSkyColorRadiance, horizonColor, skyHorizon);
-}
-
-vec3 atmos_hdrCloudColorRadiance(vec3 world_toSky)
-{
-	// TODO: this whole function is kinda cursed
-	world_toSky.y = abs(world_toSky.y);
-	return mix(atmosv_hdrCloudColorRadiance, atmos_hdrSkyGradientRadiance(world_toSky), 0.6);
 }
 #endif
 
@@ -165,7 +138,7 @@ const vec3[3] CELEST_COLOR =  vec3[](SUNRISE_LIGHT_COLOR, NOON_SUNLIGHT_COLOR, v
 const float[3] TWG_FACTOR  = float[](1.0, 0.0, 0.0); // maps celest color to twilight factor
 const int CELEST_LEN = 8;
 const int[CELEST_LEN] CELEST_INDICES = int[]  (SMONC, SRISC, SRISC, SNONC, SNONC, SRISC, SRISC, SMONC);
-const float[CELEST_LEN] CELEST_TIMES = float[](-0.04, -0.03,  0.01,  0.02,  0.48,  0.49,  0.53,  0.54);
+const float[CELEST_LEN] CELEST_TIMES = float[](-0.05, -0.04,  0.00,  0.01,  0.49,   0.5,  0.54,  0.55);
 
 const int DAYC = 0;
 const int NGTC = 1;
@@ -179,7 +152,7 @@ const vec3[2] SKY_AMBIENT = vec3[](NOON_AMBIENT,  NIGHT_AMBIENT * USER_NIGHT_AMB
 const int SKY_LEN = 4;
 const int[SKY_LEN] SKY_INDICES = int[]  ( NGTC, DAYC, DAYC, NGTC);
 const int[SKY_LEN] CLOUD_INDICES = int[]( NCLC, CLDC, CLDC, NCLC);
-const float[SKY_LEN] SKY_TIMES = float[](-0.04, -0.01, 0.51, 0.54);
+const float[SKY_LEN] SKY_TIMES = float[](-0.05, -0.01, 0.51, 0.55);
 
 void atmos_generateAtmosphereModel()
 {
@@ -210,7 +183,7 @@ void atmos_generateAtmosphereModel()
 	}
 
 	atmosv_hdrCelestialRadiance *= frx_skyLightTransitionFactor;
-	atmosv_hdrCelestialRadiance.gb *= vec2(max(frx_skyLightTransitionFactor, 0.5), frx_skyLightTransitionFactor);
+	atmosv_hdrCelestialRadiance.gb *= vec2(frx_skyLightTransitionFactor * frx_skyLightTransitionFactor);
 
 
 
@@ -264,7 +237,7 @@ void atmos_generateAtmosphereModel()
 	}
 
 	atmosv_hdrOWTwilightSkyRadiance = SKY_COLOR[TWGC];
-	atmosv_hdrOWTwilightSkyRadiance.gb *= vec2(max(frx_skyLightTransitionFactor, 0.5), frx_skyLightTransitionFactor);
+	atmosv_hdrOWTwilightSkyRadiance.gb *= vec2(max(frx_skyLightTransitionFactor, 0.3), frx_skyLightTransitionFactor * frx_skyLightTransitionFactor);
 
 	// prevent custom overworld sky reflection in non-overworld dimension or when the sky mode is not Lumi
 	bool customOWSkyAndFallback =

@@ -3,6 +3,7 @@
 #include frex:shaders/lib/noise/noise2d.glsl
 #include lumi:shaders/common/atmosphere.glsl
 #include lumi:shaders/common/texconst.glsl
+#include lumi:shaders/prog/fog.glsl
 #include lumi:shaders/prog/tile_noise.glsl
 
 /*******************************************************
@@ -53,7 +54,7 @@ float sampleCloud(sampler2D natureTexture, vec3 worldPos)
 	return smoothstep(0.0, 1.0 - 0.7 * CLOUD_PUFFINESS, yF * tF);
 }
 
-bool optimizeStart(float startTravel, float maxDist, vec3 toSky, inout vec3 worldRayPos, inout float numSample, out float sampleSize)
+bool optimizeStart(float startTravel, float maxDist, vec3 toSky, inout vec3 worldRayPos, inout float numSample, out float sampleSize, out float distanceTotal)
 {
 	float preTraveled = 0.0;
 	float nearBorder = 0.0;
@@ -104,10 +105,12 @@ bool optimizeStart(float startTravel, float maxDist, vec3 toSky, inout vec3 worl
 	numSample = min(numSample, toTravel / sampleSize);
 #endif
 
+	distanceTotal = preTraveled;
+
 	return false;
 }
 
-vec2 rayMarchCloud(sampler2D natureTexture, sampler2D noiseTexture, vec2 texcoord, float maxDist, vec3 toSky, float numSample, float startTravel)
+vec3 rayMarchCloud(sampler2D natureTexture, sampler2D noiseTexture, vec2 texcoord, float maxDist, vec3 toSky, float numSample, float startTravel)
 {
 	vec3 lightUnit = frx_skyLightVector * LIGHT_SAMPLE_SIZE;
 	vec3 worldRayPos = vec3(0.0);
@@ -117,8 +120,9 @@ vec2 rayMarchCloud(sampler2D natureTexture, sampler2D noiseTexture, vec2 texcoor
 #endif
 
 	float sampleSize = 1.0;
+	float distanceTotal = 0.0;
 
-	if (optimizeStart(startTravel, maxDist, toSky, worldRayPos, numSample, sampleSize)) return vec2(0.0);
+	if (optimizeStart(startTravel, maxDist, toSky, worldRayPos, numSample, sampleSize, distanceTotal)) return vec3(0.0);
 
 	vec3 unitRay = toSky * sampleSize;
 	float i = getRandomFloat(noiseTexture, texcoord, frxu_size) * CLOUD_MARCH_JITTER_STRENGTH;
@@ -148,9 +152,10 @@ vec2 rayMarchCloud(sampler2D natureTexture, sampler2D noiseTexture, vec2 texcoor
 
 		lightEnergy += atRayDensity * transmittance * lightAtRay;
 		transmittance *= exp(-atRayDensity);
+		distanceTotal = max(distanceTotal, i * sampleSize * transmittance);
 	}
 
-	return vec2(lightEnergy, 1.0 - min(1.0, transmittance));
+	return vec3(lightEnergy, (1.0 - min(1.0, transmittance)), distanceTotal);
 }
 
 vec4 customClouds(sampler2D cloudsBuffer, sampler2D cloudsDepthBuffer, sampler2D natureTexture, sampler2D noiseTexture, float depth, vec2 texcoord, vec3 eyePos, vec3 toSky, int numSample, float startTravel)
@@ -169,18 +174,20 @@ vec4 customClouds(sampler2D cloudsBuffer, sampler2D cloudsDepthBuffer, sampler2D
 	float maxDist = min(length(eyePos), frx_viewDistance * 4.); // actual far plane, prevents clipping
 #endif
 
-	vec2 result = rayMarchCloud(natureTexture, noiseTexture, texcoord, maxDist, toSky, numSample, startTravel);
+	vec3 result = rayMarchCloud(natureTexture, noiseTexture, texcoord, maxDist, toSky, numSample, startTravel);
 
 	float rainBrightness = mix(0.13, 0.05, hdr_fromGammaf(frx_rainGradient)); // emulate dark clouds
-	vec3  cloudShading	 = atmos_hdrCloudColorRadiance(toSky);
-	vec3  celestRadiance = atmos_hdrCelestialRadiance();
+	vec3  cloudShading	 = atmosv_hdrCloudColorRadiance;
+	vec3  skyFadeColor	 = atmos_hdrSkyGradientRadiance(toSky);
+	vec3  celestRadiance = atmosv_hdrCelestialRadiance;
 
 	if (frx_worldIsMoonlit == 1) {
 		celestRadiance *= 0.2;
 	}
 
-	celestRadiance = celestRadiance * result.x * rainBrightness * CLOUD_BRIGHTNESS;
+	celestRadiance = celestRadiance * result.x * rainBrightness;//
 	vec3 color = celestRadiance + cloudShading;
+	color = mix(color, skyFadeColor, fogFactor(result.z));
 
 	return vec4(color, result.y);
 #else

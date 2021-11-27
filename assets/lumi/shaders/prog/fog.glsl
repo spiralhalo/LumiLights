@@ -51,7 +51,7 @@ vec4 fog(vec4 color, vec3 eyePos, vec3 toFrag)
 
 	// resolve cave fog
 	float aboveGround = frx_smoothedEyeBrightness.y;
-	fogColor = mix(atmos_hdrCaveFogRadiance(), fogColor, aboveGround);
+	fogColor = mix(atmosv_hdrCaveFogRadiance, fogColor, aboveGround);
 
 	vec4 blended = mix(color, vec4(fogColor, 1.0), fogFactor);
 
