@@ -80,7 +80,7 @@ float twilightCalc(vec3 world_toSky) {
 	float isHorizon = calcHorizon(world_toSky);
 	//NB: only works if sun always rise from dead East instead of NE/SE etc.
 	float isTwilight = l2_clampScale(-1.0, 1.0, world_toSky.x * sign(frx_skyLightVector.x));
-	float result = isTwilight * isHorizon * isHorizon * atmosv_hdrOWTwilightFactor;
+	float result = isTwilight * pow(isHorizon, 5.0) * atmosv_hdrOWTwilightFactor;
 
 	return frx_smootherstep(0., 1., result);
 }
@@ -114,8 +114,9 @@ vec3 atmos_hdrSkyGradientRadiance(vec3 world_toSky)
 	float brighteningCancel = min(1., atmosv_hdrOWTwilightFactor * .6 + frx_rainGradient * .6);
 	float brightenFactor = pow(skyHorizon, 20.) * (1. - brighteningCancel);
 	float horizonBrightening = mix(1., HORIZON_MULT, brightenFactor);
+	vec3 horizonColor = mix(atmosv_hdrSkyColorRadiance * horizonBrightening, atmosv_hdrOWTwilightSkyRadiance, twilightCalc(world_toSky));
 
-	return mix(atmosv_hdrSkyColorRadiance, atmosv_hdrOWTwilightSkyRadiance, twilightCalc(world_toSky)) * horizonBrightening;
+	return mix(atmosv_hdrSkyColorRadiance, horizonColor, skyHorizon);
 }
 
 vec3 atmos_hdrCloudColorRadiance(vec3 world_toSky)
