@@ -9,7 +9,7 @@ const float FOG_DENSITY			   = FOG_DENSITY_RELATIVE / 20.0;
 const float UNDERWATER_FOG_FAR	   = UNDERWATER_FOG_FAR_CHUNKS * 16.0;
 const float UNDERWATER_FOG_DENSITY = UNDERWATER_FOG_DENSITY_RELATIVE / 20.0;
 
-vec4 fog(vec4 color, vec3 eyePos, vec3 toFrag, float lighty)
+float fogFactor(float distToEye)
 {
 	float pFogDensity = frx_cameraInFluid == 1 ? UNDERWATER_FOG_DENSITY : FOG_DENSITY;
 	float pFogFar     = frx_cameraInFluid == 1 ? UNDERWATER_FOG_FAR     : FOG_FAR;
@@ -33,10 +33,15 @@ vec4 fog(vec4 color, vec3 eyePos, vec3 toFrag, float lighty)
 		fogFactor = 1.0;
 	}
 
-	float distToEye  = length(eyePos);
 	float distFactor = min(1.0, distToEye / pFogFar);
 
-	fogFactor = clamp(fogFactor * distFactor, 0.0, 1.0);
+	return clamp(fogFactor * distFactor, 0.0, 1.0);
+}
+
+vec4 fog(vec4 color, vec3 eyePos, vec3 toFrag)
+{
+	float distToEye = length(eyePos);
+	float fogFactor = fogFactor(distToEye);
 
 	// resolve horizon blend
 	float skyBlend	  = frx_cameraInFluid == 1 ? 0.0 : min(distToEye, frx_viewDistance) / frx_viewDistance;

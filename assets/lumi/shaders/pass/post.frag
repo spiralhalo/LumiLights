@@ -55,7 +55,7 @@ void main()
 		fragColor.rgb = fragColor.rgb * (1.0 - cVanillaTrans.a) + hdr_fromGamma(cVanillaTrans.rgb) * cVanillaTrans.a;
 	}
 
-	fragColor = fog(fragColor, eyePos, toFrag, lighty);
+	fragColor = fog(fragColor, eyePos, toFrag);
 
 	vec4 clouds = customClouds(u_vanilla_clouds, u_vanilla_clouds_depth, u_tex_nature, u_tex_noise, dMin, v_texcoord, eyePos, toFrag, NUM_SAMPLE);
 	fragColor.rgb = fragColor.rgb * (1.0 - clouds.a) + clouds.rgb * clouds.a;

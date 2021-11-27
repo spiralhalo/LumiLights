@@ -1,3 +1,4 @@
+#include lumi:shaders/prog/fog.glsl
 #include lumi:shaders/prog/shading.glsl
 #include lumi:shaders/prog/sky.glsl
 #include lumi:shaders/prog/tile_noise.glsl
@@ -159,6 +160,11 @@ vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer
 
 	vec2 uvFade = smoothstep(0.5, 0.45, abs(result.xy - 0.5));
 	result.z *= min(uvFade.x, uvFade.y);
+
+	vec4 reflectedPos = frx_inverseViewProjectionMatrix * vec4(result.xy * 2.0 - 1.0, texture(depthBuffer, result.xy).r * 2.0 - 1.0, 1.0);
+	float distanceFade = fogFactor(length(reflectedPos.xyz / reflectedPos.w));
+
+	result.z *= 1.0 - distanceFade * distanceFade;
 
 	vec4 reflectedColor = texture(colorBuffer, result.xy);
 	vec3 objLight = reflectionPbr(albedo, material, reflectedColor.rgb, viewMarch, viewToEye).rgb;
