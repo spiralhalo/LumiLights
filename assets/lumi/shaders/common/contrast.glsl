@@ -49,9 +49,9 @@ const float USER_NIGHT_AMBIENT_MULTIPLIER  = clamp(NIGHT_AMBIENT_BRIGHTNESS, 0, 
 #else
 	const vec3 BLOCK_LIGHT_COLOR = hdr_fromGamma(vec3(1.0, 0.7, 0.4));
 #endif
-	const vec3 NIGHT_VISION_COLOR         = hdr_fromGamma(vec3(1.0, 0.95, 1.0));
-	const vec3 SKYLESS_LIGHT_COLOR        = hdr_fromGamma(vec3(1.0, 1.0, 1.0));
-	const vec3 NETHER_SKYLESS_LIGHT_COLOR = hdr_fromGamma(vec3(1.0, 0.9, 0.8));
+	const vec3 NIGHT_VISION_COLOR		= hdr_fromGamma(vec3(1.0, 0.95, 1.0));
+	const vec3 SKYLESS_LIGHT_COLOR		= hdr_fromGamma(vec3(1.0, 1.0, 1.0));
+	const vec3 NETHER_LIGHT_COLOR		= hdr_fromGamma(vec3(1.0, 0.6, 0.4));
 
 	// SKY COLORS
 	#define _0_DEF_NEBULAE_COLOR		vec3(0.8, 0.3, 0.6)

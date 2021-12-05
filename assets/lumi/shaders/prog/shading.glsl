@@ -14,10 +14,6 @@
  *  lumi:shaders/prog/shading.glsl
  *******************************************************/
 
-// TODO: make better ?
-const vec3 skylessDarkenedDir = vec3(0, -0.977358, 0.211593);
-const vec3 skylessDir = vec3(0, 0.977358, 0.211593);
-
 /*******************************************************
  *  vertexShader: lumi:shaders/post/shading.vert
  *******************************************************/
@@ -187,8 +183,13 @@ vec4 shading(vec4 color, sampler2D natureTexture, vec4 light, float ao, vec3 mat
 	vec3 toEye = -normalize(eyePos);
 
 	vec3 baseLight = vec3(BASE_AMBIENT_STR * USER_AMBIENT_MULTIPLIER);
-		 baseLight += hdr_fromGamma(NIGHT_VISION_COLOR) * NIGHT_VISION_STR * frx_effectNightVision;
-		 baseLight += frx_worldHasSkylight == 0 ? (atmosv_hdrFogColorRadiance + 1.0) * SKYLESS_AMBIENT_STR * 0.5 : vec3(0.0);
+
+	baseLight += hdr_fromGamma(NIGHT_VISION_COLOR) * NIGHT_VISION_STR * frx_effectNightVision;
+
+	vec3 skylessColor = mix(SKYLESS_LIGHT_COLOR * USER_END_AMBIENT_MULTIPLIER, NETHER_LIGHT_COLOR * USER_NETHER_AMBIENT_MULTIPLIER, frx_worldIsNether);
+
+	baseLight += (1.0 - frx_worldHasSkylight) * (atmosv_hdrFogColorRadiance * 0.5 + 0.5) * SKYLESS_AMBIENT_STR;
+	baseLight += (1.0 - frx_worldHasSkylight) * skylessColor * SKYLESS_AMBIENT_STR;
 
 	float bl = l2_clampScale(0.03125, 0.96875, light.x);
 
@@ -223,12 +224,7 @@ vec4 shading(vec4 color, sampler2D natureTexture, vec4 light, float ao, vec3 mat
 	shaded *= ao;
 
 	vec3 skyLight = frx_worldHasSkylight * light.w * atmosv_hdrCelestialRadiance * (1. - frx_rainGradient);
-		 skyLight += frx_worldIsNether * NETHER_SKYLESS_LIGHT_COLOR * USER_NETHER_AMBIENT_MULTIPLIER;
-		 skyLight += (1.0 - max(frx_worldHasSkylight, frx_worldIsNether)) * SKYLESS_LIGHT_COLOR * USER_END_AMBIENT_MULTIPLIER;
-
-	vec3 toLight = (frx_worldHasSkylight == 1) ? frx_skyLightVector : ((frx_worldIsSkyDarkened == 1) ? skylessDarkenedDir : skylessDir);
-
-	shaded += lightPbr(albedo, color.a, skyLight, material.x, material.y, f0, toLight, toEye, normal);
+	shaded += lightPbr(albedo, color.a, skyLight, material.x, material.y, f0, frx_skyLightVector, toEye, normal);
 
 	return vec4(shaded, color.a);
 }
