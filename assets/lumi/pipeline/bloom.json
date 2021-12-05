@@ -14,6 +14,20 @@
 				{name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
 			]
 		},
+		{
+			name: "bloomup",
+			lod: 5,
+			internalFormat: "RGB16F",
+			pixelFormat: "RGB",
+			pixelDataType: "FLOAT",
+			target: "TEXTURE_2D",
+			texParams: [ 
+				{name: "TEXTURE_MIN_FILTER", val: "LINEAR_MIPMAP_NEAREST"},
+				{name: "TEXTURE_MAG_FILTER", val: "LINEAR"},
+				{name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"},
+				{name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
+			]
+		},
 	],
 
 	framebuffers: [
@@ -39,6 +53,26 @@
 			name: "bloomdown6",
 			colorAttachments: [{image: "bloomdown", lod: 6}]
 		},
+
+		{
+			name: "bloomup0",
+			colorAttachments: [{image: "bloomup", lod: 0}]
+		}, {
+			name: "bloomup1",
+			colorAttachments: [{image: "bloomup", lod: 1}]
+		}, {
+			name: "bloomup2",
+			colorAttachments: [{image: "bloomup", lod: 2}]
+		}, {
+			name: "bloomup3",
+			colorAttachments: [{image: "bloomup", lod: 3}]
+		}, {
+			name: "bloomup4",
+			colorAttachments: [{image: "bloomup", lod: 4}]
+		}, {
+			name: "bloomup5",
+			colorAttachments: [{image: "bloomup", lod: 5}]
+		}, 
 	],
 
 	programs: [
@@ -59,7 +93,9 @@
 				name: "bloom_copy", framebuffer: "swap", program: "copy",
 				samplerImages: ["vanilla_color"],
 				toggleConfig: "bloom_effect",
-			}, {
+			},
+
+			{
 				name: "bloomdown0", framebuffer: "bloomdown0", program: "bloom",
 				samplerImages: ["swap_color", "swap_color"],
 				layer: 0, lod: 0, toggleConfig: "bloom_effect"
@@ -87,10 +123,38 @@
 				name: "bloomdown6", framebuffer: "bloomdown6", program: "bloom",
 				samplerImages: ["bloomdown", "bloomdown"],
 				layer: 1, lod: 6, toggleConfig: "bloom_effect"
+			},
+
+			{
+				name: "bloomup5", framebuffer: "bloomup5", program: "bloom",
+				samplerImages: ["bloomup", "bloomdown"],
+				layer: 2, lod: 5, toggleConfig: "bloom_effect"
 			}, {
+				name: "bloomup4", framebuffer: "bloomup4", program: "bloom",
+				samplerImages: ["bloomup", "bloomdown"],
+				layer: 2, lod: 4, toggleConfig: "bloom_effect"
+			}, {
+				name: "bloomup3", framebuffer: "bloomup3", program: "bloom",
+				samplerImages: ["bloomup", "bloomdown"],
+				layer: 2, lod: 3, toggleConfig: "bloom_effect"
+			}, {
+				name: "bloomup2", framebuffer: "bloomup2", program: "bloom",
+				samplerImages: ["bloomup", "bloomdown"],
+				layer: 2, lod: 2, toggleConfig: "bloom_effect"
+			}, {
+				name: "bloomup1", framebuffer: "bloomup1", program: "bloom",
+				samplerImages: ["bloomup", "bloomdown"],
+				layer: 2, lod: 1, toggleConfig: "bloom_effect"
+			}, {
+				name: "bloomup0", framebuffer: "bloomup0", program: "bloom",
+				samplerImages: ["bloomup", "bloomdown"],
+				layer: 2, lod: 0, toggleConfig: "bloom_effect"
+			},
+
+			{
 				name: "bloom", framebuffer: "vanilla", program: "bloom",
-				samplerImages: ["swap_color", "bloomdown"],
-				layer: 2, toggleConfig: "bloom_effect"
+				samplerImages: ["swap_color", "bloomup"],
+				layer: 99, toggleConfig: "bloom_effect"
 			},
 		]
 	},
