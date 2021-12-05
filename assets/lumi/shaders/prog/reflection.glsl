@@ -98,7 +98,7 @@ vec3 reflectionMarch(sampler2D depthBuffer, sampler2DArray normalBuffer, float i
 	// TODO: rewrite
 	viewStartPos = viewStartPos + viewMarch * -viewStartPos.z / vec3(50.); // magic
 
-	vec3 worldMarch = viewMarch * frx_normalModelMatrix;
+	// vec3 worldMarch = viewMarch * frx_normalModelMatrix;
 
 	vec3 viewRayPos = viewStartPos;
 	float edgeZ = viewStartPos.z + 0.25;
@@ -110,10 +110,14 @@ vec3 reflectionMarch(sampler2D depthBuffer, sampler2DArray normalBuffer, float i
 	bool inbound = viewMarch.z > 0.0;
 	float hitboxLimit = inbound ? 1. : 1024000.;
 
+	float hit = 0.0;
+
 	vec4 temp;
 	vec2 uvRayHitPos;
-	int steps = 0;
-	while (steps < MAXSTEPS && viewRayPos.z < 0.0) {
+	vec3 viewRayHitPos;
+	float dZ;
+
+	for (int steps = 0; steps < MAXSTEPS && viewRayPos.z < 0.0; steps ++) {
 		viewRayPos += viewRayUnit;
 
 		temp = frx_projectionMatrix * vec4(viewRayPos, 1.0);
@@ -121,8 +125,7 @@ vec3 reflectionMarch(sampler2D depthBuffer, sampler2DArray normalBuffer, float i
 
 		temp.z = texture(depthBuffer, uvRayHitPos).r;
 		temp = frx_inverseProjectionMatrix * vec4(uvRayHitPos * 2.0 - 1.0, temp.z * 2.0 - 1.0, 1.0);
-
-		vec3 viewRayHitPos = temp.xyz / temp.w;
+		viewRayHitPos = temp.xyz / temp.w;
 
 		float dZ = viewRayHitPos.z - viewRayPos.z; 
 		// vec3 reflectedNormal   = texture(normalBuffer, vec3(uvRayHitPos, idNormal)).xyz * 2.0 - 1.0;
@@ -133,42 +136,8 @@ vec3 reflectionMarch(sampler2D depthBuffer, sampler2DArray normalBuffer, float i
 			float hitboxNow = min(hitboxLimit, hitboxZ * 2);
 
 			if (dZ < hitboxNow) {
-				//refine
-				int refine_steps = 0;
-				vec2 uvLastHitPos = uvRayHitPos;
-				float lastdZ = dZ;
-				float refineRayLength = 0.0625;
-				viewRayUnit = viewMarch * refineRayLength;
-
-				// 0.01 is the dZ at which no more detail will be achieved even for very nearby reflection
-				// PERF: adapt based on initial z
-				while (refine_steps < REFINE && abs(dZ) > 0.01) {
-
-					if (abs(dZ) < refineRayLength) {
-						refineRayLength = abs(dZ);
-						viewRayUnit = viewMarch * refineRayLength;
-					}
-
-					viewRayPos -= viewRayUnit;
-
-					temp = frx_projectionMatrix * vec4(viewRayPos, 1.0);
-					uvRayHitPos = (temp.xy / temp.w) * 0.5 + 0.5;
-
-					temp.z = texture(depthBuffer, uvRayHitPos).r;
-					temp = frx_inverseProjectionMatrix * vec4(uvRayHitPos * 2.0 - 1.0, temp.z * 2.0 - 1.0, 1.0);
-
-					viewRayHitPos = temp.xyz / temp.w;
-
-					dZ = viewRayHitPos.z - viewRayPos.z;
-					// Ensure dZ never increases
-					if (abs(dZ) > abs(lastdZ)) break;
-
-					uvLastHitPos = uvRayHitPos;
-					lastdZ = dZ;
-					refine_steps ++;
-				}
-
-				return vec3(uvLastHitPos, 1.0);
+				hit = 1.0;
+				break;
 			}
 		}
 
@@ -176,11 +145,39 @@ vec3 reflectionMarch(sampler2D depthBuffer, sampler2DArray normalBuffer, float i
 			viewRayUnit *= 2.;
 			hitboxZ *= 2.;
 		}
-
-		steps ++;
 	}
 
-	return vec3(uvRayHitPos, 0.0);
+	vec2 uvLastHitPos = uvRayHitPos;
+	float lastdZ = dZ;
+	float refineRayLength = 0.0625;
+	viewRayUnit = viewMarch * refineRayLength;
+	// 0.01 is the dZ at which no more detail will be achieved even for very nearby reflection
+	// PERF: adapt based on initial z
+	for (int refine_steps = 0; hit == 1.0 && refine_steps < REFINE && abs(dZ) > 0.01; refine_steps ++) {
+		if (abs(dZ) < refineRayLength) {
+			refineRayLength = abs(dZ);
+			viewRayUnit = viewMarch * refineRayLength;
+		}
+
+		viewRayPos -= viewRayUnit;
+
+		temp = frx_projectionMatrix * vec4(viewRayPos, 1.0);
+		uvRayHitPos = (temp.xy / temp.w) * 0.5 + 0.5;
+
+		temp.z = texture(depthBuffer, uvRayHitPos).r;
+		temp = frx_inverseProjectionMatrix * vec4(uvRayHitPos * 2.0 - 1.0, temp.z * 2.0 - 1.0, 1.0);
+
+		viewRayHitPos = temp.xyz / temp.w;
+
+		dZ = viewRayHitPos.z - viewRayPos.z;
+		// Ensure dZ never increases
+		if (abs(dZ) > abs(lastdZ)) break;
+
+		uvLastHitPos = uvRayHitPos;
+		lastdZ = dZ;
+	}
+
+	return vec3(uvLastHitPos, hit);
 }
 
 const float JITTER_STRENGTH = 0.6;
@@ -232,7 +229,7 @@ vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer
 	bool withinThreshold = roughness <= REFLECTION_MAXIMUM_ROUGHNESS;
 
 	if (withinThreshold) {
-		result = reflectionMarch_v2(depthBuffer, normalBuffer, idNormal, viewPos, viewToEye, viewMarch);
+		result = reflectionMarch(depthBuffer, normalBuffer, idNormal, viewPos, viewToEye, viewMarch);
 	}
 	#endif
 
