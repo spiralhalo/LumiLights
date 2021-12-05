@@ -33,33 +33,27 @@ vec3 reflectionMarch_v2(sampler2D depthBuffer, sampler2DArray normalBuffer, floa
 	temp = frx_inverseProjectionMatrix * vec4(uvEndPos * 2.0 - 1.0, dEndPos * 2.0 - 1.0, 1.0);
 	viewEndPos = temp.xyz / temp.w;
 
-	// vec2 uvMarch = (uvEndPos - uvStartPos) / float(MAXSTEPS);
-	// viewMarch = (viewEndPos - viewStartPos) / float(MAXSTEPS);
-	vec2 uvTravel = uvEndPos - uvStartPos;
-	vec3 viewTravel = viewEndPos - viewStartPos;
-	float uvTotal = length(uvTravel);
-	float viewTotal = length(viewTravel);
+	vec2 uvMarch = (uvEndPos - uvStartPos) / float(MAXSTEPS);
 	vec2 uvRayPos = uvStartPos;
 	vec3 viewRayPos = viewStartPos;
 
 	float d = 1.0;
-	vec3 viewSampledPos;
 	float hit = 0.0;
-	vec2 uvMarch;
-	float halver = pow(0.5, MAXSTEPS);
-	float hitboxZ = abs(viewMarch.z) * halver;
+	float hitboxZ;
+	vec3 viewSampledPos;
+	vec2 uvNextPos;
 
 	for (int i=0; i<MAXSTEPS && hit < 1.0; i++) {
-		uvMarch = uvTravel * halver;
-		viewMarch = viewTravel * halver;
-		halver *= 2.0;
-		hitboxZ *= 2.0;
-		uvRayPos += uvMarch;
-		viewRayPos += viewMarch;
-
-		d = texture(depthBuffer, uvRayPos).r;
-		temp = frx_inverseProjectionMatrix * vec4(uvRayPos * 2.0 - 1.0, d * 2.0 - 1.0, 1.0);
+		uvNextPos = uvRayPos + uvMarch;
+		d = texture(depthBuffer, uvNextPos).r;
+		temp = frx_inverseProjectionMatrix * vec4(uvNextPos * 2.0 - 1.0, d * 2.0 - 1.0, 1.0);
 		viewSampledPos = temp.xyz / temp.w;
+
+		float marchProject = dot(viewSampledPos - viewRayPos, viewMarch);
+
+		uvRayPos = uvNextPos;
+		viewRayPos += viewMarch * marchProject;
+		hitboxZ = viewMarch.z * marchProject;
 
 		float dZ = viewSampledPos.z - viewRayPos.z;
 
@@ -229,7 +223,7 @@ vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer
 	bool withinThreshold = roughness <= REFLECTION_MAXIMUM_ROUGHNESS;
 
 	if (withinThreshold) {
-		result = reflectionMarch(depthBuffer, normalBuffer, idNormal, viewPos, viewToEye, viewMarch);
+		result = reflectionMarch_v2(depthBuffer, normalBuffer, idNormal, viewPos, viewToEye, viewMarch);
 	}
 	#endif
 
