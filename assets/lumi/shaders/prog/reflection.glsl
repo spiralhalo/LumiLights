@@ -15,6 +15,84 @@ const int REFINE = 8;
 const float REFLECTION_MAXIMUM_ROUGHNESS = REFLECTION_MAXIMUM_ROUGHNESS_RELATIVE / 10.0;
 const float SKYLESS_FACTOR = 0.5;
 
+vec3 reflectionMarch_v2(sampler2D depthBuffer, sampler2DArray normalBuffer, float idNormal, vec3 viewStartPos, vec3 viewToEye, vec3 viewMarch)
+{
+	vec3 worldMarch = viewMarch * frx_normalModelMatrix;
+
+	// viewStartPos = viewStartPos + viewMarch * -viewStartPos.z / vec3(50.); // magic
+	vec4 temp = frx_projectionMatrix * vec4(viewStartPos, 1.0);
+	vec2 uvStartPos = (temp.xyz/temp.w).xy * 0.5 + 0.5;
+
+	float maxTravel = frx_viewDistance;
+	vec3 viewEndPos = viewStartPos + maxTravel * viewMarch;
+	temp = frx_projectionMatrix * vec4(viewEndPos, 1.0);
+	vec2 uvEndPos = (temp.xyz/temp.w).xy * 0.5 + 0.5;
+
+	uvEndPos = clamp(uvEndPos, 0.0, 1.0);
+	float dEndPos = texture(depthBuffer, uvEndPos).r;
+	temp = frx_inverseProjectionMatrix * vec4(uvEndPos * 2.0 - 1.0, dEndPos * 2.0 - 1.0, 1.0);
+	viewEndPos = temp.xyz / temp.w;
+
+	// vec2 uvMarch = (uvEndPos - uvStartPos) / float(MAXSTEPS);
+	// viewMarch = (viewEndPos - viewStartPos) / float(MAXSTEPS);
+	vec2 uvTravel = uvEndPos - uvStartPos;
+	vec3 viewTravel = viewEndPos - viewStartPos;
+	float uvTotal = length(uvTravel);
+	float viewTotal = length(viewTravel);
+	vec2 uvRayPos = uvStartPos;
+	vec3 viewRayPos = viewStartPos;
+
+	float d = 1.0;
+	vec3 viewSampledPos;
+	float hit = 0.0;
+	vec2 uvMarch;
+	float halver = pow(0.5, MAXSTEPS);
+	float hitboxZ = abs(viewMarch.z) * halver;
+
+	for (int i=0; i<MAXSTEPS && hit < 1.0; i++) {
+		uvMarch = uvTravel * halver;
+		viewMarch = viewTravel * halver;
+		halver *= 2.0;
+		hitboxZ *= 2.0;
+		uvRayPos += uvMarch;
+		viewRayPos += viewMarch;
+
+		d = texture(depthBuffer, uvRayPos).r;
+		temp = frx_inverseProjectionMatrix * vec4(uvRayPos * 2.0 - 1.0, d * 2.0 - 1.0, 1.0);
+		viewSampledPos = temp.xyz / temp.w;
+
+		float dZ = viewSampledPos.z - viewRayPos.z;
+
+		vec3 sampledNormal = texture(normalBuffer, vec3(uvRayPos, idNormal)).xyz * 2.0 - 1.0;
+		bool frontFace = dot(worldMarch, sampledNormal) < 0.;
+
+		if (frontFace && dZ > 0 && dZ < hitboxZ) {
+			hit = 1.0;
+		}
+	}
+
+	// float marchSign = sign(viewMarch.z);
+
+	// for (int i=0; i<REFINE && hit == 1.0; i++) {
+	// 	uvMarch *= 0.5;
+	// 	viewMarch *= 0.5;
+
+	// 	if (sign(viewSampledPos.z - viewRayPos.z) != marchSign) {
+	// 		uvMarch *= -1.;
+	// 		viewMarch *= -1.;
+	// 	}
+
+	// 	uvRayPos += uvMarch;
+	// 	viewRayPos += viewMarch;
+
+	// 	d = texture(depthBuffer, uvRayPos).r;
+	// 	temp = frx_inverseProjectionMatrix * vec4(uvRayPos * 2.0 - 1.0, d * 2.0 - 1.0, 1.0);
+	// 	viewSampledPos = temp.xyz / temp.w;
+	// }
+
+	return vec3(uvRayPos, hit);
+}
+
 vec3 reflectionMarch(sampler2D depthBuffer, sampler2DArray normalBuffer, float idNormal, vec3 viewStartPos, vec3 viewToEye, vec3 viewMarch)
 {
 	// TODO: rewrite
@@ -154,7 +232,7 @@ vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer
 	bool withinThreshold = roughness <= REFLECTION_MAXIMUM_ROUGHNESS;
 
 	if (withinThreshold) {
-		result = reflectionMarch(depthBuffer, normalBuffer, idNormal, viewPos, viewToEye, viewMarch);
+		result = reflectionMarch_v2(depthBuffer, normalBuffer, idNormal, viewPos, viewToEye, viewMarch);
 	}
 	#endif
 
