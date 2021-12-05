@@ -91,19 +91,20 @@ vec3 reflectionMarch_v2(sampler2D depthBuffer, sampler2DArray normalBuffer, floa
 
 	// for (int i=0; i<REFINE && hit == 1.0; i++) {
 	// 	uvMarch *= 0.5;
-	// 	viewMarch *= 0.5;
 
 	// 	if (sign(viewSampledPos.z - viewRayPos.z) != marchSign) {
 	// 		uvMarch *= -1.;
-	// 		viewMarch *= -1.;
 	// 	}
 
-	// 	uvRayPos += uvMarch;
-	// 	viewRayPos += viewMarch;
-
-	// 	d = texture(depthBuffer, uvRayPos).r;
-	// 	temp = frx_inverseProjectionMatrix * vec4(uvRayPos * 2.0 - 1.0, d * 2.0 - 1.0, 1.0);
+	// 	uvNextPos = uvRayPos + uvMarch;
+	// 	d = texture(depthBuffer, uvNextPos).r;
+	// 	temp = frx_inverseProjectionMatrix * vec4(uvNextPos * 2.0 - 1.0, d * 2.0 - 1.0, 1.0);
 	// 	viewSampledPos = temp.xyz / temp.w;
+
+	// 	float marchProject = dot(viewSampledPos - viewRayPos, viewMarch);
+
+	// 	uvRayPos = uvNextPos;
+	// 	viewRayPos += viewMarch * marchProject;
 	// }
 
 	return vec3(uvRayPos, hit);
