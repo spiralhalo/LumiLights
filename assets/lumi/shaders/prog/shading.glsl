@@ -167,10 +167,8 @@ vec4 shading(vec4 color, sampler2D natureTexture, vec4 light, float ao, vec3 mat
 
 	light.w += causticLight;
 
-#ifdef VANILLA_AO_ENABLED
 	ao = min(1., light.z);
 	light.z = max(0., light.z - ao);
-#endif
 
 	float luminance = frx_luminance(color.rgb);
 	float vanillaEmissive = step(0.93625, light.x) * luminance * luminance;

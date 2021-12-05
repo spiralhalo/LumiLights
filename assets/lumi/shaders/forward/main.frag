@@ -92,10 +92,12 @@ void frx_pipelineFragment()
 			// frx_fragNormal = TBN * frx_fragNormal;
 		}
 
-		#ifdef VANILLA_AO_ENABLED
+		#ifndef VANILLA_AO_ENABLED
+		frx_fragEnableAo = false;
+		#endif
+
 		float ao = frx_fragEnableAo ? frx_fragLight.z : 1.0;
 		frx_fragEmissive += ao;
-		#endif
 
 		float roughness = max(0.01, frx_fragRoughness);
 		float disableAo = frx_fragEnableAo ? 0.0 : 1.0;

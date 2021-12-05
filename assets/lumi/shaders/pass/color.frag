@@ -89,12 +89,8 @@ void main()
 		base.rgb = base.rgb * (1.0 - clouds.a) + clouds.rgb * clouds.a;
 	}
 
-	if (dRains <= dSolid) {
-		if (dRains == dMin) {
-			last = vec4(last.rgb * (1.0 - cRains.a) + cRains.rgb * cRains.a, min(1.0, last.a + cRains.a));
-		} else {
-			next = vec4(next.rgb * (1.0 - cRains.a) + cRains.rgb * cRains.a, min(1.0, next.a + cRains.a));
-		}
+	if (dRains <= dSolid && dRains > dMin) {
+		next = vec4(next.rgb * (1.0 - cRains.a) + cRains.rgb * cRains.a, min(1.0, next.a + cRains.a));
 	}
 
 	next = vec4(next.rgb * (1.0 - last.a) + last.rgb * last.a, min(1.0, next.a + last.a));
@@ -130,6 +126,11 @@ void main()
 		next = shading(next, u_tex_nature, light, material, eyePos, normal, nextIsUnderwater);
 	}
 	next.a = sqrt(next.a);
+
+	if (dRains == dMin) {
+		cRains.rgb = hdr_fromGamma(cRains.rgb);
+		next = vec4(next.rgb * (1.0 - cRains.a) + cRains.rgb * cRains.a, max(next.a, cRains.a));
+	}
 
 	base.rgb = base.rgb * (1.0 - next.a) + next.rgb * next.a;
 
