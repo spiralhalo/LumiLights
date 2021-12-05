@@ -22,16 +22,18 @@ void main()
 		vec4 base = hdr_inverseTonemap(texture(u_input, v_texcoord));
 		float luminance = l2_max3(base.rgb); //use max instead of luminance to get some lava action
 		const float MIN_LUM = 0.9; // based on semi-comfortable bloom on snowy scapes
-		float luminanceGate = smoothstep(MIN_LUM, MIN_LUM + 1.0, luminance);
+		float luminanceGate = smoothstep(MIN_LUM, MIN_LUM + 2.0, luminance);
 		fragColor = base * luminanceGate;
 	} else if (frxu_layer == 1) {
 		fragColor = frx_sample13(u_input, v_texcoord, BLOOM_DOWNSAMPLE_DIST_VEC / frxu_size, max(0, frxu_lod - 1));
 	} else {
 		vec4 base  = texture(u_input, v_texcoord);
-		vec4 bloom6 = frx_sampleTent(u_blend, v_texcoord, BLOOM_UPSAMPLE_DIST_VEC / frxu_size, 6);
-		vec4 bloom5 = frx_sampleTent(u_blend, v_texcoord, BLOOM_UPSAMPLE_DIST_VEC / frxu_size, 5);
-		vec4 bloom4 = frx_sampleTent(u_blend, v_texcoord, BLOOM_UPSAMPLE_DIST_VEC / frxu_size, 4);
-		vec4 bloom = (bloom6 + bloom5 + bloom4) / 3.0 * BLOOM_INTENSITY_FLOAT;
+		vec4 bloom = vec4(0.);
+		for (int i = 6; i >= 0; i--) {
+			bloom += frx_sampleTent(u_blend, v_texcoord, BLOOM_UPSAMPLE_DIST_VEC / frxu_size, i);
+		}
+		bloom /= 6.0;
+		bloom *= BLOOM_INTENSITY_FLOAT;
 		vec3 color = hdr_inverseTonemap(base.rgb) + bloom.rgb;
 		fragColor = vec4(ldr_tonemap(color), 1.0);
 	}
