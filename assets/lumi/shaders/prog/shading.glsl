@@ -190,8 +190,7 @@ vec4 shading(vec4 color, sampler2D natureTexture, vec4 light, float ao, vec3 mat
 		 baseLight += hdr_fromGamma(NIGHT_VISION_COLOR) * NIGHT_VISION_STR * frx_effectNightVision;
 		 baseLight += frx_worldHasSkylight == 0 ? (atmosv_hdrFogColorRadiance + 1.0) * SKYLESS_AMBIENT_STR * 0.5 : vec3(0.0);
 
-	float bl = smoothstep(0.03125, 0.96875, light.x);
-		  bl *= pow(bl, 3.0 + frx_viewBrightness * 2.0) * (2.0 - frx_viewBrightness * 0.5); // lyfe hax
+	float bl = l2_clampScale(0.03125, 0.96875, light.x);
 
 	float blWhite = max(light.z, step(0.93625, light.x));
 	vec3  blColor = mix(BLOCK_LIGHT_COLOR, BLOCK_LIGHT_NEUTRAL, blWhite);
@@ -211,9 +210,8 @@ vec4 shading(vec4 color, sampler2D natureTexture, vec4 light, float ao, vec3 mat
 		float cone	   = l2_clampScale(1.0 - pbrv_coneOuter, 1.0 - pbrv_coneInner, cosView);
 		float distSq   = dot(eyePos, eyePos);
 		float hlRadSq  = heldLight.w * HANDHELD_LIGHT_RADIUS * heldLight.w * HANDHELD_LIGHT_RADIUS;
-		float hl	   = l2_clampScale(hlRadSq, 0.0, distSq);
+		float hl	   = hdr_fromGammaf(l2_clampScale(hlRadSq, 0.0, distSq));
 
-		hl *= pow(hl, 3.0 + frx_viewBrightness * 2.0) * (2.0 - frx_viewBrightness * 0.5); // lyfe hax
 		hl *= cone;
 
 		vec3 hlLight = hdr_fromGamma(heldLight.rgb) * BLOCK_LIGHT_STR * hl;
