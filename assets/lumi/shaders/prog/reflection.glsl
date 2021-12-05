@@ -53,7 +53,7 @@ vec3 reflectionMarch_v2(sampler2D depthBuffer, sampler2DArray normalBuffer, floa
 
 		uvRayPos = uvNextPos;
 		viewRayPos += viewMarch * marchProject;
-		hitboxZ = viewMarch.z * marchProject;
+		hitboxZ = -viewMarch.z * marchProject;
 
 		float dZ = viewSampledPos.z - viewRayPos.z;
 
