@@ -15,6 +15,28 @@ const int REFINE = 8;
 const float REFLECTION_MAXIMUM_ROUGHNESS = REFLECTION_MAXIMUM_ROUGHNESS_RELATIVE / 10.0;
 const float SKYLESS_FACTOR = 0.5;
 
+vec2 clipUV(vec2 uv, vec2 center, vec2 minUV, vec2 maxUV)
+{
+	if (uv == clamp(uv, minUV, maxUV)) {
+		return uv;
+	}
+
+	vec2 direction = uv - center;
+	vec2 bound;
+	bound.x = uv.x < center.x ? minUV.x : maxUV.x;
+	bound.y = uv.y < center.y ? minUV.y : maxUV.y;
+	vec2 mean = bound - center;
+	float max2 = max(direction.x, direction.y);
+
+	if (max2 == direction.x) {
+		direction *= mean.x / direction.x;
+	} else {
+		direction *= mean.y / direction.y;
+	}
+
+	return center + direction;
+}
+
 vec3 reflectionMarch_v2(sampler2D depthBuffer, sampler2DArray normalBuffer, float idNormal, vec3 viewStartPos, vec3 viewToEye, vec3 viewMarch)
 {
 	vec3 worldMarch = viewMarch * frx_normalModelMatrix;
@@ -28,7 +50,7 @@ vec3 reflectionMarch_v2(sampler2D depthBuffer, sampler2DArray normalBuffer, floa
 	temp = frx_projectionMatrix * vec4(viewEndPos, 1.0);
 	vec2 uvEndPos = (temp.xyz/temp.w).xy * 0.5 + 0.5;
 
-	uvEndPos = clamp(uvEndPos, 0.0, 1.0);
+	uvEndPos = clipUV(uvEndPos, uvStartPos, vec2(0.0), vec2(1.0));
 	float dEndPos = texture(depthBuffer, uvEndPos).r;
 	temp = frx_inverseProjectionMatrix * vec4(uvEndPos * 2.0 - 1.0, dEndPos * 2.0 - 1.0, 1.0);
 	viewEndPos = temp.xyz / temp.w;
