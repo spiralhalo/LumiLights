@@ -17,31 +17,33 @@ const float SKYLESS_FACTOR = 0.5;
 
 void clip(inout vec3 end, in vec3 start)
 {
+	float delta, param = 1.0;
+
 	if (end.z < 0.0) {
-		float delta = end.z - start.z;
-		float param = (0.0 - start.z) / delta;
-		end = start + (end - start) * param;
+		delta = end.z - start.z;
+		param = min(param, (0.0 - start.z) / delta);
+	} else if (end.z > 1.0) {
+		delta = end.z - start.z;
+		param = min(param, (1.0 - start.z) / delta);
 	}
 
 	if (end.y < 0.0) {
-		float delta = end.y - start.y;
-		float param = (0.0 - start.z) / delta;
-		end = start + (end - start) * param;
+		delta = end.y - start.y;
+		param = min(param, (0.0 - start.y) / delta);
 	} else if (end.y > 1.0) {
-		float delta = end.y - start.y;
-		float param = (1.0 - start.y) / delta;
-		end = start + (end - start) * param;
+		delta = end.y - start.y;
+		param = min(param, (1.0 - start.y) / delta);
 	}
 
 	if (end.x < 0.0) {
-		float delta = end.x - start.x;
-		float param = (0.0 - start.z) / delta;
-		end = start + (end - start) * param;
+		delta = end.x - start.x;
+		param = min(param, (0.0 - start.x) / delta);
 	} else if (end.x > 1.0) {
-		float delta = end.x - start.x;
-		float param = (1.0 - start.x) / delta;
-		end = start + (end - start) * param;
+		delta = end.x - start.x;
+		param = min(param, (1.0 - start.x) / delta);
 	}
+
+	end = start + (end - start) * param;
 }
 
 vec3 reflectionMarch_v2(sampler2D depthBuffer, sampler2DArray normalBuffer, float idNormal, vec3 viewStartPos, vec3 viewToEye, vec3 viewMarch)
@@ -51,13 +53,12 @@ vec3 reflectionMarch_v2(sampler2D depthBuffer, sampler2DArray normalBuffer, floa
 	// viewStartPos = viewStartPos + viewMarch * -viewStartPos.z / vec3(50.); // magic
 	vec4 temp = frx_projectionMatrix * vec4(viewStartPos, 1.0);
 	vec3 uvStartPos = temp.xyz / temp.w * 0.5 + 0.5;
-	uvStartPos.z = uvStartPos.z;
 
 	float maxTravel = frx_viewDistance;
+
 	vec3 viewEndPos = viewStartPos + maxTravel * viewMarch;
 	temp = frx_projectionMatrix * vec4(viewEndPos, 1.0);
 	vec3 uvEndPos = temp.xyz / temp.w * 0.5 + 0.5;
-	uvEndPos.z = uvEndPos.z;
 
 	clip(uvEndPos, uvStartPos);
 
