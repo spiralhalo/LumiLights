@@ -8,9 +8,9 @@
  *******************************************************/
 
 const float HITBOX = 0.125;
-const int MAXSTEPS = 20;
+const int MAXSTEPS = 30;
 const int PERIOD = 2;
-const int REFINE = 8;
+const int REFINE = 4;
 
 const float REFLECTION_MAXIMUM_ROUGHNESS = REFLECTION_MAXIMUM_ROUGHNESS_RELATIVE / 10.0;
 const float SKYLESS_FACTOR = 0.5;
@@ -58,7 +58,10 @@ vec3 reflectionMarch_v2(sampler2D depthBuffer, sampler2DArray normalBuffer, floa
 {
 	vec3 worldMarch = viewMarch * frx_normalModelMatrix;
 
-	// viewStartPos = viewStartPos + viewMarch * -viewStartPos.z / vec3(50.); // magic
+	// padding to prevent back face reflection. we want the divisor to be as small as possible.
+	// too small with cause distortion of reflection near the reflector
+	viewStartPos = viewStartPos + viewMarch * -viewStartPos.z / vec3(12.);
+
 	vec4 temp = frx_projectionMatrix * vec4(viewStartPos, 1.0);
 	vec3 uvStartPos = temp.xyz / temp.w * 0.5 + 0.5;
 
@@ -82,10 +85,7 @@ vec3 reflectionMarch_v2(sampler2D depthBuffer, sampler2DArray normalBuffer, floa
 		d = texture(depthBuffer, uvRayPos.xy).r;
 		float dZ = uvRayPos.z - d;
 
-		vec3 sampledNormal = texture(normalBuffer, vec3(uvRayPos.xy, idNormal)).xyz * 2.0 - 1.0;
-		bool frontFace = dot(worldMarch, sampledNormal) < 0.;
-
-		if (frontFace && dZ > 0/* && ldepth(dZ) < hitboxZ*/) {
+		if (dZ > 0/* && ldepth(dZ) < hitboxZ*/) {
 			hit = 1.0;
 		}
 	}
