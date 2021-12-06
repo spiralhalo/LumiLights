@@ -43,12 +43,12 @@ vec3 reflectionMarch_v2(sampler2D depthBuffer, sampler2DArray normalBuffer, floa
 
 	// viewStartPos = viewStartPos + viewMarch * -viewStartPos.z / vec3(50.); // magic
 	vec4 temp = frx_projectionMatrix * vec4(viewStartPos, 1.0);
-	vec2 uvStartPos = (temp.xyz/temp.w).xy * 0.5 + 0.5;
+	vec2 uvStartPos = temp.xy / temp.w * 0.5 + 0.5;
 
 	float maxTravel = frx_viewDistance;
 	vec3 viewEndPos = viewStartPos + maxTravel * viewMarch;
 	temp = frx_projectionMatrix * vec4(viewEndPos, 1.0);
-	vec2 uvEndPos = (temp.xyz/temp.w).xy * 0.5 + 0.5;
+	vec2 uvEndPos = temp.xy / temp.w * 0.5 + 0.5;
 
 	uvEndPos = clipUV(uvEndPos, uvStartPos, vec2(0.0), vec2(1.0));
 	float dEndPos = texture(depthBuffer, uvEndPos).r;
