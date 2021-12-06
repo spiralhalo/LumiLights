@@ -15,14 +15,11 @@ const int REFINE = 8;
 const float REFLECTION_MAXIMUM_ROUGHNESS = REFLECTION_MAXIMUM_ROUGHNESS_RELATIVE / 10.0;
 const float SKYLESS_FACTOR = 0.5;
 
-void clip(inout vec3 end, in vec3 start)
+void clipSides(inout vec3 end, in vec3 start)
 {
 	float delta, param = 1.0;
 
-	if (end.z < 0.0) {
-		delta = end.z - start.z;
-		param = min(param, (0.0 - start.z) / delta);
-	} else if (end.z > 1.0) {
+	if (end.z > 1.0) {
 		delta = end.z - start.z;
 		param = min(param, (1.0 - start.z) / delta);
 	}
@@ -46,6 +43,17 @@ void clip(inout vec3 end, in vec3 start)
 	end = start + (end - start) * param;
 }
 
+vec3 clipNear(vec3 end, vec3 start)
+{
+	if (end.z > -0.0001) {
+		float delta = end.z - start.z;
+		float param = (-0.0001 - start.z) / delta;
+		return start + (end - start) * clamp(param, 0.0, 1.0);
+	}
+
+	return end;
+}
+
 vec3 reflectionMarch_v2(sampler2D depthBuffer, sampler2DArray normalBuffer, float idNormal, vec3 viewStartPos, vec3 viewToEye, vec3 viewMarch)
 {
 	vec3 worldMarch = viewMarch * frx_normalModelMatrix;
@@ -56,11 +64,11 @@ vec3 reflectionMarch_v2(sampler2D depthBuffer, sampler2DArray normalBuffer, floa
 
 	float maxTravel = frx_viewDistance;
 
-	vec3 viewEndPos = viewStartPos + maxTravel * viewMarch;
+	vec3 viewEndPos = clipNear(viewStartPos + maxTravel * viewMarch, viewStartPos);
 	temp = frx_projectionMatrix * vec4(viewEndPos, 1.0);
 	vec3 uvEndPos = temp.xyz / temp.w * 0.5 + 0.5;
 
-	clip(uvEndPos, uvStartPos);
+	clipSides(uvEndPos, uvStartPos);
 
 	vec3 uvMarch = (uvEndPos - uvStartPos) / float(MAXSTEPS);
 	vec3 uvRayPos = uvStartPos;
@@ -97,93 +105,6 @@ vec3 reflectionMarch_v2(sampler2D depthBuffer, sampler2DArray normalBuffer, floa
 	}
 
 	return vec3(uvRayPos.xy, hit);
-}
-
-vec3 reflectionMarch(sampler2D depthBuffer, sampler2DArray normalBuffer, float idNormal, vec3 viewStartPos, vec3 viewToEye, vec3 viewMarch)
-{
-	// TODO: rewrite
-	viewStartPos = viewStartPos + viewMarch * -viewStartPos.z / vec3(50.); // magic
-
-	// vec3 worldMarch = viewMarch * frx_normalModelMatrix;
-
-	vec3 viewRayPos = viewStartPos;
-	float edgeZ = viewStartPos.z + 0.25;
-
-	float hitboxZ = HITBOX;
-	vec3 viewRayUnit = viewMarch * hitboxZ;
-
-	// limit hitbox size for inbound reflection
-	bool inbound = viewMarch.z > 0.0;
-	float hitboxLimit = inbound ? 1. : 1024000.;
-
-	float hit = 0.0;
-
-	vec4 temp;
-	vec2 uvRayHitPos;
-	vec3 viewRayHitPos;
-	float dZ;
-
-	for (int steps = 0; steps < MAXSTEPS && viewRayPos.z < 0.0; steps ++) {
-		viewRayPos += viewRayUnit;
-
-		temp = frx_projectionMatrix * vec4(viewRayPos, 1.0);
-		uvRayHitPos = (temp.xy / temp.w) * 0.5 + 0.5;
-
-		temp.z = texture(depthBuffer, uvRayHitPos).r;
-		temp = frx_inverseProjectionMatrix * vec4(uvRayHitPos * 2.0 - 1.0, temp.z * 2.0 - 1.0, 1.0);
-		viewRayHitPos = temp.xyz / temp.w;
-
-		float dZ = viewRayHitPos.z - viewRayPos.z; 
-		// vec3 reflectedNormal   = texture(normalBuffer, vec3(uvRayHitPos, idNormal)).xyz * 2.0 - 1.0;
-		// bool reflectsFrontFace = true;//dot(worldMarch, reflectedNormal) < 0.;
-
-		if (dZ > 0 && (/*reflectsFrontFace &&*/ viewRayHitPos.z < edgeZ || inbound)) {
-			// Pad hitbox
-			float hitboxNow = min(hitboxLimit, hitboxZ * 2);
-
-			if (dZ < hitboxNow) {
-				hit = 1.0;
-				break;
-			}
-		}
-
-		if (mod(steps, PERIOD) == 0 && hitboxZ < hitboxLimit) {
-			viewRayUnit *= 2.;
-			hitboxZ *= 2.;
-		}
-	}
-
-	vec2 uvLastHitPos = uvRayHitPos;
-	float lastdZ = dZ;
-	float refineRayLength = 0.0625;
-	viewRayUnit = viewMarch * refineRayLength;
-	// 0.01 is the dZ at which no more detail will be achieved even for very nearby reflection
-	// PERF: adapt based on initial z
-	for (int refine_steps = 0; hit == 1.0 && refine_steps < REFINE && abs(dZ) > 0.01; refine_steps ++) {
-		if (abs(dZ) < refineRayLength) {
-			refineRayLength = abs(dZ);
-			viewRayUnit = viewMarch * refineRayLength;
-		}
-
-		viewRayPos -= viewRayUnit;
-
-		temp = frx_projectionMatrix * vec4(viewRayPos, 1.0);
-		uvRayHitPos = (temp.xy / temp.w) * 0.5 + 0.5;
-
-		temp.z = texture(depthBuffer, uvRayHitPos).r;
-		temp = frx_inverseProjectionMatrix * vec4(uvRayHitPos * 2.0 - 1.0, temp.z * 2.0 - 1.0, 1.0);
-
-		viewRayHitPos = temp.xyz / temp.w;
-
-		dZ = viewRayHitPos.z - viewRayPos.z;
-		// Ensure dZ never increases
-		if (abs(dZ) > abs(lastdZ)) break;
-
-		uvLastHitPos = uvRayHitPos;
-		lastdZ = dZ;
-	}
-
-	return vec3(uvLastHitPos, hit);
 }
 
 const float JITTER_STRENGTH = 0.6;
