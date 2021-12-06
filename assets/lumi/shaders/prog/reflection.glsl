@@ -76,14 +76,14 @@ vec3 reflectionMarch_v2(sampler2D depthBuffer, sampler2DArray normalBuffer, floa
 	vec3 uvMarch = (uvEndPos - uvStartPos) / float(MAXSTEPS);
 	vec3 uvRayPos = uvStartPos;
 
-	float d = 1.0;
+	float z = 1.0;
 	float hit = 0.0;
 	// float hitboxZ = 0.0513 / frx_viewDistance;
 
 	for (int i=0; i < MAXSTEPS && hit < 1.0; i++) {
 		uvRayPos = uvRayPos + uvMarch;
-		d = texture(depthBuffer, uvRayPos.xy).r;
-		float dZ = uvRayPos.z - d;
+		z = texture(depthBuffer, uvRayPos.xy).r;
+		float dZ = uvRayPos.z - z;
 
 		if (dZ > 0/* && ldepth(dZ) < hitboxZ*/) {
 			hit = 1.0;
@@ -93,11 +93,11 @@ vec3 reflectionMarch_v2(sampler2D depthBuffer, sampler2DArray normalBuffer, floa
 	uvMarch *= -1.0 / float(REFINE);
 
 	for (int i=0; i<REFINE && hit == 1.0; i++) {
-		float lastdZ = uvRayPos.z - d;
+		float lastdZ = uvRayPos.z - z;
 
 		vec3 uvNextPos = uvRayPos + uvMarch;
-		d = texture(depthBuffer, uvNextPos.xy).r;
-		float dZ = uvNextPos.z - d;
+		z = texture(depthBuffer, uvNextPos.xy).r;
+		float dZ = uvNextPos.z - z;
 
 		if (dZ < 0 || abs(dZ) > abs(lastdZ)) break;
 
@@ -133,7 +133,9 @@ vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer
 	vec3 jitterRaw = getRandomVec(noiseTexture, v_texcoord, frxu_size) * 2.0 - 1.0;
 	vec3 jitterPrc = jitterRaw * JITTER_STRENGTH * roughness * roughness;
 
-	vec3 viewToEye  = normalize(-viewPos);
+	// view bobbing reduction, thanks to fewizz
+	vec4 nearPos = frx_inverseProjectionMatrix * vec4(v_texcoord * 2.0 - 1.0, -1.0, 1.0);
+	vec3 viewToEye  = normalize(-viewPos + nearPos.xyz / nearPos.w);
 	vec3 viewToFrag = -viewToEye;
 	vec3 viewNormal = frx_normalModelMatrix * normal;
 	vec3 viewMarch  = normalize(reflect(viewToFrag, viewNormal) + jitterPrc);
