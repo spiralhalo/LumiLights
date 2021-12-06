@@ -75,37 +75,39 @@ vec3 reflectionMarch_v2(sampler2D depthBuffer, sampler2DArray normalBuffer, floa
 
 		uvRayPos = uvNextPos;
 		viewRayPos += viewMarch * marchProject;
-		hitboxZ = -viewMarch.z * marchProject;
+		// hitboxZ = -viewMarch.z * marchProject;
 
 		float dZ = viewSampledPos.z - viewRayPos.z;
 
 		vec3 sampledNormal = texture(normalBuffer, vec3(uvRayPos, idNormal)).xyz * 2.0 - 1.0;
 		bool frontFace = dot(worldMarch, sampledNormal) < 0.;
 
-		if (frontFace && dZ > 0 && dZ < hitboxZ) {
+		if (frontFace && dZ > 0/* && dZ < hitboxZ*/) {
 			hit = 1.0;
 		}
 	}
 
-	// float marchSign = sign(viewMarch.z);
+	uvMarch = -uvMarch / float(REFINE);
+	viewMarch = -viewMarch;
 
-	// for (int i=0; i<REFINE && hit == 1.0; i++) {
-	// 	uvMarch *= 0.5;
+	for (int i=0; i<REFINE && hit == 1.0; i++) {
+		float lastdZ = viewSampledPos.z - viewRayPos.z;
 
-	// 	if (sign(viewSampledPos.z - viewRayPos.z) != marchSign) {
-	// 		uvMarch *= -1.;
-	// 	}
+		uvNextPos = uvRayPos + uvMarch;
+		d = texture(depthBuffer, uvNextPos).r;
+		temp = frx_inverseProjectionMatrix * vec4(uvNextPos * 2.0 - 1.0, d * 2.0 - 1.0, 1.0);
+		viewSampledPos = temp.xyz / temp.w;
 
-	// 	uvNextPos = uvRayPos + uvMarch;
-	// 	d = texture(depthBuffer, uvNextPos).r;
-	// 	temp = frx_inverseProjectionMatrix * vec4(uvNextPos * 2.0 - 1.0, d * 2.0 - 1.0, 1.0);
-	// 	viewSampledPos = temp.xyz / temp.w;
+		float marchProject = dot(viewSampledPos - viewRayPos, viewMarch);
 
-	// 	float marchProject = dot(viewSampledPos - viewRayPos, viewMarch);
+		viewRayPos += viewMarch * marchProject;
 
-	// 	uvRayPos = uvNextPos;
-	// 	viewRayPos += viewMarch * marchProject;
-	// }
+		float dZ = viewSampledPos.z - viewRayPos.z;
+
+		if (dZ < 0 || abs(dZ) > abs(lastdZ)) break;
+
+		uvRayPos = uvNextPos;
+	}
 
 	return vec3(uvRayPos, hit);
 }
