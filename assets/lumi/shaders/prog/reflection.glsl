@@ -15,26 +15,33 @@ const int REFINE = 8;
 const float REFLECTION_MAXIMUM_ROUGHNESS = REFLECTION_MAXIMUM_ROUGHNESS_RELATIVE / 10.0;
 const float SKYLESS_FACTOR = 0.5;
 
-vec2 clipUV(vec2 uv, vec2 center, vec2 minUV, vec2 maxUV)
+void clip(inout vec3 end, in vec3 start)
 {
-	if (uv == clamp(uv, minUV, maxUV)) {
-		return uv;
+	if (end.z < 0.0) {
+		float delta = end.z - start.z;
+		float param = (0.0 - start.z) / delta;
+		end = start + (end - start) * param;
 	}
 
-	vec2 direction = uv - center;
-	vec2 bound;
-	bound.x = uv.x < center.x ? minUV.x : maxUV.x;
-	bound.y = uv.y < center.y ? minUV.y : maxUV.y;
-	vec2 mean = bound - center;
-	float max2 = max(direction.x, direction.y);
-
-	if (max2 == direction.x) {
-		direction *= mean.x / direction.x;
-	} else {
-		direction *= mean.y / direction.y;
+	if (end.y < 0.0) {
+		float delta = end.y - start.y;
+		float param = (0.0 - start.z) / delta;
+		end = start + (end - start) * param;
+	} else if (end.y > 1.0) {
+		float delta = end.y - start.y;
+		float param = (1.0 - start.y) / delta;
+		end = start + (end - start) * param;
 	}
 
-	return center + direction;
+	if (end.x < 0.0) {
+		float delta = end.x - start.x;
+		float param = (0.0 - start.z) / delta;
+		end = start + (end - start) * param;
+	} else if (end.x > 1.0) {
+		float delta = end.x - start.x;
+		float param = (1.0 - start.x) / delta;
+		end = start + (end - start) * param;
+	}
 }
 
 vec3 reflectionMarch_v2(sampler2D depthBuffer, sampler2DArray normalBuffer, float idNormal, vec3 viewStartPos, vec3 viewToEye, vec3 viewMarch)
@@ -52,19 +59,16 @@ vec3 reflectionMarch_v2(sampler2D depthBuffer, sampler2DArray normalBuffer, floa
 	vec3 uvEndPos = temp.xyz / temp.w * 0.5 + 0.5;
 	uvEndPos.z = uvEndPos.z;
 
-	// uvEndPos = clipUV(uvEndPos, uvStartPos, vec2(0.0), vec2(1.0));
-	// float dEndPos = texture(depthBuffer, uvEndPos).r;
-	// temp = frx_inverseProjectionMatrix * vec4(uvEndPos * 2.0 - 1.0, dEndPos * 2.0 - 1.0, 1.0);
-	// viewEndPos = temp.xyz / temp.w;
+	clip(uvEndPos, uvStartPos);
 
 	vec3 uvMarch = (uvEndPos - uvStartPos) / float(MAXSTEPS);
 	vec3 uvRayPos = uvStartPos;
 
 	float d = 1.0;
 	float hit = 0.0;
-	float hitboxZ = 0.1;
+	// float hitboxZ = 0.0513 / frx_viewDistance;
 
-	for (int i=0; i<MAXSTEPS && hit < 1.0 && uvRayPos.xy == clamp(uvRayPos.xy, 0.0, 1.0); i++) {
+	for (int i=0; i < MAXSTEPS && hit < 1.0; i++) {
 		uvRayPos = uvRayPos + uvMarch;
 		d = texture(depthBuffer, uvRayPos.xy).r;
 		float dZ = uvRayPos.z - d;
@@ -72,32 +76,24 @@ vec3 reflectionMarch_v2(sampler2D depthBuffer, sampler2DArray normalBuffer, floa
 		vec3 sampledNormal = texture(normalBuffer, vec3(uvRayPos.xy, idNormal)).xyz * 2.0 - 1.0;
 		bool frontFace = dot(worldMarch, sampledNormal) < 0.;
 
-		if (frontFace && dZ > 0 && dZ < hitboxZ) {
+		if (frontFace && dZ > 0/* && ldepth(dZ) < hitboxZ*/) {
 			hit = 1.0;
 		}
 	}
 
-	// uvMarch = -uvMarch / float(REFINE);
-	// viewMarch = -viewMarch;
+	uvMarch *= -1.0 / float(REFINE);
 
-	// for (int i=0; i<REFINE && hit == 1.0; i++) {
-	// 	float lastdZ = viewSampledPos.z - viewRayPos.z;
+	for (int i=0; i<REFINE && hit == 1.0; i++) {
+		float lastdZ = uvRayPos.z - d;
 
-	// 	uvNextPos = uvRayPos + uvMarch;
-	// 	d = texture(depthBuffer, uvNextPos).r;
-	// 	temp = frx_inverseProjectionMatrix * vec4(uvNextPos * 2.0 - 1.0, d * 2.0 - 1.0, 1.0);
-	// 	viewSampledPos = temp.xyz / temp.w;
+		vec3 uvNextPos = uvRayPos + uvMarch;
+		d = texture(depthBuffer, uvNextPos.xy).r;
+		float dZ = uvNextPos.z - d;
 
-	// 	float marchProject = dot(viewSampledPos - viewRayPos, viewMarch);
+		if (dZ < 0 || abs(dZ) > abs(lastdZ)) break;
 
-	// 	viewRayPos += viewMarch * marchProject;
-
-	// 	float dZ = viewSampledPos.z - viewRayPos.z;
-
-	// 	if (dZ < 0 || abs(dZ) > abs(lastdZ)) break;
-
-	// 	uvRayPos = uvNextPos;
-	// }
+		uvRayPos = uvNextPos;
+	}
 
 	return vec3(uvRayPos.xy, hit);
 }
