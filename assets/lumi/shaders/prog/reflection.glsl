@@ -44,13 +44,13 @@ vec3 reflectionMarch_v2(sampler2D depthBuffer, sampler2DArray normalBuffer, floa
 	// viewStartPos = viewStartPos + viewMarch * -viewStartPos.z / vec3(50.); // magic
 	vec4 temp = frx_projectionMatrix * vec4(viewStartPos, 1.0);
 	vec3 uvStartPos = temp.xyz / temp.w * 0.5 + 0.5;
-	uvStartPos.z = ldepth(uvStartPos.z);
+	uvStartPos.z = uvStartPos.z;
 
 	float maxTravel = frx_viewDistance;
 	vec3 viewEndPos = viewStartPos + maxTravel * viewMarch;
 	temp = frx_projectionMatrix * vec4(viewEndPos, 1.0);
 	vec3 uvEndPos = temp.xyz / temp.w * 0.5 + 0.5;
-	uvEndPos.z = ldepth(uvEndPos.z);
+	uvEndPos.z = uvEndPos.z;
 
 	// uvEndPos = clipUV(uvEndPos, uvStartPos, vec2(0.0), vec2(1.0));
 	// float dEndPos = texture(depthBuffer, uvEndPos).r;
@@ -67,7 +67,7 @@ vec3 reflectionMarch_v2(sampler2D depthBuffer, sampler2DArray normalBuffer, floa
 	for (int i=0; i<MAXSTEPS && hit < 1.0 && uvRayPos.xy == clamp(uvRayPos.xy, 0.0, 1.0); i++) {
 		uvRayPos = uvRayPos + uvMarch;
 		d = texture(depthBuffer, uvRayPos.xy).r;
-		float dZ = uvRayPos.z - ldepth(d);
+		float dZ = uvRayPos.z - d;
 
 		vec3 sampledNormal = texture(normalBuffer, vec3(uvRayPos.xy, idNormal)).xyz * 2.0 - 1.0;
 		bool frontFace = dot(worldMarch, sampledNormal) < 0.;
