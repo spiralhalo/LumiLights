@@ -167,7 +167,7 @@ vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer
 	vec4 reflectedPos = frx_inverseViewProjectionMatrix * vec4(result.xy * 2.0 - 1.0, texture(depthBuffer, result.xy).r * 2.0 - 1.0, 1.0);
 	float distanceFade = fogFactor(length(reflectedPos.xyz / reflectedPos.w));
 
-	result.z *= 1.0 - distanceFade * distanceFade;
+	result.z *= 1.0 - pow(distanceFade, 3.0);
 
 	vec4 reflectedColor = texture(colorBuffer, result.xy);
 	vec3 objLight = reflectionPbr(albedo, material, reflectedColor.rgb, viewMarch, viewToEye).rgb;
