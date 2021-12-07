@@ -81,7 +81,7 @@ void main()
 
 	if (dSolid > dMin) {
 		if (dSolid < 1.0) {
-			base += skyReflection(u_tex_sun, u_tex_moon, cSolid.rgb, material, toFrag, normal, light.yw);
+			base += skyReflection(u_tex_sun, u_tex_moon, u_tex_noise, cSolid.rgb, material, toFrag, normal, light.yw);
 			base = fog(base, eyePos, toFrag);
 		}
 

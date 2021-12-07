@@ -80,6 +80,7 @@
 				"u_tex_moon",
 				"u_tex_nature",
 				"u_tex_glint",
+				"u_tex_noise",
 			]
 		},
 	],
@@ -143,6 +144,7 @@
 					"minecraft:textures/environment/moon_phases.png",
 					"lumi:textures/misc/nature.png",
 					"minecraft:textures/misc/enchanted_item_glint.png",
+					"lumi:textures/filter_pattern/bluenoise256.png",
 				]
 			},
 		]

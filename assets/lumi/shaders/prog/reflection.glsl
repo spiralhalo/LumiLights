@@ -1,7 +1,6 @@
 #include lumi:shaders/prog/fog.glsl
 #include lumi:shaders/prog/shading.glsl
 #include lumi:shaders/prog/sky.glsl
-#include lumi:shaders/prog/tile_noise.glsl
 
 /*******************************************************
  *  lumi:shaders/prog/reflection.glsl
@@ -131,15 +130,14 @@ vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer
 
 	// TODO: rain puddles?
 
-	vec3 jitterRaw = getRandomVec(noiseTexture, v_texcoord, frxu_size) * 2.0 - 1.0;
-	vec3 jitterPrc = jitterRaw * JITTER_STRENGTH * roughness * roughness;
+	vec3 jitterPrc;
 
 	// view bobbing reduction, thanks to fewizz
 	vec4 nearPos = frx_inverseProjectionMatrix * vec4(v_texcoord * 2.0 - 1.0, -1.0, 1.0);
 	vec3 viewToEye  = normalize(-viewPos + nearPos.xyz / nearPos.w);
 	vec3 viewToFrag = -viewToEye;
 	vec3 viewNormal = frx_normalModelMatrix * normal;
-	vec3 viewMarch  = normalize(reflect(viewToFrag, viewNormal) + jitterPrc);
+	vec3 viewMarch  = reflectRough(noiseTexture, viewToFrag, viewNormal, roughness, jitterPrc);
 
 	vec3 result = vec3(0.0);
 

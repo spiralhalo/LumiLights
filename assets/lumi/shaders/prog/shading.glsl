@@ -8,6 +8,7 @@
 #include lumi:shaders/lib/pbr.glsl
 #include lumi:shaders/lib/taa_jitter.glsl
 #include lumi:shaders/prog/shadow.glsl
+#include lumi:shaders/prog/tile_noise.glsl
 #include lumi:shaders/prog/water.glsl
 
 /*******************************************************
@@ -117,6 +118,20 @@ vec3 pbr_specularBRDF(float roughness, vec3 radiance, vec3 halfway, vec3 lightDi
 
 	vec3  specular = num / max(denom, 0.001);
 	return specular * radiance * NdotL;
+}
+
+vec3 reflectRough(sampler2D noiseTexture, vec3 toFrag, vec3 normal, float materialx, out vec3 jitterPrc)
+{
+	const float strength = 0.6;
+	vec3 jitterRaw = getRandomVec(noiseTexture, v_texcoord, frxu_size) * 2.0 - 1.0;
+	jitterPrc = jitterRaw * strength * materialx * materialx;
+	return normalize(reflect(toFrag, normal) + jitterPrc);
+}
+
+vec3 reflectRough(sampler2D noiseTexture, vec3 toFrag, vec3 normal, float materialx)
+{
+	vec3 ignored;
+	return reflectRough(noiseTexture, toFrag, normal, materialx, ignored);
 }
 
 vec3 reflectionPbr(vec3 albedo, vec3 material, vec3 radiance, vec3 toLight, vec3 toEye)
