@@ -34,7 +34,7 @@ uniform sampler2D u_tex_glint;
 uniform sampler2D u_tex_noise;
 
 layout(location = 0) out vec4 fragColor;
-layout(location = 1) out float fragDepth;
+layout(location = 1) out vec3 fragDepth;
 layout(location = 2) out vec4 fragAlbedo;
 
 void main()
@@ -63,6 +63,8 @@ void main()
 	vec4 light    = texture(u_gbuffer_light, vec3(uvSolid, ID_SOLID_LIGT));
 	vec3 material = texture(u_gbuffer_main_etc, vec3(uvSolid, ID_SOLID_MATS)).xyz;
 	vec3 normal   = texture(u_gbuffer_normal, vec3(uvSolid, ID_SOLID_MNORM)).xyz * 2.0 - 1.0;
+
+	// vec3 normalMin = normal;
 
 	light.w = denoisedShadowFactor(u_gbuffer_shadow, uvSolid, eyePos, dSolid, light.y);
 
@@ -107,6 +109,8 @@ void main()
 		material = texture(u_gbuffer_main_etc, vec3(v_texcoord, ID_TRANS_MATS)).xyz;
 		normal   = texture(u_gbuffer_normal, vec3(v_texcoord, ID_TRANS_MNORM)).xyz * 2.0 - 1.0;
 
+		// normalMin = normal;
+
 		#ifdef WATER_FOAM
 		if (transIsWater) {
 			// vec3 viewVertexNormal = frx_normalModelMatrix * (texture(u_gbuffer_normal, vec3(v_texcoord, ID_TRANS_NORM)).xyz * 2.0 - 1.0);
@@ -143,7 +147,27 @@ void main()
 	}
 
 	fragColor = base;
-	fragDepth = dMin;
+
+	// float MIN_THICKNESS = 2. / frx_viewDistance;
+	// float MAX_THICKNESS = 10. / frx_viewDistance;
+	// float dotNC = abs((frx_normalModelMatrix * normalMin).z);
+	// float thickness = mix(MIN_THICKNESS, MAX_THICKNESS, dotNC);
+
+	// float dBoxMin = dMin;
+	// float dBoxMax = dMin;
+	// for (int i=-1; i<=1; i++) {
+	// 	for (int j=-1; j<=1; j++){
+	// 		float dBox = texture(u_gbuffer_depth, vec3(v_texcoord + v_invSize * vec2(i, j), 0.)).r;
+	// 		dBoxMax = max(dBoxMax, dBox);
+	// 		dBoxMin = min(dBoxMin, dBox);
+	// 	}
+	// }
+
+	float ldMin = l2_getLdepth(dMin);
+	// thomas et al
+	float thickness = -l2_getZ(dMin) * (1.0/frx_projectionMatrix[1][1]) / (frxu_size.x * frxu_size.y);
+
+	fragDepth = vec3(dMin, ldMin, thickness);
 
 	if (dMin == dSolid) {
 		fragAlbedo = vec4(cSolid.rgb, 0.0);

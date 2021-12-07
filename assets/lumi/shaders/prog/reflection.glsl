@@ -10,7 +10,7 @@
 const float HITBOX = 0.125;
 const int MAXSTEPS = 30;
 const int PERIOD = 2;
-const int REFINE = 4;
+const int REFINE = 8;
 
 const float REFLECTION_MAXIMUM_ROUGHNESS = REFLECTION_MAXIMUM_ROUGHNESS_RELATIVE / 10.0;
 const float SKYLESS_FACTOR = 0.5;
@@ -76,16 +76,17 @@ vec3 reflectionMarch_v2(sampler2D depthBuffer, sampler2DArray normalBuffer, floa
 	vec3 uvMarch = (uvEndPos - uvStartPos) / float(MAXSTEPS);
 	vec3 uvRayPos = uvStartPos;
 
-	float z = 1.0;
+	vec2 zt;
 	float hit = 0.0;
+	float dZ;
 	// float hitboxZ = 0.0513 / frx_viewDistance;
 
 	for (int i=0; i < MAXSTEPS && hit < 1.0; i++) {
 		uvRayPos = uvRayPos + uvMarch;
-		z = texture(depthBuffer, uvRayPos.xy).r;
-		float dZ = uvRayPos.z - z;
+		zt = texture(depthBuffer, uvRayPos.xy).gb;
+		dZ = l2_getLdepth(uvRayPos.z) - zt.x;
 
-		if (dZ > 0/* && ldepth(dZ) < hitboxZ*/) {
+		if (dZ > 0 && dZ < zt.y) {
 			hit = 1.0;
 		}
 	}
@@ -93,11 +94,11 @@ vec3 reflectionMarch_v2(sampler2D depthBuffer, sampler2DArray normalBuffer, floa
 	uvMarch *= -1.0 / float(REFINE);
 
 	for (int i=0; i<REFINE && hit == 1.0; i++) {
-		float lastdZ = uvRayPos.z - z;
+		float lastdZ = dZ;
 
 		vec3 uvNextPos = uvRayPos + uvMarch;
-		z = texture(depthBuffer, uvNextPos.xy).r;
-		float dZ = uvNextPos.z - z;
+		zt = texture(depthBuffer, uvNextPos.xy).gb;
+		dZ = l2_getLdepth(uvNextPos.z) - zt.x;
 
 		if (dZ < 0 || abs(dZ) > abs(lastdZ)) break;
 
