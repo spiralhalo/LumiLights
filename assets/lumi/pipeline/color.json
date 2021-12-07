@@ -3,8 +3,8 @@
 		 {
 			name: "color_depth",
 			lod: 0,
-			internalFormat: "R32F",
-			pixelFormat: "GL_RED",
+			internalFormat: "RGB32F",
+			pixelFormat: "RGB",
 			pixelDataType: "FLOAT",
 			target: "TEXTURE_2D",
 			texParams: [ 

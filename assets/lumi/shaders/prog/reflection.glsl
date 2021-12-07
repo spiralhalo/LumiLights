@@ -8,101 +8,104 @@
  *******************************************************/
 
 const float HITBOX = 0.125;
-const int MAXSTEPS = 20;
+const int MAXSTEPS = 30;
 const int PERIOD = 2;
 const int REFINE = 8;
 
 const float REFLECTION_MAXIMUM_ROUGHNESS = REFLECTION_MAXIMUM_ROUGHNESS_RELATIVE / 10.0;
 const float SKYLESS_FACTOR = 0.5;
 
-vec3 reflectionMarch(sampler2D depthBuffer, sampler2DArray normalBuffer, float idNormal, vec3 viewStartPos, vec3 viewToEye, vec3 viewMarch)
+void clipSides(inout vec3 end, in vec3 start)
 {
-	// TODO: rewrite
-	viewStartPos = viewStartPos + viewMarch * -viewStartPos.z / vec3(50.); // magic
+	float delta, param = 1.0;
 
-	vec3 worldMarch = viewMarch * frx_normalModelMatrix;
-
-	vec3 viewRayPos = viewStartPos;
-	float edgeZ = viewStartPos.z + 0.25;
-
-	float hitboxZ = HITBOX;
-	vec3 viewRayUnit = viewMarch * hitboxZ;
-
-	// limit hitbox size for inbound reflection
-	bool inbound = viewMarch.z > 0.0;
-	float hitboxLimit = inbound ? 1. : 1024000.;
-
-	vec4 temp;
-	vec2 uvRayHitPos;
-	int steps = 0;
-	while (steps < MAXSTEPS && viewRayPos.z < 0.0) {
-		viewRayPos += viewRayUnit;
-
-		temp = frx_projectionMatrix * vec4(viewRayPos, 1.0);
-		uvRayHitPos = (temp.xy / temp.w) * 0.5 + 0.5;
-
-		temp.z = texture(depthBuffer, uvRayHitPos).r;
-		temp = frx_inverseProjectionMatrix * vec4(uvRayHitPos * 2.0 - 1.0, temp.z * 2.0 - 1.0, 1.0);
-
-		vec3 viewRayHitPos = temp.xyz / temp.w;
-
-		float dZ = viewRayHitPos.z - viewRayPos.z; 
-		// vec3 reflectedNormal   = texture(normalBuffer, vec3(uvRayHitPos, idNormal)).xyz * 2.0 - 1.0;
-		// bool reflectsFrontFace = true;//dot(worldMarch, reflectedNormal) < 0.;
-
-		if (dZ > 0 && (/*reflectsFrontFace &&*/ viewRayHitPos.z < edgeZ || inbound)) {
-			// Pad hitbox
-			float hitboxNow = min(hitboxLimit, hitboxZ * 2);
-
-			if (dZ < hitboxNow) {
-				//refine
-				int refine_steps = 0;
-				vec2 uvLastHitPos = uvRayHitPos;
-				float lastdZ = dZ;
-				float refineRayLength = 0.0625;
-				viewRayUnit = viewMarch * refineRayLength;
-
-				// 0.01 is the dZ at which no more detail will be achieved even for very nearby reflection
-				// PERF: adapt based on initial z
-				while (refine_steps < REFINE && abs(dZ) > 0.01) {
-
-					if (abs(dZ) < refineRayLength) {
-						refineRayLength = abs(dZ);
-						viewRayUnit = viewMarch * refineRayLength;
-					}
-
-					viewRayPos -= viewRayUnit;
-
-					temp = frx_projectionMatrix * vec4(viewRayPos, 1.0);
-					uvRayHitPos = (temp.xy / temp.w) * 0.5 + 0.5;
-
-					temp.z = texture(depthBuffer, uvRayHitPos).r;
-					temp = frx_inverseProjectionMatrix * vec4(uvRayHitPos * 2.0 - 1.0, temp.z * 2.0 - 1.0, 1.0);
-
-					viewRayHitPos = temp.xyz / temp.w;
-
-					dZ = viewRayHitPos.z - viewRayPos.z;
-					// Ensure dZ never increases
-					if (abs(dZ) > abs(lastdZ)) break;
-
-					uvLastHitPos = uvRayHitPos;
-					lastdZ = dZ;
-					refine_steps ++;
-				}
-
-				return vec3(uvLastHitPos, 1.0);
-			}
-		}
-
-		if (mod(steps, PERIOD) == 0 && hitboxZ < hitboxLimit) {
-			viewRayUnit *= 2.;
-			hitboxZ *= 2.;
-		}
-
-		steps ++;
+	if (end.z > 1.0) {
+		delta = end.z - start.z;
+		param = min(param, (1.0 - start.z) / delta);
 	}
 
-	return vec3(uvRayHitPos, 0.0);
+	if (end.y < 0.0) {
+		delta = end.y - start.y;
+		param = min(param, (0.0 - start.y) / delta);
+	} else if (end.y > 1.0) {
+		delta = end.y - start.y;
+		param = min(param, (1.0 - start.y) / delta);
+	}
+
+	if (end.x < 0.0) {
+		delta = end.x - start.x;
+		param = min(param, (0.0 - start.x) / delta);
+	} else if (end.x > 1.0) {
+		delta = end.x - start.x;
+		param = min(param, (1.0 - start.x) / delta);
+	}
+
+	end = start + (end - start) * param;
+}
+
+vec3 clipNear(vec3 end, vec3 start)
+{
+	if (end.z > -0.0001) {
+		float delta = end.z - start.z;
+		float param = (-0.0001 - start.z) / delta;
+		return start + (end - start) * clamp(param, 0.0, 1.0);
+	}
+
+	return end;
+}
+
+vec3 reflectionMarch_v2(sampler2D depthBuffer, sampler2DArray normalBuffer, float idNormal, vec3 viewStartPos, vec3 viewToEye, vec3 viewMarch)
+{
+	vec3 worldMarch = viewMarch * frx_normalModelMatrix;
+
+	// padding to prevent back face reflection. we want the divisor to be as small as possible.
+	// too small with cause distortion of reflection near the reflector
+	viewStartPos = viewStartPos + viewMarch * -viewStartPos.z / vec3(12.);
+
+	vec4 temp = frx_projectionMatrix * vec4(viewStartPos, 1.0);
+	vec3 uvStartPos = temp.xyz / temp.w * 0.5 + 0.5;
+
+	float maxTravel = frx_viewDistance;
+
+	vec3 viewEndPos = clipNear(viewStartPos + maxTravel * viewMarch, viewStartPos);
+	temp = frx_projectionMatrix * vec4(viewEndPos, 1.0);
+	vec3 uvEndPos = temp.xyz / temp.w * 0.5 + 0.5;
+
+	clipSides(uvEndPos, uvStartPos);
+
+	vec3 uvMarch = (uvEndPos - uvStartPos) / float(MAXSTEPS);
+	vec3 uvRayPos = uvStartPos;
+
+	vec2 zt;
+	float hit = 0.0;
+	float dZ;
+	// float hitboxZ = 0.0513 / frx_viewDistance;
+
+	for (int i=0; i < MAXSTEPS && hit < 1.0; i++) {
+		uvRayPos = uvRayPos + uvMarch;
+		zt = texture(depthBuffer, uvRayPos.xy).gb;
+		dZ = l2_getLdepth(uvRayPos.z) - zt.x;
+
+		if (dZ > 0 && dZ < zt.y) {
+			hit = 1.0;
+		}
+	}
+
+	uvMarch *= -1.0 / float(REFINE);
+
+	for (int i=0; i<REFINE && hit == 1.0; i++) {
+		float lastdZ = dZ;
+
+		vec3 uvNextPos = uvRayPos + uvMarch;
+		zt = texture(depthBuffer, uvNextPos.xy).gb;
+		dZ = l2_getLdepth(uvNextPos.z) - zt.x;
+
+		if (dZ < 0 || abs(dZ) > abs(lastdZ)) break;
+
+		uvRayPos = uvNextPos;
+	}
+
+	return vec3(uvRayPos.xy, hit);
 }
 
 const float JITTER_STRENGTH = 0.6;
@@ -131,7 +134,9 @@ vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer
 	vec3 jitterRaw = getRandomVec(noiseTexture, v_texcoord, frxu_size) * 2.0 - 1.0;
 	vec3 jitterPrc = jitterRaw * JITTER_STRENGTH * roughness * roughness;
 
-	vec3 viewToEye  = normalize(-viewPos);
+	// view bobbing reduction, thanks to fewizz
+	vec4 nearPos = frx_inverseProjectionMatrix * vec4(v_texcoord * 2.0 - 1.0, -1.0, 1.0);
+	vec3 viewToEye  = normalize(-viewPos + nearPos.xyz / nearPos.w);
 	vec3 viewToFrag = -viewToEye;
 	vec3 viewNormal = frx_normalModelMatrix * normal;
 	vec3 viewMarch  = normalize(reflect(viewToFrag, viewNormal) + jitterPrc);
@@ -154,7 +159,7 @@ vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer
 	bool withinThreshold = roughness <= REFLECTION_MAXIMUM_ROUGHNESS;
 
 	if (withinThreshold) {
-		result = reflectionMarch(depthBuffer, normalBuffer, idNormal, viewPos, viewToEye, viewMarch);
+		result = reflectionMarch_v2(depthBuffer, normalBuffer, idNormal, viewPos, viewToEye, viewMarch);
 	}
 	#endif
 

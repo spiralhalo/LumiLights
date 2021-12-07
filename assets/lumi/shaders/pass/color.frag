@@ -34,7 +34,7 @@ uniform sampler2D u_tex_glint;
 uniform sampler2D u_tex_noise;
 
 layout(location = 0) out vec4 fragColor;
-layout(location = 1) out float fragDepth;
+layout(location = 1) out vec3 fragDepth;
 layout(location = 2) out vec4 fragAlbedo;
 
 void main()
@@ -143,7 +143,11 @@ void main()
 	}
 
 	fragColor = base;
-	fragDepth = dMin;
+
+	// Thomas et al
+	float thickness = length(eyePos) * (1.0/frx_projectionMatrix[1][1]) / (frxu_size.x * frxu_size.y);
+
+	fragDepth = vec3(dMin, l2_getLdepth(dMin), thickness);
 
 	if (dMin == dSolid) {
 		fragAlbedo = vec4(cSolid.rgb, 0.0);
