@@ -25,12 +25,6 @@ float ldepth(float depth) {
 	return 2.0 * (nearZ * farZ) / (farZ + nearZ - (depth * 2.0 - 1.0) * (farZ - nearZ));
 }
 
-float l2_getLdepth(float depth) {
-	float nearZ = 0.0000001 * (32. * 16.) / frx_viewDistance;
-	const float farZ = 1.0;
-	return 2.0 * (nearZ * farZ) / (farZ + nearZ - (depth * 2.0 - 1.0) * (farZ - nearZ));
-}
-
 float l2_clampScale(float e0, float e1, float v){
 	return clamp((v - e0) / (e1 - e0), 0.0, 1.0);
 }

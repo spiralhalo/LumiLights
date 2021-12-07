@@ -75,17 +75,17 @@ vec3 reflectionMarch_v2(sampler2D depthBuffer, sampler2DArray normalBuffer, floa
 	vec3 uvMarch = (uvEndPos - uvStartPos) / float(MAXSTEPS);
 	vec3 uvRayPos = uvStartPos;
 
-	vec2 zt;
+	float sampledZ;
 	float hit = 0.0;
 	float dZ;
 	// float hitboxZ = 0.0513 / frx_viewDistance;
 
 	for (int i=0; i < MAXSTEPS && hit < 1.0; i++) {
 		uvRayPos = uvRayPos + uvMarch;
-		zt = texture(depthBuffer, uvRayPos.xy).gb;
-		dZ = l2_getLdepth(uvRayPos.z) - zt.x;
+		sampledZ = texture(depthBuffer, uvRayPos.xy).r;
+		dZ = uvRayPos.z - sampledZ;
 
-		if (dZ > 0 && dZ < zt.y) {
+		if (dZ > 0) {
 			hit = 1.0;
 		}
 	}
@@ -96,8 +96,8 @@ vec3 reflectionMarch_v2(sampler2D depthBuffer, sampler2DArray normalBuffer, floa
 		float lastdZ = dZ;
 
 		vec3 uvNextPos = uvRayPos + uvMarch;
-		zt = texture(depthBuffer, uvNextPos.xy).gb;
-		dZ = l2_getLdepth(uvNextPos.z) - zt.x;
+		sampledZ = texture(depthBuffer, uvNextPos.xy).r;
+		dZ = uvNextPos.z - sampledZ;
 
 		if (dZ < 0 || abs(dZ) > abs(lastdZ)) break;
 
