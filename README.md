@@ -12,12 +12,14 @@ A custom rendering pipeline for Canvas for improved visual fidelity.
 - PBR/HDR shading
 - Procedural sky
 - Refraction and caustics effect
-- Screenspace AO
+- Screenspace AO*
 - Screenspace reflections
 - Temporal AA
 - Toon outline and other novelty effects
 - Volumetric clouds
-- Volumetric light rays
+- Volumetric light shafts*
+
+\*) Currently timed out for v0.40 release. Will be back in the future.
 
 ## Downloads
 
@@ -26,7 +28,7 @@ A custom rendering pipeline for Canvas for improved visual fidelity.
 ## How to Install Lumi Lights
 
 1. Put `LumiLights-vX.XX.zip` in resource packs and activate the resource pack(s), and make sure it is above the `canvas/canvas_default` pack to get the full experience.
-2. Go to Video Settings → Canvas → Change the `Pipeline` to `Lumi Lights` (no shadow) or `Lumi Shadow xx` (with shadow)
+2. Go to Video Settings → Canvas → Change the `Pipeline` to `Lumi Lights *x` (for shadows) or `Lumi Lights LITE` (without shadows)
 
 ## PBR Extension
 
@@ -37,21 +39,21 @@ Lumi Lights PBR Extension brings its own spin of roughness/metalness material mo
 
 ## Acknowledgement & Special Thanks
 
-- [Antonio Hernández Bejarano's LWJGL Game Dev Gitbook](https://ahbejarano.gitbook.io/lwjglgamedev/) Helping me learn OpenGL
-- [LearnOpenGL.com](https://learnopengl.com/) Taught me about PBR
+- [Canvas by Grondag](https://github.com/grondag/canvas) The rendering engine! And primary inspiration for bloom effect
+- [lomo by fewizz](https://github.com/fewizz/lomo/) Inspiration for multiple MC specific rendering, has a cool reflection
+- [Antonio Hernández Bejarano's LWJGL Game Dev Gitbook](https://ahbejarano.gitbook.io/lwjglgamedev/) Where I learned OpenGL
+- [LearnOpenGL.com](https://learnopengl.com/) My primary source for PBR and POM
 - [Sebastian Lague's Coding Adventure](https://www.youtube.com/watch?v=4QOcCGI6xOU) Amazing exploration and explanation for volumetric clouds
-- [Volumetric lights by Alexandre Pestana](https://www.alexandre-pestana.com/volumetric-lights/) Opened my eye about dithering
-- [Temporal Reprojection Anti-Aliasing in INSIDE](https://www.youtube.com/watch?v=2XXS5UyNjjU) Inspiration and explanation for TAA
-- [Temporal Anti Aliasing – Step by Step](https://ziyadbarakat.wordpress.com/2020/07/28/temporal-anti-aliasing-step-by-step/) Another inspiration for TAA and introduced me to Halton sequences
+- [Volumetric lights by Alexandre Pestana](https://www.alexandre-pestana.com/volumetric-lights/) Inspiration for dithering in raymarched volumetric lights
+- [Temporal Reprojection Anti-Aliasing in INSIDE](https://www.youtube.com/watch?v=2XXS5UyNjjU) Pretty cool explanation for TAA
+- [Temporal Anti Aliasing – Step by Step](https://ziyadbarakat.wordpress.com/2020/07/28/temporal-anti-aliasing-step-by-step/) Another inspiration for TAA and Halton sequences
 - Lumi Lights discord members - testing and reporting countless bugs!
 
 ## Source Credits
 
-- [Canvas Standard by Grondag](https://github.com/grondag/canvas) for Bloom
-- [Erkaman/glsl-godrays](https://github.com/Erkaman/glsl-godrays) for Godrays
+- [Erkaman/glsl-godrays](https://github.com/Erkaman/glsl-godrays) for SS Godrays
 - [TheRealMJP/Shadows](https://github.com/TheRealMJP/Shadows) for Shadow PCF (thanks to Grondag for isolating the code)
 - [ziacko/Temporal-AA](https://github.com/ziacko/Temporal-AA) for TAA (based on Playdead's implementation)
-- [WebGL GLSL HBAO](https://gist.github.com/transitive-bullshit/6770346) for SSAO
 
 ## License
 
