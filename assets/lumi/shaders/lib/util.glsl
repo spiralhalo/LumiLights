@@ -25,21 +25,10 @@ float ldepth(float depth) {
 	return 2.0 * (nearZ * farZ) / (farZ + nearZ - (depth * 2.0 - 1.0) * (farZ - nearZ));
 }
 
-float l2_getZ(float depth) {
-	vec4 a = frx_inverseProjectionMatrix * vec4(0.0, 0.0, depth * 2.0 - 1.0, 1.0);
-	return a.z / a.w;
-}
-
 float l2_getLdepth(float depth) {
 	float nearZ = 0.0000001 * (32. * 16.) / frx_viewDistance;
 	const float farZ = 1.0;
 	return 2.0 * (nearZ * farZ) / (farZ + nearZ - (depth * 2.0 - 1.0) * (farZ - nearZ));
-	// float m22 = -frx_projectionMatrix[2][2];
-	// float m32 = -frx_projectionMatrix[3][2];
-
-	// float nearZ = (2.0*m32)/(2.0*m22-2.0);
-	// float farZ = ((m22-1.0)*nearZ)/(m22+1.0);
-	// return 2.0 * (nearZ * farZ) / (farZ + nearZ - (depth * 2.0 - 1.0) * (farZ - nearZ));
 }
 
 float l2_clampScale(float e0, float e1, float v){
