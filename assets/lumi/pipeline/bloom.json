@@ -77,6 +77,17 @@
 
 	programs: [
 		{
+			name: "bloom0",
+			vertexSource: "lumi:shaders/pass/basic.vert",
+			fragmentSource: "lumi:shaders/pass/bloom0.frag",
+			samplers: [
+				"u_input",
+				"u_blend",
+				"u_color_albedo",
+				"u_gbuffer_light",
+			]
+		},
+		{
 			name: "bloom",
 			vertexSource: "lumi:shaders/pass/basic.vert",
 			fragmentSource: "lumi:shaders/pass/bloom.frag",
@@ -96,9 +107,13 @@
 			},
 
 			{
-				name: "bloomdown0", framebuffer: "bloomdown0", program: "bloom",
-				samplerImages: ["swap_color", "swap_color"],
-				layer: 0, lod: 0, toggleConfig: "bloom_effect"
+				name: "bloomdown0", framebuffer: "bloomdown0", program: "bloom0",
+				samplerImages: [
+					"swap_color", "swap_color",
+					"color_albedo",
+					"gbuffer_light",
+				],
+				lod: 0, toggleConfig: "bloom_effect"
 			}, {
 				name: "bloomdown1", framebuffer: "bloomdown1", program: "bloom",
 				samplerImages: ["bloomdown", "bloomdown"],
@@ -154,7 +169,7 @@
 			{
 				name: "bloom", framebuffer: "vanilla", program: "bloom",
 				samplerImages: ["swap_color", "bloomup"],
-				layer: 99, toggleConfig: "bloom_effect"
+				layer: 0, toggleConfig: "bloom_effect"
 			},
 		]
 	},

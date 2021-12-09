@@ -18,13 +18,7 @@ const vec2 BLOOM_UPSAMPLE_DIST_VEC	 = BLOOM_DOWNSAMPLE_DIST_VEC / 10.; // not su
 
 void main()
 {
-	if (frxu_layer == 0) {
-		vec4 base = hdr_inverseTonemap(texture(u_input, v_texcoord));
-		float luminance = l2_max3(base.rgb); //use max instead of luminance to get some lava action
-		const float MIN_LUM = 0.9; // based on semi-comfortable bloom on snowy scapes
-		float luminanceGate = smoothstep(MIN_LUM, MIN_LUM + 2.0, luminance);
-		fragColor = base * luminanceGate;
-	} else if (frxu_layer == 1) {
+	if (frxu_layer == 1) {
 		fragColor = frx_sample13(u_input, v_texcoord, BLOOM_DOWNSAMPLE_DIST_VEC / frxu_size, max(0, frxu_lod - 1));
 	} else if (frxu_layer == 2) {
 		vec4 prior = frxu_lod == 5 ? vec4(0.0) : textureLod(u_input, v_texcoord, frxu_lod + 1);
