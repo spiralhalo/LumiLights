@@ -79,13 +79,12 @@ vec3 reflectionMarch_v2(sampler2D depthBuffer, sampler2DArray normalBuffer, floa
 	// thickness in hyperbolic depth. does it make sense? no. does it work? YES.
 	// bottomside hack: bigger thickness to reduce flickering when reflecting ocean floor
 	float thickness = uvMarch.y < 0.0 ? 0.0004 : 0.0001;
-	float edgeZ = texture(depthBuffer, v_texcoord).r - thickness;
+	float lastZ = texture(depthBuffer, v_texcoord).r - thickness;
 	bool pEdge = uvMarch.z >= 0;
 
 	float sampledZ;
 	float hit = 0.0;
 	float dZ;
-	float lastZ;
 	int steps;
 
 	for (steps=0; steps < MAXSTEPS && hit < 1.0; steps++) {
@@ -93,9 +92,9 @@ vec3 reflectionMarch_v2(sampler2D depthBuffer, sampler2DArray normalBuffer, floa
 		sampledZ = texture(depthBuffer, uvRayPos.xy).r;
 		dZ = uvRayPos.z - sampledZ;
 
-		bool edge = (sampledZ > edgeZ && pEdge) || (sampledZ < edgeZ && !pEdge);
+		bool edge = (sampledZ > lastZ - thickness && pEdge) || (sampledZ < lastZ + thickness && !pEdge);
 
-		if (dZ > 0 && sampledZ > lastZ - thickness && edge) {
+		if (dZ > 0 && edge) {
 			hit = 1.0;	
 		}
 
