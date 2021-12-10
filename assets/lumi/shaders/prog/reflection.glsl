@@ -76,9 +76,14 @@ vec3 reflectionMarch_v2(sampler2D depthBuffer, sampler2DArray normalBuffer, floa
 	vec3 uvMarch = (uvEndPos - uvStartPos) / float(MAXSTEPS);
 	vec3 uvRayPos = uvStartPos;
 
-	// thickness in hyperbolic depth. does it make sense? no. does it work? YES.
+	// thickness in hyperbolic depth. does it make sense? no- maybe- uhh. does it work? YES.
+	#if REFLECTION_OVERSAMPLING == REFLECTION_OVERSAMPLING_MINIMUM
+	const float thickness = 0.0004;
+	#else
 	// bottomside hack: bigger thickness to reduce flickering when reflecting ocean floor
 	float thickness = uvMarch.y < 0.0 ? 0.0004 : 0.0001;
+	#endif
+
 	float lastZ = texture(depthBuffer, v_texcoord).r - thickness;
 	bool pEdge = uvMarch.z >= 0;
 
@@ -98,7 +103,9 @@ vec3 reflectionMarch_v2(sampler2D depthBuffer, sampler2DArray normalBuffer, floa
 			hit = 1.0;	
 		}
 
+		#if REFLECTION_OVERSAMPLING != REFLECTION_OVERSAMPLING_MAXIMUM
 		lastZ = uvRayPos.z;
+		#endif
 	}
 
 	uvMarch *= -1.0 / float(REFINE);

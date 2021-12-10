@@ -39,6 +39,14 @@
 					nameKey: "config.lumi_lights.value.refraction_effect",
 					descriptionKey: "config.lumi_lights.help.refraction_effect"
 				},
+				reflection_oversampling: {
+					default: "MINIMUM",
+					choices: ["OFF", "MINIMUM", "MAXIMUM"],
+					enum: true,
+					prefix: "reflection_oversampling_",
+					nameKey: "config.lumi_lights.value.reflection_oversampling",
+					descriptionKey: "config.lumi_lights.help.reflection_oversampling"
+				},
 				reflection_maximum_roughness_relative: {
 					default: 3,
 					min: 1,
