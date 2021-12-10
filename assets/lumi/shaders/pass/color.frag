@@ -98,7 +98,7 @@ void main()
 	tempPos = frx_inverseViewProjectionMatrix * vec4(2.0 * v_texcoord - 1.0, 2.0 * dMin - 1.0, 1.0);
 	eyePos  = tempPos.xyz / tempPos.w;
 
-	light	 = vec4(0.0, 1.0, 0.0, 0.0);
+	light	 = vec4(0.0);
 	material = vec3(1.0, 0.0, 0.04);
 	normal	 = -frx_cameraView;
 

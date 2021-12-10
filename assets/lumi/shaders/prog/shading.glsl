@@ -162,6 +162,11 @@ vec3 lightPbr(vec3 albedo, float alpha, vec3 radiance, float roughness, float me
 
 vec4 shading(vec4 color, sampler2D natureTexture, vec4 light, float ao, vec3 material, vec3 eyePos, vec3 normal, bool isUnderwater)
 {
+	vec3 albedo = hdr_fromGamma(color.rgb);
+
+	// unmanaged
+	if (light.x == 0.0) return vec4(albedo, color.a);
+
 	float causticLight = 0.0;
 
 #ifdef WATER_CAUSTICS
@@ -190,7 +195,6 @@ vec4 shading(vec4 color, sampler2D natureTexture, vec4 light, float ao, vec3 mat
 
 	light.z += vanillaEmissive;
 
-	vec3 albedo = hdr_fromGamma(color.rgb);
 	vec3 f0 = mix(vec3(material.z), albedo, material.y); // TODO: multiply metallic f0?
 
 	vec3 toEye = -normalize(eyePos);
