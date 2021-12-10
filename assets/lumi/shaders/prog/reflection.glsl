@@ -57,9 +57,15 @@ vec3 reflectionMarch_v2(sampler2D depthBuffer, sampler2DArray normalBuffer, floa
 {
 	vec3 worldMarch = viewMarch * frx_normalModelMatrix;
 
+	//hack to fix weird self intersection due to viewBobbing
+	// if (viewMarch.y > -.025 && viewStartPos.z > -5.2) {
+	// 	return vec3(0.0);
+	// }
+
 	// padding to prevent back face reflection. we want the divisor to be as small as possible.
 	// too small with cause distortion of reflection near the reflector
-	viewStartPos = viewStartPos + viewMarch * -viewStartPos.z / vec3(12.);
+	float padding = -viewStartPos.z / 12.;
+	viewStartPos = viewStartPos + viewMarch * padding;
 
 	vec4 temp = frx_projectionMatrix * vec4(viewStartPos, 1.0);
 	vec3 uvStartPos = temp.xyz / temp.w * 0.5 + 0.5;
@@ -75,34 +81,56 @@ vec3 reflectionMarch_v2(sampler2D depthBuffer, sampler2DArray normalBuffer, floa
 	vec3 uvMarch = (uvEndPos - uvStartPos) / float(MAXSTEPS);
 	vec3 uvRayPos = uvStartPos;
 
+	// thickness in hyperbolic depth. does it make sense? no. does it work? YES.
+	// bottomside hack: bigger thickness to reduce flickering when reflecting ocean floor
+	float thickness = uvMarch.y < 0.0 ? 0.0004 : 0.0001;
+	float edgeZ = texture(depthBuffer, v_texcoord).r - thickness;
+	bool pEdge = uvMarch.z >= 0;
+
 	float sampledZ;
 	float hit = 0.0;
 	float dZ;
-	// float hitboxZ = 0.0513 / frx_viewDistance;
+	float lastZ;
+	int steps;
 
-	for (int i=0; i < MAXSTEPS && hit < 1.0; i++) {
+	for (steps=0; steps < MAXSTEPS && hit < 1.0; steps++) {
 		uvRayPos = uvRayPos + uvMarch;
 		sampledZ = texture(depthBuffer, uvRayPos.xy).r;
 		dZ = uvRayPos.z - sampledZ;
 
-		if (dZ > 0) {
-			hit = 1.0;
+		bool edge = (sampledZ > edgeZ && pEdge) || (sampledZ < edgeZ && !pEdge);
+
+		if (dZ > 0 && sampledZ > lastZ - thickness && edge) {
+			hit = 1.0;	
 		}
+
+		lastZ = uvRayPos.z;
 	}
 
 	uvMarch *= -1.0 / float(REFINE);
 
 	for (int i=0; i<REFINE && hit == 1.0; i++) {
-		float lastdZ = dZ;
-
 		vec3 uvNextPos = uvRayPos + uvMarch;
-		sampledZ = texture(depthBuffer, uvNextPos.xy).r;
-		dZ = uvNextPos.z - sampledZ;
+		float nextZ = texture(depthBuffer, uvNextPos.xy).r;
+		float nextdZ = uvNextPos.z - nextZ;
 
-		if (dZ < 0 || abs(dZ) > abs(lastdZ)) break;
+		if (nextdZ < 0 || abs(nextdZ) > abs(dZ)) break;
 
+		dZ = nextdZ;
+		sampledZ = nextZ;
 		uvRayPos = uvNextPos;
 	}
+
+	// float linRayZ, linZ;
+	// temp	= frx_inverseProjectionMatrix * vec4(uvRayPos * 2.0 - 1.0, 1.0);
+	// linRayZ	= temp.z / temp.w;
+	// temp	= frx_inverseProjectionMatrix * vec4(uvRayPos.xy * 2.0 - 1.0, sampledZ * 2.0 - 1.0, 1.0);
+	// linZ	= temp.z / temp.w;
+
+	// float boundary = abs(linRayZ - linZ) < max(linRayZ * linRayZ / frx_viewDistance, padding) ? 1.0 : 0.0;
+	// float boundary = abs(linRayZ - linZ) < max(1.0, padding) ? 1.0 : 0.0;
+
+	// hit *= boundary;
 
 	return vec3(uvRayPos.xy, hit);
 }
@@ -134,7 +162,9 @@ vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer
 
 	// view bobbing reduction, thanks to fewizz
 	vec4 nearPos = frx_inverseProjectionMatrix * vec4(v_texcoord * 2.0 - 1.0, -1.0, 1.0);
-	vec3 viewToEye  = normalize(-viewPos + nearPos.xyz / nearPos.w);
+	viewPos -= nearPos.xyz / nearPos.w;
+
+	vec3 viewToEye  = normalize(-viewPos);
 	vec3 viewToFrag = -viewToEye;
 	vec3 viewNormal = frx_normalModelMatrix * normal;
 	vec3 viewMarch  = reflectRough(noiseTexture, viewToFrag, viewNormal, roughness, jitterPrc);
