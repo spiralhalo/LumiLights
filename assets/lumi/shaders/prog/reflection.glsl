@@ -57,11 +57,6 @@ vec3 reflectionMarch_v2(sampler2D depthBuffer, sampler2DArray normalBuffer, floa
 {
 	vec3 worldMarch = viewMarch * frx_normalModelMatrix;
 
-	//hack to fix weird self intersection due to viewBobbing
-	// if (viewMarch.y > -.025 && viewStartPos.z > -5.2) {
-	// 	return vec3(0.0);
-	// }
-
 	// padding to prevent back face reflection. we want the divisor to be as small as possible.
 	// too small with cause distortion of reflection near the reflector
 	float padding = -viewStartPos.z / 12.;
@@ -120,17 +115,6 @@ vec3 reflectionMarch_v2(sampler2D depthBuffer, sampler2DArray normalBuffer, floa
 		sampledZ = nextZ;
 		uvRayPos = uvNextPos;
 	}
-
-	// float linRayZ, linZ;
-	// temp	= frx_inverseProjectionMatrix * vec4(uvRayPos * 2.0 - 1.0, 1.0);
-	// linRayZ	= temp.z / temp.w;
-	// temp	= frx_inverseProjectionMatrix * vec4(uvRayPos.xy * 2.0 - 1.0, sampledZ * 2.0 - 1.0, 1.0);
-	// linZ	= temp.z / temp.w;
-
-	// float boundary = abs(linRayZ - linZ) < max(linRayZ * linRayZ / frx_viewDistance, padding) ? 1.0 : 0.0;
-	// float boundary = abs(linRayZ - linZ) < max(1.0, padding) ? 1.0 : 0.0;
-
-	// hit *= boundary;
 
 	return vec3(uvRayPos.xy, hit);
 }
