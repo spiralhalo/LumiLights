@@ -144,11 +144,9 @@ vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer
 
 	vec3 jitterPrc;
 
-	// view bobbing reduction, thanks to fewizz
+	// view bobbing shaking reduction, thanks to fewizz
 	vec4 nearPos = frx_inverseProjectionMatrix * vec4(v_texcoord * 2.0 - 1.0, -1.0, 1.0);
-	viewPos -= nearPos.xyz / nearPos.w;
-
-	vec3 viewToEye  = normalize(-viewPos);
+	vec3 viewToEye  = normalize(-viewPos + nearPos.xyz / nearPos.w);
 	vec3 viewToFrag = -viewToEye;
 	vec3 viewNormal = frx_normalModelMatrix * normal;
 	vec3 viewMarch  = reflectRough(noiseTexture, viewToFrag, viewNormal, roughness, jitterPrc);
