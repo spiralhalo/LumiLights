@@ -79,10 +79,10 @@ bool pbrExt_doTBN = true;
 
 void pbrExt_resolveProperties() {
 #ifdef PBR_ENABLED
-	if (pbr_roughness >= 0.) frx_fragRoughness = pbr_roughness;
+	if (pbr_roughness >= 0.0) frx_fragRoughness = pbr_roughness;
 	// if (pbr_metallic >= 0.) frx_fragMetalness = pbr_metallic; // fragMetalness doesn't exist yet
 	if (pbr_f0 >= 0.) frx_fragReflectance = pbr_f0;
-	if (pbr_normalMicro.x >= 0) {
+	if (pbr_normalMicro.x >= -1.0) {
 		frx_fragNormal = pbr_normalMicro;
 		pbrExt_doTBN = false;
 	}
