@@ -16,14 +16,13 @@ const float CLOUD_MARCH_JITTER_STRENGTH = 1.0;
 const float TEXTURE_RADIUS = 512.0;
 const int NUM_SAMPLE = 8;
 const int LIGHT_SAMPLE = 5; 
-const float LIGHT_ABSORPTION = 0.9;
 const float LIGHT_SAMPLE_SIZE = 1.0;
 
 vec2 worldXz2Uv(vec2 worldXz)
 {
 	worldXz += frx_cameraPos.xz;
 	worldXz += frx_renderSeconds;
-	vec2 ndc = worldXz / TEXTURE_RADIUS;
+	vec2 ndc = worldXz * CLOUD_SAMPLING_ZOOM / TEXTURE_RADIUS;
 	return ndc * 0.5 + 0.5;
 }
 
@@ -33,8 +32,8 @@ vec2 worldXz2Uv(vec2 worldXz)
 	const float CLOUD_ALTITUDE = VOLUMETRIC_CLOUD_ALTITUDE;
 #endif
 
-const float CLOUD_HEIGHT = 20.0 / CLOUD_TEXTURE_ZOOM;
-const float CLOUD_MID_HEIGHT = CLOUD_HEIGHT * .4;
+const float CLOUD_HEIGHT = 20.0 / (CLOUD_TEXTURE_ZOOM * CLOUD_SAMPLING_ZOOM);
+const float CLOUD_MID_HEIGHT = CLOUD_HEIGHT * .3;
 const float CLOUD_TOP_HEIGHT = CLOUD_HEIGHT - CLOUD_MID_HEIGHT;
 const float CLOUD_MID_ALTITUDE = CLOUD_ALTITUDE + CLOUD_MID_HEIGHT;
 const float CLOUD_MIN_Y = CLOUD_ALTITUDE;
@@ -42,12 +41,13 @@ const float CLOUD_MAX_Y = CLOUD_ALTITUDE + CLOUD_HEIGHT;
 
 const float CLOUD_COVERAGE = clamp(CLOUD_COVERAGE_RELATIVE * 0.1, 0.0, 1.0);
 const float CLOUD_PUFFINESS = clamp(CLOUD_PUFFINESS_RELATIVE * 0.1, 0.0, 1.0);
-const float CLOUD_BRIGHTNESS = clamp(CLOUD_BRIGHTNESS_RELATIVE * 0.1, 0.0, 1.0);
+
+const float MIN_COVERAGE = 0.25 + 0.1 * (1.0 - CLOUD_COVERAGE);
 
 float sampleCloud(sampler2D natureTexture, vec3 worldPos)
 {
 	vec2 uv = worldXz2Uv(worldPos.xz);
-	float tF = l2_clampScale(0.35 * (1.0 - frx_rainGradient), 1.0, texture(natureTexture, uv).r);
+	float tF = l2_clampScale(MIN_COVERAGE * (1.0 - frx_rainGradient), 1.0, texture(natureTexture, uv).r);
 	float hF = tF;
 	float yF = smoothstep(CLOUD_MID_ALTITUDE + CLOUD_TOP_HEIGHT * hF, CLOUD_MID_ALTITUDE, worldPos.y);
 	yF *= smoothstep(CLOUD_MID_ALTITUDE - CLOUD_MID_HEIGHT * hF, CLOUD_MID_ALTITUDE, worldPos.y);
@@ -146,9 +146,9 @@ vec3 rayMarchCloud(sampler2D natureTexture, sampler2D noiseTexture, vec2 texcoor
 			toLightDensity += sampleCloud(natureTexture, toLightPos);
 		}
 
-		toLightDensity *= LIGHT_SAMPLE_SIZE;
+		toLightDensity /= float(LIGHT_SAMPLE);
 
-		float lightAtRay = exp(-toLightDensity * LIGHT_ABSORPTION);
+		float lightAtRay = exp(-toLightDensity * 5.);
 
 		lightEnergy += atRayDensity * transmittance * lightAtRay;
 		transmittance *= exp(-atRayDensity);
@@ -187,7 +187,8 @@ vec4 customClouds(sampler2D cloudsBuffer, sampler2D cloudsDepthBuffer, sampler2D
 
 	celestRadiance = celestRadiance * result.x * rainBrightness;//
 	vec3 color = celestRadiance + cloudShading;
-	color = mix(color, skyFadeColor, fogFactor(result.z));
+	float fogF = sqrt(fogFactor(result.z));
+	color = mix(color, skyFadeColor, fogF);
 
 	return vec4(color, result.y);
 #else
