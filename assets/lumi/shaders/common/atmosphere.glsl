@@ -244,10 +244,6 @@ void atmos_generateAtmosphereModel()
 		frx_worldIsOverworld == 1
 		&& frx_effectBlindness == 0;
 
-	#if SKY_MODE != SKY_MODE_LUMI
-	customOWSkyAndFallback = false;
-	#endif
-
 	if (!customOWSkyAndFallback) {
 		atmosv_hdrSkyColorRadiance = atmosv_hdrFogColorRadiance;
 	}

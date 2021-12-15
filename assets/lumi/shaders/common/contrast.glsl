@@ -23,24 +23,24 @@ const float USER_NIGHT_AMBIENT_MULTIPLIER  = clamp(NIGHT_AMBIENT_BRIGHTNESS, 0, 
 // ******************************
 
 	// STRENGTHS
-	#define _0_BASE_AMBIENT_STR		0.1
-	#define _0_SKYLESS_AMBIENT_STR	0.5
-	#define _0_SKYLESS_LIGHT_STR	1.0
-	#define _0_BLOCK_LIGHT_STR		1.5 * USER_BLOCK_MULTIPLIER
-	#define _0_EMISSIVE_LIGHT_STR	10.0 // want decent lava bloom
+	#define DEF_BASE_AMBIENT_STR	0.1
+	#define DEF_SKYLESS_AMBIENT_STR	0.5
+	#define DEF_SKYLESS_LIGHT_STR	1.0
+	#define DEF_BLOCK_LIGHT_STR		1.5 * USER_BLOCK_MULTIPLIER
+	#define DEF_EMISSIVE_LIGHT_STR	10.0 // want decent lava bloom
 	const float NIGHT_VISION_STR =	1.5;
-	#define _0_STARS_STR			1.0
+	#define STARS_STR				1.0
 	#define LIGHT_RAYS_STR			1.0 // this was never meant to go above 1.0 due to sdr blending
 
 	// ATMOS STRENGTHS
 	#define DEF_SUNLIGHT_STR		1.5 * USER_CELESTIAL_MULTIPLIER
 	#define DEF_SKY_STR				0.5
 	#define DEF_SKY_AMBIENT_STR		0.5 * USER_SKY_AMBIENT_MULTIPLIER
-	#define _0_DEF_MOONLIGHT_STR	0.25 * USER_CELESTIAL_MULTIPLIER
+	#define DEF_MOONLIGHT_STR		0.25 * USER_CELESTIAL_MULTIPLIER
 	#define HORIZON_MULT			6.0
 
 	// ATMOS COLORS
-	#define _0_DEF_NIGHT_AMBIENT vec3(0.65, 0.65, 0.8)
+	#define DEF_NIGHT_AMBIENT		vec3(0.65, 0.65, 0.8)
 
 	// LIGHT COLORS
 	const vec3 BLOCK_LIGHT_NEUTRAL = hdr_fromGamma(vec3(0.7555)); // luminance of warm BL color
@@ -54,11 +54,12 @@ const float USER_NIGHT_AMBIENT_MULTIPLIER  = clamp(NIGHT_AMBIENT_BRIGHTNESS, 0, 
 	const vec3 NETHER_LIGHT_COLOR		= hdr_fromGamma(vec3(1.0, 0.6, 0.4));
 
 	// SKY COLORS
-	#define _0_DEF_NEBULAE_COLOR		vec3(0.8, 0.3, 0.6)
-	#define _0_LUMI_NIGHT_SKY_COLOR		mix(vec3(0.1, 0.1, 0.2), vec3(0.2, 0.25, 0.4), clamp(USER_NIGHT_AMBIENT_MULTIPLIER, 0.0, 1.0))
 	#define DEF_VANILLA_DAY_SKY_COLOR	hdr_fromGamma(vec3(0.52, 0.69, 1.0))
 
 #if SKY_MODE == SKY_MODE_LUMI
+
+	#define DEF_NEBULAE_COLOR			vec3(0.8, 0.3, 0.6)
+	#define _0_DEF_NIGHT_SKY_COLOR		mix(vec3(0.1, 0.1, 0.2), vec3(0.2, 0.25, 0.4), clamp(USER_NIGHT_AMBIENT_MULTIPLIER, 0.0, 1.0))
 
 	#if LUMI_SKY_COLOR == LUMI_SKY_COLOR_NATURAL_AZURE
 		#define DEF_DAY_SKY_COLOR		hdr_fromGamma(vec3(0.425, 0.623333, 0.85))
@@ -76,42 +77,22 @@ const float USER_NIGHT_AMBIENT_MULTIPLIER  = clamp(NIGHT_AMBIENT_BRIGHTNESS, 0, 
 
 #else
 
+	#define DEF_NEBULAE_COLOR		vec3(0.4, 0.15, 0.3)
+	#define _0_DEF_NIGHT_SKY_COLOR	mix(vec3(0.08, 0.08, 0.15), vec3(0.15, 0.19, 0.3), clamp(USER_NIGHT_AMBIENT_MULTIPLIER, 0.0, 1.0))
 	#define DEF_DAY_SKY_COLOR		DEF_VANILLA_DAY_SKY_COLOR
 	#define DEF_DAY_CLOUD_COLOR		DEF_VANILLA_DAY_SKY_COLOR
 
 #endif
 
-	const float EXPOSURE_CANCELLATION = 1.0;
-
 	// STRENGTHS
-	const float BASE_AMBIENT_STR    = _0_BASE_AMBIENT_STR;
-	const float SKYLESS_AMBIENT_STR = _0_SKYLESS_AMBIENT_STR;
-	const float SKYLESS_LIGHT_STR   = _0_SKYLESS_LIGHT_STR;
-	const float BLOCK_LIGHT_STR     = _0_BLOCK_LIGHT_STR;
-	const float EMISSIVE_LIGHT_STR  = _0_EMISSIVE_LIGHT_STR;
-	#define STARS_STR _0_STARS_STR
-
-	// ATMOS STRENGTHS
-	#define DEF_MOONLIGHT_STR		_0_DEF_MOONLIGHT_STR
-
-	// ATMOS COLORS
-	#define DEF_NIGHT_AMBIENT		_0_DEF_NIGHT_AMBIENT
+	const float BASE_AMBIENT_STR    = DEF_BASE_AMBIENT_STR;
+	const float SKYLESS_AMBIENT_STR = DEF_SKYLESS_AMBIENT_STR;
+	const float SKYLESS_LIGHT_STR   = DEF_SKYLESS_LIGHT_STR;
+	const float BLOCK_LIGHT_STR     = DEF_BLOCK_LIGHT_STR;
+	const float EMISSIVE_LIGHT_STR  = DEF_EMISSIVE_LIGHT_STR;
 
 	// SKY_COLORS
-	#define DEF_NEBULAE_COLOR		_0_DEF_NEBULAE_COLOR
-	#define LUMI_NIGHT_SKY_COLOR	_0_LUMI_NIGHT_SKY_COLOR
-
-	// SKY COLORS
+	#define DEF_NIGHT_SKY_COLOR		hdr_fromGamma(_0_DEF_NIGHT_SKY_COLOR)
 	#define DEF_NIGHT_CLOUD_COLOR	DEF_NIGHT_SKY_COLOR * 1.25
-
-#if SKY_MODE == SKY_MODE_LUMI
-
-	#define DEF_NIGHT_SKY_COLOR		hdr_fromGamma(LUMI_NIGHT_SKY_COLOR)
 	const vec3 NEBULAE_COLOR	=	hdr_fromGamma(DEF_NEBULAE_COLOR);
-
-#else
-
-	#define DEF_NIGHT_SKY_COLOR hdr_fromGamma(vec3(0.01, 0.01, 0.01))
-	const vec3 NEBULAE_COLOR	=	vec3(0.9, 0.75, 1.0);
-
 #endif

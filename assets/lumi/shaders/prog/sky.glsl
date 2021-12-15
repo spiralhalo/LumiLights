@@ -125,7 +125,9 @@ vec4 customSky(sampler2D sunTexture, sampler2D moonTexture, vec3 toSky, vec3 fal
 		result.rgb += celestColor.rgb * (1. - frx_rainGradient) * celestStr * celestVisible;
 		#else
 		float mul = 1.0 + frx_worldIsMoonlit * frx_skyLightTransitionFactor;
-		result.rgb = hdr_fromGamma(fallback) * mul;
+		vec3 fallback1 = hdr_fromGamma(fallback) * mul;
+		float shine = step(1.0, l2_max3(fallback1));
+		result.rgb = mix(fog(vec4(fallback1, 1.0), toSky * frx_viewDistance * 4.0, toSky).rgb, fallback1, shine);
 		#endif
 
 		#if SKY_MODE == SKY_MODE_LUMI || SKY_MODE == SKY_MODE_VANILLA_STARRY
