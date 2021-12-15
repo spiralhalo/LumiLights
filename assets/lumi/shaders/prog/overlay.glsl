@@ -83,7 +83,7 @@ vec3 autoGlint(sampler2D glintTexture, vec2 normalizedUV, float glint)
 #endif
 }
 
-vec4 overlay(vec4 base, sampler2D glintTexture, vec4 misc)
+vec4 overlay(vec4 base, sampler2D glintTexture, vec3 misc)
 {
 	const float GLINT_EMISSIVE_STR = 2.0;
 	float flash = bit_unpack(misc.z, 0);

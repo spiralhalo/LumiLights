@@ -104,7 +104,7 @@
 			categoryKey: "config.lumi_lights.category.fog",
 			options: {
 				fog_far_chunks: {
-					default: 8,
+					default: 16,
 					min: 0,
 					max: 32,
 					nameKey: "config.lumi_lights.value.fog_far_chunks",

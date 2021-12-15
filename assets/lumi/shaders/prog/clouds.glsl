@@ -37,7 +37,7 @@ const float CLOUD_MAX_Y = CLOUD_ALTITUDE + CLOUD_HEIGHT;
 const float CLOUD_COVERAGE = clamp(CLOUD_COVERAGE_RELATIVE * 0.1, 0.0, 1.0);
 const float CLOUD_PUFFINESS = clamp(CLOUD_PUFFINESS_RELATIVE * 0.1, 0.0, 1.0);
 
-const float MIN_COVERAGE = 0.25 + 0.1 * (1.0 - CLOUD_COVERAGE);
+const float MIN_COVERAGE = 0.325 + 0.1 * (1.0 - CLOUD_COVERAGE);
 
 float sampleCloud(sampler2D natureTexture, vec3 worldPos)
 {

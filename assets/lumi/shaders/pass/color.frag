@@ -66,14 +66,16 @@ void main()
 
 	light.w = denoisedShadowFactor(u_gbuffer_shadow, uvSolid, eyePos, dSolid, light.y);
 
+	vec3 miscSolid = texture(u_gbuffer_main_etc, vec3(uvSolid, ID_SOLID_MISC)).xyz;
 	vec3 miscTrans = texture(u_gbuffer_main_etc, vec3(v_texcoord, ID_TRANS_MISC)).xyz;
 	bool transIsWater = bit_unpack(miscTrans.z, 7) == 1.;
 	bool solidIsUnderwater = decideUnderwater(dSolid, dTrans, transIsWater, false);
 	vec3 toFrag = normalize(eyePos);
+	float disableDiffuse = bit_unpack(miscSolid.z, 4);
 
 	// TODO: end portal glitch?
 
-	vec4 base = dSolid == 1.0 ? customSky(u_tex_sun, u_tex_moon, toFrag, solidIsUnderwater) : shading(cSolid, u_tex_nature, light, material, eyePos, normal, solidIsUnderwater);
+	vec4 base = dSolid == 1.0 ? customSky(u_tex_sun, u_tex_moon, toFrag, solidIsUnderwater) : shading(cSolid, u_tex_nature, light, material, eyePos, normal, solidIsUnderwater, disableDiffuse);
 	vec4 next = (dSolid < dTrans && dSolid < dParts) ? vec4(0.0) : (dParts > dTrans ? cParts : cTrans);
 	vec4 last = (dSolid < dTrans && dSolid < dParts) ? vec4(0.0) : (dParts > dTrans ? cTrans : cParts);
 
@@ -101,11 +103,13 @@ void main()
 	light	 = vec4(0.0);
 	material = vec3(1.0, 0.0, 0.04);
 	normal	 = -frx_cameraView;
+	disableDiffuse = 0.0;
 
 	if (dMin == dTrans) {
 		light    = texture(u_gbuffer_light, vec3(v_texcoord, ID_TRANS_LIGT));
 		material = texture(u_gbuffer_main_etc, vec3(v_texcoord, ID_TRANS_MATS)).xyz;
 		normal   = texture(u_gbuffer_normal, vec3(v_texcoord, ID_TRANS_MNORM)).xyz * 2.0 - 1.0;
+		disableDiffuse = bit_unpack(miscTrans.z, 4);
 
 		#ifdef WATER_FOAM
 		if (transIsWater) {
@@ -123,7 +127,7 @@ void main()
 	light.w = transIsWater ? lightmapRemap (light.y) : denoisedShadowFactor(u_gbuffer_shadow, v_texcoord, eyePos, dMin, light.y);
 
 	if (next.a != 0.0) {
-		next = shading(next, u_tex_nature, light, material, eyePos, normal, nextIsUnderwater);
+		next = shading(next, u_tex_nature, light, material, eyePos, normal, nextIsUnderwater, disableDiffuse);
 	}
 	next.a = sqrt(next.a);
 
@@ -134,12 +138,8 @@ void main()
 
 	base.rgb = base.rgb * (1.0 - next.a) + next.rgb * next.a;
 
-	int idMisc = dMin == dSolid ? ID_SOLID_MISC : (dMin == dTrans ? ID_TRANS_MISC : -1);
-
-	if (idMisc > -1) {
-		vec2 uvAuto = idMisc == ID_SOLID_MISC ? uvSolid : v_texcoord;
-		vec4 miscAuto = texture(u_gbuffer_main_etc, vec3(uvAuto, idMisc));
-		base = overlay(base, u_tex_glint, miscAuto);
+	if (dMin == dSolid || dMin == dTrans) {
+		base = overlay(base, u_tex_glint, dMin == dTrans ? miscTrans : miscSolid);
 	}
 
 	fragColor = base;
