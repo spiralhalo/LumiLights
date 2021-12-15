@@ -1,6 +1,7 @@
 #include frex:shaders/lib/noise/cellular2x2x2.glsl
 #include frex:shaders/lib/noise/noise3d.glsl
 #include lumi:shaders/lib/rectangle.glsl
+#include lumi:shaders/prog/fog.glsl
 #include lumi:shaders/prog/shading.glsl
 
 /*******************************************************
@@ -106,13 +107,13 @@ vec4 celestFrag(in Rect celestRect, sampler2D ssun, sampler2D smoon, vec3 worldV
 	return vec4(celestCol, opacity);
 }
 
-vec4 customSky(sampler2D sunTexture, sampler2D moonTexture, vec3 toSky, bool isUnderwater, float skyVisible, float celestVisible)
+vec4 customSky(sampler2D sunTexture, sampler2D moonTexture, vec3 toSky, vec3 fallback, bool isUnderwater, float skyVisible, float celestVisible)
 {
 	vec4 result = vec4(0.0, 0.0, 0.0, 1.0);
 	float skyDotUp = dot(toSky, vec3(0.0, 1.0, 0.0));
 
-	if (frx_cameraInWater == 1 && isUnderwater || isUnderwater || frx_worldIsNether == 1) {
-		result.rgb = atmosv_hdrFogColorRadiance;
+	if (isUnderwater || frx_worldIsNether == 1) {
+		result.rgb = fog(result, toSky * frx_viewDistance * 4.0, toSky).rgb; // most accurate fog color
 	} else if (frx_worldIsOverworld == 1 && v_not_in_void > 0.0) {
 		// Sky, sun and moon
 		#if SKY_MODE == SKY_MODE_LUMI
@@ -122,6 +123,9 @@ vec4 customSky(sampler2D sunTexture, sampler2D moonTexture, vec3 toSky, bool isU
 
 		result.rgb  = atmos_hdrSkyGradientRadiance(toSky) * skyVisible;
 		result.rgb += celestColor.rgb * (1. - frx_rainGradient) * celestStr * celestVisible;
+		#else
+		float mul = 1.0 + frx_worldIsMoonlit * frx_skyLightTransitionFactor;
+		result.rgb = hdr_fromGamma(fallback) * mul;
 		#endif
 
 		#if SKY_MODE == SKY_MODE_LUMI || SKY_MODE == SKY_MODE_VANILLA_STARRY
@@ -164,12 +168,12 @@ vec4 customSky(sampler2D sunTexture, sampler2D moonTexture, vec3 toSky, bool isU
 	return result;
 }
 
-vec4 customSky(sampler2D sunTexture, sampler2D moonTexture, vec3 toSky, bool isUnderwater) {
-	return customSky(sunTexture, moonTexture, toSky, isUnderwater, 1.0, 1.0);
+vec4 customSky(sampler2D sunTexture, sampler2D moonTexture, vec3 toSky, vec3 fallback, bool isUnderwater) {
+	return customSky(sunTexture, moonTexture, toSky, fallback, isUnderwater, 1.0, 1.0);
 }
 
 vec4 skyReflection(sampler2D sunTexture, sampler2D moonTexture, vec3 albedo, vec3 material, vec3 toFrag, vec3 toSky, vec3 normal, vec2 lightyw) {
-	vec3 radiance = customSky(sunTexture, moonTexture, toSky, false, lightmapRemap(lightyw.x), lightyw.y).rgb;
+	vec3 radiance = customSky(sunTexture, moonTexture, toSky, vec3(0.0), false, lightmapRemap(lightyw.x), lightyw.y).rgb;
 	return vec4(reflectionPbr(albedo, material, radiance, toSky, -toFrag), 0.0);
 }
 
