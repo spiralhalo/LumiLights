@@ -53,10 +53,8 @@ vec3 clipNear(vec3 end, vec3 start)
 	return end;
 }
 
-vec3 reflectionMarch_v2(sampler2D depthBuffer, sampler2DArray normalBuffer, float idNormal, vec3 viewStartPos, vec3 viewToEye, vec3 viewMarch)
+vec3 reflectionMarch_v2(sampler2D depthBuffer, sampler2DArray normalBuffer, float idNormal, vec3 viewStartPos, vec3 viewMarch)
 {
-	vec3 worldMarch = viewMarch * frx_normalModelMatrix;
-
 	// padding to prevent back face reflection. we want the divisor to be as small as possible.
 	// too small with cause distortion of reflection near the reflector
 	float padding = -viewStartPos.z / 12.;
@@ -175,9 +173,8 @@ vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer
 	bool withinThreshold = roughness <= REFLECTION_MAXIMUM_ROUGHNESS;
 
 	if (withinThreshold) {
-		result = reflectionMarch_v2(depthBuffer, normalBuffer, idNormal, viewPos, viewToEye, viewMarch);
+		result = reflectionMarch_v2(depthBuffer, normalBuffer, idNormal, viewPos, viewMarch);
 	}
-	#endif
 
 	vec2 uvFade = smoothstep(0.5, 0.45, abs(result.xy - 0.5));
 	result.z *= min(uvFade.x, uvFade.y);
@@ -189,6 +186,10 @@ vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer
 
 	vec4 reflectedColor = texture(colorBuffer, result.xy);
 	vec3 objLight = reflectionPbr(albedo, material, reflectedColor.rgb, viewMarch, viewToEye).rgb;
+	#else
+	const vec3 objLight = vec3(0.0);
+	#endif
+
 	vec3 skyLight = skyReflection(sunTexture, moonTexture, albedo, material, viewToFrag * frx_normalModelMatrix, viewMarch * frx_normalModelMatrix, normal, light.yw).rgb;
 
 	vec3 reflectedLight = skyLight * (1.0 - result.z) * smoothstep(0.0, 1.0, viewNormal.y) + objLight * result.z;

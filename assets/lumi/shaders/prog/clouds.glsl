@@ -159,6 +159,63 @@ vec4 customClouds(sampler2D cloudsBuffer, sampler2D cloudsDepthBuffer, sampler2D
 #endif
 
 	vec3 result = rayMarchCloud(natureTexture, noiseTexture, texcoord, maxDist, toSky, numSample, startTravel);
+#else
+	float dClouds = texture(cloudsDepthBuffer, texcoord).r;
+
+	if (dClouds >= depth) return vec4(0.0);
+
+	// float dzdx = dFdx(dClouds);
+	// float dzdy = dFdy(dClouds);
+	// vec3 direction = vec3(-dzdx,-dzdy,1.0);
+	// vec3 normal = normalize(direction);
+
+	vec4 temp = frx_inverseViewProjectionMatrix * vec4(texcoord * 2.0 - 1.0, dClouds * 2.0 - 1.0, 1.0);
+	vec3 origin = temp.xyz / temp.w;
+
+	vec2 txc, txc0, txc1;
+	float dd, d0, d1, mul0, mul1;
+
+	txc0 = vec2(texcoord.x + v_invSize.x, texcoord.y);
+	txc1 = vec2(texcoord.x - v_invSize.x, texcoord.y);
+	d0 = texture(cloudsDepthBuffer, txc0).r;
+	d1 = texture(cloudsDepthBuffer, txc1).r;
+
+	if (abs(d0 - dClouds) < abs(d1 - dClouds)) {
+		txc = txc0;
+		dd = d0;
+		mul0 = 1.0;
+	} else {
+		txc = txc1;
+		dd = d1;
+		mul0 = -1.0;
+	}
+
+	temp = frx_inverseViewProjectionMatrix * vec4(txc * 2.0 - 1.0, dd * 2.0 - 1.0, 1.0);
+	vec3 right = temp.xyz / temp.w;
+
+	txc0 = vec2(texcoord.x, texcoord.y + v_invSize.y);
+	txc1 = vec2(texcoord.x, texcoord.y - v_invSize.y);
+	d0 = texture(cloudsDepthBuffer, txc0).r;
+	d1 = texture(cloudsDepthBuffer, txc1).r;
+
+	if (abs(d0 - dClouds) < abs(d1 - dClouds)) {
+		txc = txc0;
+		dd = d0;
+		mul1 = 1.0;
+	} else {
+		txc = txc1;
+		dd = d1;
+		mul1 = -1.0;
+	}
+
+	temp = frx_inverseViewProjectionMatrix * vec4(txc * 2.0 - 1.0, dd * 2.0 - 1.0, 1.0);
+	vec3 bottom = temp.xyz / temp.w;
+
+	vec3 normal = normalize(cross((right - origin) * mul0, (bottom - origin) * mul1));
+
+	float energy = (dot(normal, frx_skyLightVector) * 0.5 + 0.5) * 0.7 + 0.3;
+	vec3 result = vec3(energy, 1.0, length(origin));
+#endif
 
 	float rainBrightness = mix(0.13, 0.05, hdr_fromGammaf(frx_rainGradient)); // emulate dark clouds
 	vec3  cloudShading	 = atmosv_hdrCloudColorRadiance;
@@ -175,11 +232,6 @@ vec4 customClouds(sampler2D cloudsBuffer, sampler2D cloudsDepthBuffer, sampler2D
 	color = mix(color, skyFadeColor, fogF);
 
 	return vec4(color, result.y);
-#else
-	float dClouds = texture(cloudsDepthBuffer, texcoord).r;
-
-	return dClouds <= depth ? vec4(texture(cloudsBuffer, texcoord).r) : vec4(0.0);
-#endif
 }
 
 vec4 customClouds(sampler2D cloudsBuffer, sampler2D cloudsDepthBuffer, sampler2D natureTexture, sampler2D noiseTexture, float depth, vec2 texcoord, vec3 eyePos, vec3 toSky, int numSample)
