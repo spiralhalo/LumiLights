@@ -13,7 +13,6 @@
 uniform sampler2D u_color;
 uniform sampler2D u_albedo;
 uniform sampler2D u_depth;
-uniform sampler2D u_vanilla_clouds;
 uniform sampler2D u_vanilla_clouds_depth;
 uniform sampler2D u_vanilla_transl_color;
 uniform sampler2D u_vanilla_transl_depth;
@@ -57,7 +56,7 @@ void main()
 
 	fragColor = dMin < 1.0 ? fog(fragColor, eyePos, toFrag) : fragColor;
 
-	vec4 clouds = customClouds(u_vanilla_clouds, u_vanilla_clouds_depth, u_tex_nature, u_tex_noise, dMin, v_texcoord, eyePos, toFrag, NUM_SAMPLE);
+	vec4 clouds = customClouds(u_vanilla_clouds_depth, u_tex_nature, u_tex_noise, dMin, v_texcoord, eyePos, toFrag, NUM_SAMPLE);
 	fragColor.rgb = fragColor.rgb * (1.0 - clouds.a) + clouds.rgb * clouds.a;
 
 	fragColor = ldr_tonemap(fragColor);

@@ -140,13 +140,8 @@ vec3 rayMarchCloud(sampler2D natureTexture, sampler2D noiseTexture, vec2 texcoor
 	return vec3(lightEnergy, 1.0 - transmittance, distanceTotal);
 }
 
-vec4 customClouds(sampler2D cloudsBuffer, sampler2D cloudsDepthBuffer, sampler2D natureTexture, sampler2D noiseTexture, float depth, vec2 texcoord, vec3 eyePos, vec3 toSky, int numSample, float startTravel)
+vec4 customClouds(sampler2D cloudsDepthBuffer, sampler2D natureTexture, sampler2D noiseTexture, float depth, vec2 texcoord, vec3 eyePos, vec3 toSky, int numSample, float startTravel)
 {
-	if (frx_worldHasSkylight != 1) {
-		float dClouds = texture(cloudsDepthBuffer, texcoord).r;
-
-		return dClouds <= depth ? vec4(texture(cloudsBuffer, texcoord).r) : vec4(0.0);
-	}
 #ifdef VOLUMETRIC_CLOUDS
 #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
 	if (depth != 1. || toSky.y <= 0) return vec4(0.0);
@@ -163,11 +158,6 @@ vec4 customClouds(sampler2D cloudsBuffer, sampler2D cloudsDepthBuffer, sampler2D
 	float dClouds = texture(cloudsDepthBuffer, texcoord).r;
 
 	if (dClouds >= depth) return vec4(0.0);
-
-	// float dzdx = dFdx(dClouds);
-	// float dzdy = dFdy(dClouds);
-	// vec3 direction = vec3(-dzdx,-dzdy,1.0);
-	// vec3 normal = normalize(direction);
 
 	vec4 temp = frx_inverseViewProjectionMatrix * vec4(texcoord * 2.0 - 1.0, dClouds * 2.0 - 1.0, 1.0);
 	vec3 origin = temp.xyz / temp.w;
@@ -234,7 +224,7 @@ vec4 customClouds(sampler2D cloudsBuffer, sampler2D cloudsDepthBuffer, sampler2D
 	return vec4(color, result.y);
 }
 
-vec4 customClouds(sampler2D cloudsBuffer, sampler2D cloudsDepthBuffer, sampler2D natureTexture, sampler2D noiseTexture, float depth, vec2 texcoord, vec3 eyePos, vec3 toSky, int numSample)
+vec4 customClouds(sampler2D cloudsDepthBuffer, sampler2D natureTexture, sampler2D noiseTexture, float depth, vec2 texcoord, vec3 eyePos, vec3 toSky, int numSample)
 {
-	return customClouds(cloudsBuffer, cloudsDepthBuffer, natureTexture, noiseTexture, depth, texcoord, eyePos, toSky, numSample, 0.0);
+	return customClouds(cloudsDepthBuffer, natureTexture, noiseTexture, depth, texcoord, eyePos, toSky, numSample, 0.0);
 }

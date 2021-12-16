@@ -72,7 +72,7 @@
 				{name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
 			]
 		}, {
-			name: "junk_depth",
+			name: "clouds_depth",
 			lod: 0,
 			internalFormat: "DEPTH_COMPONENT",
 			pixelFormat: "DEPTH_COMPONENT",
@@ -210,7 +210,7 @@
 		},
 		{
 			name: "clouds",
-			depthAttachment: {image: "junk_depth", clearDepth: 1.0},
+			depthAttachment: {image: "clouds_depth", clearDepth: 1.0},
 			colorAttachments: [
 				{image: "junk_color", clearColor: 0x00000000},
 			]

@@ -18,7 +18,6 @@ uniform sampler2D u_vanilla_color;
 uniform sampler2D u_vanilla_depth;
 uniform sampler2D u_weather_color;
 uniform sampler2D u_weather_depth;
-uniform sampler2D u_vanilla_clouds;
 uniform sampler2D u_vanilla_clouds_depth;
 
 uniform sampler2DArray u_gbuffer_main_etc;
@@ -56,6 +55,7 @@ void main()
 
 	cParts.rgb /= cParts.a == 0.0 ? 1.0 : cParts.a;
 	cRains.rgb /= cRains.a == 0.0 ? 1.0 : cRains.a;
+	cRains = dSolid < dRains ? vec4(0.0) : cRains;
 
 	vec4 tempPos = frx_inverseViewProjectionMatrix * vec4(2.0 * uvSolid - 1.0, 2.0 * dSolid - 1.0, 1.0);
 	vec3 eyePos  = tempPos.xyz / tempPos.w;
@@ -76,9 +76,6 @@ void main()
 	// TODO: end portal glitch?
 
 	vec4 base = dSolid == 1.0 ? customSky(u_tex_sun, u_tex_moon, toFrag, cSolid.rgb, solidIsUnderwater) : shading(cSolid, u_tex_nature, light, material, eyePos, normal, solidIsUnderwater, disableDiffuse);
-	vec4 next = (dSolid < dTrans && dSolid < dParts) ? vec4(0.0) : (dParts > dTrans ? cParts : cTrans);
-	vec4 last = (dSolid < dTrans && dSolid < dParts) ? vec4(0.0) : (dParts > dTrans ? cTrans : cParts);
-
 	float dMin = min(dSolid, min(dTrans, min(dParts, dRains)));
 
 	if (dSolid > dMin) {
@@ -87,20 +84,34 @@ void main()
 			base = fog(base, eyePos, toFrag);
 		}
 
-		vec4 clouds = customClouds(u_vanilla_clouds, u_vanilla_clouds_depth, u_tex_nature, u_tex_noise, dSolid, uvSolid, eyePos, toFrag, NUM_SAMPLE, ldepth(dMin) * frx_viewDistance * 4.);
+		vec4 clouds = customClouds(u_vanilla_clouds_depth, u_tex_nature, u_tex_noise, dSolid, uvSolid, eyePos, toFrag, NUM_SAMPLE, ldepth(dMin) * frx_viewDistance * 4.);
 		base.rgb = base.rgb * (1.0 - clouds.a) + clouds.rgb * clouds.a;
 	}
 
-	if (dRains <= dSolid && dRains > dMin) {
-		next = vec4(next.rgb * (1.0 - cRains.a) + cRains.rgb * cRains.a, min(1.0, next.a + cRains.a));
+	vec4 next0, next1, next;
+
+	// TODO: is this slower than insert sort?
+	if (dMin == dRains) {
+		next0 = (dParts > dTrans ? cParts : cTrans);
+		next1 = (dParts > dTrans ? cTrans : cParts);
+		next  = cRains;
+	} else if (dMin == dParts) {
+		next0 = (dRains > dTrans ? cRains : cTrans);
+		next1 = (dRains > dTrans ? cTrans : cRains);
+		next  = cParts;
+	} else {
+		next0 = (dRains > dParts ? cRains : cParts);
+		next1 = (dRains > dParts ? cParts : cRains);
+		next  = cTrans;
 	}
 
-	next = vec4(next.rgb * (1.0 - last.a) + last.rgb * last.a, min(1.0, next.a + last.a));
+	next0 = vec4(next0.rgb * (1.0 - next1.a) + next1.rgb * next1.a, max(next0.a, next1.a));
+	next  = vec4(next0.rgb * (1.0 - next.a) + next.rgb * next.a, max(next0.a, next.a));
 
 	tempPos = frx_inverseViewProjectionMatrix * vec4(2.0 * v_texcoord - 1.0, 2.0 * dMin - 1.0, 1.0);
 	eyePos  = tempPos.xyz / tempPos.w;
 
-	light	 = vec4(0.0);
+	light	 = vec4(1.0);
 	material = vec3(1.0, 0.0, 0.04);
 	normal	 = -frx_cameraView;
 	disableDiffuse = 0.0;
@@ -119,7 +130,7 @@ void main()
 		}
 		#endif
 	} else if (dMin == dParts) {
-		light    = texture(u_gbuffer_light, vec3(v_texcoord, ID_PARTS_LIGT));
+		light = texture(u_gbuffer_light, vec3(v_texcoord, ID_PARTS_LIGT));
 	}
 
 	bool nextIsUnderwater = decideUnderwater(dMin, dTrans, transIsWater, true);
@@ -130,11 +141,6 @@ void main()
 		next = shading(next, u_tex_nature, light, material, eyePos, normal, nextIsUnderwater, disableDiffuse);
 	}
 	next.a = sqrt(next.a);
-
-	if (dRains == dMin) {
-		cRains.rgb = hdr_fromGamma(cRains.rgb);
-		next = vec4(next.rgb * (1.0 - cRains.a) + cRains.rgb * cRains.a, max(next.a, cRains.a));
-	}
 
 	base.rgb = base.rgb * (1.0 - next.a) + next.rgb * next.a;
 

@@ -17,7 +17,6 @@
 				"u_color",
 				"u_albedo",
 				"u_depth",
-				"u_vanilla_clouds",
 				"u_vanilla_clouds_depth",
 				"u_vanilla_transl_color",
 				"u_vanilla_transl_depth",
@@ -45,8 +44,7 @@
 					"color_result",
 					"color_albedo",
 					"color_depth",
-					"junk_color",
-					"junk_depth",
+					"clouds_depth",
 					"vanilla_transl_color",
 					"vanilla_transl_depth",
 
