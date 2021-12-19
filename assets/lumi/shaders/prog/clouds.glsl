@@ -49,7 +49,7 @@ float sampleCloud(sampler2D natureTexture, vec3 worldPos)
 	return l2_clampScale(0.0, 1.0 - 0.7 * CLOUD_PUFFINESS, yF * tF);
 }
 
-bool optimizeStart(float startTravel, float maxDist, vec3 toSky, inout vec3 worldRayPos, inout float numSample, out float sampleSize, out float preTraveled)
+bool optimizeStart(float startTravel, float maxDist, vec3 toSky, inout vec3 worldRayPos, inout float numSample, float sampleSize, out float preTraveled)
 {
 	float nearBorder = 0.0;
 
@@ -85,7 +85,6 @@ bool optimizeStart(float startTravel, float maxDist, vec3 toSky, inout vec3 worl
 
 	float toTravel = max(0.0, maxDist - preTraveled);
 
-	sampleSize = frx_viewDistance / float(numSample);
 	numSample = min(numSample, toTravel / sampleSize);
 
 	return false;
@@ -100,7 +99,7 @@ vec3 rayMarchCloud(sampler2D natureTexture, sampler2D noiseTexture, vec2 texcoor
 	worldRayPos.y = frx_cameraPos.y;
 #endif
 
-	float sampleSize = 1.0;
+	float sampleSize = 256.0 / float(numSample);
 	float distanceTotal = 0.0;
 
 	if (optimizeStart(startTravel, maxDist, toSky, worldRayPos, numSample, sampleSize, distanceTotal)) return vec3(0.0);
