@@ -145,7 +145,7 @@ void main()
 	base.rgb = base.rgb * (1.0 - next.a) + next.rgb * next.a;
 
 	if (dMin == dSolid || dMin == dTrans) {
-		base = overlay(base, u_tex_glint, dMin == dTrans ? miscTrans : miscSolid);
+		base = overlay(base, u_tex_glint, dMin == dSolid ? miscSolid : miscTrans);
 	}
 
 	fragColor = base;
