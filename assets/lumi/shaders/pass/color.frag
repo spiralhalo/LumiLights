@@ -81,7 +81,7 @@ void main()
 	if (dSolid > dMin) {
 		if (dSolid < 1.0) {
 			base += skyReflection(u_tex_sun, u_tex_moon, u_tex_noise, cSolid.rgb, material, toFrag, normal, light.yw);
-			base = fog(base, eyePos, toFrag);
+			base = fog(base, eyePos, toFrag, solidIsUnderwater);
 		}
 
 		vec4 clouds = customClouds(u_vanilla_clouds_depth, u_tex_nature, u_tex_noise, dSolid, uvSolid, eyePos, toFrag, NUM_SAMPLE, ldepth(dMin) * frx_viewDistance * 4.);
@@ -126,7 +126,7 @@ void main()
 		if (transIsWater) {
 			// vec3 viewVertexNormal = frx_normalModelMatrix * (texture(u_gbuffer_normal, vec3(v_texcoord, ID_TRANS_NORM)).xyz * 2.0 - 1.0);
 			vec3 vertexNormal = texture(u_gbuffer_normal, vec3(v_texcoord, ID_TRANS_NORM)).xyz * 2.0 - 1.0;
-			foamPreprocess(next, material, u_tex_nature, eyePos + frx_cameraPos, vertexNormal.y, cSolid.rgb, dVanilla, dTrans);
+			foamPreprocess(next, material, u_tex_nature, eyePos + frx_cameraPos, vertexNormal.y, base.rgb, dVanilla, dTrans);
 		}
 		#endif
 	} else if (dMin == dParts) {

@@ -213,7 +213,7 @@ vec4 shading(vec4 color, sampler2D natureTexture, vec4 light, float ao, vec3 mat
 
 	vec3 skylessColor = mix(SKYLESS_LIGHT_COLOR * USER_END_AMBIENT_MULTIPLIER, NETHER_LIGHT_COLOR * USER_NETHER_AMBIENT_MULTIPLIER, frx_worldIsNether);
 
-	baseLight += (1.0 - frx_worldHasSkylight) * (atmosv_hdrFogColorRadiance * 0.5 + 0.5) * SKYLESS_AMBIENT_STR;
+	baseLight += (1.0 - frx_worldHasSkylight) * (atmosv_FogRadiance * 0.5 + 0.5) * SKYLESS_AMBIENT_STR;
 	baseLight += (1.0 - frx_worldHasSkylight) * skylessColor * SKYLESS_AMBIENT_STR;
 
 	float bl = l2_clampScale(0.03125, 0.96875, light.x);
@@ -222,7 +222,7 @@ vec4 shading(vec4 color, sampler2D natureTexture, vec4 light, float ao, vec3 mat
 	vec3  blColor = mix(BLOCK_LIGHT_COLOR, BLOCK_LIGHT_NEUTRAL, blWhite);
 
 	baseLight += blColor * BLOCK_LIGHT_STR * bl;
-	baseLight += atmosv_hdrSkyAmbientRadiance * lightmapRemap(light.y);
+	baseLight += atmosv_SkyAmbientRadiance * lightmapRemap(light.y);
 	baseLight += albedo * light.z * EMISSIVE_LIGHT_STR;
 
 	lightPbr(albedo, color.a, baseLight, max(material.x * (1.0 - material.y), 0.5), material.y, f0, normal, toEye, normal, disableDiffuse);
@@ -251,7 +251,7 @@ vec4 shading(vec4 color, sampler2D natureTexture, vec4 light, float ao, vec3 mat
 
 	shaded *= ao;
 
-	vec3 skyLight = frx_worldHasSkylight * light.w * atmosv_hdrCelestialRadiance * (1. - frx_rainGradient);
+	vec3 skyLight = frx_worldHasSkylight * light.w * atmosv_CelestialRadiance * (1. - frx_rainGradient);
 	lightPbr(albedo, color.a, skyLight, material.x, material.y, f0, frx_skyLightVector, toEye, normal, disableDiffuse);
 	shaded += shading0.specular + shading0.diffuse;
 

@@ -208,9 +208,9 @@ vec4 customClouds(sampler2D cloudsDepthBuffer, sampler2D natureTexture, sampler2
 #endif
 
 	float rainBrightness = mix(0.13, 0.05, hdr_fromGammaf(frx_rainGradient)); // emulate dark clouds
-	vec3  cloudShading	 = atmosv_hdrCloudColorRadiance;
-	vec3  skyFadeColor	 = atmos_hdrSkyGradientRadiance(toSky);
-	vec3  celestRadiance = atmosv_hdrCelestialRadiance;
+	vec3  cloudShading	 = atmosv_CloudRadiance;
+	vec3  skyFadeColor	 = atmos_SkyGradientRadiance(toSky);
+	vec3  celestRadiance = atmosv_CelestialRadiance;
 
 	if (frx_worldIsMoonlit == 1) {
 		celestRadiance *= 0.2;

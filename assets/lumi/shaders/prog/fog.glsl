@@ -38,7 +38,7 @@ float fogFactor(float distToEye)
 	return clamp(fogFactor * distFactor, 0.0, 1.0);
 }
 
-vec4 fog(vec4 color, vec3 eyePos, vec3 toFrag)
+vec4 fog(vec4 color, vec3 eyePos, vec3 toFrag, bool isUnderwater)
 {
 	float distToEye = length(eyePos);
 	float fogFactor = fogFactor(distToEye);
@@ -47,11 +47,13 @@ vec4 fog(vec4 color, vec3 eyePos, vec3 toFrag)
 	float skyBlend	  = frx_cameraInFluid == 1 ? 0.0 : min(distToEye, frx_viewDistance) / frx_viewDistance;
 	vec3  toFragMod	  = toFrag;
 		  toFragMod.y = mix(1.0, toFrag.y, pow(skyBlend, 0.3)); // ??
-	vec3  fogColor	  = mix(atmos_hdrFogColorRadiance(toFrag), atmos_hdrSkyGradientRadiance(toFragMod), skyBlend);
+	vec3  fogColor	  = mix(atmos_FogRadiance(toFrag, isUnderwater), atmos_SkyGradientRadiance(toFragMod), skyBlend);
 
 	// resolve cave fog
-	float aboveGround = frx_smoothedEyeBrightness.y;
-	fogColor = mix(atmosv_hdrCaveFogRadiance, fogColor, aboveGround);
+	if (!isUnderwater) {
+		float aboveGround = frx_smoothedEyeBrightness.y;
+		fogColor = mix(atmosv_CaveFogRadiance, fogColor, aboveGround);
+	}
 
 	vec4 blended = mix(color, vec4(fogColor, 1.0), fogFactor);
 

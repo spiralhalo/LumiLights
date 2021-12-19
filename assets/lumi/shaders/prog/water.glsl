@@ -89,7 +89,7 @@ void foamPreprocess(inout vec4 albedo, inout vec3 material, sampler2D natureText
 	vertexNormaly = max(0.0, vertexNormaly);
 
 	foam = mix(tex, 1.0, pow(foam, 10.0)) * foam;
-	foamAlbedo.rgb = foam + (1.0 - foam) * albedoSolid.rgb / l2_max3(albedoSolid.rgb);
+	foamAlbedo.rgb = foam + (1.0 - foam) * albedoSolid.rgb / max(0.0001, l2_max3(albedoSolid.rgb));
 	foam *= 0.5;
 	foam *= vertexNormaly;
 
