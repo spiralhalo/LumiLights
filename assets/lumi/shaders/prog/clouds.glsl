@@ -136,6 +136,9 @@ vec3 rayMarchCloud(sampler2D natureTexture, sampler2D noiseTexture, vec2 texcoor
 		transmittance *= exp(-atRayDensity);
 	}
 
+	// meant to be fix for "dark aura" around clouds but causes light aura instead (with some mental gymnastic can be interpreted as silver lining?)
+	lightEnergy += transmittance; // transparent clouds get more light
+
 	return vec3(lightEnergy, 1.0 - transmittance, distanceTotal);
 }
 
@@ -211,9 +214,11 @@ vec4 customClouds(sampler2D cloudsDepthBuffer, sampler2D natureTexture, sampler2
 	vec3  skyFadeColor	 = atmos_SkyGradientRadiance(toSky);
 	vec3  celestRadiance = atmosv_CelestialRadiance;
 
+	#ifdef VOLUMETRIC_CLOUDS
 	if (frx_worldIsMoonlit == 1) {
 		celestRadiance *= 0.2;
 	}
+	#endif
 
 	celestRadiance = celestRadiance * result.x * rainBrightness;//
 	vec3 color = celestRadiance + cloudShading;

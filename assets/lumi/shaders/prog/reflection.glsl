@@ -176,7 +176,7 @@ vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer
 		result = reflectionMarch_v2(depthBuffer, normalBuffer, idNormal, viewPos, viewMarch);
 	}
 
-	vec2 uvFade = smoothstep(0.5, 0.45, abs(result.xy - 0.5));
+	vec2 uvFade = smoothstep(0.5, 0.475 + l2_clampScale(0.1, 0.0, rawViewNormal.z) * 0.024, abs(result.xy - 0.5));
 	result.z *= min(uvFade.x, uvFade.y);
 
 	vec4 reflectedPos = frx_inverseViewProjectionMatrix * vec4(result.xy * 2.0 - 1.0, texture(depthBuffer, result.xy).r * 2.0 - 1.0, 1.0);

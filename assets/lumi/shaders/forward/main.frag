@@ -59,8 +59,7 @@ void frx_pipelineFragment()
 			frx_fragColor.a   *= 0.6;
 
 			#elif WATER_COLOR == WATER_COLOR_NO_COLOR
-			frx_fragColor.rgb = vec3(0.0);
-			frx_fragColor.a   *= 0.6;
+			frx_fragColor = vec4(0.001);
 
 			#elif WATER_COLOR == WATER_COLOR_NATURAL_BLUE
 			frx_fragColor.a   *= 0.6;
