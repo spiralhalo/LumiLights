@@ -125,6 +125,8 @@
 	"config.lumi_lights.help.cloud_puffiness_relative": "Volumetric clouds puffiness",
 	"config.lumi_lights.value.volumetric_cloud_ultrapuff": "Volumetric clouds - Ultra puff",
 	"config.lumi_lights.help.volumetric_cloud_ultrapuff": "When regular puffiness don't suffice",
+	"config.lumi_lights.value.flat_clouds": "Flat clouds",
+	"config.lumi_lights.help.flat_clouds": "Cirrus-like clouds ;Must be off for vanilla clouds",
 
 	"config.lumi_lights.value.water_color": "Water color mode",
 	"config.lumi_lights.help.water_color": "Whether to retain water texture and color",

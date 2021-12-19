@@ -5,6 +5,7 @@
 #include lumi:shaders/common/texconst.glsl
 #include lumi:shaders/prog/fog.glsl
 #include lumi:shaders/prog/tile_noise.glsl
+#include lumi:shaders/prog/tonemap.glsl
 
 /*******************************************************
  *  lumi:shaders/prog/clouds.glsl
@@ -140,8 +141,45 @@ vec3 rayMarchCloud(sampler2D natureTexture, sampler2D noiseTexture, vec2 texcoor
 	return vec3(lightEnergy, 1.0 - transmittance, distanceTotal);
 }
 
+mat4 computeCloudRotator() {
+	return l2_rotationMatrix(vec3(0.0, 1.0, 0.0), PI * 0.25);
+}
+
+vec4 flatCloud(in vec3 worldVec, in mat4 cloudRotator)
+{
+	float rainFactor = frx_rainGradient() * 0.8 + frx_thunderGradient() * 0.2;
+	float cloud = 0.0;
+	float skyDotUp = worldVec.y;
+
+	// convert hemisphere to plane centered around cameraPos
+	vec2 cloudPlane = worldVec.xz / (0.1 + worldVec.y) * 100.0
+		+ frx_cameraPos().xz / 5.0 + vec2(0.2) * frx_renderSeconds();//(frx_worldDay() + frx_worldTime());
+	vec2 rotatedCloudPlane = (cloudRotator * vec4(cloudPlane.x, 0.0, cloudPlane.y, 0.0)).xz;
+	cloudPlane *= 0.1;
+
+	float cloudBase = 1.0
+		* l2_clampScale(0.0, 0.1, skyDotUp)
+		* l2_clampScale(-0.5 - rainFactor * 0.5, 1.0 - rainFactor, snoise(rotatedCloudPlane * 0.005));
+	float cloud1 = cloudBase * l2_clampScale(-1.0, 1.0, snoise(rotatedCloudPlane * 0.015));
+	float cloud2 = cloud1 * l2_clampScale(-1.0, 1.0, snoise(rotatedCloudPlane * 0.04));
+	float cloud3 = cloud2 * l2_clampScale(-1.0, 1.0, snoise(rotatedCloudPlane * 0.1));
+
+	cloud = cloud1 * 0.5 + cloud2 * 0.75 + cloud3;
+	cloud = l2_clampScale(0.0, 2.0, cloud);
+	cloud *= max(0.1, min(abs(frx_worldTime() * 4.0 - 1.0), 1.0)) * 0.8; // less clouds at noon
+	cloud *= (1.0 - rainFactor * 0.8);
+
+	vec3 color = atmosv_hdrCelestialRadiance * 0.1 + atmosv_hdrCloudColorRadiance;
+	return vec4(color, cloud);
+}
+
+vec4 layer(vec4 foreground, vec4 background) {
+    return foreground * foreground.a + background * (1.0 - foreground.a);
+}
+
 vec4 customClouds(sampler2D cloudsDepthBuffer, sampler2D natureTexture, sampler2D noiseTexture, float depth, vec2 texcoord, vec3 eyePos, vec3 toSky, int numSample, float startTravel)
 {
+	vec3 result;
 #ifdef VOLUMETRIC_CLOUDS
 #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
 	if (depth != 1. || toSky.y <= 0) return vec4(0.0);
@@ -153,8 +191,8 @@ vec4 customClouds(sampler2D cloudsDepthBuffer, sampler2D natureTexture, sampler2
 	maxDist = min(length(eyePos), maxDist);
 #endif
 
-	vec3 result = rayMarchCloud(natureTexture, noiseTexture, texcoord, maxDist, toSky, numSample, startTravel);
-#else
+	result = rayMarchCloud(natureTexture, noiseTexture, texcoord, maxDist, toSky, numSample, startTravel);
+#elif !defined(FLAT_CLOUDS)
 	float dClouds = texture(cloudsDepthBuffer, texcoord).r;
 
 	if (dClouds >= depth) return vec4(0.0);
@@ -204,7 +242,7 @@ vec4 customClouds(sampler2D cloudsDepthBuffer, sampler2D natureTexture, sampler2
 	vec3 normal = normalize(cross((right - origin) * mul0, (bottom - origin) * mul1));
 
 	float energy = (dot(normal, frx_skyLightVector) * 0.5 + 0.5) * 0.7 + 0.3;
-	vec3 result = vec3(energy, 1.0, length(origin));
+	result = vec3(energy, 1.0, length(origin));
 #endif
 
 	float rainBrightness = mix(0.13, 0.05, hdr_fromGammaf(frx_rainGradient)); // emulate dark clouds
@@ -219,9 +257,29 @@ vec4 customClouds(sampler2D cloudsDepthBuffer, sampler2D natureTexture, sampler2
 	celestRadiance = celestRadiance * result.x * rainBrightness;//
 	vec3 color = celestRadiance + cloudShading;
 	float fogF = sqrt(fogFactor(result.z));
-	color = mix(color, skyFadeColor, fogF);
+	color = mix(color, skyFadeColor, fogF / 2);
 
+#ifdef FLAT_CLOUDS
+	vec4 flatCloudColor;
+	if (depth != 1. || toSky.y <= 0)
+	{
+		flatCloudColor = vec4(0.0);
+	}
+	else
+	{
+		vec4 modelPos = frx_inverseViewProjectionMatrix() * vec4(2.0 * v_texcoord - 1.0, 1.0, 1.0);
+		modelPos.xyz /= modelPos.w;
+		vec3 worldVec = normalize(modelPos.xyz);
+		mat4 v_cloud_rotator = computeCloudRotator();
+
+		flatCloudColor = flatCloud(worldVec, v_cloud_rotator);
+		flatCloudColor.rgb = ldr_tonemap(flatCloudColor.rgb);
+	}
+
+	return layer(vec4(color, result.y), flatCloudColor);
+#else
 	return vec4(color, result.y);
+#endif
 }
 
 vec4 customClouds(sampler2D cloudsDepthBuffer, sampler2D natureTexture, sampler2D noiseTexture, float depth, vec2 texcoord, vec3 eyePos, vec3 toSky, int numSample)
