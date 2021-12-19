@@ -166,7 +166,7 @@ vec4 flatCloud(in vec3 worldVec, in mat4 cloudRotator)
 
 	cloud = cloud1 * 0.5 + cloud2 * 0.75 + cloud3;
 	cloud = l2_clampScale(0.0, 2.0, cloud);
-	cloud *= max(0.1, min(abs(frx_worldTime() * 4.0 - 1.0), 1.0)) * 0.8; // less clouds at noon
+	cloud *= (min(abs(frx_worldTime() * 4.0 - 1.0), 1.0) * 0.6 + 0.4) * 0.8; // less clouds at noon
 	cloud *= (1.0 - rainFactor * 0.8);
 
 	vec3 color = atmosv_hdrCelestialRadiance * 0.1 + atmosv_hdrCloudColorRadiance;
