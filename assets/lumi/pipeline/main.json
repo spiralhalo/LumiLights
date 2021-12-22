@@ -44,6 +44,7 @@
 		// NB: Passes need to be in the same "include" level to be ordered correctly.
 		//	 Passes in higher "include" level will always come before passes in lower level.
 		"lumi:pipeline/clear.json",
+		"lumi:pipeline/pre.json",
 		"lumi:pipeline/color.json",
 		"lumi:pipeline/post.json",
 		"lumi:pipeline/taa.json",

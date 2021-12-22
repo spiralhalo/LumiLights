@@ -1,0 +1,53 @@
+{
+	images: [
+		 {
+			name: "light_direction",
+			lod: 0,
+			internalFormat: "RFB16",
+			pixelFormat: "RGB",
+			pixelDataType: "UNSIGNED_BYTE",
+			target: "TEXTURE_2D",
+			texParams: [ 
+				{name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
+				{name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"},
+			]
+		},
+	],
+
+	framebuffers: [
+		{
+			name: "pre",
+			colorAttachments: [
+				{image: "light_direction"},
+			]
+		},
+	],
+
+	programs: [
+		{
+			name: "pre",
+			vertexSource: "lumi:shaders/pass/basic.vert",
+			fragmentSource: "lumi:shaders/pass/pre.frag",
+			samplers: [
+				"u_vanilla_depth",
+				"u_gbuffer_light",
+				"u_gbuffer_normal",
+			]
+		},
+	],
+
+	fabulous: {
+		passes: [
+			{
+				name: "pre",
+				program: "pre",
+				framebuffer: "pre",
+				samplerImages: [
+					"vanilla_depth",
+					"gbuffer_light",
+					"gbuffer_normal",
+				]
+			},
+		]
+	}
+}
