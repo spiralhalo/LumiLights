@@ -97,6 +97,11 @@
 					nameKey: "config.lumi_lights.value.cloud_puffiness_relative",
 					descriptionKey: "config.lumi_lights.help.cloud_puffiness_relative"
 				},
+				flat_clouds: {
+					default: true,
+					nameKey: "config.lumi_lights.value.flat_clouds",
+					descriptionKey: "config.lumi_lights.help.flat_clouds"
+				},
 			}
 		},
 		{
