@@ -261,7 +261,7 @@ vec4 customClouds(sampler2D cloudsDepthBuffer, sampler2D natureTexture, sampler2
 
 #ifdef FLAT_CLOUDS
 	vec4 flatCloudColor;
-	if (depth != 1. || toSky.y <= 0)
+	if (depth != 1. || toSky.y <= 0 || frx_worldIsOverworld != 1)
 	{
 		flatCloudColor = vec4(0.0);
 	}
