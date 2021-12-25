@@ -29,6 +29,19 @@ uniform sampler2D u_tex_noise;
 
 out vec4 fragColor;
 
+// ugh
+bool endPortalFix()
+{
+	vec3 A = texture(u_gbuffer_main_etc, vec3(v_texcoord, ID_TRANS_MISC)).xyz;
+	vec3 B = texture(u_gbuffer_light, vec3(v_texcoord, ID_TRANS_LIGT)).xyz;
+	vec3 C = texture(u_gbuffer_main_etc, vec3(v_texcoord, ID_TRANS_MATS)).xyz;
+	vec3 D = texture(u_gbuffer_normal, vec3(v_texcoord, ID_TRANS_MNORM)).xyz;
+
+	vec3 test = A + B - C - D;
+
+	return abs(test.x + test.y + test.z) > 1.0 / 255.0;
+}
+
 void main()
 {
 	fragColor = texture(u_color, v_texcoord);
@@ -47,7 +60,9 @@ void main()
 	vec3 eyePos  = tempPos.xyz / tempPos.w;
 	vec3 toFrag  = normalize(eyePos);
 
-	fragColor += reflection(albedo.rgb, u_color, u_gbuffer_main_etc, u_gbuffer_light, u_gbuffer_normal, u_depth, u_gbuffer_shadow, u_tex_sun, u_tex_moon, u_tex_noise, idLight, idMaterial, idNormal, idMicroNormal, eyePos);
+	if (endPortalFix() || albedo.a == 0.0) {
+		fragColor += reflection(albedo.rgb, u_color, u_gbuffer_main_etc, u_gbuffer_light, u_gbuffer_normal, u_depth, u_gbuffer_shadow, u_tex_sun, u_tex_moon, u_tex_noise, idLight, idMaterial, idNormal, idMicroNormal, eyePos);
+	}
 
 	if (texture(u_vanilla_transl_depth, v_texcoord).r < dMin) {
 		vec4 cVanillaTrans = texture(u_vanilla_transl_color, v_texcoord);
