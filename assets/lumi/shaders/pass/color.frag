@@ -60,9 +60,9 @@ void main()
 	vec4 tempPos = frx_inverseViewProjectionMatrix * vec4(2.0 * uvSolid - 1.0, 2.0 * dSolid - 1.0, 1.0);
 	vec3 eyePos  = tempPos.xyz / tempPos.w;
 
-	vec4 light    = texture(u_gbuffer_light, vec3(uvSolid, ID_SOLID_LIGT));
-	vec3 material = texture(u_gbuffer_main_etc, vec3(uvSolid, ID_SOLID_MATS)).xyz;
-	vec3 normal   = texture(u_gbuffer_normal, vec3(uvSolid, ID_SOLID_MNORM)).xyz * 2.0 - 1.0;
+	vec4 light	= texture(u_gbuffer_light, vec3(uvSolid, ID_SOLID_LIGT));
+	vec3 rawMat	= texture(u_gbuffer_main_etc, vec3(uvSolid, ID_SOLID_MATS)).xyz;
+	vec3 normal	= texture(u_gbuffer_normal, vec3(uvSolid, ID_SOLID_MNORM)).xyz * 2.0 - 1.0;
 
 	light.w = denoisedShadowFactor(u_gbuffer_shadow, uvSolid, eyePos, dSolid, light.y);
 
@@ -75,12 +75,12 @@ void main()
 
 	// TODO: end portal glitch?
 
-	vec4 base = dSolid == 1.0 ? customSky(u_tex_sun, u_tex_moon, toFrag, cSolid.rgb, solidIsUnderwater) : shading(cSolid, u_tex_nature, light, material, eyePos, normal, solidIsUnderwater, disableDiffuse);
+	vec4 base = dSolid == 1.0 ? customSky(u_tex_sun, u_tex_moon, toFrag, cSolid.rgb, solidIsUnderwater) : shading(cSolid, u_tex_nature, light, rawMat, eyePos, normal, solidIsUnderwater, disableDiffuse);
 	float dMin = min(dSolid, min(dTrans, min(dParts, dRains)));
 
 	if (dSolid > dMin) {
 		if (dSolid < 1.0) {
-			base += skyReflection(u_tex_sun, u_tex_moon, u_tex_noise, cSolid.rgb, material, toFrag, normal, light.yw);
+			base += skyReflection(u_tex_sun, u_tex_moon, u_tex_noise, cSolid.rgb, rawMat.xy, toFrag, normal, light.yw);
 			base = fog(base, eyePos, toFrag, solidIsUnderwater);
 		}
 
@@ -111,14 +111,14 @@ void main()
 	tempPos = frx_inverseViewProjectionMatrix * vec4(2.0 * v_texcoord - 1.0, 2.0 * dMin - 1.0, 1.0);
 	eyePos  = tempPos.xyz / tempPos.w;
 
-	light	 = vec4(1.0);
-	material = vec3(1.0, 0.0, 0.04);
-	normal	 = -frx_cameraView;
+	light  = vec4(1.0);
+	rawMat = vec3(1.0, 0.0, 1.0);
+	normal = -frx_cameraView;
 	disableDiffuse = 0.0;
 
 	if (dMin == dTrans) {
 		light    = texture(u_gbuffer_light, vec3(v_texcoord, ID_TRANS_LIGT));
-		material = texture(u_gbuffer_main_etc, vec3(v_texcoord, ID_TRANS_MATS)).xyz;
+		rawMat = texture(u_gbuffer_main_etc, vec3(v_texcoord, ID_TRANS_MATS)).xyz;
 		normal   = texture(u_gbuffer_normal, vec3(v_texcoord, ID_TRANS_MNORM)).xyz * 2.0 - 1.0;
 		disableDiffuse = bit_unpack(miscTrans.z, 4);
 
@@ -126,7 +126,7 @@ void main()
 		if (transIsWater) {
 			// vec3 viewVertexNormal = frx_normalModelMatrix * (texture(u_gbuffer_normal, vec3(v_texcoord, ID_TRANS_NORM)).xyz * 2.0 - 1.0);
 			vec3 vertexNormal = texture(u_gbuffer_normal, vec3(v_texcoord, ID_TRANS_NORM)).xyz * 2.0 - 1.0;
-			foamPreprocess(next, material, u_tex_nature, eyePos + frx_cameraPos, vertexNormal.y, base.rgb, dVanilla, dTrans);
+			foamPreprocess(next, u_tex_nature, eyePos + frx_cameraPos, vertexNormal.y, base.rgb, dVanilla, dTrans);
 		}
 		#endif
 	} else if (dMin == dParts) {
@@ -138,7 +138,7 @@ void main()
 	light.w = transIsWater ? lightmapRemap (light.y) : denoisedShadowFactor(u_gbuffer_shadow, v_texcoord, eyePos, dMin, light.y);
 
 	if (next.a != 0.0) {
-		next = shading(next, u_tex_nature, light, material, eyePos, normal, nextIsUnderwater, disableDiffuse);
+		next = shading(next, u_tex_nature, light, rawMat, eyePos, normal, nextIsUnderwater, disableDiffuse);
 	}
 	next.a = sqrt(next.a);
 

@@ -141,9 +141,9 @@ vec3 reflectRough(sampler2D noiseTexture, vec3 toFrag, vec3 normal, float materi
 	return reflectRough(noiseTexture, toFrag, normal, materialx, ignored);
 }
 
-vec3 reflectionPbr(vec3 albedo, vec3 material, vec3 radiance, vec3 toLight, vec3 toEye)
+vec3 reflectionPbr(vec3 albedo, vec2 material, vec3 radiance, vec3 toLight, vec3 toEye)
 {
-	vec3 f0 = mix(vec3(material.z), albedo, material.y);
+	vec3 f0 = mix(vec3(0.01), albedo, material.y);
 	vec3 halfway = normalize(toEye + toLight);
 	vec3 fresnel = pbr_fresnelSchlick(pbr_dot(toEye, halfway), f0);
 	float smoothness = (1. - material.x);
@@ -173,7 +173,7 @@ void lightPbr(vec3 albedo, float alpha, vec3 radiance, float roughness, float me
 	shading0.diffuse = albedo * radiance * diffuseNdotL * (1.0 - fresnel) / PI;
 }
 
-vec4 shading(vec4 color, sampler2D natureTexture, vec4 light, float ao, vec3 material, vec3 eyePos, vec3 normal, bool isUnderwater, float disableDiffuse)
+vec4 shading(vec4 color, sampler2D natureTexture, vec4 light, float ao, vec2 material, vec3 eyePos, vec3 normal, bool isUnderwater, float disableDiffuse)
 {
 	vec3 albedo = hdr_fromGamma(color.rgb);
 
@@ -200,9 +200,6 @@ vec4 shading(vec4 color, sampler2D natureTexture, vec4 light, float ao, vec3 mat
 
 	light.w += causticLight;
 
-	ao = min(1., light.z);
-	light.z = max(0., light.z - ao);
-
 	float luminance = frx_luminance(color.rgb);
 	float vanillaEmissive = step(0.93625, light.x) * luminance * luminance;
 
@@ -210,7 +207,7 @@ vec4 shading(vec4 color, sampler2D natureTexture, vec4 light, float ao, vec3 mat
 
 	float lAlbedo = min(1.0, dot(albedo, vec3(1.0/3.0)));
 	vec3 f1 = (lAlbedo == 0.0) ? vec3(1.0) : (albedo / lAlbedo);
-	vec3 f0 = mix(vec3(material.z), albedo, material.y); // TODO: multiply metallic f0? hahaha no
+	vec3 f0 = mix(vec3(0.01), albedo, material.y);
 
 	vec3 toEye = -normalize(eyePos);
 
@@ -265,7 +262,7 @@ vec4 shading(vec4 color, sampler2D natureTexture, vec4 light, float ao, vec3 mat
 	return vec4(shaded, color.a);
 }
 
-vec4 shading(vec4 color, sampler2D natureTexture, vec4 light, vec3 material, vec3 eyePos, vec3 normal, bool isUnderwater, float disableDiffuse) {
-	return shading(color, natureTexture, light, 1.0, material, eyePos, normal, isUnderwater, disableDiffuse);
+vec4 shading(vec4 color, sampler2D natureTexture, vec4 light, vec3 rawMat, vec3 eyePos, vec3 normal, bool isUnderwater, float disableDiffuse) {
+	return shading(color, natureTexture, light, rawMat.z, rawMat.xy, eyePos, normal, isUnderwater, disableDiffuse);
 }
 #endif

@@ -20,7 +20,7 @@ void main()
 	vec4  albedo   = texture(u_color_albedo, v_texcoord);
 	float idLight  = albedo.a == 0.0 ? ID_SOLID_LIGT : (albedo.a < 1.0 ? ID_TRANS_LIGT : ID_PARTS_LIGT);
 	float lightz   = texture(u_gbuffer_light, vec3(v_texcoord, idLight)).z;
-	float emissive = clamp(lightz - 1.0, 0.0, 1.0);
+	float emissive = lightz;
 
 	vec4 base = hdr_inverseTonemap(texture(u_input, v_texcoord));
 	float luminance = l2_max3(base.rgb); //use max instead of luminance to get some lava action

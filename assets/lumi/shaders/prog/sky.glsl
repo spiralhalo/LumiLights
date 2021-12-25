@@ -176,7 +176,7 @@ vec4 customSky(sampler2D sunTexture, sampler2D moonTexture, vec3 toSky, vec3 fal
 	return customSky(sunTexture, moonTexture, toSky, fallback, isUnderwater, 1.0, 1.0);
 }
 
-vec4 skyReflection(sampler2D sunTexture, sampler2D moonTexture, vec3 albedo, vec3 material, vec3 toFrag, vec3 toSky, vec3 normal, vec2 lightyw) {
+vec4 skyReflection(sampler2D sunTexture, sampler2D moonTexture, vec3 albedo, vec2 material, vec3 toFrag, vec3 toSky, vec3 normal, vec2 lightyw) {
 	vec3 radiance;
 	float skyVisible = lightmapRemap(lightyw.x);
 
@@ -189,7 +189,7 @@ vec4 skyReflection(sampler2D sunTexture, sampler2D moonTexture, vec3 albedo, vec
 	return vec4(reflectionPbr(albedo, material, radiance, toSky, -toFrag), 0.0);
 }
 
-vec4 skyReflection(sampler2D sunTexture, sampler2D moonTexture, sampler2D noiseTexture, vec3 albedo, vec3 material, vec3 toFrag, vec3 normal, vec2 lightyw) {
+vec4 skyReflection(sampler2D sunTexture, sampler2D moonTexture, sampler2D noiseTexture, vec3 albedo, vec2 material, vec3 toFrag, vec3 normal, vec2 lightyw) {
 	vec3 toSky = reflectRough(noiseTexture, toFrag, normal, material.x);
 	return skyReflection(sunTexture, moonTexture, albedo, material, toFrag, toSky, normal, lightyw);
 }
