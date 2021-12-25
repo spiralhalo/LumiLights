@@ -39,18 +39,18 @@ void clipSides(inout vec3 end, in vec3 start)
 	end = start + (end - start) * param;
 }
 
-vec3 clipNear(vec3 end, vec3 start)
+vec3 clipNear(vec3 end, vec3 start, float nearZ)
 {
-	if (end.z > -0.0001) {
+	if (end.z > nearZ) {
 		float delta = end.z - start.z;
-		float param = (-0.0001 - start.z) / delta;
+		float param = (nearZ - start.z) / delta;
 		return start + (end - start) * clamp(param, 0.0, 1.0);
 	}
 
 	return end;
 }
 
-vec3 reflectionMarch_v2(sampler2D depthBuffer, sampler2DArray normalBuffer, float idNormal, vec3 viewStartPos, vec3 viewMarch)
+vec3 reflectionMarch_v2(sampler2D depthBuffer, sampler2DArray normalBuffer, float idNormal, vec3 viewStartPos, vec3 viewMarch, float nearZ)
 {
 	// padding to prevent back face reflection. we want the divisor to be as small as possible.
 	// too small with cause distortion of reflection near the reflector
@@ -62,7 +62,8 @@ vec3 reflectionMarch_v2(sampler2D depthBuffer, sampler2DArray normalBuffer, floa
 
 	float maxTravel = frx_viewDistance;
 
-	vec3 viewEndPos = clipNear(viewStartPos + maxTravel * viewMarch, viewStartPos);
+	vec3 viewEndPos = viewStartPos + maxTravel * viewMarch;
+	viewEndPos = clipNear(viewEndPos, viewStartPos, nearZ * 30.); // no question
 	temp = frx_projectionMatrix * vec4(viewEndPos, 1.0);
 	vec3 uvEndPos = temp.xyz / temp.w * 0.5 + 0.5;
 
@@ -144,8 +145,8 @@ vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer
 	vec3 jitterPrc;
 
 	// view bobbing shaking reduction, thanks to fewizz
-	vec4 nearPos = frx_inverseProjectionMatrix * vec4(v_texcoord * 2.0 - 1.0, -1.0, 1.0);
-	vec3 viewToEye  = normalize(-viewPos + nearPos.xyz / nearPos.w);
+	vec4 nearPos	= frx_inverseProjectionMatrix * vec4(v_texcoord * 2.0 - 1.0, -1.0, 1.0); nearPos.xyz /= nearPos.w;
+	vec3 viewToEye  = normalize(-viewPos + nearPos.xyz);
 	vec3 viewToFrag = -viewToEye;
 	vec3 viewNormal = frx_normalModelMatrix * normal;
 	vec3 viewMarch  = reflectRough(noiseTexture, viewToFrag, viewNormal, roughness, jitterPrc);
@@ -164,7 +165,7 @@ vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer
 			viewMarch = normalize(reflect(viewToFrag, viewNormal) + jitterPrc);
 		}
 
-		vec3 result = reflectionMarch_v2(depthBuffer, normalBuffer, idNormal, viewPos, viewMarch);
+		vec3 result = reflectionMarch_v2(depthBuffer, normalBuffer, idNormal, viewPos, viewMarch, nearPos.z);
 
 		vec2 uvFade = smoothstep(0.5, 0.475 + l2_clampScale(0.1, 0.0, rawViewNormal.z) * 0.024, abs(result.xy - 0.5));
 		result.z *= min(uvFade.x, uvFade.y);
