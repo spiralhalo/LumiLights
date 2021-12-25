@@ -152,9 +152,8 @@ vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer
 	vec3 viewNormal = frx_normalModelMatrix * normal;
 	vec3 viewMarch  = reflectRough(noiseTexture, viewToFrag, viewNormal, roughness, jitterPrc);
 
-	vec4 objLight = vec4(0.0);
-
 	#ifdef SS_REFLECTION
+	vec4 objLight = vec4(0.0);
 	if (roughness <= REFLECTION_MAXIMUM_ROUGHNESS) {
 		// Impossible Ray Resultion:
 		vec3 rawNormal = texture(normalBuffer, vec3(v_texcoord, idNormal)).xyz * 2.0 - 1.0;

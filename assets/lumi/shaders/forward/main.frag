@@ -32,6 +32,8 @@ out vec4[7] fragColor;
 
 void frx_pipelineFragment()
 {
+	frx_fragReflectance = max(0.0, frx_fragReflectance - 0.03); //better default
+
 	// no pitch black material allowed
 	frx_fragColor = max(frx_fragColor, vec4(0.004, 0.004, 0.004, 0.0));
 
@@ -117,6 +119,7 @@ void frx_pipelineFragment()
 		fragColor[1] = vec4(frx_fragLight.xy, frx_fragEmissive, 1.0);
 		fragColor[2] = vec4(vertexNormal, 1.0);
 		fragColor[3] = vec4(fragNormal, 1.0);
+		 //TODO: delete f0 just use 0.01 and use its channel for ao or something no one cares about f0 I certainly don't
 		fragColor[4] = vec4(roughness, pbr_metallic, frx_fragReflectance, 1.0);
 		fragColor[5] = vec4(frx_normalizeMappedUV(frx_texcoord), bitFlags, 1.0);
 	}

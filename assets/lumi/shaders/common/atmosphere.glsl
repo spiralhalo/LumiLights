@@ -52,7 +52,7 @@
 #endif
 
 #ifdef POST_SHADER
-#define calcHorizon(worldVec) sqrt(l2_clampScale(1.0, -l2_clampScale(ATMOS_SEA_LEVEL, ATMOS_STRATOSPHERE, frx_cameraPos.y), worldVec.y))
+#define calcHorizon(worldVec) pow(l2_clampScale(1.0, -l2_clampScale(ATMOS_SEA_LEVEL, ATMOS_STRATOSPHERE, frx_cameraPos.y), worldVec.y), 0.25)
 #define waterHorizon(isUnderwater, skyHorizon) float(isUnderwater) * l2_clampScale(0.9, 1.0, skyHorizon) // kinda hacky
 
 float twilightCalc(vec3 world_toSky, float skyHorizon) {
@@ -133,7 +133,7 @@ const vec3 SUNRISE_LIGHT_COLOR = hdr_fromGamma(vec3(1.0, 0.7, 0.4));
 const vec3 NOON_AMBIENT  = hdr_fromGamma(vec3(1.0));
 const vec3 NIGHT_AMBIENT = hdr_fromGamma(DEF_NIGHT_AMBIENT);
 
-const vec3 CAVEFOG_C	 = DEF_DAY_SKY_COLOR;
+const vec3 CAVEFOG_C	 = hdr_fromGamma(DEF_LUMI_AZURE);
 const vec3 CAVEFOG_DEEPC = SUNRISE_LIGHT_COLOR;
 const float CAVEFOG_MAXY = 16.0;
 const float CAVEFOG_MINY = 0.0;
@@ -221,21 +221,19 @@ void atmos_generateAtmosphereModel()
 	bool customOWFog = frx_worldIsOverworld == 1 && frx_effectBlindness == 0;
 	vec3 vanillaFog = frx_vanillaClearColor;
 
-	atmosv_ClearRadiance = hdr_fromGamma(mix(vanillaFog / max(0.0001, l2_max3(vanillaFog)), vanillaFog, 0.75));
-
 	if (customOWFog) {
 		atmosv_FogRadiance = atmosv_SkyRadiance;
 		// night fog are as bright as the horizon unless it's raining
 		atmosv_FogRadiance *= mix(1.0, HORIZON_MULT, frx_worldIsMoonlit * frx_skyLightTransitionFactor * (1.0 - frx_rainGradient));
 
-		if (frx_cameraInWater == 1) {
-			vanillaFog.rb *= vanillaFog.rb;
-			// special handling, lower saturaion ocean, higher saturation swamp
-			vanillaFog = pow(vanillaFog, vec3(1.0 + vanillaFog.g));
-			atmosv_ClearRadiance = vanillaFog;
-		}
+		// vanilla clear color is unreliable in overworld, sometimes orange above water, or dark immediately underwater
+		vec3 underwaterFog = hdr_fromGamma(vanillaFog);
+		float lUwFog = dot(underwaterFog, vec3(0.33));
+		underwaterFog /= (lUwFog == 0.0) ? 1.0 : lUwFog;
+
+		atmosv_ClearRadiance = mix(atmosv_FogRadiance, underwaterFog * 0.3, frx_cameraInWater);
 	} else {
-		atmosv_FogRadiance = atmosv_ClearRadiance;
+		atmosv_ClearRadiance = atmosv_FogRadiance = hdr_fromGamma(vanillaFog);
 	}
 
 	atmosv_OWTwilightRadiance = SKY_COLOR[TWGC];

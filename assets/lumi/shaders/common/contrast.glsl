@@ -60,10 +60,11 @@ const float USER_NIGHT_AMBIENT_MULTIPLIER  = clamp(NIGHT_AMBIENT_BRIGHTNESS, 0, 
 
 	#define DEF_NEBULAE_COLOR			vec3(0.8, 0.3, 0.6)
 	#define _0_DEF_NIGHT_SKY_COLOR		mix(vec3(0.1, 0.1, 0.2), vec3(0.2, 0.25, 0.4), clamp(USER_NIGHT_AMBIENT_MULTIPLIER, 0.0, 1.0))
+	#define DEF_LUMI_AZURE				vec3(0.425, 0.623333, 0.85)
 
 	#if LUMI_SKY_COLOR == LUMI_SKY_COLOR_NATURAL_AZURE
-		#define DEF_DAY_SKY_COLOR		hdr_fromGamma(vec3(0.425, 0.623333, 0.85))
-		#define DEF_DAY_CLOUD_COLOR		hdr_fromGamma(vec3(0.425, 0.623333, 0.85))
+		#define DEF_DAY_SKY_COLOR		hdr_fromGamma(DEF_LUMI_AZURE)
+		#define DEF_DAY_CLOUD_COLOR		hdr_fromGamma(DEF_LUMI_AZURE)
 	#elif LUMI_SKY_COLOR == LUMI_SKY_COLOR_BRIGHT_CYAN
 		#define DEF_DAY_SKY_COLOR		hdr_fromGamma(vec3(0.33, 0.7, 1.0))
 		#define DEF_DAY_CLOUD_COLOR		hdr_fromGamma(vec3(0.40, 0.69, 1.0))
