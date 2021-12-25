@@ -59,7 +59,7 @@
 	"config.lumi_lights.help.refraction_effect": "Distort objects behind water and glass",
 	"config.lumi_lights.value.reflection_oversampling": "SS Reflection oversampling",
 	"config.lumi_lights.help.reflection_oversampling": "Over-sample screen space reflection which ;may help fill gaps in the reflection.",
-	"config.lumi_lights.value.reflection_maximum_roughness_relative": "SS Reflection roughness threshold",
+	"config.lumi_lights.value.reflection_maximum_roughness_relative": "Reflection roughness threshold",
 	"config.lumi_lights.help.reflection_maximum_roughness_relative": "Limits screen space reflection based on roughness;(water=1, dirt=10) Lower to improve performance.",
 	"config.lumi_lights.value.bloom_intensity": "Bloom intensity",
 	"config.lumi_lights.help.bloom_intensity": "Intensity of bloom effect",

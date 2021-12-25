@@ -182,6 +182,7 @@ vec4 skyReflection(sampler2D sunTexture, sampler2D moonTexture, vec3 albedo, vec
 }
 
 vec4 skyReflection(sampler2D sunTexture, sampler2D moonTexture, sampler2D noiseTexture, vec3 albedo, vec3 material, vec3 toFrag, vec3 normal, vec2 lightyw) {
+	if (material.x > REFLECTION_MAXIMUM_ROUGHNESS) return vec4(0.0);
 	vec3 toSky = reflectRough(noiseTexture, toFrag, normal, material.x);
 	return skyReflection(sunTexture, moonTexture, albedo, material, toFrag, toSky, normal, lightyw);
 }

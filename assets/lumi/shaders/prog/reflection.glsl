@@ -11,9 +11,6 @@ const int MAXSTEPS = 30;
 const int PERIOD = 2;
 const int REFINE = 8;
 
-const float REFLECTION_MAXIMUM_ROUGHNESS = REFLECTION_MAXIMUM_ROUGHNESS_RELATIVE / 10.0;
-const float SKYLESS_FACTOR = 0.5;
-
 void clipSides(inout vec3 end, in vec3 start)
 {
 	float delta, param = 1.0;
@@ -129,11 +126,12 @@ vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer
 {
 	vec3 material = texture(mainEtcBuffer, vec3(v_texcoord, idMaterial)).xyz;
 
-	bool isUnmanaged = material.x == 0.0;
+	bool isUnmanaged = material.x == 0.0; // unmanaged draw
+	float roughness = material.x;
 
 	// TODO: end portal glitch?
 
-	if (isUnmanaged) return vec4(0.0); // unmanaged draw
+	if (isUnmanaged || roughness > REFLECTION_MAXIMUM_ROUGHNESS) return vec4(0.0);
 
 	vec4 light	= texture(lightBuffer, vec3(v_texcoord, idLight));
 	vec3 normal	= texture(normalBuffer, vec3(v_texcoord, idMicroNormal)).xyz * 2.0 - 1.0;
@@ -142,7 +140,6 @@ vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer
 	light.w = denoisedShadowFactor(shadowMap, v_texcoord, eyePos, depth, light.y);
 
 	vec3 viewPos = (frx_viewMatrix * vec4(eyePos, 1.0)).xyz;
-	float roughness = material.x;
 
 	// TODO: rain puddles?
 
@@ -169,12 +166,7 @@ vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer
 		viewMarch = normalize(reflect(viewToFrag, viewNormal) + jitterPrc);
 	}
 
-	// Roughness Threshold Resolution: 
-	bool withinThreshold = roughness <= REFLECTION_MAXIMUM_ROUGHNESS;
-
-	if (withinThreshold) {
-		result = reflectionMarch_v2(depthBuffer, normalBuffer, idNormal, viewPos, viewMarch);
-	}
+	result = reflectionMarch_v2(depthBuffer, normalBuffer, idNormal, viewPos, viewMarch);
 
 	vec2 uvFade = smoothstep(0.5, 0.475 + l2_clampScale(0.1, 0.0, rawViewNormal.z) * 0.024, abs(result.xy - 0.5));
 	result.z *= min(uvFade.x, uvFade.y);
