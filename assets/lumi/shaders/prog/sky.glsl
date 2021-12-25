@@ -177,12 +177,19 @@ vec4 customSky(sampler2D sunTexture, sampler2D moonTexture, vec3 toSky, vec3 fal
 }
 
 vec4 skyReflection(sampler2D sunTexture, sampler2D moonTexture, vec3 albedo, vec3 material, vec3 toFrag, vec3 toSky, vec3 normal, vec2 lightyw) {
-	vec3 radiance = customSky(sunTexture, moonTexture, toSky, vec3(0.0), false, lightmapRemap(lightyw.x), lightyw.y).rgb;
+	vec3 radiance;
+	float skyVisible = lightmapRemap(lightyw.x);
+
+	if (material.x > REFLECTION_MAXIMUM_ROUGHNESS) {
+		radiance = atmos_SkyGradientRadiance(toSky, vec3(0.0), false) * skyVisible;
+	} else {
+		radiance = customSky(sunTexture, moonTexture, toSky, vec3(0.0), false, skyVisible, lightyw.y).rgb;
+	}
+
 	return vec4(reflectionPbr(albedo, material, radiance, toSky, -toFrag), 0.0);
 }
 
 vec4 skyReflection(sampler2D sunTexture, sampler2D moonTexture, sampler2D noiseTexture, vec3 albedo, vec3 material, vec3 toFrag, vec3 normal, vec2 lightyw) {
-	if (material.x > REFLECTION_MAXIMUM_ROUGHNESS) return vec4(0.0);
 	vec3 toSky = reflectRough(noiseTexture, toFrag, normal, material.x);
 	return skyReflection(sunTexture, moonTexture, albedo, material, toFrag, toSky, normal, lightyw);
 }

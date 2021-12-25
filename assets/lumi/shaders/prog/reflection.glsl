@@ -127,11 +127,10 @@ vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer
 	vec3 material = texture(mainEtcBuffer, vec3(v_texcoord, idMaterial)).xyz;
 
 	bool isUnmanaged = material.x == 0.0; // unmanaged draw
-	float roughness = material.x;
 
 	// TODO: end portal glitch?
 
-	if (isUnmanaged || roughness > REFLECTION_MAXIMUM_ROUGHNESS) return vec4(0.0);
+	if (isUnmanaged) return vec4(0.0);
 
 	vec4 light	= texture(lightBuffer, vec3(v_texcoord, idLight));
 	vec3 normal	= texture(normalBuffer, vec3(v_texcoord, idMicroNormal)).xyz * 2.0 - 1.0;
@@ -140,6 +139,7 @@ vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer
 	light.w = denoisedShadowFactor(shadowMap, v_texcoord, eyePos, depth, light.y);
 
 	vec3 viewPos = (frx_viewMatrix * vec4(eyePos, 1.0)).xyz;
+	float roughness = material.x;
 
 	// TODO: rain puddles?
 
@@ -152,39 +152,42 @@ vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer
 	vec3 viewNormal = frx_normalModelMatrix * normal;
 	vec3 viewMarch  = reflectRough(noiseTexture, viewToFrag, viewNormal, roughness, jitterPrc);
 
-	vec3 result = vec3(0.0);
+	vec4 objLight = vec4(0.0);
 
 	#ifdef SS_REFLECTION
-	// Impossible Ray Resultion:
-	vec3 rawNormal = texture(normalBuffer, vec3(v_texcoord, idNormal)).xyz * 2.0 - 1.0;
-	vec3 rawViewNormal = frx_normalModelMatrix * rawNormal;
-	bool impossibleRay	= dot(rawViewNormal, viewMarch) < 0;
+	if (roughness <= REFLECTION_MAXIMUM_ROUGHNESS) {
+		// Impossible Ray Resultion:
+		vec3 rawNormal = texture(normalBuffer, vec3(v_texcoord, idNormal)).xyz * 2.0 - 1.0;
+		vec3 rawViewNormal = frx_normalModelMatrix * rawNormal;
+		bool impossibleRay	= dot(rawViewNormal, viewMarch) < 0;
 
-	if (impossibleRay) {
-		normal = rawNormal;
-		viewNormal = rawViewNormal;
-		viewMarch = normalize(reflect(viewToFrag, viewNormal) + jitterPrc);
+		if (impossibleRay) {
+			normal = rawNormal;
+			viewNormal = rawViewNormal;
+			viewMarch = normalize(reflect(viewToFrag, viewNormal) + jitterPrc);
+		}
+
+		vec3 result = reflectionMarch_v2(depthBuffer, normalBuffer, idNormal, viewPos, viewMarch);
+
+		vec2 uvFade = smoothstep(0.5, 0.475 + l2_clampScale(0.1, 0.0, rawViewNormal.z) * 0.024, abs(result.xy - 0.5));
+		result.z *= min(uvFade.x, uvFade.y);
+
+		vec4 reflectedPos = frx_inverseViewProjectionMatrix * vec4(result.xy * 2.0 - 1.0, texture(depthBuffer, result.xy).r * 2.0 - 1.0, 1.0);
+		float distanceFade = fogFactor(length(reflectedPos.xyz / reflectedPos.w));
+
+		result.z *= 1.0 - pow(distanceFade, 3.0);
+
+		vec4 reflectedColor = texture(colorBuffer, result.xy);
+
+		objLight = vec4(reflectionPbr(albedo, material, reflectedColor.rgb, viewMarch, viewToEye).rgb, result.z);
 	}
-
-	result = reflectionMarch_v2(depthBuffer, normalBuffer, idNormal, viewPos, viewMarch);
-
-	vec2 uvFade = smoothstep(0.5, 0.475 + l2_clampScale(0.1, 0.0, rawViewNormal.z) * 0.024, abs(result.xy - 0.5));
-	result.z *= min(uvFade.x, uvFade.y);
-
-	vec4 reflectedPos = frx_inverseViewProjectionMatrix * vec4(result.xy * 2.0 - 1.0, texture(depthBuffer, result.xy).r * 2.0 - 1.0, 1.0);
-	float distanceFade = fogFactor(length(reflectedPos.xyz / reflectedPos.w));
-
-	result.z *= 1.0 - pow(distanceFade, 3.0);
-
-	vec4 reflectedColor = texture(colorBuffer, result.xy);
-	vec3 objLight = reflectionPbr(albedo, material, reflectedColor.rgb, viewMarch, viewToEye).rgb;
 	#else
-	const vec3 objLight = vec3(0.0);
+	const vec4 objLight = vec4(0.0);
 	#endif
 
 	vec3 skyLight = skyReflection(sunTexture, moonTexture, albedo, material, viewToFrag * frx_normalModelMatrix, viewMarch * frx_normalModelMatrix, normal, light.yw).rgb;
 
-	vec3 reflectedLight = skyLight * (1.0 - result.z) * smoothstep(0.0, 1.0, viewNormal.y) + objLight * result.z;
+	vec3 reflectedLight = skyLight * (1.0 - objLight.a) * smoothstep(0.0, 1.0, viewNormal.y) + objLight.rgb * objLight.a;
 
 	return vec4(reflectedLight, 0.0);
 }
