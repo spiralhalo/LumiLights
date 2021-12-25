@@ -124,22 +124,23 @@ const float JITTER_STRENGTH = 0.6;
 
 vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer, sampler2DArray lightBuffer, sampler2DArray normalBuffer, sampler2D depthBuffer, sampler2DArrayShadow shadowMap, sampler2D sunTexture, sampler2D moonTexture, sampler2D noiseTexture, float idLight, float idMaterial, float idNormal, float idMicroNormal, vec3 eyePos)
 {
-	vec2 material = texture(mainEtcBuffer, vec3(v_texcoord, idMaterial)).xy;
+	vec4 light	= texture(lightBuffer, vec3(v_texcoord, idLight));
+	vec3 rawMat = texture(mainEtcBuffer, vec3(v_texcoord, idMaterial)).xyz;
 
-	bool isUnmanaged = material.x == 0.0; // unmanaged draw
+	bool isUnmanaged = rawMat.x == 0.0; // unmanaged draw
 
-	// TODO: end portal glitch?
+	vec3 test = light.xyz - rawMat;
+	if (abs(test.x + test.y + test.z) < 1.0 / 255.0) isUnmanaged = true; // end portal fix
 
 	if (isUnmanaged) return vec4(0.0);
 
-	vec4 light	= texture(lightBuffer, vec3(v_texcoord, idLight));
 	vec3 normal	= texture(normalBuffer, vec3(v_texcoord, idMicroNormal)).xyz * 2.0 - 1.0;
 	float depth	= texture(depthBuffer, v_texcoord).r;
 
 	light.w = denoisedShadowFactor(shadowMap, v_texcoord, eyePos, depth, light.y);
 
 	vec3 viewPos = (frx_viewMatrix * vec4(eyePos, 1.0)).xyz;
-	float roughness = material.x;
+	float roughness = rawMat.x;
 
 	// TODO: rain puddles?
 
@@ -178,13 +179,13 @@ vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer
 
 		vec4 reflectedColor = texture(colorBuffer, result.xy);
 
-		objLight = vec4(reflectionPbr(albedo, material, reflectedColor.rgb, viewMarch, viewToEye).rgb, result.z);
+		objLight = vec4(reflectionPbr(albedo, rawMat.xy, reflectedColor.rgb, viewMarch, viewToEye).rgb, result.z);
 	}
 	#else
 	const vec4 objLight = vec4(0.0);
 	#endif
 
-	vec3 skyLight = skyReflection(sunTexture, moonTexture, albedo, material, viewToFrag * frx_normalModelMatrix, viewMarch * frx_normalModelMatrix, normal, light.yw).rgb;
+	vec3 skyLight = skyReflection(sunTexture, moonTexture, albedo, rawMat.xy, viewToFrag * frx_normalModelMatrix, viewMarch * frx_normalModelMatrix, normal, light.yw).rgb;
 
 	vec3 reflectedLight = skyLight * (1.0 - objLight.a) * smoothstep(0.0, 1.0, viewNormal.y) + objLight.rgb * objLight.a;
 

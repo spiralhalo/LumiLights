@@ -73,9 +73,15 @@ void main()
 	vec3 toFrag = normalize(eyePos);
 	float disableDiffuse = bit_unpack(miscSolid.z, 4);
 
-	// TODO: end portal glitch?
+	vec4 base;
 
-	vec4 base = dSolid == 1.0 ? customSky(u_tex_sun, u_tex_moon, toFrag, cSolid.rgb, solidIsUnderwater) : shading(cSolid, u_tex_nature, light, rawMat, eyePos, normal, solidIsUnderwater, disableDiffuse);
+	if (dSolid == 1.0) {
+		base = customSky(u_tex_sun, u_tex_moon, toFrag, cSolid.rgb, solidIsUnderwater);
+	} else {
+		base = shading(cSolid, u_tex_nature, light, rawMat, eyePos, normal, solidIsUnderwater, disableDiffuse);
+		base = overlay(base, u_tex_glint, miscSolid);
+	}
+
 	float dMin = min(dSolid, min(dTrans, min(dParts, dRains)));
 
 	if (dSolid > dMin) {
@@ -117,9 +123,9 @@ void main()
 	disableDiffuse = 0.0;
 
 	if (dMin == dTrans) {
-		light    = texture(u_gbuffer_light, vec3(v_texcoord, ID_TRANS_LIGT));
+		light  = texture(u_gbuffer_light, vec3(v_texcoord, ID_TRANS_LIGT));
 		rawMat = texture(u_gbuffer_main_etc, vec3(v_texcoord, ID_TRANS_MATS)).xyz;
-		normal   = texture(u_gbuffer_normal, vec3(v_texcoord, ID_TRANS_MNORM)).xyz * 2.0 - 1.0;
+		normal = texture(u_gbuffer_normal, vec3(v_texcoord, ID_TRANS_MNORM)).xyz * 2.0 - 1.0;
 		disableDiffuse = bit_unpack(miscTrans.z, 4);
 
 		#ifdef WATER_FOAM
@@ -129,6 +135,9 @@ void main()
 			foamPreprocess(next, u_tex_nature, eyePos + frx_cameraPos, vertexNormal.y, base.rgb, dVanilla, dTrans);
 		}
 		#endif
+
+		vec3 test = light.xyz + miscTrans - rawMat - (normal * 0.5 + 0.5);
+		if (abs(test.x + test.y + test.z) < 1.0/255.0) light.x = 0.0; // end portal fix
 	} else if (dMin == dParts) {
 		light = texture(u_gbuffer_light, vec3(v_texcoord, ID_PARTS_LIGT));
 	}
@@ -139,14 +148,15 @@ void main()
 
 	if (next.a != 0.0) {
 		next = shading(next, u_tex_nature, light, rawMat, eyePos, normal, nextIsUnderwater, disableDiffuse);
+
+		if (dMin == dTrans && light.x != 0.0) {
+			next = overlay(next, u_tex_glint, miscTrans);
+		}
 	}
+
 	next.a = sqrt(next.a);
 
 	base.rgb = base.rgb * (1.0 - next.a) + next.rgb * next.a;
-
-	if (dMin == dSolid || dMin == dTrans) {
-		base = overlay(base, u_tex_glint, dMin == dSolid ? miscSolid : miscTrans);
-	}
 
 	fragColor = base;
 	fragDepth = dMin;
