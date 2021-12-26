@@ -165,7 +165,7 @@ void lightPbr(vec3 albedo, float alpha, vec3 radiance, float roughness, vec3 f0,
 	shading0.diffuse = albedo * radiance * diffuseNdotL * (1.0 - fresnel) / PI;
 }
 
-vec4 shading(vec4 color, sampler2D natureTexture, vec4 light, float ao, vec2 material, vec3 eyePos, vec3 normal, bool isUnderwater, float disableDiffuse)
+vec4 shading(vec4 color, sampler2D natureTexture, vec4 light, float ao, vec2 material, vec3 eyePos, vec3 normal, float vertexNormaly, bool isUnderwater, float disableDiffuse)
 {
 	vec3 albedo = hdr_fromGamma(color.rgb);
 
@@ -176,7 +176,7 @@ vec4 shading(vec4 color, sampler2D natureTexture, vec4 light, float ao, vec2 mat
 
 #ifdef WATER_CAUSTICS
 	if (isUnderwater && frx_worldHasSkylight == 1) {
-		causticLight  = caustics(natureTexture, eyePos + frx_cameraPos, normal.y);
+		causticLight  = caustics(natureTexture, eyePos + frx_cameraPos, vertexNormaly);
 		causticLight  = pow(causticLight, 15.0);
 		causticLight *= smoothstep(0.0, 1.0, light.y);
 	}
@@ -252,7 +252,7 @@ vec4 shading(vec4 color, sampler2D natureTexture, vec4 light, float ao, vec2 mat
 	return vec4(shaded, color.a);
 }
 
-vec4 shading(vec4 color, sampler2D natureTexture, vec4 light, vec3 rawMat, vec3 eyePos, vec3 normal, bool isUnderwater, float disableDiffuse) {
-	return shading(color, natureTexture, light, rawMat.z, rawMat.xy, eyePos, normal, isUnderwater, disableDiffuse);
+vec4 shading(vec4 color, sampler2D natureTexture, vec4 light, vec3 rawMat, vec3 eyePos, vec3 normal, float vertexNormaly, bool isUnderwater, float disableDiffuse) {
+	return shading(color, natureTexture, light, rawMat.z, rawMat.xy, eyePos, normal, vertexNormaly, isUnderwater, disableDiffuse);
 }
 #endif

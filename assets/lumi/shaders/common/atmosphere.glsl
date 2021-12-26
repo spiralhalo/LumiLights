@@ -143,12 +143,11 @@ const float CAVEFOG_STR	 = 0.05;
 const int SRISC = 0;
 const int SNONC = 1;
 const int SMONC = 2;
-const vec3[3] CELEST_COLOR =  vec3[](SUNRISE_LIGHT_COLOR, NOON_SUNLIGHT_COLOR, vec3(1.0));
-     float[3] CELEST_STR   = float[](SUNLIGHT_STR       , SUNLIGHT_STR       , MOONLIGHT_STR * USER_NIGHT_AMBIENT_MULTIPLIER);
+const vec3[3] SUN_COLOR =  vec3[](SUNRISE_LIGHT_COLOR, NOON_SUNLIGHT_COLOR, vec3(1.0));
 const float[3] TWG_FACTOR  = float[](1.0, 0.0, 0.0); // maps celest color to twilight factor
-const int CELEST_LEN = 8;
-const int[CELEST_LEN] CELEST_INDICES = int[]  (SMONC, SRISC, SRISC, SNONC, SNONC, SRISC, SRISC, SMONC);
-const float[CELEST_LEN] CELEST_TIMES = float[](-0.05, -0.04,  0.00,  0.01,  0.49,   0.5,  0.54,  0.55);
+const int SUN_LEN = 8;
+const int[SUN_LEN] SUN_COL_ID = int[]  (SMONC, SRISC, SRISC, SNONC, SNONC, SRISC, SRISC, SMONC);
+const float[SUN_LEN] SUN_TIMES = float[](-0.05, -0.04,  0.00,  0.01,  0.49,   0.5,  0.54,  0.55);
 
 const int DAYC = 0;
 const int NGTC = 1;
@@ -166,32 +165,33 @@ const float[SKY_LEN] SKY_TIMES = float[](-0.05, -0.01, 0.51, 0.55);
 
 void atmos_generateAtmosphereModel()
 {
-	CELEST_STR[SMONC] *= 0.5 + 0.5 * frx_moonSize;
+	float moonlightStrength = MOONLIGHT_STR * USER_NIGHT_AMBIENT_MULTIPLIER * (0.5 + 0.5 * frx_moonSize);
 	// SKY_AMBIENT[NGTC] *= 0.5 + 0.5 * frx_moonSize;
-	
 
-	float horizonTime = frx_worldTime < 0.75 ? frx_worldTime:frx_worldTime - 1.0; // [-0.25, 0.75)
 
-	if (horizonTime <= CELEST_TIMES[0]) {
-		atmosv_CelestialRadiance = CELEST_COLOR[CELEST_INDICES[0]] * CELEST_STR[CELEST_INDICES[0]];
+	vec3 sunColor;
+	float horizonTime = frx_worldTime < 0.75 ? frx_worldTime : (frx_worldTime - 1.0); // [-0.25, 0.75)
+
+	if (horizonTime <= SUN_TIMES[0]) {
+		sunColor = SUN_COLOR[SUN_COL_ID[0]];
+
 		#ifdef POST_SHADER
-			atmosv_OWTwilightFactor = TWG_FACTOR[CELEST_INDICES[0]];
+		atmosv_OWTwilightFactor = TWG_FACTOR[SUN_COL_ID[0]];
 		#endif
 	} else {
 		int sunI = 1;
-		while (horizonTime > CELEST_TIMES[sunI] && sunI < CELEST_LEN - 1) sunI++;
-		float celestTransition = l2_clampScale(CELEST_TIMES[sunI-1], CELEST_TIMES[sunI], horizonTime);
-		atmosv_CelestialRadiance = mix(CELEST_COLOR[CELEST_INDICES[sunI-1]] * CELEST_STR[CELEST_INDICES[sunI-1]],
-									  CELEST_COLOR[CELEST_INDICES[sunI]] * CELEST_STR[CELEST_INDICES[sunI]],
-									  celestTransition);
+		while (horizonTime > SUN_TIMES[sunI] && sunI < SUN_LEN - 1) sunI++;
+		float sunTransition = l2_clampScale(SUN_TIMES[sunI-1], SUN_TIMES[sunI], horizonTime);
+		sunColor = mix(SUN_COLOR[SUN_COL_ID[sunI-1]], SUN_COLOR[SUN_COL_ID[sunI]], sunTransition);
 
 		#ifdef POST_SHADER
-			atmosv_OWTwilightFactor = mix(TWG_FACTOR[CELEST_INDICES[sunI-1]], TWG_FACTOR[CELEST_INDICES[sunI]], celestTransition);
+		atmosv_OWTwilightFactor = mix(TWG_FACTOR[SUN_COL_ID[sunI-1]], TWG_FACTOR[SUN_COL_ID[sunI]], sunTransition);
 		#endif
 	}
 
-	atmosv_CelestialRadiance	*= frx_skyLightTransitionFactor;
-	atmosv_CelestialRadiance.gb *= vec2(frx_skyLightTransitionFactor * frx_skyLightTransitionFactor);
+	sunColor.gb *= vec2(frx_skyLightTransitionFactor * frx_skyLightTransitionFactor);
+
+	atmosv_CelestialRadiance = mix(sunColor * SUNLIGHT_STR, vec3(moonlightStrength), frx_worldIsMoonlit) * frx_skyLightTransitionFactor;
 
 
 

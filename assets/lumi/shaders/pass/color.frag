@@ -63,6 +63,7 @@ void main()
 	vec4 light	= texture(u_gbuffer_light, vec3(uvSolid, ID_SOLID_LIGT));
 	vec3 rawMat	= texture(u_gbuffer_main_etc, vec3(uvSolid, ID_SOLID_MATS)).xyz;
 	vec3 normal	= texture(u_gbuffer_normal, vec3(uvSolid, ID_SOLID_MNORM)).xyz * 2.0 - 1.0;
+	float vertexNormaly = texture(u_gbuffer_normal, vec3(uvSolid, ID_SOLID_NORM)).y * 2.0 - 1.0;
 
 	light.w = denoisedShadowFactor(u_gbuffer_shadow, uvSolid, eyePos, dSolid, light.y);
 
@@ -78,7 +79,7 @@ void main()
 	if (dSolid == 1.0) {
 		base = customSky(u_tex_sun, u_tex_moon, toFrag, cSolid.rgb, solidIsUnderwater);
 	} else {
-		base = shading(cSolid, u_tex_nature, light, rawMat, eyePos, normal, solidIsUnderwater, disableDiffuse);
+		base = shading(cSolid, u_tex_nature, light, rawMat, eyePos, normal, vertexNormaly, solidIsUnderwater, disableDiffuse);
 		base = overlay(base, u_tex_glint, miscSolid);
 	}
 
@@ -120,19 +121,19 @@ void main()
 	light  = vec4(1.0);
 	rawMat = vec3(1.0, 0.0, 1.0);
 	normal = -frx_cameraView;
+	vertexNormaly = normal.y;
 	disableDiffuse = 0.0;
 
 	if (dMin == dTrans) {
 		light  = texture(u_gbuffer_light, vec3(v_texcoord, ID_TRANS_LIGT));
 		rawMat = texture(u_gbuffer_main_etc, vec3(v_texcoord, ID_TRANS_MATS)).xyz;
 		normal = texture(u_gbuffer_normal, vec3(v_texcoord, ID_TRANS_MNORM)).xyz * 2.0 - 1.0;
+		vertexNormaly = texture(u_gbuffer_normal, vec3(v_texcoord, ID_TRANS_NORM)).y * 2.0 - 1.0;
 		disableDiffuse = bit_unpack(miscTrans.z, 4);
 
 		#ifdef WATER_FOAM
 		if (transIsWater) {
-			// vec3 viewVertexNormal = frx_normalModelMatrix * (texture(u_gbuffer_normal, vec3(v_texcoord, ID_TRANS_NORM)).xyz * 2.0 - 1.0);
-			vec3 vertexNormal = texture(u_gbuffer_normal, vec3(v_texcoord, ID_TRANS_NORM)).xyz * 2.0 - 1.0;
-			foamPreprocess(next, u_tex_nature, eyePos + frx_cameraPos, vertexNormal.y, base.rgb, dVanilla, dTrans);
+			foamPreprocess(next, u_tex_nature, eyePos + frx_cameraPos, vertexNormaly, base.rgb, dVanilla, dTrans);
 		}
 		#endif
 
@@ -147,7 +148,7 @@ void main()
 	light.w = transIsWater ? lightmapRemap (light.y) : denoisedShadowFactor(u_gbuffer_shadow, v_texcoord, eyePos, dMin, light.y);
 
 	if (next.a != 0.0) {
-		next = shading(next, u_tex_nature, light, rawMat, eyePos, normal, nextIsUnderwater, disableDiffuse);
+		next = shading(next, u_tex_nature, light, rawMat, eyePos, normal, vertexNormaly, nextIsUnderwater, disableDiffuse);
 
 		if (dMin == dTrans && light.x != 0.0) {
 			next = overlay(next, u_tex_glint, miscTrans);
