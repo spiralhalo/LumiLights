@@ -21,8 +21,6 @@
 	"config.lumi_lights.help.name_tag_shadow": "Render name tag shadow",
 
 	"config.lumi_lights.category.lighting": "Lighting",
-	"config.lumi_lights.value.tone_profile": "Contrast profile",
-	"config.lumi_lights.help.tone_profile": "Affects the contrast range between various light sources.;Auto-exposure is recommended for High Contrast profile.",
 	"config.lumi_lights.value.outdoors_brightness": "Sky light brightness",
 	"config.lumi_lights.help.outdoors_brightness": "Brightness of the sun in dimensions with sky",
 	"config.lumi_lights.value.block_light_mode": "Block light color",

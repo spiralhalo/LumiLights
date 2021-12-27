@@ -4,14 +4,6 @@
 			includeToken: "lumi:lighting_config",
 			categoryKey: "config.lumi_lights.category.lighting",
 			options: {
-				tone_profile: {
-					default: "standard",
-					choices: ["standard", "high_contrast"],
-					enum: true,
-					prefix: "tone_profile_",
-					nameKey: "config.lumi_lights.value.tone_profile",
-					descriptionKey: "config.lumi_lights.help.tone_profile"
-				},
 				block_light_mode: {
 					default: "warm",
 					choices: ["warm", "neutral"],
