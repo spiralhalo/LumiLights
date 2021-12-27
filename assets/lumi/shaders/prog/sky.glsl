@@ -128,8 +128,7 @@ vec4 customSky(sampler2D sunTexture, sampler2D moonTexture, vec3 toSky, vec3 fal
 		#else
 		float mul = 1.0 + frx_worldIsMoonlit * frx_skyLightTransitionFactor;
 		vec3 fallback1 = hdr_fromGamma(fallback) * mul;
-		float shine = step(1.0, l2_max3(fallback1));
-		result.rgb = mix(fog(vec4(fallback1, 1.0), toSky * frx_viewDistance * 4.0, toSky, isUnderwater).rgb, fallback1, shine);
+		result.rgb = fog(vec4(fallback1, 1.0), toSky * frx_viewDistance * 4.0, toSky, isUnderwater).rgb;
 		#endif
 
 		#if SKY_MODE == SKY_MODE_LUMI || SKY_MODE == SKY_MODE_VANILLA_STARRY
