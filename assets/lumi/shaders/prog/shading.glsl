@@ -7,6 +7,7 @@
 #include lumi:shaders/common/userconfig.glsl
 #include lumi:shaders/lib/pbr.glsl
 #include lumi:shaders/lib/taa_jitter.glsl
+#include lumi:shaders/lib/util.glsl
 #include lumi:shaders/prog/shadow.glsl
 #include lumi:shaders/prog/tile_noise.glsl
 #include lumi:shaders/prog/water.glsl
@@ -149,6 +150,15 @@ struct shadingResult {
 	vec3 diffuse;
 } shading0;
 
+vec3 specularPbr(vec3 radiance, float roughness, vec3 f0, vec3 toLight, vec3 toEye, vec3 normal)
+{
+	vec3 halfway = normalize(toEye + toLight);
+	vec3 fresnel = pbr_fresnelSchlick(pbr_dot(toEye, halfway), f0);
+	float NdotL  = pbr_dot(normal, toLight);
+
+	return pbr_specularBRDF(roughness, radiance, halfway, toLight, toEye, normal, fresnel, NdotL);
+}
+
 void lightPbr(vec3 albedo, float alpha, vec3 radiance, float roughness, float metallic, vec3 f0, vec3 toLight, vec3 toEye, vec3 normal, float disableDiffuse)
 {
 	vec3 halfway = normalize(toEye + toLight);
@@ -212,19 +222,23 @@ vec4 shading(vec4 color, sampler2D natureTexture, vec4 light, float ao, vec2 mat
 
 	baseLight += (1.0 - frx_worldHasSkylight) * (atmosv_FogRadiance * 0.5 + 0.5) * SKYLESS_AMBIENT_STR;
 	baseLight += (1.0 - frx_worldHasSkylight) * skylessColor * SKYLESS_AMBIENT_STR;
+	baseLight += atmosv_SkyAmbientRadiance * lightmapRemap(light.y);
+	baseLight += albedo * light.z * EMISSIVE_LIGHT_STR;
+
 
 	float bl = l2_clampScale(0.03125, 0.96875, light.x);
 
 	float blWhite = max(light.z, step(0.93625, light.x));
 	vec3  blColor = mix(BLOCK_LIGHT_COLOR, BLOCK_LIGHT_NEUTRAL, blWhite);
 
-	baseLight += blColor * BLOCK_LIGHT_STR * bl;
-	baseLight += atmosv_SkyAmbientRadiance * lightmapRemap(light.y);
-	baseLight += albedo * light.z * EMISSIVE_LIGHT_STR;
+	vec3 blockLight = blColor * BLOCK_LIGHT_STR * bl;
 
-	lightPbr(albedo, color.a, baseLight, max(material.x, 0.5 * material.y), material.y, f0, normal, toEye, normal, disableDiffuse);
-	float dotNorth = abs(dot(normal, vec3(0.0, 0.0, 1.0)));
-	vec3 shaded = shading0.specular + shading0.diffuse * (0.6 + 0.4 * dotNorth);
+	// vanilla-ish style diffuse
+	float dotUpNorth = l2_max3(abs(normal * vec3(0.6, 1.0, 0.8)));
+	// perfect diffuse light
+	vec3 shaded = albedo * (baseLight + blockLight) * dotUpNorth * max(1.0 - material.y, 0.5) / PI;
+	// block light specular
+	shaded += specularPbr(blockLight, max(material.x, 0.5 * material.y), f0, normal, toEye, normal);
 
 #if HANDHELD_LIGHT_RADIUS != 0
 	if (frx_heldLight.w > 0) {
