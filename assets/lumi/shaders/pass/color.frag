@@ -47,6 +47,7 @@ void main()
 
 	vec4  cSolid = texture(u_vanilla_color, uvSolid);
 	vec4  cTrans = texture(u_gbuffer_main_etc, vec3(v_texcoord, ID_TRANS_COLR));
+	vec3  rawTrans = cTrans.rgb;
 		  cTrans = vec4(cTrans.a == 0.0 ? vec3(0.0) : (cTrans.rgb / cTrans.a), sqrt(cTrans.a));
 	float dParts = texture(u_gbuffer_depth, vec3(v_texcoord, 1.)).r;
 	vec4  cParts = dParts > dSolid ? vec4(0.0) : texture(u_gbuffer_main_etc, vec3(v_texcoord, ID_PARTS_COLR));
@@ -137,8 +138,7 @@ void main()
 		}
 		#endif
 
-		vec3 test = light.xyz + miscTrans - rawMat - (normal * 0.5 + 0.5);
-		if (abs(test.x + test.y + test.z) < 1.0/255.0) light.x = 0.0; // end portal fix
+		if (miscTrans == rawMat && rawMat == rawTrans) light.x = 0.0; // end portal fix
 	} else if (dMin == dParts) {
 		light = texture(u_gbuffer_light, vec3(v_texcoord, ID_PARTS_LIGT));
 	}
