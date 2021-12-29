@@ -83,12 +83,9 @@ void frx_pipelineFragment()
 		#endif
 
 		if (pbrExt_doTBN) {
-			if (frx_fragNormal == vec3(0.0, 0.0, 1.0)) {
-				frx_fragNormal = frx_vertexNormal;
-			}
-			// vec3 bitangent = frx_vertexTangent.w * cross(frx_vertexTangent.xyz, frx_vertexNormal);
-			// mat3 TBN = mat3(frx_vertexTangent.xyz, bitangent, frx_vertexNormal);
-			// frx_fragNormal = TBN * frx_fragNormal;
+			vec3 bitangent = cross(frx_vertexNormal, frx_vertexTangent.xyz) * frx_vertexTangent.w;
+			mat3 TBN = mat3(frx_vertexTangent.xyz, bitangent, frx_vertexNormal);
+			frx_fragNormal = TBN * frx_fragNormal;
 		}
 
 		#ifndef VANILLA_AO_ENABLED
