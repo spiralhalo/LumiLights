@@ -18,8 +18,7 @@ uniform sampler2D u_vanilla_transl_color;
 uniform sampler2D u_vanilla_transl_depth;
 
 uniform sampler2DArray u_gbuffer_main_etc;
-uniform sampler2DArray u_gbuffer_light;
-uniform sampler2DArray u_gbuffer_normal;
+uniform sampler2DArray u_gbuffer_lightnormal;
 uniform sampler2DArrayShadow u_gbuffer_shadow;
 
 uniform sampler2D u_tex_sun;
@@ -33,9 +32,9 @@ out vec4 fragColor;
 bool endPortalFix()
 {
 	vec3 A = texture(u_gbuffer_main_etc, vec3(v_texcoord, ID_TRANS_MISC)).xyz;
-	vec3 B = texture(u_gbuffer_light, vec3(v_texcoord, ID_TRANS_LIGT)).xyz;
+	vec3 B = texture(u_gbuffer_lightnormal, vec3(v_texcoord, ID_TRANS_LIGT)).xyz;
 	vec3 C = texture(u_gbuffer_main_etc, vec3(v_texcoord, ID_TRANS_MATS)).xyz;
-	vec3 D = texture(u_gbuffer_normal, vec3(v_texcoord, ID_TRANS_MNORM)).xyz;
+	vec3 D = texture(u_gbuffer_lightnormal, vec3(v_texcoord, ID_TRANS_MNORM)).xyz;
 
 	vec3 test = A + B - C - D;
 
@@ -53,7 +52,7 @@ void main()
 	float idNormal = albedo.a == 0.0 ? ID_SOLID_NORM : ID_TRANS_NORM;
 	float idMicroNormal = albedo.a == 0.0 ? ID_SOLID_MNORM : ID_TRANS_MNORM;
 
-	float lighty = texture(u_gbuffer_light, vec3(v_texcoord, idLight)).y;
+	float lighty = texture(u_gbuffer_lightnormal, vec3(v_texcoord, idLight)).y;
 	float dMin   = texture(u_depth, v_texcoord).r;
 
 	vec4 tempPos = frx_inverseViewProjectionMatrix * vec4(2.0 * v_texcoord - 1.0, 2.0 * dMin - 1.0, 1.0);
@@ -61,7 +60,7 @@ void main()
 	vec3 toFrag  = normalize(eyePos);
 
 	if (endPortalFix() || albedo.a == 0.0) {
-		fragColor += reflection(albedo.rgb, u_color, u_gbuffer_main_etc, u_gbuffer_light, u_gbuffer_normal, u_depth, u_gbuffer_shadow, u_tex_sun, u_tex_moon, u_tex_noise, idLight, idMaterial, idNormal, idMicroNormal, eyePos);
+		fragColor += reflection(albedo.rgb, u_color, u_gbuffer_main_etc, u_gbuffer_lightnormal, u_depth, u_gbuffer_shadow, u_tex_sun, u_tex_moon, u_tex_noise, idLight, idMaterial, idNormal, idMicroNormal, eyePos);
 	}
 
 	if (texture(u_vanilla_transl_depth, v_texcoord).r < dMin) {

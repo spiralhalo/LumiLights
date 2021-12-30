@@ -22,8 +22,7 @@
 				"u_vanilla_transl_depth",
 
 				"u_gbuffer_main_etc",
-				"u_gbuffer_light",
-				"u_gbuffer_normal",
+				"u_gbuffer_lightnormal",
 				"u_gbuffer_shadow",
 
  				"u_tex_sun",
@@ -49,8 +48,7 @@
 					"vanilla_transl_depth",
 
 					"gbuffer_main_etc",
-					"gbuffer_light",
-					"gbuffer_normal",
+					"gbuffer_lightnormal",
 					"gbuffer_shadow",
 
 					"minecraft:textures/environment/sun.png",

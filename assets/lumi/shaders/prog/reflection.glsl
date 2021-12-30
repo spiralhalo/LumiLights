@@ -50,7 +50,7 @@ vec3 clipNear(vec3 end, vec3 start, float nearZ)
 	return end;
 }
 
-vec3 reflectionMarch_v2(sampler2D depthBuffer, sampler2DArray normalBuffer, float idNormal, vec3 viewStartPos, vec3 viewMarch, float nearZ)
+vec3 reflectionMarch_v2(sampler2D depthBuffer, sampler2DArray lightNormalBuffer, float idNormal, vec3 viewStartPos, vec3 viewMarch, float nearZ)
 {
 	// padding to prevent back face reflection. we want the divisor to be as small as possible.
 	// too small with cause distortion of reflection near the reflector
@@ -123,7 +123,7 @@ vec3 reflectionMarch_v2(sampler2D depthBuffer, sampler2DArray normalBuffer, floa
 
 const float JITTER_STRENGTH = 0.6;
 
-vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer, sampler2DArray lightBuffer, sampler2DArray normalBuffer, sampler2D depthBuffer, sampler2DArrayShadow shadowMap, sampler2D sunTexture, sampler2D moonTexture, sampler2D noiseTexture, float idLight, float idMaterial, float idNormal, float idMicroNormal, vec3 eyePos)
+vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer, sampler2DArray lightNormalBuffer, sampler2D depthBuffer, sampler2DArrayShadow shadowMap, sampler2D sunTexture, sampler2D moonTexture, sampler2D noiseTexture, float idLight, float idMaterial, float idNormal, float idMicroNormal, vec3 eyePos)
 {
 	vec3 rawMat = texture(mainEtcBuffer, vec3(v_texcoord, idMaterial)).xyz;
 
@@ -131,8 +131,8 @@ vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer
 
 	if (isUnmanaged) return vec4(0.0);
 
-	vec4 light	= texture(lightBuffer, vec3(v_texcoord, idLight));
-	vec3 normal	= texture(normalBuffer, vec3(v_texcoord, idMicroNormal)).xyz * 2.0 - 1.0;
+	vec4 light	= texture(lightNormalBuffer, vec3(v_texcoord, idLight));
+	vec3 normal	= texture(lightNormalBuffer, vec3(v_texcoord, idMicroNormal)).xyz * 2.0 - 1.0;
 	float depth	= texture(depthBuffer, v_texcoord).r;
 
 	light.w = denoisedShadowFactor(shadowMap, v_texcoord, eyePos, depth, light.y);
@@ -155,7 +155,7 @@ vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer
 	vec4 objLight = vec4(0.0);
 	if (roughness <= REFLECTION_MAXIMUM_ROUGHNESS) {
 		// Impossible Ray Resultion:
-		vec3 rawNormal = texture(normalBuffer, vec3(v_texcoord, idNormal)).xyz * 2.0 - 1.0;
+		vec3 rawNormal = texture(lightNormalBuffer, vec3(v_texcoord, idNormal)).xyz * 2.0 - 1.0;
 		vec3 rawViewNormal = frx_normalModelMatrix * rawNormal;
 		bool impossibleRay	= dot(rawViewNormal, viewMarch) < 0;
 
@@ -165,7 +165,7 @@ vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer
 			viewMarch = normalize(reflect(viewToFrag, viewNormal) + jitterPrc);
 		}
 
-		vec3 result = reflectionMarch_v2(depthBuffer, normalBuffer, idNormal, viewPos, viewMarch, nearPos.z);
+		vec3 result = reflectionMarch_v2(depthBuffer, lightNormalBuffer, idNormal, viewPos, viewMarch, nearPos.z);
 
 		vec2 uvFade = smoothstep(0.5, 0.475 + l2_clampScale(0.1, 0.0, rawViewNormal.z) * 0.024, abs(result.xy - 0.5));
 		result.z *= min(uvFade.x, uvFade.y);

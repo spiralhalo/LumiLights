@@ -134,9 +134,9 @@
 				{name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
 			]
 		}, {
-			name: "gbuffer_light",
+			name: "gbuffer_lightnormal",
 			lod: 0,
-			depth: 3,
+			depth: 7,
 			internalFormat: "RGB16F",
 			pixelFormat: "RGB",
 			pixelDataType: "FLOAT",
@@ -157,19 +157,6 @@
 				{name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
 				{name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"},
 				{name: "TEXTURE_COMPARE_MODE", val: "NONE"}
-			]
-		},
-		{
-			name: "gbuffer_normal",
-			lod: 0,
-			depth: 4,
-			internalFormat: "RGB16",
-			pixelFormat: "RGB",
-			pixelDataType: "UNSIGNED_BYTE",
-			target: "TEXTURE_2D_ARRAY",
-			texParams: [
-				{name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
-				{name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
 			]
 		},
 	],
@@ -194,9 +181,9 @@
 			depthAttachment: {image: "vanilla_depth", clearDepth: 1.0},
 			colorAttachments: [
 				{image: "vanilla_color", clearColor: 0x00000000},
-				{image: "gbuffer_light",	layer: 0, clearColor: 0x00000000},
-				{image: "gbuffer_normal",	layer: 0, clearColor: 0x00000000},
-				{image: "gbuffer_normal",	layer: 1, clearColor: 0x00000000},
+				{image: "gbuffer_lightnormal", layer: 0, clearColor: 0x00000000},
+				{image: "gbuffer_lightnormal", layer: 3, clearColor: 0x00000000},
+				{image: "gbuffer_lightnormal", layer: 4, clearColor: 0x00000000},
 				{image: "gbuffer_main_etc",	layer: 0, clearColor: 0x00000000},
 				{image: "gbuffer_main_etc",	layer: 1, clearColor: 0x00000000},
 			]
@@ -206,9 +193,9 @@
 			depthAttachment: {image: "gbuffer_depth", layer: 0, clearDepth: 1.0},
 			colorAttachments: [
 				{image: "gbuffer_trans",	layer: 0, clearColor: 0x00000000},
-				{image: "gbuffer_light",	layer: 1, clearColor: 0x00000000},
-				{image: "gbuffer_normal",	layer: 2, clearColor: 0x00000000},
-				{image: "gbuffer_normal",	layer: 3, clearColor: 0x00000000},
+				{image: "gbuffer_lightnormal", layer: 1, clearColor: 0x00000000},
+				{image: "gbuffer_lightnormal", layer: 5, clearColor: 0x00000000},
+				{image: "gbuffer_lightnormal", layer: 6, clearColor: 0x00000000},
 				{image: "gbuffer_main_etc",	layer: 2, clearColor: 0x00000000},
 				{image: "gbuffer_main_etc",	layer: 3, clearColor: 0x00000000},
 			]
@@ -217,8 +204,8 @@
 			name: "particles",
 			depthAttachment: {image: "gbuffer_depth", layer: 1, clearDepth: 1.0},
 			colorAttachments: [
-				{image: "gbuffer_trans",	layer: 1, clearColor: 0x00000000},
-				{image: "gbuffer_light",	layer: 2, clearColor: 0x00000000},
+				{image: "gbuffer_trans", layer: 1, clearColor: 0x00000000},
+				{image: "gbuffer_lightnormal", layer: 2, clearColor: 0x00000000},
 			]
 		},
 		{

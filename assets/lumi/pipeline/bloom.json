@@ -84,7 +84,7 @@
 				"u_input",
 				"u_blend",
 				"u_color_albedo",
-				"u_gbuffer_light",
+				"u_gbuffer_lightnormal",
 			]
 		},
 		{
@@ -111,7 +111,7 @@
 				samplerImages: [
 					"swap_color", "swap_color",
 					"color_albedo",
-					"gbuffer_light",
+					"gbuffer_lightnormal",
 				],
 				lod: 0, toggleConfig: "bloom_effect"
 			}, {

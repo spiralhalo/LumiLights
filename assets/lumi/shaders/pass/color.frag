@@ -23,8 +23,7 @@ uniform sampler2D u_vanilla_clouds_depth;
 uniform sampler2DArray u_gbuffer_trans;
 uniform sampler2DArray u_gbuffer_main_etc;
 uniform sampler2DArray u_gbuffer_depth;
-uniform sampler2DArray u_gbuffer_light;
-uniform sampler2DArray u_gbuffer_normal;
+uniform sampler2DArray u_gbuffer_lightnormal;
 uniform sampler2DArrayShadow u_gbuffer_shadow;
 
 uniform sampler2D u_tex_sun;
@@ -42,15 +41,16 @@ void main()
 	float dVanilla = texture(u_vanilla_depth, v_texcoord).r;
 	float dTrans = texture(u_gbuffer_depth, vec3(v_texcoord, 0.)).r;
 
-	vec2 uvSolid = refractSolidUV(u_gbuffer_normal, u_vanilla_depth, dVanilla, dTrans);
+	vec2 uvSolid = refractSolidUV(u_gbuffer_lightnormal, u_vanilla_depth, dVanilla, dTrans);
 
 	float dSolid = texture(u_vanilla_depth, uvSolid).r;
 
 	vec4  cSolid = texture(u_vanilla_color, uvSolid);
-	vec4  lTrans = texture(u_gbuffer_light, vec3(v_texcoord, ID_TRANS_LIGT));
+	vec4  lTrans = texture(u_gbuffer_lightnormal, vec3(v_texcoord, ID_TRANS_LIGT));
 	vec4  cTrans = texture(u_gbuffer_trans, vec3(v_texcoord, ID_TRANS_COLR));
 	vec3  rawTrans = cTrans.rgb;
 
+	cTrans = dSolid < dTrans ? vec4(0.0) : cTrans;
 	if (cTrans.a != 0) {
 		cTrans.rgb = cTrans.rgb / (fastLight(lTrans.xy) * cTrans.a);
 		cTrans.a = pow(cTrans.a, 1. / 3.);
@@ -68,10 +68,10 @@ void main()
 	vec4 tempPos = frx_inverseViewProjectionMatrix * vec4(2.0 * uvSolid - 1.0, 2.0 * dSolid - 1.0, 1.0);
 	vec3 eyePos  = tempPos.xyz / tempPos.w;
 
-	vec4 light	= texture(u_gbuffer_light, vec3(uvSolid, ID_SOLID_LIGT));
+	vec4 light	= texture(u_gbuffer_lightnormal, vec3(uvSolid, ID_SOLID_LIGT));
 	vec3 rawMat	= texture(u_gbuffer_main_etc, vec3(uvSolid, ID_SOLID_MATS)).xyz;
-	vec3 normal	= texture(u_gbuffer_normal, vec3(uvSolid, ID_SOLID_MNORM)).xyz * 2.0 - 1.0;
-	float vertexNormaly = texture(u_gbuffer_normal, vec3(uvSolid, ID_SOLID_NORM)).y * 2.0 - 1.0;
+	vec3 normal	= texture(u_gbuffer_lightnormal, vec3(uvSolid, ID_SOLID_MNORM)).xyz * 2.0 - 1.0;
+	float vertexNormaly = texture(u_gbuffer_lightnormal, vec3(uvSolid, ID_SOLID_NORM)).y * 2.0 - 1.0;
 
 	light.w = denoisedShadowFactor(u_gbuffer_shadow, uvSolid, eyePos, dSolid, light.y);
 
@@ -135,8 +135,8 @@ void main()
 	if (dMin == dTrans) {
 		light  = lTrans;
 		rawMat = texture(u_gbuffer_main_etc, vec3(v_texcoord, ID_TRANS_MATS)).xyz;
-		normal = texture(u_gbuffer_normal, vec3(v_texcoord, ID_TRANS_MNORM)).xyz * 2.0 - 1.0;
-		vertexNormaly = texture(u_gbuffer_normal, vec3(v_texcoord, ID_TRANS_NORM)).y * 2.0 - 1.0;
+		normal = texture(u_gbuffer_lightnormal, vec3(v_texcoord, ID_TRANS_MNORM)).xyz * 2.0 - 1.0;
+		vertexNormaly = texture(u_gbuffer_lightnormal, vec3(v_texcoord, ID_TRANS_NORM)).y * 2.0 - 1.0;
 		disableDiffuse = bit_unpack(miscTrans.z, 4);
 
 		#ifdef WATER_FOAM
@@ -147,7 +147,7 @@ void main()
 
 		if (miscTrans == rawMat && rawMat == rawTrans) light.x = 0.0; // end portal fix
 	} else if (dMin == dParts) {
-		light = texture(u_gbuffer_light, vec3(v_texcoord, ID_PARTS_LIGT));
+		light = texture(u_gbuffer_lightnormal, vec3(v_texcoord, ID_PARTS_LIGT));
 	}
 
 	bool nextIsUnderwater = decideUnderwater(dMin, dTrans, transIsWater, true);
