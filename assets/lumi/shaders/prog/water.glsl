@@ -97,20 +97,20 @@ void foamPreprocess(inout vec4 albedo, sampler2D natureTexture, vec3 worldPos, f
 }
 #else
 
-float sampleWaterNoise(sampler2D natureTexture, vec3 worldPos, vec2 uvMove, float vertexNormaly)
+float sampleWaterNoise(sampler2D natureTexture, vec3 worldPos, vec2 uvMove, vec3 absVertexNormal)
 {
-	float yMove = 1.0 - vertexNormaly;
-	vec2 moveA = vec2(1. + yMove * 5., 1. - yMove) * frx_renderSeconds;
-	vec2 moveB = vec2(1. + yMove * 5., -1. + yMove) * frx_renderSeconds;
+	vec3 yMove = 1.0 - absVertexNormal;
+	vec2 moveA = vec2(1. + yMove.y * 5., 1. - yMove.y) * frx_renderSeconds;
+	vec2 moveB = vec2(1. + yMove.y * 5., -1. + yMove.y) * frx_renderSeconds;
 
-	vec2 uv = worldPos.xz + vec2(worldPos.y, 0.0);
+	vec2 uv = worldPos.xz * absVertexNormal.y + yMove.y * vec2(worldPos.y, worldPos.x * yMove.x + worldPos.z * yMove.z);
 
 	vec4 uvuv = vec4(uv + moveA, uv + moveB);
 
 	return textureWater(natureTexture, uvuv, uvMove);
 }
 
-vec3 sampleWaterNormal(sampler2D natureTexture, vec3 fragWorldPos, float vertexNormaly)
+vec3 sampleWaterNormal(sampler2D natureTexture, vec3 fragWorldPos, vec3 absVertexNormal)
 {
 	const vec3 normal = vec3(0.0, 0.0, 1.0);
 	const vec3 tangent = vec3(1.0, 0.0, 0.0);
@@ -124,9 +124,9 @@ vec3 sampleWaterNormal(sampler2D natureTexture, vec3 fragWorldPos, float vertexN
 	vec3 bmove = bitangent * slope;
 	vec2 uvMove = vec2(0.0, oneBlock * slope);
 
-	vec3 origin = amplitude * sampleWaterNoise(natureTexture, fragWorldPos, uvMove.xx, vertexNormaly) * normal;
-	vec3 tside  = amplitude * sampleWaterNoise(natureTexture, fragWorldPos, uvMove.yx, vertexNormaly) * normal + tmove - origin;
-	vec3 bside  = amplitude * sampleWaterNoise(natureTexture, fragWorldPos, uvMove.xy, vertexNormaly) * normal + bmove - origin;
+	vec3 origin = amplitude * sampleWaterNoise(natureTexture, fragWorldPos, uvMove.xx, absVertexNormal) * normal;
+	vec3 tside  = amplitude * sampleWaterNoise(natureTexture, fragWorldPos, uvMove.yx, absVertexNormal) * normal + tmove - origin;
+	vec3 bside  = amplitude * sampleWaterNoise(natureTexture, fragWorldPos, uvMove.xy, absVertexNormal) * normal + bmove - origin;
 
 	vec3 eyePos = fragWorldPos - frx_cameraPos;
 	float farBlend = l2_clampScale(0., 1024. * 1024., dot(eyePos, eyePos));

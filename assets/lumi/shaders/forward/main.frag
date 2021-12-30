@@ -63,11 +63,12 @@ void frx_pipelineFragment()
 			frx_fragColor = vec4(0.001);
 
 			#elif WATER_COLOR == WATER_COLOR_NATURAL_BLUE
-			frx_fragColor.a   *= 0.6;
+			frx_fragColor.rgb *= frx_fragColor.a;
+			frx_fragColor.a   *= 0.4;
 			#endif
 
 			#ifdef WATER_WAVES
-			frx_fragNormal = sampleWaterNormal(u_tex_nature, frx_var0.xyz, frx_vertexNormal.y);
+			frx_fragNormal = sampleWaterNormal(u_tex_nature, frx_var0.xyz, abs(frx_vertexNormal));
 
 			vec3 bitangent = cross(frx_vertexNormal, l2_tangent);
 			mat3 TBN = mat3(l2_tangent, bitangent, frx_vertexNormal);
