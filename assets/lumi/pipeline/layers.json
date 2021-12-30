@@ -112,7 +112,7 @@
 			name: "gbuffer_trans",
 			lod: 0,
 			depth: 2,
-			internalFormat: "RGBA8",
+			internalFormat: "RGBA16",
 			pixelFormat: "RGBA",
 			pixelDataType: "UNSIGNED_BYTE",
 			target: "TEXTURE_2D_ARRAY",
