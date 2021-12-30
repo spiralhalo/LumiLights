@@ -285,6 +285,24 @@ vec4 shading(vec4 color, sampler2D natureTexture, vec4 light, float ao, vec2 mat
 	return vec4(shaded, color.a);
 }
 
+vec4 particleShading(vec4 color, sampler2D natureTexture, vec4 light, vec3 eyePos, bool isUnderwater)
+{
+	vec3 albedo = hdr_fromGamma(color.rgb);
+	// unmanaged
+	if (light.x == 0.0) return vec4(albedo, color.a);
+
+	vec3 toEye = -normalize(eyePos);
+	prepare(color, natureTexture, eyePos, toEye.y, isUnderwater, light);
+
+	vec3 baseLight, blockLight, hlLight, skyLight;
+	lights(albedo, light, eyePos, toEye, baseLight, blockLight, hlLight, skyLight);
+
+	vec3 shaded = albedo * (baseLight + blockLight + hlLight);
+	shaded += albedo * skyLight;
+
+	return vec4(shaded / PI, color.a);
+}
+
 vec4 shading(vec4 color, sampler2D natureTexture, vec4 light, vec3 rawMat, vec3 eyePos, vec3 normal, float vertexNormaly, bool isUnderwater, float disableDiffuse) {
 	return shading(color, natureTexture, light, rawMat.z, rawMat.xy, eyePos, normal, vertexNormaly, isUnderwater, disableDiffuse);
 }

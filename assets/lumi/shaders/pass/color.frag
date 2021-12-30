@@ -103,64 +103,57 @@ void main()
 		base.rgb = base.rgb * (1.0 - clouds.a) + clouds.rgb * clouds.a;
 	}
 
+
+	tempPos = frx_inverseViewProjectionMatrix * vec4(2.0 * v_texcoord - 1.0, 2.0 * dParts - 1.0, 1.0);
+	eyePos  = tempPos.xyz / tempPos.w;
+	light = texture(u_gbuffer_lightnormal, vec3(v_texcoord, ID_PARTS_LIGT));
+	light.w = denoisedShadowFactor(u_gbuffer_shadow, v_texcoord, eyePos, dParts, light.y);
+	vec4 nextParts = particleShading(cParts, u_tex_nature, light, eyePos, decideUnderwater(dParts, dTrans, transIsWater, false));
+
+
+	tempPos = frx_inverseViewProjectionMatrix * vec4(2.0 * v_texcoord - 1.0, 2.0 * dTrans - 1.0, 1.0);
+	eyePos  = tempPos.xyz / tempPos.w;
+	light  = lTrans;
+	rawMat = texture(u_gbuffer_main_etc, vec3(v_texcoord, ID_TRANS_MATS)).xyz;
+	normal = texture(u_gbuffer_lightnormal, vec3(v_texcoord, ID_TRANS_MNORM)).xyz * 2.0 - 1.0;
+	vertexNormaly = texture(u_gbuffer_lightnormal, vec3(v_texcoord, ID_TRANS_NORM)).y * 2.0 - 1.0;
+	disableDiffuse = bit_unpack(miscTrans.z, 4);
+
+	#ifdef WATER_FOAM
+	if (transIsWater) {
+		foamPreprocess(cTrans, u_tex_nature, eyePos + frx_cameraPos, vertexNormaly, base.rgb, dVanilla, dTrans);
+	}
+	#endif
+
+	if (miscTrans == rawMat && rawMat == rawTrans) light.x = 0.0; // end portal fix
+
+	light.w = transIsWater ? lightmapRemap (light.y) : denoisedShadowFactor(u_gbuffer_shadow, v_texcoord, eyePos, dTrans, light.y);
+
+	vec4 nextTrans = shading(cTrans, u_tex_nature, light, rawMat, eyePos, normal, vertexNormaly, decideUnderwater(dTrans, dTrans, transIsWater, true), disableDiffuse);
+	nextTrans = overlay(nextTrans, u_tex_glint, miscTrans);
+
+
+	vec4 nextRains = vec4(hdr_fromGamma(cRains.rgb), cRains.a);
+
 	vec4 next0, next1, next;
 
 	// TODO: is this slower than insert sort?
 	if (dMin == dRains) {
-		next0 = (dParts > dTrans ? cParts : cTrans);
-		next1 = (dParts > dTrans ? cTrans : cParts);
-		next  = cRains;
+		next0 = (dParts > dTrans ? nextParts : nextTrans);
+		next1 = (dParts > dTrans ? nextTrans : nextParts);
+		next  = nextRains;
 	} else if (dMin == dParts) {
-		next0 = (dRains > dTrans ? cRains : cTrans);
-		next1 = (dRains > dTrans ? cTrans : cRains);
-		next  = cParts;
+		next0 = (dRains > dTrans ? nextRains : nextTrans);
+		next1 = (dRains > dTrans ? nextTrans : nextRains);
+		next  = nextParts;
 	} else {
-		next0 = (dRains > dParts ? cRains : cParts);
-		next1 = (dRains > dParts ? cParts : cRains);
-		next  = cTrans;
+		next0 = (dRains > dParts ? nextRains : nextParts);
+		next1 = (dRains > dParts ? nextParts : nextRains);
+		next  = nextTrans;
 	}
 
 	next0 = vec4(next0.rgb * (1.0 - next1.a) + next1.rgb * next1.a, max(next0.a, next1.a));
 	next  = vec4(next0.rgb * (1.0 - next.a) + next.rgb * next.a, max(next0.a, next.a));
-
-	tempPos = frx_inverseViewProjectionMatrix * vec4(2.0 * v_texcoord - 1.0, 2.0 * dMin - 1.0, 1.0);
-	eyePos  = tempPos.xyz / tempPos.w;
-
-	light  = vec4(1.0);
-	rawMat = vec3(1.0, 0.0, 1.0);
-	normal = -frx_cameraView;
-	vertexNormaly = normal.y;
-	disableDiffuse = 0.0;
-
-	if (dMin == dTrans) {
-		light  = lTrans;
-		rawMat = texture(u_gbuffer_main_etc, vec3(v_texcoord, ID_TRANS_MATS)).xyz;
-		normal = texture(u_gbuffer_lightnormal, vec3(v_texcoord, ID_TRANS_MNORM)).xyz * 2.0 - 1.0;
-		vertexNormaly = texture(u_gbuffer_lightnormal, vec3(v_texcoord, ID_TRANS_NORM)).y * 2.0 - 1.0;
-		disableDiffuse = bit_unpack(miscTrans.z, 4);
-
-		#ifdef WATER_FOAM
-		if (transIsWater) {
-			foamPreprocess(next, u_tex_nature, eyePos + frx_cameraPos, vertexNormaly, base.rgb, dVanilla, dTrans);
-		}
-		#endif
-
-		if (miscTrans == rawMat && rawMat == rawTrans) light.x = 0.0; // end portal fix
-	} else if (dMin == dParts) {
-		light = texture(u_gbuffer_lightnormal, vec3(v_texcoord, ID_PARTS_LIGT));
-	}
-
-	bool nextIsUnderwater = decideUnderwater(dMin, dTrans, transIsWater, true);
-
-	light.w = transIsWater ? lightmapRemap (light.y) : denoisedShadowFactor(u_gbuffer_shadow, v_texcoord, eyePos, dMin, light.y);
-
-	if (next.a != 0.0) {
-		next = shading(next, u_tex_nature, light, rawMat, eyePos, normal, vertexNormaly, nextIsUnderwater, disableDiffuse);
-
-		if (dMin == dTrans && light.x != 0.0) {
-			next = overlay(next, u_tex_glint, miscTrans);
-		}
-	}
 
 	next.a = sqrt(next.a);
 
