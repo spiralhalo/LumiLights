@@ -136,6 +136,12 @@ void main()
 
 	vec4 next0, next1, next;
 
+	// try alpha compositing in HDR and you will go bald
+	nextParts = vec4(ldr_tonemap(nextParts.rgb) * nextParts.a, nextParts.a); // premultiply α
+	nextTrans = vec4(ldr_tonemap(nextTrans.rgb) * nextTrans.a, nextTrans.a);
+	nextRains = vec4(ldr_tonemap(nextRains.rgb) * nextRains.a, nextRains.a);
+	base = ldr_tonemap(base);
+
 	// TODO: is this slower than insert sort?
 	if (dMin == dRains) {
 		next0 = (dParts > dTrans ? nextParts : nextTrans);
@@ -151,15 +157,9 @@ void main()
 		next  = nextTrans;
 	}
 
-	// try alpha compositing in HDR and you will go bald
-	next0 = ldr_tonemap(next0);
-	next1 = ldr_tonemap(next1);
-	next = ldr_tonemap(next);
-	base = ldr_tonemap(base);
-
-	next1 = alphaComposite(next1, next0);
-	next  = alphaComposite(next, next1);
-	base  = alphaComposite(next, base);
+	next1 = premultBlend(next1, next0);
+	next  = premultBlend(next, next1);
+	base  = premultBlend(next, base);
 
 	fragColor = hdr_inverseTonemap(base);
 	fragDepth = dMin;
