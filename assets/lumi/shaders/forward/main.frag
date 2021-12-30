@@ -8,6 +8,7 @@
 #include lumi:shaders/common/forward.glsl
 #include lumi:shaders/common/userconfig.glsl
 #include lumi:shaders/prog/overlay.glsl
+#include lumi:shaders/prog/shading.glsl
 #include lumi:shaders/prog/water.glsl
 #include lumi:shaders/lib/bitpack.glsl
 #include lumi:shaders/lib/pack_normal.glsl
@@ -117,9 +118,11 @@ void frx_pipelineFragment()
 		fragColor[5] = vec4(frx_normalizeMappedUV(frx_texcoord), bitFlags, 1.0);
 	}
 
-	// Advanced translucency 3.0
+	// Advanced translucency 4.0
 	if (frx_renderTargetTranslucent) {
-		frx_fragColor.a *= frx_fragColor.a;
+		// pow 3 is a compromise as light colors blends best at high exponent while dark colors at no exponent
+		frx_fragColor.a = frx_fragColor.a * frx_fragColor.a * frx_fragColor.a;
+		frx_fragColor.rgb *= fastLight(frx_fragLight.xy);
 	}
 
 	gl_FragDepth = gl_FragCoord.z;

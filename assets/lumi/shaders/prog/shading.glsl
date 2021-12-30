@@ -16,6 +16,14 @@
  *  lumi:shaders/prog/shading.glsl
  *******************************************************/
 
+float fastLight(vec2 light) {
+	float reduction = max(1.0 - frx_skyLightTransitionFactor, frx_worldIsMoonlit);
+		  reduction = max(reduction, max(0.5 * frx_rainGradient, frx_thunderGradient));
+
+	return max(light.x, light.y * (1.0 - 0.9 * reduction));
+}
+
+#ifdef POST_SHADER
 /*******************************************************
  *  vertexShader: lumi:shaders/post/shading.vert
  *******************************************************/
@@ -272,4 +280,5 @@ vec4 shading(vec4 color, sampler2D natureTexture, vec4 light, float ao, vec2 mat
 vec4 shading(vec4 color, sampler2D natureTexture, vec4 light, vec3 rawMat, vec3 eyePos, vec3 normal, float vertexNormaly, bool isUnderwater, float disableDiffuse) {
 	return shading(color, natureTexture, light, rawMat.z, rawMat.xy, eyePos, normal, vertexNormaly, isUnderwater, disableDiffuse);
 }
+#endif
 #endif

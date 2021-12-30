@@ -7,6 +7,7 @@
  *  lumi:shaders/prog/tile_noise.glsl
  *******************************************************/
 
+#ifdef POST_SHADER
 #if DITHERING_MODE == DITHERING_MODE_HALTON
 const vec3 tile_randomVec[16] = vec3[16](
 	vec3(0.5, 0.3333333333333333, 0.25), 
@@ -126,3 +127,4 @@ float tile_denoise1_depth(vec2 uv, sampler2D scolor, sampler2D sdepth, vec2 inv_
 	}
 	return accum / float(count);
 }
+#endif

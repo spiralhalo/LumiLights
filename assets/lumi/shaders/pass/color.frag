@@ -20,6 +20,7 @@ uniform sampler2D u_weather_color;
 uniform sampler2D u_weather_depth;
 uniform sampler2D u_vanilla_clouds_depth;
 
+uniform sampler2DArray u_gbuffer_trans;
 uniform sampler2DArray u_gbuffer_main_etc;
 uniform sampler2DArray u_gbuffer_depth;
 uniform sampler2DArray u_gbuffer_light;
@@ -46,11 +47,17 @@ void main()
 	float dSolid = texture(u_vanilla_depth, uvSolid).r;
 
 	vec4  cSolid = texture(u_vanilla_color, uvSolid);
-	vec4  cTrans = texture(u_gbuffer_main_etc, vec3(v_texcoord, ID_TRANS_COLR));
+	vec4  lTrans = texture(u_gbuffer_light, vec3(v_texcoord, ID_TRANS_LIGT));
+	vec4  cTrans = texture(u_gbuffer_trans, vec3(v_texcoord, ID_TRANS_COLR));
 	vec3  rawTrans = cTrans.rgb;
-		  cTrans = vec4(cTrans.a == 0.0 ? vec3(0.0) : (cTrans.rgb / cTrans.a), sqrt(cTrans.a));
+
+	if (cTrans.a != 0) {
+		cTrans.rgb = cTrans.rgb / (fastLight(lTrans.xy) * cTrans.a);
+		cTrans.a = pow(cTrans.a, 1. / 3.);
+	}
+
 	float dParts = texture(u_gbuffer_depth, vec3(v_texcoord, 1.)).r;
-	vec4  cParts = dParts > dSolid ? vec4(0.0) : texture(u_gbuffer_main_etc, vec3(v_texcoord, ID_PARTS_COLR));
+	vec4  cParts = dParts > dSolid ? vec4(0.0) : texture(u_gbuffer_trans, vec3(v_texcoord, ID_PARTS_COLR));
 	float dRains = texture(u_weather_depth, v_texcoord).r;
 	vec4  cRains = texture(u_weather_color, v_texcoord);
 
@@ -126,7 +133,7 @@ void main()
 	disableDiffuse = 0.0;
 
 	if (dMin == dTrans) {
-		light  = texture(u_gbuffer_light, vec3(v_texcoord, ID_TRANS_LIGT));
+		light  = lTrans;
 		rawMat = texture(u_gbuffer_main_etc, vec3(v_texcoord, ID_TRANS_MATS)).xyz;
 		normal = texture(u_gbuffer_normal, vec3(v_texcoord, ID_TRANS_MNORM)).xyz * 2.0 - 1.0;
 		vertexNormaly = texture(u_gbuffer_normal, vec3(v_texcoord, ID_TRANS_NORM)).y * 2.0 - 1.0;
