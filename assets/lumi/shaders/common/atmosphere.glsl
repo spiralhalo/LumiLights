@@ -97,17 +97,6 @@ vec3 atmos_SkyGradientRadiance(vec3 world_toSky)
 
 	return mix(atmosv_SkyRadiance, horizonColor, skyHorizon);
 }
-
-vec3 atmos_SkyGradientRadiance(vec3 world_toSky, vec3 fogColor, bool isUnderwater)
-{
-	//TODO: test non-overworld has_sky_light custom dimension and broaden if fits
-	if (frx_worldIsOverworld == 0) return atmosv_SkyRadiance;
-
-	float skyHorizon = calcHorizon(world_toSky);
-	vec3 horizonColor = mix(atmos_HorizonColor(world_toSky, skyHorizon), fogColor, waterHorizon(isUnderwater, skyHorizon));
-
-	return mix(atmosv_SkyRadiance, horizonColor, skyHorizon);
-}
 #endif
 
 
