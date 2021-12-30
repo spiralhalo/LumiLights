@@ -187,13 +187,8 @@ void lightPbr(vec3 albedo, float alpha, vec3 radiance, float roughness, float me
 	shading0.diffuse = albedo * radiance * diffuseNdotL * (1.0 - fresnel * step(0.0, rawNdL)) * (1.0 - metallic) / PI;
 }
 
-vec4 shading(vec4 color, sampler2D natureTexture, vec4 light, float ao, vec2 material, vec3 eyePos, vec3 normal, float vertexNormaly, bool isUnderwater, float disableDiffuse)
+void prepare(vec4 color, sampler2D natureTexture, vec3 eyePos, float vertexNormaly, bool isUnderwater, inout vec4 light)
 {
-	vec3 albedo = hdr_fromGamma(color.rgb);
-
-	// unmanaged
-	if (light.x == 0.0) return vec4(albedo, color.a);
-
 	float causticLight = 0.0;
 
 #ifdef WATER_CAUSTICS
@@ -218,13 +213,11 @@ vec4 shading(vec4 color, sampler2D natureTexture, vec4 light, float ao, vec2 mat
 	float vanillaEmissive = step(0.93625, light.x) * luminance * luminance;
 
 	light.z += vanillaEmissive;
+}
 
-	vec3 f0 = mix(vec3(0.01), albedo, material.y);
-
-	vec3 toEye = -normalize(eyePos);
-
-	vec3 baseLight = vec3(BASE_AMBIENT_STR * USER_AMBIENT_MULTIPLIER);
-
+void lights(vec3 albedo, vec4 light, vec3 eyePos, vec3 toEye, out vec3 baseLight, out vec3 blockLight, out vec3 hlLight, out vec3 skyLight)
+{
+	baseLight = vec3(BASE_AMBIENT_STR * USER_AMBIENT_MULTIPLIER);
 	baseLight += hdr_fromGamma(NIGHT_VISION_COLOR) * NIGHT_VISION_STR * frx_effectNightVision;
 
 	vec3 skylessColor = mix(SKYLESS_LIGHT_COLOR * USER_END_AMBIENT_MULTIPLIER, NETHER_LIGHT_COLOR * USER_NETHER_AMBIENT_MULTIPLIER, frx_worldIsNether);
@@ -234,20 +227,10 @@ vec4 shading(vec4 color, sampler2D natureTexture, vec4 light, float ao, vec2 mat
 	baseLight += atmosv_SkyAmbientRadiance * lightmapRemap(light.y);
 	baseLight += albedo * light.z * EMISSIVE_LIGHT_STR;
 
-
 	float bl = l2_clampScale(0.03125, 0.96875, light.x);
-
 	float blWhite = max(light.z, step(0.93625, light.x));
 	vec3  blColor = mix(BLOCK_LIGHT_COLOR, BLOCK_LIGHT_NEUTRAL, blWhite);
-
-	vec3 blockLight = blColor * BLOCK_LIGHT_STR * bl;
-
-	// vanilla-ish style diffuse
-	float dotUpNorth = l2_max3(abs(normal * vec3(0.6, 1.0, 0.8)));
-	// perfect diffuse light
-	vec3 shaded = albedo * (baseLight + blockLight) * dotUpNorth * max(1.0 - material.y, 0.5) / PI;
-	// block light specular
-	shaded += specularPbr(blockLight, max(material.x, 0.5 * material.y), f0, normal, toEye, normal);
+	blockLight = blColor * BLOCK_LIGHT_STR * bl;
 
 #if HANDHELD_LIGHT_RADIUS != 0
 	if (frx_heldLight.w > 0) {
@@ -262,19 +245,43 @@ vec4 shading(vec4 color, sampler2D natureTexture, vec4 light, float ao, vec2 mat
 
 		hl *= cone;
 
-		vec3 hlLight = hdr_fromGamma(heldLight.rgb) * BLOCK_LIGHT_STR * hl;
-
-		lightPbr(albedo, color.a, hlLight, material.x, material.y, f0, toLight, toEye, normal, disableDiffuse);
-		shaded += shading0.specular + shading0.diffuse;
+		hlLight = hdr_fromGamma(heldLight.rgb) * BLOCK_LIGHT_STR * hl;
 	}
 #endif
 
-	shaded *= ao;
+	skyLight = frx_worldHasSkylight * light.w * atmosv_CelestialRadiance * (1. - frx_rainGradient);
+}
 
-	vec3 skyLight = frx_worldHasSkylight * light.w * atmosv_CelestialRadiance * (1. - frx_rainGradient);
-	lightPbr(albedo, color.a, skyLight, material.x, material.y, f0, frx_skyLightVector, toEye, normal, disableDiffuse);
+vec4 shading(vec4 color, sampler2D natureTexture, vec4 light, float ao, vec2 material, vec3 eyePos, vec3 normal, float vertexNormaly, bool isUnderwater, float disableDiffuse)
+{
+	vec3 albedo = hdr_fromGamma(color.rgb);
+
+	// unmanaged
+	if (light.x == 0.0) return vec4(albedo, color.a);
+
+	prepare(color, natureTexture, eyePos, vertexNormaly, isUnderwater, light);
+
+	vec3 f0 = mix(vec3(0.01), albedo, material.y);
+	vec3 toEye = -normalize(eyePos);
+
+	vec3 baseLight, blockLight, hlLight, skyLight;
+
+	lights(albedo, light, eyePos, toEye, baseLight, blockLight, hlLight, skyLight);
+
+	// vanilla-ish style diffuse
+	float dotUpNorth = l2_max3(abs(normal * vec3(0.6, 1.0, 0.8)));
+	// perfect diffuse light
+	vec3 shaded = albedo * (baseLight + blockLight) * dotUpNorth * max(1.0 - material.y, 0.5) / PI;
+	// block light specular
+	shaded += specularPbr(blockLight, max(material.x, 0.5 * material.y), f0, normal, toEye, normal);
+
+	lightPbr(albedo, color.a, hlLight, material.x, material.y, f0, toEye, toEye, normal, disableDiffuse);
 	shaded += shading0.specular + shading0.diffuse;
 
+	shaded *= ao;
+
+	lightPbr(albedo, color.a, skyLight, material.x, material.y, f0, frx_skyLightVector, toEye, normal, disableDiffuse);
+	shaded += shading0.specular + shading0.diffuse;
 	return vec4(shaded, color.a);
 }
 
