@@ -74,6 +74,13 @@ float denoisedShadowFactor(sampler2DArrayShadow shadowMap, vec2 texcoord, vec3 e
 #endif
 }
 
+vec4 alphaComposite(vec4 src, vec4 dst)
+{
+	float a = src.a + dst.a * (1.0 - src.a);
+	vec3 color = src.rgb * src.a + dst.rgb * dst.a * (1.0 - src.a);
+	return vec4(color / a, a);
+}
+
 #define pbr_dot(a, b) clamp(dot(a, b), 0.0, 1.0)
 
 float pbr_distributionGGX(vec3 N, vec3 H, float roughness)
@@ -177,7 +184,7 @@ void lightPbr(vec3 albedo, float alpha, vec3 radiance, float roughness, float me
 	//fake metallic diffuse
 	metallic = min(0.5, metallic);
 
-	float diffuseNdotL = mix(1.0, NdotL, alpha * alpha * alpha);
+	float diffuseNdotL = mix(1.0, NdotL, alpha);
 
 	#ifndef SHADOW_MAP_PRESENT
 	diffuseNdotL += (1.0 - diffuseNdotL) * disableDiffuse;

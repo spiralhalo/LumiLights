@@ -53,7 +53,6 @@ void main()
 	cTrans = dSolid < dTrans ? vec4(0.0) : cTrans;
 	if (cTrans.a != 0) {
 		cTrans.rgb = cTrans.rgb / (fastLight(lTrans.xy) * cTrans.a);
-		cTrans.a = pow(cTrans.a, 1. / 3.);
 	}
 
 	float dParts = texture(u_gbuffer_depth, vec3(v_texcoord, 1.)).r;
@@ -152,14 +151,17 @@ void main()
 		next  = nextTrans;
 	}
 
-	next0 = vec4(next0.rgb * (1.0 - next1.a) + next1.rgb * next1.a, max(next0.a, next1.a));
-	next  = vec4(next0.rgb * (1.0 - next.a) + next.rgb * next.a, max(next0.a, next.a));
+	// try alpha compositing in HDR and you will go bald
+	next0 = ldr_tonemap(next0);
+	next1 = ldr_tonemap(next1);
+	next = ldr_tonemap(next);
+	base = ldr_tonemap(base);
 
-	next.a = sqrt(next.a);
+	next1 = alphaComposite(next1, next0);
+	next  = alphaComposite(next, next1);
+	base  = alphaComposite(next, base);
 
-	base.rgb = base.rgb * (1.0 - next.a) + next.rgb * next.a;
-
-	fragColor = base;
+	fragColor = hdr_inverseTonemap(base);
 	fragDepth = dMin;
 
 	if (dMin == dSolid) {

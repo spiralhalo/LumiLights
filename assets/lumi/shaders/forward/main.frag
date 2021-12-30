@@ -120,8 +120,6 @@ void frx_pipelineFragment()
 
 	// Advanced translucency 4.0
 	if (frx_renderTargetTranslucent) {
-		// pow 3 is a compromise as light colors blends best at high exponent while dark colors at no exponent
-		frx_fragColor.a = frx_fragColor.a * frx_fragColor.a * frx_fragColor.a;
 		frx_fragColor.rgb *= fastLight(frx_fragLight.xy);
 	}
 
