@@ -171,7 +171,8 @@ void lightPbr(vec3 albedo, float alpha, vec3 radiance, float roughness, float me
 {
 	vec3 halfway = normalize(toEye + toLight);
 	vec3 fresnel = pbr_fresnelSchlick(pbr_dot(toEye, halfway), f0);
-	float NdotL  = pbr_dot(normal, toLight);
+	float rawNdL = dot(normal, toLight);
+	float NdotL  = clamp(rawNdL, 0.0, 1.0);
 
 	//fake metallic diffuse
 	metallic = min(0.5, metallic);
@@ -183,7 +184,7 @@ void lightPbr(vec3 albedo, float alpha, vec3 radiance, float roughness, float me
 	#endif
 
 	shading0.specular = pbr_specularBRDF(roughness, radiance, halfway, toLight, toEye, normal, fresnel, NdotL);
-	shading0.diffuse = albedo * radiance * diffuseNdotL * (1.0 - fresnel) * (1.0 - metallic) / PI;
+	shading0.diffuse = albedo * radiance * diffuseNdotL * (1.0 - fresnel * step(0.0, rawNdL)) * (1.0 - metallic) / PI;
 }
 
 vec4 shading(vec4 color, sampler2D natureTexture, vec4 light, float ao, vec2 material, vec3 eyePos, vec3 normal, float vertexNormaly, bool isUnderwater, float disableDiffuse)
