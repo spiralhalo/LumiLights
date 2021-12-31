@@ -65,16 +65,9 @@ float twilightCalc(vec3 world_toSky, float skyHorizon) {
 
 #define twilightCalc2(world_toSky) twilightCalc(world_toSky, calcHorizon(world_toSky))
 
-vec3 atmos_FogRadiance(vec3 world_toSky, bool isUnderwater)
+vec3 atmos_OWFogRadiance(vec3 world_toSky)
 {
-	return isUnderwater ? atmosv_ClearRadiance : mix(atmosv_FogRadiance, atmosv_OWTwilightRadiance, 0.8 * twilightCalc2(world_toSky) * atmosv_OWTwilightFactor);
-}
-
-vec3 atmos_SkyRadiance(vec3 world_toSky)
-{
-	//TODO: test non-overworld has_sky_light custom dimension and broaden if fits
-	if (frx_worldIsOverworld == 0) return atmosv_SkyRadiance;
-	return mix(atmosv_SkyRadiance, atmosv_OWTwilightRadiance, twilightCalc2(world_toSky));
+	return mix(atmosv_FogRadiance, atmosv_OWTwilightRadiance, 0.8 * twilightCalc2(world_toSky) * atmosv_OWTwilightFactor);
 }
 
 vec3 atmos_HorizonColor(vec3 world_toSky, float skyHorizon) {
@@ -85,10 +78,11 @@ vec3 atmos_HorizonColor(vec3 world_toSky, float skyHorizon) {
 	return mix(atmosv_SkyRadiance * horizonBrightening, atmosv_OWTwilightRadiance, twilightCalc(world_toSky, skyHorizon));
 }
 
+// Not for OW only, also used in sky reflection fallback and cloud fade
 vec3 atmos_SkyGradientRadiance(vec3 world_toSky)
 {
-	//TODO: test non-overworld has_sky_light custom dimension and broaden if fits
-	if (frx_worldIsOverworld == 0) return atmosv_SkyRadiance;
+	// This is for overworld but maybe any skylight dimension would work better than no gradient (TODO: need example)
+	if (frx_worldHasSkylight == 0) return atmosv_SkyRadiance;
 
 	float skyHorizon = calcHorizon(world_toSky);
 	vec3 horizonColor = atmos_HorizonColor(world_toSky, skyHorizon);
@@ -176,7 +170,7 @@ void atmos_generateAtmosphereModel()
 		#endif
 	}
 
-	atmosv_OWTwilightFactor *= float(frx_worldIsOverworld);
+	atmosv_OWTwilightFactor *= float(frx_worldHasSkylight);
 
 	sunColor.gb *= vec2(frx_skyLightTransitionFactor * frx_skyLightTransitionFactor);
 

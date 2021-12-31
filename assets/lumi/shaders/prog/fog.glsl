@@ -29,8 +29,11 @@ const float UNDERWATER_FOG_DENSITY = UNDERWATER_FOG_DENSITY_RELATIVE / 20.0;
 
 float fogFactor(float distToEye, bool isUnderwater)
 {
-	float pFogDensity = isUnderwater ? UNDERWATER_FOG_DENSITY : FOG_DENSITY;
-	float pFogFar     = isUnderwater ? UNDERWATER_FOG_FAR     : FOG_FAR;
+	// only when absolutely underwater
+	bool submerged = isUnderwater && frx_cameraInFluid == 1;
+
+	float pFogDensity = submerged ? UNDERWATER_FOG_DENSITY : FOG_DENSITY;
+	float pFogFar     = submerged ? UNDERWATER_FOG_FAR     : FOG_FAR;
 
 	pFogFar = min(frx_viewDistance, pFogFar);
 
@@ -63,10 +66,10 @@ vec4 fog(vec4 color, float distToEye, vec3 toFrag, bool isUnderwater)
 	float skyBlend	  = frx_cameraInFluid == 1 ? 0.0 : min(distToEye, frx_viewDistance) / frx_viewDistance;
 	vec3  toFragMod	  = toFrag;
 		  toFragMod.y = mix(1.0, toFrag.y, pow(skyBlend, 0.3)); // ??
-	vec3  fogColor	  = mix(atmos_FogRadiance(toFrag, isUnderwater), atmos_SkyGradientRadiance(toFragMod), skyBlend);
+	vec3  fogColor	  = mix(isUnderwater ? atmosv_ClearRadiance : atmos_OWFogRadiance(toFrag), atmos_SkyGradientRadiance(toFragMod), skyBlend);
 
 	// resolve cave fog
-	if (!isUnderwater) {
+	if (!isUnderwater || frx_cameraInFluid == 0) {
 		float aboveGround = frx_smoothedEyeBrightness.y;
 		fogColor = mix(atmosv_CaveFogRadiance, fogColor, aboveGround);
 	}
