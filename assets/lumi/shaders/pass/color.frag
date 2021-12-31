@@ -95,7 +95,7 @@ void main()
 	if (dSolid > dMin) {
 		if (dSolid < 1.0) {
 			base += skyReflection(u_tex_sun, u_tex_moon, u_tex_noise, cSolid.rgb, rawMat.xy, toFrag, normal, light.yw);
-			base = fog(base, eyePos, toFrag, solidIsUnderwater);
+			base = fog(base, length(eyePos), toFrag, solidIsUnderwater);
 		}
 
 		vec4 clouds = customClouds(u_vanilla_clouds_depth, u_tex_nature, u_tex_noise, dSolid, uvSolid, eyePos, toFrag, NUM_SAMPLE, ldepth(dMin) * frx_viewDistance * 4.);

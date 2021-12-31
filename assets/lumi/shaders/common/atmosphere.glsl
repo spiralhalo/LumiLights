@@ -67,8 +67,6 @@ float twilightCalc(vec3 world_toSky, float skyHorizon) {
 
 vec3 atmos_FogRadiance(vec3 world_toSky, bool isUnderwater)
 {
-	//TODO: test non-overworld has_sky_light custom dimension and broaden if fits
-	if (frx_worldIsOverworld == 0) return atmosv_FogRadiance;
 	return isUnderwater ? atmosv_ClearRadiance : mix(atmosv_FogRadiance, atmosv_OWTwilightRadiance, 0.8 * twilightCalc2(world_toSky) * atmosv_OWTwilightFactor);
 }
 
@@ -178,6 +176,8 @@ void atmos_generateAtmosphereModel()
 		#endif
 	}
 
+	atmosv_OWTwilightFactor *= float(frx_worldIsOverworld);
+
 	sunColor.gb *= vec2(frx_skyLightTransitionFactor * frx_skyLightTransitionFactor);
 
 	atmosv_CelestialRadiance = mix(sunColor * SUNLIGHT_STR, vec3(moonlightStrength), frx_worldIsMoonlit) * frx_skyLightTransitionFactor;
@@ -207,29 +207,34 @@ void atmos_generateAtmosphereModel()
 
 	#ifdef POST_SHADER
 	/** FOG **/
-	bool customOWFog = frx_worldIsOverworld == 1 && frx_effectBlindness == 0;
-	vec3 vanillaFog = frx_vanillaClearColor;
+	// vanilla clear color is unreliable, we want to control its brightness
+	atmosv_ClearRadiance = hdr_fromGamma(frx_vanillaClearColor);
+	float lClearRadiance = dot(atmosv_ClearRadiance, vec3(1./3.));
+	atmosv_ClearRadiance = atmosv_ClearRadiance / (lClearRadiance == 0.0 ? 1.0 : lClearRadiance);
+
+	bool customOWFog = frx_worldIsOverworld == 1 && frx_cameraInLava == 0;
+	bool customEndFog = frx_worldIsEnd == 1 && frx_cameraInLava == 0;
 
 	if (customOWFog) {
 		atmosv_FogRadiance = atmosv_SkyRadiance;
 		// night fog are as bright as the horizon unless it's raining
 		atmosv_FogRadiance *= mix(1.0, HORIZON_MULT, frx_worldIsMoonlit * frx_skyLightTransitionFactor * (1.0 - frx_rainGradient));
-
-		// vanilla clear color is unreliable in overworld, sometimes orange above water, or dark immediately underwater
-		vec3 underwaterFog = hdr_fromGamma(vanillaFog);
-		float lUwFog = dot(underwaterFog, vec3(0.33));
-		underwaterFog /= (lUwFog == 0.0) ? 1.0 : lUwFog;
-
-		atmosv_ClearRadiance = mix(atmosv_FogRadiance, underwaterFog * 0.3, frx_cameraInWater);
+	} else if (customEndFog) {
+		atmosv_FogRadiance = mix(atmosv_ClearRadiance, hdr_fromGamma(vec3(1.0, 0.7, 1.0)), float(frx_cameraInFluid)) * 0.1;
 	} else {
-		atmosv_ClearRadiance = atmosv_FogRadiance = hdr_fromGamma(vanillaFog);
+		// controllable overall brightness
+		atmosv_FogRadiance = atmosv_ClearRadiance * 0.1;
 	}
+
+	// ClearRadiance is mostly used for water
+	atmosv_ClearRadiance = mix(atmosv_FogRadiance, atmosv_ClearRadiance * 0.3, float(frx_cameraInWater));
+
 
 	atmosv_OWTwilightRadiance = SKY_COLOR[TWGC];
 	atmosv_OWTwilightRadiance.gb *= vec2(max(frx_skyLightTransitionFactor, 0.3), frx_skyLightTransitionFactor * frx_skyLightTransitionFactor);
 
 	// prevent custom overworld sky reflection in non-overworld dimension or when the sky mode is not Lumi
-	bool customOWSkyAndFallback = frx_worldIsOverworld == 1 && frx_effectBlindness == 0;
+	bool customOWSkyAndFallback = frx_worldIsOverworld == 1;
 
 	if (!customOWSkyAndFallback) {
 		atmosv_SkyRadiance = atmosv_FogRadiance;

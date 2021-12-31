@@ -1,22 +1,40 @@
 #include lumi:shaders/common/atmosphere.glsl
 
 /*******************************************************
- *  lumi:shaders/post/common/fog.glsl
+ *  lumi:shaders/post/prog/fog.glsl
  *******************************************************/
+
+#ifdef VERTEX_SHADER
+out float v_blindness;
+
+void blindnessSetup() {
+	// capture vanilla transition which happens when blindness happens/stops naturally (without milk, command, etc) 
+	v_blindness = l2_clampScale(1.0, 0.0, frx_luminance(frx_vanillaClearColor)) * float(frx_effectBlindness);
+}
+#else
+in float v_blindness;
+
+vec4 blindnessFog(vec4 color, float distToEye)
+{
+	// unlike normal fog, this also applies to the sky and doesn't mess with atmospheric fog
+	float blindFactor = min(1.0, distToEye / 2.0) * v_blindness;
+	vec4 blended = mix(color, vec4(0.0, 0.0, 0.0, 1.0), blindFactor);
+	return blended;
+}
 
 const float FOG_FAR				   = FOG_FAR_CHUNKS * 16.0;
 const float FOG_DENSITY			   = FOG_DENSITY_RELATIVE / 20.0;
 const float UNDERWATER_FOG_FAR	   = UNDERWATER_FOG_FAR_CHUNKS * 16.0;
 const float UNDERWATER_FOG_DENSITY = UNDERWATER_FOG_DENSITY_RELATIVE / 20.0;
 
-float fogFactor(float distToEye)
+float fogFactor(float distToEye, bool isUnderwater)
 {
-	float pFogDensity = frx_cameraInFluid == 1 ? UNDERWATER_FOG_DENSITY : FOG_DENSITY;
-	float pFogFar     = frx_cameraInFluid == 1 ? UNDERWATER_FOG_FAR     : FOG_FAR;
+	float pFogDensity = isUnderwater ? UNDERWATER_FOG_DENSITY : FOG_DENSITY;
+	float pFogFar     = isUnderwater ? UNDERWATER_FOG_FAR     : FOG_FAR;
 
 	pFogFar = min(frx_viewDistance, pFogFar);
 
-	if (frx_cameraInFluid == 0 && frx_worldHasSkylight == 1) {
+	if (!isUnderwater && frx_worldHasSkylight == 1) {
 		float inverseThickener = 1.0;
 
 		inverseThickener -= 0.5 * inverseThickener * frx_rainGradient;
@@ -28,20 +46,18 @@ float fogFactor(float distToEye)
 
 	float fogFactor = pFogDensity;
 
-	if (frx_cameraInLava == 1) {
-		pFogFar   = float(frx_effectFireResistance) * 2.0 + 0.5;
-		fogFactor = 1.0;
-	}
+	// resolve lava
+	pFogFar = mix(pFogFar, float(frx_effectFireResistance) * 2.0 + 0.5, float(frx_cameraInLava));
+	fogFactor = max(fogFactor, float(frx_cameraInLava));
 
 	float distFactor = min(1.0, distToEye / pFogFar);
 
 	return clamp(fogFactor * distFactor, 0.0, 1.0);
 }
 
-vec4 fog(vec4 color, vec3 eyePos, vec3 toFrag, bool isUnderwater)
+vec4 fog(vec4 color, float distToEye, vec3 toFrag, bool isUnderwater)
 {
-	float distToEye = length(eyePos);
-	float fogFactor = fogFactor(distToEye);
+	float fogFactor = fogFactor(distToEye, isUnderwater);
 
 	// resolve horizon blend
 	float skyBlend	  = frx_cameraInFluid == 1 ? 0.0 : min(distToEye, frx_viewDistance) / frx_viewDistance;
@@ -59,3 +75,4 @@ vec4 fog(vec4 color, vec3 eyePos, vec3 toFrag, bool isUnderwater)
 
 	return blended;
 }
+#endif

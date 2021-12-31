@@ -171,7 +171,7 @@ vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer
 		result.z *= min(uvFade.x, uvFade.y);
 
 		vec4 reflectedPos = frx_inverseViewProjectionMatrix * vec4(result.xy * 2.0 - 1.0, texture(depthBuffer, result.xy).r * 2.0 - 1.0, 1.0);
-		float distanceFade = fogFactor(length(reflectedPos.xyz / reflectedPos.w));
+		float distanceFade = fogFactor(length(reflectedPos.xyz / reflectedPos.w), frx_cameraInFluid == 1);
 
 		result.z *= 1.0 - pow(distanceFade, 3.0);
 

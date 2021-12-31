@@ -225,7 +225,7 @@ vec4 customClouds(sampler2D cloudsDepthBuffer, sampler2D natureTexture, sampler2
 
 	celestRadiance = celestRadiance * result.x * rainBrightness;//
 	vec3 color = celestRadiance + cloudShading;
-	float fogF = sqrt(fogFactor(result.z));
+	float fogF = sqrt(fogFactor(result.z, false));
 	color = mix(color, skyFadeColor, fogF);
 
 	return vec4(color, result.y);

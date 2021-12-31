@@ -113,7 +113,7 @@ vec4 customSky(sampler2D sunTexture, sampler2D moonTexture, vec3 toSky, vec3 fal
 	float skyDotUp = dot(toSky, vec3(0.0, 1.0, 0.0));
 
 	if (frx_worldIsNether == 1 || isUnderwater) {
-		result.rgb = fog(result, toSky * frx_viewDistance * 4.0, toSky, isUnderwater).rgb; // most accurate fog color
+		result.rgb = fog(result, frx_viewDistance * 4.0, toSky, isUnderwater).rgb; // most accurate fog color
 	} else if (frx_worldIsOverworld == 1 && v_not_in_void > 0.0) {
 		// Sky, sun and moon
 		#if SKY_MODE == SKY_MODE_LUMI
@@ -126,7 +126,7 @@ vec4 customSky(sampler2D sunTexture, sampler2D moonTexture, vec3 toSky, vec3 fal
 		#else
 		float mul = 1.0 + frx_worldIsMoonlit * frx_skyLightTransitionFactor;
 		vec3 fallback1 = hdr_fromGamma(fallback) * mul;
-		result.rgb = fog(vec4(fallback1, 1.0), toSky * frx_viewDistance * 4.0, toSky, false).rgb;
+		result.rgb = fog(vec4(fallback1, 1.0), frx_viewDistance * 4.0, toSky, false).rgb;
 		#endif
 
 		#if SKY_MODE == SKY_MODE_LUMI || SKY_MODE == SKY_MODE_VANILLA_STARRY
