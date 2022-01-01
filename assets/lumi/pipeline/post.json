@@ -22,7 +22,7 @@
 				"u_vanilla_depth",
 				"u_vanilla_clouds_depth",
 				"u_vanilla_transl_color",
-				"u_vanilla_transl_depth",
+				"u_translucent_depth",
 
 				"u_gbuffer_main_etc",
 				"u_gbuffer_lightnormal",
@@ -51,7 +51,7 @@
 					"vanilla_depth",
 					"clouds_depth",
 					"vanilla_transl_color",
-					"vanilla_transl_depth",
+					"translucent_depth",
 
 					"gbuffer_main_etc",
 					"gbuffer_lightnormal",

@@ -19,7 +19,7 @@ uniform sampler2DArray u_color_others;
 uniform sampler2D u_vanilla_depth;
 uniform sampler2D u_vanilla_clouds_depth;
 uniform sampler2D u_vanilla_transl_color;
-uniform sampler2D u_vanilla_transl_depth;
+uniform sampler2D u_translucent_depth;
 
 uniform sampler2DArray u_gbuffer_main_etc;
 uniform sampler2DArray u_gbuffer_lightnormal;
@@ -57,7 +57,7 @@ void main()
 	float idMicroNormal = albedo.a == 0.0 ? ID_SOLID_MNORM : ID_TRANS_MNORM;
 
 	if (endPortalFix() || albedo.a == 0.0) {
-		fragColor += reflection(albedo.rgb, u_color_result, u_gbuffer_main_etc, u_gbuffer_lightnormal, u_color_depth, u_gbuffer_shadow, u_tex_sun, u_tex_moon, u_tex_noise, idLight, idMaterial, idNormal, idMicroNormal);
+		fragColor += reflection(albedo.rgb, u_color_result, u_gbuffer_main_etc, u_gbuffer_lightnormal, u_translucent_depth, u_gbuffer_shadow, u_tex_sun, u_tex_moon, u_tex_noise, idLight, idMaterial, idNormal, idMicroNormal);
 	}
 
 	vec4 trans = texture(u_color_others, vec3(v_texcoord, ID_OTHER_TRANS));
@@ -66,27 +66,7 @@ void main()
 	fragColor = ldr_tonemap(fragColor);
 	fragColor = premultBlend(after, fragColor);
 
-	float dMin   = texture(u_color_depth, v_texcoord).g;
-	float dTrans = texture(u_color_depth, v_texcoord).r;
-	float dSolid = texture(u_vanilla_depth, v_texcoord).r;
-	
-	float dVanillaTransl = texture(u_vanilla_transl_depth, v_texcoord).r;
-	vec4 cVanillaTrans = texture(u_vanilla_transl_color, v_texcoord);
-
-	if (cVanillaTrans.a > 0.0 && dVanillaTransl < dSolid) {
-		cVanillaTrans.rgb = hdr_fromGamma(cVanillaTrans.rgb / cVanillaTrans.a);
-		cVanillaTrans = vec4(ldr_tonemap(cVanillaTrans.rgb), cVanillaTrans.a);
-
-		if (dVanillaTransl >= dTrans) {
-			cVanillaTrans = max(vec4(0.0), cVanillaTrans * (1.0 - trans)); // ??? trans is alpha premultiplied
-		}
-
-		cVanillaTrans.rgb *= cVanillaTrans.a;
-
-		fragColor = premultBlend(cVanillaTrans, fragColor);
-
-		dMin = min(dMin, dVanillaTransl);
-	}
+	float dMin = texture(u_color_depth, v_texcoord).r;
 
 	fragColor = hdr_inverseTonemap(fragColor);
 
@@ -102,4 +82,20 @@ void main()
 
 	fragColor = blindnessFog(fragColor, distToEye);
 	fragColor = ldr_tonemap(fragColor);
+
+	float dTrans = texture(u_translucent_depth, v_texcoord).r;
+	float dSolid = texture(u_vanilla_depth, v_texcoord).r;
+	vec4 cVanillaTrans = texture(u_vanilla_transl_color, v_texcoord);
+
+	if (cVanillaTrans.a > 0.0 && dTrans <= dSolid) {
+		cVanillaTrans.rgb = hdr_fromGamma(cVanillaTrans.rgb / cVanillaTrans.a);
+		cVanillaTrans = vec4(ldr_tonemap(cVanillaTrans.rgb), sqrt(cVanillaTrans.a)); // dunno about the sqrt really
+
+		if (trans.a > 0.0) cVanillaTrans = max(vec4(0.0), cVanillaTrans * (1.0 - trans));
+		if (after.a > 0.0) cVanillaTrans = max(vec4(0.0), cVanillaTrans * (1.0 - after));
+
+		cVanillaTrans.rgb *= cVanillaTrans.a;
+
+		fragColor = premultBlend(cVanillaTrans, fragColor);
+	}
 }

@@ -48,7 +48,7 @@
 				{name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
 			]
 		}, {
-			name: "vanilla_transl_depth",
+			name: "translucent_depth",
 			lod: 0,
 			internalFormat: "DEPTH_COMPONENT",
 			pixelFormat: "DEPTH_COMPONENT",
@@ -146,13 +146,12 @@
 				{name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
 			]
 		}, {
-			name: "gbuffer_depth",
+			name: "particles_depth",
 			lod: 0,
-			depth: 2,
 			internalFormat: "DEPTH_COMPONENT",
 			pixelFormat: "DEPTH_COMPONENT",
 			pixelDataType: "FLOAT",
-			target: "TEXTURE_2D_ARRAY",
+			target: "TEXTURE_2D",
 			texParams: [ 
 				{name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
 				{name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"},
@@ -169,9 +168,9 @@
 		},
 		{
 			name: "vanilla_transl",
-			depthAttachment: {image: "vanilla_transl_depth", clearDepth: 1.0},
+			depthAttachment: {image: "translucent_depth"},
 			colorAttachments: [{image: "vanilla_transl_color", clearColor: 0x00000000}]
-		},
+		},	
 		{
 			name: "swap",
 			colorAttachments: [{image: "swap_color"}]
@@ -190,7 +189,7 @@
 		},
 		{
 			name: "translucent",
-			depthAttachment: {image: "gbuffer_depth", layer: 0, clearDepth: 1.0},
+			depthAttachment: {image: "translucent_depth", clearDepth: 1.0},
 			colorAttachments: [
 				{image: "gbuffer_trans",	layer: 0, clearColor: 0x00000000},
 				{image: "gbuffer_lightnormal", layer: 1, clearColor: 0x00000000},
@@ -202,7 +201,7 @@
 		},
 		{
 			name: "particles",
-			depthAttachment: {image: "gbuffer_depth", layer: 1, clearDepth: 1.0},
+			depthAttachment: {image: "particles_depth", clearDepth: 1.0},
 			colorAttachments: [
 				{image: "gbuffer_trans", layer: 1, clearColor: 0x00000000},
 				{image: "gbuffer_lightnormal", layer: 2, clearColor: 0x00000000},

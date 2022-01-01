@@ -20,9 +20,11 @@ uniform sampler2D u_weather_color;
 uniform sampler2D u_weather_depth;
 uniform sampler2D u_vanilla_clouds_depth;
 
+uniform sampler2D u_translucent_depth;
+uniform sampler2D u_particles_depth;
+
 uniform sampler2DArray u_gbuffer_trans;
 uniform sampler2DArray u_gbuffer_main_etc;
-uniform sampler2DArray u_gbuffer_depth;
 uniform sampler2DArray u_gbuffer_lightnormal;
 uniform sampler2DArrayShadow u_gbuffer_shadow;
 
@@ -33,7 +35,7 @@ uniform sampler2D u_tex_glint;
 uniform sampler2D u_tex_noise;
 
 layout(location = 0) out vec4 fragColor;
-layout(location = 1) out vec2 fragDepth;
+layout(location = 1) out float fragDepth;
 layout(location = 2) out vec4 fragAlbedo;
 layout(location = 3) out vec4 fragTrans;
 layout(location = 4) out vec4 fragAfter;
@@ -41,7 +43,7 @@ layout(location = 4) out vec4 fragAfter;
 void main()
 {
 	float dVanilla = texture(u_vanilla_depth, v_texcoord).r;
-	float dTrans = texture(u_gbuffer_depth, vec3(v_texcoord, ID_TRANS_DEPT)).r;
+	float dTrans = texture(u_translucent_depth, v_texcoord).r;
 
 	vec2 uvSolid = refractSolidUV(u_gbuffer_lightnormal, u_vanilla_depth, dVanilla, dTrans);
 
@@ -57,7 +59,7 @@ void main()
 		cTrans.rgb = cTrans.rgb / (fastLight(lTrans.xy) * cTrans.a);
 	}
 
-	float dParts = texture(u_gbuffer_depth, vec3(v_texcoord, ID_PARTS_DEPT)).r;
+	float dParts = texture(u_particles_depth, v_texcoord).r;
 	vec4  cParts = dParts > dSolid ? vec4(0.0) : texture(u_gbuffer_trans, vec3(v_texcoord, ID_PARTS_COLR));
 	float dRains = texture(u_weather_depth, v_texcoord).r;
 	vec4  cRains = texture(u_weather_color, v_texcoord);
@@ -173,7 +175,7 @@ void main()
 	base  = premultBlend(next, base);
 
 	fragColor = hdr_inverseTonemap(base);
-	fragDepth = vec2(dTrans, dMin);
+	fragDepth = dMin;
 	fragTrans = next;
 	fragAfter = after1;
 

@@ -3,8 +3,8 @@
 		 {
 			name: "color_depth",
 			lod: 0,
-			internalFormat: "RG32F",
-			pixelFormat: "RG",
+			internalFormat: "R32F",
+			pixelFormat: "RED",
 			pixelDataType: "FLOAT",
 			target: "TEXTURE_2D",
 			texParams: [ 
@@ -63,9 +63,11 @@
 				"u_weather_depth",
 				"u_vanilla_clouds_depth",
 
+				"u_translucent_depth",
+				"u_particles_depth",
+
 				"u_gbuffer_trans",
 				"u_gbuffer_main_etc",
-				"u_gbuffer_depth",
 				"u_gbuffer_lightnormal",
 				"u_gbuffer_shadow",
 
@@ -122,9 +124,11 @@
 					"weather_depth",
 					"clouds_depth",
 
+					"translucent_depth",
+					"particles_depth",
+
 					"gbuffer_trans",
 					"gbuffer_main_etc",
-					"gbuffer_depth",
 					"gbuffer_lightnormal",
 					"gbuffer_shadow",
 
