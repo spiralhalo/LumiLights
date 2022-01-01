@@ -38,19 +38,25 @@ in vec2 v_texcoord;
 in vec2 v_invSize;
 #endif
 
-#define ID_SOLID_LIGT 0
-#define ID_TRANS_LIGT 1
-#define ID_PARTS_LIGT 2
+#define ID_SOLID_LIGT 0.
+#define ID_TRANS_LIGT 1.
+#define ID_PARTS_LIGT 2.
 
-#define ID_SOLID_NORM 3
-#define ID_SOLID_MNORM 4
-#define ID_TRANS_NORM 5
-#define ID_TRANS_MNORM 6
+#define ID_SOLID_NORM 3.
+#define ID_SOLID_MNORM 4.
+#define ID_TRANS_NORM 5.
+#define ID_TRANS_MNORM 6.
 
-#define ID_TRANS_COLR 0
-#define ID_PARTS_COLR 1
+#define ID_TRANS_COLR 0.
+#define ID_PARTS_COLR 1.
 
-#define ID_SOLID_MATS 0
-#define ID_SOLID_MISC 1
-#define ID_TRANS_MATS 2
-#define ID_TRANS_MISC 3
+#define ID_SOLID_MATS 0.
+#define ID_SOLID_MISC 1.
+#define ID_TRANS_MATS 2.
+#define ID_TRANS_MISC 3.
+
+#define ID_TRANS_DEPT 0.
+#define ID_PARTS_DEPT 1.
+
+#define ID_OTHER_TRANS 0.
+#define ID_OTHER_AFTER 1.

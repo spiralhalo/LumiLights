@@ -33,13 +33,15 @@ uniform sampler2D u_tex_glint;
 uniform sampler2D u_tex_noise;
 
 layout(location = 0) out vec4 fragColor;
-layout(location = 1) out float fragDepth;
+layout(location = 1) out vec2 fragDepth;
 layout(location = 2) out vec4 fragAlbedo;
+layout(location = 3) out vec4 fragTrans;
+layout(location = 4) out vec4 fragAfter;
 
 void main()
 {
 	float dVanilla = texture(u_vanilla_depth, v_texcoord).r;
-	float dTrans = texture(u_gbuffer_depth, vec3(v_texcoord, 0.)).r;
+	float dTrans = texture(u_gbuffer_depth, vec3(v_texcoord, ID_TRANS_DEPT)).r;
 
 	vec2 uvSolid = refractSolidUV(u_gbuffer_lightnormal, u_vanilla_depth, dVanilla, dTrans);
 
@@ -55,7 +57,7 @@ void main()
 		cTrans.rgb = cTrans.rgb / (fastLight(lTrans.xy) * cTrans.a);
 	}
 
-	float dParts = texture(u_gbuffer_depth, vec3(v_texcoord, 1.)).r;
+	float dParts = texture(u_gbuffer_depth, vec3(v_texcoord, ID_PARTS_DEPT)).r;
 	vec4  cParts = dParts > dSolid ? vec4(0.0) : texture(u_gbuffer_trans, vec3(v_texcoord, ID_PARTS_COLR));
 	float dRains = texture(u_weather_depth, v_texcoord).r;
 	vec4  cRains = texture(u_weather_color, v_texcoord);
@@ -92,9 +94,13 @@ void main()
 
 	float dMin = min(dSolid, min(dTrans, min(dParts, dRains)));
 
+	// reflection doesn't include other translucent stuff
+	if (dSolid > dTrans) {
+		base += skyReflection(u_tex_sun, u_tex_moon, u_tex_noise, cSolid.rgb, rawMat.xy, toFrag, normal, light.yw);
+	}
+
 	if (dSolid > dMin) {
 		if (dSolid < 1.0) {
-			base += skyReflection(u_tex_sun, u_tex_moon, u_tex_noise, cSolid.rgb, rawMat.xy, toFrag, normal, light.yw);
 			base = fog(base, length(eyePos), toFrag, solidIsUnderwater);
 		}
 
@@ -134,7 +140,7 @@ void main()
 
 	vec4 nextRains = vec4(hdr_fromGamma(cRains.rgb), cRains.a);
 
-	vec4 next0, next1, next;
+	vec4 next0, next1, next, after0, after1;
 
 	// try alpha compositing in HDR and you will go bald
 	nextParts = vec4(ldr_tonemap(nextParts.rgb) * nextParts.a, nextParts.a); // premultiply α
@@ -143,32 +149,37 @@ void main()
 	base = ldr_tonemap(base);
 
 	// TODO: is this slower than insert sort?
-	if (dMin == dRains) {
-		next0 = (dParts > dTrans ? nextParts : nextTrans);
-		next1 = (dParts > dTrans ? nextTrans : nextParts);
-		next  = nextRains;
-	} else if (dMin == dParts) {
-		next0 = (dRains > dTrans ? nextRains : nextTrans);
-		next1 = (dRains > dTrans ? nextTrans : nextRains);
-		next  = nextParts;
-	} else {
+	if (dRains > dTrans && dParts > dTrans) {
 		next0 = (dRains > dParts ? nextRains : nextParts);
 		next1 = (dRains > dParts ? nextParts : nextRains);
-		next  = nextTrans;
+		after0 = after1 = vec4(0.0);
+	} else if (dParts > dTrans) {
+		next1 = nextParts;
+		after0 = vec4(0.0);
+		after1 = nextRains;
+	} else if (dRains > dTrans) {
+		next1 = nextRains;
+		after0 = vec4(0.0);
+		after1 = nextParts;
+	} else {
+		next0 = next1 = vec4(0.0);
+		after0 = (dRains > dParts ? nextRains : nextParts);
+		after1 = (dRains > dParts ? nextParts : nextRains);
 	}
 
 	next1 = premultBlend(next1, next0);
-	next  = premultBlend(next, next1);
+	next  = premultBlend(nextTrans, next1);
+	after1 = premultBlend(after1, after0);
 	base  = premultBlend(next, base);
 
 	fragColor = hdr_inverseTonemap(base);
-	fragDepth = dMin;
+	fragDepth = vec2(dTrans, dMin);
+	fragTrans = next;
+	fragAfter = after1;
 
-	if (dMin == dSolid) {
+	if (dTrans == dSolid) {
 		fragAlbedo = vec4(cSolid.rgb, 0.0);
-	} else if (dMin == dTrans) {
-		fragAlbedo = vec4(cTrans.rgb, 0.5);
 	} else {
-		fragAlbedo = vec4(cParts.rgb, 1.0);
+		fragAlbedo = vec4(cTrans.rgb, 0.5);
 	}
 }

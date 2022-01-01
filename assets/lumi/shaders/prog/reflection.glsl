@@ -72,16 +72,11 @@ vec3 reflectionMarch_v2(sampler2D depthBuffer, sampler2DArray lightNormalBuffer,
 	vec3 uvMarch = (uvEndPos - uvStartPos) / float(MAXSTEPS);
 	vec3 uvRayPos = uvStartPos;
 
-	// thickness in hyperbolic depth. does it make sense? no- maybe- uhh. does it work? YES.
-	#if REFLECTION_OVERSAMPLING == REFLECTION_OVERSAMPLING_MINIMUM
-	const float thickness = 0.0004;
-	#else
-	// bottomside hack: bigger thickness to reduce flickering when reflecting ocean floor
-	float thickness = uvMarch.y < 0.0 ? 0.0004 : 0.0001;
-	#endif
+	// best thickness for reflecting extreme angles
+	const float thickness = 0.0064; // 0.0004 // old option
 
-	float lastZ = texture(depthBuffer, v_texcoord).r - thickness;
-	bool pEdge = uvMarch.z >= 0;
+	float marchSign = sign(uvMarch.z);
+	float lastZ = texture(depthBuffer, v_texcoord).r - 0.0016 * marchSign;
 
 	float sampledZ;
 	float hit = 0.0;
@@ -93,15 +88,11 @@ vec3 reflectionMarch_v2(sampler2D depthBuffer, sampler2DArray lightNormalBuffer,
 		sampledZ = texture(depthBuffer, uvRayPos.xy).r;
 		dZ = uvRayPos.z - sampledZ;
 
-		bool edge = (sampledZ > lastZ - thickness && pEdge) || (sampledZ < lastZ + thickness && !pEdge);
+		bool edge = marchSign * (sampledZ - lastZ) > 0.0;
 
 		if (dZ > 0 && edge) {
 			hit = 1.0;	
 		}
-
-		#if REFLECTION_OVERSAMPLING != REFLECTION_OVERSAMPLING_MAXIMUM
-		lastZ = uvRayPos.z;
-		#endif
 	}
 
 	uvMarch *= -1.0 / float(REFINE);
@@ -123,7 +114,7 @@ vec3 reflectionMarch_v2(sampler2D depthBuffer, sampler2DArray lightNormalBuffer,
 
 const float JITTER_STRENGTH = 0.6;
 
-vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer, sampler2DArray lightNormalBuffer, sampler2D depthBuffer, sampler2DArrayShadow shadowMap, sampler2D sunTexture, sampler2D moonTexture, sampler2D noiseTexture, float idLight, float idMaterial, float idNormal, float idMicroNormal, vec3 eyePos)
+vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer, sampler2DArray lightNormalBuffer, sampler2D depthBuffer, sampler2DArrayShadow shadowMap, sampler2D sunTexture, sampler2D moonTexture, sampler2D noiseTexture, float idLight, float idMaterial, float idNormal, float idMicroNormal)
 {
 	vec3 rawMat = texture(mainEtcBuffer, vec3(v_texcoord, idMaterial)).xyz;
 
@@ -135,6 +126,8 @@ vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer
 	vec3 normal	= texture(lightNormalBuffer, vec3(v_texcoord, idMicroNormal)).xyz * 2.0 - 1.0;
 	float depth	= texture(depthBuffer, v_texcoord).r;
 
+	vec4 tempPos = frx_inverseViewProjectionMatrix * vec4(2.0 * v_texcoord - 1.0, 2.0 * depth - 1.0, 1.0);
+	vec3 eyePos  = tempPos.xyz / tempPos.w;
 	light.w = denoisedShadowFactor(shadowMap, v_texcoord, eyePos, depth, light.y);
 
 	vec3 viewPos = (frx_viewMatrix * vec4(eyePos, 1.0)).xyz;

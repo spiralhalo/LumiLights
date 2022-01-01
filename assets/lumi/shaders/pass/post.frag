@@ -4,15 +4,18 @@
 #include lumi:shaders/prog/clouds.glsl
 #include lumi:shaders/prog/fog.glsl
 #include lumi:shaders/prog/reflection.glsl
+#include lumi:shaders/prog/shading.glsl
 #include lumi:shaders/prog/tonemap.glsl
 
 /*******************************************************
  *  lumi:shaders/post/post.frag
  *******************************************************/
 
-uniform sampler2D u_color;
-uniform sampler2D u_albedo;
-uniform sampler2D u_depth;
+uniform sampler2D u_color_result;
+uniform sampler2D u_color_depth;
+uniform sampler2D u_color_albedo;
+uniform sampler2DArray u_color_others;
+
 uniform sampler2D u_vanilla_clouds_depth;
 uniform sampler2D u_vanilla_transl_color;
 uniform sampler2D u_vanilla_transl_depth;
@@ -43,9 +46,9 @@ bool endPortalFix()
 
 void main()
 {
-	fragColor = texture(u_color, v_texcoord);
+	fragColor = texture(u_color_result, v_texcoord);
 
-	vec4 albedo = texture(u_albedo, v_texcoord);
+	vec4 albedo = texture(u_color_albedo, v_texcoord);
 
 	float idLight = albedo.a == 0.0 ? ID_SOLID_LIGT : (albedo.a < 1.0 ? ID_TRANS_LIGT : ID_PARTS_LIGT);
 	float idMaterial = albedo.a == 0.0 ? ID_SOLID_MATS : ID_TRANS_MATS;
@@ -53,20 +56,44 @@ void main()
 	float idMicroNormal = albedo.a == 0.0 ? ID_SOLID_MNORM : ID_TRANS_MNORM;
 
 	float lighty = texture(u_gbuffer_lightnormal, vec3(v_texcoord, idLight)).y;
-	float dMin   = texture(u_depth, v_texcoord).r;
+	float dMin   = texture(u_color_depth, v_texcoord).g;
+	float dTrans = texture(u_color_depth, v_texcoord).r;
+
+	if (endPortalFix() || albedo.a == 0.0) {
+		fragColor += reflection(albedo.rgb, u_color_result, u_gbuffer_main_etc, u_gbuffer_lightnormal, u_color_depth, u_gbuffer_shadow, u_tex_sun, u_tex_moon, u_tex_noise, idLight, idMaterial, idNormal, idMicroNormal);
+	}
+
+	vec4 trans = texture(u_color_others, vec3(v_texcoord, ID_OTHER_TRANS));
+	vec4 after = texture(u_color_others, vec3(v_texcoord, ID_OTHER_AFTER));
+
+	fragColor = ldr_tonemap(fragColor);
+	fragColor = premultBlend(after, fragColor);
+	
+	float dVanillaTransl = texture(u_vanilla_transl_depth, v_texcoord).r;
+	vec4 cVanillaTrans = texture(u_vanilla_transl_color, v_texcoord);
+
+	float dSolid = trans.a == 0.0 ? dTrans : 1.0;
+
+	if (cVanillaTrans.a > 0.0 && dVanillaTransl < dSolid) {
+		cVanillaTrans.rgb = hdr_fromGamma(cVanillaTrans.rgb / cVanillaTrans.a);
+		cVanillaTrans = vec4(ldr_tonemap(cVanillaTrans.rgb), cVanillaTrans.a);
+
+		if (dVanillaTransl >= dTrans) {
+			cVanillaTrans = max(vec4(0.0), cVanillaTrans * (1.0 - trans)); // ??? trans is alpha premultiplied
+		}
+
+		cVanillaTrans.rgb *= cVanillaTrans.a;
+
+		fragColor = premultBlend(cVanillaTrans, fragColor);
+
+		dMin = min(dMin, dVanillaTransl);
+	}
+
+	fragColor = hdr_inverseTonemap(fragColor);
 
 	vec4 tempPos = frx_inverseViewProjectionMatrix * vec4(2.0 * v_texcoord - 1.0, 2.0 * dMin - 1.0, 1.0);
 	vec3 eyePos  = tempPos.xyz / tempPos.w;
 	vec3 toFrag  = normalize(eyePos);
-
-	if (endPortalFix() || albedo.a == 0.0) {
-		fragColor += reflection(albedo.rgb, u_color, u_gbuffer_main_etc, u_gbuffer_lightnormal, u_depth, u_gbuffer_shadow, u_tex_sun, u_tex_moon, u_tex_noise, idLight, idMaterial, idNormal, idMicroNormal, eyePos);
-	}
-
-	if (texture(u_vanilla_transl_depth, v_texcoord).r < dMin) {
-		vec4 cVanillaTrans = texture(u_vanilla_transl_color, v_texcoord);
-		fragColor.rgb = fragColor.rgb * (1.0 - cVanillaTrans.a) + hdr_fromGamma(cVanillaTrans.rgb) * cVanillaTrans.a;
-	}
 
 	float distToEye = length(eyePos);
 	fragColor = dMin < 1.0 ? fog(fragColor, distToEye, toFrag, frx_cameraInWater == 1) : fragColor;

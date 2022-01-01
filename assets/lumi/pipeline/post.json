@@ -14,9 +14,11 @@
 			vertexSource: "lumi:shaders/pass/shading.vert",
 			fragmentSource: "lumi:shaders/pass/post.frag",
 			samplers: [
-				"u_color",
-				"u_albedo",
-				"u_depth",
+				"u_color_result",
+				"u_color_depth",
+				"u_color_albedo",
+				"u_color_others",
+
 				"u_vanilla_clouds_depth",
 				"u_vanilla_transl_color",
 				"u_vanilla_transl_depth",
@@ -41,8 +43,10 @@
 				framebuffer: "post",
 				samplerImages: [
 					"color_result",
-					"color_albedo",
 					"color_depth",
+					"color_albedo",
+					"color_others",
+
 					"clouds_depth",
 					"vanilla_transl_color",
 					"vanilla_transl_depth",
