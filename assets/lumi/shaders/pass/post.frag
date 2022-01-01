@@ -43,7 +43,7 @@ void main()
 	float idNormal = albedo.a == 0.0 ? ID_SOLID_NORM : ID_TRANS_NORM;
 	float idMicroNormal = albedo.a == 0.0 ? ID_SOLID_MNORM : ID_TRANS_MNORM;
 
-	if (endPortalFix(u_gbuffer_lightnormal) || albedo.a == 0.0) {
+	if (notEndPortal(u_gbuffer_lightnormal) || albedo.a == 0.0) {
 		fragColor += reflection(albedo.rgb, u_color_result, u_gbuffer_main_etc, u_gbuffer_lightnormal, u_translucent_depth, u_gbuffer_shadow, u_tex_sun, u_tex_moon, u_tex_noise, idLight, idMaterial, idNormal, idMicroNormal);
 	}
 

@@ -52,12 +52,6 @@ void main()
 	vec4  cSolid = texture(u_vanilla_color, uvSolid);
 	vec4  lTrans = texture(u_gbuffer_lightnormal, vec3(v_texcoord, ID_TRANS_LIGT));
 	vec4  cTrans = texture(u_gbuffer_trans, vec3(v_texcoord, ID_TRANS_COLR));
-
-	cTrans = dSolid < dTrans ? vec4(0.0) : cTrans;
-	if (cTrans.a != 0) {
-		cTrans.rgb = cTrans.rgb / (fastLight(lTrans.xy) * cTrans.a);
-	}
-
 	float dParts = texture(u_particles_depth, v_texcoord).r;
 	vec4  cParts = dParts > dSolid ? vec4(0.0) : texture(u_gbuffer_trans, vec3(v_texcoord, ID_PARTS_COLR));
 	float dRains = texture(u_weather_depth, v_texcoord).r;
@@ -116,28 +110,31 @@ void main()
 	light.w = denoisedShadowFactor(u_gbuffer_shadow, v_texcoord, eyePos, dParts, light.y);
 	vec4 nextParts = particleShading(cParts, u_tex_nature, light, eyePos, decideUnderwater(dParts, dTrans, transIsWater, false));
 
+	vec4 nextTrans;
+	if (cTrans.a > 0.0 && notEndPortal(u_gbuffer_lightnormal) && lTrans.x > 0.0) {
+		cTrans.rgb = cTrans.rgb / (fastLight(lTrans.xy) * cTrans.a);
+		tempPos = frx_inverseViewProjectionMatrix * vec4(2.0 * v_texcoord - 1.0, 2.0 * dTrans - 1.0, 1.0);
+		eyePos  = tempPos.xyz / tempPos.w;
+		light  = lTrans;
+		rawMat = texture(u_gbuffer_main_etc, vec3(v_texcoord, ID_TRANS_MATS)).xyz;
+		normal = texture(u_gbuffer_lightnormal, vec3(v_texcoord, ID_TRANS_MNORM)).xyz * 2.0 - 1.0;
+		vertexNormaly = texture(u_gbuffer_lightnormal, vec3(v_texcoord, ID_TRANS_NORM)).y * 2.0 - 1.0;
+		disableDiffuse = bit_unpack(miscTrans.z, 4);
 
-	tempPos = frx_inverseViewProjectionMatrix * vec4(2.0 * v_texcoord - 1.0, 2.0 * dTrans - 1.0, 1.0);
-	eyePos  = tempPos.xyz / tempPos.w;
-	light  = lTrans;
-	rawMat = texture(u_gbuffer_main_etc, vec3(v_texcoord, ID_TRANS_MATS)).xyz;
-	normal = texture(u_gbuffer_lightnormal, vec3(v_texcoord, ID_TRANS_MNORM)).xyz * 2.0 - 1.0;
-	vertexNormaly = texture(u_gbuffer_lightnormal, vec3(v_texcoord, ID_TRANS_NORM)).y * 2.0 - 1.0;
-	disableDiffuse = bit_unpack(miscTrans.z, 4);
+		#ifdef WATER_FOAM
+		if (transIsWater) {
+			foamPreprocess(cTrans, u_tex_nature, eyePos + frx_cameraPos, vertexNormaly, base.rgb, dVanilla, dTrans);
+		}
+		#endif
 
-	#ifdef WATER_FOAM
-	if (transIsWater) {
-		foamPreprocess(cTrans, u_tex_nature, eyePos + frx_cameraPos, vertexNormaly, base.rgb, dVanilla, dTrans);
+		light.w = transIsWater ? lightmapRemap (light.y) : denoisedShadowFactor(u_gbuffer_shadow, v_texcoord, eyePos, dTrans, light.y);
+
+		nextTrans = shading(cTrans, u_tex_nature, light, rawMat, eyePos, normal, vertexNormaly, decideUnderwater(dTrans, dTrans, transIsWater, true), disableDiffuse);
+		nextTrans = overlay(nextTrans, u_tex_glint, miscTrans);
+	} else {
+		cTrans.rgb = cTrans.rgb / (cTrans.a == 0.0 ? 1.0 : cTrans.a);
+		nextTrans = vec4(hdr_fromGamma(cTrans.rgb), cTrans.a);
 	}
-	#endif
-
-	if (endPortalFix(u_gbuffer_lightnormal)) light.x = 0.0; // end portal fix
-
-	light.w = transIsWater ? lightmapRemap (light.y) : denoisedShadowFactor(u_gbuffer_shadow, v_texcoord, eyePos, dTrans, light.y);
-
-	vec4 nextTrans = shading(cTrans, u_tex_nature, light, rawMat, eyePos, normal, vertexNormaly, decideUnderwater(dTrans, dTrans, transIsWater, true), disableDiffuse);
-	nextTrans = overlay(nextTrans, u_tex_glint, miscTrans);
-
 
 	vec4 nextRains = vec4(hdr_fromGamma(cRains.rgb), cRains.a);
 
