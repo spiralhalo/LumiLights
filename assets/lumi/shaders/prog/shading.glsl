@@ -81,6 +81,16 @@ vec4 premultBlend(vec4 src, vec4 dst)
 	return vec4(color, a);
 }
 
+// ugh
+bool endPortalFix(sampler2DArray lightNormalBuffer)
+{
+	vec3 A = texture(lightNormalBuffer, vec3(v_texcoord, ID_TRANS_LIGT)).xyz;
+	vec3 B = texture(lightNormalBuffer, vec3(v_texcoord, ID_TRANS_NORM)).xyz;
+	vec3 C = texture(lightNormalBuffer, vec3(v_texcoord, ID_TRANS_MNORM)).xyz;
+
+	return A == B && A == C;
+}
+
 #define pbr_dot(a, b) clamp(dot(a, b), 0.0, 1.0)
 
 float pbr_distributionGGX(vec3 N, vec3 H, float roughness)

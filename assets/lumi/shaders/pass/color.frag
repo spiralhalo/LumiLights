@@ -52,7 +52,6 @@ void main()
 	vec4  cSolid = texture(u_vanilla_color, uvSolid);
 	vec4  lTrans = texture(u_gbuffer_lightnormal, vec3(v_texcoord, ID_TRANS_LIGT));
 	vec4  cTrans = texture(u_gbuffer_trans, vec3(v_texcoord, ID_TRANS_COLR));
-	vec3  rawTrans = cTrans.rgb;
 
 	cTrans = dSolid < dTrans ? vec4(0.0) : cTrans;
 	if (cTrans.a != 0) {
@@ -132,7 +131,7 @@ void main()
 	}
 	#endif
 
-	if (miscTrans == rawMat && rawMat == rawTrans) light.x = 0.0; // end portal fix
+	if (endPortalFix(u_gbuffer_lightnormal)) light.x = 0.0; // end portal fix
 
 	light.w = transIsWater ? lightmapRemap (light.y) : denoisedShadowFactor(u_gbuffer_shadow, v_texcoord, eyePos, dTrans, light.y);
 
