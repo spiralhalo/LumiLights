@@ -16,6 +16,7 @@ uniform sampler2D u_color_depth;
 uniform sampler2D u_color_albedo;
 uniform sampler2DArray u_color_others;
 
+uniform sampler2D u_vanilla_depth;
 uniform sampler2D u_vanilla_clouds_depth;
 uniform sampler2D u_vanilla_transl_color;
 uniform sampler2D u_vanilla_transl_depth;
@@ -55,10 +56,6 @@ void main()
 	float idNormal = albedo.a == 0.0 ? ID_SOLID_NORM : ID_TRANS_NORM;
 	float idMicroNormal = albedo.a == 0.0 ? ID_SOLID_MNORM : ID_TRANS_MNORM;
 
-	float lighty = texture(u_gbuffer_lightnormal, vec3(v_texcoord, idLight)).y;
-	float dMin   = texture(u_color_depth, v_texcoord).g;
-	float dTrans = texture(u_color_depth, v_texcoord).r;
-
 	if (endPortalFix() || albedo.a == 0.0) {
 		fragColor += reflection(albedo.rgb, u_color_result, u_gbuffer_main_etc, u_gbuffer_lightnormal, u_color_depth, u_gbuffer_shadow, u_tex_sun, u_tex_moon, u_tex_noise, idLight, idMaterial, idNormal, idMicroNormal);
 	}
@@ -68,11 +65,13 @@ void main()
 
 	fragColor = ldr_tonemap(fragColor);
 	fragColor = premultBlend(after, fragColor);
+
+	float dMin   = texture(u_color_depth, v_texcoord).g;
+	float dTrans = texture(u_color_depth, v_texcoord).r;
+	float dSolid = texture(u_vanilla_depth, v_texcoord).r;
 	
 	float dVanillaTransl = texture(u_vanilla_transl_depth, v_texcoord).r;
 	vec4 cVanillaTrans = texture(u_vanilla_transl_color, v_texcoord);
-
-	float dSolid = trans.a == 0.0 ? dTrans : 1.0;
 
 	if (cVanillaTrans.a > 0.0 && dVanillaTransl < dSolid) {
 		cVanillaTrans.rgb = hdr_fromGamma(cVanillaTrans.rgb / cVanillaTrans.a);

@@ -169,8 +169,8 @@
 		},
 		{
 			name: "vanilla_transl",
-			depthAttachment: {image: "vanilla_transl_depth"},
-			colorAttachments: [{image: "vanilla_transl_color"}]
+			depthAttachment: {image: "vanilla_transl_depth", clearDepth: 1.0},
+			colorAttachments: [{image: "vanilla_transl_color", clearColor: 0x00000000}]
 		},
 		{
 			name: "swap",

@@ -9,6 +9,10 @@
 				name: "clear_translucent",
 				framebuffer: "translucent",
 				program: "frex_clear"
+			},  {
+				name: "clear_vanilla_transl",
+				framebuffer: "vanilla_transl",
+				program: "frex_clear"
 			}, {
 				name: "clear_particles",
 				framebuffer: "particles",
