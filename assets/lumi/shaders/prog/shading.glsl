@@ -175,15 +175,6 @@ struct shadingResult {
 	vec3 diffuse;
 } shading0;
 
-vec3 specularPbr(vec3 radiance, float roughness, vec3 f0, vec3 toLight, vec3 toEye, vec3 normal)
-{
-	vec3 halfway = normalize(toEye + toLight);
-	vec3 fresnel = pbr_fresnelSchlick(pbr_dot(toEye, halfway), f0);
-	float NdotL  = pbr_dot(normal, toLight);
-
-	return pbr_specularBRDF(roughness, radiance, halfway, toLight, toEye, normal, fresnel, NdotL);
-}
-
 void lightPbr(vec3 albedo, float alpha, vec3 radiance, float roughness, float metallic, vec3 f0, vec3 toLight, vec3 toEye, vec3 normal, float disableDiffuse)
 {
 	vec3 halfway = normalize(toEye + toLight);
@@ -285,12 +276,15 @@ vec4 shading(vec4 color, sampler2D natureTexture, vec4 light, float ao, vec2 mat
 
 	lights(albedo, light, eyePos, toEye, baseLight, blockLight, hlLight, skyLight);
 
+	// block light fresnel
+	vec3 blH = normalize(toEye + normal);
+	vec3 blF = pbr_fresnelSchlick(pbr_dot(toEye, blH), f0);
 	// vanilla-ish style diffuse
 	float dotUpNorth = l2_max3(abs(normal * vec3(0.6, 1.0, 0.8)));
 	// perfect diffuse light
-	vec3 shaded = albedo * (baseLight + blockLight) * dotUpNorth * max(1.0 - material.y, 0.5) / PI;
+	vec3 shaded = albedo * (baseLight + blockLight * (1.0 - blF)) * dotUpNorth * max(1.0 - material.y, 0.5) / PI;
 	// block light specular
-	shaded += specularPbr(blockLight, max(material.x, 0.5 * material.y), f0, normal, toEye, normal);
+	shaded += pbr_specularBRDF(max(material.x, 0.5 * material.y), blockLight, blH, normal, toEye, normal, blF, 1.0);
 
 	lightPbr(albedo, color.a, hlLight, material.x, material.y, f0, toEye, toEye, normal, disableDiffuse);
 	shaded += shading0.specular + shading0.diffuse;
