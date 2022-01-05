@@ -66,7 +66,7 @@ float caustics(sampler2D natureTexture, vec3 worldPos, float vertexNormaly)
 	return e;
 }
 
-void foamPreprocess(inout vec4 albedo, sampler2D natureTexture, vec3 worldPos, float vertexNormaly, vec3 albedoSolid, float dSolid, float dTrans)
+void foamPreprocess(inout vec4 albedo, sampler2D natureTexture, vec3 worldPos, float vertexNormaly, float dSolid, float dTrans)
 {
 	vec2 moveA = vec2(1., 1.) * frx_renderSeconds;
 	vec2 moveB = vec2(1., -1.) * frx_renderSeconds;
@@ -88,12 +88,10 @@ void foamPreprocess(inout vec4 albedo, sampler2D natureTexture, vec3 worldPos, f
 	vertexNormaly = max(0.0, vertexNormaly);
 
 	foam = mix(tex, 1.0, pow(foam, 10.0)) * foam;
-	foamAlbedo.rgb = foam + (1.0 - foam) * albedoSolid.rgb / max(0.0001, l2_max3(albedoSolid.rgb));
-	foam *= 0.5;
+	foam *= 0.7;
 	foam *= vertexNormaly;
 
-	albedo = mix(albedo, foamAlbedo, foam);
-	albedo.a *= mix(1.0, smoothstep(0.0, 0.0625, dZ), vertexNormaly);
+	albedo = mix(albedo, vec4(1.0), foam);
 }
 #else
 

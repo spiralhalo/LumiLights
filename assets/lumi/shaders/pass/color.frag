@@ -123,7 +123,7 @@ void main()
 
 		#ifdef WATER_FOAM
 		if (transIsWater) {
-			foamPreprocess(cTrans, u_tex_nature, eyePos + frx_cameraPos, vertexNormaly, base.rgb, dVanilla, dTrans);
+			foamPreprocess(cTrans, u_tex_nature, eyePos + frx_cameraPos, vertexNormaly, dVanilla, dTrans);
 		}
 		#endif
 

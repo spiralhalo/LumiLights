@@ -29,7 +29,12 @@ void main()
 		vec4 bloom = texture(u_blend, v_texcoord);
 		bloom /= 6.0;
 		bloom *= BLOOM_INTENSITY_FLOAT;
+
 		vec3 color = hdr_inverseTonemap(base.rgb) + bloom.rgb;
 		fragColor = vec4(ldr_tonemap(color), 1.0);
+
+		#if TONEMAP_OPERATOR != TMO_DEFAULT
+		fragColor = brightness(POST_TMO_BRIGHTNESS, contrast(POST_TMO_CONTRAST, saturation(POST_TMO_SATURATION, fragColor)));
+		#endif
 	}
 }

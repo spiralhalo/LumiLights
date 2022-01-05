@@ -110,12 +110,33 @@
 					descriptionKey: "config.lumi_lights.help.antialiasing"
 				},
 				tonemap_operator: {
-					default: "contrast",
-					choices: ["contrast", "naive"],
+					default: "default",
+					choices: ["default", "naive", "contrast"],
 					enum: true,
 					prefix: "tmo_",
 					nameKey: "config.lumi_lights.value.tonemap_operator",
 					descriptionKey: "config.lumi_lights.help.tonemap_operator"
+				},
+				post_tmo_brightness: {
+					default: 1.0,
+					min: 0.01,
+					max: 10.0,
+					nameKey: "config.lumi_lights.value.post_tmo_brightness",
+					descriptionKey: "config.lumi_lights.help.post_tmo_brightness"
+				},
+				post_tmo_contrast: {
+					default: 1.0,
+					min: 0.01,
+					max: 10.0,
+					nameKey: "config.lumi_lights.value.post_tmo_contrast",
+					descriptionKey: "config.lumi_lights.help.post_tmo_contrast"
+				},
+				post_tmo_saturation: {
+					default: 1.0,
+					min: 0.01,
+					max: 10.0,
+					nameKey: "config.lumi_lights.value.post_tmo_saturation",
+					descriptionKey: "config.lumi_lights.help.post_tmo_saturation"
 				},
 			}
 		},

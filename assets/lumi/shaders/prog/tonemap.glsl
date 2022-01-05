@@ -61,13 +61,12 @@ vec3 inverse_Hable_Fit(vec3 x) {
 const float reinhard_fExposure = 1.0;
 
 vec3 reinhard(vec3 col) {
-    return col * (reinhard_fExposure / (1.0 + col / reinhard_fExposure));
+	return col * (reinhard_fExposure / (1.0 + col / reinhard_fExposure));
 }
 
 vec3 inverseReinhard(vec3 col) {
-    return col / (reinhard_fExposure * max(vec3(1.0) - col / reinhard_fExposure, 0.001));
+	return col / (reinhard_fExposure * max(vec3(1.0) - col / reinhard_fExposure, 0.001));
 }
-
 
 #if TONEMAP_OPERATOR == TMO_NAIVE
 #define l2_tmo(x) reinhard(x)
@@ -95,4 +94,30 @@ vec3 hdr_inverseTonemap(vec3 color)
 vec4 hdr_inverseTonemap(vec4 color)
 {
 	return vec4(hdr_inverseTonemap(color.rgb), color.a);
+}
+
+// Ref: https://www.shadertoy.com/view/XdcXzn
+vec4 brightness(float value, vec4 color)
+{
+	return vec4(color.rgb + vec3(value - 1.0), color.a);
+}
+
+vec4 contrast(float value, vec4 color)
+{
+	return vec4(color.rgb * vec3(value) + vec3((1.0 - value) / 2.0), color.a);
+}
+
+vec4 saturation(float value, vec4 color)
+{
+	vec3 luminance = vec3(0.3086, 0.6094, 0.0820);
+	float oneMinusSat = 1.0 - value;
+
+	vec3 red = vec3(luminance.x * oneMinusSat) + vec3(value, 0, 0);
+	vec3 green = vec3(luminance.y * oneMinusSat) + vec3(0, value, 0);
+	vec3 blue = vec3(luminance.z * oneMinusSat) + vec3(0, 0, value);
+
+	return mat4(red,	  0,
+				green,	  0,
+				blue,	  0,
+				0, 0, 0,  1 ) * color;
 }

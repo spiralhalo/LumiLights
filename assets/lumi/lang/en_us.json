@@ -170,6 +170,12 @@
 	"config.lumi_lights.help.antialiasing": "Filtering technique to remove noise and jagged edges",
 	"config.lumi_lights.value.tonemap_operator": "Tone mapping operator",
 	"config.lumi_lights.help.tonemap_operator": "Different ways to map HDR colors to the monitor",
+	"config.lumi_lights.value.post_tmo_brightness": "Alternative brightness",
+	"config.lumi_lights.help.post_tmo_brightness": "Post-brightness when TMO is not set to default",
+	"config.lumi_lights.value.post_tmo_contrast": "Alternative contrast",
+	"config.lumi_lights.help.post_tmo_contrast": "Post-contrast when TMO is not set to default",
+	"config.lumi_lights.value.post_tmo_saturation": "Alternative saturation",
+	"config.lumi_lights.help.post_tmo_saturation": "Post-saturation when TMO is not set to default",
 
 	"config.lumi_lights.category.debug": "Debug",
 	"config.lumi_lights.value.dithering_mode": "Dithering mode",
