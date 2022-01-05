@@ -144,6 +144,16 @@
 			includeToken: "lumi:debug_config",
 			categoryKey: "config.lumi_lights.category.debug",
 			options: {
+				water_noise_debug: {
+					default: false,
+					nameKey: "config.lumi_lights.value.water_noise_debug",
+					descriptionKey: "config.lumi_lights.help.water_noise_debug"
+				},
+				white_world: {
+					default: false,
+					nameKey: "config.lumi_lights.value.white_world",
+					descriptionKey: "config.lumi_lights.help.white_world"
+				},
 				dithering_mode: {
 					default: "blue_noise",
 					choices: ["blue_noise", "halton"],
@@ -151,13 +161,6 @@
 					prefix: "dithering_mode_",
 					nameKey: "config.lumi_lights.value.dithering_mode",
 					descriptionKey: "config.lumi_lights.help.dithering_mode"
-				},
-				parallax_cloud_density: {
-					default: 1.0,
-					min: 0.5,
-					max: 10.0,
-					nameKey: "config.lumi_lights.value.parallax_cloud_density",
-					descriptionKey: "config.lumi_lights.help.parallax_cloud_density"
 				},
 				exposure_debug: {
 					default: false,

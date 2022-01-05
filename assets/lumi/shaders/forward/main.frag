@@ -27,7 +27,10 @@ uniform sampler2D u_tex_glint;
 uniform sampler2D u_tex_nature;
 
 in float pv_diffuse;
-in float pv_ortho;
+
+#ifdef WATER_NOISE_DEBUG
+in vec3 pv_vertex;
+#endif
 
 out vec4[7] fragColor;
 
@@ -45,6 +48,10 @@ void frx_pipelineFragment()
 	if (!frx_modelOriginRegion) {
 		frx_fragEnableAo = false;
 	}
+
+	#ifdef WHITE_WORLD
+	frx_fragColor.rgb = vec3(1.0);
+	#endif
 
 	if (frx_isGui && !frx_isHand) {
 		float diffuse = mix(pv_diffuse, 1, frx_fragEmissive);
@@ -77,6 +84,11 @@ void frx_pipelineFragment()
 			pbrExt_doTBN = false;
 			#endif
 		}
+
+		#ifdef WATER_NOISE_DEBUG
+		float wtrNs = sampleWaterNoise(u_tex_nature, pv_vertex, vec2(0.0), abs(frx_vertexNormal));
+		frx_fragColor.rgba += vec4(wtrNs * wtrNs * wtrNs);
+		#endif
 
 		if (frx_fragRoughness == 0.0) frx_fragRoughness = 1.0; // TODO: fix assumption?
 
@@ -124,6 +136,5 @@ void frx_pipelineFragment()
 		frx_fragColor.rgb *= fastLight(frx_fragLight.xy);
 	}
 
-	gl_FragDepth = gl_FragCoord.z;
 	fragColor[0] = frx_fragColor;
 }

@@ -35,15 +35,6 @@ void main()
 	fragColor = vec4(velocity, 0.0, 1.0);
 	#endif
 
-	vec2 coord = vec2(clamp(v_texcoord.x, 0.35, 0.65), clamp(v_texcoord.y, 0.92, 1.0));
-
-	if (v_texcoord == coord) {
-		coord -= vec2(0.35, 0.92);
-		coord *= vec2(1.0/0.3, -1.0/0.08);
-
-		fragColor = texture(u_debugText, coord);
-	}
-
 	#else // TAA_DEBUG_RENDER != TAA_DEBUG_RENDER_OFF
 	// PROGRESS:
 	// [o] velocity buffer works fine
@@ -78,4 +69,16 @@ void main()
 #else
 	fragColor = texture(u_current, v_texcoord);
 #endif
+
+	#if TAA_DEBUG_RENDER != TAA_DEBUG_RENDER_OFF || defined(WATER_NOISE_DEBUG) || defined(WHITE_WORLD)
+	const vec2 size = vec2(0.2 / 2.0, 0.06);
+	vec2 debugTextCoord = vec2(clamp(v_texcoord.x, 0.5 - size.x, 0.5 + size.x), clamp(v_texcoord.y, 1.0 - size.y, 1.0));
+
+	if (v_texcoord == debugTextCoord) {
+		debugTextCoord.x = l2_clampScale(0.5 - size.x, 0.5 + size.x, v_texcoord.x);
+		debugTextCoord.y = l2_clampScale(1.0, 1.0 - size.y, v_texcoord.y);
+
+		fragColor = fragColor * 0.5 + texture(u_debugText, debugTextCoord) * 0.5;
+	}
+	#endif
 }
