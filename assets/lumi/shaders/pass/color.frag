@@ -53,12 +53,14 @@ void main()
 	vec4  lTrans = texture(u_gbuffer_lightnormal, vec3(v_texcoord, ID_TRANS_LIGT));
 	vec4  cTrans = texture(u_gbuffer_trans, vec3(v_texcoord, ID_TRANS_COLR));
 	float dParts = texture(u_particles_depth, v_texcoord).r;
-	vec4  cParts = dParts > dSolid ? vec4(0.0) : texture(u_gbuffer_trans, vec3(v_texcoord, ID_PARTS_COLR));
+	vec4  cParts = texture(u_gbuffer_trans, vec3(v_texcoord, ID_PARTS_COLR));
 	float dRains = texture(u_weather_depth, v_texcoord).r;
 	vec4  cRains = texture(u_weather_color, v_texcoord);
 
 	cParts.rgb /= cParts.a == 0.0 ? 1.0 : cParts.a;
 	cRains.rgb /= cRains.a == 0.0 ? 1.0 : cRains.a;
+	cTrans = dSolid < dTrans ? vec4(0.0) : cTrans;
+	cParts = dSolid < dParts ? vec4(0.0) : cParts;
 	cRains = dSolid < dRains ? vec4(0.0) : cRains;
 
 	vec4 tempPos = frx_inverseViewProjectionMatrix * vec4(2.0 * uvSolid - 1.0, 2.0 * dSolid - 1.0, 1.0);

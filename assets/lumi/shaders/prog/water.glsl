@@ -88,7 +88,7 @@ void foamPreprocess(inout vec4 albedo, sampler2D natureTexture, vec3 worldPos, f
 	vertexNormaly = max(0.0, vertexNormaly);
 
 	foam = mix(tex, 1.0, pow(foam, 10.0)) * foam;
-	foam *= 0.7;
+	foam *= 0.6;
 	foam *= vertexNormaly;
 
 	albedo = mix(albedo, vec4(1.0), foam);

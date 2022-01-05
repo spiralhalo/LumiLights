@@ -156,6 +156,8 @@ vec4 customSky(sampler2D sunTexture, sampler2D moonTexture, vec3 toSky, vec3 fal
 
 		result.rgb += starRadiance * skyVisible;
 		#endif
+	} else {
+		result.rgb = hdr_fromGamma(fallback) * (1.0 + float(frx_worldIsEnd) * 3.0);
 	}
 
 	if (frx_worldIsOverworld == 1) {
