@@ -64,7 +64,7 @@ void frx_pipelineFragment()
 
 			#elif WATER_COLOR == WATER_COLOR_NATURAL_BLUE
 			frx_fragColor.rgb *= frx_fragColor.a;
-			frx_fragColor.a   *= 0.4;
+			frx_fragColor.a   *= 0.5;
 			#endif
 
 			#ifdef WATER_WAVES

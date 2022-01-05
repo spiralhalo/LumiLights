@@ -260,9 +260,11 @@ void lights(vec3 albedo, vec4 light, vec3 eyePos, vec3 toEye, out vec3 baseLight
 	skyLight = frx_worldHasSkylight * light.w * atmosv_CelestialRadiance * (1. - frx_rainGradient);
 }
 
+#define hdrAlbedo(color) hdr_fromGamma(color.rgb)
+
 vec4 shading(vec4 color, sampler2D natureTexture, vec4 light, float ao, vec2 material, vec3 eyePos, vec3 normal, float vertexNormaly, bool isUnderwater, float disableDiffuse)
 {
-	vec3 albedo = hdr_fromGamma(color.rgb);
+	vec3 albedo = hdrAlbedo(color);
 
 	// unmanaged
 	if (light.x == 0.0) return vec4(albedo, color.a);
@@ -284,21 +286,26 @@ vec4 shading(vec4 color, sampler2D natureTexture, vec4 light, float ao, vec2 mat
 	// perfect diffuse light
 	vec3 shaded = albedo * (baseLight + blockLight * (1.0 - blF)) * dotUpNorth * max(1.0 - material.y, 0.5) / PI;
 	// block light specular
-	shaded += pbr_specularBRDF(max(material.x, 0.5 * material.y), blockLight, blH, normal, toEye, normal, blF, 1.0);
+	vec3 specular = pbr_specularBRDF(max(material.x, 0.5 * material.y), blockLight, blH, normal, toEye, normal, blF, 1.0);
+	shaded += specular;
 
 	lightPbr(albedo, color.a, hlLight, material.x, material.y, f0, toEye, toEye, normal, disableDiffuse);
 	shaded += shading0.specular + shading0.diffuse;
-
-	shaded *= ao;
+	specular += shading0.specular;
 
 	lightPbr(albedo, color.a, skyLight, material.x, material.y, f0, frx_skyLightVector, toEye, normal, disableDiffuse);
 	shaded += shading0.specular + shading0.diffuse;
-	return vec4(shaded, color.a);
+	specular += shading0.specular;
+
+	shaded *= ao;
+	specular *= ao;
+
+	return vec4(shaded, min(1.0, color.a + frx_luminance(specular)));
 }
 
 vec4 particleShading(vec4 color, sampler2D natureTexture, vec4 light, vec3 eyePos, bool isUnderwater)
 {
-	vec3 albedo = hdr_fromGamma(color.rgb);
+	vec3 albedo = hdrAlbedo(color);
 	// unmanaged
 	if (light.x == 0.0) return vec4(albedo, color.a);
 

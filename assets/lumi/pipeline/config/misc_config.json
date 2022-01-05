@@ -109,6 +109,14 @@
 					nameKey: "config.lumi_lights.value.antialiasing",
 					descriptionKey: "config.lumi_lights.help.antialiasing"
 				},
+				tonemap_operator: {
+					default: "contrast",
+					choices: ["contrast", "naive"],
+					enum: true,
+					prefix: "tmo_",
+					nameKey: "config.lumi_lights.value.tonemap_operator",
+					descriptionKey: "config.lumi_lights.help.tonemap_operator"
+				},
 			}
 		},
 		{

@@ -54,12 +54,28 @@ vec3 inverse_Hable_Fit(vec3 x) {
 	return (sqrt((vec3(4.0) * x - 4.0 * x * x) * A * D * F * F * F + (-4.0 * x * A * D * E + B * B * C * C - 2.0 * x * B * B * C + x * x * B * B) * F * F + (2.0 * x * B * B - 2.0 * B * B * C) * E * F + B * B * E * E) + (B * C - x * B) * F - B * E) / ((2.0 * x - 2.0) * A * F + 2.0 * A * E);
 }
 
-vec3 inverse_Hable(vec3 x) {
-	return inverse_Hable_Fit(x) ;
+// vec3 inverse_Hable(vec3 x) {
+// 	return inverse_Hable_Fit(x) ;
+// }
+
+const float reinhard_fExposure = 1.0;
+
+vec3 reinhard(vec3 col) {
+    return col * (reinhard_fExposure / (1.0 + col / reinhard_fExposure));
 }
 
+vec3 inverseReinhard(vec3 col) {
+    return col / (reinhard_fExposure * max(vec3(1.0) - col / reinhard_fExposure, 0.001));
+}
+
+
+#if TONEMAP_OPERATOR == TMO_NAIVE
+#define l2_tmo(x) reinhard(x)
+#define l2_inverse_tmo(x) inverseReinhard(x)
+#else
 #define l2_tmo(x) acesNarkowicz(x)
 #define l2_inverse_tmo(x) inverse_acesNarkowicz(x)
+#endif
 
 vec3 ldr_tonemap(vec3 color)
 {

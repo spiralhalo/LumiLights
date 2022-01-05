@@ -170,15 +170,16 @@ vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer
 
 		vec4 reflectedColor = texture(colorBuffer, result.xy);
 
-		objLight = vec4(reflectionPbr(albedo, rawMat.xy, reflectedColor.rgb, viewMarch, viewToEye).rgb, result.z);
+		objLight = vec4(reflectedColor.rgb, result.z);
 	}
 	#else
 	const vec4 objLight = vec4(0.0);
 	#endif
 
-	vec3 skyLight = skyReflection(sunTexture, moonTexture, albedo, rawMat.xy, viewToFrag * frx_normalModelMatrix, viewMarch * frx_normalModelMatrix, normal, light.yw).rgb;
+	vec3 skyLight = skyRadiance(sunTexture, moonTexture, rawMat.xy, viewMarch * frx_normalModelMatrix, light.yw) * smoothstep(0.0, 1.0, viewNormal.y);
+	vec3 envLight = BLOCK_LIGHT_COLOR * lightmapRemap(light.x) * (1.0 - frx_smoothedEyeBrightness.y);
 
-	vec3 reflectedLight = skyLight * (1.0 - objLight.a) * smoothstep(0.0, 1.0, viewNormal.y) + objLight.rgb * objLight.a;
+	vec3 reflectedLight = reflectionPbr(albedo, rawMat.xy, envLight + mix(skyLight, objLight.rgb, objLight.a), viewMarch, viewToEye);
 
 	return vec4(reflectedLight, 0.0);
 }

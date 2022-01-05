@@ -168,6 +168,8 @@
 	"config.lumi_lights.help.exposure_func": "Exposure compute function. Default is median.",
 	"config.lumi_lights.value.antialiasing": "Anti-alias and denoising",
 	"config.lumi_lights.help.antialiasing": "Filtering technique to remove noise and jagged edges",
+	"config.lumi_lights.value.tonemap_operator": "Tone mapping operator",
+	"config.lumi_lights.help.tonemap_operator": "Different ways to map HDR colors to the monitor",
 
 	"config.lumi_lights.category.debug": "Debug",
 	"config.lumi_lights.value.dithering_mode": "Dithering mode",
