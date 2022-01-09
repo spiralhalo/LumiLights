@@ -27,7 +27,7 @@ void main()
 	const float MIN_LUM = 0.9; // based on semi-comfortable bloom on snowy scapes
 
 	// NOTE: multiplying the gate only makes sense with additive bloom
-	float luminanceGate = smoothstep(MIN_LUM, MIN_LUM + 1.0, luminance) * 0.5;
+	float luminanceGate = smoothstep(MIN_LUM, MIN_LUM + 1.0, luminance) * 0.25;
 
 	luminanceGate = max(luminanceGate, emissive);
 
