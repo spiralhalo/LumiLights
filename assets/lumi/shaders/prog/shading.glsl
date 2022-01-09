@@ -245,14 +245,16 @@ void lights(vec3 albedo, vec4 light, vec3 eyePos, vec3 toEye, out vec3 baseLight
 	baseLight += albedo * light.z * EMISSIVE_LIGHT_STR;
 
 	float bl = l2_clampScale(0.03125, 0.96875, light.x);
+	vec3 blColor = BLOCK_LIGHT_COLOR;
+
+#if BLOCK_LIGHT_MODE != BLOCK_LIGHT_MODE_NEUTRAL
 	float blWhite = max(light.z, step(0.93625, light.x));
-
-	#ifdef SHADOW_MAP_PRESENT
 	// makes builds look better under the sun
-	blWhite = max(blWhite, light.w * min(1.0 - float(frx_worldIsMoonlit), frx_skyLightTransitionFactor));
-	#endif
+	blWhite = max(blWhite, frx_smoothedEyeBrightness.y * min(1.0 - float(frx_worldIsMoonlit), frx_skyLightTransitionFactor));
 
-	vec3  blColor = mix(BLOCK_LIGHT_COLOR, BLOCK_LIGHT_NEUTRAL, blWhite);
+	blColor = mix(blColor, BLOCK_LIGHT_NEUTRAL, blWhite);
+#endif
+
 	blockLight = blColor * BLOCK_LIGHT_STR * bl;
 
 #if HANDHELD_LIGHT_RADIUS != 0
