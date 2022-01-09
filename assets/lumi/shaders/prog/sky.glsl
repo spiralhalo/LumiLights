@@ -93,7 +93,7 @@ vec4 celestFrag(in Rect celestRect, sampler2D ssun, sampler2D smoon, vec3 worldV
 				celestUV.y += (mod(frx_worldDay, 8.) >= 4.) ? 0.5 : 0.0;
 
 				celestTex = hdr_fromGamma(texture(smoon, celestUV).rgb);
-				celestCol = celestTex + vec3(0.01) * hdr_fromGamma(fullMoonColor);
+				celestCol = celestTex + vec3(0.001) * hdr_fromGamma(fullMoonColor);
 				celestCol *= EMISSIVE_LIGHT_STR;
 			}
 		} else {

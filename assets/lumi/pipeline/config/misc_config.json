@@ -138,6 +138,13 @@
 					nameKey: "config.lumi_lights.value.post_tmo_saturation",
 					descriptionKey: "config.lumi_lights.help.post_tmo_saturation"
 				},
+				albedo_brightening: {
+					default: 0,
+					min: 0,
+					max: 20,
+					nameKey: "config.lumi_lights.value.albedo_brightening",
+					descriptionKey: "config.lumi_lights.help.albedo_brightening"
+				},
 			}
 		},
 		{

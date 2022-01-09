@@ -62,6 +62,7 @@ void main()
 	cTrans = dSolid < dTrans ? vec4(0.0) : cTrans;
 	cParts = dSolid < dParts ? vec4(0.0) : cParts;
 	cRains = dSolid < dRains ? vec4(0.0) : cRains;
+	cRains.a *= 0.7; // thinner rains and snow
 
 	vec4 tempPos = frx_inverseViewProjectionMatrix * vec4(2.0 * uvSolid - 1.0, 2.0 * dSolid - 1.0, 1.0);
 	vec3 eyePos  = tempPos.xyz / tempPos.w;

@@ -175,6 +175,19 @@ struct shadingResult {
 	vec3 diffuse;
 } shading0;
 
+float diffuseNdL(float NdotL, float alpha, float disableDiffuse)
+{
+	float diffuseNdotL = mix(1.0, NdotL, alpha);
+
+	#ifdef SHADOW_MAP_PRESENT
+	diffuseNdotL += (1.0 - diffuseNdotL) * disableDiffuse * 0.5;
+	#else
+	diffuseNdotL += (1.0 - diffuseNdotL) * disableDiffuse;
+	#endif
+
+	return diffuseNdotL;
+}
+
 void lightPbr(vec3 albedo, float alpha, vec3 radiance, float roughness, float metallic, vec3 f0, vec3 toLight, vec3 toEye, vec3 normal, float disableDiffuse)
 {
 	vec3 halfway = normalize(toEye + toLight);
@@ -185,11 +198,7 @@ void lightPbr(vec3 albedo, float alpha, vec3 radiance, float roughness, float me
 	//fake metallic diffuse
 	metallic = min(0.5, metallic);
 
-	float diffuseNdotL = mix(1.0, NdotL, alpha);
-
-	#ifndef SHADOW_MAP_PRESENT
-	diffuseNdotL += (1.0 - diffuseNdotL) * disableDiffuse;
-	#endif
+	float diffuseNdotL = diffuseNdL(NdotL, alpha, disableDiffuse);
 
 	shading0.specular = pbr_specularBRDF(roughness, radiance, halfway, toLight, toEye, normal, fresnel, NdotL);
 	shading0.diffuse = albedo * radiance * diffuseNdotL * (1.0 - fresnel * step(0.0, rawNdL)) * (1.0 - metallic) / PI;
@@ -237,6 +246,12 @@ void lights(vec3 albedo, vec4 light, vec3 eyePos, vec3 toEye, out vec3 baseLight
 
 	float bl = l2_clampScale(0.03125, 0.96875, light.x);
 	float blWhite = max(light.z, step(0.93625, light.x));
+
+	#ifdef SHADOW_MAP_PRESENT
+	// makes builds look better under the sun
+	blWhite = max(blWhite, light.w * min(1.0 - float(frx_worldIsMoonlit), frx_skyLightTransitionFactor));
+	#endif
+
 	vec3  blColor = mix(BLOCK_LIGHT_COLOR, BLOCK_LIGHT_NEUTRAL, blWhite);
 	blockLight = blColor * BLOCK_LIGHT_STR * bl;
 
@@ -260,7 +275,11 @@ void lights(vec3 albedo, vec4 light, vec3 eyePos, vec3 toEye, out vec3 baseLight
 	skyLight = frx_worldHasSkylight * light.w * atmosv_CelestialRadiance * (1. - frx_rainGradient);
 }
 
+#if ALBEDO_BRIGHTENING == 0
 #define hdrAlbedo(color) hdr_fromGamma(color.rgb)
+#else
+#define hdrAlbedo(color) hdr_fromGamma(color.rgb) * (1.0 - USER_ALBEDO_BRIGHTENING) + vec3(USER_ALBEDO_BRIGHTENING)
+#endif
 
 vec4 shading(vec4 color, sampler2D natureTexture, vec4 light, float ao, vec2 material, vec3 eyePos, vec3 normal, float vertexNormaly, bool isUnderwater, float disableDiffuse)
 {

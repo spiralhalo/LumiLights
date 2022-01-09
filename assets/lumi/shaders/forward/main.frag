@@ -110,12 +110,7 @@ void frx_pipelineFragment()
 
 		float roughness = max(0.01, frx_fragRoughness);
 		float disableAo = 1.0 - float(frx_fragEnableAo);
-
-		#ifdef SHADOW_MAP_PRESENT
-		const float disableDiffuse = 0.0;
-		#else
 		float disableDiffuse = 1.0 - float(frx_fragEnableDiffuse);
-		#endif
 
 		// put water flag last because it makes the material buffer looks blue :D easier to debug
 		float bitFlags = bit_pack(frx_matFlash, frx_matHurt, frx_matGlint, disableAo, disableDiffuse, 0., 0., float(pbr_isWater));
