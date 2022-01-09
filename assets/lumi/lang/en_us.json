@@ -43,6 +43,8 @@
 	"config.lumi_lights.category.effects": "Performance",
 	"config.lumi_lights.value.ss_reflection": "Screen Space Reflection",
 	"config.lumi_lights.help.ss_reflection": "Expensive raymarched reflection",
+	"config.lumi_lights.value.ss_ao": "Screen Space Ambient Occlusion",
+	"config.lumi_lights.help.ss_ao": "Expensive approximated local shadows",
 	"config.lumi_lights.value.volumetric_clouds": "Volumetric clouds",
 	"config.lumi_lights.help.volumetric_clouds": "Expensive volumetric clouds",
 	"config.lumi_lights.value.bloom_effect": "Bloom effect",

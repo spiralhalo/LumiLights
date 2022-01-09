@@ -109,11 +109,10 @@ void frx_pipelineFragment()
 		float ao = (frx_fragEnableAo && frx_modelOriginRegion) ? frx_fragLight.z : 1.0;
 
 		float roughness = max(0.01, frx_fragRoughness);
-		float disableAo = 1.0 - float(frx_fragEnableAo);
 		float disableDiffuse = 1.0 - float(frx_fragEnableDiffuse);
 
 		// put water flag last because it makes the material buffer looks blue :D easier to debug
-		float bitFlags = bit_pack(frx_matFlash, frx_matHurt, frx_matGlint, disableAo, disableDiffuse, 0., 0., float(pbr_isWater));
+		float bitFlags = bit_pack(frx_matFlash, frx_matHurt, frx_matGlint, 0., disableDiffuse, 0., 0., float(pbr_isWater));
 
 		vec3 vertexNormal = frx_vertexNormal * 0.5 + 0.5;
 		vec3 fragNormal = frx_fragNormal * 0.5 + 0.5;

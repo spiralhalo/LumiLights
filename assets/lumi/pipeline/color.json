@@ -51,7 +51,6 @@
 		},
 		{
 			name: "ao_result",
-			// lod: 4,
 			internalFormat: "R16",
 			pixelFormat: "RED",
 			pixelDataType: "UNSIGNED_BYTE",
@@ -61,18 +60,6 @@
 				{name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"},
 			]
 		},
-		// {
-		// 	name: "ao_up",
-		// 	lod: 3,
-		// 	internalFormat: "R16",
-		// 	pixelFormat: "RED",
-		// 	pixelDataType: "UNSIGNED_BYTE",
-		// 	target: "TEXTURE_2D",
-		// 	texParams: [ 
-		// 		{name: "TEXTURE_MIN_FILTER", val: "LINEAR_MIPMAP_NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "LINEAR"},
-		// 		{name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"},
-		// 	]
-		// },
 		{
 			name: "gbuffer_main_etc_copy",
 			internalFormat: "RGB8",
@@ -147,19 +134,8 @@
 			fragmentSource: "lumi:shaders/pass/ao0.frag",
 			samplers: [
 				"u_gbuffer_main_etc",
-				// "u_ao",
 			]
 		},
-		// {
-		// 	name: "ao1",
-		// 	vertexSource: "lumi:shaders/pass/basic.vert",
-		// 	fragmentSource: "lumi:shaders/pass/ao1.frag",
-		// 	samplers: [
-		// 		"u_depth",
-		// 		"u_ao",
-		// 		"u_ao_up",
-		// 	]
-		// },
 		{
 			name: "ao2",
 			vertexSource: "lumi:shaders/pass/basic.vert",
@@ -187,45 +163,16 @@
 			name: "ao_result0",
 			colorAttachments: [
 				{image: "gbuffer_main_etc_copy"},
-				// {image: "ao_result", lod: 0},
 			]
 		},
 		{
 			name: "ao_result1",
-			colorAttachments: [{image: "ao_result"}],// lod: 1}]
+			colorAttachments: [{image: "ao_result"}],
 		},
-		// {
-		// 	name: "ao_result2",
-		// 	colorAttachments: [{image: "ao_result", lod: 2}]
-		// },
-		// {
-		// 	name: "ao_result3",
-		// 	colorAttachments: [{image: "ao_result", lod: 3}]
-		// },
-		// {
-		// 	name: "ao_result4",
-		// 	colorAttachments: [{image: "ao_result", lod: 4}]
-		// },
 		{
 			name: "ao_final",
 			colorAttachments: [{image: "gbuffer_main_etc", layer: 0}]
 		},
-		// {
-		// 	name: "ao_up3",
-		// 	colorAttachments: [{image: "ao_up", lod: 3}]
-		// },
-		// {
-		// 	name: "ao_up2",
-		// 	colorAttachments: [{image: "ao_up", lod: 2}]
-		// },
-		// {
-		// 	name: "ao_up1",
-		// 	colorAttachments: [{image: "ao_up", lod: 1}]
-		// },
-		// {
-		// 	name: "ao_up0",
-		// 	colorAttachments: [{image: "ao_up", lod: 0}]
-		// },
 	],
 
 	fabulous: {
@@ -234,12 +181,12 @@
 				name: "ao",
 				program: "ao",
 				framebuffer: "ao_result1",
-				// lod: 1,
 				samplerImages: [
 					"vanilla_depth",
 					"gbuffer_lightnormal",
 					"lumi:textures/filter_pattern/bluenoise256.png",
-				]
+				],
+				toggleConfig: "ss_ao",
 			},
 			{
 				name: "ao0",
@@ -249,20 +196,9 @@
 					"gbuffer_main_etc",
 					"u_gbuffer_lightnormal",
 					"ao_result",
-				]
+				],
+				toggleConfig: "ss_ao",
 			},
-			// {
-			// 	name: "ao_down2", framebuffer: "ao_result2", program: "ao1",
-			// 	lod: 2, layer: 1, samplerImages: ["vanilla_depth", "ao_result", "ao_up"]
-			// },
-			// {
-			// 	name: "ao_down3", framebuffer: "ao_result3", program: "ao1",
-			// 	lod: 3, layer: 1, samplerImages: ["vanilla_depth", "ao_result", "ao_up"]
-			// },
-			// {
-			// 	name: "ao_down4", framebuffer: "ao_result4", program: "ao1",
-			// 	lod: 4, layer: 1, samplerImages: ["vanilla_depth", "ao_result", "ao_up"]
-			// },
 			{
 				name: "ao_final",
 				program: "ao2",
@@ -270,7 +206,8 @@
 				samplerImages: [
 					"gbuffer_main_etc_copy",
 					"ao_result",
-				]
+				],
+				toggleConfig: "ss_ao",
 			},
 			{
 				name: "color",

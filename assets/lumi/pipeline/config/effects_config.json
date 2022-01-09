@@ -9,6 +9,11 @@
 					nameKey: "config.lumi_lights.value.ss_reflection",
 					descriptionKey: "config.lumi_lights.help.ss_reflection"
 				},
+				ss_ao: {
+					default: false,
+					nameKey: "config.lumi_lights.value.ss_ao",
+					descriptionKey: "config.lumi_lights.help.ss_ao"
+				},
 				volumetric_clouds: {
 					default: true,
 					nameKey: "config.lumi_lights.value.volumetric_clouds",

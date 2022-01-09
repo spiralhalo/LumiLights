@@ -67,7 +67,6 @@ void main()
 
 	for (int i = 0; i < DIRECTIONS; ++i) {
 		deltaUV = v_deltaRotator * deltaUV;
-		// int adds = 0; 
 		float prevPhi = ANGLEBIAS;
 
 		for (int j = 0; j < STEPS; ++j) {
@@ -82,11 +81,8 @@ void main()
 				float value		  = sin(phi) - sin(prevPhi);
 				occlusion += attenuation * value;
 				prevPhi = phi;
-				// adds ++;
 			}
 		}
-
-		// occlusion /= float(max(1, adds)); // is this correct? I don't even know.. (apparently not?)
 	}
 
 	float fade = l2_clampScale(256.0, 0.0, -viewPos.z); // distant result are rather inaccurate, and I'm lazy

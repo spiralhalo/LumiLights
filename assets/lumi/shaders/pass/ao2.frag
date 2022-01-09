@@ -3,21 +3,21 @@
 #include frex:shaders/lib/sample.glsl
 
 /******************************************************
-  lumi:shaders/pass/ao1.frag
+  lumi:shaders/pass/ao2.frag
 ******************************************************/
 
 const float INTENSITY = SSAO_INTENSITY;
 
-uniform sampler2DArray u_gbuffer_main_etc_copy;
+uniform sampler2D u_gbuffer_main_etc_copy;
 uniform sampler2DArray u_gbuffer_lightnormal;
 uniform sampler2D u_ao;
 
-out vec4 light;
+out vec4 rawMat;
 
 void main()
 {
-	light = texture(u_gbuffer_main_etc_copy, vec3(v_texcoord, ID_SOLID_LIGT));
-	
+	rawMat = texture(u_gbuffer_main_etc_copy, v_texcoord);
+
 	float totalAo = 0.0;
 	float total = 0.0;
 	vec3 normal = texture(u_gbuffer_lightnormal, vec3(v_texcoord, ID_SOLID_NORM)).xyz * 2.0 - 1.0;
@@ -34,5 +34,5 @@ void main()
 	}
 	}
 
-	light.z = pow(totalAo/total, 1.0 + INTENSITY);
+	rawMat.z = pow(totalAo/total, 1.0 + INTENSITY);
 }
