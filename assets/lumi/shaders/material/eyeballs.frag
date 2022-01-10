@@ -1,7 +1,7 @@
 #include frex:shaders/api/fragment.glsl
 
 /**********************************************
-	lumi:shaders/material/oculi.frag
+	lumi:shaders/material/eyeballs.frag
 ***********************************************/
 
 void frx_materialFragment() {

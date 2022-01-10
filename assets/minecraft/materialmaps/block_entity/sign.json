@@ -6,7 +6,7 @@
                     "renderLayerName": "text"
                 }
             },
-            "material": "lumi:tasty_board"
+            "material": "lumi:sign"
         }
     ]
 }

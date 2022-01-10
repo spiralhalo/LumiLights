@@ -1,7 +1,7 @@
 {
 	"transparency": "none",
 	"vertexSource": "lumi:shaders/material/noop.vert",
-	"fragmentSource": "lumi:shaders/material/oculi.frag",
+	"fragmentSource": "lumi:shaders/material/eyeballs.frag",
 	"disableAo": true,
 	"emissive": true,
 	"transform": true
