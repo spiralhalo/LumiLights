@@ -114,7 +114,8 @@ void main()
 	vec4 nextParts = particleShading(cParts, u_tex_nature, light, eyePos, decideUnderwater(dParts, dTrans, transIsWater, false));
 
 	vec4 nextTrans;
-	if (cTrans.a > 0.0 && notEndPortal(u_gbuffer_lightnormal) && lTrans.x > 0.0) {
+	bool transIsManaged = cTrans.a > 0.0 && notEndPortal(u_gbuffer_lightnormal) && lTrans.x > 0.0;
+	if (transIsManaged) {
 		cTrans.rgb = cTrans.rgb / (fastLight(lTrans.xy) * cTrans.a);
 		tempPos = frx_inverseViewProjectionMatrix * vec4(2.0 * v_texcoord - 1.0, 2.0 * dTrans - 1.0, 1.0);
 		eyePos  = tempPos.xyz / tempPos.w;
@@ -145,15 +146,17 @@ void main()
 
 	// try alpha compositing in HDR and you will go bald
 	nextParts = vec4(ldr_tonemap(nextParts.rgb) * nextParts.a, nextParts.a); // premultiply α
-	nextTrans = vec4(ldr_tonemap(nextTrans.rgb) * nextTrans.a, nextTrans.a);
 	nextRains = vec4(ldr_tonemap(nextRains.rgb) * nextRains.a, nextRains.a);
 	base = ldr_tonemap(base);
+
+	bool applyTransFog = transIsManaged;
 
 	// TODO: is this slower than insert sort?
 	if (dRains > dTrans && dParts > dTrans) {
 		next0 = (dRains > dParts ? nextRains : nextParts);
 		next1 = (dRains > dParts ? nextParts : nextRains);
 		after0 = after1 = vec4(0.0);
+		applyTransFog = false;
 	} else if (dParts > dTrans) {
 		next1 = nextParts;
 		after0 = vec4(0.0);
@@ -167,6 +170,13 @@ void main()
 		after0 = (dRains > dParts ? nextRains : nextParts);
 		after1 = (dRains > dParts ? nextParts : nextRains);
 	}
+
+	if (applyTransFog) {
+		// eyePos belongs to translucent at this point
+		nextTrans = fog(nextTrans, length(eyePos), toFrag, frx_cameraInWater == 1);
+	}
+
+	nextTrans = vec4(ldr_tonemap(nextTrans.rgb) * nextTrans.a, nextTrans.a);
 
 	next1 = premultBlend(next1, next0);
 	next  = premultBlend(nextTrans, next1);
