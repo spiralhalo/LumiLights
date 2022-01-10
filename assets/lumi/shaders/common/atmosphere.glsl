@@ -87,7 +87,10 @@ vec3 atmos_SkyGradientRadiance(vec3 world_toSky)
 	float skyHorizon = calcHorizon(world_toSky);
 	vec3 horizonColor = atmos_HorizonColor(world_toSky, skyHorizon);
 
-	return mix(atmosv_SkyRadiance, horizonColor, skyHorizon);
+	vec3 result = mix(atmosv_SkyRadiance, horizonColor, skyHorizon);
+	float exposure = mix(max(2.0, frx_luminance(atmosv_CaveFogRadiance) / frx_luminance(result)), 1.0, sqrt(frx_smoothedEyeBrightness.y));
+
+	return result * exposure;
 }
 #endif
 
@@ -118,7 +121,7 @@ const vec3 CAVEFOG_C	 = hdr_fromGamma(DEF_LUMI_AZURE);
 const vec3 CAVEFOG_DEEPC = SUNRISE_LIGHT_COLOR;
 const float CAVEFOG_MAXY = 16.0;
 const float CAVEFOG_MINY = 0.0;
-const float CAVEFOG_STR	 = 0.05;
+const float CAVEFOG_STR	 = 0.5;
 
 
 const int SRISC = 0;
@@ -211,8 +214,6 @@ void atmos_generateAtmosphereModel()
 
 	if (customOWFog) {
 		atmosv_FogRadiance = atmosv_SkyRadiance;
-		// night fog are as bright as the horizon unless it's raining
-		atmosv_FogRadiance *= mix(1.0, HORIZON_MULT, frx_worldIsMoonlit * frx_skyLightTransitionFactor * (1.0 - frx_rainGradient));
 	} else if (customEndFog) {
 		atmosv_FogRadiance = mix(atmosv_ClearRadiance, hdr_fromGamma(vec3(1.0, 0.7, 1.0)), float(frx_cameraInFluid)) * 0.1;
 	} else {
@@ -268,13 +269,8 @@ void atmos_generateAtmosphereModel()
 
 
 	/** CAVE FOG **/
-	if (frx_worldIsOverworld == 1 && frx_cameraInFluid == 0) {
-		atmosv_CaveFogRadiance = mix(CAVEFOG_C, CAVEFOG_DEEPC, l2_clampScale(CAVEFOG_MAXY, CAVEFOG_MINY, frx_cameraPos.y));
-
-		float fogL  = frx_luminance(atmosv_FogRadiance);
-		float caveL = frx_luminance(atmosv_CaveFogRadiance);
-
-		atmosv_CaveFogRadiance *= max(fogL, CAVEFOG_STR) / caveL;
+	if (frx_worldIsOverworld == 1) {
+		atmosv_CaveFogRadiance = mix(CAVEFOG_C, CAVEFOG_DEEPC, l2_clampScale(CAVEFOG_MAXY, CAVEFOG_MINY, frx_cameraPos.y)) * CAVEFOG_STR;
 	} else {
 		atmosv_CaveFogRadiance = atmosv_FogRadiance;
 	}
