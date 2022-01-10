@@ -250,7 +250,7 @@ void lights(vec3 albedo, vec4 light, vec3 eyePos, vec3 toEye, out vec3 baseLight
 #if BLOCK_LIGHT_MODE != BLOCK_LIGHT_MODE_NEUTRAL
 	float blWhite = max(light.z, step(0.93625, light.x));
 	// makes builds look better under the sun
-	blWhite = max(blWhite, frx_smoothedEyeBrightness.y * min(1.0 - float(frx_worldIsMoonlit), frx_skyLightTransitionFactor));
+	blWhite = max(blWhite, frx_smoothedEyeBrightness.y * min(1.0 - float(frx_worldIsMoonlit), frx_skyLightTransitionFactor * (1. - frx_rainGradient)));
 
 	blColor = mix(blColor, BLOCK_LIGHT_NEUTRAL, blWhite);
 #endif
