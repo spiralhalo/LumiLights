@@ -61,6 +61,18 @@
 			]
 		},
 		{
+			name: "detectsky",
+			lod: 4,
+			internalFormat: "R16",
+			pixelFormat: "RED",
+			pixelDataType: "UNSIGNED_BYTE",
+			target: "TEXTURE_2D",
+			texParams: [ 
+				{name: "TEXTURE_MIN_FILTER", val: "LINEAR_MIPMAP_NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "LINEAR"},
+				{name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"},
+			]
+		},
+		{
 			name: "gbuffer_main_etc_copy",
 			internalFormat: "RGB8",
 			pixelFormat: "RGB",
@@ -146,6 +158,25 @@
 				"u_ao",
 			]
 		},
+		{
+			name: "detectsky0",
+			vertexSource: "lumi:shaders/pass/basic.vert",
+			fragmentSource: "lumi:shaders/pass/detectsky0.frag",
+			samplers: [
+				"u_input",
+				"u_vanilla_depth",
+				"u_translucent_depth",
+				"u_gbuffer_lightnormal",
+			]
+		},
+		{
+			name: "detectsky1",
+			vertexSource: "lumi:shaders/pass/basic.vert",
+			fragmentSource: "lumi:shaders/pass/detectsky1.frag",
+			samplers: [
+				"u_input",
+			]
+		},
 	],
 
 	framebuffers: [
@@ -172,6 +203,30 @@
 		{
 			name: "ao_final",
 			colorAttachments: [{image: "gbuffer_main_etc", layer: 0}]
+		},
+		{
+			name: "detectsky0",
+			colorAttachments: [{image: "detectsky", lod: 0}]
+		},
+		{
+			name: "detectsky1",
+			colorAttachments: [{image: "detectsky", lod: 1}]
+		},
+		{
+			name: "detectsky2",
+			colorAttachments: [{image: "detectsky", lod: 2}]
+		},
+		{
+			name: "detectsky3",
+			colorAttachments: [{image: "detectsky", lod: 3}]
+		},
+		{
+			name: "detectsky4",
+			colorAttachments: [{image: "detectsky", lod: 4}]
+		},
+		{
+			name: "detectsky_final",
+			colorAttachments: [{image: "gbuffer_main_etc", layer: 4}]
 		},
 	],
 
@@ -207,6 +262,36 @@
 					"ao_result",
 				],
 				toggleConfig: "ss_ao",
+			},
+			{
+				name: "detectsky0", layer: 2, program: "detectsky0",
+				framebuffer: "detectsky0",
+				samplerImages: [
+					"detectsky",
+					"vanilla_depth",
+					"translucent_depth",
+					"gbuffer_lightnormal",
+				],
+			},
+			{
+				name: "detectsky1", layer: 1, lod: 1, program: "detectsky1",
+				framebuffer: "detectsky1", samplerImages: [ "detectsky" ],
+			},
+			{
+				name: "detectsky2", layer: 1, lod: 2,  program: "detectsky1",
+				framebuffer: "detectsky2", samplerImages: [ "detectsky" ],
+			},
+			{
+				name: "detectsky3", layer: 1, lod: 3,  program: "detectsky1",
+				framebuffer: "detectsky3", samplerImages: [ "detectsky" ],
+			},
+			{
+				name: "detectsky4", layer: 1, lod: 4,  program: "detectsky1",
+				framebuffer: "detectsky4", samplerImages: [ "detectsky" ],
+			},
+			{
+				name: "detectsky_final", layer: 3, program: "detectsky1",
+				framebuffer: "detectsky_final", samplerImages: [ "detectsky" ],
 			},
 			{
 				name: "color",
