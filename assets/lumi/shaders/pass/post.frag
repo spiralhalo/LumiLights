@@ -62,7 +62,7 @@ void main()
 	vec3 toFrag  = normalize(eyePos);
 
 	float distToEye = length(eyePos);
-	fragColor = dMin < 1.0 ? fog(fragColor, distToEye, toFrag, frx_cameraInWater == 1, texture(u_gbuffer_main_etc, vec3(v_texcoord, ID_DETECT_SKY)).r) : fragColor;
+	fragColor = dMin < 1.0 ? fog(fragColor, distToEye, toFrag, frx_cameraInWater == 1) : fragColor;
 
 	vec4 clouds = customClouds(u_vanilla_clouds_depth, u_tex_nature, u_tex_noise, dMin, v_texcoord, eyePos, toFrag, NUM_SAMPLE);
 	fragColor.rgb = fragColor.rgb * (1.0 - clouds.a) + clouds.rgb * clouds.a;

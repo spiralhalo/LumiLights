@@ -57,5 +57,3 @@ in vec2 v_invSize;
 
 #define ID_OTHER_TRANS 0.
 #define ID_OTHER_AFTER 1.
-
-#define ID_DETECT_SKY 4.
