@@ -34,6 +34,7 @@ float fogFactor(float distToEye, bool isUnderwater)
 
 	float pFogDensity = submerged ? UNDERWATER_FOG_DENSITY : FOG_DENSITY;
 	float pFogFar     = submerged ? UNDERWATER_FOG_FAR     : FOG_FAR;
+	float invEyeY	  = (1.0 - frx_smoothedEyeBrightness.y);
 
 	pFogFar = min(frx_viewDistance, pFogFar);
 
@@ -42,6 +43,7 @@ float fogFactor(float distToEye, bool isUnderwater)
 
 		inverseThickener -= 0.5 * inverseThickener * frx_rainGradient;
 		inverseThickener -= 0.5 * inverseThickener * frx_thunderGradient;
+		inverseThickener = mix(inverseThickener, 1.0, invEyeY * invEyeY);
 
 		pFogFar *= inverseThickener;
 		pFogDensity = mix(min(1.0, pFogDensity * 2.0), min(0.8, pFogDensity), inverseThickener);
@@ -70,8 +72,8 @@ vec4 fog(vec4 color, float distToEye, vec3 toFrag, bool isUnderwater)
 
 	// resolve cave fog
 	if (!isUnderwater || frx_cameraInFluid == 0) {
-		float aboveGround = frx_smoothedEyeBrightness.y;
-		fogColor = mix(atmosv_CaveFogRadiance, fogColor, aboveGround);
+		float invEyeY = (1.0 - frx_smoothedEyeBrightness.y);
+		fogColor = mix(fogColor, atmosv_CaveFogRadiance, invEyeY * invEyeY);
 	}
 
 	vec4 blended = mix(color, vec4(fogColor, 1.0), fogFactor);

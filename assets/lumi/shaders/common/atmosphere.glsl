@@ -88,7 +88,10 @@ vec3 atmos_SkyGradientRadiance(vec3 world_toSky)
 	vec3 horizonColor = atmos_HorizonColor(world_toSky, skyHorizon);
 
 	vec3 result = mix(atmosv_SkyRadiance, horizonColor, skyHorizon);
-	float exposure = mix(max(2.0, frx_luminance(atmosv_CaveFogRadiance) / frx_luminance(result)), 1.0, sqrt(frx_smoothedEyeBrightness.y));
+
+	float l = frx_luminance(result);
+	float invEyeY = (1.0 - frx_smoothedEyeBrightness.y);
+	float exposure = mix(1.0, max(2.0, frx_luminance(atmosv_CaveFogRadiance) / (l == 0.0 ? 1.0 : l)), invEyeY * invEyeY);
 
 	return result * exposure;
 }
@@ -121,7 +124,7 @@ const vec3 CAVEFOG_C	 = hdr_fromGamma(DEF_LUMI_AZURE);
 const vec3 CAVEFOG_DEEPC = SUNRISE_LIGHT_COLOR;
 const float CAVEFOG_MAXY = 16.0;
 const float CAVEFOG_MINY = 0.0;
-const float CAVEFOG_STR	 = 0.5;
+const float CAVEFOG_STR	 = 1.0;
 
 
 const int SRISC = 0;
