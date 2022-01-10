@@ -194,8 +194,6 @@
 				framebuffer: "ao_result0",
 				samplerImages: [
 					"gbuffer_main_etc",
-					"u_gbuffer_lightnormal",
-					"ao_result",
 				],
 				toggleConfig: "ss_ao",
 			},
@@ -205,6 +203,7 @@
 				framebuffer: "ao_final",
 				samplerImages: [
 					"gbuffer_main_etc_copy",
+					"gbuffer_lightnormal",
 					"ao_result",
 				],
 				toggleConfig: "ss_ao",

@@ -2,10 +2,21 @@
 
 #include lumi:shaders/prog/tile_noise.glsl
 
+#ifdef SSAO_OVERRIDE
+
 const int STEPS		  = clamp(SSAO_NUM_STEPS, 1, 10);
 const int DIRECTIONS  = clamp(SSAO_NUM_DIRECTIONS, 1, 10);
 const float RADIUS	  = SSAO_RADIUS;
 const float ANGLEBIAS = SSAO_BIAS;
+
+#else
+
+const int STEPS		  = 5;
+const int DIRECTIONS  = 5;
+const float RADIUS	  = 0.8; // 0.5 ~ 1.0 is good
+const float ANGLEBIAS = 0.3;
+
+#endif
 
 #ifdef VERTEX_SHADER
 
@@ -69,7 +80,8 @@ void main()
 		deltaUV = v_deltaRotator * deltaUV;
 		float prevPhi = ANGLEBIAS;
 
-		for (int j = 0; j < STEPS; ++j) {
+		// last step is ignored because it will have 0 attenuation.. probably
+		for (int j = 0; j < STEPS - 1; ++j) {
 			vec2 sampleUV	   = v_texcoord + deltaUV * (float(j + 1) + sampleNoise.z);
 			vec3 sampleViewPos = getViewPos(sampleUV, u_vanilla_depth);
 			vec3 horizonVec	   = sampleViewPos - viewPos;
@@ -86,7 +98,7 @@ void main()
 	}
 
 	float fade = l2_clampScale(256.0, 0.0, -viewPos.z); // distant result are rather inaccurate, and I'm lazy
-	occlusion  = 1.0 - occlusion / float(DIRECTIONS * STEPS) * fade;
+	occlusion  = 1.0 - occlusion / float(DIRECTIONS) * fade;
 	ao_result = clamp(occlusion, 0.0, 1.0);
 }
 
