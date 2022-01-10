@@ -1,0 +1,8 @@
+{
+  "defaultMaterial": "fabric:standard",
+  "variants": {
+	"berries=true": {
+	  "defaultMaterial": "lumi:tasty_warmth"
+	}
+  }
+}

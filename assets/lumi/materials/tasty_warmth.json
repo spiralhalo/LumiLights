@@ -1,0 +1,4 @@
+{
+	"vertexSource": "lumi:shaders/material/noop.vert",
+	"fragmentSource": "lumi:shaders/material/warmth.frag"
+}

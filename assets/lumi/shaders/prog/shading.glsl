@@ -318,6 +318,8 @@ vec4 shading(vec4 color, sampler2D natureTexture, vec4 light, float ao, vec2 mat
 	shaded += shading0.specular + shading0.diffuse;
 	specular += shading0.specular;
 
+	ao = min(1.0, ao + light.z);
+
 	shaded *= ao;
 	specular *= ao;
 

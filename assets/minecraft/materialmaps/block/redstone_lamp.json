@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "lit=true": {
+      "defaultMaterial": "lumi:tasty_warmth"
+    }
+  }
+}
