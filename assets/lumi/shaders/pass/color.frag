@@ -99,7 +99,7 @@ void main()
 
 	if (dSolid > dMin) {
 		if (dSolid < 1.0) {
-			base = fog(base, length(eyePos), toFrag, solidIsUnderwater);
+			base = fog(base, length(eyePos), toFrag, solidIsUnderwater, lightmapRemap(light.y));
 		}
 
 		vec4 clouds = customClouds(u_vanilla_clouds_depth, u_tex_nature, u_tex_noise, dSolid, uvSolid, eyePos, toFrag, NUM_SAMPLE, ldepth(dMin) * frx_viewDistance * 4.);

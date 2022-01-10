@@ -87,13 +87,7 @@ vec3 atmos_SkyGradientRadiance(vec3 world_toSky)
 	float skyHorizon = calcHorizon(world_toSky);
 	vec3 horizonColor = atmos_HorizonColor(world_toSky, skyHorizon);
 
-	vec3 result = mix(atmosv_SkyRadiance, horizonColor, skyHorizon);
-
-	float l = frx_luminance(result);
-	float invEyeY = (1.0 - frx_smoothedEyeBrightness.y);
-	float exposure = mix(1.0, max(2.0, frx_luminance(atmosv_CaveFogRadiance) / (l == 0.0 ? 1.0 : l)), invEyeY * invEyeY);
-
-	return result * exposure;
+	return mix(atmosv_SkyRadiance, horizonColor, skyHorizon);
 }
 #endif
 

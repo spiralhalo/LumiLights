@@ -60,7 +60,7 @@ float fogFactor(float distToEye, bool isUnderwater)
 	return clamp(fogFactor * distFactor, 0.0, 1.0);
 }
 
-vec4 fog(vec4 color, float distToEye, vec3 toFrag, bool isUnderwater)
+vec4 fog(vec4 color, float distToEye, vec3 toFrag, bool isUnderwater, float remappedLightY)
 {
 	float fogFactor = fogFactor(distToEye, isUnderwater);
 
@@ -72,7 +72,7 @@ vec4 fog(vec4 color, float distToEye, vec3 toFrag, bool isUnderwater)
 
 	// resolve cave fog
 	if (!isUnderwater || frx_cameraInFluid == 0) {
-		float invEyeY = (1.0 - frx_smoothedEyeBrightness.y);
+		float invEyeY = (1.0 - max(remappedLightY, frx_smoothedEyeBrightness.y));
 		fogColor = mix(fogColor, atmosv_CaveFogRadiance, invEyeY * invEyeY);
 	}
 
