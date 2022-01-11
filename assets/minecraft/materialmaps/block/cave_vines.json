@@ -1,7 +1,82 @@
 {
   "defaultMaterial": "fabric:standard",
   "variants": {
-	"berries=true": {
+	"age=0,berries=true": {
+	  "defaultMaterial": "lumi:warmth"
+	},
+	"age=1,berries=true": {
+	  "defaultMaterial": "lumi:warmth"
+	},
+	"age=2,berries=true": {
+	  "defaultMaterial": "lumi:warmth"
+	},
+	"age=3,berries=true": {
+	  "defaultMaterial": "lumi:warmth"
+	},
+	"age=4,berries=true": {
+	  "defaultMaterial": "lumi:warmth"
+	},
+	"age=5,berries=true": {
+	  "defaultMaterial": "lumi:warmth"
+	},
+	"age=6,berries=true": {
+	  "defaultMaterial": "lumi:warmth"
+	},
+	"age=7,berries=true": {
+	  "defaultMaterial": "lumi:warmth"
+	},
+	"age=8,berries=true": {
+	  "defaultMaterial": "lumi:warmth"
+	},
+	"age=9,berries=true": {
+	  "defaultMaterial": "lumi:warmth"
+	},
+	"age=10,berries=true": {
+	  "defaultMaterial": "lumi:warmth"
+	},
+	"age=11,berries=true": {
+	  "defaultMaterial": "lumi:warmth"
+	},
+	"age=12,berries=true": {
+	  "defaultMaterial": "lumi:warmth"
+	},
+	"age=13,berries=true": {
+	  "defaultMaterial": "lumi:warmth"
+	},
+	"age=14,berries=true": {
+	  "defaultMaterial": "lumi:warmth"
+	},
+	"age=15,berries=true": {
+	  "defaultMaterial": "lumi:warmth"
+	},
+	"age=16,berries=true": {
+	  "defaultMaterial": "lumi:warmth"
+	},
+	"age=17,berries=true": {
+	  "defaultMaterial": "lumi:warmth"
+	},
+	"age=18,berries=true": {
+	  "defaultMaterial": "lumi:warmth"
+	},
+	"age=19,berries=true": {
+	  "defaultMaterial": "lumi:warmth"
+	},
+	"age=20,berries=true": {
+	  "defaultMaterial": "lumi:warmth"
+	},
+	"age=21,berries=true": {
+	  "defaultMaterial": "lumi:warmth"
+	},
+	"age=22,berries=true": {
+	  "defaultMaterial": "lumi:warmth"
+	},
+	"age=23,berries=true": {
+	  "defaultMaterial": "lumi:warmth"
+	},
+	"age=24,berries=true": {
+	  "defaultMaterial": "lumi:warmth"
+	},
+	"age=25,berries=true": {
 	  "defaultMaterial": "lumi:warmth"
 	}
   }

@@ -10,7 +10,7 @@
 const float INTENSITY = SSAO_INTENSITY;
 #else
 // 7 if divided by direction, 40 if divided by step * direction
-const float INTENSITY = 7.0;
+const float INTENSITY = 4.0;
 #endif
 
 uniform sampler2D u_gbuffer_main_etc_copy;

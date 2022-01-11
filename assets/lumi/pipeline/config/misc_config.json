@@ -171,7 +171,7 @@
 					descriptionKey: "config.lumi_lights.help.ssao_bias"
 				},
 				ssao_intensity: {
-					default: 7.0, min: 0.01, max: 100.0,
+					default: 4.0, min: 0.01, max: 100.0,
 					nameKey: "config.lumi_lights.value.ssao_intensity",
 					descriptionKey: "config.lumi_lights.help.ssao_intensity"
 				}

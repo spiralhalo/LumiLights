@@ -189,8 +189,8 @@ void main()
 	fragAfter = after1;
 
 	if (dTrans == dSolid) {
-		fragAlbedo = vec4(cSolid.rgb, 0.0);
+		fragAlbedo = vec4(hdrAlbedo(cSolid), 0.0);
 	} else {
-		fragAlbedo = vec4(cTrans.rgb, 0.5);
+		fragAlbedo = vec4(hdrAlbedo(cTrans), 0.5);
 	}
 }
