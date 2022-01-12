@@ -6,13 +6,6 @@
   lumi:shaders/pass/ao2.frag
 ******************************************************/
 
-#ifdef SSAO_OVERRIDE
-const float INTENSITY = SSAO_INTENSITY;
-#else
-// 7 if divided by direction, 40 if divided by step * direction
-const float INTENSITY = 4.0;
-#endif
-
 uniform sampler2D u_gbuffer_main_etc_copy;
 uniform sampler2DArray u_gbuffer_lightnormal;
 uniform sampler2D u_ao;
@@ -39,5 +32,5 @@ void main()
 	}
 	}
 
-	rawMat.z = pow(totalAo/total, 1.0 + INTENSITY);
+	rawMat.z = totalAo / total;
 }
