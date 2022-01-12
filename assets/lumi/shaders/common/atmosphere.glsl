@@ -51,6 +51,14 @@
 
 #endif
 
+float lightLuminance(vec3 radiance) {
+	return min(1.0, dot(radiance, vec3(0.2126, 0.7152, 0.0722)));
+}
+
+float lightLuminanceUnclamped(vec3 radiance) {
+	return dot(radiance, vec3(0.2126, 0.7152, 0.0722));
+}
+
 #ifdef POST_SHADER
 #define calcHorizon(worldVec) pow(l2_clampScale(1.0, -l2_clampScale(ATMOS_SEA_LEVEL, ATMOS_STRATOSPHERE, frx_cameraPos.y), worldVec.y), 0.25)
 #define waterHorizon(isUnderwater, skyHorizon) float(isUnderwater) * l2_clampScale(0.9, 1.0, skyHorizon) // kinda hacky

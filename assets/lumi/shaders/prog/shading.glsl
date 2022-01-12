@@ -246,16 +246,17 @@ void lights(vec3 albedo, vec4 light, vec3 eyePos, vec3 toEye, out vec3 baseLight
 
 	float bl = l2_clampScale(0.03125, 0.96875, light.x);
 	vec3 blColor = BLOCK_LIGHT_COLOR;
+	
+	// makes builds look better outside
+	float sunAdaptation = frx_smoothedEyeBrightness.y * lightLuminance(atmosv_CelestialRadiance) * (1. - frx_rainGradient);
 
 #if BLOCK_LIGHT_MODE != BLOCK_LIGHT_MODE_NEUTRAL
 	float blWhite = light.z;
-	// makes builds look better under the sun
-	blWhite = max(blWhite, frx_smoothedEyeBrightness.y * min(1.0 - float(frx_worldIsMoonlit), frx_skyLightTransitionFactor * (1. - frx_rainGradient)));
-
+	blWhite = max(blWhite, sunAdaptation * 0.5);
 	blColor = mix(blColor, BLOCK_LIGHT_NEUTRAL, blWhite);
 #endif
 
-	blockLight = blColor * BLOCK_LIGHT_STR * bl;
+	blockLight = blColor * BLOCK_LIGHT_STR * bl * (1.0 - 0.5 * sunAdaptation);
 
 #if HANDHELD_LIGHT_RADIUS != 0
 	if (frx_heldLight.w > 0) {
@@ -315,7 +316,7 @@ vec4 shading(vec4 color, sampler2D natureTexture, vec4 light, float ao, vec2 mat
 	specular += shading0.specular;
 
 	lightPbr(albedo, color.a, skyLight, material.x, material.y, f0, frx_skyLightVector, toEye, normal, disableDiffuse);
-	shaded += shading0.specular + shading0.diffuse;
+	shaded += shading0.specular + shading0.diffuse * pow(ao, 3.0); // extra harsh AO on sky light is perfectly valid
 	specular += shading0.specular;
 
 	ao = min(1.0, ao + light.z);

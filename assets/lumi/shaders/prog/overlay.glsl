@@ -58,7 +58,7 @@ vec3 noiseGlint(vec2 normalizedUV, float glint)
 		n += o;
 		#endif
 
-		return n * GLINT_COLOR;
+		return n * GLINT_COLOR * GLINT_COLOR;
 	} else {
 		return vec3(0.0);
 	}
@@ -67,8 +67,32 @@ vec3 noiseGlint(vec2 normalizedUV, float glint)
 vec3 textureGlint(sampler2D glintTexture, vec2 normalizedUV, float glint)
 {
 	if (glint == 1.0) {
-		vec4 glint_tex_c = texture(glintTexture, mod(normalizedUV * 0.5 + frx_renderSeconds * 0.4, 1.0));
-		return glint_tex_c.rgb * glint_tex_c.a;
+		// vanilla scale factor for entity, works in most scenario
+		const float scale = 0.16;
+
+		// vanilla rotation factor
+		const float angle = PI * 10. / 180.;
+		const vec3  axis = vec3(0.0, 0.0, 1.0);
+		const float s = sin(angle);
+		const float c = cos(angle);
+		const float oc = 1.0 - c;
+		const mat4 rotation = mat4(
+		oc * axis.x * axis.x + c,           oc * axis.x * axis.y - axis.z * s,  oc * axis.z * axis.x + axis.y * s,  0.0,
+		oc * axis.x * axis.y + axis.z * s,  oc * axis.y * axis.y + c,           oc * axis.y * axis.z - axis.x * s,  0.0,
+		oc * axis.z * axis.x - axis.y * s,  oc * axis.y * axis.z + axis.x * s,  oc * axis.z * axis.z + c,           0.0,
+		0.0,                                0.0,                                0.0,                                1.0);
+
+		// vanilla translation factor
+		float time = frx_renderSeconds * 8.;
+		float tx = mod(time, 110.) / 110.;
+		float ty = mod(time, 30.) / 30.;
+		vec2 translation = vec2(-tx, ty);
+
+		vec2 uv = (rotation * vec4(normalizedUV * scale, 0.0, 1.0)).xy + translation;
+		vec3 glint = texture(glintTexture, uv).rgb;
+
+		// emulate GL_SRC_COLOR sfactor
+		return glint * glint;
 	} else {
 		return vec3(0.0);
 	}
@@ -77,12 +101,13 @@ vec3 textureGlint(sampler2D glintTexture, vec2 normalizedUV, float glint)
 vec3 autoGlint(sampler2D glintTexture, vec2 normalizedUV, float glint)
 {
 #if GLINT_MODE == GLINT_MODE_GLINT_SHADER
-	return hdr_fromGamma(noiseGlint(normalizedUV, glint));
+	return noiseGlint(normalizedUV, glint);
 #else
-	return hdr_fromGamma(textureGlint(glintTexture, normalizedUV, glint));
+	return textureGlint(glintTexture, normalizedUV, glint);
 #endif
 }
 
+#ifdef POST_SHADER
 vec4 overlay(vec4 base, sampler2D glintTexture, vec3 misc)
 {
 	const float GLINT_EMISSIVE_STR = 2.0;
@@ -90,10 +115,13 @@ vec4 overlay(vec4 base, sampler2D glintTexture, vec3 misc)
 	float hurt = bit_unpack(misc.z, 1);
 	float glint = bit_unpack(misc.z, 2);
 
-	vec3 overlay = autoGlint(glintTexture, misc.xy, glint) * GLINT_EMISSIVE_STR;
+	vec3 glintColor = hdr_fromGamma(autoGlint(glintTexture, misc.xy, glint));
+
+	vec3 overlay = glintColor * GLINT_EMISSIVE_STR;
 	overlay += vec3(flash) + vec3(0.5 * hurt, 0.0, 0.0);
 
 	base.rgb += overlay;
 
 	return base;
 }
+#endif
