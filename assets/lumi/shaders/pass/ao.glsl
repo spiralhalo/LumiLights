@@ -81,8 +81,8 @@ void main()
 		float prevPhi = ANGLEBIAS;
 
 		// last step is ignored because it will have 0 attenuation.. probably
-		for (int j = 0; j < STEPS - 1; ++j) {
-			vec2 sampleUV	   = v_texcoord + deltaUV * (float(j + 1) + sampleNoise.z);
+		for (int j = 1; j < STEPS - 1; ++j) {
+			vec2 sampleUV	   = v_texcoord + deltaUV * (float(j) + sampleNoise.z);
 			vec3 sampleViewPos = getViewPos(sampleUV, u_vanilla_depth);
 			vec3 horizonVec	   = sampleViewPos - viewPos;
 			float phi = (PI / 2.0) - acos(dot(viewNormal, normalize(horizonVec)));
