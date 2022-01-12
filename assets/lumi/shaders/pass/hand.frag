@@ -38,7 +38,7 @@ void main()
 
 		vec4 light	= texture(u_gbuffer_lightnormal, vec3(v_texcoord, ID_SOLID_LIGT));
 		vec3 rawMat = texture(u_gbuffer_main_etc, vec3(v_texcoord, ID_SOLID_MATS)).xyz;
-		vec3 normal	= texture(u_gbuffer_lightnormal, vec3(v_texcoord, ID_SOLID_MNORM)).xyz * 2.0 - 1.0;
+		vec3 normal	= normalize(texture(u_gbuffer_lightnormal, vec3(v_texcoord, ID_SOLID_MNORM)).xyz * 2.0 - 1.0);
 		vec3 misc	= texture(u_gbuffer_main_etc, vec3(v_texcoord, ID_SOLID_MISC)).xyz;
 		float disableDiffuse = bit_unpack(misc.z, 4);
 		float vertexNormaly = texture(u_gbuffer_lightnormal, vec3(v_texcoord, ID_SOLID_NORM)).y * 2.0 - 1.0;
