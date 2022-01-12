@@ -123,7 +123,7 @@ vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer
 	if (isUnmanaged) return vec4(0.0);
 
 	vec4 light	= texture(lightNormalBuffer, vec3(v_texcoord, idLight));
-	vec3 normal	= normalize(texture(lightNormalBuffer, vec3(v_texcoord, idMicroNormal)).xyz * 2.0 - 1.0);
+	vec3 normal	= normalize(texture(lightNormalBuffer, vec3(v_texcoord, idMicroNormal)).xyz);
 	float depth	= texture(depthBuffer, v_texcoord).r;
 
 	vec4 tempPos = frx_inverseViewProjectionMatrix * vec4(2.0 * v_texcoord - 1.0, 2.0 * depth - 1.0, 1.0);
@@ -148,7 +148,7 @@ vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer
 	vec4 objLight = vec4(0.0);
 	if (roughness <= REFLECTION_MAXIMUM_ROUGHNESS) {
 		// Impossible Ray Resultion:
-		vec3 rawNormal = normalize(texture(lightNormalBuffer, vec3(v_texcoord, idNormal)).xyz * 2.0 - 1.0);
+		vec3 rawNormal = normalize(texture(lightNormalBuffer, vec3(v_texcoord, idNormal)).xyz);
 		vec3 rawViewNormal = normalize(frx_normalModelMatrix * rawNormal);
 		bool impossibleRay	= dot(rawViewNormal, viewMarch) < 0;
 

@@ -61,7 +61,7 @@ vec3 getViewPos(vec2 texcoord, in sampler2D target)
 void main()
 {
 	vec3  viewPos = getViewPos(v_texcoord, u_vanilla_depth);
-	vec3  viewNormal = frx_normalModelMatrix * normalize(texture(u_gbuffer_lightnormal, vec3(v_texcoord, ID_SOLID_NORM)).xyz * 2.0 - 1.0);
+	vec3  viewNormal = frx_normalModelMatrix * normalize(texture(u_gbuffer_lightnormal, vec3(v_texcoord, ID_SOLID_NORM)).xyz);
 	float viewRadius = RADIUS / max(1.0, abs(viewPos.z));
 
 	vec2 deltaUV = vec2(1.0, 0.0) * (viewRadius / float(STEPS));

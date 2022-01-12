@@ -114,13 +114,10 @@ void frx_pipelineFragment()
 		// put water flag last because it makes the material buffer looks blue :D easier to debug
 		float bitFlags = bit_pack(frx_matFlash, frx_matHurt, frx_matGlint, 0., disableDiffuse, 0., 0., float(pbr_isWater));
 
-		vec3 vertexNormal = frx_vertexNormal * 0.5 + 0.5;
-		vec3 fragNormal = frx_fragNormal * 0.5 + 0.5;
-
 		// PERF: view normal, more useful than world normal
 		fragColor[1] = vec4(frx_fragLight.xy, frx_fragEmissive, 1.0);
-		fragColor[2] = vec4(vertexNormal, 1.0);
-		fragColor[3] = vec4(fragNormal, 1.0);
+		fragColor[2] = vec4(frx_vertexNormal, 1.0);
+		fragColor[3] = vec4(frx_fragNormal, 1.0);
 		fragColor[4] = vec4(roughness, pbr_metallic, ao, 1.0);
 		fragColor[5] = vec4(frx_normalizeMappedUV(frx_texcoord), bitFlags, 1.0);
 	}

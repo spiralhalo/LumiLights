@@ -34,8 +34,8 @@ vec2 refractSolidUV(sampler2DArray normalBuffer, sampler2D solidDepthBuffer, flo
 
 		float ldepth_range = ldepth(dSolid) - ldepth(dTrans);
 
-		vec3 viewVNormal = frx_normalModelMatrix * (texture(normalBuffer, vec3(v_texcoord, ID_TRANS_NORM)).xyz * 2.0 - 1.0);
-		vec3 viewMNormal = frx_normalModelMatrix * (texture(normalBuffer, vec3(v_texcoord, ID_TRANS_MNORM)).xyz * 2.0 - 1.0);
+		vec3 viewVNormal = frx_normalModelMatrix * (texture(normalBuffer, vec3(v_texcoord, ID_TRANS_NORM)).xyz);
+		vec3 viewMNormal = frx_normalModelMatrix * (texture(normalBuffer, vec3(v_texcoord, ID_TRANS_MNORM)).xyz);
 
 		vec2 refractUV = refractStr * l2_clampScale(0.0, 0.005, ldepth_range) * (viewMNormal.xy - viewVNormal.xy);
 		refractUV = clamp(v_texcoord + refractUV, 0.0, 1.0);
