@@ -12,13 +12,15 @@ const float INTENSITY	= SSAO_INTENSITY;
 
 #else
 
-const int RADIAL_STEPS	= 5;
+const int RADIAL_STEPS	= 3;
 const int DIRECTIONS	= 5;
 const float VIEW_RADIUS	= 0.8; // 0.5 ~ 1.0 is good
 const float ANGLE_BIAS	= 0.3;
 const float INTENSITY	= 4.0; // new: 4.0 is good for dim light, 7.0 for bright lights. old: 7.0 if divided by DIR, 40.0 if divided by STEP * DIR
 
 #endif
+
+const float CENTER_BIAS_POW = 2.0;
 
 #ifdef VERTEX_SHADER
 
@@ -81,9 +83,10 @@ void main()
 		deltaUV = v_deltaRotator * deltaUV;
 		float prevPhi = ANGLE_BIAS;
 
-		// last step is ignored because it will have 0 attenuation.. probably
-		for (int j = 1; j < RADIAL_STEPS - 1; ++j) {
-			vec2 sampleUV	   = v_texcoord + deltaUV * (float(j) + fragNoise.z);
+		for (int j = 1; j < RADIAL_STEPS; ++j) {
+			// bias towards center
+			float samplingBias = pow(float(j) / RADIAL_STEPS, CENTER_BIAS_POW) / (float(j) / RADIAL_STEPS);
+			vec2 sampleUV	   = v_texcoord + deltaUV * (float(j) + fragNoise.z) * samplingBias;
 			vec3 sampleViewPos = getViewPos(sampleUV, u_vanilla_depth);
 			vec3 horizonVec	   = sampleViewPos - viewPos;
 			float phi = (PI / 2.0) - acos(dot(viewNormal, normalize(horizonVec)));
