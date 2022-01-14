@@ -6,20 +6,18 @@
 
 const int RADIAL_STEPS	= clamp(SSAO_NUM_STEPS, 1, 10);
 const int DIRECTIONS	= clamp(SSAO_NUM_DIRECTIONS, 1, 10);
-const float VIEW_RADIUS	= SSAO_RADIUS;
 const float ANGLE_BIAS	= SSAO_BIAS;
-const float INTENSITY	= SSAO_INTENSITY;
 
 #else
 
 const int RADIAL_STEPS	= 3;
 const int DIRECTIONS	= 5;
-const float VIEW_RADIUS	= 0.8; // 0.5 ~ 1.0 is good
 const float ANGLE_BIAS	= 0.3;
-const float INTENSITY	= 4.0; // new: 4.0 is good for dim light, 7.0 for bright lights. old: 7.0 if divided by DIR, 40.0 if divided by STEP * DIR
 
 #endif
 
+const float VIEW_RADIUS	= float(clamp(SSAO_RADIUS_INT, 1, 20)) / 10.;
+const float INTENSITY	= float(clamp(SSAO_INTENSITY_INT, 1, 20));
 const float CENTER_BIAS_POW = 2.0;
 
 #ifdef VERTEX_SHADER
@@ -101,11 +99,11 @@ void main()
 		}
 	}
 
-	float fade = l2_clampScale(256.0, 0.0, -viewPos.z); // distant result are rather inaccurate, and I'm lazy
+	float fade = l2_clampScale(256.0, 64.0, length(viewPos)); // distant result are rather inaccurate, and I'm lazy
 	occlusion  = 1.0 - occlusion / float(DIRECTIONS) * fade;
 
 	// apply intensity before blurring
-	ao_result = pow(clamp(occlusion, 0.0, 1.0), 1.0 + INTENSITY);
+	ao_result = pow(clamp(occlusion, 0.0, 1.0), INTENSITY);
 }
 
 #endif

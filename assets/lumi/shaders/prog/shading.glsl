@@ -316,7 +316,7 @@ vec4 shading(vec4 color, sampler2D natureTexture, vec4 light, float ao, vec2 mat
 	specular += shading0.specular;
 
 	lightPbr(albedo, color.a, skyLight, material.x, material.y, f0, frx_skyLightVector, toEye, normal, disableDiffuse);
-	shaded += shading0.specular + shading0.diffuse * pow(ao, 3.0); // extra harsh AO on sky light is perfectly valid
+	shaded += shading0.specular + shading0.diffuse;
 	specular += shading0.specular;
 
 	ao = min(1.0, ao + light.z);
