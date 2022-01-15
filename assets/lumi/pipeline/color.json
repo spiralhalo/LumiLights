@@ -141,6 +141,7 @@
 			vertexSource: "lumi:shaders/pass/basic.vert",
 			fragmentSource: "lumi:shaders/pass/ao2.frag",
 			samplers: [
+				"u_vanilla_depth",
 				"u_gbuffer_main_etc_copy",
 				"u_gbuffer_lightnormal",
 				"u_ao",
@@ -202,6 +203,7 @@
 				program: "ao2",
 				framebuffer: "ao_final",
 				samplerImages: [
+					"vanilla_depth",
 					"gbuffer_main_etc_copy",
 					"gbuffer_lightnormal",
 					"ao_result",
