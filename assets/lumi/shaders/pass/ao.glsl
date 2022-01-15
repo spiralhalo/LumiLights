@@ -17,8 +17,8 @@ const float ANGLE_BIAS	= 0.3;
 #endif
 
 const float VIEW_RADIUS	= float(clamp(SSAO_RADIUS_INT, 1, 20)) / 10.;
-const float INTENSITY	= float(clamp(SSAO_INTENSITY_INT, 1, 20));
-const float CENTER_BIAS_POW = 2.0;
+const float INTENSITY	= float(clamp(SSAO_INTENSITY_INT, 1, 20)) / 2.;
+const float CENTER_BIAS_POW = clamp(VIEW_RADIUS, 1.0, 2.0);
 
 #ifdef VERTEX_SHADER
 
@@ -64,7 +64,11 @@ void main()
 {
 	vec3  viewPos = getViewPos(v_texcoord, u_vanilla_depth);
 	vec3  viewNormal = frx_normalModelMatrix * normalize(texture(u_gbuffer_lightnormal, vec3(v_texcoord, ID_SOLID_NORM)).xyz);
-	float screenRadius = VIEW_RADIUS / (1.0 + abs(viewPos.z));
+
+	vec3 rightPos = viewPos + vec3(VIEW_RADIUS, 0.0, 0.0);
+	vec4 temp = frx_projectionMatrix * vec4(rightPos, 1.0);
+	temp.x /= temp.w;
+	float screenRadius = (temp.x * 0.5 + 0.5) - v_texcoord.x;
 
 	// exclude last step here too
 	vec2 deltaUV = vec2(float(RADIAL_STEPS - 1) / float(RADIAL_STEPS), 0.0) * (screenRadius / float(RADIAL_STEPS));
@@ -76,15 +80,18 @@ void main()
 
 	deltaUV = randomRotation * deltaUV;
 
+	vec2 aspectNormalizer = v_invSize * min(frxu_size.x, frxu_size.y);
+
 	float occlusion = 0.0;
 	for (int i = 0; i < DIRECTIONS; ++i) {
 		deltaUV = v_deltaRotator * deltaUV;
 		float prevPhi = ANGLE_BIAS;
+		vec2 deltaUVnormalized = deltaUV * aspectNormalizer;
 
 		for (int j = 1; j < RADIAL_STEPS; ++j) {
 			// bias towards center
 			float samplingBias = pow(float(j) / RADIAL_STEPS, CENTER_BIAS_POW) / (float(j) / RADIAL_STEPS);
-			vec2 sampleUV	   = v_texcoord + deltaUV * (float(j) + fragNoise.z) * samplingBias;
+			vec2 sampleUV	   = v_texcoord + deltaUVnormalized * (float(j) + fragNoise.z) * samplingBias;
 			vec3 sampleViewPos = getViewPos(sampleUV, u_vanilla_depth);
 			vec3 horizonVec	   = sampleViewPos - viewPos;
 			float phi = (PI / 2.0) - acos(dot(viewNormal, normalize(horizonVec)));

@@ -52,12 +52,12 @@
 					descriptionKey: "config.lumi_lights.help.reflection_maximum_roughness_relative"
 				},
 				ssao_radius_int: {
-					default: 10, min: 1, max: 20,
+					default: 20, min: 1, max: 20,
 					nameKey: "config.lumi_lights.value.ssao_radius",
 					descriptionKey: "config.lumi_lights.help.ssao_radius"
 				},
 				ssao_intensity_int: {
-					default: 7, min: 1, max: 20,
+					default: 10, min: 1, max: 20,
 					nameKey: "config.lumi_lights.value.ssao_intensity",
 					descriptionKey: "config.lumi_lights.help.ssao_intensity"
 				},
