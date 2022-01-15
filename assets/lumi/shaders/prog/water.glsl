@@ -85,11 +85,9 @@ void foamPreprocess(inout vec4 albedo, sampler2D natureTexture, vec3 worldPos, f
 	float dZ = (ldepth(dSolid) - ldepth(dTrans)) * frx_viewDistance;
 	float foam = l2_clampScale(0.8, 0.0, dZ);
 
-	vertexNormaly = max(0.0, vertexNormaly);
-
 	foam = mix(tex, 1.0, pow(foam, 10.0)) * foam;
 	foam *= 0.6;
-	foam *= vertexNormaly;
+	foam *= abs(vertexNormaly);
 
 	albedo = mix(albedo, vec4(1.0), foam);
 }
