@@ -62,6 +62,8 @@ vec3 getViewPos(vec2 texcoord, in sampler2D target)
 
 void main()
 {
+	/* NOTE: using reconstructed normals doesn't really help reduce artifacts.
+	         and as minecraft is blocky the interpolated normals should be accurate anyway. */
 	vec3  viewPos = getViewPos(v_texcoord, u_vanilla_depth);
 	vec3  viewNormal = frx_normalModelMatrix * normalize(texture(u_gbuffer_lightnormal, vec3(v_texcoord, ID_SOLID_NORM)).xyz);
 

@@ -70,7 +70,19 @@
 				{name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
 				{name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
 			]
-		}, 
+		},
+		{
+			name: "view_z",
+			lod: 0,
+			internalFormat: "R32F",
+			pixelFormat: "RED",
+			pixelDataType: "FLOAT",
+			target: "TEXTURE_2D",
+			texParams: [ 
+				{name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
+				{name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"},
+			]
+		},
 	],
 
 	programs: [
@@ -137,14 +149,22 @@
 			]
 		},
 		{
-			name: "ao2",
+			name: "ao_final",
 			vertexSource: "lumi:shaders/pass/basic.vert",
 			fragmentSource: "lumi:shaders/pass/ao2.frag",
 			samplers: [
-				"u_vanilla_depth",
+				"u_view_z",
 				"u_gbuffer_main_etc_copy",
 				"u_gbuffer_lightnormal",
 				"u_ao",
+			]
+		},
+		{
+			name: "depth_process",
+			vertexSource: "lumi:shaders/pass/basic.vert",
+			fragmentSource: "lumi:shaders/pass/depth.frag",
+			samplers: [
+				"u_vanilla_depth",
 			]
 		},
 	],
@@ -174,10 +194,23 @@
 			name: "ao_final",
 			colorAttachments: [{image: "gbuffer_main_etc", layer: 0}]
 		},
+		{
+			name: "depth_process",
+			colorAttachments: [{image: "view_z"}]
+		},
 	],
 
 	fabulous: {
 		passes: [
+			{
+				name: "depth_process",
+				program: "depth_process",
+				framebuffer: "depth_process",
+				samplerImages: [
+					"vanilla_depth",
+				],
+				toggleConfig: "ss_ao",
+			},
 			{
 				name: "ao",
 				program: "ao",
@@ -200,10 +233,10 @@
 			},
 			{
 				name: "ao_final",
-				program: "ao2",
+				program: "ao_final",
 				framebuffer: "ao_final",
 				samplerImages: [
-					"vanilla_depth",
+					"view_z",
 					"gbuffer_main_etc_copy",
 					"gbuffer_lightnormal",
 					"ao_result",
