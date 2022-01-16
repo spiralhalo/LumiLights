@@ -276,6 +276,13 @@ void atmos_generateAtmosphereModel()
 	/** CAVE FOG **/
 	if (frx_worldIsOverworld == 1) {
 		atmosv_CaveFogRadiance = mix(CAVEFOG_C, CAVEFOG_DEEPC, l2_clampScale(CAVEFOG_MAXY, CAVEFOG_MINY, frx_cameraPos.y)) * CAVEFOG_STR;
+
+		/* adjust cave fog brightness to outdoors fog's brightness.
+		   this means cave fog is affected by the daylight cycle, which sucks, but 
+		   it's better than having cave fog affect the outdoors in a jarring way. */
+		float fogLuminance = lightLuminance(atmosv_FogRadiance);
+		float caveFogLuminance = lightLuminance(atmosv_CaveFogRadiance);
+		atmosv_CaveFogRadiance *= fogLuminance / caveFogLuminance;
 	} else {
 		atmosv_CaveFogRadiance = atmosv_FogRadiance;
 	}
