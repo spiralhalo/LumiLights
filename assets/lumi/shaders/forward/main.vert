@@ -46,7 +46,7 @@ void frx_pipelineVertex() {
 
 		#ifdef TAA_ENABLED
 		if (frx_isHand) {
-			gl_Position.st += taa_jitter(inv_size) * gl_Position.w;
+			gl_Position.st += taaJitter(inv_size, frx_renderFrames) * gl_Position.w;
 		}
 		#endif
 	} else {
@@ -59,7 +59,7 @@ void frx_pipelineVertex() {
 		gl_Position = frx_viewProjectionMatrix * frx_vertex;
 
 		#ifdef TAA_ENABLED
-		gl_Position.st += taa_jitter(inv_size) * gl_Position.w;
+		gl_Position.st += taaJitter(inv_size, frx_renderFrames) * gl_Position.w;
 		#endif
 	}
 

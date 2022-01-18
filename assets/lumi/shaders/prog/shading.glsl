@@ -55,7 +55,7 @@ float lightmapRemap(float lightMapCoords)
 float denoisedShadowFactor(sampler2DArrayShadow shadowMap, vec2 texcoord, vec3 eyePos, float depth, float lighty) {
 #ifdef SHADOW_MAP_PRESENT
 #ifdef TAA_ENABLED
-	vec2 uvJitter	   = taa_jitter(v_invSize);
+	vec2 uvJitter	   = taaJitter(v_invSize);
 	vec4 unjitteredPos = frx_inverseViewProjectionMatrix * vec4(2.0 * texcoord - uvJitter - 1.0, 2.0 * depth - 1.0, 1.0);
 	vec4 shadowViewPos = frx_shadowViewMatrix * vec4(unjitteredPos.xyz / unjitteredPos.w, 1.0);
 #else

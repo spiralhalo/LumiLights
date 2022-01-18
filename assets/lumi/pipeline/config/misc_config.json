@@ -103,7 +103,7 @@
 				// },
 				antialiasing: {
 					default: "taa",
-					choices: ["none", "taa", "taa_blurry"],
+					choices: ["none", "taa"],
 					enum: true,
 					prefix: "antialiasing_",
 					nameKey: "config.lumi_lights.value.antialiasing",

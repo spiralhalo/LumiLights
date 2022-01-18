@@ -39,11 +39,11 @@ void celestSetup()
 
 	// jitter celest
 	// #ifdef TAA_ENABLED
-	// 	vec2 taa_jitterValue = taa_jitter(v_invSize);
+	// 	vec2 taaJitterValue = taaJitter(v_invSize);
 	// 	vec4 celest_clip = frx_projectionMatrix * vec4(v_celest1, 1.0);
-	// 	v_celest1.xy += taa_jitterValue * celest_clip.w;
-	// 	v_celest2.xy += taa_jitterValue * celest_clip.w;
-	// 	v_celest3.xy += taa_jitterValue * celest_clip.w;
+	// 	v_celest1.xy += taaJitterValue * celest_clip.w;
+	// 	v_celest2.xy += taaJitterValue * celest_clip.w;
+	// 	v_celest3.xy += taaJitterValue * celest_clip.w;
 	// #endif
 
 	v_celest1 = result.bottomLeft;

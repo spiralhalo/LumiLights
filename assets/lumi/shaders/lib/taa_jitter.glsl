@@ -1,5 +1,3 @@
-#include frex:shaders/api/world.glsl
-
 /*******************************************************
  *  lumi:shaders/lib/taa_jitter.glsl
  *******************************************************/
@@ -23,6 +21,7 @@ const vec2 halton[4] = vec2[4](
 	// vec2(0.03125, 0.5925925925925926)
 	);
 
-vec2 taa_jitter(vec2 rcpSize) {
-	return halton[frx_renderFrames % 4u] * rcpSize;
+// jitter in ndc space, not image space
+vec2 taaJitter(vec2 rcpSize, uint frame) {
+	return halton[frame % 4u] * rcpSize;
 }

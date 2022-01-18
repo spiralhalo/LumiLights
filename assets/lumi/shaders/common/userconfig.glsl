@@ -14,7 +14,7 @@
  *  lumi:shaders/common/userconfig.glsl
  *******************************************************/
 
-#if ANTIALIASING == ANTIALIASING_TAA || ANTIALIASING == ANTIALIASING_TAA_BLURRY
+#if ANTIALIASING == ANTIALIASING_TAA
 	#define TAA_ENABLED
 #endif
 
