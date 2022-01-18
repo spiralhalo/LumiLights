@@ -284,14 +284,14 @@ void lights(vec3 albedo, vec4 light, vec3 eyePos, vec3 toEye, out vec3 baseLight
 #define hdrAlbedo(color) hdr_fromGamma(color.rgb) * (1.0 - USER_ALBEDO_BRIGHTENING) + vec3(USER_ALBEDO_BRIGHTENING)
 #endif
 
-vec4 shading(vec4 color, sampler2D natureTexture, vec4 light, float ao, vec2 material, vec3 eyePos, vec3 normal, float vertexNormaly, bool isUnderwater, float disableDiffuse)
+vec4 shading(vec4 color, sampler2D natureTexture, vec4 light, float ao, vec2 material, vec3 eyePos, vec3 normal, vec3 vertexNormal, bool isUnderwater, float disableDiffuse)
 {
 	vec3 albedo = hdrAlbedo(color);
 
 	// unmanaged
 	if (light.x == 0.0) return vec4(albedo, color.a);
 
-	prepare(color, natureTexture, eyePos, vertexNormaly, isUnderwater, light);
+	prepare(color, natureTexture, eyePos, vertexNormal.y, isUnderwater, light);
 
 	vec3 f0 = mix(vec3(0.01), albedo, material.y);
 	vec3 toEye = -normalize(eyePos);
@@ -334,7 +334,7 @@ vec4 particleShading(vec4 color, sampler2D natureTexture, vec4 light, vec3 eyePo
 	if (light.x == 0.0) return vec4(albedo, color.a);
 
 	vec3 toEye = -normalize(eyePos);
-	prepare(color, natureTexture, eyePos, toEye.y, isUnderwater, light);
+	prepare(color, natureTexture, eyePos, 1.0, isUnderwater, light);
 
 	vec3 baseLight, blockLight, hlLight, skyLight;
 	lights(albedo, light, eyePos, toEye, baseLight, blockLight, hlLight, skyLight);
@@ -345,8 +345,8 @@ vec4 particleShading(vec4 color, sampler2D natureTexture, vec4 light, vec3 eyePo
 	return vec4(shaded / PI, color.a);
 }
 
-vec4 shading(vec4 color, sampler2D natureTexture, vec4 light, vec3 rawMat, vec3 eyePos, vec3 normal, float vertexNormaly, bool isUnderwater, float disableDiffuse) {
-	return shading(color, natureTexture, light, rawMat.z, rawMat.xy, eyePos, normal, vertexNormaly, isUnderwater, disableDiffuse);
+vec4 shading(vec4 color, sampler2D natureTexture, vec4 light, vec3 rawMat, vec3 eyePos, vec3 normal, vec3 vertexNormal, bool isUnderwater, float disableDiffuse) {
+	return shading(color, natureTexture, light, rawMat.z, rawMat.xy, eyePos, normal, vertexNormal, isUnderwater, disableDiffuse);
 }
 #endif
 #endif

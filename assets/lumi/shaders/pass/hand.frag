@@ -41,12 +41,12 @@ void main()
 		vec3 normal	= normalize(texture(u_gbuffer_lightnormal, vec3(v_texcoord, ID_SOLID_MNORM)).xyz);
 		vec3 misc	= texture(u_gbuffer_main_etc, vec3(v_texcoord, ID_SOLID_MISC)).xyz;
 		float disableDiffuse = bit_unpack(misc.z, 4);
-		float vertexNormaly = texture(u_gbuffer_lightnormal, vec3(v_texcoord, ID_SOLID_NORM)).y;
+		vec3 vertexNormal = normalize(texture(u_gbuffer_lightnormal, vec3(v_texcoord, ID_SOLID_NORM)).xyz);
 
 		light.w = lightmapRemap(light.y);
 		normal = normal * frx_normalModelMatrix;
 
-		fragColor = shading(cSolid, u_tex_nature, light, rawMat, eyePos, normal, vertexNormaly, frx_cameraInWater == 1., disableDiffuse);
+		fragColor = shading(cSolid, u_tex_nature, light, rawMat, eyePos, normal, vertexNormal, frx_cameraInWater == 1., disableDiffuse);
 		fragColor += skyReflection(u_tex_sun, u_tex_moon, u_tex_noise, hdrAlbedo(cSolid), rawMat.xy, normalize(eyePos), normal, light.yy);
 
 		fragColor = overlay(fragColor, u_tex_glint, misc);

@@ -70,7 +70,7 @@ void main()
 	vec4 light	= texture(u_gbuffer_lightnormal, vec3(uvSolid, ID_SOLID_LIGT));
 	vec3 rawMat	= texture(u_gbuffer_main_etc, vec3(uvSolid, ID_SOLID_MATS)).xyz;
 	vec3 normal	= normalize(texture(u_gbuffer_lightnormal, vec3(uvSolid, ID_SOLID_MNORM)).xyz);
-	float vertexNormaly = texture(u_gbuffer_lightnormal, vec3(uvSolid, ID_SOLID_NORM)).y;
+	vec3 vertexNormal = normalize(texture(u_gbuffer_lightnormal, vec3(uvSolid, ID_SOLID_NORM)).xyz);
 
 	light.w = denoisedShadowFactor(u_gbuffer_shadow, uvSolid, eyePos, dSolid, light.y);
 
@@ -86,7 +86,7 @@ void main()
 	if (dSolid == 1.0) {
 		base = customSky(u_tex_sun, u_tex_moon, toFrag, cSolid.rgb, solidIsUnderwater);
 	} else {
-		base = shading(cSolid, u_tex_nature, light, rawMat, eyePos, normal, vertexNormaly, solidIsUnderwater, disableDiffuse);
+		base = shading(cSolid, u_tex_nature, light, rawMat, eyePos, normal, vertexNormal, solidIsUnderwater, disableDiffuse);
 		base = overlay(base, u_tex_glint, miscSolid);
 	}
 
@@ -122,18 +122,18 @@ void main()
 		light  = lTrans;
 		rawMat = texture(u_gbuffer_main_etc, vec3(v_texcoord, ID_TRANS_MATS)).xyz;
 		normal = normalize(texture(u_gbuffer_lightnormal, vec3(v_texcoord, ID_TRANS_MNORM)).xyz);
-		vertexNormaly = texture(u_gbuffer_lightnormal, vec3(v_texcoord, ID_TRANS_NORM)).y;
+		vertexNormal = normalize(texture(u_gbuffer_lightnormal, vec3(v_texcoord, ID_TRANS_NORM)).xyz);
 		disableDiffuse = bit_unpack(miscTrans.z, 4);
 
 		#ifdef WATER_FOAM
 		if (transIsWater) {
-			foamPreprocess(cTrans, u_tex_nature, eyePos + frx_cameraPos, vertexNormaly, dVanilla, dTrans);
+			foamPreprocess(cTrans, u_tex_nature, eyePos + frx_cameraPos, vertexNormal.y, dVanilla, dTrans);
 		}
 		#endif
 
 		light.w = transIsWater ? lightmapRemap (light.y) : denoisedShadowFactor(u_gbuffer_shadow, v_texcoord, eyePos, dTrans, light.y);
 
-		nextTrans = shading(cTrans, u_tex_nature, light, rawMat, eyePos, normal, vertexNormaly, decideUnderwater(dTrans, dTrans, transIsWater, true), disableDiffuse);
+		nextTrans = shading(cTrans, u_tex_nature, light, rawMat, eyePos, normal, vertexNormal, decideUnderwater(dTrans, dTrans, transIsWater, true), disableDiffuse);
 		nextTrans = overlay(nextTrans, u_tex_glint, miscTrans);
 	} else {
 		cTrans.rgb = cTrans.rgb / (cTrans.a == 0.0 ? 1.0 : cTrans.a);
