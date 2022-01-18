@@ -62,15 +62,18 @@ vec3 getViewPos(vec2 texcoord, in sampler2D target)
 
 void main()
 {
-	/* NOTE: using reconstructed normals doesn't really help reduce artifacts.
-	         and as minecraft is blocky the interpolated normals should be accurate anyway. */
 	vec3  viewPos = getViewPos(v_texcoord, u_vanilla_depth);
+	/* using reconstructed normals doesn't really help reduce artifacts (tried dF and accurate methods!!)
+	   and as minecraft is blocky the interpolated normals should be accurate anyway. */
 	vec3  viewNormal = frx_normalModelMatrix * normalize(texture(u_gbuffer_lightnormal, vec3(v_texcoord, ID_SOLID_NORM)).xyz);
 
 	vec3 rightPos = viewPos + vec3(VIEW_RADIUS, 0.0, 0.0);
 	vec4 temp = frx_projectionMatrix * vec4(rightPos, 1.0);
 	temp.x /= temp.w;
-	float screenRadius = (temp.x * 0.5 + 0.5) - v_texcoord.x;
+
+	/* screen radius is clamped up to reduce artifact. it's allowed since it
+	   doesn't affect attenuation radius. 20 is arbitraty minimum radius */
+	float screenRadius = max((temp.x * 0.5 + 0.5) - v_texcoord.x, max(float(RADIAL_STEPS), 20.0) * v_invSize.x);
 
 	// exclude last step here too
 	vec2 deltaUV = vec2(float(RADIAL_STEPS - 1) / float(RADIAL_STEPS), 0.0) * (screenRadius / float(RADIAL_STEPS));
