@@ -13,7 +13,7 @@
 	defaultFramebuffer: "vanilla",
 	fabulousTargets: {
 		translucent: "vanilla_transl", // translucent terrain
-		entity: "vanilla_transl",	  // translucent ITEM entities
+		entity: "entity_hitbox",	  // literally just entity hitbox
 		particles: "vanilla_transl",
 		weather: "weather",
 		clouds: "clouds",

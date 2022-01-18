@@ -13,13 +13,14 @@
 
 uniform sampler2D u_color_result;
 uniform sampler2D u_color_depth;
-uniform sampler2D u_color_albedo;
 uniform sampler2DArray u_color_others;
 
 uniform sampler2D u_vanilla_depth;
 uniform sampler2D u_vanilla_clouds_depth;
 uniform sampler2D u_vanilla_transl_color;
 uniform sampler2D u_translucent_depth;
+uniform sampler2D u_entity_hitbox;
+uniform sampler2D u_entity_hitbox_depth;
 
 uniform sampler2DArray u_gbuffer_main_etc;
 uniform sampler2DArray u_gbuffer_lightnormal;
@@ -36,7 +37,7 @@ void main()
 {
 	fragColor = texture(u_color_result, v_texcoord);
 
-	vec4 albedo = texture(u_color_albedo, v_texcoord);
+	vec4 albedo = texture(u_color_others, vec3(v_texcoord, ID_OTHER_ALBEDO));
 
 	float idLight = albedo.a == 0.0 ? ID_SOLID_LIGT : (albedo.a < 1.0 ? ID_TRANS_LIGT : ID_PARTS_LIGT);
 	float idMaterial = albedo.a == 0.0 ? ID_SOLID_MATS : ID_TRANS_MATS;
@@ -84,5 +85,18 @@ void main()
 		cVanillaTrans.rgb *= cVanillaTrans.a;
 
 		fragColor = premultBlend(cVanillaTrans, fragColor);
+	}
+
+	vec4 cHitbox = texture(u_entity_hitbox, v_texcoord);
+	float dHitbox = texture(u_entity_hitbox_depth, v_texcoord).r;
+
+	if (cHitbox.a > 0.0 && dHitbox <= dSolid) {
+		cHitbox = vec4(ldr_tonemap(hdr_fromGamma(cHitbox.rgb / cHitbox.a)), cHitbox.a);
+
+		if (dHitbox > dTrans && trans.a > 0.0) cHitbox = max(vec4(0.0), cHitbox * (1.0 - trans));
+		if (dHitbox > dMin && after.a > 0.0) cHitbox = max(vec4(0.0), cHitbox * (1.0 - after));
+
+		cHitbox.rgb *= cHitbox.a;
+		fragColor = premultBlend(cHitbox, fragColor);
 	}
 }

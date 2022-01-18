@@ -2,11 +2,9 @@
 	images: [
 		 {
 			name: "color_depth",
-			lod: 0,
 			internalFormat: "R32F",
 			pixelFormat: "RED",
 			pixelDataType: "FLOAT",
-			target: "TEXTURE_2D",
 			texParams: [ 
 				{name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
 				{name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"},
@@ -14,11 +12,9 @@
 		},
 		{
 			name: "color_result",
-			lod: 0,
 			internalFormat: "RGB16F",
 			pixelFormat: "RGB",
 			pixelDataType: "FLOAT",
-			target: "TEXTURE_2D",
 			texParams: [ 
 				{name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
 				{name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"},
@@ -26,24 +22,10 @@
 		},
 		{
 			name: "color_others",
-			lod: 0,
-			depth: 2,
+			depth: 3,
 			internalFormat: "RGBA8",
 			pixelFormat: "RGBA",
-			pixelDataType: "UNSIGNED_BYTE",
 			target: "TEXTURE_2D_ARRAY",
-			texParams: [ 
-				{name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
-				{name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"},
-			]
-		},
-		{
-			name: "color_albedo",
-			lod: 0,
-			internalFormat: "RGBA8",
-			pixelFormat: "RGBA",
-			pixelDataType: "UNSIGNED_BYTE",
-			target: "TEXTURE_2D",
 			texParams: [ 
 				{name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
 				{name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"},
@@ -53,8 +35,6 @@
 			name: "ao_result",
 			internalFormat: "R16",
 			pixelFormat: "RED",
-			pixelDataType: "UNSIGNED_BYTE",
-			target: "TEXTURE_2D",
 			texParams: [ 
 				{name: "TEXTURE_MIN_FILTER", val: "LINEAR"}, {name: "TEXTURE_MAG_FILTER", val: "LINEAR"},
 				{name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"},
@@ -64,8 +44,6 @@
 			name: "gbuffer_main_etc_copy",
 			internalFormat: "RGB8",
 			pixelFormat: "RGB",
-			pixelDataType: "UNSIGNED_BYTE",
-			target: "TEXTURE_2D",
 			texParams: [
 				{name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
 				{name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
@@ -73,11 +51,9 @@
 		},
 		{
 			name: "view_z",
-			lod: 0,
 			internalFormat: "R32F",
 			pixelFormat: "RED",
 			pixelDataType: "FLOAT",
-			target: "TEXTURE_2D",
 			texParams: [ 
 				{name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
 				{name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"},
@@ -175,9 +151,9 @@
 			colorAttachments: [
 				{image: "color_result"},
 				{image: "color_depth"},
-				{image: "color_albedo"},
 				{image: "color_others", layer: 0},
 				{image: "color_others", layer: 1},
+				{image: "color_others", layer: 2},
 			]
 		},
 		{

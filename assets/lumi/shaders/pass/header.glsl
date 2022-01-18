@@ -55,5 +55,6 @@ in vec2 v_invSize;
 #define ID_TRANS_MATS 2.
 #define ID_TRANS_MISC 3.
 
-#define ID_OTHER_TRANS 0.
-#define ID_OTHER_AFTER 1.
+#define ID_OTHER_ALBEDO 0.
+#define ID_OTHER_TRANS 1.
+#define ID_OTHER_AFTER 2.

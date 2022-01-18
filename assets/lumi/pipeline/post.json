@@ -16,13 +16,14 @@
 			samplers: [
 				"u_color_result",
 				"u_color_depth",
-				"u_color_albedo",
 				"u_color_others",
 
 				"u_vanilla_depth",
 				"u_vanilla_clouds_depth",
 				"u_vanilla_transl_color",
 				"u_translucent_depth",
+				"u_entity_hitbox",
+				"u_entity_hitbox_depth",
 
 				"u_gbuffer_main_etc",
 				"u_gbuffer_lightnormal",
@@ -45,13 +46,14 @@
 				samplerImages: [
 					"color_result",
 					"color_depth",
-					"color_albedo",
 					"color_others",
 
 					"vanilla_depth",
 					"clouds_depth",
 					"vanilla_transl_color",
 					"translucent_depth",
+					"entity_hitbox",
+					"entity_hitbox_depth",
 
 					"gbuffer_main_etc",
 					"gbuffer_lightnormal",

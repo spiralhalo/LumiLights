@@ -14,6 +14,10 @@
 				framebuffer: "vanilla_transl",
 				program: "frex_clear"
 			}, {
+				name: "clear_entity_hitbox",
+				framebuffer: "entity_hitbox",
+				program: "frex_clear"
+			}, {
 				name: "clear_particles",
 				framebuffer: "particles",
 				program: "frex_clear"

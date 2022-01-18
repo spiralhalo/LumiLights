@@ -83,7 +83,7 @@
 			samplers: [
 				"u_input",
 				"u_blend",
-				"u_color_albedo",
+				"u_color_others",
 				"u_gbuffer_lightnormal",
 			]
 		},
@@ -110,7 +110,7 @@
 				name: "bloomdown0", framebuffer: "bloomdown0", program: "bloom0",
 				samplerImages: [
 					"swap_color", "swap_color",
-					"color_albedo",
+					"color_others",
 					"gbuffer_lightnormal",
 				],
 				lod: 0, toggleConfig: "bloom_effect"
