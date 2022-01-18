@@ -1,5 +1,6 @@
 #include frex:shaders/lib/noise/cellular2x2x2.glsl
 #include frex:shaders/lib/noise/noise3d.glsl
+#include lumi:shaders/common/atmosphere.glsl
 #include lumi:shaders/lib/rectangle.glsl
 #include lumi:shaders/prog/fog.glsl
 #include lumi:shaders/prog/shading.glsl
@@ -13,7 +14,6 @@ l2_vary vec3 v_celest2;
 l2_vary vec3 v_celest3;
 
 l2_vary mat4 v_star_rotator;
-l2_vary float v_night; //what
 l2_vary float v_not_in_void;
 l2_vary float v_near_void_core;
 
@@ -54,8 +54,6 @@ void celestSetup()
 void skySetup()
 {
 	v_star_rotator = l2_rotationMatrix(vec3(1.0, 0.0, 1.0), frx_worldTime * PI);
-	v_night		   = min(smoothstep(0.50, 0.54, frx_worldTime), smoothstep(1.0, 0.96, frx_worldTime));
-
 	v_not_in_void	 = l2_clampScale(-65.0, -64.0, frx_cameraPos.y);
 	v_near_void_core = l2_clampScale(-64.0, -128.0, frx_cameraPos.y);
 }
@@ -119,10 +117,9 @@ vec4 customSky(sampler2D sunTexture, sampler2D moonTexture, vec3 toSky, vec3 fal
 		#if SKY_MODE == SKY_MODE_LUMI
 		vec4 celestColor = celestFrag(Rect(v_celest1, v_celest2, v_celest3), sunTexture, moonTexture, toSky);
 		float starEraser = celestColor.a;
-		float celestStr  = mix(1.0, STARS_STR, v_night);
 
 		result.rgb  = atmos_SkyGradientRadiance(toSky) * skyVisible;
-		result.rgb += celestColor.rgb * (1. - frx_rainGradient) * celestStr * celestVisible;
+		result.rgb += celestColor.rgb * (1. - frx_rainGradient) * celestVisible;
 		#else
 		float mul = 1.0 + frx_worldIsMoonlit * frx_skyLightTransitionFactor;
 		vec3 fallback1 = hdr_fromGamma(fallback) * mul;
@@ -133,7 +130,7 @@ vec4 customSky(sampler2D sunTexture, sampler2D moonTexture, vec3 toSky, vec3 fal
 		// Stars
 		const vec3 NON_MILKY_AXIS = vec3(-0.598964, 0.531492, 0.598964);
 
-		float starry = l2_clampScale(0.4, 0.0, frx_luminance(result.rgb)) * v_night;
+		float starry = l2_clampScale(0.27, 0.07, lightLuminance(result.rgb));
 			 starry *= l2_clampScale(-0.6, -0.5, skyDotUp); //prevent star near the void core
 
 		float milkyness   = l2_clampScale(0.7, 0.0, abs(dot(NON_MILKY_AXIS, toSky.xyz)));

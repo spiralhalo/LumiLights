@@ -159,7 +159,11 @@ void atmos_generateAtmosphereModel()
 
 
 	vec3 sunColor;
-	float horizonTime = frx_worldTime < 0.75 ? frx_worldTime : (frx_worldTime - 1.0); // [-0.25, 0.75)
+	
+	// Respect dimension setting. Not accurate but better than nothing
+	float dimTime = fract(frx_skyAngleRadians / TAU + 0.25);
+	float dayTime = mix(dimTime, frx_worldTime, frx_worldIsOverworld);
+	float horizonTime = dayTime < 0.75 ? dayTime : (dayTime - 1.0); // [-0.25, 0.75)
 
 	if (horizonTime <= SUN_TIMES[0]) {
 		sunColor = SUN_COLOR[SUN_COL_ID[0]];
