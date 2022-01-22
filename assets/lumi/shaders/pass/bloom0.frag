@@ -8,7 +8,7 @@
 ******************************************************/
 
 uniform sampler2D u_input;
-uniform sampler2D u_blend;
+uniform sampler2D u_vanilla_depth;
 
 uniform sampler2DArray u_color_others;
 uniform sampler2DArray u_gbuffer_lightnormal;
@@ -18,7 +18,9 @@ out vec4 fragColor;
 void main()
 {
 	vec4  albedo   = texture(u_color_others, vec3(v_texcoord, ID_OTHER_ALBEDO));
-	float idLight  = albedo.a == 0.0 ? ID_SOLID_LIGT : (albedo.a < 1.0 ? ID_TRANS_LIGT : ID_PARTS_LIGT);
+	float idLight  = texture(u_vanilla_depth, v_texcoord).r == 1.0
+		? (albedo.a == 0.0 ? ID_SOLID_LIGT : (albedo.a < 1.0 ? ID_TRANS_LIGT : ID_PARTS_LIGT))
+		: ID_SOLID_LIGT;
 	float lightz   = texture(u_gbuffer_lightnormal, vec3(v_texcoord, idLight)).z;
 	float emissive = lightz;
 

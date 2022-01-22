@@ -82,7 +82,7 @@
 			fragmentSource: "lumi:shaders/pass/bloom0.frag",
 			samplers: [
 				"u_input",
-				"u_blend",
+				"u_vanilla_depth",
 				"u_color_others",
 				"u_gbuffer_lightnormal",
 			]
@@ -109,7 +109,8 @@
 			{
 				name: "bloomdown0", framebuffer: "bloomdown0", program: "bloom0",
 				samplerImages: [
-					"swap_color", "swap_color",
+					"swap_color",
+					"vanilla_depth",
 					"color_others",
 					"gbuffer_lightnormal",
 				],
