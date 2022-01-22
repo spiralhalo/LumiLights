@@ -16,9 +16,7 @@ const float ANGLE_BIAS	= 0.3;
 
 #endif
 
-const float VIEW_RADIUS	= float(clamp(SSAO_RADIUS_INT, 1, 20)) / 10.;
-const float INTENSITY	= float(clamp(SSAO_INTENSITY_INT, 1, 20)) / 2.;
-const float CENTER_BIAS_POW = clamp(VIEW_RADIUS, 1.0, 2.0);
+const float CENTER_BIAS_POW = clamp(SSAO_VIEW_RADIUS, 1.0, 2.0);
 
 #ifdef VERTEX_SHADER
 
@@ -67,7 +65,7 @@ void main()
 	   and as minecraft is blocky the interpolated normals should be accurate anyway. */
 	vec3  viewNormal = frx_normalModelMatrix * normalize(texture(u_gbuffer_lightnormal, vec3(v_texcoord, ID_SOLID_NORM)).xyz);
 
-	vec3 rightPos = viewPos + vec3(VIEW_RADIUS, 0.0, 0.0);
+	vec3 rightPos = viewPos + vec3(SSAO_VIEW_RADIUS, 0.0, 0.0);
 	vec4 temp = frx_projectionMatrix * vec4(rightPos, 1.0);
 	temp.x /= temp.w;
 
@@ -87,6 +85,7 @@ void main()
 
 	vec2 aspectNormalizer = v_invSize * min(frxu_size.x, frxu_size.y);
 
+	const float ATT_RADIUS_SQ = SSAO_VIEW_RADIUS * SSAO_VIEW_RADIUS * 4.0;
 	float occlusion = 0.0;
 	for (int i = 0; i < DIRECTIONS; ++i) {
 		deltaUV = v_deltaRotator * deltaUV;
@@ -102,7 +101,7 @@ void main()
 			float phi = (PI / 2.0) - acos(dot(viewNormal, normalize(horizonVec)));
 
 			if (phi > prevPhi) {
-				float r2 = dot(horizonVec, horizonVec) / (VIEW_RADIUS * VIEW_RADIUS); // optimized pow(len/rad, 2)
+				float r2 = dot(horizonVec, horizonVec) / ATT_RADIUS_SQ; // optimized pow(len/rad, 2)
 				float attenuation = clamp(1.0 - r2, 0.0, 1.0);
 				float value		  = sin(phi) - sin(prevPhi);
 				occlusion += attenuation * value;
@@ -115,7 +114,7 @@ void main()
 	occlusion  = 1.0 - occlusion / float(DIRECTIONS) * fade;
 
 	// apply intensity before blurring
-	ao_result = pow(clamp(occlusion, 0.0, 1.0), INTENSITY);
+	ao_result = pow(clamp(occlusion, 0.0, 1.0), SSAO_INTENSITY);
 }
 
 #endif

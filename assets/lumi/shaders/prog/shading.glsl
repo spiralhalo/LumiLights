@@ -320,6 +320,7 @@ vec4 shading(vec4 color, sampler2D natureTexture, vec4 light, float ao, vec2 mat
 	specular += shading0.specular;
 
 	ao = min(1.0, ao + light.z);
+	ao = pow(ao, mix(1.0, SSAO_INTENSITY, lightLuminance(shaded)));
 
 	shaded *= ao;
 	specular *= ao;
