@@ -249,6 +249,7 @@ void lights(vec3 albedo, vec4 light, vec3 eyePos, vec3 toEye, out vec3 baseLight
 	
 	// makes builds look better outside
 	float sunAdaptation = frx_smoothedEyeBrightness.y * lightLuminance(atmosv_CelestialRadiance) * (1. - frx_rainGradient);
+	float adaptationTerm = 1.0 - 0.5 * sunAdaptation;
 
 #if BLOCK_LIGHT_MODE != BLOCK_LIGHT_MODE_NEUTRAL
 	float blWhite = light.z;
@@ -256,7 +257,7 @@ void lights(vec3 albedo, vec4 light, vec3 eyePos, vec3 toEye, out vec3 baseLight
 	blColor = mix(blColor, BLOCK_LIGHT_NEUTRAL, blWhite);
 #endif
 
-	blockLight = blColor * BLOCK_LIGHT_STR * bl * (1.0 - 0.5 * sunAdaptation);
+	blockLight = blColor * BLOCK_LIGHT_STR * bl * adaptationTerm;
 
 #if HANDHELD_LIGHT_RADIUS != 0
 	if (frx_heldLight.w > 0) {
@@ -267,11 +268,9 @@ void lights(vec3 albedo, vec4 light, vec3 eyePos, vec3 toEye, out vec3 baseLight
 		float cone	   = l2_clampScale(1.0 - pbrv_coneOuter, 1.0 - pbrv_coneInner, cosView);
 		float distSq   = dot(eyePos, eyePos);
 		float hlRadSq  = heldLight.w * HANDHELD_LIGHT_RADIUS * heldLight.w * HANDHELD_LIGHT_RADIUS;
-		float hl	   = hdr_fromGammaf(l2_clampScale(hlRadSq, 0.0, distSq));
+		float hl	   = hdr_fromGammaf(l2_clampScale(hlRadSq, 0.0, distSq)) * cone;
 
-		hl *= cone;
-
-		hlLight = hdr_fromGamma(heldLight.rgb) * BLOCK_LIGHT_STR * hl;
+		hlLight = hdr_fromGamma(heldLight.rgb) * BLOCK_LIGHT_STR * hl * adaptationTerm;
 	}
 #endif
 
