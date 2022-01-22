@@ -56,10 +56,21 @@ void frx_pipelineVertex() {
 		pv_vertex = frx_vertex.xyz + frx_cameraPos;
 		#endif
 
-		gl_Position = frx_viewProjectionMatrix * frx_vertex;
-
 		#ifdef TAA_ENABLED
+		/* make every pixel slightly farther from camera so vanilla renders (round entity shadow, block outline) don't
+		clip into jittered faces.
+
+		side effect: they render slightly above managed faces, depending on strength.
+
+		strength is bigger when the screen is smaller. the multiplier is brute forced to get the smallest amount of
+		both clipping and side effect at reasonable angles. note: the strength should be leaning towards 1.0 when
+		directly facing the eye (view normal z = 1.0) but we want to reduce compute by using a constant.*/
+		float correctionStrength = 1.0 + max(inv_size.x, inv_size.y) * 7.0;
+		gl_Position = frx_projectionMatrix * vec4((frx_viewMatrix * frx_vertex).xyz * correctionStrength, 1.0);
+
 		gl_Position.st += taaJitter(inv_size, frx_renderFrames) * gl_Position.w;
+		#else
+		gl_Position = frx_viewProjectionMatrix * frx_vertex;
 		#endif
 	}
 
