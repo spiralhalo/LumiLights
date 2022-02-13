@@ -57,6 +57,9 @@ void frx_pipelineVertex() {
 		#endif
 
 		#ifdef TAA_ENABLED
+		#ifdef SHADOW_MAP_PRESENT
+		gl_Position = frx_viewProjectionMatrix * frx_vertex;
+		#else
 		/* make every pixel slightly farther from camera so vanilla renders (round entity shadow, block outline) don't
 		clip into jittered faces.
 
@@ -67,6 +70,7 @@ void frx_pipelineVertex() {
 		directly facing the eye (view normal z = 1.0) but we want to reduce compute by using a constant.*/
 		float correctionStrength = 1.0 + max(inv_size.x, inv_size.y) * 7.0;
 		gl_Position = frx_projectionMatrix * vec4((frx_viewMatrix * frx_vertex).xyz * correctionStrength, 1.0);
+		#endif
 
 		gl_Position.st += taaJitter(inv_size, frx_renderFrames) * gl_Position.w;
 		#else
