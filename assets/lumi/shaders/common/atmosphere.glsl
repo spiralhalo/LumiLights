@@ -75,7 +75,7 @@ float twilightCalc(vec3 world_toSky, float skyHorizon) {
 
 vec3 atmos_OWFogRadiance(vec3 world_toSky)
 {
-	return mix(atmosv_FogRadiance, atmosv_OWTwilightRadiance, 0.8 * twilightCalc2(world_toSky) * atmosv_OWTwilightFactor);
+	return mix(atmosv_FogRadiance, atmosv_OWTwilightRadiance, 0.4 * twilightCalc2(world_toSky) * atmosv_OWTwilightFactor);
 }
 
 vec3 atmos_HorizonColor(vec3 world_toSky, float skyHorizon) {
