@@ -34,29 +34,33 @@ vec4 clipAABB(vec3 colorMin, vec3 colorMax, vec4 currentColor, vec4 previousColo
 	}
 }
 
-vec2 reproject(sampler2D depthBuffer, vec2 currentUv) {
-	// vec2 ndcJitter	   = taaJitter(v_invSize, frx_renderFrames);
-	// vec2 prevNdcJitter = taaJitter(v_invSize, frx_renderFrames - 1u);
-
-	float depth = texture(depthBuffer, currentUv).r;
-
-	vec2 currentNdc = currentUv * 2.0 - 1.0;// - ndcJitter;
-	vec4 temp = frx_inverseViewProjectionMatrix * vec4(currentNdc, depth * 2.0 - 1.0, 1.0);
+vec3 calcPrevNdc(vec3 currentNdc) {
+	vec4 temp = frx_inverseViewProjectionMatrix * vec4(currentNdc, 1.0);
 	vec3 currentPos = temp.xyz / temp.w;
 
 	// transform current camera-space pos -> world-space pos (assumed static) -> previous camera-space pos
 	vec3 prevPos = (currentPos + frx_cameraPos) - frx_lastCameraPos;
 
 	temp = frx_lastViewProjectionMatrix * vec4(prevPos, 1.0);
-	vec2 prevUv = temp.xy / temp.w;// + prevNdcJitter;
-	prevUv = prevUv * 0.5 + 0.5;
+	return temp.xyz / temp.w;
+}
+
+vec2 calcPrevUv(sampler2D depthBuffer, vec2 currentUv) {
+	vec2 ndcJitter	   = taaJitter(v_invSize, frx_renderFrames);
+	vec2 prevNdcJitter = taaJitter(v_invSize, frx_renderFrames - 1u);
+
+	float depth = texture(depthBuffer, currentUv).r;
+	vec2 prevUv = (calcPrevNdc(vec3(currentUv * 2.0 - 1.0 - ndcJitter, depth * 2.0 - 1.0)).xy + prevNdcJitter) * 0.5 + 0.5;
 
 	if (prevUv != clamp(prevUv, 0.0, 1.0)) return currentUv; // out of bounds
-
 	return prevUv;
 }
 
-#define velocityWeight(prevCoord) min(1.0, length((v_texcoord - prevCoord) * frxu_size)) // I don't even know
+float velocityWeight(sampler2D depthBuffer, vec2 currentUv) {
+	float depth = texture(depthBuffer, currentUv).r;
+	vec2 prevUv = calcPrevNdc(vec3(currentUv * 2.0 - 1.0, depth * 2.0 - 1.0)).xy * 0.5 + 0.5;
+	return min(1.0, length((currentUv - prevUv) * frxu_size));
+}
 
 // based on INSIDE's TAA and https://github.com/ziacko/Temporal-AA
 vec4 taa()
@@ -79,7 +83,7 @@ vec4 taa()
 		ivec2(0, 1)
 	);
 
-	vec2 prevCoord	  = reproject(u_depthCurrent, v_texcoord);
+	vec2 prevCoord	  = calcPrevUv(u_depthCurrent, v_texcoord);
 	vec4 currentColor = texture(u_current, v_texcoord);
 	vec4 historyColor = texture(u_history0, prevCoord);
 
@@ -102,7 +106,7 @@ vec4 taa()
 	vec3 mixedMin = mix(minColor0, minColor1, 0.5);
 	vec3 mixedMax = mix(maxColor0, maxColor1, 0.5);
 
-	float feedback = mix(FEEDBACK_MAX, FEEDBACK_MIN, velocityWeight(prevCoord));
+	float feedback = mix(FEEDBACK_MAX, FEEDBACK_MIN, velocityWeight(u_depthCurrent, v_texcoord));
 	vec4 clippedHistoryColor = clipAABB(mixedMin, mixedMax, currentColor, historyColor);
 
 	return mix(currentColor, clippedHistoryColor, feedback);
@@ -127,15 +131,17 @@ void main()
 
 #else
 
-	vec2 prevCoord = reproject(u_depthCurrent, v_texcoord);
-	fragColor = vec4(velocityWeight(prevCoord));// * 0.9;
-	// fragColor += texture(u_current, v_texcoord) * 0.1;
+	if (min(v_texcoord.x, v_texcoord.y) >= 0.75) {
+		fragColor = texture(u_current, v_texcoord * 4.0 - 3.0);
+	} else {
+		fragColor = vec4(velocityWeight(u_depthCurrent, v_texcoord));
+	}
 
 #endif
 
 #else // TAA_DEBUG_RENDER != TAA_DEBUG_RENDER_OFF
 
-	vec2 prevCoord = reproject(u_depthCurrent, v_texcoord);
+	vec2 prevCoord = calcPrevUv(u_depthCurrent, v_texcoord);
 	vec2 velocity = v_texcoord - prevCoord;
 
 	float depth		  = texture(u_depthCurrent, v_texcoord).r;
