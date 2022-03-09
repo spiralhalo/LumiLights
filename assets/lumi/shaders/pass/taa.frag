@@ -16,7 +16,7 @@ uniform sampler2D u_debugText;
 out vec4 fragColor;
 
 #define FEEDBACK_MAX 0.9
-#define FEEDBACK_MIN 0.6
+#define FEEDBACK_MIN 0.1
 
 vec4 clipAABB(vec3 colorMin, vec3 colorMax, vec4 currentColor, vec4 previousColor)
 {
@@ -35,20 +35,20 @@ vec4 clipAABB(vec3 colorMin, vec3 colorMax, vec4 currentColor, vec4 previousColo
 }
 
 vec2 reproject(sampler2D depthBuffer, vec2 currentUv) {
-	vec2 ndcJitter	   = taaJitter(v_invSize, frx_renderFrames);
-	vec2 prevNdcJitter = taaJitter(v_invSize, frx_renderFrames - 1u);
+	// vec2 ndcJitter	   = taaJitter(v_invSize, frx_renderFrames);
+	// vec2 prevNdcJitter = taaJitter(v_invSize, frx_renderFrames - 1u);
 
 	float depth = texture(depthBuffer, currentUv).r;
 
-	vec4 temp = frx_inverseViewProjectionMatrix * vec4(currentUv * 2.0 - 1.0 - ndcJitter, depth * 2.0 - 1.0, 1.0);
+	vec2 currentNdc = currentUv * 2.0 - 1.0;// - ndcJitter;
+	vec4 temp = frx_inverseViewProjectionMatrix * vec4(currentNdc, depth * 2.0 - 1.0, 1.0);
 	vec3 currentPos = temp.xyz / temp.w;
 
-	// This produces correct velocity?
-	vec3 cameraToLastCamera = frx_cameraPos - frx_lastCameraPos;
-	vec3 prevPos = currentPos + cameraToLastCamera;
+	// transform current camera-space pos -> world-space pos (assumed static) -> previous camera-space pos
+	vec3 prevPos = (currentPos + frx_cameraPos) - frx_lastCameraPos;
 
 	temp = frx_lastViewProjectionMatrix * vec4(prevPos, 1.0);
-	vec2 prevUv = temp.xy / temp.w + prevNdcJitter; // jitter to get correct previous UV
+	vec2 prevUv = temp.xy / temp.w;// + prevNdcJitter;
 	prevUv = prevUv * 0.5 + 0.5;
 
 	if (prevUv != clamp(prevUv, 0.0, 1.0)) return currentUv; // out of bounds
@@ -56,7 +56,7 @@ vec2 reproject(sampler2D depthBuffer, vec2 currentUv) {
 	return prevUv;
 }
 
-#define velocityWeight(prevCoord) exp(-length((v_texcoord - prevCoord) * frxu_size)) // I don't even know
+#define velocityWeight(prevCoord) min(1.0, length((v_texcoord - prevCoord) * frxu_size)) // I don't even know
 
 // based on INSIDE's TAA and https://github.com/ziacko/Temporal-AA
 vec4 taa()
@@ -102,7 +102,7 @@ vec4 taa()
 	vec3 mixedMin = mix(minColor0, minColor1, 0.5);
 	vec3 mixedMax = mix(maxColor0, maxColor1, 0.5);
 
-	float feedback = mix(FEEDBACK_MIN, FEEDBACK_MAX, velocityWeight(prevCoord));
+	float feedback = mix(FEEDBACK_MAX, FEEDBACK_MIN, velocityWeight(prevCoord));
 	vec4 clippedHistoryColor = clipAABB(mixedMin, mixedMax, currentColor, historyColor);
 
 	return mix(currentColor, clippedHistoryColor, feedback);
@@ -128,9 +128,8 @@ void main()
 #else
 
 	vec2 prevCoord = reproject(u_depthCurrent, v_texcoord);
-	vec2 velocity = v_texcoord - prevCoord;
-	fragColor = vec4(velocityWeight(prevCoord)) * 0.9;
-	fragColor += texture(u_current, v_texcoord) * 0.1;
+	fragColor = vec4(velocityWeight(prevCoord));// * 0.9;
+	// fragColor += texture(u_current, v_texcoord) * 0.1;
 
 #endif
 
