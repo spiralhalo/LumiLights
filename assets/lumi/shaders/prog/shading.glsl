@@ -245,11 +245,13 @@ void lights(vec3 albedo, vec4 light, vec3 eyePos, vec3 toEye, out vec3 baseLight
 	baseLight += albedo * light.z * EMISSIVE_LIGHT_STR;
 
 	float bl = l2_clampScale(0.03125, 0.96875, light.x);
+	#define BL_MULT 3.0
+	bl = clamp(pow(bl, 0.5 + BL_MULT / 2.0) * BL_MULT, 0.0, BL_MULT);
 	vec3 blColor = BLOCK_LIGHT_COLOR;
-	
+
 	// makes builds look better outside
 	float sunAdaptation = frx_smoothedEyeBrightness.y * lightLuminance(atmosv_CelestialRadiance) * (1. - frx_rainGradient);
-	float adaptationTerm = 1.0 - 0.5 * sunAdaptation;
+	float adaptationTerm = mix(1.0, 0.5 / BL_MULT, sunAdaptation);
 
 #if BLOCK_LIGHT_MODE != BLOCK_LIGHT_MODE_NEUTRAL
 	float blWhite = light.z;
