@@ -70,8 +70,8 @@
 				},
 				bloom_scale: {
 					default: 10,
-					min: 10,
-					max: 50,
+					min: 1,
+					max: 20,
 					nameKey: "config.lumi_lights.value.bloom_scale",
 					descriptionKey: "config.lumi_lights.help.bloom_scale"
 				},
