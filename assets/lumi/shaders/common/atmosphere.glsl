@@ -97,6 +97,10 @@ vec3 atmos_SkyGradientRadiance(vec3 world_toSky)
 
 	return mix(atmosv_SkyRadiance, horizonColor, skyHorizon);
 }
+
+float atmos_eyeAdaptation() {
+	return frx_smoothedEyeBrightness.y * lightLuminance(atmosv_CelestialRadiance) * (1. - frx_rainGradient);
+}
 #endif
 
 

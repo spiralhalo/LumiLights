@@ -78,7 +78,7 @@
 	programs: [
 		{
 			name: "bloom0",
-			vertexSource: "lumi:shaders/pass/basic.vert",
+			vertexSource: "lumi:shaders/pass/shading.vert",
 			fragmentSource: "lumi:shaders/pass/bloom0.frag",
 			samplers: [
 				"u_input",

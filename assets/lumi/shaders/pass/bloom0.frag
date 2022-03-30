@@ -1,6 +1,7 @@
 #include lumi:shaders/pass/header.glsl
 
 #include frex:shaders/lib/sample.glsl
+#include lumi:shaders/common/atmosphere.glsl
 #include lumi:shaders/prog/tonemap.glsl
 
 /******************************************************
@@ -32,6 +33,7 @@ void main()
 	float luminanceGate = smoothstep(MIN_LUM, MIN_LUM + 1.0, luminance) * 0.25;
 
 	luminanceGate = max(luminanceGate, emissive);
+	luminanceGate -= min(1.0, luminanceGate) * 0.5 * atmos_eyeAdaptation();
 
 	fragColor = base * luminanceGate;
 }
