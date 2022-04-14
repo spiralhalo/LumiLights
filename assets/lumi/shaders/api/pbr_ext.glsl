@@ -17,7 +17,7 @@
  */
 
 /* API version */
-#define LUMI_PBR_API 7
+#define LUMI_PBR_API 8
 
 #ifndef VERTEX_SHADER
 
@@ -25,7 +25,7 @@
 /* Roughness property -- Since version 1 */
 float pbr_roughness = -1.0;
 
-/* DEPRECATED. Use frx_fragMetalness instead. */
+/* DEPRECATED. Use frx_fragReflectance instead. */
 /* Metalness property -- Since version 1 */
 float pbr_metallic = -1.0;
 
@@ -38,8 +38,11 @@ float pbr_f0 = -1.0;
 /* Microfacet normal in world space -- Since version 3 */
 vec3  pbr_normalMicro = vec3(-2., -2., -2.);
 
-/* Water flag. Lumi Lights handle water exceptionally -- Since version 4 */
+/* Special water flag. Adds caustics and foam based on user setting -- Since version 4, updated in version 8 */
 bool  pbr_isWater = false;
+
+/* Built-in water flag. Replaces any water material with built-in shader -- Since version 8 */
+bool  pbr_builtinWater = false;
 
 #endif
 
@@ -47,17 +50,19 @@ bool  pbr_isWater = false;
 
 #ifdef VERTEX_SHADER
 
+/* DEPRECATED. Use frx_vertexTangent instead */
 /* Usable tangent vector vertex output */
 out vec3 l2_tangent;
 
 #else
 
+/* DEPRECATED. Use frx_vertexTangent instead */
 /* Usable tangent vector fragment input */
 in vec3 l2_tangent;
 
 #endif
 
-/* Deprecated. Use LUMI_PBR_API instead */
+/* DEPRECATED. Use LUMI_PBR_API instead */
 #define LUMI_PBRX
 
 
@@ -67,21 +72,24 @@ in vec3 l2_tangent;
 #include lumi:shaders/api/bump_ext.glsl
 
 #ifdef VERTEX_SHADER
+/* DEPRECATED. Use frx_vertexTangent instead */
 #define pbrExt_tangentSetup(normal) l2_tangent = bumpExt_computeTangent_v1(normal)
 #endif
 
 
 
 #ifndef VERTEX_SHADER
-/*** FOR INTERNAL USE. DO NOT ACCESS ***/
+/*** Optional - for internal pipeline use. DO NOT ACCESS IN MATERIAL ***/
 
+/* Since version 7 */
 bool pbrExt_doTBN = true;
 
+/* Since version 7 */
 void pbrExt_resolveProperties() {
 #ifdef PBR_ENABLED
 	if (pbr_roughness >= 0.0) frx_fragRoughness = pbr_roughness;
-	// if (pbr_metallic >= 0.) frx_fragMetalness = pbr_metallic; // fragMetalness doesn't exist yet
 	if (pbr_f0 >= 0.) frx_fragReflectance = pbr_f0;
+	if (pbr_metallic >= 0.) frx_fragReflectance = mix(frx_fragReflectance, 1.0, pbr_metallic);
 	if (pbr_normalMicro.x >= -1.0) {
 		frx_fragNormal = pbr_normalMicro;
 		pbrExt_doTBN = false;

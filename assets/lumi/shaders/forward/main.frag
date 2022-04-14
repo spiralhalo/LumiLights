@@ -60,7 +60,11 @@ void frx_pipelineFragment()
 		frx_fragColor.rgb *= diffuse;
 		frx_fragColor.rgb += autoGlint(u_tex_glint, frx_normalizeMappedUV(frx_texcoord), frx_matGlint);
 	} else {
-		if (pbr_isWater) {
+		if (pbr_builtinWater) {
+			pbr_isWater = true;
+			frx_fragReflectance = 0.02;
+			frx_fragRoughness = 0.05;
+
 			/* WATER RECOLOR */
 			#if WATER_COLOR == WATER_COLOR_NO_TEXTURE
 			frx_fragColor.rgb  = frx_vertexColor.rgb;
@@ -92,8 +96,10 @@ void frx_pipelineFragment()
 
 		if (frx_fragRoughness == 0.0) frx_fragRoughness = 1.0; // TODO: fix assumption?
 
-		#if LUMI_PBR_API == 7
+		#if LUMI_PBR_API >= 7
 		pbrExt_resolveProperties();
+		#else
+		bool pbrExt_doTBN = true;
 		#endif
 
 		if (pbrExt_doTBN) {
@@ -108,7 +114,8 @@ void frx_pipelineFragment()
 
 		float ao = (frx_fragEnableAo && frx_modelOriginRegion) ? frx_fragLight.z : 1.0;
 
-		float roughness = max(0.01, frx_fragRoughness);
+		float roughness = max(0.01, frx_fragRoughness); // TODO: use white clear color and stop doing this
+		float metalness = frx_fragReflectance > 0.5 ? frx_fragReflectance : 0.0; // TODO: do something
 		float disableDiffuse = 1.0 - float(frx_fragEnableDiffuse);
 
 		// put water flag last because it makes the material buffer looks blue :D easier to debug
@@ -118,7 +125,7 @@ void frx_pipelineFragment()
 		fragColor[1] = vec4(frx_fragLight.xy, frx_fragEmissive, 1.0);
 		fragColor[2] = vec4(frx_vertexNormal, 1.0);
 		fragColor[3] = vec4(frx_fragNormal, 1.0);
-		fragColor[4] = vec4(roughness, pbr_metallic, ao, 1.0);
+		fragColor[4] = vec4(roughness, metalness, ao, 1.0);
 		fragColor[5] = vec4(frx_normalizeMappedUV(frx_texcoord), bitFlags, 1.0);
 	}
 
