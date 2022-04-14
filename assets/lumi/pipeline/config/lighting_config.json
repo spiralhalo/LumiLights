@@ -27,7 +27,7 @@
 					descriptionKey: "config.lumi_lights.help.indoors_brightness"
 				},
 				outdoors_brightness: {
-					default: 20,
+					default: 40,
 					min: 5,
 					max: 50,
 					nameKey: "config.lumi_lights.value.outdoors_brightness",

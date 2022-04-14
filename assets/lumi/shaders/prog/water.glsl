@@ -29,6 +29,7 @@ bool decideUnderwater(float depth, float dTrans, bool transIsWater, bool translu
 }
 
 vec2 refractSolidUV(sampler2DArray normalBuffer, sampler2D solidDepthBuffer, float dSolid, float dTrans) {
+#ifdef REFRACTION_EFFECT
 	if (dTrans < dSolid) {
 		const float refractStr = .1;
 
@@ -48,6 +49,9 @@ vec2 refractSolidUV(sampler2DArray normalBuffer, sampler2D solidDepthBuffer, flo
 	} else {
 		return v_texcoord;
 	}
+#else
+	return v_texcoord;
+#endif
 }
 
 float caustics(sampler2D natureTexture, vec3 worldPos, float vertexNormaly)
