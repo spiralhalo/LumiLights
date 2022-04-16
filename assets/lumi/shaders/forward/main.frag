@@ -60,6 +60,14 @@ void frx_pipelineFragment()
 		frx_fragColor.rgb *= diffuse;
 		frx_fragColor.rgb += autoGlint(u_tex_glint, frx_normalizeMappedUV(frx_texcoord), frx_matGlint);
 	} else {
+		#if LUMI_PBR_API >= 7
+		pbrExt_resolveProperties();
+		#else // safeguard
+		bool pbrExt_doTBN = true;
+		bool pbr_isWater = false;
+		bool pbr_builtinWater = false;
+		#endif
+
 		if (pbr_builtinWater) {
 			pbr_isWater = true;
 			frx_fragReflectance = 0.02;
@@ -80,12 +88,6 @@ void frx_pipelineFragment()
 
 			#ifdef WATER_WAVES
 			frx_fragNormal = sampleWaterNormal(u_tex_nature, frx_var0.xyz, abs(frx_vertexNormal));
-
-			vec3 bitangent = cross(frx_vertexNormal, l2_tangent);
-			mat3 TBN = mat3(l2_tangent, bitangent, frx_vertexNormal);
-
-			frx_fragNormal = TBN * frx_fragNormal;
-			pbrExt_doTBN = false;
 			#endif
 		}
 
@@ -95,12 +97,6 @@ void frx_pipelineFragment()
 		#endif
 
 		if (frx_fragRoughness == 0.0) frx_fragRoughness = 1.0; // TODO: fix assumption?
-
-		#if LUMI_PBR_API >= 7
-		pbrExt_resolveProperties();
-		#else
-		bool pbrExt_doTBN = true;
-		#endif
 
 		if (pbrExt_doTBN) {
 			vec3 bitangent = cross(frx_vertexNormal, frx_vertexTangent.xyz) * frx_vertexTangent.w;
