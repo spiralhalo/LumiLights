@@ -36,8 +36,6 @@ float fogFactor(float distToEye, bool isUnderwater)
 	float pFogFar     = submerged ? UNDERWATER_FOG_FAR     : FOG_FAR;
 	float invEyeY	  = (1.0 - frx_smoothedEyeBrightness.y);
 
-	pFogFar = min(frx_viewDistance, pFogFar);
-
 	if (!isUnderwater && frx_worldHasSkylight == 1) {
 		float inverseThickener = 1.0;
 
@@ -65,7 +63,8 @@ vec4 fog(vec4 color, float distToEye, vec3 toFrag, bool isUnderwater)
 	float fogFactor = fogFactor(distToEye, isUnderwater);
 
 	// resolve horizon blend
-	float skyBlend	  = frx_cameraInFluid == 1 ? 0.0 : min(distToEye, frx_viewDistance) / frx_viewDistance;
+	float blendStart  = 1.0 - (min(32.0, frx_viewDistance) / frx_viewDistance); // % position of 2 chunks before render distance
+	float skyBlend	  = frx_cameraInFluid == 1 ? 0.0 : l2_clampScale(blendStart, 1.0, min(distToEye, frx_viewDistance) / frx_viewDistance);
 	vec3  toFragMod	  = toFrag;
 		  toFragMod.y = mix(1.0, toFrag.y, pow(skyBlend, 0.3)); // ??
 	vec3  fogColor	  = mix(isUnderwater ? atmosv_ClearRadiance : atmos_OWFogRadiance(toFrag), atmos_SkyGradientRadiance(toFragMod), skyBlend);
