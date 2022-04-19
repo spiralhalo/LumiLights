@@ -26,7 +26,6 @@ vec2 worldXz2Uv(vec2 worldXz)
 	return ndc * 0.5 + 0.5;
 }
 
-const float CLOUD_ALTITUDE = VOLUMETRIC_CLOUD_ALTITUDE;
 const float CLOUD_HEIGHT = 20.0 / (CLOUD_TEXTURE_ZOOM * CLOUD_SAMPLING_ZOOM);
 const float CLOUD_MID_HEIGHT = CLOUD_HEIGHT * .3;
 const float CLOUD_TOP_HEIGHT = CLOUD_HEIGHT - CLOUD_MID_HEIGHT;
@@ -42,7 +41,7 @@ const float MIN_COVERAGE = 0.325 + 0.1 * (1.0 - CLOUD_COVERAGE);
 float sampleCloud(sampler2D natureTexture, vec3 worldPos)
 {
 	vec2 uv = worldXz2Uv(worldPos.xz);
-	float tF = l2_clampScale(MIN_COVERAGE * (1.0 - frx_rainGradient), 1.0, texture(natureTexture, uv).r);
+	float tF = l2_clampScale(MIN_COVERAGE * (1.0 - frx_rainGradient * 0.6), 1.0, texture(natureTexture, uv).r);
 	float hF = tF;
 	float yF = l2_clampScale(CLOUD_MID_ALTITUDE + CLOUD_TOP_HEIGHT * hF, CLOUD_MID_ALTITUDE, worldPos.y);
 	yF *= l2_clampScale(CLOUD_MID_ALTITUDE - CLOUD_MID_HEIGHT * hF, CLOUD_MID_ALTITUDE, worldPos.y);
@@ -138,6 +137,7 @@ vec3 rayMarchCloud(sampler2D natureTexture, sampler2D noiseTexture, vec2 texcoor
 
 	// meant to be fix for "dark aura" around clouds but causes light aura instead (with some mental gymnastic can be interpreted as silver lining?)
 	lightEnergy += transmittance; // transparent clouds get more light
+	lightEnergy *= lightEnergy; // contrast hax
 
 	return vec3(lightEnergy, 1.0 - transmittance, distanceTotal);
 }
@@ -153,6 +153,10 @@ vec4 customClouds(sampler2D cloudsDepthBuffer, sampler2D natureTexture, sampler2
 #endif
 
 	float maxDist = frx_viewDistance * 4.; // actual far plane, prevents clipping
+
+#if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
+	maxDist = max(maxDist, CLOUD_ALTITUDE * 4.);
+#endif
 
 #if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_WORLD
 	maxDist = min(length(eyePos), maxDist);
@@ -212,10 +216,9 @@ vec4 customClouds(sampler2D cloudsDepthBuffer, sampler2D natureTexture, sampler2
 	vec3 result = vec3(energy, 1.0, length(origin));
 #endif
 
-	float rainBrightness = mix(0.13, 0.05, hdr_fromGammaf(frx_rainGradient)); // emulate dark clouds
-	vec3  cloudShading	 = atmosv_CloudRadiance;
+	float rainBrightness = 1.0 - hdr_fromGammaf(frx_rainGradient) * 0.5; // emulate dark clouds
 	vec3  skyFadeColor	 = atmos_SkyGradientRadiance(toSky);
-	vec3  celestRadiance = atmosv_CelestialRadiance;
+	vec3  celestRadiance = atmosv_CelestialRadiance * result.x * 0.13; // magic multiplier
 
 	#ifdef VOLUMETRIC_CLOUDS
 	if (frx_worldIsMoonlit == 1) {
@@ -223,8 +226,7 @@ vec4 customClouds(sampler2D cloudsDepthBuffer, sampler2D natureTexture, sampler2
 	}
 	#endif
 
-	celestRadiance = celestRadiance * result.x * rainBrightness;//
-	vec3 color = celestRadiance + cloudShading;
+	vec3 color = (celestRadiance + atmosv_CloudRadiance) * rainBrightness;
 	float fogF = sqrt(fogFactor(result.z, false));
 	color = mix(color, skyFadeColor, fogF);
 

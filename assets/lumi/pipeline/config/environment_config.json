@@ -68,10 +68,10 @@
 			includeToken: "lumi:clouds_config",
 			categoryKey: "config.lumi_lights.category.clouds",
 			options: {
-				volumetric_cloud_altitude: {
-					default: 110,
+				cloud_altitude: {
+					default: 170,
 					min: 0,
-					max: 1000,
+					max: 320,
 					nameKey: "config.lumi_lights.value.volumetric_cloud_altitude",
 					descriptionKey: "config.lumi_lights.help.volumetric_cloud_altitude"
 				},
