@@ -126,6 +126,10 @@ vec4 customSky(sampler2D sunTexture, sampler2D moonTexture, vec3 toSky, vec3 fal
 		result.rgb = fog(vec4(fallback1, 1.0), frx_viewDistance * 4.0, toSky, false).rgb;
 		#endif
 
+		// temporary solution for lightning flashes
+		float fallbackL = lightLuminance(hdr_fromGamma(fallback));
+		result.rgb *= mix(1.0, max(1.0, fallbackL / lightLuminance(result.rgb)), frx_thunderGradient);
+
 		#if SKY_MODE == SKY_MODE_LUMI || SKY_MODE == SKY_MODE_VANILLA_STARRY
 		// Stars
 		const vec3 NON_MILKY_AXIS = vec3(-0.598964, 0.531492, 0.598964);
