@@ -51,14 +51,6 @@
 
 #endif
 
-float lightLuminance(vec3 radiance) {
-	return min(1.0, dot(radiance, vec3(0.2126, 0.7152, 0.0722)));
-}
-
-float lightLuminanceUnclamped(vec3 radiance) {
-	return dot(radiance, vec3(0.2126, 0.7152, 0.0722));
-}
-
 #ifdef POST_SHADER
 #define calcHorizon(worldVec) pow(l2_clampScale(1.0, -l2_clampScale(ATMOS_SEA_LEVEL, ATMOS_STRATOSPHERE, frx_cameraPos.y), worldVec.y), 0.25)
 #define waterHorizon(isUnderwater, skyHorizon) float(isUnderwater) * l2_clampScale(0.9, 1.0, skyHorizon) // kinda hacky
@@ -110,11 +102,6 @@ float atmos_eyeAdaptation() {
 const float SKY_LIGHT_RAINING_MULT    = 0.5;
 const float SKY_LIGHT_THUNDERING_MULT = 0.2;
 
-const float SUNLIGHT_STR	= DEF_SUNLIGHT_STR;
-const float MOONLIGHT_STR	= DEF_MOONLIGHT_STR;
-const float SKY_STR			= DEF_SKY_STR;
-const float SKY_AMBIENT_STR	= DEF_SKY_AMBIENT_STR;
-
 const vec3 NOON_SUNLIGHT_COLOR = hdr_fromGamma(vec3(1.0, 1.0, 1.0));
 const vec3 SUNRISE_LIGHT_COLOR = hdr_fromGamma(vec3(1.0, 0.7, 0.4));
 
@@ -147,7 +134,7 @@ const float[SKY_LEN] SKY_TIMES = float[](-0.05, -0.01, 0.51, 0.55);
 
 void atmos_generateAtmosphereModel()
 {
-	float moonlightStrength = MOONLIGHT_STR * USER_NIGHT_AMBIENT_MULTIPLIER * (0.5 + 0.5 * frx_moonSize);
+	float moonlightStrength = DEF_MOONLIGHT_STR * USER_NIGHT_AMBIENT_MULTIPLIER * (0.5 + 0.5 * frx_moonSize);
 	// SKY_AMBIENT[NGTC] *= 0.5 + 0.5 * frx_moonSize;
 
 
@@ -179,7 +166,7 @@ void atmos_generateAtmosphereModel()
 
 	sunColor.gb *= vec2(frx_skyLightTransitionFactor * frx_skyLightTransitionFactor);
 
-	atmosv_CelestialRadiance = mix(sunColor * SUNLIGHT_STR, vec3(moonlightStrength), frx_worldIsMoonlit) * frx_skyLightTransitionFactor;
+	atmosv_CelestialRadiance = mix(sunColor * DEF_SUNLIGHT_STR, vec3(moonlightStrength), frx_worldIsMoonlit) * frx_skyLightTransitionFactor;
 
 
 	float nightFactor = SKY_NIGHT[0];
@@ -191,9 +178,9 @@ void atmos_generateAtmosphereModel()
 		nightFactor = mix(SKY_NIGHT[skyI-1], SKY_NIGHT[skyI], skyTransition);
 	}
 
-	atmosv_SkyAmbientRadiance = mix(NOON_AMBIENT, NIGHT_AMBIENT, nightFactor) * SKY_AMBIENT_STR * (frx_worldHasSkylight == 1 ? 1.0 : 0.0);
+	atmosv_SkyAmbientRadiance = mix(NOON_AMBIENT, NIGHT_AMBIENT, nightFactor) * DEF_SKY_AMBIENT_STR * (frx_worldHasSkylight == 1 ? 1.0 : 0.0);
 	#ifdef POST_SHADER
-	atmosv_SkyRadiance   = mix(DAY_SKY_COLOR, NIGHT_SKY_COLOR, nightFactor) * SKY_STR;
+	atmosv_SkyRadiance   = mix(DAY_SKY_COLOR, NIGHT_SKY_COLOR, nightFactor) * DEF_SKY_STR;
 	atmosv_CloudRadiance = mix(atmosv_SkyRadiance, vec3(lightLuminance(atmosv_SkyRadiance)), 0.5) * (1.0 + 0.25 * nightFactor);
 	#endif
 

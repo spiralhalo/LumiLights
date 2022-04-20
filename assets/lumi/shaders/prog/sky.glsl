@@ -134,7 +134,7 @@ vec4 customSky(sampler2D sunTexture, sampler2D moonTexture, vec3 toSky, vec3 fal
 		// Stars
 		const vec3 NON_MILKY_AXIS = vec3(-0.598964, 0.531492, 0.598964);
 
-		float starry = l2_clampScale(0.27, 0.07, lightLuminance(result.rgb));
+		float starry = l2_clampScale(STAR_LUMIGATE_HIGH, STAR_LUMIGATE_LOW, lightLuminance(result.rgb));
 			 starry *= l2_clampScale(-0.6, -0.5, skyDotUp); //prevent star near the void core
 
 		float milkyness   = l2_clampScale(0.7, 0.0, abs(dot(NON_MILKY_AXIS, toSky.xyz)));

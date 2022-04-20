@@ -70,7 +70,8 @@ const float USER_ALBEDO_BRIGHTENING		   = clamp(ALBEDO_BRIGHTENING, 0, 20) / 500
 	#elif LUMI_SKY_COLOR == LUMI_SKY_COLOR_DEEP_CERULEAN
 		#define DEF_DAY_SKY_COLOR		hdr_fromGamma(vec3(0.3, 0.5, 1.0))
 	#else
-		#define DEF_DAY_SKY_COLOR		hdr_fromGamma(vec3(LUMI_SKY_RED, LUMI_SKY_GREEN, LUMI_SKY_BLUE))
+		// spaghetti
+		#define DEF_DAY_SKY_COLOR		hdr_fromGamma(max(vec3(1.0 / 255.0), vec3(LUMI_SKY_RED, LUMI_SKY_GREEN, LUMI_SKY_BLUE))) * max(1.0, (lightLuminance(DEF_NIGHT_SKY_COLOR) + 0.1) / lightLuminance(hdr_fromGamma(max(vec3(1.0 / 255.0), vec3(LUMI_SKY_RED, LUMI_SKY_GREEN, LUMI_SKY_BLUE)))))
 	#endif
 
 #else
@@ -81,13 +82,16 @@ const float USER_ALBEDO_BRIGHTENING		   = clamp(ALBEDO_BRIGHTENING, 0, 20) / 500
 
 #endif
 
-	// STRENGTHS
-	const float BASE_AMBIENT_STR    = DEF_BASE_AMBIENT_STR;
-	const float SKYLESS_AMBIENT_STR = DEF_SKYLESS_AMBIENT_STR;
-	const float SKYLESS_LIGHT_STR   = DEF_SKYLESS_LIGHT_STR;
-	const float BLOCK_LIGHT_STR     = DEF_BLOCK_LIGHT_STR;
-	const float EMISSIVE_LIGHT_STR  = DEF_EMISSIVE_LIGHT_STR;
-
 	// SKY_COLORS
 	#define DEF_NIGHT_SKY_COLOR		hdr_fromGamma(_0_DEF_NIGHT_SKY_COLOR)
 	const vec3 NEBULAE_COLOR	=	hdr_fromGamma(DEF_NEBULAE_COLOR);
+
+	// STRENGTHS
+	const float BASE_AMBIENT_STR	= DEF_BASE_AMBIENT_STR;
+	const float SKYLESS_AMBIENT_STR	= DEF_SKYLESS_AMBIENT_STR;
+	const float SKYLESS_LIGHT_STR	= DEF_SKYLESS_LIGHT_STR;
+	const float BLOCK_LIGHT_STR		= DEF_BLOCK_LIGHT_STR;
+	const float EMISSIVE_LIGHT_STR	= DEF_EMISSIVE_LIGHT_STR;
+	// spaghetti
+	const float STAR_LUMIGATE_HIGH	= max(lightLuminance(DEF_DAY_SKY_COLOR) * 0.8, lightLuminance(DEF_NIGHT_SKY_COLOR) + 0.1) * DEF_SKY_STR;
+	const float STAR_LUMIGATE_LOW	= max(STAR_LUMIGATE_HIGH * 0.26, lightLuminance(DEF_NIGHT_SKY_COLOR)) * DEF_SKY_STR;

@@ -42,3 +42,6 @@ mat4 l2_rotationMatrix(vec3 axis, float angle)
 				oc * axis.z * axis.x - axis.y * s,	oc * axis.y * axis.z + axis.x * s,	oc * axis.z * axis.z + c,			0.0,
 				0.0,								0.0,								0.0,								1.0);
 }
+
+#define lightLuminance(radiance) min(1.0, dot(radiance, vec3(0.2126, 0.7152, 0.0722)))
+#define lightLuminanceUnclamped(radiance) dot(radiance, vec3(0.2126, 0.7152, 0.0722))
