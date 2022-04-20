@@ -115,16 +115,15 @@ const float MOONLIGHT_STR	= DEF_MOONLIGHT_STR;
 const float SKY_STR			= DEF_SKY_STR;
 const float SKY_AMBIENT_STR	= DEF_SKY_AMBIENT_STR;
 
-const vec3 DAY_SKY_COLOR	 = DEF_DAY_SKY_COLOR;
-const vec3 NIGHT_SKY_COLOR	 = DEF_NIGHT_SKY_COLOR;
-const vec3 NIGHT_CLOUD_COLOR = DEF_NIGHT_CLOUD_COLOR;
-const vec3 DAY_CLOUD_COLOR	 = DEF_DAY_CLOUD_COLOR;
-
 const vec3 NOON_SUNLIGHT_COLOR = hdr_fromGamma(vec3(1.0, 1.0, 1.0));
 const vec3 SUNRISE_LIGHT_COLOR = hdr_fromGamma(vec3(1.0, 0.7, 0.4));
 
+const vec3 DAY_SKY_COLOR   = DEF_DAY_SKY_COLOR;
+const vec3 NIGHT_SKY_COLOR = DEF_NIGHT_SKY_COLOR;
+const vec3 TWILIGHT_COLOR  = SUNRISE_LIGHT_COLOR;
+
 const vec3 NOON_AMBIENT  = hdr_fromGamma(vec3(1.0));
-const vec3 NIGHT_AMBIENT = hdr_fromGamma(DEF_NIGHT_AMBIENT);
+const vec3 NIGHT_AMBIENT = hdr_fromGamma(DEF_NIGHT_AMBIENT) * USER_NIGHT_AMBIENT_MULTIPLIER;
 
 const vec3 CAVEFOG_C	 = hdr_fromGamma(DEF_LUMI_AZURE);
 const vec3 CAVEFOG_DEEPC = SUNRISE_LIGHT_COLOR;
@@ -142,18 +141,8 @@ const int SUN_LEN = 8;
 const int[SUN_LEN] SUN_COL_ID = int[]  (SMONC, SRISC, SRISC, SNONC, SNONC, SRISC, SRISC, SMONC);
 const float[SUN_LEN] SUN_TIMES = float[](-0.05, -0.04,  0.00,  0.01,  0.49,   0.5,  0.54,  0.55);
 
-const int DAYC = 0;
-const int NGTC = 1;
-const int TWGC = 2;
-const int CLDC = 3;
-const int NCLC = 4;
-#ifdef POST_SHADER
-const vec3[5] SKY_COLOR   = vec3[](DAY_SKY_COLOR, NIGHT_SKY_COLOR, SUNRISE_LIGHT_COLOR, DAY_CLOUD_COLOR, NIGHT_CLOUD_COLOR);
-#endif
-const vec3[2] SKY_AMBIENT = vec3[](NOON_AMBIENT,  NIGHT_AMBIENT * USER_NIGHT_AMBIENT_MULTIPLIER);
 const int SKY_LEN = 4;
-const int[SKY_LEN] SKY_INDICES = int[]  ( NGTC, DAYC, DAYC, NGTC);
-const int[SKY_LEN] CLOUD_INDICES = int[]( NCLC, CLDC, CLDC, NCLC);
+const float[SKY_LEN] SKY_NIGHT = float[]( 1.0 ,  0.0 , 0.0 , 1.0 );
 const float[SKY_LEN] SKY_TIMES = float[](-0.05, -0.01, 0.51, 0.55);
 
 void atmos_generateAtmosphereModel()
@@ -193,27 +182,20 @@ void atmos_generateAtmosphereModel()
 	atmosv_CelestialRadiance = mix(sunColor * SUNLIGHT_STR, vec3(moonlightStrength), frx_worldIsMoonlit) * frx_skyLightTransitionFactor;
 
 
+	float nightFactor = SKY_NIGHT[0];
 
-	if (horizonTime <= SKY_TIMES[0]) {
-		atmosv_SkyAmbientRadiance = SKY_AMBIENT[SKY_INDICES[0]] * SKY_AMBIENT_STR * (frx_worldHasSkylight == 1 ? 1.0 : 0.0);
-		#ifdef POST_SHADER
-		atmosv_SkyRadiance   = SKY_COLOR  [SKY_INDICES[0]] * SKY_STR;
-		atmosv_CloudRadiance = SKY_COLOR[CLOUD_INDICES[0]] * SKY_STR;
-		#endif
-	} else {
+	if (horizonTime > SKY_TIMES[0]) {
 		int skyI = 1;
 		while (horizonTime > SKY_TIMES[skyI] && skyI < SKY_LEN - 1) skyI++;
 		float skyTransition = l2_clampScale(SKY_TIMES[skyI-1], SKY_TIMES[skyI], horizonTime);
-
-		atmosv_SkyAmbientRadiance = mix(SKY_AMBIENT[SKY_INDICES[skyI-1]], SKY_AMBIENT[SKY_INDICES[skyI]], skyTransition)
-									   * SKY_AMBIENT_STR * (frx_worldHasSkylight == 1 ? 1.0 : 0.0);
-		#ifdef POST_SHADER
-		atmosv_SkyRadiance   = mix(SKY_COLOR[SKY_INDICES[skyI-1]], SKY_COLOR[SKY_INDICES[skyI]], skyTransition) * SKY_STR;
-		atmosv_CloudRadiance = mix(SKY_COLOR[CLOUD_INDICES[skyI-1]], SKY_COLOR[CLOUD_INDICES[skyI]], skyTransition) * SKY_STR;
-		#endif
+		nightFactor = mix(SKY_NIGHT[skyI-1], SKY_NIGHT[skyI], skyTransition);
 	}
 
-
+	atmosv_SkyAmbientRadiance = mix(NOON_AMBIENT, NIGHT_AMBIENT, nightFactor) * SKY_AMBIENT_STR * (frx_worldHasSkylight == 1 ? 1.0 : 0.0);
+	#ifdef POST_SHADER
+	atmosv_SkyRadiance   = mix(DAY_SKY_COLOR, NIGHT_SKY_COLOR, nightFactor) * SKY_STR;
+	atmosv_CloudRadiance = mix(atmosv_SkyRadiance, vec3(lightLuminance(atmosv_SkyRadiance)), 0.5) * (1.0 + 0.25 * nightFactor);
+	#endif
 
 	#ifdef POST_SHADER
 	/** FOG **/
@@ -238,7 +220,7 @@ void atmos_generateAtmosphereModel()
 	atmosv_ClearRadiance = mix(atmosv_FogRadiance, atmosv_ClearRadiance * 0.3, float(frx_cameraInWater));
 
 
-	atmosv_OWTwilightRadiance = SKY_COLOR[TWGC];
+	atmosv_OWTwilightRadiance = TWILIGHT_COLOR;
 	atmosv_OWTwilightRadiance.gb *= vec2(max(frx_skyLightTransitionFactor, 0.3), frx_skyLightTransitionFactor * frx_skyLightTransitionFactor);
 
 	// prevent custom overworld sky reflection in non-overworld dimension or when the sky mode is not Lumi

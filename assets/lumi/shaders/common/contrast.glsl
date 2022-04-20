@@ -65,16 +65,12 @@ const float USER_ALBEDO_BRIGHTENING		   = clamp(ALBEDO_BRIGHTENING, 0, 20) / 500
 
 	#if LUMI_SKY_COLOR == LUMI_SKY_COLOR_NATURAL_AZURE
 		#define DEF_DAY_SKY_COLOR		hdr_fromGamma(DEF_LUMI_AZURE)
-		#define DEF_DAY_CLOUD_COLOR		hdr_fromGamma(DEF_LUMI_AZURE)
 	#elif LUMI_SKY_COLOR == LUMI_SKY_COLOR_BRIGHT_CYAN
-		#define DEF_DAY_SKY_COLOR		hdr_fromGamma(vec3(0.33, 0.7, 1.0))
-		#define DEF_DAY_CLOUD_COLOR		hdr_fromGamma(vec3(0.40, 0.69, 1.0))
+		#define DEF_DAY_SKY_COLOR		hdr_fromGamma(vec3(0.40, 0.69, 1.0))
 	#elif LUMI_SKY_COLOR == LUMI_SKY_COLOR_DEEP_CERULEAN
 		#define DEF_DAY_SKY_COLOR		hdr_fromGamma(vec3(0.3, 0.5, 1.0))
-		#define DEF_DAY_CLOUD_COLOR		DEF_VANILLA_DAY_SKY_COLOR
 	#else
 		#define DEF_DAY_SKY_COLOR		hdr_fromGamma(vec3(LUMI_SKY_RED, LUMI_SKY_GREEN, LUMI_SKY_BLUE))
-		#define DEF_DAY_CLOUD_COLOR		hdr_fromGamma(vec3(LUMI_SKY_RED, LUMI_SKY_GREEN, LUMI_SKY_BLUE))
 	#endif
 
 #else
@@ -82,7 +78,6 @@ const float USER_ALBEDO_BRIGHTENING		   = clamp(ALBEDO_BRIGHTENING, 0, 20) / 500
 	#define DEF_NEBULAE_COLOR		vec3(0.4, 0.15, 0.3)
 	#define _0_DEF_NIGHT_SKY_COLOR	mix(vec3(0.08, 0.08, 0.15), vec3(0.15, 0.19, 0.3), clamp(USER_NIGHT_AMBIENT_MULTIPLIER, 0.0, 1.0))
 	#define DEF_DAY_SKY_COLOR		DEF_VANILLA_DAY_SKY_COLOR
-	#define DEF_DAY_CLOUD_COLOR		DEF_VANILLA_DAY_SKY_COLOR
 
 #endif
 
@@ -95,5 +90,4 @@ const float USER_ALBEDO_BRIGHTENING		   = clamp(ALBEDO_BRIGHTENING, 0, 20) / 500
 
 	// SKY_COLORS
 	#define DEF_NIGHT_SKY_COLOR		hdr_fromGamma(_0_DEF_NIGHT_SKY_COLOR)
-	#define DEF_NIGHT_CLOUD_COLOR	DEF_NIGHT_SKY_COLOR * 1.25
 	const vec3 NEBULAE_COLOR	=	hdr_fromGamma(DEF_NEBULAE_COLOR);
