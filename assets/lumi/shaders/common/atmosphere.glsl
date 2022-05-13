@@ -100,8 +100,8 @@ float atmos_eyeAdaptation() {
 #ifdef VERTEX_SHADER
 
 #define DEF_MOONLIGHT_COLOR	hdr_fromGamma(vec3(0.8 , 0.8 , 1.0 ))
-#define DEF_SUNLIGHT_COLOR	hdr_fromGamma(vec3(1.0 , 0.95, 0.7 ))
-#define DEF_NOON_AMBIENT	hdr_fromGamma(vec3(0.6 , 0.8 , 1.0 ))
+#define DEF_SUNLIGHT_COLOR	hdr_fromGamma(vec3(1.0 , 0.95, 0.75))
+#define DEF_NOON_AMBIENT	hdr_fromGamma(vec3(0.7 , 0.8 , 1.0 ))
 #define DEF_NIGHT_AMBIENT	hdr_fromGamma(vec3(0.6 , 0.6 , 1.0 ))
 
 const float SKY_LIGHT_RAINING_MULT    = 0.5;
