@@ -40,9 +40,6 @@ const float USER_ALBEDO_BRIGHTENING		   = clamp(ALBEDO_BRIGHTENING, 0, 20) / 500
 	#define DEF_MOONLIGHT_STR		0.25 * USER_CELESTIAL_MULTIPLIER
 	#define HORIZON_MULT			6.0
 
-	// ATMOS COLORS
-	#define DEF_NIGHT_AMBIENT		vec3(0.65, 0.65, 0.8)
-
 	// LIGHT COLORS
 	const vec3 BLOCK_LIGHT_NEUTRAL = hdr_fromGamma(vec3(0.7555)); // luminance of warm BL color
 #if BLOCK_LIGHT_MODE == BLOCK_LIGHT_MODE_NEUTRAL

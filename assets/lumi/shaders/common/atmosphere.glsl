@@ -102,15 +102,16 @@ float atmos_eyeAdaptation() {
 const float SKY_LIGHT_RAINING_MULT    = 0.5;
 const float SKY_LIGHT_THUNDERING_MULT = 0.2;
 
-const vec3 NOON_SUNLIGHT_COLOR = hdr_fromGamma(vec3(1.0, 1.0, 1.0));
-const vec3 SUNRISE_LIGHT_COLOR = hdr_fromGamma(vec3(1.0, 0.7, 0.4));
+const vec3 MOONLIGHT_COLOR	   = hdr_fromGamma(vec3(0.8, 0.8, 1.0));
+const vec3 NOON_SUNLIGHT_COLOR = hdr_fromGamma(vec3(1.05, 1.05, 0.85));
+const vec3 SUNRISE_LIGHT_COLOR = hdr_fromGamma(vec3(1.0, 0.8, 0.4));
 
 const vec3 DAY_SKY_COLOR   = DEF_DAY_SKY_COLOR;
 const vec3 NIGHT_SKY_COLOR = DEF_NIGHT_SKY_COLOR;
 const vec3 TWILIGHT_COLOR  = SUNRISE_LIGHT_COLOR;
 
-const vec3 NOON_AMBIENT  = hdr_fromGamma(vec3(1.0));
-const vec3 NIGHT_AMBIENT = hdr_fromGamma(DEF_NIGHT_AMBIENT) * USER_NIGHT_AMBIENT_MULTIPLIER;
+const vec3 NOON_AMBIENT  = hdr_fromGamma(vec3(0.65, 0.9, 1.2));
+const vec3 NIGHT_AMBIENT = hdr_fromGamma(vec3(0.6, 0.6, 1.0)) * USER_NIGHT_AMBIENT_MULTIPLIER;
 
 const vec3 CAVEFOG_C	 = hdr_fromGamma(DEF_LUMI_AZURE);
 const vec3 CAVEFOG_DEEPC = SUNRISE_LIGHT_COLOR;
@@ -122,7 +123,7 @@ const float CAVEFOG_STR	 = 1.0;
 const int SRISC = 0;
 const int SNONC = 1;
 const int SMONC = 2;
-const vec3[3] SUN_COLOR =  vec3[](SUNRISE_LIGHT_COLOR, NOON_SUNLIGHT_COLOR, vec3(1.0));
+const vec3[3] SUN_COLOR =  vec3[](SUNRISE_LIGHT_COLOR, NOON_SUNLIGHT_COLOR, MOONLIGHT_COLOR);
 const float[3] TWG_FACTOR  = float[](1.0, 0.0, 0.0); // maps celest color to twilight factor
 const int SUN_LEN = 8;
 const int[SUN_LEN] SUN_COL_ID = int[]  (SMONC, SRISC, SRISC, SNONC, SNONC, SRISC, SRISC, SMONC);
@@ -166,7 +167,7 @@ void atmos_generateAtmosphereModel()
 
 	sunColor.gb *= vec2(frx_skyLightTransitionFactor * frx_skyLightTransitionFactor);
 
-	atmosv_CelestialRadiance = mix(sunColor * DEF_SUNLIGHT_STR, vec3(moonlightStrength), frx_worldIsMoonlit) * frx_skyLightTransitionFactor;
+	atmosv_CelestialRadiance = mix(sunColor * DEF_SUNLIGHT_STR, MOONLIGHT_COLOR * moonlightStrength, frx_worldIsMoonlit) * frx_skyLightTransitionFactor;
 
 
 	float nightFactor = SKY_NIGHT[0];
