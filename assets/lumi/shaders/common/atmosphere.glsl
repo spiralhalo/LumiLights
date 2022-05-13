@@ -99,19 +99,24 @@ float atmos_eyeAdaptation() {
 
 #ifdef VERTEX_SHADER
 
+#define DEF_MOONLIGHT_COLOR	hdr_fromGamma(vec3(0.8 , 0.8 , 1.0 ))
+#define DEF_SUNLIGHT_COLOR	hdr_fromGamma(vec3(1.0 , 0.95, 0.7 ))
+#define DEF_NOON_AMBIENT	hdr_fromGamma(vec3(0.6 , 0.8 , 1.0 ))
+#define DEF_NIGHT_AMBIENT	hdr_fromGamma(vec3(0.6 , 0.6 , 1.0 ))
+
 const float SKY_LIGHT_RAINING_MULT    = 0.5;
 const float SKY_LIGHT_THUNDERING_MULT = 0.2;
 
-const vec3 MOONLIGHT_COLOR	   = hdr_fromGamma(vec3(0.8, 0.8, 1.0));
-const vec3 NOON_SUNLIGHT_COLOR = hdr_fromGamma(vec3(1.05, 1.05, 0.85));
+const vec3 MOONLIGHT_COLOR	   = DEF_MOONLIGHT_COLOR / lightLuminanceUnclamped(DEF_MOONLIGHT_COLOR);
+const vec3 NOON_SUNLIGHT_COLOR = DEF_SUNLIGHT_COLOR / lightLuminanceUnclamped(DEF_SUNLIGHT_COLOR);
 const vec3 SUNRISE_LIGHT_COLOR = hdr_fromGamma(vec3(1.0, 0.8, 0.4));
 
 const vec3 DAY_SKY_COLOR   = DEF_DAY_SKY_COLOR;
 const vec3 NIGHT_SKY_COLOR = DEF_NIGHT_SKY_COLOR;
 const vec3 TWILIGHT_COLOR  = SUNRISE_LIGHT_COLOR;
 
-const vec3 NOON_AMBIENT  = hdr_fromGamma(vec3(0.65, 0.9, 1.2));
-const vec3 NIGHT_AMBIENT = hdr_fromGamma(vec3(0.6, 0.6, 1.0)) * USER_NIGHT_AMBIENT_MULTIPLIER;
+const vec3 NOON_AMBIENT  = DEF_NOON_AMBIENT / lightLuminanceUnclamped(DEF_NOON_AMBIENT);
+const vec3 NIGHT_AMBIENT = DEF_NIGHT_AMBIENT / lightLuminanceUnclamped(DEF_NIGHT_AMBIENT) * USER_NIGHT_AMBIENT_MULTIPLIER;
 
 const vec3 CAVEFOG_C	 = hdr_fromGamma(DEF_LUMI_AZURE);
 const vec3 CAVEFOG_DEEPC = SUNRISE_LIGHT_COLOR;
@@ -225,11 +230,11 @@ void atmos_generateAtmosphereModel()
 	/** RAIN **/
 	float rainBrightness = min(mix(1.0, SKY_LIGHT_RAINING_MULT, frx_rainGradient), mix(1.0, SKY_LIGHT_THUNDERING_MULT, frx_thunderGradient));
 
-	vec3 grayCelestial  = vec3(frx_luminance(atmosv_CelestialRadiance));
-	vec3 graySkyAmbient = vec3(frx_luminance(atmosv_SkyAmbientRadiance));
+	vec3 grayCelestial  = vec3(lightLuminance(atmosv_CelestialRadiance));
+	vec3 graySkyAmbient = vec3(lightLuminance(atmosv_SkyAmbientRadiance));
 	#ifdef POST_SHADER
-	vec3 graySky = vec3(frx_luminance(atmosv_SkyRadiance));
-	vec3 grayFog = vec3(frx_luminance(atmosv_FogRadiance));
+	vec3 graySky = vec3(lightLuminance(atmosv_SkyRadiance));
+	vec3 grayFog = vec3(lightLuminance(atmosv_FogRadiance));
 	#endif
 
 	float toGray = frx_rainGradient * 0.6 + frx_thunderGradient * 0.35;
