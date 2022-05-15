@@ -111,7 +111,6 @@ void frx_pipelineFragment()
 		float ao = (frx_fragEnableAo && frx_modelOriginRegion) ? frx_fragLight.z : 1.0;
 
 		float roughness = max(0.01, frx_fragRoughness); // TODO: use white clear color and stop doing this
-		float metalness = frx_fragReflectance > 0.5 ? frx_fragReflectance : 0.0; // TODO: do something
 		float disableDiffuse = 1.0 - float(frx_fragEnableDiffuse);
 
 		// put water flag last because it makes the material buffer looks blue :D easier to debug
@@ -121,7 +120,7 @@ void frx_pipelineFragment()
 		fragColor[1] = vec4(frx_fragLight.xy, frx_fragEmissive, 1.0);
 		fragColor[2] = vec4(frx_vertexNormal, 1.0);
 		fragColor[3] = vec4(frx_fragNormal, 1.0);
-		fragColor[4] = vec4(roughness, metalness, ao, 1.0);
+		fragColor[4] = vec4(roughness, frx_fragReflectance, ao, 1.0);
 		fragColor[5] = vec4(frx_normalizeMappedUV(frx_texcoord), bitFlags, 1.0);
 	}
 
