@@ -142,31 +142,11 @@ vec3 rayMarchCloud(sampler2D natureTexture, sampler2D noiseTexture, vec2 texcoor
 	return vec3(lightEnergy, 1.0 - transmittance, distanceTotal);
 }
 
-vec4 customClouds(sampler2D cloudsDepthBuffer, sampler2D natureTexture, sampler2D noiseTexture, float depth, vec2 texcoord, vec3 eyePos, vec3 toSky, int numSample, float startTravel)
+vec3 vanillaClouds(sampler2D cloudsDepthBuffer, float depth, vec2 texcoord)
 {
-	// TODO: need some flag for dimension that want clouds
-	if (frx_worldIsOverworld != 1) return vec4(0.0);
-
-#ifdef VOLUMETRIC_CLOUDS
-#if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
-	if (depth != 1. || toSky.y <= 0) return vec4(0.0);
-#endif
-
-	float maxDist = frx_viewDistance * 4.; // actual far plane, prevents clipping
-
-#if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
-	maxDist = max(maxDist, CLOUD_ALTITUDE * 4.);
-#endif
-
-#if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_WORLD
-	maxDist = min(length(eyePos), maxDist);
-#endif
-
-	vec3 result = rayMarchCloud(natureTexture, noiseTexture, texcoord, maxDist, toSky, numSample, startTravel);
-#else
 	float dClouds = texture(cloudsDepthBuffer, texcoord).r;
 
-	if (dClouds >= depth) return vec4(0.0);
+	if (dClouds >= depth) return vec3(0.0);
 
 	vec4 temp = frx_inverseViewProjectionMatrix * vec4(texcoord * 2.0 - 1.0, dClouds * 2.0 - 1.0, 1.0);
 	vec3 origin = temp.xyz / temp.w;
@@ -213,8 +193,35 @@ vec4 customClouds(sampler2D cloudsDepthBuffer, sampler2D natureTexture, sampler2
 	vec3 normal = normalize(cross((right - origin) * mul0, (bottom - origin) * mul1));
 
 	float energy = (dot(normal, frx_skyLightVector) * 0.5 + 0.5) * 0.7 + 0.3;
-	vec3 result = vec3(energy, 1.0, length(origin));
-#endif
+	return vec3(energy, 1.0, length(origin));
+}
+
+vec4 customClouds(sampler2D cloudsDepthBuffer, sampler2D natureTexture, sampler2D noiseTexture, float depth, vec2 texcoord, vec3 eyePos, vec3 toSky, int numSample, float startTravel)
+{
+	vec3 result;
+	if (frx_worldIsOverworld != 1) {
+		result = vanillaClouds(cloudsDepthBuffer, depth, texcoord);
+	} else {
+		#ifdef VOLUMETRIC_CLOUDS
+		#if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
+		if (depth != 1. || toSky.y <= 0) return vec4(0.0);
+		#endif
+
+		float maxDist = frx_viewDistance * 4.; // actual far plane, prevents clipping
+
+		#if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
+		maxDist = max(maxDist, CLOUD_ALTITUDE * 4.);
+		#endif
+
+		#if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_WORLD
+		maxDist = min(length(eyePos), maxDist);
+		#endif
+
+		result = rayMarchCloud(natureTexture, noiseTexture, texcoord, maxDist, toSky, numSample, startTravel);
+		#else
+		result = vanillaClouds(cloudsDepthBuffer, depth, texcoord);
+		#endif
+	}
 
 	float rainBrightness = 1.0 - hdr_fromGammaf(frx_rainGradient) * 0.5; // emulate dark clouds
 	vec3  skyFadeColor	 = atmos_SkyGradientRadiance(toSky);
