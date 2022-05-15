@@ -97,11 +97,11 @@ void main()
 		base += skyReflection(u_tex_sun, u_tex_moon, u_tex_noise, cSolid.rgb, rawMat.xy, toFrag, normal, light.yw);
 	}
 
-	if (dSolid < 1.0) {
-		base = fog(base, length(eyePos), toFrag, solidIsUnderwater);
-	}
-
 	if (dSolid > dMin) {
+		if (dSolid < 1.0) {
+			base = fog(base, length(eyePos), toFrag, solidIsUnderwater);
+		}
+
 		vec4 clouds = customClouds(u_vanilla_clouds_depth, u_tex_nature, u_tex_noise, dSolid, uvSolid, eyePos, toFrag, NUM_SAMPLE, ldepth(dMin) * frx_viewDistance * 4.);
 		base.rgb = base.rgb * (1.0 - clouds.a) + clouds.rgb * clouds.a;
 	}
@@ -112,7 +112,6 @@ void main()
 	light = texture(u_gbuffer_lightnormal, vec3(v_texcoord, ID_PARTS_LIGT));
 	light.w = denoisedShadowFactor(u_gbuffer_shadow, v_texcoord, eyePos, dParts, light.y);
 	vec4 nextParts = particleShading(cParts, u_tex_nature, light, eyePos, decideUnderwater(dParts, dTrans, transIsWater, false));
-	if (cParts.a > 0.0) nextParts = fog(nextParts, length(eyePos), normalize(eyePos), frx_cameraInWater == 1);
 
 	vec4 nextTrans;
 	bool transIsManaged = cTrans.a > 0.0 && notEndPortal(u_gbuffer_lightnormal) && lTrans.x > 0.0;
@@ -136,18 +135,12 @@ void main()
 
 		nextTrans = shading(cTrans, u_tex_nature, light, rawMat, eyePos, normal, vertexNormal, decideUnderwater(dTrans, dTrans, transIsWater, true), disableDiffuse);
 		nextTrans = overlay(nextTrans, u_tex_glint, miscTrans);
-		if (cTrans.a > 0.0) nextTrans = fog(nextTrans, length(eyePos), normalize(eyePos), frx_cameraInWater == 1);
 	} else {
 		cTrans.rgb = cTrans.rgb / (cTrans.a == 0.0 ? 1.0 : cTrans.a);
 		nextTrans = vec4(hdr_fromGamma(cTrans.rgb), cTrans.a);
 	}
 
 	vec4 nextRains = vec4(hdr_fromGamma(cRains.rgb), cRains.a);
-	if (cRains.a > 0.0) {
-		tempPos = frx_inverseViewProjectionMatrix * vec4(2.0 * v_texcoord - 1.0, 2.0 * dRains - 1.0, 1.0);
-		eyePos  = tempPos.xyz / tempPos.w;
-		nextRains.a *= 1.0 - fogFactor(length(eyePos), false);
-	}
 
 	vec4 next0, next1, next, after0, after1;
 
@@ -156,11 +149,14 @@ void main()
 	nextRains = vec4(ldr_tonemap(nextRains.rgb) * nextRains.a, nextRains.a);
 	base = ldr_tonemap(base);
 
+	bool applyTransFog = transIsManaged;
+
 	// TODO: is this slower than insert sort?
 	if (dRains > dTrans && dParts > dTrans) {
 		next0 = (dRains > dParts ? nextRains : nextParts);
 		next1 = (dRains > dParts ? nextParts : nextRains);
 		after0 = after1 = vec4(0.0);
+		applyTransFog = false;
 	} else if (dParts > dTrans) {
 		next1 = nextParts;
 		after0 = vec4(0.0);
@@ -173,6 +169,11 @@ void main()
 		next0 = next1 = vec4(0.0);
 		after0 = (dRains > dParts ? nextRains : nextParts);
 		after1 = (dRains > dParts ? nextParts : nextRains);
+	}
+
+	if (applyTransFog) {
+		// eyePos belongs to translucent at this point
+		nextTrans = fog(nextTrans, length(eyePos), toFrag, frx_cameraInWater == 1);
 	}
 
 	nextTrans = vec4(ldr_tonemap(nextTrans.rgb) * nextTrans.a, nextTrans.a);
