@@ -197,16 +197,18 @@ void atmos_generateAtmosphereModel()
 	float lClearRadiance = dot(atmosv_ClearRadiance, vec3(1./3.));
 	atmosv_ClearRadiance = atmosv_ClearRadiance / (lClearRadiance == 0.0 ? 1.0 : lClearRadiance);
 
-	bool customOWFog = frx_worldIsOverworld == 1 && frx_cameraInLava == 0;
-	bool customEndFog = frx_worldIsEnd == 1 && frx_cameraInLava == 0;
+	bool customOWFog	 = frx_worldIsOverworld == 1 && frx_cameraInLava == 0;
+	bool customEndFog	 = frx_worldIsEnd == 1 && frx_cameraInLava == 0;
+	bool customNetherFog = frx_worldIsNether == 1 && frx_cameraInLava == 0;
 
 	if (customOWFog) {
 		atmosv_FogRadiance = atmosv_SkyRadiance;
 	} else if (customEndFog) {
 		atmosv_FogRadiance = mix(atmosv_ClearRadiance, hdr_fromGamma(vec3(1.0, 0.7, 1.0)), float(frx_cameraInFluid)) * 0.1;
+	} else if (customNetherFog) {
+		atmosv_FogRadiance = atmosv_ClearRadiance * 0.1; // controllable overall brightness
 	} else {
-		// controllable overall brightness
-		atmosv_FogRadiance = atmosv_ClearRadiance * 0.1;
+		atmosv_FogRadiance = hdr_fromGamma(frx_vanillaClearColor);
 	}
 
 	// ClearRadiance is mostly used for water
