@@ -310,7 +310,7 @@ vec4 shading(vec4 color, sampler2D natureTexture, vec4 light, float ao, vec2 mat
 	// vanilla-ish style diffuse
 	float dotUpNorth = l2_max3(abs(normal * vec3(0.6, 1.0, 0.8)));
 	// perfect diffuse light
-	vec3 shaded = albedo * (baseLight + blockLight * (1.0 - blF)) * dotUpNorth * max(1.0 - f0, vec3(0.5)) / PI;
+	vec3 shaded = albedo * (baseLight + blockLight * (1.0 - blF)) * dotUpNorth * (1.0 - material.y * 0.5) / PI;
 	// block light specular
 	vec3 specular = pbr_specularBRDF(max(material.x, 0.5 * material.y), blockLight, blH, normal, toEye, normal, blF, 1.0);
 	shaded += specular;

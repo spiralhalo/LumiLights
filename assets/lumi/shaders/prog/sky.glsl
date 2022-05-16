@@ -186,12 +186,12 @@ vec3 skyRadiance(sampler2D sunTexture, sampler2D moonTexture, vec2 material, vec
 	}
 }
 
-#define skyReflectionFac(viewNormal) smoothstep(0.0, 1.0, viewNormal.y)
+#define skyReflectionFac(march) smoothstep(-0.1, 0.1, march.y)
 
 vec4 skyReflection(sampler2D sunTexture, sampler2D moonTexture, sampler2D noiseTexture, vec3 albedo, vec2 material, vec3 toFrag, vec3 normal, vec2 lightyw) {
 	vec3 toSky = reflectRough(noiseTexture, toFrag, normal, material.x);
 	vec3 radiance = skyRadiance(sunTexture, moonTexture, material, toSky, lightyw);
-	return vec4(reflectionPbr(albedo, material, radiance, toSky, -toFrag), 0.0) * skyReflectionFac(normalize(frx_normalModelMatrix * normal));
+	return vec4(reflectionPbr(albedo, material, radiance, toSky, -toFrag), 0.0) * skyReflectionFac(toSky);
 }
 
 #endif
