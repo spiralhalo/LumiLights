@@ -171,6 +171,11 @@
 			includeToken: "lumi:debug_config",
 			categoryKey: "config.lumi_lights.category.debug",
 			options: {
+				disable_entities: {
+					default: false,
+					nameKey: "config.lumi_lights.value.disable_entities",
+					descriptionKey: "config.lumi_lights.help.disable_entities"
+				},
 				water_noise_debug: {
 					default: false,
 					nameKey: "config.lumi_lights.value.water_noise_debug",

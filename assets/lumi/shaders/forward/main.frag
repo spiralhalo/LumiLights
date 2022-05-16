@@ -36,6 +36,10 @@ out vec4[7] fragColor;
 
 void frx_pipelineFragment()
 {
+#ifdef DISABLE_ENTITIES
+	if (frx_modelOriginCamera && !frx_renderTargetParticles) discard;
+#endif
+
 	// no pitch black material allowed
 	frx_fragColor = max(frx_fragColor, vec4(0.004, 0.004, 0.004, 0.0));
 

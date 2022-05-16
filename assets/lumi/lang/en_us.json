@@ -182,6 +182,8 @@
 	"config.lumi_lights.help.albedo_brightening": "Brighten the texture before any lighting is applied",
 
 	"config.lumi_lights.category.debug": "Debug",
+	"config.lumi_lights.value.disable_entities": "Disable entities",
+	"config.lumi_lights.help.disable_entities": "Disable entities rendering",
 	"config.lumi_lights.value.water_noise_debug": "Water noise overlay",
 	"config.lumi_lights.help.water_noise_debug": "Show water noise sampling as overlay",
 	"config.lumi_lights.value.white_world": "Copied_City",
