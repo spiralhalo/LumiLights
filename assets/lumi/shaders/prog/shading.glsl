@@ -175,7 +175,7 @@ struct shadingResult {
 	vec3 diffuse;
 } shading0;
 
-float diffuseNdL(float NdotL, float alpha, float disableDiffuse)
+float diffuseNdL(float NdotL, float alpha, float disableDiffuse, float dielectricity)
 {
 	float diffuseNdotL = mix(1.0, NdotL, alpha);
 
@@ -185,7 +185,9 @@ float diffuseNdL(float NdotL, float alpha, float disableDiffuse)
 	diffuseNdotL += (1.0 - diffuseNdotL) * disableDiffuse;
 	#endif
 
-	return diffuseNdotL;
+	float internalScatter = dielectricity * /*scattering factor = */0.1;
+
+	return diffuseNdotL * (1.0 - internalScatter) + internalScatter;
 }
 
 void lightPbr(vec3 albedo, float alpha, vec3 radiance, float roughness, vec3 f0, vec3 toLight, vec3 toEye, vec3 normal, float disableDiffuse)
@@ -196,12 +198,12 @@ void lightPbr(vec3 albedo, float alpha, vec3 radiance, float roughness, vec3 f0,
 	float NdotL  = clamp(rawNdL, 0.0, 1.0);
 
 	// darken diffuse on conductive materials
-	float conductiveFac = 1.0 - l2_max3(f0);
+	float dielectricity = 1.0 - l2_max3(f0);
 
-	float diffuseNdotL = diffuseNdL(NdotL, alpha, disableDiffuse);
+	float diffuseNdotL = diffuseNdL(NdotL, alpha, disableDiffuse, dielectricity);
 
 	shading0.specular = pbr_specularBRDF(roughness, radiance, halfway, toLight, toEye, normal, fresnel, NdotL);
-	shading0.diffuse = albedo * radiance * diffuseNdotL * (1.0 - fresnel * step(0.0, rawNdL)) * conductiveFac / PI;
+	shading0.diffuse = albedo * radiance * diffuseNdotL * (1.0 - fresnel * step(0.0, rawNdL)) * dielectricity / PI;
 }
 
 void prepare(vec4 color, sampler2D natureTexture, vec3 eyePos, float vertexNormaly, bool isUnderwater, inout vec4 light)

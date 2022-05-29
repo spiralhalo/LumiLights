@@ -99,10 +99,9 @@ float atmos_eyeAdaptation() {
 
 #ifdef VERTEX_SHADER
 
-#define DEF_MOONLIGHT_COLOR	hdr_fromGamma(vec3(0.8 , 0.8 , 1.0 ))
+#define DEF_MOONLIGHT_COLOR	hdr_fromGamma(vec3(0.6 , 0.6 , 1.0 ))
 #define DEF_SUNLIGHT_COLOR	hdr_fromGamma(vec3(1.0 , 0.9 , 0.7 ))
 #define DEF_NOON_AMBIENT	hdr_fromGamma(vec3(0.6 , 0.85, 1.0 ))
-#define DEF_NIGHT_AMBIENT	hdr_fromGamma(vec3(0.6 , 0.6 , 1.0 ))
 
 const float SKY_LIGHT_RAINING_MULT    = 0.5;
 const float SKY_LIGHT_THUNDERING_MULT = 0.2;
@@ -115,8 +114,8 @@ const vec3 DAY_SKY_COLOR   = DEF_DAY_SKY_COLOR;
 const vec3 NIGHT_SKY_COLOR = DEF_NIGHT_SKY_COLOR;
 const vec3 TWILIGHT_COLOR  = SUNRISE_LIGHT_COLOR;
 
-const vec3 NOON_AMBIENT  = DEF_NOON_AMBIENT / lightLuminanceUnclamped(DEF_NOON_AMBIENT);
-const vec3 NIGHT_AMBIENT = DEF_NIGHT_AMBIENT / lightLuminanceUnclamped(DEF_NIGHT_AMBIENT);
+const vec3 NOON_AMBIENT  = DEF_SKY_AMBIENT_STR * (DEF_NOON_AMBIENT / lightLuminanceUnclamped(DEF_NOON_AMBIENT));
+const vec3 NIGHT_AMBIENT = DEF_NIGHT_AMBIENT_STR * MOONLIGHT_COLOR;
 
 const vec3 CAVEFOG_C	 = hdr_fromGamma(DEF_LUMI_AZURE);
 const vec3 CAVEFOG_DEEPC = SUNRISE_LIGHT_COLOR;
@@ -140,8 +139,8 @@ const float[SKY_LEN] SKY_TIMES = float[](-0.05, -0.01, 0.51, 0.55);
 
 void atmos_generateAtmosphereModel()
 {
-	float moonlightStrength = DEF_MOONLIGHT_STR * (0.5 + 0.5 * frx_moonSize);
-	// SKY_AMBIENT[NGTC] *= 0.5 + 0.5 * frx_moonSize;
+	float moonlightSize = 0.3 + 0.7 * frx_moonSize;
+	float moonlightStrength = DEF_MOONLIGHT_STR * moonlightSize;
 
 
 	vec3 sunColor;
@@ -184,7 +183,7 @@ void atmos_generateAtmosphereModel()
 		nightFactor = mix(SKY_NIGHT[skyI-1], SKY_NIGHT[skyI], skyTransition);
 	}
 
-	atmosv_SkyAmbientRadiance = mix(NOON_AMBIENT, NIGHT_AMBIENT * moonlightStrength, nightFactor) * DEF_SKY_AMBIENT_STR * (frx_worldHasSkylight == 1 ? 1.0 : 0.0);
+	atmosv_SkyAmbientRadiance = mix(NOON_AMBIENT, NIGHT_AMBIENT * moonlightSize, nightFactor) * (frx_worldHasSkylight == 1 ? 1.0 : 0.0);
 	#ifdef POST_SHADER
 	atmosv_SkyRadiance   = mix(DAY_SKY_COLOR, NIGHT_SKY_COLOR, nightFactor) * DEF_SKY_STR;
 	atmosv_CloudRadiance = mix(atmosv_SkyRadiance, vec3(lightLuminance(atmosv_SkyRadiance)), 0.5) * (1.0 + 0.25 * nightFactor);

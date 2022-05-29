@@ -59,6 +59,7 @@ void main()
 
 	cParts.rgb /= cParts.a == 0.0 ? 1.0 : cParts.a;
 	cRains.rgb /= cRains.a == 0.0 ? 1.0 : cRains.a;
+	// cRains.rgb = frx_worldIsOverworld == 1 ? vec3(lightLuminance(cRains.rgb)) : cRains.rgb;
 	cTrans = dSolid < dTrans ? vec4(0.0) : cTrans;
 	cParts = dSolid < dParts ? vec4(0.0) : cParts;
 	cRains = dSolid < dRains ? vec4(0.0) : cRains;

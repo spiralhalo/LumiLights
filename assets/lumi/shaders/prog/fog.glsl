@@ -27,24 +27,31 @@ const float FOG_DENSITY			   = FOG_DENSITY_RELATIVE / 20.0;
 const float UNDERWATER_FOG_FAR	   = UNDERWATER_FOG_FAR_CHUNKS * 16.0;
 const float UNDERWATER_FOG_DENSITY = UNDERWATER_FOG_DENSITY_RELATIVE / 20.0;
 
-float fogFactor(float distToEye, bool isUnderwater)
+float invThickener(bool isUnderwater) {
+	if (isUnderwater || frx_worldHasSkylight != 1) {
+		return 1.0;
+	}
+
+	float invThickener = 1.0;
+	invThickener *= 1.0 - 0.5 * max(frx_worldIsMoonlit, 1.0 - frx_skyLightTransitionFactor);
+	invThickener *= 1.0 - 0.6 * frx_rainGradient;
+	invThickener *= 1.0 - 0.5 * frx_thunderGradient;
+	invThickener = mix(1.0, invThickener, frx_smoothedEyeBrightness.y);
+
+	return invThickener;
+}
+
+float fogFactor(float distToEye, bool isUnderwater, float invThickener)
 {
 	// only when absolutely underwater
 	bool submerged = isUnderwater && frx_cameraInFluid == 1;
 
 	float pFogDensity = submerged ? UNDERWATER_FOG_DENSITY : FOG_DENSITY;
 	float pFogFar     = submerged ? UNDERWATER_FOG_FAR     : FOG_FAR;
-	float invEyeY	  = (1.0 - frx_smoothedEyeBrightness.y);
 
 	if (!isUnderwater && frx_worldHasSkylight == 1) {
-		float inverseThickener = 1.0;
-
-		inverseThickener -= 0.5 * inverseThickener * frx_rainGradient;
-		inverseThickener -= 0.5 * inverseThickener * frx_thunderGradient;
-		inverseThickener = mix(inverseThickener, 1.0, invEyeY * invEyeY);
-
-		pFogFar *= inverseThickener;
-		pFogDensity = mix(min(1.0, pFogDensity * 2.0), min(0.8, pFogDensity), inverseThickener);
+		pFogFar *= invThickener;
+		pFogDensity = mix(min(1.0, pFogDensity * 2.0), min(0.8, pFogDensity), invThickener);
 	}
 
 	float fogFactor = pFogDensity;
@@ -58,12 +65,17 @@ float fogFactor(float distToEye, bool isUnderwater)
 	return clamp(fogFactor * distFactor, 0.0, 1.0);
 }
 
+float fogFactor(float distToEye, bool isUnderwater) {
+	return fogFactor(distToEye, isUnderwater, invThickener(isUnderwater));
+}
+
 vec4 fog(vec4 color, float distToEye, vec3 toFrag, bool isUnderwater)
 {
-	float fogFactor = fogFactor(distToEye, isUnderwater);
+	float invThickener = invThickener(isUnderwater);
+	float fogFactor = fogFactor(distToEye, isUnderwater, invThickener);
 
 	// resolve horizon blend
-	float blendStart  = 1.0 - (min(32.0, frx_viewDistance) / frx_viewDistance); // % position of 2 chunks before render distance
+	float blendStart  = (1.0 - (min(32.0, frx_viewDistance) / frx_viewDistance)) * invThickener; // % position of 2 chunks before render distance
 	float skyBlend	  = frx_cameraInFluid == 1 ? 0.0 : l2_clampScale(blendStart, 1.0, min(distToEye, frx_viewDistance) / frx_viewDistance);
 	vec3  toFragMod	  = toFrag;
 		  toFragMod.y = mix(1.0, toFrag.y, pow(skyBlend, 0.3)); // ??
