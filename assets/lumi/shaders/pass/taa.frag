@@ -65,22 +65,22 @@ float velocityWeight(sampler2D depthBuffer, vec2 currentUv) {
 // based on INSIDE's TAA and https://github.com/ziacko/Temporal-AA
 vec4 taa()
 {
-	const ivec2 box[] = ivec2[](
-		ivec2(-1, -1),
-		ivec2( 0, -1),
-		ivec2( 1, -1),
-		ivec2(-1,  0),
-		ivec2( 1,  0),
-		ivec2(-1,  1),
-		ivec2( 0,  1),
-		ivec2( 1,  1)
+	const vec2 box[] = vec2[](
+		vec2(-1, -1),
+		vec2( 0, -1),
+		vec2( 1, -1),
+		vec2(-1,  0),
+		vec2( 1,  0),
+		vec2(-1,  1),
+		vec2( 0,  1),
+		vec2( 1,  1)
 	);
 
-	const ivec2 plus[] = ivec2[](
-		ivec2(-1, 0),
-		ivec2(0, -1),
-		ivec2(1, 0),
-		ivec2(0, 1)
+	const vec2 plus[] = vec2[](
+		vec2(-1, 0),
+		vec2(0, -1),
+		vec2(1, 0),
+		vec2(0, 1)
 	);
 
 	vec2 prevCoord	  = calcPrevUv(u_depthCurrent, v_texcoord);
@@ -90,7 +90,7 @@ vec4 taa()
 	vec3 minColor0 = currentColor.rgb;
 	vec3 maxColor0 = currentColor.rgb;
 	for(int i = 0; i < 8; i++) {
-		vec3 sampled = textureOffset(u_current, v_texcoord, box[i]).rgb;
+		vec3 sampled = texture(u_current, v_texcoord + box[i] * v_invSize).rgb;
 		minColor0 = min(minColor0, sampled);
 		maxColor0 = max(maxColor0, sampled);
 	}
@@ -98,7 +98,7 @@ vec4 taa()
 	vec3 minColor1 = currentColor.rgb;
 	vec3 maxColor1 = currentColor.rgb;
 	for(int i = 0; i < 4; i++) {
-		vec3 sampled = textureOffset(u_current, v_texcoord, plus[i]).rgb;
+		vec3 sampled = texture(u_current, v_texcoord + plus[i] * v_invSize).rgb;
 		minColor1 = min(minColor1, sampled);
 		maxColor1 = max(maxColor1, sampled);
 	}
