@@ -115,6 +115,7 @@ void frx_pipelineFragment()
 		float ao = (frx_fragEnableAo && frx_modelOriginRegion) ? frx_fragLight.z : 1.0;
 
 		float roughness = max(0.01, frx_fragRoughness); // TODO: use white clear color and stop doing this
+		roughness = max(0.01, roughness - roughness * 0.6 * frx_smoothedRainGradient * l2_clampScale(0.9, 0.93, frx_fragLight.y));
 		float disableDiffuse = 1.0 - float(frx_fragEnableDiffuse);
 
 		// put water flag last because it makes the material buffer looks blue :D easier to debug

@@ -132,7 +132,7 @@ void main()
 		}
 		#endif
 
-		light.w = transIsWater ? lightmapRemap (light.y) : denoisedShadowFactor(u_gbuffer_shadow, v_texcoord, eyePos, dTrans, light.y);
+		light.w = denoisedShadowFactor(u_gbuffer_shadow, v_texcoord, eyePos, dTrans, light.y);
 
 		nextTrans = shading(cTrans, u_tex_nature, light, rawMat, eyePos, normal, vertexNormal, decideUnderwater(dTrans, dTrans, transIsWater, true), disableDiffuse);
 		nextTrans = overlay(nextTrans, u_tex_glint, miscTrans);
