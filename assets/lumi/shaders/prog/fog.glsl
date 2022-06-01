@@ -33,8 +33,8 @@ float invThickener(bool isUnderwater) {
 	}
 
 	float invThickener = 1.0;
-	invThickener *= 1.0 - 0.5 * max(frx_worldIsMoonlit, 1.0 - frx_skyLightTransitionFactor);
-	invThickener *= 1.0 - 0.6 * frx_rainGradient;
+	float night = max(frx_worldIsMoonlit, 1.0 - frx_skyLightTransitionFactor);
+	invThickener *= 1.0 - 0.6 * max(night, frx_rainGradient);
 	invThickener *= 1.0 - 0.5 * frx_thunderGradient;
 	invThickener = mix(1.0, invThickener, frx_smoothedEyeBrightness.y);
 
@@ -75,11 +75,14 @@ vec4 fog(vec4 color, float distToEye, vec3 toFrag, bool isUnderwater)
 	float fogFactor = fogFactor(distToEye, isUnderwater, invThickener);
 
 	// resolve horizon blend
-	float blendStart  = (1.0 - (min(32.0, frx_viewDistance) / frx_viewDistance)) * invThickener; // % position of 2 chunks before render distance
-	float skyBlend	  = frx_cameraInFluid == 1 ? 0.0 : l2_clampScale(blendStart, 1.0, min(distToEye, frx_viewDistance) / frx_viewDistance);
+	float blendStart  = max(0.0, frx_viewDistance - 16.0) * invThickener;
+	float blendEnd	  = max(1.0, frx_viewDistance - 8.0);
+	float skyBlend	  = frx_cameraInFluid == 1 ? 0.0 : l2_clampScale(blendStart, blendEnd, distToEye);
 	vec3  toFragMod	  = toFrag;
 		  toFragMod.y = mix(1.0, toFrag.y, pow(skyBlend, 0.3)); // ??
 	vec3  fogColor	  = mix(isUnderwater ? atmosv_ClearRadiance : atmos_OWFogRadiance(toFrag), atmos_SkyGradientRadiance(toFragMod), skyBlend);
+
+	fogFactor = max(fogFactor, skyBlend);
 
 	// resolve cave fog
 	if (!isUnderwater || frx_cameraInFluid == 0) {
@@ -88,7 +91,8 @@ vec4 fog(vec4 color, float distToEye, vec3 toFrag, bool isUnderwater)
 	}
 
 	vec4 blended = mix(color, vec4(fogColor, 1.0), fogFactor);
+	vec4 added = color + vec4(fogColor, max(0.0, 1.0 - color.a)) * fogFactor;
 
-	return blended;
+	return mix(added, blended, fogFactor);
 }
 #endif

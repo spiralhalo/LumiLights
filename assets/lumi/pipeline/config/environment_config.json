@@ -130,14 +130,7 @@
 					max: 20,
 					nameKey: "config.lumi_lights.value.underwater_fog_density_relative",
 					descriptionKey: "config.lumi_lights.help.underwater_fog_density_relative"
-				},
-				horizon_blend_relative: {
-					default: 5,
-					min: 0,
-					max: 10,
-					nameKey: "config.lumi_lights.value.horizon_blend_relative",
-					descriptionKey: "config.lumi_lights.help.horizon_blend_relative"
-				},
+				}
 			}
 		},
 	]
