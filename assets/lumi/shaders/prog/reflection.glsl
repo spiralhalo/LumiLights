@@ -72,8 +72,8 @@ vec3 reflectionMarch_v2(sampler2D depthBuffer, sampler2DArray lightNormalBuffer,
 	vec3 uvMarch = (uvEndPos - uvStartPos) / float(MAXSTEPS);
 	vec3 uvRayPos = uvStartPos;
 
-	// best thickness for reflecting extreme angles
-	const float thickness = 0.0064; // 0.0004 // old option
+	// best thickness for reflecting extreme angles is 0.0064 // 0.0004 was the old option
+	float thickness = mix(0.0016, 0.0064, abs(viewMarch.z));
 
 	float marchSign = sign(uvMarch.z);
 	float lastZ = texture(depthBuffer, v_texcoord).r - 0.0016 * marchSign;
@@ -89,9 +89,11 @@ vec3 reflectionMarch_v2(sampler2D depthBuffer, sampler2DArray lightNormalBuffer,
 		dZ = uvRayPos.z - sampledZ;
 
 		bool edge = marchSign * (sampledZ - lastZ) > 0.0;
+		// inwards reflections look especially wack without thickness limit
+		bool doHit = dZ < thickness && dZ > 0;
 
-		if (dZ > 0 && edge) {
-			hit = 1.0;	
+		if (doHit && edge) {
+			hit = 1.0;
 		}
 	}
 
@@ -158,7 +160,11 @@ vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer
 			viewMarch = normalize(reflect(viewToFrag, viewNormal) + jitterPrc);
 		}
 
-		vec3 result = reflectionMarch_v2(depthBuffer, lightNormalBuffer, idNormal, viewPos, viewMarch, nearPos.z);
+		// reduce jagginess
+		float startJitter = getRandomFloat(noiseTexture, v_texcoord, frxu_size) * mix(0.2, 1.0, roughness);
+		vec3 viewStartPos = viewPos + viewMarch * startJitter;
+
+		vec3 result = reflectionMarch_v2(depthBuffer, lightNormalBuffer, idNormal, viewStartPos, viewMarch, nearPos.z);
 
 		vec2 uvFade = smoothstep(0.5, 0.475 + l2_clampScale(0.1, 0.0, rawViewNormal.z) * 0.024, abs(result.xy - 0.5));
 		result.z *= min(uvFade.x, uvFade.y);
