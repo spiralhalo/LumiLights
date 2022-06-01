@@ -11,43 +11,46 @@
  *  published by the Free Software Foundation, Inc.
  *******************************************************/
 
-const float USER_CELESTIAL_MULTIPLIER      = clamp(OUTDOORS_BRIGHTNESS, 10, 50) / 10.;
-const float USER_SKY_AMBIENT_MULTIPLIER    = clamp(SKY_AMBIENT_BRIGHTNESS, 10, 50) / 10.;
-const float USER_BLOCK_MULTIPLIER          = clamp(INDOORS_BRIGHTNESS, 10, 50) / 10.;
-const float USER_AMBIENT_MULTIPLIER        = clamp(AMBIENT_BRIGHTNESS, 0, 50) / 10.;
-const float USER_NETHER_AMBIENT_MULTIPLIER = clamp(NETHER_AMBIENT_BRIGHTNESS, 0, 50) / 10.;
-const float USER_END_AMBIENT_MULTIPLIER    = clamp(END_AMBIENT_BRIGHTNESS, 0, 50) / 10.;
-const float USER_NIGHT_AMBIENT_MULTIPLIER  = clamp(NIGHT_AMBIENT_BRIGHTNESS, 0, 50) / 10.;
-const float USER_ALBEDO_BRIGHTENING		   = clamp(ALBEDO_BRIGHTENING, 0, 20) / 500.;
+const float USER_SUNLIGHT_MULTIPLIER       = clamp(SUNLIGHT_BOOST, 0.5, 2.0);
+const float USER_NOON_AMBIENT_MULTIPLIER   = clamp(NOON_AMBIENT_BOOST, 0.5, 2.0);
+const float USER_BLOCKLIGHT_MULTIPLIER     = clamp(BLOCKLIGHT_BOOST, 0.5, 2.0);
+const float USER_AMBIENT_MULTIPLIER        = clamp(AMBIENT_BOOST, 0.0, 2.0);
+const float USER_NETHER_AMBIENT_MULTIPLIER = clamp(NETHER_AMBIENT_BOOST, 0.0, 2.0);
+const float USER_END_AMBIENT_MULTIPLIER    = clamp(END_AMBIENT_BOOST, 0.0, 2.0);
+const float USER_NIGHT_AMBIENT_MULTIPLIER  = clamp(NIGHT_AMBIENT_BOOST, 0.0, 2.0);
+const float USER_ALBEDO_BRIGHTENING        = clamp(ALBEDO_BRIGHTENING, 0, 20) / 500.;
 
 // PROFILE-AGNOSTIC
 // ******************************
 
 	// STRENGTHS
-	#define DEF_BASE_AMBIENT_STR	0.1
+	#define DEF_BASE_AMBIENT_STR	0.1 //* USER_AMBIENT_MULTIPLIER
 	#define DEF_SKYLESS_AMBIENT_STR	0.5
 	#define DEF_SKYLESS_LIGHT_STR	1.0
-	#define DEF_BLOCK_LIGHT_STR		1.5 * USER_BLOCK_MULTIPLIER
+	#define DEF_BLOCK_LIGHT_STR		1.5 * USER_BLOCKLIGHT_MULTIPLIER
 	#define DEF_EMISSIVE_LIGHT_STR	10.0 // want decent lava bloom
 	const float NIGHT_VISION_STR =	1.5;
 	#define STARS_STR				1.0
 	#define LIGHT_RAYS_STR			1.0 // this was never meant to go above 1.0 due to sdr blending
 
 	// ATMOS STRENGTHS
-	#define DEF_SUNLIGHT_STR		1.5 * USER_CELESTIAL_MULTIPLIER
+	#define DEF_SUNLIGHT_STR		7.5 * USER_SUNLIGHT_MULTIPLIER
 	#define DEF_SKY_STR				1.0
-	#define DEF_SKY_AMBIENT_STR		1.0 * USER_SKY_AMBIENT_MULTIPLIER
+	#define DEF_NOON_AMBIENT_STR	1.0 * USER_NOON_AMBIENT_MULTIPLIER
 	#define DEF_NIGHT_AMBIENT_STR	0.2 * USER_NIGHT_AMBIENT_MULTIPLIER
 	#define DEF_MOONLIGHT_STR		0.5 * USER_NIGHT_AMBIENT_MULTIPLIER
 	#define HORIZON_MULT			6.0
 
 	// LIGHT COLORS
-	const vec3 BLOCK_LIGHT_NEUTRAL = hdr_fromGamma(vec3(0.7555)); // luminance of warm BL color
+	const vec3 BLOCK_LIGHT_WARM	   = hdr_fromGamma(vec3(1.0, 0.7, 0.4));
+	const vec3 BLOCK_LIGHT_NEUTRAL = vec3(lightLuminance(BLOCK_LIGHT_WARM));
+
 #if BLOCK_LIGHT_MODE == BLOCK_LIGHT_MODE_NEUTRAL
 	const vec3 BLOCK_LIGHT_COLOR = BLOCK_LIGHT_NEUTRAL;
 #else
-	const vec3 BLOCK_LIGHT_COLOR = hdr_fromGamma(vec3(1.0, 0.7, 0.4));
+	const vec3 BLOCK_LIGHT_COLOR = BLOCK_LIGHT_WARM;
 #endif
+
 	const vec3 NIGHT_VISION_COLOR		= hdr_fromGamma(vec3(1.0, 0.95, 1.0));
 	const vec3 SKYLESS_LIGHT_COLOR		= hdr_fromGamma(vec3(1.0, 1.0, 1.0));
 	const vec3 NETHER_LIGHT_COLOR		= hdr_fromGamma(vec3(1.0, 0.6, 0.4));
@@ -59,7 +62,7 @@ const float USER_ALBEDO_BRIGHTENING		   = clamp(ALBEDO_BRIGHTENING, 0, 20) / 500
 #if SKY_MODE == SKY_MODE_LUMI
 
 	#define DEF_NEBULAE_COLOR			vec3(0.8, 0.3, 0.6)
-	#define _0_DEF_NIGHT_SKY_COLOR		vec3(0.15, 0.175, 0.3)
+	#define _0_DEF_NIGHT_SKY_COLOR		vec3(0.09, 0.105, 0.18)
 
 	#if LUMI_SKY_COLOR == LUMI_SKY_COLOR_NATURAL_AZURE
 		#define DEF_DAY_SKY_COLOR		hdr_fromGamma(DEF_LUMI_AZURE)

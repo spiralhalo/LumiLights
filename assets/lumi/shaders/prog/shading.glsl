@@ -236,23 +236,34 @@ void prepare(vec4 color, sampler2D natureTexture, vec3 eyePos, float vertexNorma
 
 void lights(vec3 albedo, vec4 light, vec3 eyePos, vec3 toEye, out vec3 baseLight, out vec3 blockLight, out vec3 hlLight, out vec3 skyLight)
 {
-	baseLight = vec3(BASE_AMBIENT_STR * USER_AMBIENT_MULTIPLIER);
+	float userBrightness = frx_viewBrightness <= 0.5 ? (0.5 + frx_viewBrightness) : (2.0 * frx_viewBrightness);
+
+	baseLight = vec3(BASE_AMBIENT_STR);
 	baseLight += hdr_fromGamma(NIGHT_VISION_COLOR) * NIGHT_VISION_STR * frx_effectNightVision;
 
 	vec3 skylessColor = mix(SKYLESS_LIGHT_COLOR * USER_END_AMBIENT_MULTIPLIER, NETHER_LIGHT_COLOR * USER_NETHER_AMBIENT_MULTIPLIER, frx_worldIsNether);
 
 	baseLight += (1.0 - frx_worldHasSkylight) * (atmosv_FogRadiance * 0.5 + 0.5) * SKYLESS_AMBIENT_STR;
 	baseLight += (1.0 - frx_worldHasSkylight) * skylessColor * SKYLESS_AMBIENT_STR;
+
+	// user brightness afects every base ambient except for sky ambient (emissive isn't ambient)
+	baseLight *= userBrightness;
+
 	baseLight += atmosv_SkyAmbientRadiance * lightmapRemap(light.y);
 	baseLight += albedo * light.z * EMISSIVE_LIGHT_STR;
 
 	float bl = l2_clampScale(0.03125, 0.96875, light.x);
 
+#if BLOCK_LIGHT_MODE != BLOCK_LIGHT_MODE_NEUTRAL
+	vec3 blColor = mix(BLOCK_LIGHT_NEUTRAL, BLOCK_LIGHT_WARM, l2_clampScale(0.5, 0.7, light.x));
+#else
+	vec3 blColor = BLOCK_LIGHT_NEUTRAL;
+#endif
+
 	// exaggerate block light
 	#define BL_MULT 3.0
 	bl = clamp(pow(bl, 0.5 + BL_MULT / 2.0) * BL_MULT, 0.0, BL_MULT);
-
-	vec3 blColor = BLOCK_LIGHT_COLOR;
+	bl += pow(l2_clampScale(0.7, 0.96875, light.x) * 3.0, 2.0);
 
 	// makes builds look better outside
 	float eyeAdaptation = atmos_eyeAdaptation();
@@ -265,6 +276,7 @@ void lights(vec3 albedo, vec4 light, vec3 eyePos, vec3 toEye, out vec3 baseLight
 #endif
 
 	blockLight = blColor * BLOCK_LIGHT_STR * bl * adaptationTerm;
+	blockLight *= userBrightness;
 
 #if HANDHELD_LIGHT_RADIUS != 0
 	if (frx_heldLight.w > 0) {
