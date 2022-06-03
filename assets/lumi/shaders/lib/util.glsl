@@ -29,6 +29,12 @@ float l2_clampScale(float e0, float e1, float v){
 	return clamp((v - e0) / (e1 - e0), 0.0, 1.0);
 }
 
+float l2_softenUp(float x) {
+	x = 1.0 - x;
+	x *= x;
+	return 1.0 - x;
+}
+
 mat4 l2_rotationMatrix(vec3 axis, float angle)
 {
 	axis = normalize(axis);

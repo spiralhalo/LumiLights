@@ -14,7 +14,7 @@
 
 const float CLOUD_MARCH_JITTER_STRENGTH = 1.0;
 const float TEXTURE_RADIUS = 512.0;
-const int NUM_SAMPLE = 32;
+const int NUM_SAMPLE = 24;
 const int LIGHT_SAMPLE = 5; 
 const float LIGHT_SAMPLE_SIZE = 1.0;
 
@@ -26,23 +26,23 @@ vec2 worldXz2Uv(vec2 worldXz)
 	return ndc * 0.5 + 0.5;
 }
 
-const float CLOUD_HEIGHT = 20.0 / (CLOUD_TEXTURE_ZOOM * CLOUD_SAMPLING_ZOOM);
+const float CLOUD_HEIGHT = 15.0 / (CLOUD_TEXTURE_ZOOM * CLOUD_SAMPLING_ZOOM);
 const float CLOUD_MID_HEIGHT = CLOUD_HEIGHT * .3;
 const float CLOUD_TOP_HEIGHT = CLOUD_HEIGHT - CLOUD_MID_HEIGHT;
 const float CLOUD_MID_ALTITUDE = CLOUD_ALTITUDE + CLOUD_MID_HEIGHT;
 const float CLOUD_MIN_Y = CLOUD_ALTITUDE;
 const float CLOUD_MAX_Y = CLOUD_ALTITUDE + CLOUD_HEIGHT;
 
-const float CLOUD_COVERAGE = clamp(CLOUD_COVERAGE_RELATIVE * 0.1, 0.0, 1.0);
-const float CLOUD_PUFFINESS = clamp(CLOUD_PUFFINESS_RELATIVE * 0.1, 0.0, 1.0);
+const float CLOUD_COVERAGE = clamp(CLOUD_COVERAGE_RELATIVE / 10.0, 0.0, 1.0);
+const float CLOUD_PUFFINESS = clamp(CLOUD_PUFFINESS_RELATIVE / 10.0, 0.0, 1.0);
 
-const float MIN_COVERAGE = 0.325 + 0.1 * (1.0 - CLOUD_COVERAGE);
+const float MIN_COVERAGE = 0.325 + 0.2 * (1.0 - CLOUD_COVERAGE);
 
 float sampleCloud(sampler2D natureTexture, vec3 worldPos)
 {
 	vec2 uv = worldXz2Uv(worldPos.xz);
 	float tF = l2_clampScale(MIN_COVERAGE * (1.0 - frx_rainGradient * 0.6), 1.0, texture(natureTexture, uv).r);
-	float hF = tF;
+	float hF = 0.1 + 0.9 * tF;
 	float yF = l2_clampScale(CLOUD_MID_ALTITUDE + CLOUD_TOP_HEIGHT * hF, CLOUD_MID_ALTITUDE, worldPos.y);
 	yF *= l2_clampScale(CLOUD_MID_ALTITUDE - CLOUD_MID_HEIGHT * hF, CLOUD_MID_ALTITUDE, worldPos.y);
 	return l2_clampScale(0.0, 1.0 - 0.7 * CLOUD_PUFFINESS, yF * tF);
@@ -110,12 +110,14 @@ vec3 rayMarchCloud(sampler2D natureTexture, sampler2D noiseTexture, vec2 texcoor
 
 	float lightEnergy = 0.0;
 	float transmittance = 1.0;
+	float totalDensity = 0.0;
 
 	// Adapted from Sebastian Lague's method
 	for (; i < numSample; i += 1.0) {
 		worldRayPos += unitRay;
 
 		float atRayDensity = sampleCloud(natureTexture, worldRayPos) * sampleSize;
+		totalDensity += atRayDensity;
 
 		vec3 toLightPos = worldRayPos;
 		float toLightDensity = 0.0;
@@ -127,7 +129,7 @@ vec3 rayMarchCloud(sampler2D natureTexture, sampler2D noiseTexture, vec2 texcoor
 
 		toLightDensity /= float(LIGHT_SAMPLE);
 
-		float lightAtRay = exp(-toLightDensity * 5.);
+		float lightAtRay = exp(-toLightDensity * 8.);
 
 		lightEnergy += atRayDensity * transmittance * lightAtRay;
 		distanceTotal += sampleSize * transmittance;
@@ -135,11 +137,10 @@ vec3 rayMarchCloud(sampler2D natureTexture, sampler2D noiseTexture, vec2 texcoor
 		transmittance *= exp(-atRayDensity);
 	}
 
-	// meant to be fix for "dark aura" around clouds but causes light aura instead (with some mental gymnastic can be interpreted as silver lining?)
-	lightEnergy += transmittance; // transparent clouds get more light
-	lightEnergy *= lightEnergy; // contrast hax
+	totalDensity = l2_clampScale(0.0, 1.0, totalDensity / numSample);
+	totalDensity = l2_softenUp(totalDensity);
 
-	return vec3(lightEnergy, 1.0 - transmittance, distanceTotal);
+	return vec3(lightEnergy, totalDensity, distanceTotal);
 }
 
 vec3 vanillaClouds(sampler2D cloudsDepthBuffer, float depth, vec2 texcoord)
@@ -224,8 +225,7 @@ vec4 customClouds(sampler2D cloudsDepthBuffer, sampler2D natureTexture, sampler2
 	}
 
 	float rainBrightness = 1.0 - hdr_fromGammaf(frx_rainGradient) * 0.5; // emulate dark clouds
-	vec3  skyFadeColor	 = atmos_SkyGradientRadiance(toSky);
-	vec3  celestRadiance = atmosv_CelestialRadiance * result.x * 0.13; // magic multiplier
+	vec3  celestRadiance = atmosv_CelestialRadiance * result.x * 0.06; // magic multiplier
 
 	#ifdef VOLUMETRIC_CLOUDS
 	if (frx_worldIsMoonlit == 1) {
@@ -234,9 +234,7 @@ vec4 customClouds(sampler2D cloudsDepthBuffer, sampler2D natureTexture, sampler2
 	#endif
 
 	vec3 color = (celestRadiance + atmosv_CloudRadiance) * rainBrightness;
-	float fogF = sqrt(fogFactor(result.z, false));
-	color = mix(color, skyFadeColor, fogF);
-
+	color = fog(color.rgbb, result.z, toSky, false, false).rgb;
 	return vec4(color, result.y);
 }
 

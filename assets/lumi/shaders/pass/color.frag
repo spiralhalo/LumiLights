@@ -99,9 +99,7 @@ void main()
 	}
 
 	if (dSolid > dMin) {
-		if (dSolid < 1.0) {
-			base = fog(base, length(eyePos), toFrag, solidIsUnderwater);
-		}
+		base = fog(base, length(eyePos), toFrag, solidIsUnderwater);
 
 		vec4 clouds = customClouds(u_vanilla_clouds_depth, u_tex_nature, u_tex_noise, dSolid, uvSolid, eyePos, toFrag, NUM_SAMPLE, ldepth(dMin) * frx_viewDistance * 4.);
 		base.rgb = base.rgb * (1.0 - clouds.a) + clouds.rgb * clouds.a;
@@ -141,6 +139,10 @@ void main()
 		nextTrans = vec4(hdr_fromGamma(cTrans.rgb), cTrans.a);
 	}
 
+	if (transIsManaged && dTrans != dMin) {
+		nextTrans = fog(nextTrans, length(eyePos), toFrag, frx_cameraInWater == 1);
+	}
+
 	vec4 nextRains = vec4(hdr_fromGamma(cRains.rgb), cRains.a);
 
 	vec4 next0, next1, next, after0, after1;
@@ -150,14 +152,11 @@ void main()
 	nextRains = vec4(ldr_tonemap(nextRains.rgb) * nextRains.a, nextRains.a);
 	base = ldr_tonemap(base);
 
-	bool applyTransFog = transIsManaged;
-
 	// TODO: is this slower than insert sort?
 	if (dRains > dTrans && dParts > dTrans) {
 		next0 = (dRains > dParts ? nextRains : nextParts);
 		next1 = (dRains > dParts ? nextParts : nextRains);
 		after0 = after1 = vec4(0.0);
-		applyTransFog = false;
 	} else if (dParts > dTrans) {
 		next1 = nextParts;
 		after0 = vec4(0.0);
@@ -170,11 +169,6 @@ void main()
 		next0 = next1 = vec4(0.0);
 		after0 = (dRains > dParts ? nextRains : nextParts);
 		after1 = (dRains > dParts ? nextParts : nextRains);
-	}
-
-	if (applyTransFog) {
-		// eyePos belongs to translucent at this point
-		nextTrans = fog(nextTrans, length(eyePos), toFrag, frx_cameraInWater == 1);
 	}
 
 	nextTrans = vec4(ldr_tonemap(nextTrans.rgb) * nextTrans.a, nextTrans.a);

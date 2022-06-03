@@ -55,39 +55,17 @@
 #define calcHorizon(worldVec) pow(l2_clampScale(1.0, -l2_clampScale(ATMOS_SEA_LEVEL, ATMOS_STRATOSPHERE, frx_cameraPos.y), worldVec.y), 0.25)
 #define waterHorizon(isUnderwater, skyHorizon) float(isUnderwater) * l2_clampScale(0.9, 1.0, skyHorizon) // kinda hacky
 
-float twilightCalc(vec3 world_toSky, float skyHorizon) {
+float twilightCalc(vec3 world_toSky) {
 	//NB: only works if sun always rise from dead East instead of NE/SE etc.
 	float isTwilight = l2_clampScale(-1.0, 1.0, world_toSky.x * sign(frx_skyLightVector.x) * (1.0 - frx_worldIsMoonlit * 2.0));
-	float result = isTwilight * pow(skyHorizon, 5.0) * atmosv_OWTwilightFactor;
-
-	return frx_smootherstep(0., 1., result);
+	float result = isTwilight * atmosv_OWTwilightFactor;
+	return result * result;
 }
-
-#define twilightCalc2(world_toSky) twilightCalc(world_toSky, calcHorizon(world_toSky))
 
 vec3 atmos_OWFogRadiance(vec3 world_toSky)
 {
-	return mix(atmosv_FogRadiance, atmosv_OWTwilightRadiance, 0.6 * twilightCalc2(world_toSky) * atmosv_OWTwilightFactor);
-}
-
-vec3 atmos_HorizonColor(vec3 world_toSky, float skyHorizon) {
-	float brighteningCancel = min(1., atmosv_OWTwilightFactor * .6 + frx_rainGradient * .6);
-	float brightenFactor = pow(skyHorizon, 20.) * (1. - brighteningCancel);
-	float horizonBrightening = mix(1., HORIZON_MULT, brightenFactor);
-
-	return mix(atmosv_SkyRadiance * horizonBrightening, atmosv_OWTwilightRadiance, twilightCalc(world_toSky, skyHorizon));
-}
-
-// Not for OW only, also used in sky reflection fallback and cloud fade
-vec3 atmos_SkyGradientRadiance(vec3 world_toSky)
-{
-	// This is for overworld but maybe any skylight dimension would work better than no gradient (TODO: need example)
-	if (frx_worldHasSkylight == 0) return atmosv_SkyRadiance;
-
-	float skyHorizon = calcHorizon(world_toSky);
-	vec3 horizonColor = atmos_HorizonColor(world_toSky, skyHorizon);
-
-	return mix(atmosv_SkyRadiance, horizonColor, skyHorizon);
+	vec3 baseFogColor = mix(atmosv_FogRadiance, atmosv_SkyRadiance, atmosv_OWTwilightFactor);
+	return mix(baseFogColor, atmosv_OWTwilightRadiance, twilightCalc(world_toSky) * atmosv_OWTwilightFactor);
 }
 
 float atmos_eyeAdaptation() {
@@ -134,8 +112,8 @@ const int[SUN_LEN] SUN_COL_ID = int[]  (SMONC, SRISC, SRISC, SNONC, SNONC, SRISC
 const float[SUN_LEN] SUN_TIMES = float[](-0.05, -0.04,  0.00,  0.01,  0.49,   0.5,  0.54,  0.55);
 
 const int SKY_LEN = 4;
-const float[SKY_LEN] SKY_NIGHT = float[]( 1.0 ,  0.0 , 0.0 , 1.0 );
-const float[SKY_LEN] SKY_TIMES = float[](-0.05, -0.01, 0.51, 0.55);
+const float[SKY_LEN] SKY_NIGHT = float[]( 1.0 ,  0.0, 0.0 , 1.0);
+const float[SKY_LEN] SKY_TIMES = float[](-0.05, -0.0, 0.5, 0.55);
 
 void atmos_generateAtmosphereModel()
 {
@@ -186,7 +164,7 @@ void atmos_generateAtmosphereModel()
 	atmosv_SkyAmbientRadiance = mix(NOON_AMBIENT, NIGHT_AMBIENT * moonlightSize, nightFactor) * (frx_worldHasSkylight == 1 ? 1.0 : 0.0);
 	#ifdef POST_SHADER
 	atmosv_SkyRadiance   = mix(DAY_SKY_COLOR, NIGHT_SKY_COLOR, nightFactor) * DEF_SKY_STR;
-	atmosv_CloudRadiance = mix(atmosv_SkyRadiance, vec3(lightLuminance(atmosv_SkyRadiance)), 0.5) * (1.0 + 0.25 * nightFactor);
+	atmosv_CloudRadiance = atmosv_SkyRadiance;
 	#endif
 
 	#ifdef POST_SHADER
@@ -201,7 +179,8 @@ void atmos_generateAtmosphereModel()
 	bool customNetherFog = frx_worldIsNether == 1 && frx_cameraInLava == 0;
 
 	if (customOWFog) {
-		atmosv_FogRadiance = atmosv_SkyRadiance;
+		float skyLuminance = lightLuminanceUnclamped(atmosv_SkyRadiance);
+		atmosv_FogRadiance = atmosv_SkyRadiance / skyLuminance * max(skyLuminance, lightLuminance(atmosv_CelestialRadiance * 0.4));
 	} else if (customEndFog) {
 		atmosv_FogRadiance = mix(atmosv_ClearRadiance, hdr_fromGamma(vec3(1.0, 0.7, 1.0)), float(frx_cameraInFluid)) * 0.1;
 	} else if (customNetherFog) {

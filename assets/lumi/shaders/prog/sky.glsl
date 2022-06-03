@@ -118,7 +118,7 @@ vec4 customSky(sampler2D sunTexture, sampler2D moonTexture, vec3 toSky, vec3 fal
 		vec4 celestColor = celestFrag(Rect(v_celest1, v_celest2, v_celest3), sunTexture, moonTexture, toSky);
 		float starEraser = celestColor.a;
 
-		result.rgb  = atmos_SkyGradientRadiance(toSky) * skyVisible;
+		result.rgb  = atmosv_SkyRadiance * skyVisible;
 		result.rgb += celestColor.rgb * (1. - frx_rainGradient) * celestVisible;
 		#else
 		float mul = 1.0 + frx_worldIsMoonlit * frx_skyLightTransitionFactor;
@@ -180,7 +180,7 @@ vec3 skyRadiance(sampler2D sunTexture, sampler2D moonTexture, vec2 material, vec
 	float skyVisible = lightmapRemap(lightyw.x);
 
 	if (material.x > REFLECTION_MAXIMUM_ROUGHNESS) {
-		return atmos_SkyGradientRadiance(toSky) * skyVisible;
+		return atmosv_SkyRadiance * skyVisible;
 	} else {
 		return customSky(sunTexture, moonTexture, toSky, vec3(0.0), false, skyVisible, lightyw.y).rgb;
 	}
