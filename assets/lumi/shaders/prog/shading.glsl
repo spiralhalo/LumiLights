@@ -179,6 +179,8 @@ float diffuseNdL(float NdotL, float alpha, float disableDiffuse, float dielectri
 {
 	float diffuseNdotL = mix(1.0, NdotL, alpha);
 
+	diffuseNdotL = l2_softenUp(diffuseNdotL);
+
 	#ifdef SHADOW_MAP_PRESENT
 	diffuseNdotL += (1.0 - diffuseNdotL) * disableDiffuse * 0.5;
 	#else
