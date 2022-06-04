@@ -35,6 +35,10 @@ float l2_softenUp(float x) {
 	return 1.0 - x;
 }
 
+float l2_softenUp(float x, float e) {
+	return 1.0 - pow(1.0 - x, e);
+}
+
 mat4 l2_rotationMatrix(vec3 axis, float angle)
 {
 	axis = normalize(axis);

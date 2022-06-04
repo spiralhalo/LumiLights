@@ -133,12 +133,12 @@ vec2 rayMarchCloud(sampler2D natureTexture, sampler2D noiseTexture, vec2 texcoor
 
 	distanceTotal += sampleSize * numSample;
 	float fade = min(1.0, distanceTotal / 1024.0);
-	// float pow = mix(5.0, 1.5, fade); // hacky solutions are cute right?
+	float power = mix(6.0, 2.0, fade); // hacky solutions are cute right?
 
 	lightEnergy = clamp(lightEnergy / totalDensity, 0.0, 1.0);
-	lightEnergy = pow(lightEnergy, 3.0);
+	lightEnergy = pow(lightEnergy, power);
 
-	totalDensity = l2_softenUp(clamp(totalDensity / i, 0.0, 1.0));
+	totalDensity = l2_softenUp(clamp(totalDensity / i, 0.0, 1.0), 4.0);
 	// I guess this works because we limit the distance when we are on cloud level with world-clouds
 	totalDensity *= l2_softenUp(1.0 - fade);
 
