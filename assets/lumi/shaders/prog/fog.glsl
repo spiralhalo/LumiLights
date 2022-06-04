@@ -1,7 +1,8 @@
 #include lumi:shaders/common/atmosphere.glsl
+#include lumi:shaders/prog/volumetrics.glsl
 
 /*******************************************************
- *  lumi:shaders/post/prog/fog.glsl
+ *  lumi:shaders/prog/fog.glsl
  *******************************************************/
 
 #ifdef VERTEX_SHADER
@@ -23,9 +24,9 @@ vec4 blindnessFog(vec4 color, float distToEye)
 }
 
 const float FOG_FAR				   = FOG_FAR_CHUNKS * 16.0;
-const float FOG_DENSITY			   = FOG_DENSITY_RELATIVE / 20.0;
+const float FOG_DENSITY			   = clamp(FOG_DENSITY_F, 0.0, 10.0);
 const float UNDERWATER_FOG_FAR	   = UNDERWATER_FOG_FAR_CHUNKS * 16.0;
-const float UNDERWATER_FOG_DENSITY = UNDERWATER_FOG_DENSITY_RELATIVE / 20.0;
+const float UNDERWATER_FOG_DENSITY = clamp(UNDERWATER_FOG_DENSITY_F, 0.0, 10.0);
 
 float invThickener(bool isUnderwater) {
 	if (isUnderwater || frx_worldHasSkylight != 1) {
@@ -51,25 +52,24 @@ float fogFactor(float distToEye, bool isUnderwater, float invThickener)
 
 	if (!isUnderwater && frx_worldHasSkylight == 1) {
 		pFogFar *= invThickener;
-		pFogDensity = mix(min(1.0, pFogDensity * 2.0), min(0.8, pFogDensity), invThickener);
+		pFogDensity = mix(max(1.0, pFogDensity * 2.0), pFogDensity, invThickener);
 	}
-
-	float density = pFogDensity;
 
 	// resolve lava
 	pFogFar = mix(pFogFar, float(frx_effectFireResistance) * 2.0 + 0.5, float(frx_cameraInLava));
-	density = max(density, float(frx_cameraInLava));
+	pFogDensity = max(pFogDensity, float(frx_cameraInLava));
 
 	float distFactor = min(1.0, distToEye / pFogFar);
+	distFactor = l2_softenUp(distFactor, pFogDensity * 2.0);
 
-	return clamp(density * distFactor, 0.0, 1.0);
+	return clamp(distFactor, 0.0, 1.0);
 }
 
 float fogFactor(float distToEye, bool isUnderwater) {
 	return fogFactor(distToEye, isUnderwater, invThickener(isUnderwater));
 }
 
-vec4 fog(vec4 color, float distToEye, vec3 toFrag, bool isUnderwater, bool doSkyBlend)
+vec4 fog(vec4 color, float distToEye, vec3 toFrag, bool isUnderwater, float volumetric)
 {
 	float invThickener = invThickener(isUnderwater);
 	float fogFactor = fogFactor(distToEye, isUnderwater, invThickener);
@@ -77,12 +77,10 @@ vec4 fog(vec4 color, float distToEye, vec3 toFrag, bool isUnderwater, bool doSky
 	vec3 fogColor = isUnderwater ? atmosv_ClearRadiance : atmos_OWFogRadiance(toFrag);
 
 	// resolve sky blend
-	if (doSkyBlend) {
-		float blendStart = max(0.0, frx_viewDistance - 16.0) * invThickener;
-		float blendEnd	 = max(1.0, frx_viewDistance - 8.0);
-		float skyBlend	 = frx_cameraInFluid == 1 ? 0.0 : l2_clampScale(blendStart, blendEnd, distToEye);
-		fogFactor = max(fogFactor, skyBlend);
-	}
+	float blendStart = max(0.0, frx_viewDistance - 16.0) * invThickener;
+	float blendEnd	 = max(1.0, frx_viewDistance - 8.0);
+	float skyBlend	 = frx_cameraInFluid == 1 ? 0.0 : l2_clampScale(blendStart, blendEnd, distToEye);
+	fogFactor = max(fogFactor, skyBlend);
 
 	// resolve height fog
 	if (!isUnderwater && frx_cameraInLava != 1) {
@@ -101,18 +99,28 @@ vec4 fog(vec4 color, float distToEye, vec3 toFrag, bool isUnderwater, bool doSky
 	}
 
 	// resolve cave fog
+	float cave = 0.0;
 	if (!isUnderwater || frx_cameraInFluid == 0) {
 		float invEyeY = (1.0 - frx_smoothedEyeBrightness.y);
-		fogColor = mix(fogColor, atmosv_CaveFogRadiance, invEyeY * invEyeY);
+		cave = invEyeY * invEyeY;
+		fogColor = mix(fogColor, atmosv_CaveFogRadiance, cave);
 	}
+
+	// resolve volumetric
+	volumetric += (1.0 - volumetric) * max(max(frx_rainGradient, 0.1 + frx_cameraInWater * 0.1), max(frx_cameraInLava, cave));
+	// fogFactor = mix(fogFactor * 0.97 + 0.03, fogFactor, cave);
+	fogFactor *= volumetric;
 
 	vec4 blended = mix(color, vec4(fogColor, 1.0), fogFactor);
 	
 	return blended;
 }
 
-vec4 fog(vec4 color, float distToEye, vec3 toFrag, bool isUnderwater)
-{
-	return fog(color, distToEye, toFrag, isUnderwater, true);
+vec4 fog(vec4 color, float distToEye, vec3 toFrag, bool isUnderwater) {
+	return fog(color, distToEye, toFrag, isUnderwater, 1.0);
+}
+
+vec4 volumetricFog(sampler2DArrayShadow shadowBuffer, sampler2D natureTexture, vec4 color, float distToEye, vec3 toFrag, float yLightmap, float tileJitter, float depth, bool isUnderwater) {
+	return fog(color, distToEye, toFrag, isUnderwater, celestialLightRays(shadowBuffer, natureTexture, distToEye, toFrag, yLightmap, tileJitter, depth, isUnderwater));
 }
 #endif

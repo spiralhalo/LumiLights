@@ -1,8 +1,8 @@
 #include frex:shaders/api/view.glsl
 #include frex:shaders/api/world.glsl
 #include lumi:shaders/common/atmosphere.glsl
-#include lumi:shaders/common/shadow.glsl
-#include lumi:shaders/lib/caustics.glsl
+#include lumi:shaders/prog/shadow.glsl
+#include lumi:shaders/prog/water.glsl
 
 /*******************************************************
  *  lumi:shaders/prog/volumetrics.glsl
@@ -10,75 +10,65 @@
 
 #define RAYS_MIN_DIST 32
 
-float celestialLightRays(sampler2DArrayShadow sshadow, vec3 modelPos, float strength, float yLightmap, float tileJitter, float translucentDepth, float depth, float exposure)
+#ifndef VERTEX_SHADER
+float celestialLightRays(sampler2DArrayShadow shadowBuffer, sampler2D natureTexture, float distToEye, vec3 toFrag, float yLightmap, float tileJitter, float depth, bool isUnderwater)
 {
-	bool doUnderwaterRays = frx_cameraInWater == 1 && translucentDepth >= depth && frx_worldHasSkylight == 1;
+	bool doUnderwaterRays = frx_cameraInWater == 1 && isUnderwater;
 
-	vec3  unit	  = normalize(modelPos);
-	float scatter = dot(unit, frx_skyLightVector);
+#ifndef SHADOW_MAP_PRESENT
+	// there is no point
+	// if (!doUnderwaterRays) {
+		return 1.0;
+	// }
+#endif
 
-	if (doUnderwaterRays) {
-		scatter = 0.5 - abs(scatter - 0.5);
-		scatter *= 2.0;
-	} else {
-		if (frx_worldIsMoonlit == 1) {
-			scatter = l2_clampScale(0.7, 1.0, scatter);
-		} else {
-			scatter = l2_clampScale(-1.0, 0.5, scatter);
-		}
-		// scatter = pow(scatter, 0.25);
-	#ifdef SHADOW_WORKAROUND
-		// Workaround to fix patches in shadow map until it's FLAWLESS
-		scatter *= depth == 1.0 ? 1.0 : l2_clampScale(0.03125, 0.0625, yLightmap);
-	#endif
-	}
+	float scatter = 1.0;
+
+#ifdef SHADOW_WORKAROUND
+	// Workaround to fix patches in shadow map until it's FLAWLESS
+	scatter *= depth == 1.0 ? 1.0 : l2_clampScale(0.03125, 0.0625, yLightmap);
+#endif
 
 	if (scatter <= 0.0) {
 		return 0.0;
 	}
 
-	float maxDist	 = length(modelPos);
-	int   maxSteps	 = doUnderwaterRays ? 10 : 16;
-	float sample	 = doUnderwaterRays ? 2.0 : maxDist / float(maxSteps);
-	float basePower	 = doUnderwaterRays ? 1.0 : strength;
-	float deadRadius = doUnderwaterRays ? 4.0 : 0.0;
-	float nearLands	 = frx_viewDistance;
-	float farLands	 = frx_viewDistance * 4.0;
-	// const float range = 10.0;
+	const int MAX_STEPS = 6;
+	// TODO: perhaps reintroduce deadRadius once caustic light shafts are added
+	float sample	 = doUnderwaterRays ? 2.0 : max(1.0, distToEye) / float(MAX_STEPS);
 
 	vec3 ray   = vec3(0.);
-	vec3 march = unit * sample;
+	vec3 march = toFrag * sample;
 
-	ray += tileJitter * march + unit * deadRadius;
+	ray += tileJitter * march;
+	// sideways blurring
+	// ray += (tileJitter * 2.0 - 1.0) * normalize(vec3(frx_skyLightVector.x, 0.0, frx_skyLightVector.z));
 
-	float power    = 0.0;
-	float traveled = tileJitter * sample + deadRadius;
-	int   steps	   = 0;
+	float energy = 0.0;
+	int steps = 0;
 
-	while (traveled < maxDist && steps < maxSteps) {
-		float e = 0.0;
+	while (steps < MAX_STEPS) {
+		float e = 1.0;
 
-		if (doUnderwaterRays) {
-			e = caustics(ray);
-			e = pow(e, 30.0);
-		} else {
-			e = l2_clampScale(256, 64., ray.y) * l2_clampScale(farLands, nearLands, traveled) * l2_clampScale(RAYS_MIN_DIST * exposure * 0.5, RAYS_MIN_DIST * exposure, traveled);
-		}
-		// e *= traveled / range;
+		// DISABLED because need a different caustics function that respects light direction
+		// and also because it was for caustic light shafts not fog (?) 
+		// if (doUnderwaterRays) {
+		// 	e *= pow(caustics(natureTexture, ray + frx_cameraPos, 1.0), 30.0);
+		// }
 
 		#ifdef SHADOW_MAP_PRESENT
-		vec4 ray_shadow = (frx_shadowViewMatrix * vec4(ray, 1.0));
-		e *= simpleShadowFactor(sshadow, ray_shadow);
+		vec4 shadowRay = (frx_shadowViewMatrix * vec4(ray, 1.0));
+		e *= simpleShadowFactor(shadowBuffer, shadowRay);
 		#endif
 
-		power	 += e;
-		ray		 += march;
-		traveled += sample;
+		energy += e;
+		ray += march;
 
 		steps ++;
 	}
 
-	power = power / float(maxSteps) * scatter * basePower;
+	energy = (energy / float(MAX_STEPS)) * scatter;
 
-	return power;
+	return energy;
 }
+#endif
