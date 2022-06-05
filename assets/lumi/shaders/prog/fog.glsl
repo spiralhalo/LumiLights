@@ -115,6 +115,7 @@ vec4 fog(vec4 color, float distToEye, vec3 toFrag, bool isUnderwater, float volu
 	residual = max(residual, frx_cameraInLava);
 	residual = max(residual, cave);
 	residual = max(residual, l2_clampScale(0.1, 0.0, frx_skyLightTransitionFactor));
+	residual = max(residual, l2_softenUp(fogFactor) * l2_clampScale(0.3, 0.0, dot(toFrag, frx_skyLightVector))); // reduce batman sign effect
 	volumetric += (1.0 - volumetric) * residual;
 	fogFactor *= volumetric;
 
