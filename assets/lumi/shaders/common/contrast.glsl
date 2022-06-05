@@ -30,7 +30,6 @@ const float USER_ALBEDO_BRIGHTENING        = clamp(ALBEDO_BRIGHTENING, 0, 20) / 
 	#define DEF_BLOCK_LIGHT_STR		1.5 * USER_BLOCKLIGHT_MULTIPLIER
 	#define DEF_EMISSIVE_LIGHT_STR	10.0 // want decent lava bloom
 	const float NIGHT_VISION_STR =	1.5;
-	#define STARS_STR				1.0
 	#define LIGHT_RAYS_STR			1.0 // this was never meant to go above 1.0 due to sdr blending
 
 	// ATMOS STRENGTHS
@@ -57,7 +56,7 @@ const float USER_ALBEDO_BRIGHTENING        = clamp(ALBEDO_BRIGHTENING, 0, 20) / 
 
 	// SKY COLORS
 	#define DEF_VANILLA_DAY_SKY_COLOR	hdr_fromGamma(vec3(0.52, 0.69, 1.0))
-	#define DEF_LUMI_AZURE				vec3(0.425, 0.623333, 0.85)
+	#define DEF_LUMI_AZURE				hdr_fromGamma(vec3(0.425, 0.623333, 0.85))
 
 #if SKY_MODE == SKY_MODE_LUMI
 
@@ -65,7 +64,7 @@ const float USER_ALBEDO_BRIGHTENING        = clamp(ALBEDO_BRIGHTENING, 0, 20) / 
 	#define _0_DEF_NIGHT_SKY_COLOR		vec3(0.09, 0.105, 0.18)
 
 	#if LUMI_SKY_COLOR == LUMI_SKY_COLOR_NATURAL_AZURE
-		#define DEF_DAY_SKY_COLOR		hdr_fromGamma(DEF_LUMI_AZURE)
+		#define DEF_DAY_SKY_COLOR		DEF_LUMI_AZURE
 	#elif LUMI_SKY_COLOR == LUMI_SKY_COLOR_BRIGHT_CYAN
 		#define DEF_DAY_SKY_COLOR		hdr_fromGamma(vec3(0.40, 0.69, 1.0))
 	#elif LUMI_SKY_COLOR == LUMI_SKY_COLOR_DEEP_CERULEAN

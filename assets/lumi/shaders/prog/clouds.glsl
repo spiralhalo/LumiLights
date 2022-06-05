@@ -140,7 +140,7 @@ vec2 rayMarchCloud(sampler2D natureTexture, sampler2D noiseTexture, vec2 texcoor
 
 	totalDensity = l2_softenUp(clamp(totalDensity / i, 0.0, 1.0), 4.0);
 	// I guess this works because we limit the distance when we are on cloud level with world-clouds
-	totalDensity *= l2_softenUp(1.0 - fade);
+	totalDensity *= l2_softenUp(1.0 - fade, 4.0);
 
 	return vec2(lightEnergy, totalDensity);
 }

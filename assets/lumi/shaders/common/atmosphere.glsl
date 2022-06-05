@@ -92,11 +92,11 @@ const vec3 TWILIGHT_COLOR  = SUNRISE_LIGHT_COLOR;
 const vec3 NOON_AMBIENT  = DEF_NOON_AMBIENT_STR * (DEF_NOON_AMBIENT / lightLuminanceUnclamped(DEF_NOON_AMBIENT));
 const vec3 NIGHT_AMBIENT = DEF_NIGHT_AMBIENT_STR * MOONLIGHT_COLOR;
 
-const vec3 CAVEFOG_C	 = hdr_fromGamma(DEF_LUMI_AZURE);
-const vec3 CAVEFOG_DEEPC = SUNRISE_LIGHT_COLOR;
+const vec3	CAVEFOG_C	  = DEF_LUMI_AZURE / lightLuminanceUnclamped(DEF_LUMI_AZURE);
+const vec3	CAVEFOG_DEEPC = SUNRISE_LIGHT_COLOR / lightLuminanceUnclamped(SUNRISE_LIGHT_COLOR);
 const float CAVEFOG_MAXY = 16.0;
 const float CAVEFOG_MINY = 0.0;
-const float CAVEFOG_STR	 = 1.0;
+const float CAVEFOG_STR	 = 0.7;
 
 
 const int SRISC = 0;
@@ -235,14 +235,13 @@ void atmos_generateAtmosphereModel()
 
 	/** CAVE FOG **/
 	if (frx_worldIsOverworld == 1) {
-		atmosv_CaveFogRadiance = mix(CAVEFOG_C, CAVEFOG_DEEPC, l2_clampScale(CAVEFOG_MAXY, CAVEFOG_MINY, frx_cameraPos.y)) * CAVEFOG_STR;
+		atmosv_CaveFogRadiance = mix(CAVEFOG_C, CAVEFOG_DEEPC, l2_clampScale(CAVEFOG_MAXY, CAVEFOG_MINY, frx_cameraPos.y));
 
 		/* adjust cave fog brightness to outdoors fog's brightness.
 		   this means cave fog is affected by the daylight cycle, which sucks, but 
 		   it's better than having cave fog affect the outdoors in a jarring way. */
 		float fogLuminance = lightLuminance(atmosv_FogRadiance);
-		float caveFogLuminance = lightLuminance(atmosv_CaveFogRadiance);
-		atmosv_CaveFogRadiance *= min(caveFogLuminance, fogLuminance / caveFogLuminance);
+		atmosv_CaveFogRadiance *= min(CAVEFOG_STR, fogLuminance / CAVEFOG_STR);
 	} else {
 		atmosv_CaveFogRadiance = atmosv_FogRadiance;
 	}

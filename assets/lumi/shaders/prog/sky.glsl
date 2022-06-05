@@ -141,8 +141,8 @@ vec4 customSky(sampler2D sunTexture, sampler2D moonTexture, vec3 toSky, vec3 fal
 		float rainOcclude = (1.0 - frx_rainGradient);
 		vec4  starVec     = v_star_rotator * vec4(toSky, 0.0);
 		float milkyHaze   = starry * rainOcclude * milkyness * 0.4 * l2_clampScale(-1.0, 1.0, snoise(starVec.xyz * 2.0));
-		float starNoise   = cellular2x2x2(starVec.xyz * mix(20 + 2 * LUMI_STAR_DENSITY, 40 + 2 * LUMI_STAR_DENSITY, milkyness)).x;
-		float star        = starry * l2_clampScale(0.025 + 0.0095 * LUMI_STAR_SIZE + milkyness * milkyness * 0.15, 0.0, starNoise);
+		float starNoise   = cellular2x2x2(starVec.xyz * mix(20 + LUMI_STAR_DENSITY, 40 + LUMI_STAR_DENSITY, milkyness)).x;
+		float star        = starry * l2_clampScale(0.025 + 0.005 * LUMI_STAR_SIZE + milkyness * milkyness * 0.1, 0.0, starNoise);
 
 		star = l2_clampScale(0.0, 1.0 - 0.6, star) * rainOcclude;
 
@@ -153,7 +153,7 @@ vec4 customSky(sampler2D sunTexture, sampler2D moonTexture, vec3 toSky, vec3 fal
 		milkyHaze *= milkyHaze;
 		#endif
 
-		vec3 starRadiance = vec3(star) * STARS_STR * 0.1 * LUMI_STAR_BRIGHTNESS + NEBULAE_COLOR * milkyHaze;
+		vec3 starRadiance = vec3(star) * EMISSIVE_LIGHT_STR * 0.1 * LUMI_STAR_BRIGHTNESS + NEBULAE_COLOR * milkyHaze;
 
 		result.rgb += starRadiance * skyVisible;
 		#endif
