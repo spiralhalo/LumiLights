@@ -63,10 +63,7 @@ void main()
 	vec3 toFrag  = normalize(eyePos);
 
 	float distToEye = length(eyePos);
-	// modulate fog on transparent surfaces
-	fragColor.a = (idLight == ID_SOLID_LIGT) ? 1.0 : max(trans.a, after.a);
 	fragColor = volumetricFog(u_gbuffer_shadow, u_tex_nature, fragColor, distToEye, toFrag, texture(u_gbuffer_lightnormal, vec3(v_texcoord, idLight)).y, getRandomFloat(u_tex_noise, v_texcoord, frxu_size), dMin, frx_cameraInWater == 1);
-	fragColor.a = 1.0;
 
 	vec4 clouds = customClouds(u_vanilla_clouds_depth, u_tex_nature, u_tex_noise, dMin, v_texcoord, eyePos, toFrag, NUM_SAMPLE);
 	fragColor.rgb = fragColor.rgb * (1.0 - clouds.a) + clouds.rgb * clouds.a;

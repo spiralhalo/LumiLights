@@ -99,11 +99,6 @@ void main()
 	}
 
 	if (dSolid > dMin) {
-		// modulate fog behind translucent
-		base.a = 1.0 - (dSolid > dTrans ? cTrans.a : max(cParts.a, cRains.a));
-		base = volumetricFog(u_gbuffer_shadow, u_tex_nature, base, length(eyePos), toFrag, light.y, getRandomFloat(u_tex_noise, v_texcoord, frxu_size), dSolid, solidIsUnderwater);
-		base.a = 1.0;
-
 		vec4 clouds = customClouds(u_vanilla_clouds_depth, u_tex_nature, u_tex_noise, dSolid, uvSolid, eyePos, toFrag, NUM_SAMPLE, ldepth(dMin) * frx_viewDistance * 4.);
 		base.rgb = base.rgb * (1.0 - clouds.a) + clouds.rgb * clouds.a;
 	}
@@ -140,10 +135,6 @@ void main()
 	} else {
 		cTrans.rgb = cTrans.rgb / (cTrans.a == 0.0 ? 1.0 : cTrans.a);
 		nextTrans = vec4(hdr_fromGamma(cTrans.rgb), cTrans.a);
-	}
-
-	if (transIsManaged && dTrans != dMin) {
-		nextTrans = fog(nextTrans, length(eyePos), toFrag, frx_cameraInWater == 1);
 	}
 
 	vec4 nextRains = vec4(hdr_fromGamma(cRains.rgb), cRains.a);

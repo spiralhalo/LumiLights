@@ -118,7 +118,7 @@ vec4 fog(vec4 color, float distToEye, vec3 toFrag, bool isUnderwater, float volu
 	volumetric += (1.0 - volumetric) * residual;
 	fogFactor *= volumetric;
 
-	vec4 blended = mix(color, vec4(fogColor, 1.0), fogFactor * color.a);
+	vec4 blended = mix(color, vec4(fogColor, 1.0), fogFactor);
 
 	return blended;
 }
