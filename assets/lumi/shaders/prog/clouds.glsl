@@ -14,7 +14,7 @@
 
 const float CLOUD_MARCH_JITTER_STRENGTH = 1.0;
 const float TEXTURE_RADIUS = 512.0;
-const int NUM_SAMPLE = 24;
+const int NUM_SAMPLE = 18;
 const int LIGHT_SAMPLE = 5; 
 const float LIGHT_SAMPLE_SIZE = 1.0;
 
