@@ -19,6 +19,11 @@
 					nameKey: "config.lumi_lights.value.volumetric_clouds",
 					descriptionKey: "config.lumi_lights.help.volumetric_clouds"
 				},
+				volumetric_fog: {
+					default: true,
+					nameKey: "config.lumi_lights.value.volumetric_fog",
+					descriptionKey: "config.lumi_lights.help.volumetric_fog"
+				},
 				bloom_effect: {
 					default: true,
 					nameKey: "config.lumi_lights.value.bloom_effect",

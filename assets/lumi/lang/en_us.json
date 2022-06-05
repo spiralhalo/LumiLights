@@ -47,6 +47,8 @@
 	"config.lumi_lights.help.ss_ao": "Very expensive approximated local shadows",
 	"config.lumi_lights.value.volumetric_clouds": "Volumetric clouds",
 	"config.lumi_lights.help.volumetric_clouds": "Expensive volumetric clouds",
+	"config.lumi_lights.value.volumetric_fog": "Volumetric fog",
+	"config.lumi_lights.help.volumetric_fog": "Expensive volumetric fog",
 	"config.lumi_lights.value.bloom_effect": "Bloom effect",
 	"config.lumi_lights.help.bloom_effect": "Emulate eye lens bloom",
 	"config.lumi_lights.value.water_waves": "Water waves",

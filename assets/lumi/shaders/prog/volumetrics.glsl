@@ -15,7 +15,7 @@ float celestialLightRays(sampler2DArrayShadow shadowBuffer, sampler2D natureText
 {
 	bool doUnderwaterRays = frx_cameraInWater == 1 && isUnderwater;
 
-#ifndef SHADOW_MAP_PRESENT
+#if !defined(SHADOW_MAP_PRESENT) || !defined(VOLUMETRIC_FOG)
 	// there is no point
 	// if (!doUnderwaterRays) {
 		return 1.0;
