@@ -23,6 +23,8 @@ vec4 blindnessFog(vec4 color, float distToEye)
 	return blended;
 }
 
+const float VOLUMETRIC_RESIDUAL	   = 0.1;
+const float HEIGHT_RESIDUAL		   = 0.05;
 const float FOG_FAR				   = FOG_FAR_CHUNKS * 16.0;
 const float FOG_DENSITY			   = clamp(FOG_DENSITY_F, 0.0, 10.0);
 const float UNDERWATER_FOG_FAR	   = UNDERWATER_FOG_FAR_CHUNKS * 16.0;
@@ -95,7 +97,7 @@ vec4 fog(vec4 color, float distToEye, vec3 toFrag, bool isUnderwater, float volu
 		yFactor = mix(yFactor, l2_clampScale(-0.125 + cameraAt, 0.5 + cameraAt, toFrag.y), extraViewBlend);
 
 		float invYFactor = 1.0 - yFactor;
-		fogFactor *= invYFactor * invYFactor;
+		fogFactor *= HEIGHT_RESIDUAL + (invYFactor * invYFactor) * (1.0 - HEIGHT_RESIDUAL);
 	}
 
 	// resolve cave fog
@@ -107,8 +109,12 @@ vec4 fog(vec4 color, float distToEye, vec3 toFrag, bool isUnderwater, float volu
 	}
 
 	// resolve volumetric
-	volumetric += (1.0 - volumetric) * max(max(frx_rainGradient, 0.1 + frx_cameraInWater * 0.1), max(frx_cameraInLava, cave));
-	// fogFactor = mix(fogFactor * 0.97 + 0.03, fogFactor, cave);
+	float residual = VOLUMETRIC_RESIDUAL + frx_cameraInWater * VOLUMETRIC_RESIDUAL;
+	residual = max(residual, frx_rainGradient);
+	residual = max(residual, frx_cameraInLava);
+	residual = max(residual, cave);
+	residual = max(residual, l2_clampScale(0.1, 0.0, frx_skyLightTransitionFactor));
+	volumetric += (1.0 - volumetric) * residual;
 	fogFactor *= volumetric;
 
 	vec4 blended = mix(color, vec4(fogColor, 1.0), fogFactor);
