@@ -76,7 +76,8 @@ vec4 fog(vec4 color, float distToEye, vec3 toFrag, bool isUnderwater, float volu
 	float invThickener = invThickener(isUnderwater);
 	float fogFactor = fogFactor(distToEye, isUnderwater, invThickener);
 
-	vec3 fogColor = isUnderwater ? atmosv_ClearRadiance : atmos_OWFogRadiance(toFrag);
+	bool submerged = isUnderwater && frx_cameraInFluid == 1;
+	vec3 fogColor = submerged ? atmosv_ClearRadiance : atmos_OWFogRadiance(toFrag);
 
 	// resolve sky blend
 	float blendStart = max(0.0, frx_viewDistance - 16.0) * invThickener;
@@ -103,7 +104,7 @@ vec4 fog(vec4 color, float distToEye, vec3 toFrag, bool isUnderwater, float volu
 	// resolve cave fog
 	float cave = 0.0;
 	if (!isUnderwater || frx_cameraInFluid == 0) {
-		float invEyeY = (1.0 - frx_smoothedEyeBrightness.y);
+		float invEyeY = 1.0 - frx_smoothedEyeBrightness.y;
 		cave = invEyeY * invEyeY;
 		fogColor = mix(fogColor, atmosv_CaveFogRadiance, cave);
 	}
@@ -117,8 +118,8 @@ vec4 fog(vec4 color, float distToEye, vec3 toFrag, bool isUnderwater, float volu
 	volumetric += (1.0 - volumetric) * residual;
 	fogFactor *= volumetric;
 
-	vec4 blended = mix(color, vec4(fogColor, 1.0), fogFactor);
-	
+	vec4 blended = mix(color, vec4(fogColor, 1.0), fogFactor * color.a);
+
 	return blended;
 }
 

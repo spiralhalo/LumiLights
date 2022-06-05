@@ -81,9 +81,6 @@ float atmos_eyeAdaptation() {
 #define DEF_SUNLIGHT_COLOR	hdr_fromGamma(vec3(1.0 , 0.9 , 0.7 ))
 #define DEF_NOON_AMBIENT	hdr_fromGamma(vec3(0.6 , 0.85, 1.0 ))
 
-const float SKY_LIGHT_RAINING_MULT    = 0.5;
-const float SKY_LIGHT_THUNDERING_MULT = 0.2;
-
 const vec3 MOONLIGHT_COLOR	   = DEF_MOONLIGHT_COLOR / lightLuminanceUnclamped(DEF_MOONLIGHT_COLOR);
 const vec3 NOON_SUNLIGHT_COLOR = DEF_SUNLIGHT_COLOR / lightLuminanceUnclamped(DEF_SUNLIGHT_COLOR);
 const vec3 SUNRISE_LIGHT_COLOR = hdr_fromGamma(vec3(1.0, 0.8, 0.4));
@@ -208,7 +205,7 @@ void atmos_generateAtmosphereModel()
 
 
 	/** RAIN **/
-	float rainBrightness = min(mix(1.0, SKY_LIGHT_RAINING_MULT, frx_rainGradient), mix(1.0, SKY_LIGHT_THUNDERING_MULT, frx_thunderGradient));
+	float rainBrightness = 1.0 - 0.4 * frx_rainGradient - 0.3 * frx_thunderGradient;
 
 	vec3 grayCelestial  = vec3(lightLuminance(atmosv_CelestialRadiance));
 	vec3 graySkyAmbient = vec3(lightLuminance(atmosv_SkyAmbientRadiance));
@@ -245,7 +242,7 @@ void atmos_generateAtmosphereModel()
 		   it's better than having cave fog affect the outdoors in a jarring way. */
 		float fogLuminance = lightLuminance(atmosv_FogRadiance);
 		float caveFogLuminance = lightLuminance(atmosv_CaveFogRadiance);
-		atmosv_CaveFogRadiance *= fogLuminance / caveFogLuminance;
+		atmosv_CaveFogRadiance *= min(caveFogLuminance, fogLuminance / caveFogLuminance);
 	} else {
 		atmosv_CaveFogRadiance = atmosv_FogRadiance;
 	}

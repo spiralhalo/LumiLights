@@ -125,7 +125,7 @@
 					descriptionKey: "config.lumi_lights.help.underwater_fog_far_chunks"
 				},
 				underwater_fog_density_f: {
-					default: 2.0,
+					default: 1.0,
 					min: 0,
 					max: 5.0,
 					nameKey: "config.lumi_lights.value.underwater_fog_density_relative",

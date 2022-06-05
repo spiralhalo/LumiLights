@@ -13,6 +13,8 @@
 #ifndef VERTEX_SHADER
 float celestialLightRays(sampler2DArrayShadow shadowBuffer, sampler2D natureTexture, float distToEye, vec3 toFrag, float yLightmap, float tileJitter, float depth, bool isUnderwater)
 {
+	if (frx_worldHasSkylight == 0) return 1.0;
+
 	bool doUnderwaterRays = frx_cameraInWater == 1 && isUnderwater;
 
 #if !defined(SHADOW_MAP_PRESENT) || !defined(VOLUMETRIC_FOG)
@@ -25,8 +27,11 @@ float celestialLightRays(sampler2DArrayShadow shadowBuffer, sampler2D natureText
 	float scatter = 1.0;
 
 #ifdef SHADOW_WORKAROUND
-	// Workaround to fix patches in shadow map until it's FLAWLESS
-	scatter *= depth == 1.0 ? 1.0 : l2_clampScale(0.03125, 0.0625, yLightmap);
+	// This is very awkward.. I hope shadows will get better soon
+	float maximize = step(1.0, depth);
+	maximize = max(maximize, float(isUnderwater));
+	maximize = max(maximize, pow(frx_smoothedEyeBrightness.y, 5.0));
+	scatter *= max(maximize, l2_clampScale(0.03125, 0.0625, yLightmap));
 #endif
 
 	if (scatter <= 0.0) {
