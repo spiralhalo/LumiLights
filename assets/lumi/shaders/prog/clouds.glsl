@@ -41,7 +41,7 @@ const float MIN_COVERAGE = 0.325 + 0.2 * (1.0 - CLOUD_COVERAGE);
 float sampleCloud(sampler2D natureTexture, vec3 worldPos)
 {
 	vec2 uv = worldXz2Uv(worldPos.xz);
-	float tF = l2_clampScale(MIN_COVERAGE * (1.0 - frx_rainGradient * 0.6), 1.0, texture(natureTexture, uv).r);
+	float tF = l2_clampScale(MIN_COVERAGE * (1.0 - frx_smoothedRainGradient * 0.6), 1.0, texture(natureTexture, uv).r);
 	float hF = 0.1 + 0.9 * tF;
 	float yF = l2_clampScale(CLOUD_MID_ALTITUDE + CLOUD_TOP_HEIGHT * hF, CLOUD_MID_ALTITUDE, worldPos.y);
 	yF *= l2_clampScale(CLOUD_MID_ALTITUDE - CLOUD_MID_HEIGHT * hF, CLOUD_MID_ALTITUDE, worldPos.y);
@@ -226,7 +226,7 @@ vec4 customClouds(sampler2D cloudsDepthBuffer, sampler2D natureTexture, sampler2
 		#endif
 	}
 
-	float rainBrightness = 1.0 - hdr_fromGammaf(frx_rainGradient) * 0.5; // emulate dark clouds
+	float rainCloudBrightness = 1.0 - hdr_fromGammaf(frx_smoothedRainGradient) * 0.3 - hdr_fromGammaf(frx_thunderGradient) * 0.1; // emulate dark clouds
 	vec3  celestRadiance = atmosv_CelestialRadiance * result.x * 0.06; // magic multiplier
 
 	#ifdef VOLUMETRIC_CLOUDS
@@ -235,7 +235,7 @@ vec4 customClouds(sampler2D cloudsDepthBuffer, sampler2D natureTexture, sampler2
 	}
 	#endif
 
-	vec3 color = (celestRadiance + atmosv_CloudRadiance) * rainBrightness;
+	vec3 color = (celestRadiance + atmosv_CloudRadiance) * rainCloudBrightness;
 	return vec4(color, result.y);
 }
 

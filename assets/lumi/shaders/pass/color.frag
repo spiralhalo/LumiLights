@@ -98,6 +98,14 @@ void main()
 		base += skyReflection(u_tex_sun, u_tex_moon, u_tex_noise, cSolid.rgb, rawMat.xy, toFrag, normal, light.yw);
 	}
 
+	vec4 foggedColor = base;
+	vec3 foggedToFrag = toFrag;
+	// float foggedLightY = light.y;
+	float foggedDist = length(eyePos);
+	// float tileJitter = getRandomFloat(u_tex_noise, v_texcoord, frxu_size);
+	// float foggedDepth = dSolid;
+	bool foggedIsUnderwater = solidIsUnderwater;
+
 	if (dSolid > dMin) {
 		vec4 clouds = customClouds(u_vanilla_clouds_depth, u_tex_nature, u_tex_noise, dSolid, uvSolid, eyePos, toFrag, NUM_SAMPLE, ldepth(dMin) * frx_viewDistance * 4.);
 		base.rgb = base.rgb * (1.0 - clouds.a) + clouds.rgb * clouds.a;
@@ -135,6 +143,30 @@ void main()
 	} else {
 		cTrans.rgb = cTrans.rgb / (cTrans.a == 0.0 ? 1.0 : cTrans.a);
 		nextTrans = vec4(hdr_fromGamma(cTrans.rgb), cTrans.a);
+	}
+
+	// fog behind rain
+	if (cRains.a > 0 && frx_rainGradient > 0 && dSolid > dRains && (dSolid != 1.0 || dTrans < dSolid)) {
+		bool foggedIsTrans = dTrans < dSolid && dTrans > dRains;
+
+		if (foggedIsTrans) {
+			foggedColor = nextTrans;
+			foggedToFrag = toFrag;
+			// foggedLightY = light.y;
+			foggedDist = length(eyePos);
+			// foggedDepth = dTrans;
+			foggedIsUnderwater = frx_cameraInWater == 1;
+		}
+
+		// use normal fog for optimization because vol fog isn't applied during rain
+		vec4 fogged = fog(foggedColor, foggedDist, foggedToFrag, foggedIsUnderwater);
+		// vec4 fogged = volumetricFog(u_gbuffer_shadow, u_tex_nature, foggedColor, foggedDist, foggedToFrag, foggedLightY, tileJitter, foggedDepth, foggedIsUnderwater);
+
+		if (foggedIsTrans) {
+			nextTrans = mix(nextTrans, fogged, frx_rainGradient);
+		} else {
+			base = mix(base, fogged, frx_rainGradient);
+		}
 	}
 
 	vec4 nextRains = vec4(hdr_fromGamma(cRains.rgb), cRains.a);
