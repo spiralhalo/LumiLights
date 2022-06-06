@@ -146,7 +146,7 @@ void main()
 	}
 
 	// fog behind rain
-	if (cRains.a > 0 && frx_rainGradient > 0 && dSolid > dRains && (dSolid != 1.0 || dTrans < dSolid)) {
+	if (cRains.a > 0 && frx_rainGradient > 0 && dSolid > dRains) {
 		bool foggedIsTrans = dTrans < dSolid && dTrans > dRains;
 
 		if (foggedIsTrans) {
