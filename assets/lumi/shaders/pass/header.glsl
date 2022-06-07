@@ -3,6 +3,20 @@
 #define POST_SHADER
 
 #include frex:shaders/api/world.glsl
+
+// alpha stuff
+#ifdef _alpha_frx_skyFlashStrength
+	#define frx_skyFlashStrength _alpha_frx_skyFlashStrength
+#elif !defined(frx_skyFlashStrength)
+	#define frx_skyFlashStrength 0.0
+#endif
+
+#ifdef _alpha_frx_smoothedThunderGradient
+	#define frx_smoothedThunderGradient _alpha_frx_smoothedThunderGradient
+#elif !defined(frx_smoothedThunderGradient)
+	#define frx_smoothedThunderGradient frx_thunderGradient
+#endif
+
 #include frex:shaders/api/player.glsl
 #include frex:shaders/api/view.glsl
 #include frex:shaders/lib/math.glsl

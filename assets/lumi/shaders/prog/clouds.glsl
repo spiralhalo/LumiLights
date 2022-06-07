@@ -226,7 +226,7 @@ vec4 customClouds(sampler2D cloudsDepthBuffer, sampler2D natureTexture, sampler2
 		#endif
 	}
 
-	float rainCloudBrightness = 1.0 - hdr_fromGammaf(frx_smoothedRainGradient) * 0.3 - hdr_fromGammaf(frx_thunderGradient) * 0.1; // emulate dark clouds
+	float rainCloudBrightness = 1.0 - hdr_fromGammaf(frx_smoothedRainGradient) * 0.3 - hdr_fromGammaf(frx_smoothedThunderGradient) * 0.1; // emulate dark clouds
 	vec3  celestRadiance = atmosv_CelestialRadiance * result.x * 0.06; // magic multiplier
 
 	#ifdef VOLUMETRIC_CLOUDS

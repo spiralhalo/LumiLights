@@ -33,6 +33,13 @@
 					nameKey: "config.lumi_lights.value.outdoors_brightness",
 					descriptionKey: "config.lumi_lights.help.outdoors_brightness"
 				},
+				lightning_flash_boost: {
+					default: 1.0,
+					min: 0.0,
+					max: 2.0,
+					nameKey: "config.lumi_lights.value.lightning_flash_brightness",
+					descriptionKey: "config.lumi_lights.help.lightning_flash_brightness"
+				},
 				noon_ambient_boost: {
 					default: 1.0,
 					min: 0.5,

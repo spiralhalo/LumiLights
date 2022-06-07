@@ -11,6 +11,7 @@
  *  published by the Free Software Foundation, Inc.
  *******************************************************/
 
+const float USER_LIGHTNING_MULTIPLIER      = clamp(LIGHTNING_FLASH_BOOST, 0.0, 2.0);
 const float USER_SUNLIGHT_MULTIPLIER       = clamp(SUNLIGHT_BOOST, 0.5, 2.0);
 const float USER_NOON_AMBIENT_MULTIPLIER   = clamp(NOON_AMBIENT_BOOST, 0.5, 2.0);
 const float USER_BLOCKLIGHT_MULTIPLIER     = clamp(BLOCKLIGHT_BOOST, 0.5, 2.0);
@@ -29,6 +30,7 @@ const float USER_ALBEDO_BRIGHTENING        = clamp(ALBEDO_BRIGHTENING, 0, 20) / 
 	#define DEF_SKYLESS_LIGHT_STR	1.0
 	#define DEF_BLOCK_LIGHT_STR		1.5 * USER_BLOCKLIGHT_MULTIPLIER
 	#define DEF_EMISSIVE_LIGHT_STR	10.0 // want decent lava bloom
+	#define DEF_LIGHTNING_FLASH_STR 0.1 * USER_LIGHTNING_MULTIPLIER
 	const float NIGHT_VISION_STR =	1.5;
 	#define LIGHT_RAYS_STR			1.0 // this was never meant to go above 1.0 due to sdr blending
 
@@ -92,6 +94,7 @@ const float USER_ALBEDO_BRIGHTENING        = clamp(ALBEDO_BRIGHTENING, 0, 20) / 
 	const float SKYLESS_LIGHT_STR	= DEF_SKYLESS_LIGHT_STR;
 	const float BLOCK_LIGHT_STR		= DEF_BLOCK_LIGHT_STR;
 	const float EMISSIVE_LIGHT_STR	= DEF_EMISSIVE_LIGHT_STR;
+	const float LIGHTNING_FLASH_STR = DEF_LIGHTNING_FLASH_STR;
 	// spaghetti
 	const float STAR_LUMIGATE_HIGH	= max(lightLuminance(DEF_DAY_SKY_COLOR) * 0.8, lightLuminance(DEF_NIGHT_SKY_COLOR) + 0.1) * DEF_SKY_STR;
 	const float STAR_LUMIGATE_LOW	= max(STAR_LUMIGATE_HIGH * 0.26, lightLuminance(DEF_NIGHT_SKY_COLOR)) * DEF_SKY_STR;

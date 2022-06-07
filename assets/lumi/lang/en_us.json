@@ -29,6 +29,8 @@
 	"config.lumi_lights.help.handheld_light_radius": "Max reach of held light source. Set to 0 to disable",
 	"config.lumi_lights.value.indoors_brightness": "Block light brightness",
 	"config.lumi_lights.help.indoors_brightness": "Brightness of block light source",
+	"config.lumi_lights.value.lightning_flash_brightness": "Lightning flash brightness",
+	"config.lumi_lights.help.lightning_flash_brightness": "Brightness of sky flashing whenever lightning strikes",
 	"config.lumi_lights.value.ambient_brightness": "Base ambient brightness",
 	"config.lumi_lights.help.ambient_brightness": "Base ambient light for all dimensions",
 	"config.lumi_lights.value.sky_ambient_brightness": "Noon ambient brightness",
