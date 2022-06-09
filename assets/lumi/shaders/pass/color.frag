@@ -65,7 +65,10 @@ void main()
 	cRains = dSolid < dRains ? vec4(0.0) : cRains;
 	cRains.a *= 0.7; // thinner rains and snow
 
-	vec4 tempPos = frx_inverseViewProjectionMatrix * vec4(2.0 * uvSolid - 1.0, 2.0 * dSolid - 1.0, 1.0);
+	// hack that fixes shadow filtering probably
+	float dShadow = dSolid == 1.0 ? 0.999 : dSolid;
+
+	vec4 tempPos = frx_inverseViewProjectionMatrix * vec4(2.0 * uvSolid - 1.0, 2.0 * dShadow - 1.0, 1.0);
 	vec3 eyePos  = tempPos.xyz / tempPos.w;
 
 	vec4 light	= texture(u_gbuffer_lightnormal, vec3(uvSolid, ID_SOLID_LIGT));
@@ -73,7 +76,7 @@ void main()
 	vec3 normal	= normalize(texture(u_gbuffer_lightnormal, vec3(uvSolid, ID_SOLID_MNORM)).xyz);
 	vec3 vertexNormal = normalize(texture(u_gbuffer_lightnormal, vec3(uvSolid, ID_SOLID_NORM)).xyz);
 
-	light.w = denoisedShadowFactor(u_gbuffer_shadow, uvSolid, eyePos, dSolid, light.y);
+	light.w = denoisedShadowFactor(u_gbuffer_shadow, uvSolid, eyePos, dShadow, light.y);
 
 	vec3 miscSolid = texture(u_gbuffer_main_etc, vec3(uvSolid, ID_SOLID_MISC)).xyz;
 	vec3 miscTrans = texture(u_gbuffer_main_etc, vec3(v_texcoord, ID_TRANS_MISC)).xyz;
@@ -120,11 +123,22 @@ void main()
 
 	vec4 nextTrans;
 	bool transIsManaged = cTrans.a > 0.0 && notEndPortal(u_gbuffer_lightnormal) && lTrans.x > 0.0;
+
+	// do shadow stuff outside of branch if shadow filtering is ON
+#if !defined(SHADOW_MAP_PRESENT) || !defined(FILTER_SHADOWS)
 	if (transIsManaged) {
+#endif
+
+	tempPos = frx_inverseViewProjectionMatrix * vec4(2.0 * v_texcoord - 1.0, 2.0 * dTrans - 1.0, 1.0);
+	eyePos  = tempPos.xyz / tempPos.w;
+	light   = lTrans;
+	light.w = denoisedShadowFactor(u_gbuffer_shadow, v_texcoord, eyePos, dTrans, light.y);
+
+#if defined(SHADOW_MAP_PRESENT) && defined(FILTER_SHADOWS)
+	if (transIsManaged) {
+#endif
+
 		cTrans.rgb = cTrans.rgb / (fastLight(lTrans.xy) * cTrans.a);
-		tempPos = frx_inverseViewProjectionMatrix * vec4(2.0 * v_texcoord - 1.0, 2.0 * dTrans - 1.0, 1.0);
-		eyePos  = tempPos.xyz / tempPos.w;
-		light  = lTrans;
 		rawMat = texture(u_gbuffer_main_etc, vec3(v_texcoord, ID_TRANS_MATS)).xyz;
 		normal = normalize(texture(u_gbuffer_lightnormal, vec3(v_texcoord, ID_TRANS_MNORM)).xyz);
 		vertexNormal = normalize(texture(u_gbuffer_lightnormal, vec3(v_texcoord, ID_TRANS_NORM)).xyz);
@@ -135,8 +149,6 @@ void main()
 			foamPreprocess(cTrans, u_tex_nature, eyePos + frx_cameraPos, vertexNormal.y, dVanilla, dTrans);
 		}
 		#endif
-
-		light.w = denoisedShadowFactor(u_gbuffer_shadow, v_texcoord, eyePos, dTrans, light.y);
 
 		nextTrans = shading(cTrans, u_tex_nature, light, rawMat, eyePos, normal, vertexNormal, decideUnderwater(dTrans, dTrans, transIsWater, true), disableDiffuse);
 		nextTrans = overlay(nextTrans, u_tex_glint, miscTrans);

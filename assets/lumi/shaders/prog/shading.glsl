@@ -55,6 +55,7 @@ float lightmapRemap(float lightMapCoords)
 float denoisedShadowFactor(sampler2DArrayShadow shadowMap, vec2 texcoord, vec3 eyePos, float depth, float lighty) {
 #ifdef SHADOW_MAP_PRESENT
 #ifdef TAA_ENABLED
+	// TODO: might as well apply unjitter to root shading eyePos?
 	vec2 uvJitter	   = taaJitter(v_invSize, frx_renderFrames);
 	vec4 unjitteredPos = frx_inverseViewProjectionMatrix * vec4(2.0 * texcoord - uvJitter - 1.0, 2.0 * depth - 1.0, 1.0);
 	vec4 shadowViewPos = frx_shadowViewMatrix * vec4(unjitteredPos.xyz / unjitteredPos.w, 1.0);
@@ -295,7 +296,7 @@ void lights(vec3 albedo, vec4 light, vec3 eyePos, vec3 toEye, out vec3 baseLight
 	}
 #endif
 
-	skyLight = frx_worldHasSkylight * light.w * mix(atmosv_CelestialRadiance, vec3(frx_skyFlashStrength * LIGHTNING_FLASH_STR), frx_rainGradient);
+	skyLight = frx_worldHasSkylight * light.w * mix(atmosv_CelestialRadiance, vec3(frx_skyFlashStrength * LIGHTNING_FLASH_STR), frx_thunderGradient);
 }
 
 #if ALBEDO_BRIGHTENING == 0
