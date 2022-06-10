@@ -314,7 +314,8 @@ vec4 shading(vec4 color, sampler2D natureTexture, vec4 light, float ao, vec2 mat
 
 	prepare(color, natureTexture, eyePos, vertexNormal.y, isUnderwater, light);
 
-	vec3 f0 = albedo * material.y;
+	// modulate by luminance to preserve rich dark colors
+	vec3 f0 = mix(vec3(material.y) * lightLuminance(albedo), albedo * material.y, material.y);
 	vec3 toEye = -normalize(eyePos);
 
 	vec3 baseLight, blockLight, hlLight, skyLight;

@@ -24,7 +24,6 @@
 
 	#ifdef POST_SHADER
 	out vec3 atmosv_CaveFogRadiance;
-	out vec3 atmosv_CloudRadiance;
 	out vec3 atmosv_FogRadiance;
 	out vec3 atmosv_ClearRadiance;
 	out vec3 atmosv_SkyRadiance;
@@ -41,7 +40,6 @@
 
 	#ifdef POST_SHADER
 	in vec3 atmosv_CaveFogRadiance;
-	in vec3 atmosv_CloudRadiance;
 	in vec3 atmosv_FogRadiance;
 	in vec3 atmosv_ClearRadiance;
 	in vec3 atmosv_SkyRadiance;
@@ -146,6 +144,7 @@ void atmos_generateAtmosphereModel()
 
 	sunColor.gb *= vec2(frx_skyLightTransitionFactor * frx_skyLightTransitionFactor);
 
+	// if editing this, also edit nightFogLuminance for cave fog
 	atmosv_CelestialRadiance = mix(sunColor * DEF_SUNLIGHT_STR, MOONLIGHT_COLOR * moonlightStrength, frx_worldIsMoonlit) * frx_skyLightTransitionFactor;
 
 
@@ -160,8 +159,8 @@ void atmos_generateAtmosphereModel()
 
 	atmosv_SkyAmbientRadiance = mix(NOON_AMBIENT, NIGHT_AMBIENT * moonlightSize, nightFactor) * (frx_worldHasSkylight == 1 ? 1.0 : 0.0);
 	#ifdef POST_SHADER
+	// if editing this, also edit nightFogLuminance for cave fog
 	atmosv_SkyRadiance   = mix(DAY_SKY_COLOR, NIGHT_SKY_COLOR, nightFactor) * DEF_SKY_STR;
-	atmosv_CloudRadiance = atmosv_SkyRadiance;
 	#endif
 
 	#ifdef POST_SHADER
@@ -177,7 +176,7 @@ void atmos_generateAtmosphereModel()
 
 	if (customOWFog) {
 		float skyLuminance = lightLuminanceUnclamped(atmosv_SkyRadiance);
-		atmosv_FogRadiance = atmosv_SkyRadiance / skyLuminance * max(skyLuminance, lightLuminance(atmosv_CelestialRadiance * 0.4));
+		atmosv_FogRadiance = (atmosv_SkyRadiance / skyLuminance) * max(skyLuminance, lightLuminance(atmosv_CelestialRadiance * 0.4));
 	} else if (customEndFog) {
 		atmosv_FogRadiance = mix(atmosv_ClearRadiance, hdr_fromGamma(vec3(1.0, 0.7, 1.0)), float(frx_cameraInFluid)) * 0.1;
 	} else if (customNetherFog) {
@@ -221,7 +220,6 @@ void atmos_generateAtmosphereModel()
 
 	#ifdef POST_SHADER
 	atmosv_SkyRadiance   = mix(atmosv_SkyRadiance, graySky, toGray) * rainBrightness;
-	atmosv_CloudRadiance = mix(atmosv_CloudRadiance, graySky, toGray) * rainBrightness;
 
 	if (customOWFog) {
 		atmosv_FogRadiance		  = mix(atmosv_FogRadiance, grayFog, toGray) * rainBrightness;
@@ -235,11 +233,11 @@ void atmos_generateAtmosphereModel()
 	if (frx_worldIsOverworld == 1) {
 		atmosv_CaveFogRadiance = mix(CAVEFOG_C, CAVEFOG_DEEPC, l2_clampScale(CAVEFOG_MAXY, CAVEFOG_MINY, frx_cameraPos.y));
 
-		/* adjust cave fog brightness to outdoors fog's brightness.
-		   this means cave fog is affected by the daylight cycle, which sucks, but 
-		   it's better than having cave fog affect the outdoors in a jarring way. */
-		float fogLuminance = lightLuminance(atmosv_FogRadiance);
-		atmosv_CaveFogRadiance *= min(CAVEFOG_STR, fogLuminance / CAVEFOG_STR);
+		// night fog luminance (always max moon phase)
+		float nightFogLuminance = lightLuminance(MOONLIGHT_COLOR * DEF_MOONLIGHT_STR * 0.4);
+
+		// cave fog strength is adjusted to dimmest night fog strength so it doesn't make the outdoors look jarring or misleading
+		atmosv_CaveFogRadiance *= nightFogLuminance;
 	} else {
 		atmosv_CaveFogRadiance = atmosv_FogRadiance;
 	}
