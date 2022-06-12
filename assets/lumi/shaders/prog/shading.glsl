@@ -296,7 +296,7 @@ void lights(vec3 albedo, vec4 light, vec3 eyePos, vec3 toEye, out vec3 baseLight
 	}
 #endif
 
-	skyLight = frx_worldHasSkylight * light.w * mix(atmosv_CelestialRadiance, vec3(frx_skyFlashStrength * LIGHTNING_FLASH_STR), frx_thunderGradient);
+	skyLight = frx_worldHasSkylight * light.w * mix(atmosv_CelestialRadiance, vec3(frx_skyFlashStrength * LIGHTNING_FLASH_STR), frx_rainGradient);
 }
 
 #if ALBEDO_BRIGHTENING == 0
