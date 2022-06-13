@@ -176,9 +176,10 @@ void main()
 
 		if (foggedIsTrans) {
 			nextTrans = mix(nextTrans, fogged, frx_rainGradient);
-		} else {
-			base = mix(base, fogged, frx_rainGradient);
 		}
+
+		// do this mix to fill gaps
+		base = mix(base, fogged, frx_rainGradient * (1.0 - nextTrans.a));
 	}
 
 	vec4 nextRains = vec4(hdr_fromGamma(cRains.rgb), cRains.a);
