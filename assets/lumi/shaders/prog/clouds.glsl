@@ -235,7 +235,9 @@ vec4 customClouds(sampler2D cloudsDepthBuffer, sampler2D natureTexture, sampler2
 	}
 	#endif
 
-	vec3 color = (celestRadiance + atmosv_SkyRadiance) * rainCloudBrightness;
+	vec3 cloudRadiance = mix(atmosv_SkyRadiance, vec3(lightLuminance(atmosv_SkyRadiance)), 0.5);
+
+	vec3 color = (celestRadiance + cloudRadiance) * rainCloudBrightness;
 	return vec4(color, result.y);
 }
 

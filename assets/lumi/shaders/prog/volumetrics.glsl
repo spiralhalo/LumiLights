@@ -31,7 +31,7 @@ float celestialLightRays(sampler2DArrayShadow shadowBuffer, sampler2D natureText
 	// This is very awkward.. I hope shadows will get better soon
 	float maximize = step(1.0, depth);
 	maximize = max(maximize, float(isUnderwater));
-	maximize = max(maximize, pow(frx_smoothedEyeBrightness.y, 5.0));
+	maximize = max(maximize, frx_smoothedEyeBrightness.y);
 	scatter *= max(maximize, lightmapRemap(lighty));
 	// shadow workaround is dead. long live shadow workaround
 	// scatter *= max(maximize, l2_clampScale(0.03125, 0.0625, lighty));
