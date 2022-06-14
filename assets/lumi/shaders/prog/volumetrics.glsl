@@ -1,6 +1,7 @@
 #include frex:shaders/api/view.glsl
 #include frex:shaders/api/world.glsl
 #include lumi:shaders/common/atmosphere.glsl
+#include lumi:shaders/lib/util.glsl
 #include lumi:shaders/prog/shadow.glsl
 #include lumi:shaders/prog/water.glsl
 
@@ -11,7 +12,7 @@
 #define RAYS_MIN_DIST 32
 
 #ifndef VERTEX_SHADER
-float celestialLightRays(sampler2DArrayShadow shadowBuffer, sampler2D natureTexture, float distToEye, vec3 toFrag, float yLightmap, float tileJitter, float depth, bool isUnderwater)
+float celestialLightRays(sampler2DArrayShadow shadowBuffer, sampler2D natureTexture, float distToEye, vec3 toFrag, float lighty, float tileJitter, float depth, bool isUnderwater)
 {
 	if (frx_worldHasSkylight == 0) return 1.0;
 
@@ -26,13 +27,15 @@ float celestialLightRays(sampler2DArrayShadow shadowBuffer, sampler2D natureText
 
 	float scatter = 1.0;
 
-#ifdef SHADOW_WORKAROUND
+// #ifdef SHADOW_WORKAROUND
 	// This is very awkward.. I hope shadows will get better soon
 	float maximize = step(1.0, depth);
 	maximize = max(maximize, float(isUnderwater));
 	maximize = max(maximize, pow(frx_smoothedEyeBrightness.y, 5.0));
-	scatter *= max(maximize, l2_clampScale(0.03125, 0.0625, yLightmap));
-#endif
+	scatter *= max(maximize, lightmapRemap(lighty));
+	// shadow workaround is dead. long live shadow workaround
+	// scatter *= max(maximize, l2_clampScale(0.03125, 0.0625, lighty));
+// #endif
 
 	if (scatter <= 0.0) {
 		return 0.0;

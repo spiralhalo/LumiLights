@@ -46,11 +46,6 @@ void shadingSetup() {
 }
 #endif
 
-float lightmapRemap(float lightMapCoords)
-{
-	return hdr_fromGammaf(l2_clampScale(0.03125, 0.96875, lightMapCoords));
-}
-
 #ifndef VERTEX_SHADER
 float denoisedShadowFactor(sampler2DArrayShadow shadowMap, vec2 texcoord, vec3 eyePos, float depth, float lighty) {
 #ifdef SHADOW_MAP_PRESENT
@@ -65,9 +60,10 @@ float denoisedShadowFactor(sampler2DArrayShadow shadowMap, vec2 texcoord, vec3 e
 
 	float val = calcShadowFactor(shadowMap, shadowViewPos);
 
-#ifdef SHADOW_WORKAROUND
-	val *= l2_clampScale(0.03125, 0.04, lighty);
-#endif
+	// shadow workaround is dead. long live shadow workaround
+// #ifdef SHADOW_WORKAROUND
+// 	val *= l2_clampScale(0.03125, 0.04, lighty);
+// #endif
 
 	return val;
 #else
@@ -225,9 +221,9 @@ void prepare(vec4 color, sampler2D natureTexture, vec3 eyePos, float vertexNorma
 	causticLight *= max(0.15, light.w); // TODO: can improve even more?
 #endif
 
-	if (isUnderwater) {
-		light.w *= lightmapRemap(light.y);
-	}
+	// shadow workaround is dead. long live shadow workaround
+	// and yes I guess sunlight is nerfed in LITE now
+	light.w *= lightmapRemap(light.y);
 
 	light.w += causticLight;
 

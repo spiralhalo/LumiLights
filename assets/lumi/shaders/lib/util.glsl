@@ -55,3 +55,8 @@ mat4 l2_rotationMatrix(vec3 axis, float angle)
 
 #define lightLuminance(radiance) min(1.0, dot(radiance, vec3(0.2126, 0.7152, 0.0722)))
 #define lightLuminanceUnclamped(radiance) dot(radiance, vec3(0.2126, 0.7152, 0.0722))
+
+float lightmapRemap(float lightMapCoords)
+{
+	return hdr_fromGammaf(l2_clampScale(0.03125, 0.96875, lightMapCoords));
+}
