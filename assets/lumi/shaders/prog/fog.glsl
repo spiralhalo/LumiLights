@@ -37,8 +37,9 @@ float invThickener(bool isUnderwater) {
 	}
 
 	float invThickener = 1.0;
+	// stronger night fog because it's darker
 	float night = max(frx_worldIsMoonlit, 1.0 - frx_skyLightTransitionFactor);
-	invThickener *= 1.0 - 0.6 * frx_rainGradient;
+	invThickener *= 1.0 - max(0.4 * night, 0.6 * frx_rainGradient);
 	invThickener *= 1.0 - 0.5 * frx_thunderGradient;
 	invThickener = mix(1.0, invThickener, frx_smoothedEyeBrightness.y);
 

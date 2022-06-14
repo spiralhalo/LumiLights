@@ -204,7 +204,7 @@ void atmos_generateAtmosphereModel()
 
 
 	/** RAIN **/
-	float rainBrightness = 1.0 - 0.4 * frx_rainGradient - 0.3 * frx_thunderGradient;
+	float rainBrightness = 1.0 - 0.5 * frx_thunderGradient;
 
 	vec3 grayCelestial  = vec3(lightLuminance(atmosv_CelestialRadiance));
 	vec3 graySkyAmbient = vec3(lightLuminance(atmosv_SkyAmbientRadiance));
@@ -216,7 +216,7 @@ void atmos_generateAtmosphereModel()
 	float toGray = frx_rainGradient * 0.8 + frx_thunderGradient * 0.2;
 
 	atmosv_CelestialRadiance  = mix(atmosv_CelestialRadiance, grayCelestial, toGray) * rainBrightness; // only used for cloud shading during rain
-	atmosv_SkyAmbientRadiance = mix(atmosv_SkyAmbientRadiance, graySkyAmbient, toGray) * mix(1., .5, frx_thunderGradient);
+	atmosv_SkyAmbientRadiance = mix(atmosv_SkyAmbientRadiance, graySkyAmbient, toGray) * rainBrightness;
 
 	#ifdef POST_SHADER
 	atmosv_SkyRadiance   = mix(atmosv_SkyRadiance, graySky, toGray) * rainBrightness;
