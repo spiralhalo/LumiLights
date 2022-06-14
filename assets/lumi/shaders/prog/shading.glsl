@@ -128,9 +128,19 @@ float pbr_geometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
 	return ggx1 * ggx2;
 }
 
+vec3 pbr_calcF0(vec3 albedo, vec2 material) {
+	return mix(lightLuminance(albedo) * vec3(material.y), albedo, material.y);
+	// return mix(vec3(material.y), albedo, step(1.0, material.y));
+}
+
+float pbr_fresnelSchlick(float cosTheta, float F0)
+{
+	return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
+}
+
 vec3 pbr_fresnelSchlick(float cosTheta, vec3 F0)
 {
-	return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 10.0);
+	return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
 }
 
 vec3 pbr_specularBRDF(float roughness, vec3 radiance, vec3 halfway, vec3 lightDir, vec3 viewDir, vec3 normal, vec3 fresnel, float NdotL)
@@ -162,7 +172,7 @@ vec3 reflectRough(sampler2D noiseTexture, vec3 toFrag, vec3 normal, float materi
 
 vec3 reflectionPbr(vec3 albedo, vec2 material, vec3 radiance, vec3 toLight, vec3 toEye)
 {
-	vec3 f0 = mix(vec3(0.01), albedo, material.y);
+	vec3 f0 = pbr_calcF0(albedo, material);
 	vec3 halfway = normalize(toEye + toLight);
 	vec3 fresnel = pbr_fresnelSchlick(pbr_dot(toEye, halfway), f0);
 	float smoothness = (1. - material.x);
@@ -317,8 +327,7 @@ vec4 shading(vec4 color, sampler2D natureTexture, vec4 light, float ao, vec2 mat
 
 	prepare(color, natureTexture, eyePos, vertexNormal.y, isUnderwater, light);
 
-	// modulate by luminance to preserve rich dark colors
-	vec3 f0 = mix(vec3(material.y) * lightLuminance(albedo), albedo * material.y, material.y);
+	vec3 f0 = pbr_calcF0(albedo, material);
 	vec3 toEye = -normalize(eyePos);
 
 	vec3 baseLight, blockLight, hlLight, skyLight;
@@ -350,7 +359,11 @@ vec4 shading(vec4 color, sampler2D natureTexture, vec4 light, float ao, vec2 mat
 	shaded *= ao;
 	specular *= ao;
 
-	return vec4(shaded, min(1.0, color.a + frx_luminance(specular)));
+	// emulate refraction, becoming opaque as less light is let through
+	float alpha = pbr_fresnelSchlick(pbr_dot(toEye, vertexNormal), color.a);
+	alpha += lightLuminance(specular);
+
+	return vec4(shaded, min(1.0, alpha));
 }
 
 vec4 particleShading(vec4 color, sampler2D natureTexture, vec4 light, vec3 eyePos, bool isUnderwater)
