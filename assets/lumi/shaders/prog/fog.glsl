@@ -29,7 +29,6 @@ const float FOG_ABSOLUTE_LIMIT	   = 0.9;
 const float FOG_FAR				   = FOG_FAR_CHUNKS * 16.0;
 const float FOG_DENSITY			   = clamp(FOG_DENSITY_F, 0.0, 10.0);
 const float UNDERWATER_FOG_FAR	   = UNDERWATER_FOG_FAR_CHUNKS * 16.0;
-const float UNDERWATER_FOG_DENSITY = clamp(UNDERWATER_FOG_DENSITY_F, 0.0, 10.0);
 
 float invThickener(bool isUnderwater) {
 	if (isUnderwater || frx_worldHasSkylight != 1) {
@@ -51,8 +50,8 @@ float fogFactor(float distToEye, bool isUnderwater, float invThickener)
 	// only when absolutely underwater
 	bool submerged = isUnderwater && frx_cameraInFluid == 1;
 
-	float pFogDensity = submerged ? UNDERWATER_FOG_DENSITY : FOG_DENSITY;
-	float pFogFar     = submerged ? UNDERWATER_FOG_FAR     : FOG_FAR;
+	float pFogDensity = submerged ? (FOG_DENSITY * 2.0) : FOG_DENSITY;
+	float pFogFar     = submerged ? UNDERWATER_FOG_FAR  : FOG_FAR;
 
 	if (!isUnderwater && frx_worldHasSkylight == 1) {
 		pFogFar *= invThickener;

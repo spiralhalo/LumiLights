@@ -167,8 +167,8 @@ void atmos_generateAtmosphereModel()
 	/** FOG **/
 	// vanilla clear color is unreliable, we want to control its brightness
 	atmosv_ClearRadiance = hdr_fromGamma(frx_vanillaClearColor);
-	float lClearRadiance = dot(atmosv_ClearRadiance, vec3(1./3.));
-	atmosv_ClearRadiance = atmosv_ClearRadiance / (lClearRadiance == 0.0 ? 1.0 : lClearRadiance);
+	float clearLuminance = lightLuminance(atmosv_ClearRadiance);
+	atmosv_ClearRadiance = atmosv_ClearRadiance / (clearLuminance == 0.0 ? 1.0 : clearLuminance);
 
 	bool customOWFog	 = frx_worldIsOverworld == 1 && frx_cameraInLava == 0;
 	bool customEndFog	 = frx_worldIsEnd == 1 && frx_cameraInLava == 0;
@@ -180,13 +180,17 @@ void atmos_generateAtmosphereModel()
 	} else if (customEndFog) {
 		atmosv_FogRadiance = mix(atmosv_ClearRadiance, hdr_fromGamma(vec3(1.0, 0.7, 1.0)), float(frx_cameraInFluid)) * 0.1;
 	} else if (customNetherFog) {
-		atmosv_FogRadiance = atmosv_ClearRadiance * 0.1; // controllable overall brightness
+		atmosv_FogRadiance = atmosv_ClearRadiance * 0.3; // controllable overall brightness
 	} else {
 		atmosv_FogRadiance = hdr_fromGamma(frx_vanillaClearColor);
 	}
 
+	vec3 waterFog = atmosv_ClearRadiance;
+	waterFog.g = max(waterFog.g, waterFog.b * 0.1);
+	waterFog *= 0.1 / lightLuminance(waterFog);
+
 	// ClearRadiance is mostly used for water
-	atmosv_ClearRadiance = mix(atmosv_FogRadiance, atmosv_ClearRadiance * 0.3, float(frx_cameraInWater));
+	atmosv_ClearRadiance = mix(atmosv_FogRadiance, waterFog, float(frx_cameraInWater));
 
 
 	atmosv_OWTwilightRadiance = TWILIGHT_COLOR;
