@@ -129,56 +129,56 @@ float sampleShadowPCF(in sampler2DArrayShadow shadowMap, in vec3 shadowPos, in f
 
 // #if SHADOW_FILTERING == SHADOW_FILTERING_PCF_LOW
 
-	float uw0 = (3 - 2 * s);
-	float uw1 = (1 + 2 * s);
+	// float uw0 = (3 - 2 * s);
+	// float uw1 = (1 + 2 * s);
 
-	float u0 = (2 - s) / uw0 - 1;
-	float u1 = s / uw1 + 1;
+	// float u0 = (2 - s) / uw0 - 1;
+	// float u1 = s / uw1 + 1;
 
-	float vw0 = (3 - 2 * t);
-	float vw1 = (1 + 2 * t);
+	// float vw0 = (3 - 2 * t);
+	// float vw1 = (1 + 2 * t);
 
-	float v0 = (2 - t) / vw0 - 1;
-	float v1 = t / vw1 + 1;
-
-	sum += uw0 * vw0 * pcfSample(shadowMap, base_uv, u0, v0, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
-	sum += uw1 * vw0 * pcfSample(shadowMap, base_uv, u1, v0, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
-	sum += uw0 * vw1 * pcfSample(shadowMap, base_uv, u0, v1, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
-	sum += uw1 * vw1 * pcfSample(shadowMap, base_uv, u1, v1, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
-
-	return sum * 1.0f / 16;
-
-// #elif SHADOW_FILTERING == SHADOW_FILTERING_PCF_MEDIUM
-
-	// float uw0 = (4 - 3 * s);
-	// float uw1 = 7;
-	// float uw2 = (1 + 3 * s);
-
-	// float u0 = (3 - 2 * s) / uw0 - 2;
-	// float u1 = (3 + s) / uw1;
-	// float u2 = s / uw2 + 2;
-
-	// float vw0 = (4 - 3 * t);
-	// float vw1 = 7;
-	// float vw2 = (1 + 3 * t);
-
-	// float v0 = (3 - 2 * t) / vw0 - 2;
-	// float v1 = (3 + t) / vw1;
-	// float v2 = t / vw2 + 2;
+	// float v0 = (2 - t) / vw0 - 1;
+	// float v1 = t / vw1 + 1;
 
 	// sum += uw0 * vw0 * pcfSample(shadowMap, base_uv, u0, v0, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
 	// sum += uw1 * vw0 * pcfSample(shadowMap, base_uv, u1, v0, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
-	// sum += uw2 * vw0 * pcfSample(shadowMap, base_uv, u2, v0, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
-
 	// sum += uw0 * vw1 * pcfSample(shadowMap, base_uv, u0, v1, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
 	// sum += uw1 * vw1 * pcfSample(shadowMap, base_uv, u1, v1, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
-	// sum += uw2 * vw1 * pcfSample(shadowMap, base_uv, u2, v1, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
 
-	// sum += uw0 * vw2 * pcfSample(shadowMap, base_uv, u0, v2, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
-	// sum += uw1 * vw2 * pcfSample(shadowMap, base_uv, u1, v2, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
-	// sum += uw2 * vw2 * pcfSample(shadowMap, base_uv, u2, v2, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
+	// return sum * 1.0f / 16;
 
-	// return sum * 1.0f / 144;
+// #elif SHADOW_FILTERING == SHADOW_FILTERING_PCF_MEDIUM
+
+	float uw0 = (4 - 3 * s);
+	float uw1 = 7;
+	float uw2 = (1 + 3 * s);
+
+	float u0 = (3 - 2 * s) / uw0 - 2;
+	float u1 = (3 + s) / uw1;
+	float u2 = s / uw2 + 2;
+
+	float vw0 = (4 - 3 * t);
+	float vw1 = 7;
+	float vw2 = (1 + 3 * t);
+
+	float v0 = (3 - 2 * t) / vw0 - 2;
+	float v1 = (3 + t) / vw1;
+	float v2 = t / vw2 + 2;
+
+	sum += uw0 * vw0 * pcfSample(shadowMap, base_uv, u0, v0, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
+	sum += uw1 * vw0 * pcfSample(shadowMap, base_uv, u1, v0, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
+	sum += uw2 * vw0 * pcfSample(shadowMap, base_uv, u2, v0, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
+
+	sum += uw0 * vw1 * pcfSample(shadowMap, base_uv, u0, v1, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
+	sum += uw1 * vw1 * pcfSample(shadowMap, base_uv, u1, v1, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
+	sum += uw2 * vw1 * pcfSample(shadowMap, base_uv, u2, v1, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
+
+	sum += uw0 * vw2 * pcfSample(shadowMap, base_uv, u0, v2, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
+	sum += uw1 * vw2 * pcfSample(shadowMap, base_uv, u1, v2, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
+	sum += uw2 * vw2 * pcfSample(shadowMap, base_uv, u2, v2, shadowMapSizeInv, cascade, lightDepth, receiverPlaneDepthBias);
+
+	return sum * 1.0f / 144;
 
 // #endif
 }

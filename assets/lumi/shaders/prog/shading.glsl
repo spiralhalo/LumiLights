@@ -47,6 +47,9 @@ void shadingSetup() {
 #endif
 
 #ifndef VERTEX_SHADER
+
+const vec3 SHADOW_COEFF = hdr_fromGamma(vec3(1.0, 0.5, 0.5));
+
 float denoisedShadowFactor(sampler2DArrayShadow shadowMap, vec2 texcoord, vec3 eyePos, float depth, float lighty) {
 #ifdef SHADOW_MAP_PRESENT
 #ifdef TAA_ENABLED
@@ -292,7 +295,11 @@ void lights(vec3 albedo, vec4 light, vec3 eyePos, vec3 toEye, out vec3 baseLight
 	}
 #endif
 
-	skyLight = frx_worldHasSkylight * light.w * mix(atmosv_CelestialRadiance, vec3(frx_skyFlashStrength * LIGHTNING_FLASH_STR), frx_rainGradient);
+	// famcy scattering
+	// the overmix and clamping is because lightw doesn't reach 1 for some reason (??)
+	vec3 shadowCoeff = min(vec3(1.0), mix(SHADOW_COEFF * light.w, vec3(1.1), light.w));
+
+	skyLight = frx_worldHasSkylight * shadowCoeff * mix(atmosv_CelestialRadiance, vec3(frx_skyFlashStrength * LIGHTNING_FLASH_STR), frx_rainGradient);
 }
 
 #if ALBEDO_BRIGHTENING == 0
