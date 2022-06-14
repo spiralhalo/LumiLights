@@ -66,9 +66,10 @@ void main()
 	cRains.a *= 0.7; // thinner rains and snow
 
 	// hack that fixes shadow filtering probably
-	float dShadow = dSolid == 1.0 ? 0.999 : dSolid;
+	// haha just kidding shadow filtering is doomed
+	// float dShadow = dSolid == 1.0 ? 0.999 : dSolid;
 
-	vec4 tempPos = frx_inverseViewProjectionMatrix * vec4(2.0 * uvSolid - 1.0, 2.0 * dShadow - 1.0, 1.0);
+	vec4 tempPos = frx_inverseViewProjectionMatrix * vec4(2.0 * uvSolid - 1.0, 2.0 * dSolid - 1.0, 1.0);
 	vec3 eyePos  = tempPos.xyz / tempPos.w;
 
 	vec4 light	= texture(u_gbuffer_lightnormal, vec3(uvSolid, ID_SOLID_LIGT));
@@ -76,7 +77,7 @@ void main()
 	vec3 normal	= normalize(texture(u_gbuffer_lightnormal, vec3(uvSolid, ID_SOLID_MNORM)).xyz);
 	vec3 vertexNormal = normalize(texture(u_gbuffer_lightnormal, vec3(uvSolid, ID_SOLID_NORM)).xyz);
 
-	light.w = denoisedShadowFactor(u_gbuffer_shadow, uvSolid, eyePos, dShadow, light.y);
+	light.w = denoisedShadowFactor(u_gbuffer_shadow, uvSolid, eyePos, dSolid, light.y);
 
 	vec3 miscSolid = texture(u_gbuffer_main_etc, vec3(uvSolid, ID_SOLID_MISC)).xyz;
 	vec3 miscTrans = texture(u_gbuffer_main_etc, vec3(v_texcoord, ID_TRANS_MISC)).xyz;
@@ -101,6 +102,11 @@ void main()
 		base += skyReflection(u_tex_sun, u_tex_moon, u_tex_noise, cSolid.rgb, rawMat.xy, toFrag, normal, light.yw);
 	}
 
+	if (dSolid > dMin) {
+		vec4 clouds = customClouds(u_vanilla_clouds_depth, u_tex_nature, u_tex_noise, dSolid, uvSolid, eyePos, toFrag, NUM_SAMPLE, ldepth(dMin) * frx_viewDistance * 4.);
+		base.rgb = base.rgb * (1.0 - clouds.a) + clouds.rgb * clouds.a;
+	}
+
 	vec4 foggedColor = base;
 	vec3 foggedToFrag = toFrag;
 	// float foggedLightY = light.y;
@@ -108,11 +114,6 @@ void main()
 	// float tileJitter = getRandomFloat(u_tex_noise, v_texcoord, frxu_size);
 	// float foggedDepth = dSolid;
 	bool foggedIsUnderwater = solidIsUnderwater;
-
-	if (dSolid > dMin) {
-		vec4 clouds = customClouds(u_vanilla_clouds_depth, u_tex_nature, u_tex_noise, dSolid, uvSolid, eyePos, toFrag, NUM_SAMPLE, ldepth(dMin) * frx_viewDistance * 4.);
-		base.rgb = base.rgb * (1.0 - clouds.a) + clouds.rgb * clouds.a;
-	}
 
 
 	tempPos = frx_inverseViewProjectionMatrix * vec4(2.0 * v_texcoord - 1.0, 2.0 * dParts - 1.0, 1.0);
@@ -157,13 +158,13 @@ void main()
 		nextTrans = vec4(hdr_fromGamma(cTrans.rgb), cTrans.a);
 	}
 
-	// fog behind rain
-	if (cRains.a > 0 && frx_rainGradient > 0 && dSolid > dRains) {
+	// fog behind rain or trans but only if it's not water (why are you like this)
+	if ((cRains.a > 0 && dSolid > dRains) || (dSolid > dMin && !solidIsUnderwater)) {
 		bool foggedIsTrans = dTrans < dSolid && dTrans > dRains;
 
 		if (foggedIsTrans) {
 			foggedColor = nextTrans;
-			foggedToFrag = toFrag;
+			////// foggedToFrag = normalize(eyePos); // should be the same
 			// foggedLightY = light.y;
 			foggedDist = length(eyePos);
 			// foggedDepth = dTrans;
@@ -179,7 +180,7 @@ void main()
 		}
 
 		// do this mix to fill gaps
-		base = mix(base, fogged, frx_rainGradient * (1.0 - nextTrans.a));
+		base = mix(base, fogged, 1.0 - nextTrans.a);
 	}
 
 	vec4 nextRains = vec4(hdr_fromGamma(cRains.rgb), cRains.a);
