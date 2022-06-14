@@ -61,6 +61,9 @@ in vec2 v_invSize;
 #define ID_TRANS_NORM 5.
 #define ID_TRANS_MNORM 6.
 
+#define ID_SHADOW_VAL 7.
+
+
 #define ID_TRANS_COLR 0.
 #define ID_PARTS_COLR 1.
 

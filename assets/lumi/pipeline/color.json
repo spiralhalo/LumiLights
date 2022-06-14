@@ -144,6 +144,44 @@
 				"u_vanilla_depth",
 			]
 		},
+		{
+			name: "shadow0",
+			vertexSource: "lumi:shaders/pass/basic.vert",
+			fragmentSource: "lumi:shaders/pass/shadow0.frag",
+			samplers: [
+				"u_vanilla_depth",
+				"u_translucent_depth",
+				"u_particles_depth",
+
+				"u_gbuffer_lightnormal",
+				"u_gbuffer_shadow",
+				"u_tex_noise"
+			]
+		},
+		{
+			name: "shadow_h",
+			vertexSource: "lumi:shaders/pass/basic.vert",
+			fragmentSource: "lumi:shaders/pass/shadow_h.frag",
+			samplers: [
+				"u_vanilla_depth",
+				"u_translucent_depth",
+				"u_particles_depth",
+
+				"u_gbuffer_lightnormal",
+			]
+		},
+		{
+			name: "shadow_v",
+			vertexSource: "lumi:shaders/pass/basic.vert",
+			fragmentSource: "lumi:shaders/pass/shadow_v.frag",
+			samplers: [
+				"u_vanilla_depth",
+				"u_translucent_depth",
+				"u_particles_depth",
+
+				"u_gbuffer_lightnormal",
+			]
+		},
 	],
 
 	framebuffers: [
@@ -175,6 +213,18 @@
 			name: "depth_process",
 			colorAttachments: [{image: "view_z"}]
 		},
+		{
+			name: "shadow_blur_a",
+			colorAttachments: [
+				{image: "gbuffer_lightnormal", layer: 7},
+			]
+		},
+		{
+			name: "shadow_blur_b",
+			colorAttachments: [
+				{image: "gbuffer_lightnormal", layer: 8},
+			]
+		},
 	],
 
 	fabulous: {
@@ -198,6 +248,132 @@
 					"lumi:textures/filter_pattern/bluenoise256.png",
 				],
 				toggleConfig: "ss_ao",
+			},
+			{
+				name: "shadow0",
+				program: "shadow0",
+				framebuffer: "shadow_blur_a",
+				samplerImages: [
+					"vanilla_depth",
+					"translucent_depth",
+					"particles_depth",
+
+					"gbuffer_lightnormal",
+					"gbuffer_shadow",
+					"lumi:textures/filter_pattern/bluenoise256.png",
+				]
+			},
+			{
+				name: "shadow_h1",
+				program: "shadow_h",
+				framebuffer: "shadow_blur_b",
+				layer: 0,
+				samplerImages: [
+					"vanilla_depth",
+					"translucent_depth",
+					"particles_depth",
+
+					"gbuffer_lightnormal"
+				],
+				toggleConfig: "filter_shadows",
+			},
+			{
+				name: "shadow_v1",
+				program: "shadow_v",
+				framebuffer: "shadow_blur_a",
+				layer: 1,
+				samplerImages: [
+					"vanilla_depth",
+					"translucent_depth",
+					"particles_depth",
+
+					"gbuffer_lightnormal"
+				],
+				toggleConfig: "filter_shadows",
+			},
+			{
+				name: "shadow_h2",
+				program: "shadow_h",
+				framebuffer: "shadow_blur_b",
+				layer: 0,
+				samplerImages: [
+					"vanilla_depth",
+					"translucent_depth",
+					"particles_depth",
+
+					"gbuffer_lightnormal"
+				],
+				toggleConfig: "filter_shadows",
+			},
+			{
+				name: "shadow_v2",
+				program: "shadow_v",
+				framebuffer: "shadow_blur_a",
+				layer: 1,
+				samplerImages: [
+					"vanilla_depth",
+					"translucent_depth",
+					"particles_depth",
+
+					"gbuffer_lightnormal"
+				],
+				toggleConfig: "filter_shadows",
+			},
+			{
+				name: "shadow_h3",
+				program: "shadow_h",
+				framebuffer: "shadow_blur_b",
+				layer: 0,
+				samplerImages: [
+					"vanilla_depth",
+					"translucent_depth",
+					"particles_depth",
+
+					"gbuffer_lightnormal"
+				],
+				toggleConfig: "filter_shadows",
+			},
+			{
+				name: "shadow_v3",
+				program: "shadow_v",
+				framebuffer: "shadow_blur_a",
+				layer: 1,
+				samplerImages: [
+					"vanilla_depth",
+					"translucent_depth",
+					"particles_depth",
+
+					"gbuffer_lightnormal"
+				],
+				toggleConfig: "filter_shadows",
+			},
+			{
+				name: "shadow_h4",
+				program: "shadow_h",
+				framebuffer: "shadow_blur_b",
+				layer: 0,
+				samplerImages: [
+					"vanilla_depth",
+					"translucent_depth",
+					"particles_depth",
+
+					"gbuffer_lightnormal"
+				],
+				toggleConfig: "filter_shadows",
+			},
+			{
+				name: "shadow_v4",
+				program: "shadow_v",
+				framebuffer: "shadow_blur_a",
+				layer: 1,
+				samplerImages: [
+					"vanilla_depth",
+					"translucent_depth",
+					"particles_depth",
+
+					"gbuffer_lightnormal"
+				],
+				toggleConfig: "filter_shadows",
 			},
 			{
 				name: "ao0",

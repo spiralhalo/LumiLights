@@ -127,7 +127,7 @@
 			]
 		}, {
 			name: "gbuffer_lightnormal",
-			depth: 7,
+			depth: 9,
 			// Floating point so we can have signed normals and absurdly high emissive levels
 			internalFormat: "RGB16F",
 			pixelFormat: "RGB",
