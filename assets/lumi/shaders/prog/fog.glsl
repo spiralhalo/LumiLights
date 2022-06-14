@@ -25,6 +25,7 @@ vec4 blindnessFog(vec4 color, float distToEye)
 
 const float VOLUMETRIC_RESIDUAL	   = 0.1;
 const float HEIGHT_RESIDUAL		   = 0.05;
+const float FOG_ABSOLUTE_LIMIT	   = 0.9;
 const float FOG_FAR				   = FOG_FAR_CHUNKS * 16.0;
 const float FOG_DENSITY			   = clamp(FOG_DENSITY_F, 0.0, 10.0);
 const float UNDERWATER_FOG_FAR	   = UNDERWATER_FOG_FAR_CHUNKS * 16.0;
@@ -118,6 +119,9 @@ vec4 fog(vec4 color, float distToEye, vec3 toFrag, bool isUnderwater, float volu
 	residual = max(residual, l2_softenUp(fogFactor) * l2_clampScale(0.3, 0.0, dot(toFrag, frx_skyLightVector))); // reduce batman sign effect
 	volumetric += (1.0 - volumetric) * residual;
 	fogFactor *= volumetric;
+
+	// resolve fog limit
+	fogFactor *= FOG_ABSOLUTE_LIMIT;
 
 	vec4 blended = mix(color, vec4(fogColor, 1.0), fogFactor);
 
