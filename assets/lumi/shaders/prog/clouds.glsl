@@ -226,8 +226,9 @@ vec4 customClouds(sampler2D cloudsDepthBuffer, sampler2D natureTexture, sampler2
 		#endif
 	}
 
+	float night = frx_worldIsMoonlit * frx_skyLightTransitionFactor; // night cloud brightening hack
 	float rainCloudBrightness = 1.0 - hdr_fromGammaf(frx_smoothedRainGradient) * 0.2 - hdr_fromGammaf(frx_smoothedThunderGradient) * 0.1; // emulate dark clouds
-	vec3  celestRadiance = atmosv_CelestialRadiance * result.x * 0.06; // magic multiplier
+	vec3  celestRadiance = atmosv_CelestialRadiance * result.x * (0.06 + 0.06 * night); // magic multiplier
 
 	#ifdef VOLUMETRIC_CLOUDS
 	if (frx_worldIsMoonlit == 1) {
@@ -235,7 +236,7 @@ vec4 customClouds(sampler2D cloudsDepthBuffer, sampler2D natureTexture, sampler2
 	}
 	#endif
 
-	vec3 cloudRadiance = mix(atmosv_SkyRadiance, vec3(lightLuminance(atmosv_SkyRadiance)), 0.5);
+	vec3 cloudRadiance = mix(atmosv_SkyRadiance, vec3(lightLuminance(atmosv_SkyRadiance)), 0.5 - 0.5 * night) * (1.0 + night * 0.5);
 
 	vec3 color = (celestRadiance + cloudRadiance) * rainCloudBrightness;
 	return vec4(color, result.y);

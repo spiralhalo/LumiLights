@@ -217,7 +217,7 @@ void atmos_generateAtmosphereModel()
 	vec3 grayFog = vec3(lightLuminance(atmosv_FogRadiance));
 	#endif
 
-	float toGray = frx_rainGradient * 0.8 + frx_thunderGradient * 0.2;
+	float toGray = frx_smoothedRainGradient * 0.8 + frx_thunderGradient * 0.2;
 
 	atmosv_CelestialRadiance  = mix(atmosv_CelestialRadiance, grayCelestial, toGray) * rainBrightness; // only used for cloud shading during rain
 	atmosv_SkyAmbientRadiance = mix(atmosv_SkyAmbientRadiance, graySkyAmbient, toGray) * rainBrightness;

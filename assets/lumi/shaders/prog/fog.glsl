@@ -38,7 +38,7 @@ float invThickener(bool isUnderwater) {
 	float invThickener = 1.0;
 	// stronger night fog because it's darker
 	float night = max(frx_worldIsMoonlit, 1.0 - frx_skyLightTransitionFactor);
-	invThickener *= 1.0 - max(0.4 * night, 0.6 * frx_rainGradient);
+	invThickener *= 1.0 - max(0.4 * night, 0.6 * frx_smoothedRainGradient);
 	invThickener *= 1.0 - 0.5 * frx_thunderGradient;
 	invThickener = mix(1.0, invThickener, frx_smoothedEyeBrightness.y);
 
@@ -99,7 +99,8 @@ vec4 fog(vec4 color, float distToEye, vec3 toFrag, bool isUnderwater, float volu
 		yFactor = mix(yFactor, l2_clampScale(-0.125 + cameraAt, 0.5 + cameraAt, toFrag.y), extraViewBlend);
 
 		float invYFactor = 1.0 - yFactor;
-		fogFactor *= HEIGHT_RESIDUAL + (invYFactor * invYFactor) * (1.0 - HEIGHT_RESIDUAL);
+		// pow 3.0 is better especially at night
+		fogFactor *= HEIGHT_RESIDUAL + pow(invYFactor, 3.0) * (1.0 - HEIGHT_RESIDUAL);
 	}
 
 	// resolve cave fog
@@ -112,7 +113,7 @@ vec4 fog(vec4 color, float distToEye, vec3 toFrag, bool isUnderwater, float volu
 
 	// resolve volumetric
 	float residual = VOLUMETRIC_RESIDUAL + frx_cameraInWater * VOLUMETRIC_RESIDUAL;
-	residual = max(residual, frx_rainGradient);
+	residual = max(residual, frx_smoothedRainGradient);
 	residual = max(residual, frx_cameraInLava);
 	residual = max(residual, cave);
 	residual = max(residual, l2_clampScale(0.1, 0.0, frx_skyLightTransitionFactor));
