@@ -16,7 +16,7 @@ uniform sampler2D u_debugText;
 out vec4 fragColor;
 
 #define FEEDBACK_MAX 0.9
-#define FEEDBACK_MIN 0.1
+#define FEEDBACK_MIN 0.7
 
 vec4 clipAABB(vec3 colorMin, vec3 colorMax, vec4 currentColor, vec4 previousColor)
 {
