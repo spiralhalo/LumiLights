@@ -43,7 +43,7 @@ float celestialLightRays(sampler2DArrayShadow shadowBuffer, sampler2D natureText
 
 	const int MAX_STEPS = 6;
 	// TODO: perhaps reintroduce deadRadius once caustic light shafts are added
-	float sample	 = doUnderwaterRays ? 2.0 : max(1.0, distToEye) / float(MAX_STEPS);
+	float sample = doUnderwaterRays ? 2.0 : max(1.0, distToEye) / float(MAX_STEPS);
 
 	vec3 ray   = vec3(0.);
 	vec3 march = toFrag * sample;

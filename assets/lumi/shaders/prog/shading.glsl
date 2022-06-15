@@ -54,6 +54,9 @@ void shadingSetup() {
 const vec3 SHADOW_COEFF = hdr_fromGamma(vec3(1.0, 0.5, 0.5));
 
 float denoisedShadowFactor(sampler2DArrayShadow shadowMap, vec2 texcoord, vec3 eyePos, float depth, float lighty) {
+	// nasty
+	float transitionClamping = l2_clampScale(0.0, 0.1, frx_skyLightTransitionFactor);
+
 #ifdef SHADOW_MAP_PRESENT
 #ifdef TAA_ENABLED
 	// TODO: might as well apply unjitter to root shading eyePos?
@@ -71,9 +74,9 @@ float denoisedShadowFactor(sampler2DArrayShadow shadowMap, vec2 texcoord, vec3 e
 // 	val *= l2_clampScale(0.03125, 0.04, lighty);
 // #endif
 
-	return val;
+	return val * transitionClamping;
 #else
-	return lighty * lighty;
+	return lighty * lighty * transitionClamping;
 #endif
 }
 
@@ -312,7 +315,7 @@ void lights(vec3 albedo, vec4 light, vec3 eyePos, vec3 toEye, out vec3 baseLight
 	// the overmix and clamping is because lightw doesn't reach 1 for some reason (??)
 	vec3 shadowCoeff = min(vec3(1.0), mix(SHADOW_COEFF * light.w, vec3(1.1), light.w));
 
-	skyLight = frx_worldHasSkylight * shadowCoeff * mix(atmosv_CelestialRadiance, vec3(frx_skyFlashStrength * LIGHTNING_FLASH_STR), frx_rainGradient);
+	skyLight = frx_worldHasSkylight * shadowCoeff * mix(atmosv_CelestialRadiance, vec3(frx_skyFlashStrength * LIGHTNING_FLASH_STR), frx_smoothedRainGradient);
 }
 
 #if ALBEDO_BRIGHTENING == 0
