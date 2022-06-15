@@ -65,10 +65,6 @@ void main()
 	cRains = dSolid < dRains ? vec4(0.0) : cRains;
 	cRains.a *= 0.7; // thinner rains and snow
 
-	// hack that fixes shadow filtering probably
-	// haha just kidding shadow filtering is doomed
-	// float dShadow = dSolid == 1.0 ? 0.999 : dSolid;
-
 	vec4 tempPos = frx_inverseViewProjectionMatrix * vec4(2.0 * uvSolid - 1.0, 2.0 * dSolid - 1.0, 1.0);
 	vec3 eyePos  = tempPos.xyz / tempPos.w;
 
@@ -125,20 +121,13 @@ void main()
 	vec4 nextTrans;
 	bool transIsManaged = cTrans.a > 0.0 && notEndPortal(u_gbuffer_lightnormal) && lTrans.x > 0.0;
 
-	// do shadow stuff outside of branch if shadow filtering is ON
-#if !defined(SHADOW_MAP_PRESENT) || !defined(FILTER_SHADOWS)
-	if (transIsManaged) {
-#endif
-
+	// will be used for fog outside of shading
 	tempPos = frx_inverseViewProjectionMatrix * vec4(2.0 * v_texcoord - 1.0, 2.0 * dTrans - 1.0, 1.0);
 	eyePos  = tempPos.xyz / tempPos.w;
 	light   = lTrans;
 	light.w = denoisedShadowFactor(u_gbuffer_shadow, v_texcoord, eyePos, dTrans, light.y);
 
-#if defined(SHADOW_MAP_PRESENT) && defined(FILTER_SHADOWS)
 	if (transIsManaged) {
-#endif
-
 		cTrans.rgb = cTrans.rgb / (fastLight(lTrans.xy) * cTrans.a);
 		rawMat = texture(u_gbuffer_main_etc, vec3(v_texcoord, ID_TRANS_MATS)).xyz;
 		normal = normalize(texture(u_gbuffer_lightnormal, vec3(v_texcoord, ID_TRANS_MNORM)).xyz);

@@ -31,34 +31,13 @@ void main()
 
 	bool f1Pressed = texture(u_vanilla_depth, vec2(0.5, 1.0)).r != 1.0;
 
-	// check sides too, this is for shadow filtering
-	float dCheck = dSolid;
-
-#if defined(SHADOW_MAP_PRESENT) && defined(FILTER_SHADOWS)
-	dCheck = min(dCheck, texture(u_vanilla_depth, v_texcoord + vec2(v_invSize.x, 0.0)).r);
-	dCheck = min(dCheck, texture(u_vanilla_depth, v_texcoord + vec2(-v_invSize.x, 0.0)).r);
-	dCheck = min(dCheck, texture(u_vanilla_depth, v_texcoord + vec2(0.0, v_invSize.y)).r);
-	dCheck = min(dCheck, texture(u_vanilla_depth, v_texcoord + vec2(0.0, -v_invSize.y)).r);
-#endif
-
-	if (dCheck == 1.0 || f1Pressed) {
+	if (dSolid == 1.0 || f1Pressed) {
 		fragColor = cSolid;
 	} else {
-		#if defined(SHADOW_MAP_PRESENT) && defined(FILTER_SHADOWS)
-		dCheck = dSolid == 1.0 ? dCheck : dSolid;
-		#endif
-
-		vec4 tempPos = frx_inverseViewProjectionMatrix * vec4(2.0 * v_texcoord - 1.0, 2.0 * dCheck - 1.0, 1.0);
+		vec4 tempPos = frx_inverseViewProjectionMatrix * vec4(2.0 * v_texcoord - 1.0, 2.0 * dSolid - 1.0, 1.0);
 		vec3 eyePos  = tempPos.xyz / tempPos.w;
 		vec4 light	= texture(u_gbuffer_lightnormal, vec3(v_texcoord, ID_SOLID_LIGT));
-		light.w = denoisedShadowFactor(u_gbuffer_shadow, v_texcoord, eyePos, dCheck, light.y);
-
-		#if defined(SHADOW_MAP_PRESENT) && defined(FILTER_SHADOWS)
-		if (dSolid == 1.0) {
-			fragColor = cSolid;
-			return;
-		}
-		#endif
+		light.w = denoisedShadowFactor(u_gbuffer_shadow, v_texcoord, eyePos, dSolid, light.y);
 
 		vec3 rawMat = texture(u_gbuffer_main_etc, vec3(v_texcoord, ID_SOLID_MATS)).xyz;
 		vec3 normal	= normalize(texture(u_gbuffer_lightnormal, vec3(v_texcoord, ID_SOLID_MNORM)).xyz);
