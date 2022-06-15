@@ -20,7 +20,10 @@ float fastLight(vec2 light) {
 	float reduction = max(1.0 - frx_skyLightTransitionFactor, frx_worldIsMoonlit);
 		  reduction = max(reduction, max(0.5 * frx_rainGradient, frx_thunderGradient));
 
-	return max(light.x, light.y * (1.0 - 0.9 * reduction));
+	float result = max(light.x, light.y * (1.0 - 0.9 * reduction));
+
+	// prevents overblown values when recovering the original as well as representing ambient light
+	return 0.2 + 0.8 * result;
 }
 
 #ifdef POST_SHADER
