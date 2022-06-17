@@ -123,9 +123,12 @@ vec4 fog(vec4 color, float distToEye, vec3 toFrag, bool isUnderwater, float volu
 	fogFactor *= volumetric;
 
 	// resolve fog limit
-	fogFactor *= FOG_ABSOLUTE_LIMIT + (1.0 - FOG_ABSOLUTE_LIMIT) * frx_cameraInLava;
+	float fogAmount = min(1.0, fogFactor);
+	float fogExcess = fogFactor - fogAmount;
+	fogAmount *= FOG_ABSOLUTE_LIMIT + (1.0 - FOG_ABSOLUTE_LIMIT) * frx_cameraInLava;
 
-	vec4 blended = mix(color, vec4(fogColor, 1.0), fogFactor);
+	vec4 blended = mix(color, vec4(fogColor, 1.0), fogAmount);
+	blended.rgb += fogColor * fogExcess;
 
 	return blended;
 }

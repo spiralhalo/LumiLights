@@ -76,6 +76,11 @@ float celestialLightRays(sampler2DArrayShadow shadowBuffer, sampler2D natureText
 	}
 
 	energy = (energy / float(MAX_STEPS)) * scatter;
+	
+	if (doUnderwaterRays) {
+		// have you heard of HDR fog?
+		energy += 0.5;
+	}
 
 	return energy;
 }
