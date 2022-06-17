@@ -9,6 +9,7 @@
  *  lumi:shaders/prog/sky.glsl
  *******************************************************/
 
+l2_vary vec3 v_celestVec;
 l2_vary vec3 v_celest1;
 l2_vary vec3 v_celest2;
 l2_vary vec3 v_celest3;
@@ -46,6 +47,7 @@ void celestSetup()
 	// 	v_celest3.xy += taaJitterValue * celest_clip.w;
 	// #endif
 
+	v_celestVec = (frx_worldIsMoonlit * 2.0 - 1.0) * normalize(result.topLeft + result.bottomRight);
 	v_celest1 = result.bottomLeft;
 	v_celest2 = result.bottomRight;
 	v_celest3 = result.topLeft;
@@ -67,8 +69,8 @@ vec4 celestFrag(in Rect celestRect, sampler2D ssun, sampler2D smoon, vec3 worldV
 	if (dot(worldVec, frx_skyLightVector) < 0.) return vec4(0.); // no more both at opposites, sorry
 
 	vec2 celestUV  = rect_innerUV(celestRect, worldVec * 1024.);
-	vec3 celestCol = vec3(0.);
-	vec3 celestTex = vec3(0.);
+	vec3 celestCol = vec3(0.0);
+	vec3 celestTex = vec3(0.0);
 	float opacity  = 0.0;
 
 	bool isMoon = frx_worldIsMoonlit == 1;
@@ -119,6 +121,7 @@ vec4 customSky(sampler2D sunTexture, sampler2D moonTexture, vec3 toSky, vec3 fal
 		float starEraser = celestColor.a;
 
 		result.rgb  = atmosv_SkyRadiance * skyVisible;
+		result.rgb += pow(max(0.0, dot(toSky, v_celestVec)), 100.0) * atmosv_CelestialRadiance * 0.1; // halo?
 		result.rgb += celestColor.rgb * (1. - frx_rainGradient) * celestVisible;
 		#else
 		float mul = 1.0 + frx_worldIsMoonlit * frx_skyLightTransitionFactor;

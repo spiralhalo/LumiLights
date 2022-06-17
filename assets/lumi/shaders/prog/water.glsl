@@ -118,7 +118,7 @@ vec3 sampleWaterNormal(sampler2D natureTexture, vec3 fragWorldPos, vec3 absVerte
 
 	const float slope = 1. / 32.;
 	const float oneBlock = WATER_BLOCK_RES / WATER_TEXSIZE;
-	const float amplitude = 0.02;
+	const float amplitude = 0.04;
 
 	vec3 tmove = tangent * slope;
 	vec3 bmove = bitangent * slope;

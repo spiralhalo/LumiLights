@@ -107,8 +107,8 @@ const int[SUN_LEN] SUN_COL_ID = int[]  (SMONC, SRISC, SRISC, SNONC, SNONC, SRISC
 const float[SUN_LEN] SUN_TIMES = float[](-0.05, -0.04,  0.00,  0.01,  0.49,   0.5,  0.54,  0.55);
 
 const int SKY_LEN = 4;
-const float[SKY_LEN] SKY_NIGHT = float[]( 1.0 ,  0.0, 0.0 , 1.0);
-const float[SKY_LEN] SKY_TIMES = float[](-0.05, -0.0, 0.5, 0.55);
+const float[SKY_LEN] SKY_NIGHT = float[]( 1.0 ,  0.0 , 0.0 , 1.0);
+const float[SKY_LEN] SKY_TIMES = float[](-0.05, -0.01, 0.49, 0.55);
 
 void atmos_generateAtmosphereModel()
 {
@@ -187,7 +187,7 @@ void atmos_generateAtmosphereModel()
 
 	vec3 waterFog = atmosv_ClearRadiance;
 	waterFog.g = max(waterFog.g, waterFog.b * 0.1);
-	waterFog *= 0.1 / lightLuminance(waterFog);
+	waterFog *= 0.05 / lightLuminance(waterFog);
 
 	// ClearRadiance is mostly used for water
 	atmosv_ClearRadiance = mix(atmosv_FogRadiance, waterFog, float(frx_cameraInWater));

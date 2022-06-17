@@ -51,7 +51,7 @@ void shadingSetup() {
 
 #ifndef VERTEX_SHADER
 
-const vec3 SHADOW_COEFF = hdr_fromGamma(vec3(1.0, 0.5, 0.5));
+const vec3 SHADOW_COEFF = hdr_fromGamma(vec3(1.0, 0.1, 0.1));
 
 float denoisedShadowFactor(sampler2DArrayShadow shadowMap, vec2 texcoord, vec3 eyePos, float depth, float lighty) {
 	// nasty

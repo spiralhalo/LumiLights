@@ -38,7 +38,7 @@ float invThickener(bool isUnderwater) {
 	float invThickener = 1.0;
 	// stronger night fog because it's darker
 	float night = max(frx_worldIsMoonlit, 1.0 - frx_skyLightTransitionFactor);
-	invThickener *= 1.0 - max(0.4 * night, 0.6 * frx_smoothedRainGradient);
+	invThickener *= 1.0 - 0.6 * max(night, frx_smoothedRainGradient);
 	invThickener *= 1.0 - 0.5 * frx_thunderGradient;
 	invThickener = mix(1.0, invThickener, frx_smoothedEyeBrightness.y);
 
@@ -87,6 +87,7 @@ vec4 fog(vec4 color, float distToEye, vec3 toFrag, bool isUnderwater, float volu
 	fogFactor = max(fogFactor, skyBlend);
 
 	// resolve height fog
+	// more accurate in volumetrics, but it's cheaper and simpler this way
 	if (!isUnderwater && frx_cameraInLava != 1) {
 		float eyeY = toFrag.y * distToEye;
 		// for terrain
