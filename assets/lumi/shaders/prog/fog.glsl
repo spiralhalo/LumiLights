@@ -59,7 +59,7 @@ float fogFactor(float distToEye, bool isUnderwater, float invThickener)
 	}
 
 	// resolve lava
-	pFogFar = mix(pFogFar, float(frx_effectFireResistance) * 2.0 + 0.5, float(frx_cameraInLava));
+	pFogFar = mix(pFogFar, float(frx_effectFireResistance) * 4.0 + 1.0, float(frx_cameraInLava));
 	pFogDensity = max(pFogDensity, float(frx_cameraInLava));
 
 	float distFactor = min(1.0, distToEye / pFogFar);
@@ -117,12 +117,12 @@ vec4 fog(vec4 color, float distToEye, vec3 toFrag, bool isUnderwater, float volu
 	residual = max(residual, frx_cameraInLava);
 	residual = max(residual, cave);
 	residual = max(residual, l2_clampScale(0.1, 0.0, frx_skyLightTransitionFactor));
-	residual = max(residual, l2_softenUp(fogFactor) * l2_clampScale(0.3, 0.0, dot(toFrag, frx_skyLightVector))); // reduce batman sign effect
+	residual = max(residual, l2_softenUp(fogFactor) * l2_clampScale(0.4, -0.4, dot(toFrag, frx_skyLightVector))); // reduce batman sign effect
 	volumetric += (1.0 - volumetric) * residual;
 	fogFactor *= volumetric;
 
 	// resolve fog limit
-	fogFactor *= FOG_ABSOLUTE_LIMIT;
+	fogFactor *= FOG_ABSOLUTE_LIMIT + (1.0 - FOG_ABSOLUTE_LIMIT) * frx_cameraInLava;
 
 	vec4 blended = mix(color, vec4(fogColor, 1.0), fogFactor);
 
