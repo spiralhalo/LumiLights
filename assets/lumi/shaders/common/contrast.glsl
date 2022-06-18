@@ -96,5 +96,5 @@ const float USER_ALBEDO_BRIGHTENING        = clamp(ALBEDO_BRIGHTENING, 0, 20) / 
 	const float EMISSIVE_LIGHT_STR	= DEF_EMISSIVE_LIGHT_STR;
 	const float LIGHTNING_FLASH_STR = DEF_LIGHTNING_FLASH_STR;
 	// spaghetti
-	const float STAR_LUMIGATE_HIGH	= max(lightLuminance(DEF_DAY_SKY_COLOR) * 0.4, lightLuminance(DEF_NIGHT_SKY_COLOR) + 0.1) * DEF_SKY_STR;
-	const float STAR_LUMIGATE_LOW	= max(STAR_LUMIGATE_HIGH * 0.26, lightLuminance(DEF_NIGHT_SKY_COLOR)) * DEF_SKY_STR;
+	const float STAR_LUMIGATE_HIGH	= max(lightLuminance(DEF_DAY_SKY_COLOR) * 0.4, lightLuminance(DEF_NIGHT_SKY_COLOR) * 1.1) * DEF_SKY_STR;
+	const float STAR_LUMIGATE_LOW	= lightLuminance(DEF_NIGHT_SKY_COLOR) * DEF_SKY_STR;
