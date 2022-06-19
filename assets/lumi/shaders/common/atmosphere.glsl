@@ -238,7 +238,7 @@ void atmos_generateAtmosphereModel()
 		atmosv_CaveFogRadiance = mix(CAVEFOG_C, CAVEFOG_DEEPC, l2_clampScale(CAVEFOG_MAXY, CAVEFOG_MINY, frx_cameraPos.y));
 
 		// night fog luminance (always max moon phase)
-		float nightFogLuminance = lightLuminance(MOONLIGHT_COLOR * DEF_MOONLIGHT_STR * 0.4);
+		float nightFogLuminance = lightLuminance(MOONLIGHT_COLOR * DEF_MOONLIGHT_RAW_STR * 0.4);
 
 		// cave fog strength is adjusted to dimmest night fog strength so it doesn't make the outdoors look jarring or misleading
 		atmosv_CaveFogRadiance *= nightFogLuminance;
