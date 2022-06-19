@@ -7,6 +7,14 @@
                 }
             },
             "material": "lumi:sign"
+        },
+        {
+            "predicate": {
+                "materialPredicate": {
+                    "renderLayerName": "text_polygon_offset"
+                }
+            },
+            "material": "lumi:sign"
         }
     ]
 }
