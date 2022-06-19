@@ -61,6 +61,7 @@ const float USER_ALBEDO_BRIGHTENING        = clamp(ALBEDO_BRIGHTENING, 0, 20) / 
 	#define DEF_VANILLA_DAY_SKY_COLOR	hdr_fromGamma(vec3(0.52, 0.69, 1.0))
 	#define DEF_LUMI_AZURE				hdr_fromGamma(vec3(0.425, 0.623333, 0.85))
 	#define DEF_NEO_AZURE				hdr_fromGamma(vec3(0.47, 0.62, 0.85))
+	#define DEF_NEO_CERULEAN			hdr_fromGamma(vec3(0.34, 0.50, 0.8))
 
 #if SKY_MODE == SKY_MODE_LUMI
 
@@ -72,7 +73,7 @@ const float USER_ALBEDO_BRIGHTENING        = clamp(ALBEDO_BRIGHTENING, 0, 20) / 
 	#elif LUMI_SKY_COLOR == LUMI_SKY_COLOR_BRIGHT_CYAN
 		#define DEF_DAY_SKY_COLOR		DEF_LUMI_AZURE
 	#elif LUMI_SKY_COLOR == LUMI_SKY_COLOR_DEEP_CERULEAN
-		#define DEF_DAY_SKY_COLOR		hdr_fromGamma(vec3(0.3, 0.5, 1.0))
+		#define DEF_DAY_SKY_COLOR		DEF_NEO_CERULEAN
 	#else
 		// spaghetti
 		#define DEF_DAY_SKY_COLOR		hdr_fromGamma(max(vec3(1.0 / 255.0), vec3(LUMI_SKY_RED, LUMI_SKY_GREEN, LUMI_SKY_BLUE))) * max(1.0, (lightLuminance(DEF_NIGHT_SKY_COLOR) + 0.1) / lightLuminance(hdr_fromGamma(max(vec3(1.0 / 255.0), vec3(LUMI_SKY_RED, LUMI_SKY_GREEN, LUMI_SKY_BLUE)))))
