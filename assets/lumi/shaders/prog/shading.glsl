@@ -8,6 +8,7 @@
 #include lumi:shaders/lib/pbr.glsl
 #include lumi:shaders/lib/taa_jitter.glsl
 #include lumi:shaders/lib/util.glsl
+#include lumi:shaders/prog/celest.glsl
 #include lumi:shaders/prog/shadow.glsl
 #include lumi:shaders/prog/tile_noise.glsl
 #include lumi:shaders/prog/water.glsl
@@ -355,7 +356,8 @@ vec4 shading(vec4 color, sampler2D natureTexture, vec4 light, float ao, vec2 mat
 	shaded += shading0.specular + shading0.diffuse;
 	specular += shading0.specular;
 
-	lightPbr(albedo, color.a, skyLight, material.x, f0, frx_skyLightVector, toEye, normal, disableDiffuse);
+	// we use v_celestVec because it's not actually aligned with skyLightVector sadge
+	lightPbr(albedo, color.a, skyLight, material.x, f0, v_celestVec, toEye, normal, disableDiffuse);
 	shaded += shading0.specular + shading0.diffuse;
 	specular += shading0.specular;
 
