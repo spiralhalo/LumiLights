@@ -6,7 +6,6 @@
 
 #ifdef POST_SHADER
 
-l2_vary vec3 v_celestVec;
 l2_vary vec3 v_celest1;
 l2_vary vec3 v_celest2;
 l2_vary vec3 v_celest3;
@@ -15,14 +14,14 @@ l2_vary vec3 v_celest3;
 
 void celestSetup()
 {
-	const vec3 o	   = vec3(-1024., 0.,  0.);
-	const vec3 dayAxis = vec3(	0., 0., -1.);
+	const vec3 o	   = vec3(-1024.0, 0.0,  0.0);
+	const vec3 dayAxis = vec3(	  0.0, 0.0, -1.0);
 
 	float size = 250.; // One size fits all; vanilla would be -50 for moon and +50 for sun
 
 	Rect result = Rect(o + vec3(.0, -size, -size), o + vec3(.0, -size,  size), o + vec3(.0,  size, -size));
 	
-	vec3  zenithAxis  = cross(frx_skyLightVector, vec3( 0.,  0., -1.));
+	vec3  zenithAxis  = vec3(-1.0, 0.0, 0.0);
 	float zenithAngle = asin(frx_skyLightVector.z);
 	float dayAngle	  = frx_skyAngleRadians + PI * 0.5;
 
@@ -40,11 +39,16 @@ void celestSetup()
 	// 	v_celest3.xy += taaJitterValue * celest_clip.w;
 	// #endif
 
-	// TODO: change the entire setup routine so this becomes unnecessary
-	v_celestVec = (frx_worldIsMoonlit * 2.0 - 1.0) * normalize(result.topLeft + result.bottomRight);
-	v_celest1 = result.bottomLeft;
-	v_celest2 = result.bottomRight;
-	v_celest3 = result.topLeft;
+	// TODO: wtf
+	float flipper = frx_worldIsMoonlit * 2.0 - 1.0;
+
+	// TODO: wtf double facepalm combo
+	vec3 correction = flipper * normalize(result.topLeft + result.bottomRight);
+	correction = (frx_skyLightVector - correction) * 1024;
+
+	v_celest1 = flipper * result.bottomLeft + correction;
+	v_celest2 = flipper * result.bottomRight + correction;
+	v_celest3 = flipper * result.topLeft + correction;
 }
 
 #endif
