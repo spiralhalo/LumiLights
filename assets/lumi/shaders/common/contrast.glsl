@@ -60,6 +60,7 @@ const float USER_ALBEDO_BRIGHTENING        = clamp(ALBEDO_BRIGHTENING, 0, 20) / 
 	// SKY COLORS
 	#define DEF_VANILLA_DAY_SKY_COLOR	hdr_fromGamma(vec3(0.52, 0.69, 1.0))
 	#define DEF_LUMI_AZURE				hdr_fromGamma(vec3(0.425, 0.623333, 0.85))
+	#define DEF_NEO_AZURE				hdr_fromGamma(vec3(0.47, 0.62, 0.85))
 
 #if SKY_MODE == SKY_MODE_LUMI
 
@@ -67,9 +68,9 @@ const float USER_ALBEDO_BRIGHTENING        = clamp(ALBEDO_BRIGHTENING, 0, 20) / 
 	#define _0_DEF_NIGHT_SKY_COLOR		vec3(0.09, 0.105, 0.18)
 
 	#if LUMI_SKY_COLOR == LUMI_SKY_COLOR_NATURAL_AZURE
-		#define DEF_DAY_SKY_COLOR		DEF_LUMI_AZURE
+		#define DEF_DAY_SKY_COLOR		DEF_NEO_AZURE
 	#elif LUMI_SKY_COLOR == LUMI_SKY_COLOR_BRIGHT_CYAN
-		#define DEF_DAY_SKY_COLOR		hdr_fromGamma(vec3(0.40, 0.69, 1.0))
+		#define DEF_DAY_SKY_COLOR		DEF_LUMI_AZURE
 	#elif LUMI_SKY_COLOR == LUMI_SKY_COLOR_DEEP_CERULEAN
 		#define DEF_DAY_SKY_COLOR		hdr_fromGamma(vec3(0.3, 0.5, 1.0))
 	#else
