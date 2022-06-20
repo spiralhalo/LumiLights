@@ -10,7 +10,7 @@ out float v_blindness;
 
 void blindnessSetup() {
 	// capture vanilla transition which happens when blindness happens/stops naturally (without milk, command, etc) 
-	v_blindness = l2_clampScale(1.0, 0.0, frx_luminance(frx_vanillaClearColor)) * float(frx_effectBlindness);
+	v_blindness = l2_clampScale(1.0, 0.0, frx_luminance(frx_vanillaClearColor)) * float(max(frx_effectBlindness, frx_effectDarkness));
 }
 #else
 in float v_blindness;
@@ -18,7 +18,7 @@ in float v_blindness;
 vec4 blindnessFog(vec4 color, float distToEye)
 {
 	// unlike normal fog, this also applies to the sky and doesn't mess with atmospheric fog
-	float blindFactor = min(1.0, distToEye / 2.0) * v_blindness;
+	float blindFactor = min(1.0, distToEye / mix(16.0, 2.0, float(frx_effectBlindness))) * v_blindness;
 	vec4 blended = mix(color, vec4(0.0, 0.0, 0.0, 1.0), blindFactor);
 	return blended;
 }
@@ -58,9 +58,9 @@ float fogFactor(float distToEye, bool isUnderwater, float invThickener)
 		pFogDensity = mix(max(1.0, pFogDensity * 2.0), pFogDensity, invThickener);
 	}
 
-	// resolve lava
-	pFogFar = mix(pFogFar, float(frx_effectFireResistance) * 4.0 + 1.0, float(frx_cameraInLava));
-	pFogDensity = max(pFogDensity, float(frx_cameraInLava));
+	// resolve lava and snow
+	pFogFar = mix(pFogFar, max(0, frx_effectFireResistance - frx_playerIsFreezing) * 4.0 + 1.0, max(frx_cameraInSnow, frx_cameraInLava));
+	pFogDensity = max(pFogDensity, max(frx_cameraInSnow, frx_cameraInLava));
 
 	float distFactor = min(1.0, distToEye / pFogFar);
 	distFactor = l2_softenUp(distFactor, pFogDensity * 2.0);
@@ -88,7 +88,7 @@ vec4 fog(vec4 color, float distToEye, vec3 toFrag, bool isUnderwater, float volu
 
 	// resolve height fog
 	// more accurate in volumetrics, but it's cheaper and simpler this way
-	if (!isUnderwater && frx_cameraInLava != 1) {
+	if (!isUnderwater && max(frx_cameraInSnow, frx_cameraInLava) < 1) {
 		float eyeY = toFrag.y * distToEye;
 		// for terrain
 		float yFactor = l2_clampScale(-128.0, 128.0, eyeY);
@@ -115,7 +115,7 @@ vec4 fog(vec4 color, float distToEye, vec3 toFrag, bool isUnderwater, float volu
 	// resolve volumetric
 	float residual = VOLUMETRIC_RESIDUAL + frx_cameraInWater * VOLUMETRIC_RESIDUAL;
 	residual = max(residual, frx_smoothedRainGradient);
-	residual = max(residual, frx_cameraInLava);
+	residual = max(residual, max(frx_cameraInSnow, frx_cameraInLava));
 	residual = max(residual, cave);
 	residual = max(residual, l2_clampScale(0.1, 0.0, frx_skyLightTransitionFactor));
 	residual = max(residual, l2_softenUp(fogFactor) * l2_clampScale(0.4, -0.4, dot(toFrag, frx_skyLightVector))); // reduce batman sign effect
@@ -125,7 +125,7 @@ vec4 fog(vec4 color, float distToEye, vec3 toFrag, bool isUnderwater, float volu
 	// resolve fog limit
 	float fogAmount = min(1.0, fogFactor);
 	float fogExcess = fogFactor - fogAmount;
-	fogAmount *= FOG_ABSOLUTE_LIMIT + (1.0 - FOG_ABSOLUTE_LIMIT) * frx_cameraInLava;
+	fogAmount *= FOG_ABSOLUTE_LIMIT + (1.0 - FOG_ABSOLUTE_LIMIT) * max(frx_cameraInSnow, frx_cameraInLava);
 
 	vec4 blended = mix(color, vec4(fogColor, 1.0), fogAmount);
 	blended.rgb += fogColor * fogExcess;

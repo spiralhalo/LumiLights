@@ -7,14 +7,21 @@
 // alpha stuff
 #ifdef _alpha_frx_skyFlashStrength
 	#define frx_skyFlashStrength _alpha_frx_skyFlashStrength
+	#define frx_smoothedThunderGradient _alpha_frx_smoothedThunderGradient
 #elif !defined(frx_skyFlashStrength)
 	#define frx_skyFlashStrength 0.0
+	#define frx_smoothedThunderGradient frx_thunderGradient
 #endif
 
-#ifdef _alpha_frx_smoothedThunderGradient
-	#define frx_smoothedThunderGradient _alpha_frx_smoothedThunderGradient
-#elif !defined(frx_smoothedThunderGradient)
-	#define frx_smoothedThunderGradient frx_thunderGradient
+#ifndef frx_darknessFactor
+	#define frx_darknessFactor 1.0
+	#define frx_effectDarkness 0
+#endif
+
+#ifndef frx_playerIsFreezing
+	#define frx_playerIsFreezing 0
+	#define frx_playerEyeInSnow 0
+	#define frx_cameraInSnow 0
 #endif
 
 #include frex:shaders/api/player.glsl
