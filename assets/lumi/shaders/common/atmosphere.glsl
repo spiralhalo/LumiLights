@@ -170,9 +170,9 @@ void atmos_generateAtmosphereModel()
 	float clearLuminance = lightLuminance(atmosv_ClearRadiance);
 	atmosv_ClearRadiance = atmosv_ClearRadiance / (clearLuminance == 0.0 ? 1.0 : clearLuminance);
 
-	bool customOWFog	 = frx_worldIsOverworld == 1 && max(frx_cameraInSnow, frx_cameraInLava) < 0;
-	bool customEndFog	 = frx_worldIsEnd == 1 && max(frx_cameraInSnow, frx_cameraInLava) < 0;
-	bool customNetherFog = frx_worldIsNether == 1 && max(frx_cameraInSnow, frx_cameraInLava) < 0;
+	bool customOWFog	 = frx_worldIsOverworld == 1 && max(frx_cameraInSnow, frx_cameraInLava) < 1;
+	bool customEndFog	 = frx_worldIsEnd == 1 && max(frx_cameraInSnow, frx_cameraInLava) < 1;
+	bool customNetherFog = frx_worldIsNether == 1 && max(frx_cameraInSnow, frx_cameraInLava) < 1;
 
 	if (customOWFog) {
 		float skyLuminance = lightLuminanceUnclamped(atmosv_SkyRadiance);
