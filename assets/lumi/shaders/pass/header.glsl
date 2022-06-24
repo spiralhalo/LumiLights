@@ -3,6 +3,8 @@
 #define POST_SHADER
 
 #include frex:shaders/api/world.glsl
+#include frex:shaders/api/player.glsl
+#include frex:shaders/api/view.glsl
 
 // alpha stuff
 #ifdef _alpha_frx_skyFlashStrength
@@ -13,8 +15,8 @@
 	#define frx_smoothedThunderGradient frx_thunderGradient
 #endif
 
-#ifndef frx_darknessFactor
-	#define frx_darknessFactor 1.0
+#ifndef frx_darknessEffectFactor
+	#define frx_darknessEffectFactor 1.0
 	#define frx_effectDarkness 0
 #endif
 
@@ -24,8 +26,6 @@
 	#define frx_cameraInSnow 0
 #endif
 
-#include frex:shaders/api/player.glsl
-#include frex:shaders/api/view.glsl
 #include frex:shaders/lib/math.glsl
 #include lumi:shaders/lib/util.glsl
 #include lumi:shaders/common/userconfig.glsl

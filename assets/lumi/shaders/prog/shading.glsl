@@ -318,7 +318,7 @@ void lights(vec3 albedo, vec4 light, vec3 eyePos, vec3 toEye, out vec3 baseLight
 
 	skyLight = frx_worldHasSkylight * shadowCoeff * mix(atmosv_CelestialRadiance, vec3(frx_skyFlashStrength * LIGHTNING_FLASH_STR), frx_smoothedRainGradient);
 
-	float darkness = pow(frx_darknessFactor, 2.0);
+	float darkness = pow(frx_darknessEffectFactor, 2.0);
 	baseLight *= 0.1 + 0.9 * darkness;
 	blockLight *= 0.5 + 0.5 * darkness;
 	skyLight *= 0.1 + 0.9 * darkness;
