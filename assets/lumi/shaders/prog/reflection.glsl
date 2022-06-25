@@ -145,6 +145,7 @@ vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer
 	vec3 viewToFrag = -viewToEye;
 	vec3 viewNormal = normalize(frx_normalModelMatrix * normal);
 	vec3 viewMarch  = reflectRough(noiseTexture, viewToFrag, viewNormal, roughness, jitterPrc);
+	vec3 march = viewMarch * frx_normalModelMatrix;
 
 	#ifdef SS_REFLECTION
 	vec4 objLight = vec4(0.0);
@@ -158,6 +159,7 @@ vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer
 			normal = rawNormal;
 			viewNormal = rawViewNormal;
 			viewMarch = normalize(reflect(viewToFrag, viewNormal) + jitterPrc);
+			march = viewMarch * frx_normalModelMatrix;
 		}
 
 		// reduce jagginess
@@ -170,7 +172,7 @@ vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer
 		result.z *= min(uvFade.x, uvFade.y);
 
 		vec4 reflectedPos = frx_inverseViewProjectionMatrix * vec4(result.xy * 2.0 - 1.0, texture(depthBuffer, result.xy).r * 2.0 - 1.0, 1.0);
-		float distanceFade = fogFactor(length(reflectedPos.xyz / reflectedPos.w), frx_cameraInFluid == 1);
+		float distanceFade = fogFactor(length(reflectedPos.xyz / reflectedPos.w), march, frx_cameraInFluid == 1);
 
 		result.z *= 1.0 - pow(distanceFade, 3.0);
 
@@ -182,7 +184,6 @@ vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer
 	const vec4 objLight = vec4(0.0);
 	#endif
 
-	vec3 march = viewMarch * frx_normalModelMatrix;
 	vec3 skyLight = skyRadiance(sunTexture, moonTexture, rawMat.xy, march, light.yw) * skyReflectionFac(march);
 	vec3 envLight = BLOCK_LIGHT_COLOR * lightmapRemap(light.x) * (1.0 - frx_smoothedEyeBrightness.y);
 

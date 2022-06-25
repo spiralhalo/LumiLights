@@ -45,7 +45,7 @@ float invThickener(bool isUnderwater) {
 	return invThickener;
 }
 
-float fogFactor(float distToEye, bool isUnderwater, float invThickener)
+float fogFactor(float distToEye, vec3 toFrag, bool isUnderwater, float invThickener)
 {
 	// only when absolutely underwater
 	bool submerged = isUnderwater && frx_cameraInFluid == 1;
@@ -65,20 +65,7 @@ float fogFactor(float distToEye, bool isUnderwater, float invThickener)
 	float distFactor = min(1.0, distToEye / pFogFar);
 	distFactor = l2_softenUp(distFactor, pFogDensity * 2.0);
 
-	return clamp(distFactor, 0.0, 1.0);
-}
-
-float fogFactor(float distToEye, bool isUnderwater) {
-	return fogFactor(distToEye, isUnderwater, invThickener(isUnderwater));
-}
-
-vec4 fog(vec4 color, float distToEye, vec3 toFrag, bool isUnderwater, float volumetric)
-{
-	float invThickener = invThickener(isUnderwater);
-	float fogFactor = fogFactor(distToEye, isUnderwater, invThickener);
-
-	bool submerged = isUnderwater && frx_cameraInFluid == 1;
-	vec3 fogColor = submerged ? atmosv_ClearRadiance : atmos_OWFogRadiance(toFrag);
+	float fogFactor = clamp(distFactor, 0.0, 1.0);
 
 	// resolve sky blend
 	float blendStart = max(0.0, frx_viewDistance - 16.0) * invThickener;
@@ -103,6 +90,21 @@ vec4 fog(vec4 color, float distToEye, vec3 toFrag, bool isUnderwater, float volu
 		// pow 3.0 is better especially at night
 		fogFactor *= HEIGHT_RESIDUAL + pow(invYFactor, 3.0) * (1.0 - HEIGHT_RESIDUAL);
 	}
+
+	return fogFactor;
+}
+
+float fogFactor(float distToEye, vec3 toFrag, bool isUnderwater) {
+	return fogFactor(distToEye, toFrag, isUnderwater, invThickener(isUnderwater));
+}
+
+vec4 fog(vec4 color, float distToEye, vec3 toFrag, bool isUnderwater, float volumetric)
+{
+	float invThickener = invThickener(isUnderwater);
+	float fogFactor = fogFactor(distToEye, toFrag, isUnderwater, invThickener);
+
+	bool submerged = isUnderwater && frx_cameraInFluid == 1;
+	vec3 fogColor = submerged ? atmosv_ClearRadiance : atmos_OWFogRadiance(toFrag);
 
 	// resolve cave fog
 	float cave = 0.0;
