@@ -225,10 +225,8 @@ void lightPbr(vec3 albedo, float alpha, vec3 radiance, float roughness, vec3 f0,
 	shading0.diffuse = albedo * radiance * diffuseNdotL * (1.0 - fresnel * step(0.0, rawNdL)) * dielectricity / PI;
 }
 
-void prepare(vec4 color, sampler2D natureTexture, vec3 eyePos, float vertexNormaly, bool isUnderwater, inout vec4 light)
+void prepare(vec4 color, sampler2D natureTexture, vec3 eyePos, float vertexNormaly, bool isUnderwater, inout vec4 light, out float causticLight)
 {
-	float causticLight = 0.0;
-
 #ifdef WATER_CAUSTICS
 	if (isUnderwater && frx_worldHasSkylight == 1) {
 		causticLight  = caustics(natureTexture, eyePos + frx_cameraPos, vertexNormaly);
@@ -241,19 +239,13 @@ void prepare(vec4 color, sampler2D natureTexture, vec3 eyePos, float vertexNorma
 	causticLight *= max(0.15, light.w); // TODO: can improve even more?
 #endif
 
-	// shadow workaround is dead. long live shadow workaround
-	// and yes I guess sunlight is nerfed in LITE now
-	light.w *= lightmapRemap(light.y);
-
-	light.w += causticLight;
-
 	float luminance = frx_luminance(color.rgb);
 	float vanillaEmissive = step(0.93625, light.x) * luminance * luminance;
 
 	light.z += vanillaEmissive;
 }
 
-void lights(vec3 albedo, vec4 light, vec3 eyePos, vec3 toEye, out vec3 baseLight, out vec3 blockLight, out vec3 hlLight, out vec3 skyLight)
+void lights(vec3 albedo, vec4 light, float causticLight, vec3 eyePos, vec3 toEye, out vec3 baseLight, out vec3 blockLight, out vec3 hlLight, out vec3 skyLight)
 {
 	float userBrightness = frx_viewBrightness <= 0.5 ? (0.5 + frx_viewBrightness) : (2.0 * frx_viewBrightness);
 
@@ -268,7 +260,9 @@ void lights(vec3 albedo, vec4 light, vec3 eyePos, vec3 toEye, out vec3 baseLight
 	// user brightness afects every base ambient except for sky ambient (emissive isn't ambient)
 	baseLight *= userBrightness;
 
-	baseLight += atmosv_SkyAmbientRadiance * lightmapRemap(light.y);
+	float remappedY = lightmapRemap(light.y);
+
+	baseLight += atmosv_SkyAmbientRadiance * remappedY;
 	baseLight += albedo * light.z * EMISSIVE_LIGHT_STR;
 
 	float bl = l2_clampScale(0.03125, 0.96875, light.x);
@@ -312,11 +306,22 @@ void lights(vec3 albedo, vec4 light, vec3 eyePos, vec3 toEye, out vec3 baseLight
 	}
 #endif
 
+#ifdef SHADOW_MAP_PRESENT
 	// famcy scattering
 	// the overmix and clamping is because lightw doesn't reach 1 for some reason (??)
-	vec3 shadowCoeff = min(vec3(1.0), mix(SHADOW_COEFF * light.w, vec3(1.1), light.w));
+	vec3 lightCoeff = min(vec3(1.0), mix(SHADOW_COEFF * light.w, vec3(1.1), light.w));
 
-	skyLight = frx_worldHasSkylight * shadowCoeff * mix(atmosv_CelestialRadiance, vec3(frx_skyFlashStrength * LIGHTNING_FLASH_STR), frx_smoothedRainGradient);
+	// this is mostly for underwater and acts as wide range "ambient occlusion"
+	// replaces shadow workaround
+	lightCoeff *= l2_softenUp(remappedY, 5.0);
+#else
+	vec3 lightCoeff = vec3(light.w);
+#endif
+
+	// caustics is unclamped
+	lightCoeff += vec3(causticLight);
+
+	skyLight = frx_worldHasSkylight * lightCoeff * mix(atmosv_CelestialRadiance, vec3(frx_skyFlashStrength * LIGHTNING_FLASH_STR), frx_smoothedRainGradient);
 
 	float darkness = pow(frx_darknessEffectFactor, 2.0);
 	baseLight *= 0.1 + 0.9 * darkness;
@@ -337,14 +342,15 @@ vec4 shading(vec4 color, sampler2D natureTexture, vec4 light, float ao, vec2 mat
 	// unmanaged
 	if (light.x == 0.0) return vec4(albedo, color.a);
 
-	prepare(color, natureTexture, eyePos, vertexNormal.y, isUnderwater, light);
+	float causticLight;
+	prepare(color, natureTexture, eyePos, vertexNormal.y, isUnderwater, light, causticLight);
 
 	vec3 f0 = pbr_calcF0(albedo, material);
 	vec3 toEye = -normalize(eyePos);
 
 	vec3 baseLight, blockLight, hlLight, skyLight;
 
-	lights(albedo, light, eyePos, toEye, baseLight, blockLight, hlLight, skyLight);
+	lights(albedo, light, causticLight, eyePos, toEye, baseLight, blockLight, hlLight, skyLight);
 
 	// block light fresnel
 	vec3 blH = normalize(toEye + normal);
@@ -385,10 +391,11 @@ vec4 particleShading(vec4 color, sampler2D natureTexture, vec4 light, vec3 eyePo
 	if (light.x == 0.0) return vec4(albedo, color.a);
 
 	vec3 toEye = -normalize(eyePos);
-	prepare(color, natureTexture, eyePos, 1.0, isUnderwater, light);
+	float causticLight;
+	prepare(color, natureTexture, eyePos, 1.0, isUnderwater, light, causticLight);
 
 	vec3 baseLight, blockLight, hlLight, skyLight;
-	lights(albedo, light, eyePos, toEye, baseLight, blockLight, hlLight, skyLight);
+	lights(albedo, light, causticLight, eyePos, toEye, baseLight, blockLight, hlLight, skyLight);
 
 	vec3 shaded = albedo * (baseLight + blockLight + hlLight);
 	shaded += albedo * skyLight;
