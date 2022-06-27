@@ -42,18 +42,26 @@ float simpleShadowFactor(in sampler2DArrayShadow shadowMap, in vec4 shadowViewPo
 	return texture(shadowMap, vec4(shadowCoords.xy, float(cascade), shadowCoords.z));
 }
 
-float calcShadowFactor(in sampler2DArrayShadow shadowMap, vec4 shadowViewPos) {
+float calcShadowFactor(in sampler2DArrayShadow shadowMap, vec4 shadowViewPos, float vertexNormalY) {
 	vec3 d3 = shadowDist(3, shadowViewPos);
 	vec3 d2 = shadowDist(2, shadowViewPos);
 	vec3 d1 = shadowDist(1, shadowViewPos);
 	int cascade = 0;
+	float biasHigh = 4.0;
+	float biasLow = 2.0;
 
 	if (d3.x < 1.0 && d3.y < 1.0 && d3.z < 1.0) {
 		cascade = 3;
+		biasHigh = 0.1;
+		biasLow = 0.05;
 	} else if (d2.x < 1.0 && d2.y < 1.0 && d2.z < 1.0) {
 		cascade = 2;
+		biasHigh = 0.25;
+		biasLow = 0.1;
 	} else if (d1.x < 1.0 && d1.y < 1.0 && d1.z < 1.0) {
 		cascade = 1;
+		biasHigh = 2.0;
+		biasLow = 1.0;
 	}
 
 	vec4 shadowCoords = frx_shadowProjectionMatrix(cascade) * shadowViewPos;
@@ -61,6 +69,8 @@ float calcShadowFactor(in sampler2DArrayShadow shadowMap, vec4 shadowViewPos) {
 	shadowCoords.xyz = shadowCoords.xyz * 0.5 + 0.5; // Transform from screen coordinates to texture coordinates
 
 #ifdef FILTER_SHADOWS
+	// bias
+	shadowCoords.z -= mix(biasHigh, biasLow, max(vertexNormalY * frx_skyLightVector.y, 0.0)) / SHADOW_MAP_SIZE;
 	float shadowFactor = sampleShadowPCF(shadowMap, shadowCoords.xyz, float(cascade));
 #else
 	float shadowFactor = texture(shadowMap, vec4(shadowCoords.xy, float(cascade), shadowCoords.z));
@@ -110,8 +120,7 @@ float sampleShadowPCF(in sampler2DArrayShadow shadowMap, in vec3 shadowPos, in f
 	// Static depth biasing to make up for incorrect fractional sampling on the shadow map grid
 	// float fractionalSamplingError = 2 * dot(vec2(1.0, 1.0) * texelSize, abs(receiverPlaneDepthBias));
 	// this gives bias smaller than receiverPlaneDepthBias, usually
-	lightDepth -= mix(0.1, 0.05, abs(frx_skyLightVector.y)) / SHADOW_MAP_SIZE;//min(fractionalSamplingError, 0.01);
-
+	// lightDepth -= min(fractionalSamplingError, 0.01);
 	vec2 uv = shadowPos.xy * shadowMapSize; // 1 unit - 1 texel
 
 	vec2 base_uv;

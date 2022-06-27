@@ -130,7 +130,8 @@ vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer
 
 	vec4 tempPos = frx_inverseViewProjectionMatrix * vec4(2.0 * v_texcoord - 1.0, 2.0 * depth - 1.0, 1.0);
 	vec3 eyePos  = tempPos.xyz / tempPos.w;
-	light.w = denoisedShadowFactor(shadowMap, v_texcoord, eyePos, depth, light.y);
+	vec3 vertexNormal = normalize(texture(lightNormalBuffer, vec3(v_texcoord, idNormal)).xyz);
+	light.w = denoisedShadowFactor(shadowMap, v_texcoord, eyePos, depth, light.y, vertexNormal.y);
 
 	vec3 viewPos = (frx_viewMatrix * vec4(eyePos, 1.0)).xyz;
 	float roughness = rawMat.x;
@@ -151,13 +152,12 @@ vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer
 	vec4 objLight = vec4(0.0);
 	if (roughness <= REFLECTION_MAXIMUM_ROUGHNESS) {
 		// Impossible Ray Resultion:
-		vec3 rawNormal = normalize(texture(lightNormalBuffer, vec3(v_texcoord, idNormal)).xyz);
-		vec3 rawViewNormal = normalize(frx_normalModelMatrix * rawNormal);
-		bool impossibleRay	= dot(rawViewNormal, viewMarch) < 0;
+		vec3 viewVertexNormal = normalize(frx_normalModelMatrix * vertexNormal);
+		bool impossibleRay	= dot(viewVertexNormal, viewMarch) < 0;
 
 		if (impossibleRay) {
-			normal = rawNormal;
-			viewNormal = rawViewNormal;
+			normal = vertexNormal;
+			viewNormal = viewVertexNormal;
 			viewMarch = normalize(reflect(viewToFrag, viewNormal) + jitterPrc);
 			march = viewMarch * frx_normalModelMatrix;
 		}
@@ -168,7 +168,7 @@ vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer
 
 		vec3 result = reflectionMarch_v2(depthBuffer, lightNormalBuffer, idNormal, viewStartPos, viewMarch, nearPos.z);
 
-		vec2 uvFade = smoothstep(0.5, 0.475 + l2_clampScale(0.1, 0.0, rawViewNormal.z) * 0.024, abs(result.xy - 0.5));
+		vec2 uvFade = smoothstep(0.5, 0.475 + l2_clampScale(0.1, 0.0, viewVertexNormal.z) * 0.024, abs(result.xy - 0.5));
 		result.z *= min(uvFade.x, uvFade.y);
 
 		vec4 reflectedPos = frx_inverseViewProjectionMatrix * vec4(result.xy * 2.0 - 1.0, texture(depthBuffer, result.xy).r * 2.0 - 1.0, 1.0);

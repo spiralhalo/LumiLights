@@ -73,7 +73,7 @@ void main()
 	vec3 normal	= normalize(texture(u_gbuffer_lightnormal, vec3(uvSolid, ID_SOLID_MNORM)).xyz);
 	vec3 vertexNormal = normalize(texture(u_gbuffer_lightnormal, vec3(uvSolid, ID_SOLID_NORM)).xyz);
 
-	light.w = denoisedShadowFactor(u_gbuffer_shadow, uvSolid, eyePos, dSolid, light.y);
+	light.w = denoisedShadowFactor(u_gbuffer_shadow, uvSolid, eyePos, dSolid, light.y, vertexNormal.y);
 
 	vec3 miscSolid = texture(u_gbuffer_main_etc, vec3(uvSolid, ID_SOLID_MISC)).xyz;
 	vec3 miscTrans = texture(u_gbuffer_main_etc, vec3(v_texcoord, ID_TRANS_MISC)).xyz;
@@ -115,7 +115,7 @@ void main()
 	tempPos = frx_inverseViewProjectionMatrix * vec4(2.0 * v_texcoord - 1.0, 2.0 * dParts - 1.0, 1.0);
 	eyePos  = tempPos.xyz / tempPos.w;
 	light = texture(u_gbuffer_lightnormal, vec3(v_texcoord, ID_PARTS_LIGT));
-	light.w = denoisedShadowFactor(u_gbuffer_shadow, v_texcoord, eyePos, dParts, light.y);
+	light.w = denoisedShadowFactor(u_gbuffer_shadow, v_texcoord, eyePos, dParts, light.y, -frx_cameraView.y);
 	vec4 nextParts = particleShading(cParts, u_tex_nature, light, eyePos, decideUnderwater(dParts, dTrans, transIsWater, false));
 
 	vec4 nextTrans;
@@ -125,13 +125,13 @@ void main()
 	tempPos = frx_inverseViewProjectionMatrix * vec4(2.0 * v_texcoord - 1.0, 2.0 * dTrans - 1.0, 1.0);
 	eyePos  = tempPos.xyz / tempPos.w;
 	light   = lTrans;
-	light.w = denoisedShadowFactor(u_gbuffer_shadow, v_texcoord, eyePos, dTrans, light.y);
+	vertexNormal = normalize(texture(u_gbuffer_lightnormal, vec3(v_texcoord, ID_TRANS_NORM)).xyz);
+	light.w = denoisedShadowFactor(u_gbuffer_shadow, v_texcoord, eyePos, dTrans, light.y, vertexNormal.y);
 
 	if (transIsManaged) {
 		cTrans.rgb = cTrans.rgb / (fastLight(lTrans.xy) * cTrans.a);
 		rawMat = texture(u_gbuffer_main_etc, vec3(v_texcoord, ID_TRANS_MATS)).xyz;
 		normal = normalize(texture(u_gbuffer_lightnormal, vec3(v_texcoord, ID_TRANS_MNORM)).xyz);
-		vertexNormal = normalize(texture(u_gbuffer_lightnormal, vec3(v_texcoord, ID_TRANS_NORM)).xyz);
 		disableDiffuse = bit_unpack(miscTrans.z, 4);
 
 		#ifdef WATER_FOAM
