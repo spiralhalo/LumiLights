@@ -79,15 +79,17 @@ void frx_pipelineFragment()
 
 			/* WATER RECOLOR */
 			#if WATER_COLOR == WATER_COLOR_NO_TEXTURE
-			frx_fragColor.rgb  = frx_vertexColor.rgb;
-			frx_fragColor.a   *= 0.6;
+			frx_fragColor.rgb = frx_vertexColor.rgb * 0.49;
 
 			#elif WATER_COLOR == WATER_COLOR_NO_COLOR
-			frx_fragColor = vec4(0.001);
+			frx_fragColor.rgb = vec3(0.05, 0.1, 0.2);
 
 			#elif WATER_COLOR == WATER_COLOR_NATURAL_BLUE
-			frx_fragColor.rgb *= frx_fragColor.a;
-			frx_fragColor.a   *= 0.5;
+			frx_fragColor.rgb *= 0.49;
+			#endif
+
+			#if WATER_COLOR != WATER_COLOR_VANILLA
+			frx_fragColor.a = 0.7;
 			#endif
 
 			#ifdef WATER_WAVES
