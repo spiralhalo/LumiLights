@@ -133,7 +133,7 @@ void frx_pipelineFragment()
 
 	// Advanced translucency 4.0
 	if (frx_renderTargetTranslucent || frx_renderTargetEntity) {
-		frx_fragColor.rgb *= fastLight(frx_fragLight.xy);
+		frx_fragColor.rgb *= fastLight(frx_fragLight.xy, frx_vertexNormal);
 	}
 
 	fragColor[0] = frx_fragColor;

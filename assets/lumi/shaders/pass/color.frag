@@ -129,7 +129,7 @@ void main()
 	light.w = denoisedShadowFactor(u_gbuffer_shadow, v_texcoord, eyePos, dTrans, light.y, vertexNormal.y);
 
 	if (transIsManaged) {
-		cTrans.rgb = cTrans.rgb / (fastLight(lTrans.xy) * cTrans.a);
+		cTrans.rgb = cTrans.rgb / (fastLight(lTrans.xy, vertexNormal) * cTrans.a);
 		rawMat = texture(u_gbuffer_main_etc, vec3(v_texcoord, ID_TRANS_MATS)).xyz;
 		normal = normalize(texture(u_gbuffer_lightnormal, vec3(v_texcoord, ID_TRANS_MNORM)).xyz);
 		disableDiffuse = bit_unpack(miscTrans.z, 4);

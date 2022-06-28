@@ -17,11 +17,13 @@
  *  lumi:shaders/prog/shading.glsl
  *******************************************************/
 
-float fastLight(vec2 light) {
+float fastLight(vec2 light, vec3 normal) {
 	float reduction = max(1.0 - frx_skyLightTransitionFactor, frx_worldIsMoonlit);
 		  reduction = max(reduction, max(0.5 * frx_rainGradient, frx_thunderGradient));
 
-	float result = max(light.x, light.y * (1.0 - 0.9 * reduction));
+	float sun = 0.6 * max(0.0, dot(normal, frx_skyLightVector)) * (1.0 - 0.9 * reduction);
+	float blockFactor = 1.0 - 0.8 * frx_worldHasSkylight * frx_smoothedEyeBrightness.y;
+	float result = (light.x * blockFactor + light.y * (0.4 + mix(0.6, sun, frx_worldHasSkylight)) * (1.0 - blockFactor));
 
 	// prevents overblown values when recovering the original as well as representing ambient light
 	return 0.2 + 0.8 * result;
@@ -237,11 +239,11 @@ void prepare(vec4 color, sampler2D natureTexture, vec3 eyePos, float vertexNorma
 
 #ifdef SHADOW_MAP_PRESENT
 	causticLight *= max(0.15, light.w); // TODO: can improve even more?
+#endif
 
 	// this is mostly for underwater and acts as wide range "ambient occlusion"
 	// replaces shadow workaround
-	light.w *= l2_softenUp(lightmapRemap(light.y), 5.0);
-#endif
+	light.w *= lightmapRemap(light.y);
 
 	// caustics is unclamped
 	light.w += causticLight;
