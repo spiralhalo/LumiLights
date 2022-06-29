@@ -42,7 +42,7 @@ float simpleShadowFactor(in sampler2DArrayShadow shadowMap, in vec4 shadowViewPo
 	return texture(shadowMap, vec4(shadowCoords.xy, float(cascade), shadowCoords.z));
 }
 
-float calcShadowFactor(in sampler2DArrayShadow shadowMap, vec4 shadowViewPos, float vertexNormalY) {
+float calcShadowFactor(in sampler2DArrayShadow shadowMap, vec4 shadowViewPos, vec3 vertexNormal) {
 	vec3 d3 = shadowDist(3, shadowViewPos);
 	vec3 d2 = shadowDist(2, shadowViewPos);
 	vec3 d1 = shadowDist(1, shadowViewPos);
@@ -60,8 +60,9 @@ float calcShadowFactor(in sampler2DArrayShadow shadowMap, vec4 shadowViewPos, fl
 		biasLow = 0.1;
 	} else if (d1.x < 1.0 && d1.y < 1.0 && d1.z < 1.0) {
 		cascade = 1;
-		biasHigh = 2.0;
-		biasLow = 1.0;
+		// these can't go any higher
+		biasHigh = 1.0;
+		biasLow = 0.5;
 	}
 
 	vec4 shadowCoords = frx_shadowProjectionMatrix(cascade) * shadowViewPos;
@@ -70,7 +71,7 @@ float calcShadowFactor(in sampler2DArrayShadow shadowMap, vec4 shadowViewPos, fl
 
 #ifdef FILTER_SHADOWS
 	// bias
-	shadowCoords.z -= mix(biasHigh, biasLow, max(vertexNormalY * frx_skyLightVector.y, 0.0)) / SHADOW_MAP_SIZE;
+	shadowCoords.z -= mix(biasHigh, biasLow, max(dot(vertexNormal, frx_skyLightVector), 0.0)) / SHADOW_MAP_SIZE;
 	float shadowFactor = sampleShadowPCF(shadowMap, shadowCoords.xyz, float(cascade));
 #else
 	float shadowFactor = texture(shadowMap, vec4(shadowCoords.xy, float(cascade), shadowCoords.z));

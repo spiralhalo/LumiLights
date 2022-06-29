@@ -131,7 +131,7 @@ vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer
 	vec4 tempPos = frx_inverseViewProjectionMatrix * vec4(2.0 * v_texcoord - 1.0, 2.0 * depth - 1.0, 1.0);
 	vec3 eyePos  = tempPos.xyz / tempPos.w;
 	vec3 vertexNormal = normalize(texture(lightNormalBuffer, vec3(v_texcoord, idNormal)).xyz);
-	light.w = denoisedShadowFactor(shadowMap, v_texcoord, eyePos, depth, light.y, vertexNormal.y);
+	light.w = denoisedShadowFactor(shadowMap, v_texcoord, eyePos, depth, light.y, vertexNormal);
 
 	vec3 viewPos = (frx_viewMatrix * vec4(eyePos, 1.0)).xyz;
 	float roughness = rawMat.x;

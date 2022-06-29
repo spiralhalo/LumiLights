@@ -54,7 +54,7 @@ void shadingSetup() {
 
 #ifndef VERTEX_SHADER
 
-float denoisedShadowFactor(sampler2DArrayShadow shadowMap, vec2 texcoord, vec3 eyePos, float depth, float lighty, float vertexNormalY) {
+float denoisedShadowFactor(sampler2DArrayShadow shadowMap, vec2 texcoord, vec3 eyePos, float depth, float lighty, vec3 vertexNormal) {
 	// nasty
 	float transitionClamping = l2_clampScale(0.0, 0.1, frx_skyLightTransitionFactor);
 
@@ -68,7 +68,7 @@ float denoisedShadowFactor(sampler2DArrayShadow shadowMap, vec2 texcoord, vec3 e
 	vec4 shadowViewPos = frx_shadowViewMatrix * vec4(eyePos, 1.0);
 #endif
 
-	float val = calcShadowFactor(shadowMap, shadowViewPos, vertexNormalY);
+	float val = calcShadowFactor(shadowMap, shadowViewPos, vertexNormal);
 
 	// shadow workaround is dead. long live shadow workaround
 // #ifdef SHADOW_WORKAROUND
