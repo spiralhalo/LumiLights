@@ -27,7 +27,7 @@ const float VOLUMETRIC_RESIDUAL	   = 0.1;
 const float HEIGHT_RESIDUAL		   = 0.05;
 const float FOG_ABSOLUTE_LIMIT	   = 0.7;
 const float FOG_FAR				   = FOG_FAR_CHUNKS * 16.0;
-const float FOG_DENSITY			   = clamp(FOG_DENSITY_F, 0.0, 10.0);
+const float FOG_DENSITY			   = clamp(FOG_DENSITY_F, 0.01, 10.0);
 const float UNDERWATER_FOG_FAR	   = UNDERWATER_FOG_FAR_CHUNKS * 16.0;
 
 float invThickener(bool isUnderwater) {
@@ -80,7 +80,7 @@ vec2 fullFogFactor(float distToEye, vec3 toFrag, bool isUnderwater, float invThi
 
 		// for sky, has curve... 1.0 is equivalent to y=1024
 		float rdMult   = min(1.0, frx_viewDistance / 512.0);
-		float cameraAt = mix(0.0, -0.75, l2_clampScale(64.0 + 64.0 * rdMult, 256.0 + 256.0 * rdMult, frx_cameraPos.y));
+		float cameraAt = mix(0.0, -0.75, l2_clampScale(64.0 + 256.0 * rdMult, 256.0 + 512.0 * rdMult, frx_cameraPos.y));
 		isSky   = step(frx_viewDistance * 2.0, distToEye);
 		invSky  = pow(l2_clampScale(0.625 + cameraAt, -0.125 + cameraAt, toFrag.y), 3.0);
 		yFactor = mix(yFactor, invSky, isSky);

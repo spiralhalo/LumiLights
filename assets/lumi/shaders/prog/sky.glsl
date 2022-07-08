@@ -84,7 +84,7 @@ vec4 customSky(sampler2D sunTexture, sampler2D moonTexture, vec3 toSky, vec3 fal
 		float starEraser = celestColor.a;
 
 		result.rgb  = atmosv_SkyRadiance * skyVisible;
-		result.rgb += pow(max(0.0, dot(toSky, frx_skyLightVector)), 100.0) * atmosv_CelestialRadiance * 0.1; // halo?
+		result.rgb += pow(max(0.0, dot(toSky, frx_skyLightVector)), 100.0) * atmosv_CelestialRadiance * 0.1 * celestVisible; // halo?
 		result.rgb += celestColor.rgb * (1. - frx_rainGradient) * celestVisible;
 		#else
 		float mul = 1.0 + frx_worldIsMoonlit * frx_skyLightTransitionFactor;

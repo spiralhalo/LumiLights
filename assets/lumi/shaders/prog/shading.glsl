@@ -196,7 +196,7 @@ float diffuseNdL(float NdotL, float alpha, float disableDiffuse, float dielectri
 {
 	float diffuseNdotL = mix(1.0, NdotL, alpha);
 
-	diffuseNdotL = l2_softenUp(diffuseNdotL);
+	diffuseNdotL = l2_softenUp(diffuseNdotL, 5.0);
 
 	#ifdef SHADOW_MAP_PRESENT
 	diffuseNdotL += (1.0 - diffuseNdotL) * disableDiffuse * 0.5;
@@ -204,9 +204,7 @@ float diffuseNdL(float NdotL, float alpha, float disableDiffuse, float dielectri
 	diffuseNdotL += (1.0 - diffuseNdotL) * disableDiffuse;
 	#endif
 
-	float internalScatter = dielectricity * /*scattering factor = */0.1;
-
-	return diffuseNdotL * (1.0 - internalScatter) + internalScatter;
+	return diffuseNdotL;
 }
 
 void lightPbr(vec3 albedo, float alpha, vec3 radiance, float roughness, vec3 f0, vec3 toLight, vec3 toEye, vec3 normal, float disableDiffuse)

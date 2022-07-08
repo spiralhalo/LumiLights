@@ -28,5 +28,5 @@
 
 const float REFLECTION_MAXIMUM_ROUGHNESS = REFLECTION_MAXIMUM_ROUGHNESS_RELATIVE / 10.0;
 
-const float SSAO_VIEW_RADIUS = float(clamp(SSAO_RADIUS_INT, 1, 20)) / 10.;
-const float SSAO_INTENSITY	 = float(clamp(SSAO_INTENSITY_INT, 4, 20)) / 4.;
+const float SSAO_VIEW_RADIUS = clamp(SSAO_RADIUS_F, 0.1, 2.0);
+const float SSAO_INTENSITY	 = clamp(SSAO_INTENSITY_F, 1.0, 5.0);

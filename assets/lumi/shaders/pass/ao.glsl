@@ -85,7 +85,7 @@ void main()
 
 	vec2 aspectNormalizer = v_invSize * min(frxu_size.x, frxu_size.y);
 
-	const float ATT_RADIUS_SQ = SSAO_VIEW_RADIUS * SSAO_VIEW_RADIUS * 4.0;
+	const float ATT_RADIUS_SQ = SSAO_VIEW_RADIUS * SSAO_VIEW_RADIUS;
 	float occlusion = 0.0;
 	for (int i = 0; i < DIRECTIONS; ++i) {
 		deltaUV = v_deltaRotator * deltaUV;

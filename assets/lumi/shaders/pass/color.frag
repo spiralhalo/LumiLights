@@ -73,6 +73,10 @@ void main()
 	vec3 normal	= normalize(texture(u_gbuffer_lightnormal, vec3(uvSolid, ID_SOLID_MNORM)).xyz);
 	vec3 vertexNormal = normalize(texture(u_gbuffer_lightnormal, vec3(uvSolid, ID_SOLID_NORM)).xyz);
 
+	bool solidIsManaged = light.x > 0.0;
+	vec3 solidPos = eyePos;
+	float solidNormaly = vertexNormal.y;
+
 	light.w = denoisedShadowFactor(u_gbuffer_shadow, uvSolid, eyePos, dSolid, light.y, vertexNormal);
 
 	vec3 miscSolid = texture(u_gbuffer_main_etc, vec3(uvSolid, ID_SOLID_MISC)).xyz;
@@ -135,8 +139,8 @@ void main()
 		disableDiffuse = bit_unpack(miscTrans.z, 4);
 
 		#ifdef WATER_FOAM
-		if (transIsWater) {
-			foamPreprocess(cTrans, u_tex_nature, eyePos + frx_cameraPos, vertexNormal.y, dVanilla, dTrans);
+		if (transIsWater && solidIsManaged) {
+			foamPreprocess(cTrans, u_tex_nature, eyePos + frx_cameraPos, vertexNormal.y, solidNormaly, eyePos, solidPos);
 		}
 		#endif
 

@@ -70,7 +70,7 @@ float caustics(sampler2D natureTexture, vec3 worldPos, float vertexNormaly)
 	return e;
 }
 
-void foamPreprocess(inout vec4 albedo, sampler2D natureTexture, vec3 worldPos, float vertexNormaly, float dSolid, float dTrans)
+void foamPreprocess(inout vec4 albedo, sampler2D natureTexture, vec3 worldPos, float waterNormaly, float solidNormaly, vec3 waterPos, vec3 solidPos)
 {
 	vec2 moveA = vec2(1., 1.) * frx_renderSeconds;
 	vec2 moveB = vec2(1., -1.) * frx_renderSeconds;
@@ -86,12 +86,12 @@ void foamPreprocess(inout vec4 albedo, sampler2D natureTexture, vec3 worldPos, f
 	vec4 foamAlbedo = vec4(1.0);
 
 	// float viewCorrection = pow(viewVertexNormal.y, 5.0); // kinda breaks things near the camera
-	float dZ = (ldepth(dSolid) - ldepth(dTrans)) * frx_viewDistance;
-	float foam = l2_clampScale(0.8, 0.0, dZ);
+	float dZ = distance(waterPos, solidPos);
+	float foam = l2_clampScale(0.6, 0.0, dZ);
 
-	foam = mix(tex, 1.0, pow(foam, 10.0)) * foam;
+	foam = mix(tex, 1.0, pow(foam, 5.0)) * foam;
 	foam *= 0.6;
-	foam *= abs(vertexNormaly);
+	foam *= (1.0 - abs(solidNormaly)) * abs(waterNormaly);
 
 	albedo = mix(albedo, vec4(1.0), foam);
 }
