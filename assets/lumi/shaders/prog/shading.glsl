@@ -283,7 +283,7 @@ void lights(vec3 albedo, vec4 light, vec3 eyePos, vec3 toEye, out vec3 baseLight
 	// exaggerate block light
 	#define BL_MULT 3.0
 	bl = clamp(pow(bl, 0.5 + BL_MULT / 2.0) * BL_MULT, 0.0, BL_MULT);
-	bl += pow(l2_clampScale(0.7, 0.96875, light.x) * 3.0, 2.0);
+	bl += pow(l2_clampScale(0.7, 0.96875, light.x), 2.0) * 3.0;
 
 	// makes builds look better outside
 	float eyeAdaptation = atmos_eyeAdaptation();
@@ -347,9 +347,10 @@ vec4 shading(vec4 color, sampler2D natureTexture, vec4 light, float ao, vec2 mat
 	vec3 blH = normalize(toEye + normal);
 	vec3 blF = pbr_fresnelSchlick(pbr_dot(toEye, blH), f0);
 	// vanilla-ish style diffuse
-	float dotUpNorth = l2_max3(abs(normal * vec3(0.6, 1.0, 0.8)));
+	const vec3 upSouth = vec3(0.154303, 0.771517, 0.617213);
+	float dotPerfect = 0.25 + 0.75 * (dot(normal, upSouth) * 0.5 + 0.5);
 	// perfect diffuse light
-	vec3 shaded = albedo * (baseLight + blockLight * (1.0 - blF)) * dotUpNorth * (1.0 - material.y * 0.5) / PI;
+	vec3 shaded = albedo * (baseLight + blockLight * (1.0 - blF)) * dotPerfect * (1.0 - material.y * 0.5) / PI;
 	// block light specular
 	vec3 specular = pbr_specularBRDF(max(material.x, 0.5 * material.y), blockLight, blH, normal, toEye, normal, blF, 1.0);
 	shaded += specular;

@@ -21,14 +21,14 @@
 				},
 				blocklight_boost: {
 					default: 1.0,
-					min: 0.5,
+					min: 0.25,
 					max: 2.0,
 					nameKey: "config.lumi_lights.value.indoors_brightness",
 					descriptionKey: "config.lumi_lights.help.indoors_brightness"
 				},
 				sunlight_boost: {
 					default: 1.0,
-					min: 0.5,
+					min: 0.25,
 					max: 2.0,
 					nameKey: "config.lumi_lights.value.outdoors_brightness",
 					descriptionKey: "config.lumi_lights.help.outdoors_brightness"
@@ -42,7 +42,7 @@
 				},
 				noon_ambient_boost: {
 					default: 1.0,
-					min: 0.5,
+					min: 0.25,
 					max: 2.0,
 					nameKey: "config.lumi_lights.value.sky_ambient_brightness",
 					descriptionKey: "config.lumi_lights.help.sky_ambient_brightness"

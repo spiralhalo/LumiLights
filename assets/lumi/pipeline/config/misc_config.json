@@ -138,6 +138,13 @@
 					nameKey: "config.lumi_lights.value.post_tmo_saturation",
 					descriptionKey: "config.lumi_lights.help.post_tmo_saturation"
 				},
+				color_gamma: {
+					default: 2.0,
+					min: 0.5,
+					max: 5.0,
+					nameKey: "config.lumi_lights.value.color_gamma",
+					descriptionKey: "config.lumi_lights.help.color_gamma"
+				},
 				albedo_brightening: {
 					default: 0,
 					min: 0,

@@ -62,7 +62,7 @@ float twilightCalc(vec3 world_toSky) {
 
 vec3 atmos_OWFogRadiance(vec3 world_toSky)
 {
-	vec3 baseFogColor = mix(atmosv_FogRadiance, atmosv_SkyRadiance, atmosv_OWTwilightFactor);
+	vec3 baseFogColor = mix(atmosv_FogRadiance, atmosv_SkyRadiance * 0.25, atmosv_OWTwilightFactor);
 	return mix(baseFogColor, atmosv_OWTwilightRadiance, twilightCalc(world_toSky) * atmosv_OWTwilightFactor);
 }
 
@@ -76,8 +76,8 @@ float atmos_eyeAdaptation() {
 #ifdef VERTEX_SHADER
 
 #define DEF_MOONLIGHT_COLOR	hdr_fromGamma(vec3(0.6 , 0.6 , 1.0 ))
-#define DEF_SUNLIGHT_COLOR	hdr_fromGamma(vec3(1.0 , 0.9 , 0.7 ))
-#define DEF_NOON_AMBIENT	hdr_fromGamma(vec3(0.6 , 0.85, 1.0 ))
+#define DEF_SUNLIGHT_COLOR	hdr_fromGamma(vec3(1.0 , 0.9 , 0.8 ))
+#define DEF_NOON_AMBIENT	vec3(1.0)
 
 const vec3 MOONLIGHT_COLOR	   = DEF_MOONLIGHT_COLOR / lightLuminanceUnclamped(DEF_MOONLIGHT_COLOR);
 const vec3 NOON_SUNLIGHT_COLOR = DEF_SUNLIGHT_COLOR / lightLuminanceUnclamped(DEF_SUNLIGHT_COLOR);

@@ -80,7 +80,7 @@ vec2 fullFogFactor(float distToEye, vec3 toFrag, bool isUnderwater, float invThi
 
 		// for sky, has curve... 1.0 is equivalent to y=1024
 		float rdMult   = min(1.0, frx_viewDistance / 512.0);
-		float cameraAt = mix(0.0, -0.75, l2_clampScale(64.0 + 256.0 * rdMult, 256.0 + 512.0 * rdMult, frx_cameraPos.y));
+		float cameraAt = mix(0.0, -0.75, l2_clampScale(64.0 + 256.0 * rdMult, 256.0 + 256.0 * rdMult, frx_cameraPos.y));
 		isSky   = step(frx_viewDistance * 2.0, distToEye);
 		invSky  = pow(l2_clampScale(0.625 + cameraAt, -0.125 + cameraAt, toFrag.y), 3.0);
 		yFactor = mix(yFactor, invSky, isSky);

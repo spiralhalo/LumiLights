@@ -62,7 +62,7 @@
 					descriptionKey: "config.lumi_lights.help.ssao_radius"
 				},
 				ssao_intensity_f: {
-					default: 1.0, min: 1.0, max: 2.0,
+					default: 2.0, min: 1.0, max: 5.0,
 					nameKey: "config.lumi_lights.value.ssao_intensity",
 					descriptionKey: "config.lumi_lights.help.ssao_intensity"
 				},
