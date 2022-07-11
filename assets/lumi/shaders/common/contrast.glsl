@@ -35,7 +35,7 @@ const float USER_ALBEDO_BRIGHTENING        = clamp(ALBEDO_BRIGHTENING, 0, 20) / 
 	#define LIGHT_RAYS_STR			1.0 // this was never meant to go above 1.0 due to sdr blending
 
 	// ATMOS STRENGTHS
-	#define DEF_SUNLIGHT_STR		5.0 * USER_SUNLIGHT_MULTIPLIER
+	#define DEF_SUNLIGHT_STR		3.5 * USER_SUNLIGHT_MULTIPLIER // this brightness decision is influenced by perfect diffuse light
 	#define DEF_SKY_STR				1.0
 	#define DEF_NOON_AMBIENT_STR	2.0 * USER_NOON_AMBIENT_MULTIPLIER
 	#define DEF_NIGHT_AMBIENT_STR	0.2 * USER_NIGHT_AMBIENT_MULTIPLIER
@@ -98,6 +98,3 @@ const float USER_ALBEDO_BRIGHTENING        = clamp(ALBEDO_BRIGHTENING, 0, 20) / 
 	const float BLOCK_LIGHT_STR		= DEF_BLOCK_LIGHT_STR;
 	const float EMISSIVE_LIGHT_STR	= DEF_EMISSIVE_LIGHT_STR;
 	const float LIGHTNING_FLASH_STR = DEF_LIGHTNING_FLASH_STR;
-	// spaghetti
-	const float STAR_LUMIGATE_HIGH	= max(lightLuminance(DEF_DAY_SKY_COLOR) * 0.4, lightLuminance(DEF_NIGHT_SKY_COLOR) * 1.1) * DEF_SKY_STR;
-	const float STAR_LUMIGATE_LOW	= lightLuminance(DEF_NIGHT_SKY_COLOR) * DEF_SKY_STR;

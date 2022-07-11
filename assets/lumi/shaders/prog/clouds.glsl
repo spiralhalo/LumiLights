@@ -140,7 +140,7 @@ vec2 rayMarchCloud(sampler2D natureTexture, sampler2D noiseTexture, vec2 texcoor
 
 	totalDensity = l2_softenUp(clamp(totalDensity / i, 0.0, 1.0), 4.0);
 	// I guess this works because we limit the distance when we are on cloud level with world-clouds
-	totalDensity *= l2_softenUp(1.0 - fade, 4.0);
+	totalDensity *= 1.0 - pow(fade, 10.0);
 
 	return vec2(lightEnergy, totalDensity);
 }
@@ -228,7 +228,8 @@ vec4 customClouds(sampler2D cloudsDepthBuffer, sampler2D natureTexture, sampler2
 
 	float night = frx_worldIsMoonlit * frx_skyLightTransitionFactor; // night cloud brightening hack
 	float rainCloudBrightness = 1.0 - hdr_fromGammaf(frx_smoothedRainGradient) * 0.2 - hdr_fromGammaf(frx_smoothedThunderGradient) * 0.1; // emulate dark clouds
-	vec3  celestRadiance = atmosv_CelestialRadiance * result.x * (0.06 + 0.06 * night); // magic multiplier
+	float celestLuminance = lightLuminanceUnclamped(atmosv_CelestialRadiance);
+	vec3  celestRadiance = safeDiv(atmosv_CelestialRadiance, celestLuminance) * min(1.0, celestLuminance) * result.x * mix(0.36, 0.12, night); // magic multiplier
 
 	#ifdef VOLUMETRIC_CLOUDS
 	if (frx_worldIsMoonlit == 1) {

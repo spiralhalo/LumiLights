@@ -113,7 +113,8 @@ vec4 fog(vec4 color, float distToEye, vec3 toFrag, bool isUnderwater, float volu
 	float fogFactor = fullFactor.x;
 
 	bool submerged = isUnderwater && frx_cameraInFluid == 1;
-	vec3 fogColor = submerged ? atmosv_ClearRadiance : atmos_OWFogRadiance(toFrag);
+	vec3 OWFog = atmos_OWFogRadiance(toFrag);
+	vec3 fogColor = submerged ? atmosv_ClearRadiance : OWFog;//mix(OWFog, vec3(lightLuminanceUnclamped(OWFog)), fullFactor.z * atmosv_OWTwilightFactor);
 
 	// resolve sky blend color
 	fogColor = mix(fogColor, atmosv_SkyRadiance, fullFactor.y);

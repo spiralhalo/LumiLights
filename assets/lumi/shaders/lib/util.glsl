@@ -1,15 +1,20 @@
 #include frex:shaders/api/view.glsl
-#include lumi:shaders/common/userconfig.glsl
 
 /*******************************************************
  *  lumi:shaders/lib/util.glsl
  *******************************************************/
 
+#ifdef COLOR_GAMMA
 #define hdr_gamma COLOR_GAMMA
+#else
+#define hdr_gamma 2.0
+#endif
 #define hdr_fromGamma(x) pow(x, vec3(hdr_gamma))
 #define hdr_fromGamma4(x) vec4(pow(x.rgb, vec3(hdr_gamma)), x.a)
 #define hdr_toSRGB(x) pow(x, vec3(1.0 / hdr_gamma))
 #define hdr_fromGammaf(x) pow(x, hdr_gamma)
+
+#define safeDiv(x, y) x / (y == 0.0 ? 1.0 : y)
 
 float l2_min3(vec3 vec) {
 	return min(vec.x, min(vec.y, vec.z));

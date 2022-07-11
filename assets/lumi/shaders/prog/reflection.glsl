@@ -76,7 +76,7 @@ vec3 reflectionMarch_v2(sampler2D depthBuffer, sampler2DArray lightNormalBuffer,
 	float thickness = mix(0.0016, 0.0064, abs(viewMarch.z));
 
 	float marchSign = sign(uvMarch.z);
-	float lastZ = texture(depthBuffer, v_texcoord).r - 0.0016 * marchSign;
+	float lastZ = texture(depthBuffer, v_texcoord).r;// - 0.0016 * marchSign;
 
 	float sampledZ;
 	float hit = 0.0;

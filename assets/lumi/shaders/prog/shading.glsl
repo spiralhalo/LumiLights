@@ -347,8 +347,8 @@ vec4 shading(vec4 color, sampler2D natureTexture, vec4 light, float ao, vec2 mat
 	vec3 blH = normalize(toEye + normal);
 	vec3 blF = pbr_fresnelSchlick(pbr_dot(toEye, blH), f0);
 	// vanilla-ish style diffuse
-	const vec3 upSouth = vec3(0.154303, 0.771517, 0.617213);
-	float dotPerfect = 0.25 + 0.75 * (dot(normal, upSouth) * 0.5 + 0.5);
+	const vec3 northWest = vec3(0.242535, 0, -0.970143);
+	float dotPerfect = 0.5 + 0.5 * abs(dot(normal, northWest));
 	// perfect diffuse light
 	vec3 shaded = albedo * (baseLight + blockLight * (1.0 - blF)) * dotPerfect * (1.0 - material.y * 0.5) / PI;
 	// block light specular

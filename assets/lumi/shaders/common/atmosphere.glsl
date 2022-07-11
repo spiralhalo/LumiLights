@@ -81,7 +81,7 @@ float atmos_eyeAdaptation() {
 
 const vec3 MOONLIGHT_COLOR	   = DEF_MOONLIGHT_COLOR / lightLuminanceUnclamped(DEF_MOONLIGHT_COLOR);
 const vec3 NOON_SUNLIGHT_COLOR = DEF_SUNLIGHT_COLOR / lightLuminanceUnclamped(DEF_SUNLIGHT_COLOR);
-const vec3 SUNRISE_LIGHT_COLOR = hdr_fromGamma(vec3(1.0, 0.8, 0.4));
+const vec3 SUNRISE_LIGHT_COLOR = hdr_fromGamma(vec3(1.0, 0.7, 0.2));
 
 const vec3 DAY_SKY_COLOR   = DEF_DAY_SKY_COLOR;
 const vec3 NIGHT_SKY_COLOR = DEF_NIGHT_SKY_COLOR;
@@ -168,7 +168,7 @@ void atmos_generateAtmosphereModel()
 	// vanilla clear color is unreliable, we want to control its brightness
 	atmosv_ClearRadiance = hdr_fromGamma(frx_vanillaClearColor);
 	float clearLuminance = lightLuminance(atmosv_ClearRadiance);
-	atmosv_ClearRadiance = atmosv_ClearRadiance / (clearLuminance == 0.0 ? 1.0 : clearLuminance);
+	atmosv_ClearRadiance = safeDiv(atmosv_ClearRadiance, clearLuminance);
 
 	bool customOWFog	 = frx_worldIsOverworld == 1 && max(frx_cameraInSnow, frx_cameraInLava) < 1;
 	bool customEndFog	 = frx_worldIsEnd == 1 && max(frx_cameraInSnow, frx_cameraInLava) < 1;
@@ -176,7 +176,7 @@ void atmos_generateAtmosphereModel()
 
 	if (customOWFog) {
 		float skyLuminance = lightLuminanceUnclamped(atmosv_SkyRadiance);
-		atmosv_FogRadiance = (atmosv_SkyRadiance / skyLuminance) * max(skyLuminance, lightLuminance(atmosv_CelestialRadiance * 0.4));
+		atmosv_FogRadiance = (atmosv_SkyRadiance / skyLuminance) * max(skyLuminance, lightLuminance(atmosv_CelestialRadiance * 0.4) * 1.5);
 	} else if (customEndFog) {
 		atmosv_FogRadiance = mix(atmosv_ClearRadiance, hdr_fromGamma(vec3(1.0, 0.7, 1.0)), float(frx_cameraInFluid)) * 0.1;
 	} else if (customNetherFog) {
@@ -224,7 +224,7 @@ void atmos_generateAtmosphereModel()
 	atmosv_SkyAmbientRadiance = mix(atmosv_SkyAmbientRadiance, graySkyAmbient, toGray) * rainBrightness;
 
 	#ifdef POST_SHADER
-	atmosv_SkyRadiance   = mix(atmosv_SkyRadiance, graySky, toGray) * rainBrightness;
+	atmosv_SkyRadiance   = mix(atmosv_SkyRadiance, graySky, max(toGray, atmosv_OWTwilightFactor * 0.5)) * rainBrightness;
 
 	if (customOWFog) {
 		atmosv_FogRadiance		  = mix(atmosv_FogRadiance, grayFog, toGray) * rainBrightness;

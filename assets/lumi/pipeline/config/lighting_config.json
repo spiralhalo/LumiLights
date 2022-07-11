@@ -29,7 +29,7 @@
 				sunlight_boost: {
 					default: 1.0,
 					min: 0.25,
-					max: 2.0,
+					max: 4.0,
 					nameKey: "config.lumi_lights.value.outdoors_brightness",
 					descriptionKey: "config.lumi_lights.help.outdoors_brightness"
 				},

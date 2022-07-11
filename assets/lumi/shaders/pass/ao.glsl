@@ -16,8 +16,6 @@ const float ANGLE_BIAS	= 0.3;
 
 #endif
 
-const float CENTER_BIAS_POW = clamp(SSAO_VIEW_RADIUS, 1.0, 2.0);
-
 #ifdef VERTEX_SHADER
 
 out mat2 v_deltaRotator;
@@ -85,7 +83,8 @@ void main()
 
 	vec2 aspectNormalizer = v_invSize * min(frxu_size.x, frxu_size.y);
 
-	const float ATT_RADIUS_SQ = SSAO_VIEW_RADIUS * SSAO_VIEW_RADIUS;
+	const float ATT_RADIUS_SQ = 1.0; // attenuation radius is always 1 block
+
 	float occlusion = 0.0;
 	for (int i = 0; i < DIRECTIONS; ++i) {
 		deltaUV = v_deltaRotator * deltaUV;
@@ -93,9 +92,8 @@ void main()
 		vec2 deltaUVnormalized = deltaUV * aspectNormalizer;
 
 		for (int j = 1; j < RADIAL_STEPS; ++j) {
-			// bias towards center
-			float samplingBias = pow(float(j) / RADIAL_STEPS, CENTER_BIAS_POW) / (float(j) / RADIAL_STEPS);
-			vec2 sampleUV	   = v_texcoord + deltaUVnormalized * (float(j) + fragNoise.z) * samplingBias;
+			// float samplingBias = (RADIAL_STEPS - j) * 0.25;
+			vec2 sampleUV	   = v_texcoord + deltaUVnormalized * (float(j) + fragNoise.z);
 			vec3 sampleViewPos = getViewPos(sampleUV, u_vanilla_depth);
 			vec3 horizonVec	   = sampleViewPos - viewPos;
 			float phi = (PI / 2.0) - acos(dot(viewNormal, normalize(horizonVec)));

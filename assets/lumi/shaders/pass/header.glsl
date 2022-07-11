@@ -27,8 +27,8 @@
 #endif
 
 #include frex:shaders/lib/math.glsl
-#include lumi:shaders/lib/util.glsl
 #include lumi:shaders/common/userconfig.glsl
+#include lumi:shaders/lib/util.glsl
 
 /*******************************************************
  *  lumi:shaders/pass/header.glsl
