@@ -30,6 +30,7 @@ const float FOG_FAR				   = FOG_FAR_CHUNKS * 16.0;
 const float FOG_DENSITY			   = clamp(FOG_DENSITY_F, 0.01, 10.0);
 const float UNDERWATER_FOG_FAR	   = UNDERWATER_FOG_FAR_CHUNKS * 16.0;
 
+// a.k.a ground visibility
 float invThickener(bool isUnderwater) {
 	if (isUnderwater || frx_worldHasSkylight != 1) {
 		return 1.0;
@@ -72,7 +73,7 @@ vec2 fullFogFactor(float distToEye, vec3 toFrag, bool isUnderwater, float invThi
 	float isSky  = 0.0;
 	float invSky = 0.0;
 
-	if (!isUnderwater && max(frx_cameraInSnow, frx_cameraInLava) < 1) {
+	if (!isUnderwater && (frx_cameraInSnow + frx_cameraInLava) < 1) {
 		float eyeY = toFrag.y * distToEye;
 		// for terrain
 		float yFactor = l2_clampScale(-128.0, 164.0, eyeY);
@@ -97,9 +98,10 @@ vec2 fullFogFactor(float distToEye, vec3 toFrag, bool isUnderwater, float invThi
 	float blendEnd	 = max(1.0, frx_viewDistance - 8.0);
 	float edgeBlend	 = frx_cameraInFluid == 1 ? 0.0 : l2_clampScale(blendStart, blendEnd, distToEye);
 	edgeBlend *= 1.0 - isSky;
+	edgeBlend *= frx_worldIsOverworld; //it wont behave without custom sky idk
 	fogFactor += (1.0 - fogFactor) * edgeBlend;
 
-	return vec2(fogFactor, (1.0 - invSky * fogLimit) * edgeBlend);
+	return vec2(fogFactor, mix((1.0 - invSky * fogLimit) * edgeBlend, pow(distFactor, 10.0), frx_worldIsNether));
 }
 
 float fogFactor(float distToEye, vec3 toFrag, bool isUnderwater) {
@@ -121,7 +123,7 @@ vec4 fog(vec4 color, float distToEye, vec3 toFrag, bool isUnderwater, float volu
 
 	// resolve cave fog
 	float cave = 0.0;
-	if (!isUnderwater || frx_cameraInFluid == 0) {
+	if (frx_cameraInFluid == 0 && frx_worldHasSkylight == 1) {
 		float invEyeY = 1.0 - frx_smoothedEyeBrightness.y;
 		cave = invEyeY * invEyeY;
 		fogColor = mix(fogColor, atmosv_CaveFogRadiance, cave);

@@ -62,7 +62,7 @@ float twilightCalc(vec3 world_toSky) {
 
 vec3 atmos_OWFogRadiance(vec3 world_toSky)
 {
-	vec3 baseFogColor = mix(atmosv_FogRadiance, atmosv_SkyRadiance * 0.25, atmosv_OWTwilightFactor);
+	vec3 baseFogColor = mix(atmosv_FogRadiance, vec3(lightLuminance(atmosv_SkyRadiance)), atmosv_OWTwilightFactor);
 	return mix(baseFogColor, atmosv_OWTwilightRadiance, twilightCalc(world_toSky) * atmosv_OWTwilightFactor);
 }
 
@@ -176,11 +176,11 @@ void atmos_generateAtmosphereModel()
 
 	if (customOWFog) {
 		float skyLuminance = lightLuminanceUnclamped(atmosv_SkyRadiance);
-		atmosv_FogRadiance = (atmosv_SkyRadiance / skyLuminance) * max(skyLuminance, lightLuminance(atmosv_CelestialRadiance * 0.4) * 1.5);
+		atmosv_FogRadiance = (atmosv_SkyRadiance / skyLuminance) * max(skyLuminance, lightLuminance(atmosv_CelestialRadiance * 0.4) * (2.0 - nightFactor - nightFactor * frx_rainGradient * 0.5));
 	} else if (customEndFog) {
 		atmosv_FogRadiance = mix(atmosv_ClearRadiance, hdr_fromGamma(vec3(1.0, 0.7, 1.0)), float(frx_cameraInFluid)) * 0.1;
 	} else if (customNetherFog) {
-		atmosv_FogRadiance = atmosv_ClearRadiance * 0.3; // controllable overall brightness
+		atmosv_FogRadiance = atmosv_ClearRadiance * 0.1; // controllable overall brightness
 	} else {
 		atmosv_FogRadiance = hdr_fromGamma(frx_vanillaClearColor);
 	}
@@ -194,13 +194,13 @@ void atmos_generateAtmosphereModel()
 	atmosv_ClearRadiance = mix(atmosv_FogRadiance, waterFog, float(frx_cameraInWater));
 
 
-	atmosv_OWTwilightRadiance = TWILIGHT_COLOR;
+	atmosv_OWTwilightRadiance = TWILIGHT_COLOR * 2.0;
 	atmosv_OWTwilightRadiance.gb *= vec2(max(frx_skyLightTransitionFactor, 0.3), frx_skyLightTransitionFactor * frx_skyLightTransitionFactor);
 
 	// prevent custom overworld sky reflection in non-overworld dimension or when the sky mode is not Lumi
 	bool customOWSkyAndFallback = frx_worldIsOverworld == 1;
 
-	if (!customOWSkyAndFallback) {
+	if (frx_worldIsNether == 1) {
 		atmosv_SkyRadiance = atmosv_FogRadiance;
 	}
 
@@ -209,7 +209,7 @@ void atmos_generateAtmosphereModel()
 
 
 	/** RAIN **/
-	float rainBrightness = 1.0 - 0.5 * frx_thunderGradient;
+	float rainBrightness = 1.0 - 0.5 * frx_thunderGradient * (1.0 - frx_worldIsMoonlit);
 
 	vec3 grayCelestial  = vec3(lightLuminance(atmosv_CelestialRadiance));
 	vec3 graySkyAmbient = vec3(lightLuminance(atmosv_SkyAmbientRadiance));
@@ -224,7 +224,7 @@ void atmos_generateAtmosphereModel()
 	atmosv_SkyAmbientRadiance = mix(atmosv_SkyAmbientRadiance, graySkyAmbient, toGray) * rainBrightness;
 
 	#ifdef POST_SHADER
-	atmosv_SkyRadiance   = mix(atmosv_SkyRadiance, graySky, max(toGray, atmosv_OWTwilightFactor * 0.5)) * rainBrightness;
+	atmosv_SkyRadiance = mix(atmosv_SkyRadiance, graySky, toGray) * rainBrightness;
 
 	if (customOWFog) {
 		atmosv_FogRadiance		  = mix(atmosv_FogRadiance, grayFog, toGray) * rainBrightness;

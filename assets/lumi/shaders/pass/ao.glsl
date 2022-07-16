@@ -67,9 +67,7 @@ void main()
 	vec4 temp = frx_projectionMatrix * vec4(rightPos, 1.0);
 	temp.x /= temp.w;
 
-	/* screen radius is clamped up to reduce artifact. it's allowed since it
-	   doesn't affect attenuation radius. 20 is arbitraty minimum radius */
-	float screenRadius = max((temp.x * 0.5 + 0.5) - v_texcoord.x, max(float(RADIAL_STEPS), 20.0) * v_invSize.x);
+	float screenRadius = (temp.x * 0.5 + 0.5) - v_texcoord.x;
 
 	// exclude last step here too
 	vec2 deltaUV = vec2(float(RADIAL_STEPS - 1) / float(RADIAL_STEPS), 0.0) * (screenRadius / float(RADIAL_STEPS));
@@ -111,8 +109,11 @@ void main()
 	float fade = l2_clampScale(256.0, 64.0, length(viewPos)); // distant result are rather inaccurate, and I'm lazy
 	occlusion  = 1.0 - occlusion / float(DIRECTIONS) * fade;
 
+	// higher intensity at a distance
+	float intensity = SSAO_INTENSITY * (1.0 + 2.0 * l2_clampScale(16.0, 128.0, -viewPos.z));
+
 	// apply intensity before blurring
-	ao_result = pow(clamp(occlusion, 0.0, 1.0), SSAO_INTENSITY);
+	ao_result = pow(clamp(occlusion, 0.0, 1.0), intensity);
 }
 
 #endif

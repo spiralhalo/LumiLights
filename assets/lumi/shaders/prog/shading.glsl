@@ -259,9 +259,8 @@ void lights(vec3 albedo, vec4 light, vec3 eyePos, vec3 toEye, out vec3 baseLight
 	baseLight = vec3(BASE_AMBIENT_STR);
 	baseLight += hdr_fromGamma(NIGHT_VISION_COLOR) * NIGHT_VISION_STR * frx_effectNightVision;
 
-	vec3 skylessColor = mix(SKYLESS_LIGHT_COLOR * USER_END_AMBIENT_MULTIPLIER, NETHER_LIGHT_COLOR * USER_NETHER_AMBIENT_MULTIPLIER, frx_worldIsNether);
+	vec3 skylessColor = SKYLESS_LIGHT_COLOR * mix(USER_END_AMBIENT_MULTIPLIER, USER_NETHER_AMBIENT_MULTIPLIER, frx_worldIsNether);
 
-	baseLight += (1.0 - frx_worldHasSkylight) * (atmosv_FogRadiance * 0.5 + 0.5) * SKYLESS_AMBIENT_STR;
 	baseLight += (1.0 - frx_worldHasSkylight) * skylessColor * SKYLESS_AMBIENT_STR;
 
 	// user brightness afects every base ambient except for sky ambient (emissive isn't ambient)
@@ -347,8 +346,8 @@ vec4 shading(vec4 color, sampler2D natureTexture, vec4 light, float ao, vec2 mat
 	vec3 blH = normalize(toEye + normal);
 	vec3 blF = pbr_fresnelSchlick(pbr_dot(toEye, blH), f0);
 	// vanilla-ish style diffuse
-	const vec3 northWest = vec3(0.242535, 0, -0.970143);
-	float dotPerfect = 0.5 + 0.5 * abs(dot(normal, northWest));
+	const vec3 upNorth = vec3(0, 0.5547, -0.83205);
+	float dotPerfect = 0.5 + 0.5 * abs(dot(normal, upNorth));
 	// perfect diffuse light
 	vec3 shaded = albedo * (baseLight + blockLight * (1.0 - blF)) * dotPerfect * (1.0 - material.y * 0.5) / PI;
 	// block light specular
