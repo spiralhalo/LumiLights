@@ -18,5 +18,5 @@ void main()
 	celestSetup();
 	skySetup();
 	shadingSetup();
-	blindnessSetup();
+	fogVarsSetup();
 }

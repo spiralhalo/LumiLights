@@ -13,6 +13,7 @@
 l2_vary mat4 v_star_rotator;
 l2_vary float v_not_in_void;
 l2_vary float v_near_void_core;
+l2_vary float v_cameraAt;
 
 #ifdef VERTEX_SHADER
 
@@ -21,6 +22,9 @@ void skySetup()
 	v_star_rotator = l2_rotationMatrix(vec3(1.0, 0.0, 1.0), frx_worldTime * PI);
 	v_not_in_void	 = l2_clampScale(-65.0, -64.0, frx_cameraPos.y);
 	v_near_void_core = l2_clampScale(-64.0, -128.0, frx_cameraPos.y);
+
+	float rdMult = min(1.0, frx_viewDistance / 512.0);
+	v_cameraAt = mix(0.0, -0.75, l2_clampScale(64.0 + 256.0 * rdMult, 256.0 + 256.0 * rdMult, frx_cameraPos.y));
 }
 
 #else
@@ -121,6 +125,9 @@ vec4 customSky(sampler2D sunTexture, sampler2D moonTexture, vec3 toSky, vec3 fal
 		vec3 starRadiance = vec3(star) * EMISSIVE_LIGHT_STR * 0.1 * LUMI_STAR_BRIGHTNESS + NEBULAE_COLOR * milkyHaze;
 
 		result.rgb += starRadiance * skyVisible;
+
+		float skyGradient = pow(l2_clampScale(0.625 + v_cameraAt, -0.125 + v_cameraAt, toSky.y), 3.0);
+		result.rgb = mix(result.rgb, atmos_OWFogRadiance(toSky), skyGradient);
 		#endif
 	} else {
 		result.rgb = hdr_fromGamma(fallback) * (1.0 + float(frx_worldIsEnd) * 1.0);

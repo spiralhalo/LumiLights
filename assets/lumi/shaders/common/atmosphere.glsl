@@ -23,7 +23,7 @@
 	out vec3 atmosv_SkyAmbientRadiance;
 
 	#ifdef POST_SHADER
-	out vec3 atmosv_CaveFogRadiance;
+	out float atmosv_CaveFog;
 	out vec3 atmosv_FogRadiance;
 	out vec3 atmosv_ClearRadiance;
 	out vec3 atmosv_SkyRadiance;
@@ -39,7 +39,7 @@
 	in vec3 atmosv_SkyAmbientRadiance;
 
 	#ifdef POST_SHADER
-	in vec3 atmosv_CaveFogRadiance;
+	in float atmosv_CaveFog;
 	in vec3 atmosv_FogRadiance;
 	in vec3 atmosv_ClearRadiance;
 	in vec3 atmosv_SkyRadiance;
@@ -235,16 +235,20 @@ void atmos_generateAtmosphereModel()
 
 
 	/** CAVE FOG **/
-	if (frx_worldIsOverworld == 1) {
-		atmosv_CaveFogRadiance = mix(CAVEFOG_C, CAVEFOG_DEEPC, l2_clampScale(CAVEFOG_MAXY, CAVEFOG_MINY, frx_cameraPos.y));
+	atmosv_CaveFog = 0.0;
+
+	if (frx_worldIsOverworld == 1 && frx_cameraInFluid == 0) {
+		vec3 caveFogRadiance = mix(CAVEFOG_C, CAVEFOG_DEEPC, l2_clampScale(CAVEFOG_MAXY, CAVEFOG_MINY, frx_cameraPos.y));
 
 		// night fog luminance (always max moon phase)
 		float nightFogLuminance = lightLuminance(MOONLIGHT_COLOR * DEF_MOONLIGHT_RAW_STR * 0.4);
 
 		// cave fog strength is adjusted to dimmest night fog strength so it doesn't make the outdoors look jarring or misleading
-		atmosv_CaveFogRadiance *= nightFogLuminance;
-	} else {
-		atmosv_CaveFogRadiance = atmosv_FogRadiance;
+		caveFogRadiance *= nightFogLuminance;
+
+		float invEyeY = 1.0 - frx_smoothedEyeBrightness.y;
+		atmosv_CaveFog = invEyeY * invEyeY;
+		atmosv_FogRadiance = mix(atmosv_FogRadiance, caveFogRadiance, atmosv_CaveFog);
 	}
 	/**********/
 }
