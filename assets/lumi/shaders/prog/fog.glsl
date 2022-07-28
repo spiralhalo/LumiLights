@@ -105,8 +105,7 @@ vec4 fog(vec4 color, float distToEye, vec3 toFrag, bool isUnderwater, float volu
 	float fogFactor = fullFogFactor(distToEye, toFrag, isUnderwater, visibility);
 
 	bool submerged = isUnderwater && frx_cameraInFluid == 1;
-	vec3 OWFog = atmos_OWFogRadiance(toFrag);
-	vec3 fogColor = submerged ? atmosv_ClearRadiance : OWFog;
+	vec3 fogColor = submerged ? atmosv_ClearRadiance : atmosv_FogRadiance;
 
 	// resolve volumetric
 	float residual = VOLUMETRIC_RESIDUAL + frx_cameraInWater * VOLUMETRIC_RESIDUAL;

@@ -127,7 +127,7 @@ vec4 customSky(sampler2D sunTexture, sampler2D moonTexture, vec3 toSky, vec3 fal
 		result.rgb += starRadiance * skyVisible;
 
 		float skyGradient = pow(l2_clampScale(0.625 + v_cameraAt, -0.125 + v_cameraAt, toSky.y), 3.0);
-		result.rgb = mix(result.rgb, atmos_OWFogRadiance(toSky), skyGradient);
+		result.rgb = mix(result.rgb, atmosv_FogRadiance, skyGradient);
 		#endif
 	} else {
 		result.rgb = hdr_fromGamma(fallback) * (1.0 + float(frx_worldIsEnd) * 1.0);

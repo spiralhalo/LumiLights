@@ -28,7 +28,6 @@
 	out vec3 atmosv_ClearRadiance;
 	out vec3 atmosv_SkyRadiance;
 	out float atmosv_OWTwilightFactor;
-	out vec3 atmosv_OWTwilightRadiance;
 	#endif
 
 	void atmos_generateAtmosphereModel();
@@ -44,7 +43,6 @@
 	in vec3 atmosv_ClearRadiance;
 	in vec3 atmosv_SkyRadiance;
 	in float atmosv_OWTwilightFactor;
-	in vec3 atmosv_OWTwilightRadiance;
 	#endif
 
 #endif
@@ -58,12 +56,6 @@ float twilightCalc(vec3 world_toSky) {
 	float isTwilight = l2_clampScale(-1.0, 1.0, world_toSky.x * sign(frx_skyLightVector.x) * (1.0 - frx_worldIsMoonlit * 2.0));
 	float result = isTwilight * atmosv_OWTwilightFactor;
 	return result * result;
-}
-
-vec3 atmos_OWFogRadiance(vec3 world_toSky)
-{
-	vec3 baseFogColor = mix(atmosv_FogRadiance, vec3(lightLuminance(atmosv_SkyRadiance)), atmosv_OWTwilightFactor);
-	return mix(baseFogColor, atmosv_OWTwilightRadiance, twilightCalc(world_toSky) * atmosv_OWTwilightFactor);
 }
 
 float atmos_eyeAdaptation() {
@@ -165,6 +157,9 @@ void atmos_generateAtmosphereModel()
 
 	#ifdef POST_SHADER
 	/** FOG **/
+	vec3 twilightRadiance = TWILIGHT_COLOR * 2.0;
+	twilightRadiance.gb *= vec2(max(frx_skyLightTransitionFactor, 0.3), frx_skyLightTransitionFactor * frx_skyLightTransitionFactor);
+
 	// vanilla clear color is unreliable, we want to control its brightness
 	atmosv_ClearRadiance = hdr_fromGamma(frx_vanillaClearColor);
 	float clearLuminance = lightLuminance(atmosv_ClearRadiance);
@@ -177,6 +172,7 @@ void atmos_generateAtmosphereModel()
 	if (customOWFog) {
 		float skyLuminance = lightLuminanceUnclamped(atmosv_SkyRadiance);
 		atmosv_FogRadiance = (atmosv_SkyRadiance / skyLuminance) * max(skyLuminance, lightLuminance(atmosv_CelestialRadiance * 0.4) * (2.0 - nightFactor - nightFactor * frx_rainGradient * 0.5));
+		atmosv_FogRadiance = mix(atmosv_FogRadiance, twilightRadiance, atmosv_OWTwilightFactor);
 	} else if (customEndFog) {
 		atmosv_FogRadiance = mix(atmosv_ClearRadiance, hdr_fromGamma(vec3(1.0, 0.7, 1.0)), float(frx_cameraInFluid)) * 0.1;
 	} else if (customNetherFog) {
@@ -192,10 +188,6 @@ void atmos_generateAtmosphereModel()
 
 	// ClearRadiance is mostly used for water
 	atmosv_ClearRadiance = mix(atmosv_FogRadiance, waterFog, float(frx_cameraInWater));
-
-
-	atmosv_OWTwilightRadiance = TWILIGHT_COLOR * 2.0;
-	atmosv_OWTwilightRadiance.gb *= vec2(max(frx_skyLightTransitionFactor, 0.3), frx_skyLightTransitionFactor * frx_skyLightTransitionFactor);
 
 	// prevent custom overworld sky reflection in non-overworld dimension or when the sky mode is not Lumi
 	bool customOWSkyAndFallback = frx_worldIsOverworld == 1;
@@ -227,8 +219,8 @@ void atmos_generateAtmosphereModel()
 	atmosv_SkyRadiance = mix(atmosv_SkyRadiance, graySky, toGray) * rainBrightness;
 
 	if (customOWFog) {
-		atmosv_FogRadiance		  = mix(atmosv_FogRadiance, grayFog, toGray) * rainBrightness;
-		atmosv_OWTwilightRadiance = mix(atmosv_OWTwilightRadiance, graySky, toGray) * rainBrightness;
+		atmosv_FogRadiance = mix(atmosv_FogRadiance, grayFog, toGray) * rainBrightness;
+		// twilightRadiance = mix(twilightRadiance, graySky, toGray) * rainBrightness;
 	}
 	#endif
 	/**********/
