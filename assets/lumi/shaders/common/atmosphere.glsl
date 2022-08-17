@@ -51,13 +51,6 @@
 #define calcHorizon(worldVec) pow(l2_clampScale(1.0, -l2_clampScale(ATMOS_SEA_LEVEL, ATMOS_STRATOSPHERE, frx_cameraPos.y), worldVec.y), 0.25)
 #define waterHorizon(isUnderwater, skyHorizon) float(isUnderwater) * l2_clampScale(0.9, 1.0, skyHorizon) // kinda hacky
 
-float twilightCalc(vec3 world_toSky) {
-	//NB: only works if sun always rise from dead East instead of NE/SE etc.
-	float isTwilight = l2_clampScale(-1.0, 1.0, world_toSky.x * sign(frx_skyLightVector.x) * (1.0 - frx_worldIsMoonlit * 2.0));
-	float result = isTwilight * atmosv_OWTwilightFactor;
-	return result * result;
-}
-
 float atmos_eyeAdaptation() {
 	return frx_smoothedEyeBrightness.y * lightLuminance(atmosv_CelestialRadiance) * (1. - frx_rainGradient);
 }
@@ -73,7 +66,7 @@ float atmos_eyeAdaptation() {
 
 const vec3 MOONLIGHT_COLOR	   = DEF_MOONLIGHT_COLOR / lightLuminanceUnclamped(DEF_MOONLIGHT_COLOR);
 const vec3 NOON_SUNLIGHT_COLOR = DEF_SUNLIGHT_COLOR / lightLuminanceUnclamped(DEF_SUNLIGHT_COLOR);
-const vec3 SUNRISE_LIGHT_COLOR = hdr_fromGamma(vec3(1.0, 0.7, 0.2));
+const vec3 SUNRISE_LIGHT_COLOR = hdr_fromGamma(vec3(0.9, 0.4, 0.1));
 
 const vec3 DAY_SKY_COLOR   = DEF_DAY_SKY_COLOR;
 const vec3 NIGHT_SKY_COLOR = DEF_NIGHT_SKY_COLOR;
@@ -95,8 +88,8 @@ const int SMONC = 2;
 const vec3[3] SUN_COLOR =  vec3[](SUNRISE_LIGHT_COLOR, NOON_SUNLIGHT_COLOR, MOONLIGHT_COLOR);
 const float[3] TWG_FACTOR  = float[](1.0, 0.0, 0.0); // maps celest color to twilight factor
 const int SUN_LEN = 8;
-const int[SUN_LEN] SUN_COL_ID = int[]  (SMONC, SRISC, SRISC, SNONC, SNONC, SRISC, SRISC, SMONC);
-const float[SUN_LEN] SUN_TIMES = float[](-0.05, -0.04,  0.00,  0.01,  0.49,   0.5,  0.54,  0.55);
+const int[SUN_LEN] SUN_COL_ID  = int[]  (SMONC, SRISC, SRISC, SNONC, SNONC, SRISC, SRISC, SMONC);
+const float[SUN_LEN] SUN_TIMES = float[](-0.045, -0.035, -0.02,  0.02,  0.48,  0.52,  0.535,  0.545);
 
 const int SKY_LEN = 4;
 const float[SKY_LEN] SKY_NIGHT = float[]( 1.0 ,  0.0 , 0.0 , 1.0);
@@ -132,7 +125,7 @@ void atmos_generateAtmosphereModel()
 		#endif
 	}
 
-	atmosv_OWTwilightFactor *= float(frx_worldHasSkylight);
+	atmosv_OWTwilightFactor *= float(frx_worldHasSkylight);// * (1.0 - frx_worldIsMoonlit);
 
 	sunColor.gb *= vec2(frx_skyLightTransitionFactor * frx_skyLightTransitionFactor);
 
@@ -171,8 +164,9 @@ void atmos_generateAtmosphereModel()
 
 	if (customOWFog) {
 		float skyLuminance = lightLuminanceUnclamped(atmosv_SkyRadiance);
-		atmosv_FogRadiance = (atmosv_SkyRadiance / skyLuminance) * max(skyLuminance, lightLuminance(atmosv_CelestialRadiance * 0.4) * (2.0 - nightFactor - nightFactor * frx_rainGradient * 0.5));
+		atmosv_FogRadiance = (atmosv_SkyRadiance / skyLuminance) * max(skyLuminance, mix(lightLuminance(atmosv_CelestialRadiance * 0.4), 0.1 - frx_smoothedRainGradient * 0.05, nightFactor));
 		atmosv_FogRadiance = mix(atmosv_FogRadiance, twilightRadiance, atmosv_OWTwilightFactor);
+		// atmosv_FogRadiance = mix(atmosv_FogRadiance, atmosv_SkyRadiance, l2_clampScale(0.2, 0.0, frx_skyLightTransitionFactor));
 	} else if (customEndFog) {
 		atmosv_FogRadiance = mix(atmosv_ClearRadiance, hdr_fromGamma(vec3(1.0, 0.7, 1.0)), float(frx_cameraInFluid)) * 0.1;
 	} else if (customNetherFog) {

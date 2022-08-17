@@ -99,13 +99,22 @@ float fogFactor(float distToEye, vec3 toFrag, bool isUnderwater) {
 	return fullFogFactor(distToEye, toFrag, isUnderwater, getVisibility(isUnderwater));
 }
 
+vec3 fogColor(bool submerged, vec3 toFrag) {
+	//NB: only works if sun always rise from dead East instead of NE/SE etc.
+	float twGray = l2_clampScale(1.0, -1.0, toFrag.x * sign(frx_skyLightVector.x) * (1.0 - frx_worldIsMoonlit * 2.0));
+	twGray = l2_softenUp(twGray) * atmosv_OWTwilightFactor;
+
+	vec3 result = submerged ? atmosv_ClearRadiance : atmosv_FogRadiance;
+	result = mix(result, atmosv_SkyRadiance, twGray);
+	return result;
+}
+
 vec4 fog(vec4 color, float distToEye, vec3 toFrag, bool isUnderwater, float volumetric)
 {
 	float visibility = getVisibility(isUnderwater);
 	float fogFactor = fullFogFactor(distToEye, toFrag, isUnderwater, visibility);
 
-	bool submerged = isUnderwater && frx_cameraInFluid == 1;
-	vec3 fogColor = submerged ? atmosv_ClearRadiance : atmosv_FogRadiance;
+	vec3 fogColor = fogColor(isUnderwater && frx_cameraInFluid == 1, toFrag);
 
 	// resolve volumetric
 	float residual = VOLUMETRIC_RESIDUAL + frx_cameraInWater * VOLUMETRIC_RESIDUAL;

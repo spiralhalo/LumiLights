@@ -247,7 +247,7 @@ void prepare(vec4 color, sampler2D natureTexture, vec3 eyePos, float vertexNorma
 	light.w += causticLight;
 
 	float luminance = frx_luminance(color.rgb);
-	float vanillaEmissive = step(0.93625, light.x) * luminance * luminance;
+	float vanillaEmissive = step(0.93625, light.x) * luminance;
 
 	light.z += vanillaEmissive;
 }
@@ -281,7 +281,7 @@ void lights(vec3 albedo, vec4 light, vec3 eyePos, vec3 toEye, out vec3 baseLight
 
 	// exaggerate block light
 	#define BL_MULT 3.0
-	bl = clamp(pow(bl, 0.5 + BL_MULT / 2.0) * BL_MULT, 0.0, BL_MULT);
+	bl = clamp(pow(bl, 0.5 + BL_MULT / 2.0) * BL_MULT, 0.0, BL_MULT); // unnecessary if BL_MULT is 1
 	bl += pow(l2_clampScale(0.7, 0.96875, light.x), 2.0) * 3.0;
 
 	// makes builds look better outside
@@ -295,7 +295,7 @@ void lights(vec3 albedo, vec4 light, vec3 eyePos, vec3 toEye, out vec3 baseLight
 #endif
 
 	blockLight = blColor * BLOCK_LIGHT_STR * bl * adaptationTerm;
-	blockLight *= userBrightness;
+	blockLight *= 0.7 + userBrightness * 0.4;
 
 #if HANDHELD_LIGHT_RADIUS != 0
 	if (frx_heldLight.w > 0) {

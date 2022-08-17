@@ -229,7 +229,7 @@ vec4 customClouds(sampler2D cloudsDepthBuffer, sampler2D natureTexture, sampler2
 	float night = frx_worldIsMoonlit * frx_skyLightTransitionFactor; // night cloud brightening hack
 	float rainCloudBrightness = 1.0 - hdr_fromGammaf(frx_smoothedRainGradient) * 0.2 - hdr_fromGammaf(frx_smoothedThunderGradient) * 0.1; // emulate dark clouds
 	float celestLuminance = lightLuminanceUnclamped(atmosv_CelestialRadiance);
-	vec3  celestRadiance = safeDiv(atmosv_CelestialRadiance, celestLuminance) * min(1.0, celestLuminance) * DEF_SKY_STR * result.x * mix(0.36, 0.12, night); // magic multiplier
+	vec3  celestRadiance = safeDiv(atmosv_CelestialRadiance, celestLuminance) * min(1.0, celestLuminance) * DEF_SKY_STR * result.x * mix(0.6, 0.12, night); // magic multiplier
 
 	#ifdef VOLUMETRIC_CLOUDS
 	if (frx_worldIsMoonlit == 1) {

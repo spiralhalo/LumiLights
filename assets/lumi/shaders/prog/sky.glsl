@@ -61,7 +61,7 @@ vec4 celestFrag(in Rect celestRect, sampler2D ssun, sampler2D smoon, vec3 worldV
 
 				celestTex = hdr_fromGamma(texture(smoon, celestUV).rgb);
 				celestCol = celestTex + vec3(0.001) * hdr_fromGamma(fullMoonColor);
-				celestCol *= EMISSIVE_LIGHT_STR;
+				celestCol *= EMISSIVE_LIGHT_STR  * frx_skyLightTransitionFactor;
 			}
 		} else {
 			celestTex = texture(ssun, celestUV).rgb;
@@ -80,7 +80,7 @@ vec4 customSky(sampler2D sunTexture, sampler2D moonTexture, vec3 toSky, vec3 fal
 	float skyDotUp = dot(toSky, vec3(0.0, 1.0, 0.0));
 
 	if (frx_worldIsNether == 1 || isUnderwater) {
-		result.rgb = fog(result, frx_viewDistance * 4.0, toSky, isUnderwater).rgb; // most accurate fog color
+		result.rgb = atmosv_ClearRadiance;
 	} else if (frx_worldIsOverworld == 1 && v_not_in_void > 0.0) {
 		// Sky, sun and moon
 		#if SKY_MODE == SKY_MODE_LUMI
@@ -127,7 +127,7 @@ vec4 customSky(sampler2D sunTexture, sampler2D moonTexture, vec3 toSky, vec3 fal
 		result.rgb += starRadiance * skyVisible;
 
 		float skyGradient = pow(l2_clampScale(0.625 + v_cameraAt, -0.125 + v_cameraAt, toSky.y), 3.0);
-		result.rgb = mix(result.rgb, atmosv_FogRadiance, skyGradient);
+		result.rgb = mix(result.rgb, fogColor(false, toSky), skyGradient);
 		#endif
 	} else {
 		result.rgb = hdr_fromGamma(fallback) * (1.0 + float(frx_worldIsEnd) * 1.0);
