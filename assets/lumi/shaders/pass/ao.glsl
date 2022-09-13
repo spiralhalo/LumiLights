@@ -61,7 +61,7 @@ void main()
 	vec3  viewPos = getViewPos(v_texcoord, u_vanilla_depth);
 	/* using reconstructed normals doesn't really help reduce artifacts (tried dF and accurate methods!!)
 	   and as minecraft is blocky the interpolated normals should be accurate anyway. */
-	vec3  viewNormal = frx_normalModelMatrix * normalize(texture(u_gbuffer_lightnormal, vec3(v_texcoord, ID_SOLID_NORM)).xyz);
+	vec3  viewNormal = frx_normalModelMatrix * normalize(texture(u_gbuffer_lightnormal, vec3(v_texcoord, ID_SOLID_MNORM)).xyz);
 
 	vec3 rightPos = viewPos + vec3(SSAO_VIEW_RADIUS, 0.0, 0.0);
 	vec4 temp = frx_projectionMatrix * vec4(rightPos, 1.0);
