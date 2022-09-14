@@ -28,12 +28,18 @@ void main()
 	vec4 base = hdr_inverseTonemap(texture(u_input, v_texcoord));
 	float luminance = l2_max3(base.rgb); //use max instead of luminance to get some lava action
 	const float MIN_LUM = 0.9; // based on semi-comfortable bloom on snowy scapes
+	float alpha = max(1.0, luminance - MIN_LUM);
 
 	// NOTE: multiplying the gate only makes sense with additive bloom
-	float luminanceGate = smoothstep(MIN_LUM, MIN_LUM + 1.0, luminance) * 0.25;
+	float luminanceGate = smoothstep(MIN_LUM, MIN_LUM + 1.0, luminance) * 0.25 * alpha;
 
 	luminanceGate = max(luminanceGate, emissive);
 	luminanceGate -= min(1.0, luminanceGate) * 0.5 * atmos_eyeAdaptation();
 
 	fragColor = base * luminanceGate;
+
+	float clipping_point = 12.5 * BLOOM_SCALE;
+	if (any(greaterThan(fragColor, vec4(clipping_point)))) {
+		fragColor *= clipping_point / l2_max3(fragColor.rgb);	
+	}
 }

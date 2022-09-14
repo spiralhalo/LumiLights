@@ -12,8 +12,7 @@ uniform sampler2D u_blend;
 
 out vec4 fragColor;
 
-const float BLOOM_INTENSITY_FLOAT	 = BLOOM_INTENSITY / 50.0;
-const vec2 BLOOM_DOWNSAMPLE_DIST_VEC = vec2(clamp(BLOOM_SCALE / 10., 0.1, 2.0));
+const vec2 BLOOM_DOWNSAMPLE_DIST_VEC = vec2(BLOOM_SCALE);
 const vec2 BLOOM_UPSAMPLE_DIST_VEC	 = BLOOM_DOWNSAMPLE_DIST_VEC / 10.; // not sure why this is
 
 void main()
@@ -28,7 +27,7 @@ void main()
 		vec4 base  = texture(u_input, v_texcoord);
 		vec4 bloom = texture(u_blend, v_texcoord);
 		bloom /= 6.0;
-		bloom *= BLOOM_INTENSITY_FLOAT;
+		bloom *= BLOOM_INTENSITY;
 
 		vec3 color = hdr_inverseTonemap(base.rgb) + bloom.rgb;
 		fragColor = vec4(ldr_tonemap(color), 1.0);
