@@ -115,7 +115,6 @@ void main()
 	// float tileJitter = getRandomFloat(u_tex_noise, v_texcoord, frxu_size);
 	// float foggedDepth = dSolid;
 	bool foggedIsUnderwater = solidIsUnderwater;
-	float edgeBlend = edgeBlendFactor(foggedDist);
 
 
 	tempPos = frx_inverseViewProjectionMatrix * vec4(2.0 * v_texcoord - 1.0, 2.0 * dParts - 1.0, 1.0);
@@ -172,14 +171,11 @@ void main()
 
 		if (foggedIsTrans) {
 			nextTrans = mix(nextTrans, fogged, frx_rainGradient);
-			nextTrans = mix(nextTrans, sky, edgeBlendFactor(foggedDist));
 		}
 
 		// do this mix to fill gaps
 		base = mix(base, fogged, 1.0 - nextTrans.a);
 	}
-
-	base = mix(base, sky, edgeBlend);
 
 	vec4 nextRains = vec4(hdr_fromGamma(cRains.rgb), cRains.a);
 

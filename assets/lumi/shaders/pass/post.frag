@@ -63,12 +63,11 @@ void main()
 	vec3 toFrag  = normalize(eyePos);
 
 	float distToEye = length(eyePos);
-	if (dMin < 1.0) {
-		fragColor = mix(
-			volumetricFog(u_gbuffer_shadow, u_tex_nature, fragColor, distToEye, toFrag, texture(u_gbuffer_lightnormal, vec3(v_texcoord, idLight)).y, getRandomFloat(u_tex_noise, v_texcoord, frxu_size), dMin, frx_cameraInWater == 1),
-			fragColor,
-			edgeBlendFactor(distToEye));
-	}
+	vec4 sky = customSky(u_tex_sun, u_tex_moon, toFrag, frx_vanillaClearColor, false);
+	fragColor = mix(
+		volumetricFog(u_gbuffer_shadow, u_tex_nature, fragColor, distToEye, toFrag, texture(u_gbuffer_lightnormal, vec3(v_texcoord, idLight)).y, getRandomFloat(u_tex_noise, v_texcoord, frxu_size), dMin, frx_cameraInWater == 1),
+		sky,
+		edgeBlendFactor(distToEye));
 
 	vec4 clouds = customClouds(u_vanilla_clouds_depth, u_tex_nature, u_tex_noise, dMin, v_texcoord, eyePos, toFrag, NUM_SAMPLE);
 	fragColor.rgb = fragColor.rgb * (1.0 - clouds.a) + clouds.rgb * clouds.a;

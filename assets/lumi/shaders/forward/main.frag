@@ -89,7 +89,7 @@ void frx_pipelineFragment()
 			#endif
 
 			#ifdef WATER_WAVES
-			frx_fragNormal = sampleWaterNormal(u_tex_nature, frx_var0.xyz, abs(frx_vertexNormal));
+			frx_fragNormal = sampleWaterNormal(u_tex_nature, pv_vertex + frx_cameraPos, abs(frx_vertexNormal));
 			#endif
 		}
 

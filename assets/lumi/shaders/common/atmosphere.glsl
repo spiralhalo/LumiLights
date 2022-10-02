@@ -26,7 +26,7 @@
 	#ifdef POST_SHADER
 	out float atmosv_CaveFog;
 	out vec3 atmosv_FogRadiance;
-	out vec3 atmosv_ClearRadiance;
+	out vec3 atmosv_WaterFogRadiance;
 	out vec3 atmosv_SkyRadiance;
 	out float atmosv_OWTwilightFactor;
 	#endif
@@ -42,7 +42,7 @@
 	#ifdef POST_SHADER
 	in float atmosv_CaveFog;
 	in vec3 atmosv_FogRadiance;
-	in vec3 atmosv_ClearRadiance;
+	in vec3 atmosv_WaterFogRadiance;
 	in vec3 atmosv_SkyRadiance;
 	in float atmosv_OWTwilightFactor;
 	#endif
@@ -152,9 +152,9 @@ void atmos_generateAtmosphereModel()
 	twilightRadiance.gb *= vec2(max(frx_skyLightTransitionFactor, 0.3), frx_skyLightTransitionFactor * frx_skyLightTransitionFactor);
 
 	// vanilla clear color is unreliable, we want to control its brightness
-	atmosv_ClearRadiance = hdr_fromGamma(frx_vanillaClearColor);
-	float clearLuminance = lightLuminance(atmosv_ClearRadiance);
-	atmosv_ClearRadiance = safeDiv(atmosv_ClearRadiance, clearLuminance);
+	vec3 clearRadiance = hdr_fromGamma(frx_vanillaClearColor);
+	float clearLuminance = lightLuminance(clearRadiance);
+	clearRadiance = safeDiv(clearRadiance, clearLuminance);
 
 	bool customOWFog	 = frx_worldIsOverworld == 1 && max(frx_cameraInSnow, frx_cameraInLava) < 1;
 	bool customEndFog	 = frx_worldIsEnd == 1 && max(frx_cameraInSnow, frx_cameraInLava) < 1;
@@ -166,20 +166,17 @@ void atmos_generateAtmosphereModel()
 		atmosv_FogRadiance = mix(atmosv_FogRadiance, twilightRadiance, atmosv_OWTwilightFactor);
 		// atmosv_FogRadiance = mix(atmosv_FogRadiance, atmosv_SkyRadiance, l2_clampScale(0.2, 0.0, frx_skyLightTransitionFactor));
 	} else if (customEndFog) {
-		atmosv_FogRadiance = mix(atmosv_ClearRadiance, hdr_fromGamma(vec3(1.0, 0.7, 1.0)), float(frx_cameraInFluid)) * 0.1;
+		atmosv_FogRadiance = mix(clearRadiance, hdr_fromGamma(vec3(1.0, 0.7, 1.0)), float(frx_cameraInFluid)) * 0.1;
 	} else if (customNetherFog) {
-		atmosv_FogRadiance = atmosv_ClearRadiance * 0.1; // controllable overall brightness
+		atmosv_FogRadiance = clearRadiance * 0.1; // controllable overall brightness
 	} else {
 		atmosv_FogRadiance = hdr_fromGamma(frx_vanillaClearColor);
 	}
 
-	vec3 waterFog = atmosv_ClearRadiance;
-	waterFog.g = max(waterFog.g, waterFog.b * 0.1);
-	float waterFogL = lightLuminance(waterFog);
-	waterFog *= 0.05 / (waterFogL > 0.0 ? waterFogL : 1.0);
-
-	// ClearRadiance is mostly used for water
-	atmosv_ClearRadiance = mix(atmosv_FogRadiance, waterFog, float(frx_cameraInWater));
+	atmosv_WaterFogRadiance = clearRadiance;
+	atmosv_WaterFogRadiance.g = max(atmosv_WaterFogRadiance.g, atmosv_WaterFogRadiance.b * 0.1);
+	float waterFogL = lightLuminance(atmosv_WaterFogRadiance);
+	atmosv_WaterFogRadiance *= 0.05 / (waterFogL > 0.0 ? waterFogL : 1.0);
 
 	// prevent custom overworld sky reflection in non-overworld dimension or when the sky mode is not Lumi
 	bool customOWSkyAndFallback = frx_worldIsOverworld == 1;
@@ -228,7 +225,6 @@ void atmos_generateAtmosphereModel()
 		atmosv_CelestialRadiance *= skyAdaptor;
 		atmosv_SkyAmbientRadiance *= skyAdaptor;
 		atmosv_FogRadiance *= skyAdaptor;
-		// atmosv_ClearRadiance;
 	}
 
 	/** CAVE FOG **/
