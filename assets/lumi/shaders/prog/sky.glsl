@@ -81,14 +81,14 @@ vec4 customSky(sampler2D sunTexture, sampler2D moonTexture, vec3 toSky, vec3 fal
 
 	if (frx_worldIsNether == 1 || isUnderwater) {
 		result.rgb = atmosv_ClearRadiance;
-	} else if (frx_worldIsOverworld == 1 && v_not_in_void > 0.0) {
+	} else if (frx_worldIsOverworld == 1) {
 		// Sky, sun and moon
 		#if SKY_MODE == SKY_MODE_LUMI
 		vec4 celestColor = celestFrag(Rect(v_celest1, v_celest2, v_celest3), sunTexture, moonTexture, toSky);
 		float starEraser = celestColor.a;
 
 		result.rgb  = atmosv_SkyRadiance * skyVisible;
-		result.rgb += pow(max(0.0, dot(toSky, frx_skyLightVector)), 100.0) * atmosv_CelestialRadiance * 0.1 * celestVisible; // halo?
+		result.rgb += pow(max(0.0, dot(toSky, frx_skyLightVector)), 100.0) * atmosv_CelestialRadiance * 0.1 * (1. - frx_rainGradient) * celestVisible; // halo?
 		result.rgb += celestColor.rgb * (1. - frx_rainGradient) * celestVisible;
 		#else
 		float mul = 1.0 + frx_worldIsMoonlit * frx_skyLightTransitionFactor;

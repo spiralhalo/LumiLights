@@ -91,7 +91,7 @@ const float[SUN_LEN] SUN_TIMES = float[](-0.045, -0.035, -0.02,  0.02,  0.48,  0
 
 const int SKY_LEN = 4;
 const float[SKY_LEN] SKY_NIGHT = float[]( 1.0 ,  0.0 , 0.0 , 1.0);
-const float[SKY_LEN] SKY_TIMES = float[](-0.05, -0.01, 0.49, 0.55);
+const float[SKY_LEN] SKY_TIMES = float[](-0.05, -0.05, 0.45, 0.55);
 
 void atmos_generateAtmosphereModel()
 {
