@@ -131,9 +131,7 @@ vec4 basicSky(vec3 toSky, vec3 fallback, bool isUnderwater) {
 	return voidCore(skyBase(toSky, fallback, isUnderwater), toSky);
 }
 
-vec4 customSky(sampler2D sunTexture, sampler2D moonTexture, vec3 toSky, vec3 fallback, bool isUnderwater, float skyVisible, float celestVisible)
-{
-	vec4 result = skyBase(toSky, fallback, isUnderwater) * skyVisible;
+vec4 customSky(vec4 result, sampler2D sunTexture, sampler2D moonTexture, vec3 toSky, vec3 fallback, bool isUnderwater, float skyVisible, float celestVisible) {
 	float starEraser = 0.0;
 
 	if (frx_worldIsOverworld == 1) {
@@ -182,8 +180,8 @@ vec4 customSky(sampler2D sunTexture, sampler2D moonTexture, vec3 toSky, vec3 fal
 	return voidCore(result, toSky);
 }
 
-vec4 customSky(sampler2D sunTexture, sampler2D moonTexture, vec3 toSky, vec3 fallback, bool isUnderwater) {
-	return customSky(sunTexture, moonTexture, toSky, fallback, isUnderwater, 1.0, 1.0);
+vec4 customSky(vec4 result, sampler2D sunTexture, sampler2D moonTexture, vec3 toSky, vec3 fallback, bool isUnderwater) {
+	return customSky(result, sunTexture, moonTexture, toSky, fallback, isUnderwater, 1.0, 1.0);
 }
 
 vec3 skyRadiance(sampler2D sunTexture, sampler2D moonTexture, vec2 material, vec3 toSky, vec2 lightyw) {
@@ -192,7 +190,9 @@ vec3 skyRadiance(sampler2D sunTexture, sampler2D moonTexture, vec2 material, vec
 	if (material.x > REFLECTION_MAXIMUM_ROUGHNESS) {
 		return atmosv_SkyRadiance * skyVisible;
 	} else {
-		return customSky(sunTexture, moonTexture, toSky, vec3(0.0), frx_cameraInWater == 1 && toSky.y < 0.0, skyVisible, lightyw.y).rgb;
+		bool isUnderwater = frx_cameraInWater == 1 && toSky.y < 0.0;
+		vec4 base = skyBase(toSky, vec3(0.0), isUnderwater) * skyVisible;
+		return customSky(base, sunTexture, moonTexture, toSky, vec3(0.0), isUnderwater, skyVisible, lightyw.y).rgb;
 	}
 }
 

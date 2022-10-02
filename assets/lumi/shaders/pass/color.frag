@@ -87,7 +87,8 @@ void main()
 	float disableDiffuse = bit_unpack(miscSolid.z, 4);
 
 	vec4 base;
-	vec4 sky = customSky(u_tex_sun, u_tex_moon, toFrag, dSolid == 1.0 ? cSolid.rgb : frx_vanillaClearColor, solidIsUnderwater);
+	vec4 skyBasic = basicSky(toFrag, frx_vanillaClearColor, false);
+	vec4 sky = customSky(skyBasic, u_tex_sun, u_tex_moon, toFrag, dSolid == 1.0 ? cSolid.rgb : frx_vanillaClearColor, solidIsUnderwater);
 
 	if (dSolid == 1.0) {
 		base = sky;
@@ -104,7 +105,7 @@ void main()
 	}
 
 	if (dSolid > dMin) {
-		vec4 clouds = customClouds(u_vanilla_clouds_depth, u_tex_nature, u_tex_noise, dSolid, uvSolid, eyePos, toFrag, NUM_SAMPLE, ldepth(dMin) * frx_viewDistance * 4.);
+		vec4 clouds = customClouds(u_vanilla_clouds_depth, u_tex_nature, u_tex_noise, dSolid, uvSolid, eyePos, toFrag, NUM_SAMPLE, ldepth(dMin) * frx_viewDistance * 4., skyBasic);
 		base.rgb = base.rgb * (1.0 - clouds.a) + clouds.rgb * clouds.a;
 	}
 

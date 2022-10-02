@@ -71,7 +71,7 @@ void main()
 			edgeBlendFactor(distToEye));
 	}
 
-	vec4 clouds = customClouds(u_vanilla_clouds_depth, u_tex_nature, u_tex_noise, dMin, v_texcoord, eyePos, toFrag, NUM_SAMPLE);
+	vec4 clouds = customClouds(u_vanilla_clouds_depth, u_tex_nature, u_tex_noise, dMin, v_texcoord, eyePos, toFrag, NUM_SAMPLE, skyBasic);
 	fragColor.rgb = fragColor.rgb * (1.0 - clouds.a) + clouds.rgb * clouds.a;
 
 	fragColor = blindnessFog(fragColor, distToEye);

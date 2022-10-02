@@ -89,7 +89,7 @@ bool optimizeStart(float startTravel, float maxDist, vec3 toSky, inout vec3 worl
 	return false;
 }
 
-vec2 rayMarchCloud(sampler2D natureTexture, sampler2D noiseTexture, vec2 texcoord, float maxDist, vec3 toSky, float numSample, float startTravel)
+vec3 rayMarchCloud(sampler2D natureTexture, sampler2D noiseTexture, vec2 texcoord, float maxDist, vec3 toSky, float numSample, float startTravel)
 {
 	vec3 lightUnit = frx_skyLightVector * LIGHT_SAMPLE_SIZE;
 	vec3 worldRayPos = vec3(0.0, 63.0, 0.0);
@@ -101,7 +101,7 @@ vec2 rayMarchCloud(sampler2D natureTexture, sampler2D noiseTexture, vec2 texcoor
 	float sampleSize = 256.0 / float(numSample);
 	float distanceTotal = 0.0;
 
-	if (optimizeStart(startTravel, maxDist, toSky, worldRayPos, numSample, sampleSize, distanceTotal)) return vec2(0.0);
+	if (optimizeStart(startTravel, maxDist, toSky, worldRayPos, numSample, sampleSize, distanceTotal)) return vec3(0.0);
 
 	vec3 unitRay = toSky * sampleSize;
 	float i = getRandomFloat(noiseTexture, texcoord, frxu_size) * CLOUD_MARCH_JITTER_STRENGTH;
@@ -140,9 +140,9 @@ vec2 rayMarchCloud(sampler2D natureTexture, sampler2D noiseTexture, vec2 texcoor
 
 	totalDensity = l2_softenUp(clamp(totalDensity / i, 0.0, 1.0), 4.0);
 	// I guess this works because we limit the distance when we are on cloud level with world-clouds
-	totalDensity *= 1.0 - pow(fade, 2.0);
+	float fadeOut = 1.0 - pow(fade, 2.0);
 
-	return vec2(lightEnergy, totalDensity);
+	return vec3(lightEnergy, totalDensity, fadeOut);
 }
 
 vec2 vanillaClouds(sampler2D cloudsDepthBuffer, float depth, vec2 texcoord)
@@ -199,11 +199,11 @@ vec2 vanillaClouds(sampler2D cloudsDepthBuffer, float depth, vec2 texcoord)
 	return vec2(energy, 1.0);
 }
 
-vec4 customClouds(sampler2D cloudsDepthBuffer, sampler2D natureTexture, sampler2D noiseTexture, float depth, vec2 texcoord, vec3 eyePos, vec3 toSky, int numSample, float startTravel)
+vec4 customClouds(sampler2D cloudsDepthBuffer, sampler2D natureTexture, sampler2D noiseTexture, float depth, vec2 texcoord, vec3 eyePos, vec3 toSky, int numSample, float startTravel, vec4 fallback)
 {
-	vec2 result;
+	vec3 result;
 	if (frx_worldIsOverworld != 1) {
-		result = vanillaClouds(cloudsDepthBuffer, depth, texcoord);
+		result = vec3(vanillaClouds(cloudsDepthBuffer, depth, texcoord), 1.0);
 	} else {
 		#ifdef VOLUMETRIC_CLOUDS
 		#if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
@@ -222,7 +222,7 @@ vec4 customClouds(sampler2D cloudsDepthBuffer, sampler2D natureTexture, sampler2
 
 		result = rayMarchCloud(natureTexture, noiseTexture, texcoord, maxDist, toSky, numSample, startTravel);
 		#else
-		result = vanillaClouds(cloudsDepthBuffer, depth, texcoord);
+		result = vec3(vanillaClouds(cloudsDepthBuffer, depth, texcoord), 1.0);
 		#endif
 	}
 
@@ -240,10 +240,11 @@ vec4 customClouds(sampler2D cloudsDepthBuffer, sampler2D natureTexture, sampler2
 	vec3 cloudRadiance = mix(atmosv_SkyRadiance, vec3(lightLuminance(atmosv_SkyRadiance)), 0.5 - 0.5 * night) * (1.0 + night * 0.5);
 
 	vec3 color = (celestRadiance + cloudRadiance) * rainCloudBrightness;
+	color = mix(fallback.rgb, color.rgb, result.z);
 	return vec4(color, result.y);
 }
 
-vec4 customClouds(sampler2D cloudsDepthBuffer, sampler2D natureTexture, sampler2D noiseTexture, float depth, vec2 texcoord, vec3 eyePos, vec3 toSky, int numSample)
+vec4 customClouds(sampler2D cloudsDepthBuffer, sampler2D natureTexture, sampler2D noiseTexture, float depth, vec2 texcoord, vec3 eyePos, vec3 toSky, int numSample, vec4 fallback)
 {
-	return customClouds(cloudsDepthBuffer, natureTexture, noiseTexture, depth, texcoord, eyePos, toSky, numSample, 0.0);
+	return customClouds(cloudsDepthBuffer, natureTexture, noiseTexture, depth, texcoord, eyePos, toSky, numSample, 0.0, fallback);
 }
