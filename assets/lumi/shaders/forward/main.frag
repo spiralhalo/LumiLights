@@ -75,6 +75,7 @@ void frx_pipelineFragment()
 			frx_fragRoughness = 0.05;
 
 			/* WATER RECOLOR */
+			// alpha=0.7 is the hard lower limit for outdoors water for better surface objects reflection potential
 			#if WATER_COLOR == WATER_COLOR_NO_TEXTURE
 			frx_fragColor = vec4(frx_vertexColor.rgb * 0.49, 0.7);
 
@@ -83,7 +84,8 @@ void frx_pipelineFragment()
 			frx_fragColor.a = mix(frx_fragColor.a, 0.7, frx_smoothedEyeBrightness.y);
 
 			#elif WATER_COLOR == WATER_COLOR_NO_COLOR
-			frx_fragColor.rgb = vec3(0.1, 0.15, 0.3);
+			frx_fragColor.rgb = vec3(0.075, 0.1, 0.125);
+			// ironically, lower sky light (usually) means more block light to reflect making it more visible without alpha
 			frx_fragColor.a = mix(0.3, 0.7, frx_smoothedEyeBrightness.y);
 
 			#endif
