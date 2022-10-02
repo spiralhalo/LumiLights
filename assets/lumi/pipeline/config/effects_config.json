@@ -62,7 +62,7 @@
 					descriptionKey: "config.lumi_lights.help.reflection_maximum_roughness_relative"
 				},
 				ssao_radius_f: {
-					default: 4.0, min: 0.1, max: 8.0,
+					default: 1.0, min: 0.1, max: 2.0,
 					nameKey: "config.lumi_lights.value.ssao_radius",
 					descriptionKey: "config.lumi_lights.help.ssao_radius"
 				},

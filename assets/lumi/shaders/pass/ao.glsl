@@ -82,7 +82,7 @@ void main()
 
 	vec2 aspectNormalizer = v_invSize * min(frxu_size.x, frxu_size.y);
 
-	const float ATT_RADIUS_SQ = 1.0; // attenuation radius is always 1 block
+	const float ATT_RADIUS_SQ = max(1.0, SSAO_VIEW_RADIUS * SSAO_VIEW_RADIUS); // attenuation radius is always at least 1 block
 
 	float occlusion = 0.0;
 	for (int i = 0; i < DIRECTIONS; ++i) {

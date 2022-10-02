@@ -111,10 +111,6 @@ void frx_pipelineFragment()
 		// reduce noise caused by micro normal in faraway blocks
 		float farBlend = l2_clampScale(16.0 * 1.0, 16.0 * 4.0, length(pv_vertex));
 		frx_fragNormal = normalize(mix(frx_fragNormal, frx_vertexNormal, farBlend));
-		
-		#ifndef VANILLA_AO_ENABLED
-		frx_fragEnableAo = false;
-		#endif
 
 		float ao = (frx_fragEnableAo && frx_modelOriginRegion) ? frx_fragLight.z : 1.0;
 
