@@ -78,6 +78,7 @@ vec4 customSky(sampler2D sunTexture, sampler2D moonTexture, vec3 toSky, vec3 fal
 {
 	vec4 result = vec4(0.0, 0.0, 0.0, 1.0);
 	float skyDotUp = dot(toSky, vec3(0.0, 1.0, 0.0));
+	float starEraser = 0.0;
 
 	if (frx_worldIsNether == 1 || isUnderwater) {
 		result.rgb = atmosv_ClearRadiance;
@@ -85,7 +86,7 @@ vec4 customSky(sampler2D sunTexture, sampler2D moonTexture, vec3 toSky, vec3 fal
 		// Sky, sun and moon
 		#if SKY_MODE == SKY_MODE_LUMI
 		vec4 celestColor = celestFrag(Rect(v_celest1, v_celest2, v_celest3), sunTexture, moonTexture, toSky);
-		float starEraser = celestColor.a;
+		starEraser = celestColor.a;
 
 		result.rgb  = atmosv_SkyRadiance * skyVisible;
 		result.rgb += pow(max(0.0, dot(toSky, frx_skyLightVector)), 100.0) * atmosv_CelestialRadiance * 0.1 * (1. - frx_rainGradient) * celestVisible; // halo?
@@ -97,7 +98,9 @@ vec4 customSky(sampler2D sunTexture, sampler2D moonTexture, vec3 toSky, vec3 fal
 		#endif
 
 		result.rgb += vec3(frx_skyFlashStrength * LIGHTNING_FLASH_STR);
+	}
 
+	if (frx_worldIsOverworld + frx_worldIsEnd > 0) {
 		#if SKY_MODE == SKY_MODE_LUMI || SKY_MODE == SKY_MODE_VANILLA_STARRY
 		// Stars
 		const vec3 NON_MILKY_AXIS = vec3(-0.598964, 0.531492, 0.598964);
@@ -122,7 +125,7 @@ vec4 customSky(sampler2D sunTexture, sampler2D moonTexture, vec3 toSky, vec3 fal
 		milkyHaze *= milkyHaze;
 		#endif
 
-		vec3 starColor = vec3(LUMI_STAR_BRIGHTNESS); // mix(vec3(LUMI_STAR_BRIGHTNESS), vec3(3.0, 1.0, 10.0), frx_worldIsEnd)
+		vec3 starColor = mix(vec3(LUMI_STAR_BRIGHTNESS), vec3(0.3, 0.1, 0.5), frx_worldIsEnd);
 		vec3 starRadiance = vec3(star) * EMISSIVE_LIGHT_STR * 0.1 * starColor + NEBULAE_COLOR * milkyHaze;
 
 		result.rgb += starRadiance * skyVisible;
@@ -133,25 +136,11 @@ vec4 customSky(sampler2D sunTexture, sampler2D moonTexture, vec3 toSky, vec3 fal
 	}
 
 	if (frx_worldIsEnd == 1){
-		// vec2 uv = toSky.xy;
-		// uv.x = atan(-toSky.x, toSky.z) / PI;
-		// uv.y = 2.0 * acos(uv.y) / PI;
-		// vec2 e = mod(uv, 0.1) * 10.0;
-		// e = smoothstep(0.01, 0.0, abs(e-vec2(0.5)));
-		// float f = max(e.x, e.y);
-		// result.rgb = vec3(1.0) * abs(snoise(uv.xxy * 10.0));
-		
-		
-		// vec3 uv = toSky + frx_renderSeconds * vec3(0.0, 0.2, 0.0);
-		// float e = snoise(uv * 10.0);
-		// float f = 1.0 - abs(snoise(uv + e * 0.1));
-		// result.rgb += pow(f, 100.0) * vec3(0.02, 0.1, 0.05);
-		// f = 1.0 - abs(snoise(-uv - e * 0.1));
-		// result.rgb += pow(f, 100.0) * vec3(0.02, 0.02, 0.1);
-		float g = (snoise(toSky * 2.0 + snoise(toSky * 10.0 + vec3(0.0, 0.0, frx_renderSeconds)) * 0.1)) * 0.5 + 0.5;
+		vec3 mov = vec3(0.0, 0.0, frx_renderSeconds);
+		float g = (snoise(toSky * 2.0 + snoise(toSky * 10.0 + mov) * 0.1 + mov * 0.05)) * 0.5 + 0.5;
 		// vec3 norm = normalize(vec3(dFdx(g), dFdy(g), 0.0));
 		// float sup = 1.0 + pow(dot(norm, vec3(0.0, 1.0, 0.0)) * 0.5 + 0.5, 5.0);
-		result.rgb += g * 0.04 * (toSky * 0.5 + 0.5) * vec3(1.0, 0.1, 0.9);// * sup;
+		result.rgb += 0.04 * (toSky * 0.5 + 0.5) * vec3(1.0, 0.1, 0.9) * g;// * sup;
 	
 		result.rgb *= l2_clampScale(0.0, l2_clampScale(128.0, 10.0, frx_cameraPos.y), toSky.y * 0.5 + 0.5);
 	}
