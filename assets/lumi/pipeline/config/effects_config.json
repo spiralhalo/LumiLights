@@ -14,6 +14,11 @@
 					nameKey: "config.lumi_lights.value.ss_ao",
 					descriptionKey: "config.lumi_lights.help.ss_ao"
 				},
+				combine_vanilla_ao: {
+					default: true,
+					nameKey: "config.lumi_lights.value.combine_vanilla_ao",
+					descriptionKey: "config.lumi_lights.help.combine_vanilla_ao"
+				},
 				volumetric_clouds: {
 					default: true,
 					nameKey: "config.lumi_lights.value.volumetric_clouds",

@@ -47,6 +47,8 @@
 	"config.lumi_lights.help.ss_reflection": "Expensive raymarched reflection",
 	"config.lumi_lights.value.ss_ao": "Screen-space ambient occlusion",
 	"config.lumi_lights.help.ss_ao": "Very expensive approximated local shadows",
+	"config.lumi_lights.value.combine_vanilla_ao": "Combine vanilla AO",
+	"config.lumi_lights.help.combine_vanilla_ao": "Combine vanilla vertex AO with screen-space AO for richer result. Usually recommended unless vanilla AO is glitched (rarely happens with modded blocks).",
 	"config.lumi_lights.value.volumetric_clouds": "Volumetric clouds",
 	"config.lumi_lights.help.volumetric_clouds": "Expensive volumetric clouds",
 	"config.lumi_lights.value.volumetric_fog": "Volumetric fog",

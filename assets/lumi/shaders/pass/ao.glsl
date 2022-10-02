@@ -41,6 +41,7 @@ void main()
 
 uniform sampler2D u_vanilla_depth;
 uniform sampler2DArray u_gbuffer_lightnormal;
+uniform sampler2D u_gbuffer_main_etc_copy;
 uniform sampler2D u_tex_noise;
 
 in mat2 v_deltaRotator;
@@ -115,6 +116,10 @@ void main()
 
 	// apply intensity before blurring
 	ao_result = pow(clamp(occlusion, 0.0, 1.0), SSAO_INTENSITY);
+
+	#ifdef COMBINE_VANILLA_AO
+	ao_result = min(ao_result, texture(u_gbuffer_main_etc_copy, v_texcoord).z);
+	#endif
 }
 
 #endif

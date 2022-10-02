@@ -114,6 +114,7 @@
 			samplers: [
 				"u_vanilla_depth",
 				"u_gbuffer_lightnormal",
+				"u_gbuffer_main_etc_copy",
 				"u_tex_noise",
 			]
 		},
@@ -189,18 +190,29 @@
 				toggleConfig: "ss_ao",
 			},
 			{
+				name: "ao0_copy_prior",
+				program: "ao0",
+				framebuffer: "ao_result0",
+				samplerImages: [
+					"gbuffer_main_etc",
+				],
+				// TODO: require new canvas, require two conditions (ss_ao and combine_vanilla_ao)
+				toggleConfig: "ss_ao",
+			},
+			{
 				name: "ao",
 				program: "ao",
 				framebuffer: "ao_result1",
 				samplerImages: [
 					"vanilla_depth",
 					"gbuffer_lightnormal",
+					"gbuffer_main_etc_copy",
 					"lumi:textures/filter_pattern/bluenoise256.png",
 				],
 				toggleConfig: "ss_ao",
 			},
 			{
-				name: "ao0",
+				name: "ao0_copy_result",
 				program: "ao0",
 				framebuffer: "ao_result0",
 				samplerImages: [
