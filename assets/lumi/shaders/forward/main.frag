@@ -27,10 +27,7 @@ uniform sampler2D u_tex_glint;
 uniform sampler2D u_tex_nature;
 
 in float pv_diffuse;
-
-#ifdef WATER_NOISE_DEBUG
 in vec3 pv_vertex;
-#endif
 
 out vec4[7] fragColor;
 
@@ -98,7 +95,7 @@ void frx_pipelineFragment()
 		}
 
 		#ifdef WATER_NOISE_DEBUG
-		float wtrNs = sampleWaterNoise(u_tex_nature, pv_vertex, vec2(0.0), abs(frx_vertexNormal));
+		float wtrNs = sampleWaterNoise(u_tex_nature, pv_vertex + frx_cameraPos, vec2(0.0), abs(frx_vertexNormal));
 		frx_fragColor.rgba += vec4(wtrNs * wtrNs * wtrNs);
 		#endif
 
@@ -110,6 +107,10 @@ void frx_pipelineFragment()
 			frx_fragNormal = TBN * frx_fragNormal;
 		}
 
+		// reduce noise caused by micro normal in faraway blocks
+		float farBlend = l2_clampScale(16.0 * 1.0, 16.0 * 4.0, length(pv_vertex));
+		frx_fragNormal = normalize(mix(frx_fragNormal, frx_vertexNormal, farBlend));
+		
 		#ifndef VANILLA_AO_ENABLED
 		frx_fragEnableAo = false;
 		#endif

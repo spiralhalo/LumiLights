@@ -128,11 +128,7 @@ vec3 sampleWaterNormal(sampler2D natureTexture, vec3 fragWorldPos, vec3 absVerte
 	vec3 tside  = amplitude * sampleWaterNoise(natureTexture, fragWorldPos, uvMove.yx, absVertexNormal) * normal + tmove - origin;
 	vec3 bside  = amplitude * sampleWaterNoise(natureTexture, fragWorldPos, uvMove.xy, absVertexNormal) * normal + bmove - origin;
 
-	vec3 eyePos = fragWorldPos - frx_cameraPos;
-	float farBlend = l2_clampScale(0., 1024. * 1024., dot(eyePos, eyePos));
-	vec3 noisyNormal = normalize(mix(cross(tside, bside), normal, farBlend));
-
-	return noisyNormal;
+	return normalize(cross(tside, bside));
 }
 #endif
 #endif

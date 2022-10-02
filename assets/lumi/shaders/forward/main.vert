@@ -17,10 +17,7 @@
  *******************************************************/
 
 out float pv_diffuse;
-
-#ifdef WATER_NOISE_DEBUG
 out vec3 pv_vertex;
-#endif
 
 // Grondag's vanilla diffuse but different
 float p_diffuseGui(vec3 normal) {
@@ -38,10 +35,7 @@ vec2 inv_size = 1.0 / vec2(frx_viewWidth, frx_viewHeight);
 void frx_pipelineVertex() {
 
 	if (frx_modelOriginScreen) {
-		#ifdef WATER_NOISE_DEBUG
 		pv_vertex = frx_vertex.xyz;
-		#endif
-
 		gl_Position = frx_guiViewProjectionMatrix * frx_vertex;
 
 		#ifdef TAA_ENABLED
@@ -51,10 +45,7 @@ void frx_pipelineVertex() {
 		#endif
 	} else {
 		frx_vertex += frx_modelToCamera;
-
-		#ifdef WATER_NOISE_DEBUG
-		pv_vertex = frx_vertex.xyz + frx_cameraPos;
-		#endif
+		pv_vertex = frx_vertex.xyz;
 
 		#ifdef TAA_ENABLED
 		#ifdef SHADOW_MAP_PRESENT
