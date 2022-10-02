@@ -16,14 +16,36 @@
 		// These are automatically calculated for the largest (least-detail)
 		// cascade to contain the entire visible scene. These correspond
 		// to cascade indices 1, 2 and 3 in shader.
-		cascadeRadius: [64, 16, 8]
+		cascadeRadius: {
+			default: 1024,
+			optionMap: {
+				shadow_resolution: [
+					{ from: "256", to: [64, 32, 8] },
+					{ from: "512", to: [64, 32, 8] },
+					{ from: "1024", to: [64, 16, 8] },
+					{ from: "2048", to: [64, 16, 4] },
+					{ from: "4096", to: [64, 16, 4] },
+				]
+			}
+		},
 	},
 
 	images: [
 		// depth attachment for shadow map
 		{
 			name: "gbuffer_shadow",
-			size: 1024,
+			size: {
+				default: 1024,
+				optionMap: {
+					shadow_resolution: [
+						{ from: "256", to: 256 },
+						{ from: "512", to: 512 },
+						{ from: "1024", to: 1024 },
+						{ from: "2048", to: 2048 },
+						{ from: "4096", to: 4096 },
+					]
+				}
+			},
 			// DO NOT CHANGE ANY SETTINGS BELOW
 			internalFormat: "DEPTH_COMPONENT32",
 			pixelFormat: "DEPTH_COMPONENT",

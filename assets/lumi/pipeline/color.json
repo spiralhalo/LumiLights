@@ -196,7 +196,6 @@
 				samplerImages: [
 					"gbuffer_main_etc",
 				],
-				// TODO: require new canvas, require two conditions (ss_ao and combine_vanilla_ao)
 				toggleConfig: "ss_ao",
 			},
 			{

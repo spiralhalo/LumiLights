@@ -4,6 +4,22 @@
 			includeToken: "lumi:shadow_config",
 			categoryKey: "config.lumi_lights.category.shadow",
 			options: {
+				shadow_resolution: {
+					default: "1024",
+					choices: ["256", "512", "1024", "2048", "4096"],
+					enum: true,
+					prefix: "shadow_resolution_",
+					default: true,
+					nameKey: "config.lumi_lights.value.shadow_resolution",
+					descriptionKey: "config.lumi_lights.help.shadow_resolution"
+				},
+				shadow_angle: {
+					default: -30,
+					min: -45,
+					max: 45,
+					nameKey: "config.lumi_lights.value.shadow_angle",
+					descriptionKey: "config.lumi_lights.help.shadow_angle"
+				},
 				filter_shadows: {
 					default: true,
 					nameKey: "config.lumi_lights.value.filter_shadows",

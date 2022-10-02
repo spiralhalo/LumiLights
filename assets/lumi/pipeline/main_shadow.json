@@ -1,7 +1,7 @@
 {
 	sky: {
 		// Used when dimension/celestial object does not specify
-		defaultZenithAngle: -30
+		defaultZenithAngle: {option: "shadow_angle"}
 	},
 
 	include: [

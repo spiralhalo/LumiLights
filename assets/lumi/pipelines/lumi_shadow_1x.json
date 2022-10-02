@@ -1,11 +1,11 @@
 {
-	nameKey: "pipeline.lumi_shadow_1x.name",
-	descriptionKey: "pipeline.lumi_shadow_1x.desc",
+	nameKey: "pipeline.lumi_lights_deluxe.name",
+	descriptionKey: "pipeline.lumi_lights_deluxe.desc",
 
 	include: [
 		"lumi:pipeline/main.json",
 		"lumi:pipeline/main_shadow.json",
-		"lumi:pipeline/skyshadow_1x.json",
+		"lumi:pipeline/skyshadow.json",
 		"lumi:pipeline/config.json",
 	],
 }
