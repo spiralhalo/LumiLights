@@ -185,7 +185,7 @@ vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer
 	#endif
 
 	vec3 skyLight = skyRadiance(sunTexture, moonTexture, rawMat.xy, march, light.yw) * skyReflectionFac(march);
-	vec3 envLight = BLOCK_LIGHT_COLOR * lightmapRemap(light.x) * (1.0 - frx_smoothedEyeBrightness.y);
+	vec3 envLight = blockLightColor(light.x, light.z) * lightmapRemap(light.x) * (1.0 - frx_smoothedEyeBrightness.y);
 
 	vec3 reflectedLight = reflectionPbr(albedo, rawMat.xy, envLight + mix(skyLight, objLight.rgb, objLight.a), viewMarch, viewToEye);
 

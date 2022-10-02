@@ -34,7 +34,7 @@ void main()
 	float luminanceGate = smoothstep(MIN_LUM, MIN_LUM + 1.0, luminance) * 0.25 * alpha;
 
 	luminanceGate = max(luminanceGate, emissive);
-	luminanceGate -= min(1.0, luminanceGate) * 0.5 * atmos_eyeAdaptation();
+	luminanceGate -= min(1.0, luminanceGate) * 0.5 * atmosv_eyeAdaptation;
 
 	fragColor = base * luminanceGate;
 

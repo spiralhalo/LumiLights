@@ -110,10 +110,11 @@ void main()
 	occlusion  = 1.0 - occlusion / float(DIRECTIONS) * fade;
 
 	// higher intensity at a distance
-	float intensity = SSAO_INTENSITY * (1.0 + 2.0 * l2_clampScale(16.0, 128.0, -viewPos.z));
+	// NOPE: causes distance darkening :/
+	// float intensity = SSAO_INTENSITY * (1.0 + 2.0 * l2_clampScale(16.0, 128.0, -viewPos.z));
 
 	// apply intensity before blurring
-	ao_result = pow(clamp(occlusion, 0.0, 1.0), intensity);
+	ao_result = pow(clamp(occlusion, 0.0, 1.0), SSAO_INTENSITY);
 }
 
 #endif

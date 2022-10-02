@@ -46,12 +46,6 @@ const float USER_ALBEDO_BRIGHTENING        = clamp(ALBEDO_BRIGHTENING, 0, 20) / 
 	const vec3 BLOCK_LIGHT_WARM	   = hdr_fromGamma(vec3(1.0, 0.7, 0.4));
 	const vec3 BLOCK_LIGHT_NEUTRAL = vec3(lightLuminance(BLOCK_LIGHT_WARM));
 
-#if BLOCK_LIGHT_MODE == BLOCK_LIGHT_MODE_NEUTRAL
-	const vec3 BLOCK_LIGHT_COLOR = BLOCK_LIGHT_NEUTRAL;
-#else
-	const vec3 BLOCK_LIGHT_COLOR = BLOCK_LIGHT_WARM;
-#endif
-
 	const vec3 NIGHT_VISION_COLOR		= hdr_fromGamma(vec3(1.0, 0.95, 1.0));
 	const vec3 SKYLESS_LIGHT_COLOR		= vec3(1.0);
 

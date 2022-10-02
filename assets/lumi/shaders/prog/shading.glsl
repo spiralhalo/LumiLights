@@ -252,6 +252,16 @@ void prepare(vec4 color, sampler2D natureTexture, vec3 eyePos, float vertexNorma
 	light.z += vanillaEmissive;
 }
 
+vec3 blockLightColor(float lightx, float blWhite) {
+#if BLOCK_LIGHT_MODE != BLOCK_LIGHT_MODE_NEUTRAL
+	vec3 blColor = mix(BLOCK_LIGHT_NEUTRAL, BLOCK_LIGHT_WARM, l2_clampScale(0.5, 0.7, lightx));
+	blWhite = max(blWhite, atmosv_eyeAdaptation * 0.5);
+	return mix(blColor, BLOCK_LIGHT_NEUTRAL, blWhite);
+#else
+	return BLOCK_LIGHT_NEUTRAL;
+#endif
+}
+
 void lights(vec3 albedo, vec4 light, vec3 eyePos, vec3 toEye, out vec3 baseLight, out vec3 blockLight, out vec3 hlLight, out vec3 skyLight)
 {
 	float userBrightness = frx_viewBrightness <= 0.5 ? (0.5 + frx_viewBrightness) : (2.0 * frx_viewBrightness);
@@ -273,11 +283,6 @@ void lights(vec3 albedo, vec4 light, vec3 eyePos, vec3 toEye, out vec3 baseLight
 
 	float bl = l2_clampScale(0.03125, 0.96875, light.x);
 
-#if BLOCK_LIGHT_MODE != BLOCK_LIGHT_MODE_NEUTRAL
-	vec3 blColor = mix(BLOCK_LIGHT_NEUTRAL, BLOCK_LIGHT_WARM, l2_clampScale(0.5, 0.7, light.x));
-#else
-	vec3 blColor = BLOCK_LIGHT_NEUTRAL;
-#endif
 
 	// exaggerate block light
 	#define BL_MULT 3.0
@@ -285,15 +290,10 @@ void lights(vec3 albedo, vec4 light, vec3 eyePos, vec3 toEye, out vec3 baseLight
 	bl += pow(l2_clampScale(0.7, 0.96875, light.x), 2.0) * 3.0;
 
 	// makes builds look better outside
-	float eyeAdaptation = atmos_eyeAdaptation();
-	float adaptationTerm = mix(1.0, 0.5 / BL_MULT, eyeAdaptation);
+	float adaptationTerm = mix(1.0, 0.5 / BL_MULT, atmosv_eyeAdaptation);
 
-#if BLOCK_LIGHT_MODE != BLOCK_LIGHT_MODE_NEUTRAL
-	float blWhite = light.z;
-	blWhite = max(blWhite, eyeAdaptation * 0.5);
-	blColor = mix(blColor, BLOCK_LIGHT_NEUTRAL, blWhite);
-#endif
-
+	vec3 blColor = blockLightColor(light.x, light.z);
+	
 	blockLight = blColor * BLOCK_LIGHT_STR * bl * adaptationTerm;
 	blockLight *= 0.7 + userBrightness * 0.4;
 

@@ -21,6 +21,7 @@
 
 	out vec3 atmosv_CelestialRadiance;
 	out vec3 atmosv_SkyAmbientRadiance;
+	out float atmosv_eyeAdaptation;
 
 	#ifdef POST_SHADER
 	out float atmosv_CaveFog;
@@ -36,6 +37,7 @@
 
 	in vec3 atmosv_CelestialRadiance;
 	in vec3 atmosv_SkyAmbientRadiance;
+	in float atmosv_eyeAdaptation;
 
 	#ifdef POST_SHADER
 	in float atmosv_CaveFog;
@@ -50,10 +52,6 @@
 #ifdef POST_SHADER
 #define calcHorizon(worldVec) pow(l2_clampScale(1.0, -l2_clampScale(ATMOS_SEA_LEVEL, ATMOS_STRATOSPHERE, frx_cameraPos.y), worldVec.y), 0.25)
 #define waterHorizon(isUnderwater, skyHorizon) float(isUnderwater) * l2_clampScale(0.9, 1.0, skyHorizon) // kinda hacky
-
-float atmos_eyeAdaptation() {
-	return frx_smoothedEyeBrightness.y * lightLuminance(atmosv_CelestialRadiance) * (1. - frx_rainGradient);
-}
 #endif
 
 
@@ -219,6 +217,19 @@ void atmos_generateAtmosphereModel()
 	#endif
 	/**********/
 
+
+	/** EYE ADAPTATION **/
+	atmosv_eyeAdaptation = frx_smoothedEyeBrightness.y * lightLuminance(atmosv_CelestialRadiance) * (1. - frx_rainGradient);
+
+	//  NB: mustn't affect cave fog
+	if (frx_worldHasSkylight == 1) {
+		float skyAdaptor = 1.0 / (0.33 + 0.67 * max(frx_smoothedEyeBrightness.y, max(frx_rainGradient, 1.0 - lightLuminance(atmosv_CelestialRadiance))));
+		atmosv_SkyRadiance *= skyAdaptor;
+		atmosv_CelestialRadiance *= skyAdaptor;
+		atmosv_SkyAmbientRadiance *= skyAdaptor;
+		atmosv_FogRadiance *= skyAdaptor;
+		// atmosv_ClearRadiance;
+	}
 
 	/** CAVE FOG **/
 	atmosv_CaveFog = 0.0;
