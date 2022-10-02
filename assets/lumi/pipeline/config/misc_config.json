@@ -62,6 +62,11 @@
 					nameKey: "config.lumi_lights.value.toon_outline",
 					descriptionKey: "config.lumi_lights.help.toon_outline"
 				},
+				small_hand: {
+					default: false,
+					nameKey: "config.lumi_lights.value.small_hand",
+					descriptionKey: "config.lumi_lights.help.small_hand"
+				},
 			}
 		},
 		{

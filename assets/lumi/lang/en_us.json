@@ -160,6 +160,8 @@
 	"config.lumi_lights.help.glint_blue": "Enchantment glint blue value (Shader mode)",
 	"config.lumi_lights.value.toon_outline": "Toon outline",
 	"config.lumi_lights.help.toon_outline": "Render \"toon\" style object outline",
+	"config.lumi_lights.value.small_hand": "Smaller hands",
+	"config.lumi_lights.help.small_hand": "Smaller player hands on first person view",
 
 	"config.lumi_lights.category.experimental": "Experiments",
 	"config.lumi_lights.value.shadow_workaround": "Shadow workaround",

@@ -40,7 +40,14 @@ void frx_pipelineVertex() {
 
 		#ifdef TAA_ENABLED
 		if (frx_isHand) {
-			gl_Position.st += taaJitter(inv_size, frx_renderFrames) * gl_Position.w;
+			gl_Position.xy += taaJitter(inv_size, frx_renderFrames) * gl_Position.w;
+		}
+		#endif
+
+		#ifdef SMALL_HAND
+		if (frx_isHand) {
+			gl_Position.xy *= 0.5;
+			gl_Position.y -= 0.25;
 		}
 		#endif
 	} else {
@@ -63,7 +70,7 @@ void frx_pipelineVertex() {
 		gl_Position = frx_projectionMatrix * vec4((frx_viewMatrix * frx_vertex).xyz * correctionStrength, 1.0);
 		#endif
 
-		gl_Position.st += taaJitter(inv_size, frx_renderFrames) * gl_Position.w;
+		gl_Position.xy += taaJitter(inv_size, frx_renderFrames) * gl_Position.w;
 		#else
 		gl_Position = frx_viewProjectionMatrix * frx_vertex;
 		#endif
