@@ -106,7 +106,9 @@ vec4 skyBase(vec3 toSky, vec3 fallback, bool isUnderwater) {
 
 	if (frx_worldIsOverworld + frx_worldIsEnd < 1) {
 		result.rgb = hdr_fromGamma(fallback) * (1.0 + float(frx_worldIsEnd) * 1.0);
-	} else if (isUnderwater) {
+	}
+	
+	if (isUnderwater) {
 		result.rgb = atmosv_WaterFogRadiance;
 	} else if (frx_worldIsNether == 1) {
 		result.rgb = atmosv_FogRadiance;
@@ -134,7 +136,7 @@ vec4 basicSky(vec3 toSky, vec3 fallback, bool isUnderwater) {
 vec4 customSky(vec4 result, sampler2D sunTexture, sampler2D moonTexture, vec3 toSky, vec3 fallback, bool isUnderwater, float skyVisible, float celestVisible) {
 	float starEraser = 0.0;
 
-	if (frx_worldIsOverworld == 1) {
+	if (frx_worldIsOverworld == 1 && !isUnderwater) {
 		// Sky, sun and moon
 		#if SKY_MODE == SKY_MODE_LUMI
 		vec4 celestColor = celestFrag(Rect(v_celest1, v_celest2, v_celest3), sunTexture, moonTexture, toSky);
@@ -145,7 +147,7 @@ vec4 customSky(vec4 result, sampler2D sunTexture, sampler2D moonTexture, vec3 to
 		#endif
 	}
 
-	if (frx_worldIsOverworld + frx_worldIsEnd > 0) {
+	if (frx_worldIsOverworld + frx_worldIsEnd > 0 && !isUnderwater) {
 		#if SKY_MODE == SKY_MODE_LUMI || SKY_MODE == SKY_MODE_VANILLA_STARRY
 		// Stars
 		const vec3 NON_MILKY_AXIS = vec3(-0.598964, 0.531492, 0.598964);

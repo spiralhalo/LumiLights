@@ -63,7 +63,7 @@ void main()
 	vec3 toFrag  = normalize(eyePos);
 
 	float distToEye = length(eyePos);
-	vec4 skyBasic = basicSky(toFrag, frx_vanillaClearColor, false);
+	vec4 skyBasic = basicSky(toFrag, frx_vanillaClearColor, frx_cameraInWater == 1);
 	if (dMin < 1) {
 		fragColor = mix(
 			volumetricFog(u_gbuffer_shadow, u_tex_nature, fragColor, distToEye, toFrag, texture(u_gbuffer_lightnormal, vec3(v_texcoord, idLight)).y, getRandomFloat(u_tex_noise, v_texcoord, frxu_size), dMin, frx_cameraInWater == 1),

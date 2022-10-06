@@ -104,8 +104,7 @@ vec3 fogColor(bool submerged, vec3 toFrag) {
 	float twGray = l2_clampScale(1.0, -1.0, toFrag.x * sign(frx_skyLightVector.x) * (1.0 - frx_worldIsMoonlit * 2.0));
 	twGray = l2_softenUp(twGray) * atmosv_OWTwilightFactor;
 
-	vec3 result = submerged ? atmosv_WaterFogRadiance : atmosv_FogRadiance;
-	result = mix(result, atmosv_SkyRadiance, twGray);
+	vec3 result = submerged ? atmosv_WaterFogRadiance : mix(atmosv_FogRadiance, atmosv_SkyRadiance, twGray);
 	return result;
 }
 

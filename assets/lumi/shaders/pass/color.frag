@@ -87,7 +87,7 @@ void main()
 	float disableDiffuse = bit_unpack(miscSolid.z, 4);
 
 	vec4 base;
-	vec4 skyBasic = basicSky(toFrag, frx_vanillaClearColor, false);
+	vec4 skyBasic = basicSky(toFrag, frx_vanillaClearColor, solidIsUnderwater);
 	vec4 sky = customSky(skyBasic, u_tex_sun, u_tex_moon, toFrag, dSolid == 1.0 ? cSolid.rgb : frx_vanillaClearColor, solidIsUnderwater);
 
 	if (dSolid == 1.0) {
