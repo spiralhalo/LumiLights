@@ -143,7 +143,9 @@ void atmos_generateAtmosphereModel()
 	atmosv_SkyAmbientRadiance = mix(NOON_AMBIENT, NIGHT_AMBIENT * moonlightSize, nightFactor) * (frx_worldHasSkylight == 1 ? 1.0 : 0.0);
 	#ifdef POST_SHADER
 	// if editing this, also edit nightFogLuminance for cave fog
-	atmosv_SkyRadiance   = mix(DAY_SKY_COLOR, NIGHT_SKY_COLOR, nightFactor) * DEF_SKY_STR;
+	atmosv_SkyRadiance = mix(DAY_SKY_COLOR, NIGHT_SKY_COLOR, nightFactor) * DEF_SKY_STR;
+	float skyLuminance = lightLuminanceUnclamped(atmosv_SkyRadiance);
+	atmosv_SkyRadiance = mix(atmosv_SkyRadiance, vec3(skyLuminance), atmosv_OWTwilightFactor);
 	#endif
 
 	#ifdef POST_SHADER
@@ -161,8 +163,8 @@ void atmos_generateAtmosphereModel()
 	bool customNetherFog = frx_worldIsNether == 1 && max(frx_cameraInSnow, frx_cameraInLava) < 1;
 
 	if (customOWFog) {
-		float skyLuminance = lightLuminanceUnclamped(atmosv_SkyRadiance);
 		atmosv_FogRadiance = (atmosv_SkyRadiance / skyLuminance) * max(skyLuminance, mix(lightLuminance(atmosv_CelestialRadiance * 0.4), 0.1 - frx_smoothedRainGradient * 0.05, nightFactor));
+		// atmosv_FogRadiance = mix(atmosv_SkyRadiance, vec3(1.0), lightLuminance(atmosv_CelestialRadiance));
 		atmosv_FogRadiance = mix(atmosv_FogRadiance, twilightRadiance, atmosv_OWTwilightFactor);
 		// atmosv_FogRadiance = mix(atmosv_FogRadiance, atmosv_SkyRadiance, l2_clampScale(0.2, 0.0, frx_skyLightTransitionFactor));
 	} else if (customEndFog) {
