@@ -164,9 +164,8 @@ void atmos_generateAtmosphereModel()
 
 	if (customOWFog) {
 		atmosv_FogRadiance = (atmosv_SkyRadiance / skyLuminance) * max(skyLuminance, mix(lightLuminance(atmosv_CelestialRadiance * 0.4), 0.1 - frx_smoothedRainGradient * 0.05, nightFactor));
-		// atmosv_FogRadiance = mix(atmosv_SkyRadiance, vec3(1.0), lightLuminance(atmosv_CelestialRadiance));
+		atmosv_FogRadiance = mix(atmosv_FogRadiance, vec3(lightLuminance(atmosv_FogRadiance)), 0.25);
 		atmosv_FogRadiance = mix(atmosv_FogRadiance, twilightRadiance, atmosv_OWTwilightFactor);
-		// atmosv_FogRadiance = mix(atmosv_FogRadiance, atmosv_SkyRadiance, l2_clampScale(0.2, 0.0, frx_skyLightTransitionFactor));
 	} else if (customEndFog) {
 		atmosv_FogRadiance = mix(clearRadiance, hdr_fromGamma(vec3(1.0, 0.7, 1.0)), float(frx_cameraInFluid)) * 0.1;
 	} else if (customNetherFog) {

@@ -195,15 +195,7 @@ struct shadingResult {
 float diffuseNdL(float NdotL, float alpha, float disableDiffuse, float dielectricity)
 {
 	float diffuseNdotL = mix(1.0, NdotL, alpha);
-
-	diffuseNdotL = l2_softenUp(diffuseNdotL, 5.0);
-
-	#ifdef SHADOW_MAP_PRESENT
-	diffuseNdotL += (1.0 - diffuseNdotL) * disableDiffuse * 0.5;
-	#else
-	diffuseNdotL += (1.0 - diffuseNdotL) * disableDiffuse;
-	#endif
-
+	diffuseNdotL = max(l2_softenUp(diffuseNdotL, 5.0), disableDiffuse);
 	return diffuseNdotL;
 }
 

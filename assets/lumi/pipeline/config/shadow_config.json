@@ -5,11 +5,10 @@
 			categoryKey: "config.lumi_lights.category.shadow",
 			options: {
 				shadow_resolution: {
-					default: "1024",
+					default: "2048",
 					choices: ["256", "512", "1024", "2048", "4096"],
 					enum: true,
 					prefix: "shadow_resolution_",
-					default: true,
 					nameKey: "config.lumi_lights.value.shadow_resolution",
 					descriptionKey: "config.lumi_lights.help.shadow_resolution"
 				},

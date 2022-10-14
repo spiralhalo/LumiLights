@@ -12,7 +12,7 @@
  *******************************************************/
 
 const float USER_LIGHTNING_MULTIPLIER      = clamp(LIGHTNING_FLASH_BOOST, 0.0, 2.0);
-const float USER_SUNLIGHT_MULTIPLIER       = clamp(SUNLIGHT_BOOST, 0.25, 2.0);
+const float USER_SUNLIGHT_MULTIPLIER       = clamp(SUNLIGHT_BOOST, 0.25, 4.0);
 const float USER_NOON_AMBIENT_MULTIPLIER   = clamp(NOON_AMBIENT_BOOST, 0.25, 2.0);
 const float USER_BLOCKLIGHT_MULTIPLIER     = clamp(BLOCKLIGHT_BOOST, 0.25, 2.0);
 const float USER_AMBIENT_MULTIPLIER        = clamp(AMBIENT_BOOST, 0.0, 2.0);
