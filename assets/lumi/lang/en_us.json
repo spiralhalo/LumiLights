@@ -2,7 +2,7 @@
 	"pipeline.lumi_lights.name": "Lumi Lights LITE",
 	"pipeline.lumi_lights.desc": "Lumi Lights without shadows",
 
-	"pipeline.lumi_lights_deluxe.name": "Lumi Lights DELUXE",
+	"pipeline.lumi_lights_deluxe.name": "Lumi Lights",
 	"pipeline.lumi_lights_deluxe.desc": "Lumi Lights with shadows",
 
 	"config.lumi_lights.category.shadow": "Shadows",
@@ -50,6 +50,8 @@
 	"config.lumi_lights.help.volumetric_fog": "Expensive volumetric fog",
 	"config.lumi_lights.value.bloom_effect": "Bloom effect",
 	"config.lumi_lights.help.bloom_effect": "Emulate eye lens bloom",
+	"config.lumi_lights.value.high_quality_bloom": "High quality bloom",
+	"config.lumi_lights.help.high_quality_bloom": "Expensive but nicer bicubic filtering",
 	"config.lumi_lights.value.water_waves": "Water waves",
 	"config.lumi_lights.help.water_waves": "Animated water waves texture",
 	"config.lumi_lights.value.water_caustics": "Water caustics effect",

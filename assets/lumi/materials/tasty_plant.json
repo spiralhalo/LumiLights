@@ -1,0 +1,7 @@
+{
+	"vertexSource": "lumi:shaders/material/leaves.vert",
+	"fragmentSource": "lumi:shaders/material/leaves.frag",
+	"depthVertexSource": "lumi:shaders/material/leaves.vert",
+	"disableAo": false,
+	"disableDiffuse": true
+}

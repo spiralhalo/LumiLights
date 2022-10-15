@@ -27,13 +27,15 @@ void main()
 
 	vec4 base = hdr_inverseTonemap(texture(u_input, v_texcoord));
 	float luminance = l2_max3(base.rgb); //use max instead of luminance to get some lava action
-	const float MIN_LUM = 0.9; // based on semi-comfortable bloom on snowy scapes
-	float alpha = max(1.0, luminance - MIN_LUM);
+	
+	const float MIN_LUM = 1.0;
+	const float MAX_LUM = max(10.0, DEF_SUNLIGHT_STR); //if your screen is already bright by sunlight you probably don't want bloom anyway
+	float alpha = max(1.0, min(MAX_LUM, luminance) - MIN_LUM);
 
 	// NOTE: multiplying the gate only makes sense with additive bloom
-	float luminanceGate = smoothstep(MIN_LUM, MIN_LUM + 1.0, luminance) * 0.25 * alpha;
+	float luminanceGate = smoothstep(MIN_LUM, MAX_LUM, luminance) * 0.25 * alpha;
 
-	luminanceGate = max(luminanceGate, emissive);
+	// luminanceGate = max(luminanceGate, emissive);
 	luminanceGate -= min(1.0, luminanceGate) * 0.5 * atmosv_eyeAdaptation;
 
 	fragColor = base * luminanceGate;

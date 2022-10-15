@@ -61,11 +61,11 @@ vec4 celestFrag(in Rect celestRect, sampler2D ssun, sampler2D smoon, vec3 worldV
 
 				celestTex = hdr_fromGamma(texture(smoon, celestUV).rgb);
 				celestCol = celestTex + vec3(0.001) * hdr_fromGamma(fullMoonColor);
-				celestCol *= EMISSIVE_LIGHT_STR  * frx_skyLightTransitionFactor;
+				celestCol *= frx_skyLightTransitionFactor;
 			}
 		} else {
 			celestTex = texture(ssun, celestUV).rgb;
-			celestCol = hdr_fromGamma(celestTex) * atmosv_CelestialRadiance * EMISSIVE_LIGHT_STR;
+			celestCol = hdr_fromGamma(celestTex) * atmosv_CelestialRadiance;
 		}
 
 		opacity = max(opacity, frx_luminance(clamp(celestTex, 0.0, 1.0)));
@@ -142,7 +142,7 @@ vec4 customSky(vec4 result, sampler2D sunTexture, sampler2D moonTexture, vec3 to
 		vec4 celestColor = celestFrag(Rect(v_celest1, v_celest2, v_celest3), sunTexture, moonTexture, toSky);
 		starEraser = celestColor.a;
 
-		result.rgb += pow(max(0.0, dot(toSky, frx_skyLightVector)), 100.0) * atmosv_CelestialRadiance * 0.1 * (1. - frx_rainGradient) * celestVisible; // halo?
+		result.rgb += pow(max(0.0, dot(toSky, frx_skyLightVector)), 100.0) * atmosv_CelestialRadiance * exp(-lightLuminance(atmosv_CelestialRadiance)) * 0.1 * (1. - frx_rainGradient) * celestVisible; // halo?
 		result.rgb += celestColor.rgb * (1. - frx_rainGradient) * celestVisible;
 		#endif
 	}
@@ -173,7 +173,7 @@ vec4 customSky(vec4 result, sampler2D sunTexture, sampler2D moonTexture, vec3 to
 		#endif
 
 		vec3 starColor = mix(vec3(LUMI_STAR_BRIGHTNESS), atmosv_FogRadiance, frx_worldIsEnd);
-		vec3 starRadiance = vec3(star) * EMISSIVE_LIGHT_STR * 0.1 * starColor + NEBULAE_COLOR * milkyHaze;
+		vec3 starRadiance = vec3(star) * EMISSIVE_LIGHT_STR * 0.05 * starColor + NEBULAE_COLOR * milkyHaze;
 
 		result.rgb += starRadiance * skyVisible;
 		#endif

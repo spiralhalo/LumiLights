@@ -38,7 +38,7 @@ const float VOLUMETRIC_RESIDUAL	   = 0.1;
 const float HEIGHT_RESIDUAL		   = 0.05;
 const float FOG_ABSOLUTE_LIMIT	   = 0.7;
 const float FOG_FAR				   = FOG_FAR_CHUNKS * 16.0;
-const float FOG_DENSITY			   = clamp(FOG_DENSITY_F, 0.01, 10.0);
+const float FOG_DENSITY			   = clamp(FOG_DENSITY_F, 0.01, 5.0) * 2.0;
 const float UNDERWATER_FOG_FAR	   = UNDERWATER_FOG_FAR_CHUNKS * 16.0;
 
 float getVisibility(bool isUnderwater)
