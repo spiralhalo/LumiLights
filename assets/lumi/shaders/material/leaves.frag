@@ -1,5 +1,7 @@
 #include frex:shaders/api/fragment.glsl
 
 void frx_materialFragment() {
-	frx_fragEnableDiffuse = false;
+#ifndef SHADOW_MAP_PRESENT
+	frx_fragEnableDiffuse = true;
+#endif
 }

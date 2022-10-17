@@ -45,6 +45,7 @@ void main()
 		vec3 misc	= texture(u_gbuffer_main_etc, vec3(v_texcoord, ID_SOLID_MISC)).xyz;
 		float disableDiffuse = bit_unpack(misc.z, 4);
 
+		vertexNormal = vertexNormal * frx_normalModelMatrix;
 		normal = normal * frx_normalModelMatrix;
 
 		fragColor = shading(cSolid, u_tex_nature, light, rawMat, eyePos, normal, vertexNormal, frx_cameraInWater == 1., disableDiffuse);

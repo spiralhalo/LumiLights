@@ -141,6 +141,7 @@ void atmos_generateAtmosphereModel()
 	}
 
 	atmosv_SkyAmbientRadiance = mix(NOON_AMBIENT, NIGHT_AMBIENT * moonlightSize, nightFactor) * (frx_worldHasSkylight == 1 ? 1.0 : 0.0);
+
 	#ifdef POST_SHADER
 	// if editing this, also edit nightFogLuminance for cave fog
 	atmosv_SkyRadiance = mix(DAY_SKY_COLOR, NIGHT_SKY_COLOR, nightFactor) * DEF_SKY_STR;
