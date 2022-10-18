@@ -33,6 +33,20 @@ const vec3 tile_randomVec[16] = vec3[16](
 const uint BLUE_RES = 256u;
 const float BLUE_RES_RCP = 1. / float(BLUE_RES);
 
+#if DITHERING_MODE == DITHERING_MODE_DISABLED
+
+vec3 getRandomVec(sampler2D blueNoiseTex, vec2 uv, vec2 texSize)
+{
+	return vec3(1.0);
+}
+
+float getRandomFloat(sampler2D blueNoiseTex, vec2 uv, vec2 texSize)
+{
+	return 1.0;
+}
+
+#else
+
 vec3 getRandomVec(sampler2D blueNoiseTex, vec2 uv, vec2 texSize)
 {
 	uint mult = (frx_renderFrames % 2u) * 2u - 1u;
@@ -58,6 +72,8 @@ float getRandomFloat(sampler2D blueNoiseTex, vec2 uv, vec2 texSize)
 	return texture(blueNoiseTex, noiseUv).r;
 #endif
 }
+
+#endif
 
 vec4 tile_denoise(vec2 uv, sampler2D scolor, vec2 inv_size, int noise_size)
 {

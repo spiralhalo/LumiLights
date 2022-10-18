@@ -200,7 +200,7 @@
 				},
 				dithering_mode: {
 					default: "blue_noise",
-					choices: ["blue_noise", "halton"],
+					choices: ["blue_noise", "halton", "disabled"],
 					enum: true,
 					prefix: "dithering_mode_",
 					nameKey: "config.lumi_lights.value.dithering_mode",
