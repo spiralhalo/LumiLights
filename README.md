@@ -1,5 +1,5 @@
 # Lumi Lights 
-![Lumi Lights](https://github.com/spiralhalo/spiralhalo.github.io/raw/main/img/screen2.jpg)
+![Lumi Lights](https://github.com/spiralhalo/spiralhalo.github.io/raw/main/img/main.jpg)
 
 A custom rendering pipeline for Canvas for improved visual fidelity.
 
