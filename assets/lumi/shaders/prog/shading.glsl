@@ -111,7 +111,7 @@ float pbr_distributionGGX(vec3 N, vec3 H, float roughness)
 	float denom = (NdotH2 * (a2 - 1.0) + 1.0);
 		  denom = PI * denom * denom;
 
-	return max(0.0, num / denom);
+	return denom == 0.0 ? 0.0 : max(0.0, num / denom);
 }
 
 float pbr_geometrySchlickGGX(float NdotV, float roughness)
@@ -199,9 +199,8 @@ float diffuseNdL(float NdotL, float alpha, float disableDiffuse, float dielectri
 	return diffuseNdotL;
 }
 
-void lightPbr(vec3 albedo, float alpha, vec3 radiance, float roughness, vec3 f0, vec3 toLight, vec3 toEye, vec3 normal, float disableDiffuse)
+void lightPbr(vec3 albedo, float alpha, vec3 radiance, float roughness, vec3 f0, vec3 toLight, vec3 toEye, vec3 halfway, vec3 normal, float disableDiffuse)
 {
-	vec3 halfway = normalize(toEye + toLight);
 	vec3 fresnel = pbr_fresnelSchlick(pbr_dot(toEye, halfway), f0);
 	float rawNdL = dot(normal, toLight);
 	float NdotL  = clamp(rawNdL, 0.0, 1.0);
@@ -312,11 +311,13 @@ void lights(vec3 albedo, vec4 light, vec3 eyePos, vec3 toEye, out vec3 baseLight
 	skyLight *= 0.1 + 0.9 * darkness;
 }
 
-#if ALBEDO_BRIGHTENING == 0
-#define hdrAlbedo(color) hdr_fromGamma(color.rgb)
-#else
-#define hdrAlbedo(color) hdr_fromGamma(color.rgb) * (1.0 - USER_ALBEDO_BRIGHTENING) + vec3(USER_ALBEDO_BRIGHTENING)
-#endif
+// #if ALBEDO_BRIGHTENING == 0
+// #define hdrAlbedo(color) hdr_fromGamma(color.rgb)
+// #else
+// #define hdrAlbedo(color) hdr_fromGamma(color.rgb) * (1.0 - USER_ALBEDO_BRIGHTENING) + vec3(USER_ALBEDO_BRIGHTENING)
+// #endif
+
+#define hdrAlbedo(color) hdr_fromGamma(color.rgb) * vec3(0.98, 0.96, 0.94) * 0.98 + 0.02
 
 vec4 shading(vec4 color, sampler2D natureTexture, vec4 light, float ao, vec2 material, vec3 eyePos, vec3 normal, vec3 vertexNormal, bool isUnderwater, float disableDiffuse)
 {
@@ -346,16 +347,16 @@ vec4 shading(vec4 color, sampler2D natureTexture, vec4 light, float ao, vec2 mat
 	vec3 specular = pbr_specularBRDF(max(material.x, 0.5 * material.y), blockLight, blH, normal, toEye, normal, blF, 1.0);
 	shaded += specular;
 
-	lightPbr(albedo, color.a, hlLight, material.x, f0, toEye, toEye, normal, disableDiffuse);
+	lightPbr(albedo, color.a, hlLight, material.x, f0, toEye, toEye, toEye, normal, disableDiffuse);
 	shaded += shading0.specular + shading0.diffuse;
 	specular += shading0.specular;
 
-	lightPbr(albedo, color.a, skyLight, material.x, f0, frx_skyLightVector, toEye, normal, disableDiffuse);
+	lightPbr(albedo, color.a, skyLight, material.x, f0, frx_skyLightVector, toEye, normalize(toEye + frx_skyLightVector), normal, disableDiffuse);
 	shaded += shading0.specular + shading0.diffuse;
 	specular += shading0.specular;
 
 	ao = min(1.0, ao + light.z);
-	ao = pow(ao, mix(1.0, SSAO_INTENSITY, lightLuminance(shaded)));
+	ao = pow(ao, mix(1.0, SSAO_INTENSITY, lightLuminance(shaded / max(vec3(0.01), albedo)) * 0.5));
 
 	shaded *= ao;
 	specular *= ao;
