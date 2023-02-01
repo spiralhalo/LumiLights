@@ -1,6 +1,6 @@
 ![banner](https://github.com/spiralhalo/spiralhalo.github.io/raw/main/img/main.jpg)
 
-# ![icon](./pack.png) Lumi Lights
+# Lumi Lights
 
 A custom rendering pipeline for Canvas for improved visual fidelity.
 
