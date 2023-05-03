@@ -287,8 +287,6 @@ void lights(vec3 albedo, vec4 light, vec3 eyePos, vec3 toEye, out vec3 baseLight
 	
 	blockLight = blColor * BLOCK_LIGHT_STR * bl * adaptationTerm;
 	blockLight *= 0.7 + userBrightness * 0.4;
-	
-	skyLight = vec3(0.0);
 
 #if HANDHELD_LIGHT_RADIUS != 0
 	if (frx_heldLight.w > 0) {
@@ -379,7 +377,10 @@ vec4 particleShading(vec4 color, sampler2D natureTexture, vec4 light, vec3 eyePo
 	vec3 toEye = -normalize(eyePos);
 	prepare(color, natureTexture, eyePos, 1.0, isUnderwater, light);
 
-	vec3 baseLight, blockLight, hlLight, skyLight;
+	vec3 baseLight = vec3(0.0);
+	vec3 blockLight = vec3(0.0);
+	vec3 hlLight = vec3(0.0);
+	vec3 skyLight = vec3(0.0);
 	lights(albedo, light, eyePos, toEye, baseLight, blockLight, hlLight, skyLight);
 
 	vec3 shaded = albedo * (baseLight + blockLight + hlLight);
