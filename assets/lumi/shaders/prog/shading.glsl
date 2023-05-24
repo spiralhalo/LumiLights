@@ -371,6 +371,7 @@ vec4 shading(vec4 color, sampler2D natureTexture, vec4 light, float ao, vec2 mat
 vec4 particleShading(vec4 color, sampler2D natureTexture, vec4 light, vec3 eyePos, bool isUnderwater)
 {
 	vec3 albedo = hdrAlbedo(color);
+	
 	// unmanaged
 	if (light.x == 0.0) return vec4(albedo, color.a);
 

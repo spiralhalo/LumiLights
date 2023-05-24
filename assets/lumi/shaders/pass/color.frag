@@ -111,11 +111,11 @@ void main()
 
 	vec4 foggedColor = base;
 	vec3 foggedToFrag = toFrag;
-	// float foggedLightY = light.y;
 	float foggedDist = length(eyePos);
-	// float tileJitter = getRandomFloat(u_tex_noise, v_texcoord, frxu_size);
-	// float foggedDepth = dSolid;
 	bool foggedIsUnderwater = solidIsUnderwater;
+	// float foggedLightY = light.y;
+	// float foggedDepth = dSolid;
+	// float tileJitter = getRandomFloat(u_tex_noise, v_texcoord, frxu_size);
 
 
 	tempPos = frx_inverseViewProjectionMatrix * vec4(2.0 * v_texcoord - 1.0, 2.0 * dParts - 1.0, 1.0);
@@ -154,28 +154,31 @@ void main()
 	}
 
 	// fog behind rain or trans but only if it's not water (why are you like this)
-	if ((cRains.a > 0 && dSolid > dRains) || (dSolid > dMin && !solidIsUnderwater)) {
-		bool foggedIsTrans = dTrans < dSolid && dTrans > dRains;
+	if ((cRains.a > 0 && dRains < dSolid) || (dMin < dSolid && !solidIsUnderwater)) {
+		bool foggedIsTrans = dTrans < dSolid && dRains < dTrans;
 
 		if (foggedIsTrans) {
 			foggedColor = nextTrans;
-			////// foggedToFrag = normalize(eyePos); // should be the same
-			// foggedLightY = light.y;
 			foggedDist = length(eyePos);
-			// foggedDepth = dTrans;
 			foggedIsUnderwater = frx_cameraInWater == 1;
+			// foggedToFrag is the same
+			// foggedLightY = light.y;
+			// foggedDepth = dTrans;
 		}
 
 		// use normal fog for optimization because vol fog isn't applied during rain
 		vec4 fogged = fog(foggedColor, foggedDist, foggedToFrag, foggedIsUnderwater);
 		// vec4 fogged = volumetricFog(u_gbuffer_shadow, u_tex_nature, foggedColor, foggedDist, foggedToFrag, foggedLightY, tileJitter, foggedDepth, foggedIsUnderwater);
+		
+		float edgeBlend = edgeBlendFactor(foggedDist);
+		fogged = mix(fogged, skyBasic, edgeBlend);
 
 		if (foggedIsTrans) {
 			nextTrans = mix(nextTrans, fogged, frx_rainGradient);
 		}
 
 		// do this mix to fill gaps
-		base = mix(base, fogged, 1.0 - nextTrans.a);
+		base = mix(base, fogged, (1.0 - nextTrans.a) * frx_rainGradient);
 	}
 
 	vec4 nextRains = vec4(hdr_fromGamma(cRains.rgb), cRains.a);

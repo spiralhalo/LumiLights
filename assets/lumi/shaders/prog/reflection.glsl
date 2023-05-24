@@ -120,10 +120,6 @@ vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer
 {
 	vec3 rawMat = texture(mainEtcBuffer, vec3(v_texcoord, idMaterial)).xyz;
 
-	bool isUnmanaged = rawMat.x == 0.0; // unmanaged draw
-
-	if (isUnmanaged) return vec4(0.0);
-
 	vec4 light	= texture(lightNormalBuffer, vec3(v_texcoord, idLight));
 	vec3 normal	= normalize(texture(lightNormalBuffer, vec3(v_texcoord, idMicroNormal)).xyz);
 	float depth	= texture(depthBuffer, v_texcoord).r;
