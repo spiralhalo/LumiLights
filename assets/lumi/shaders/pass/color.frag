@@ -87,8 +87,9 @@ void main()
 	float disableDiffuse = bit_unpack(miscSolid.z, 4);
 
 	vec4 base;
-	vec4 skyBasic = basicSky(toFrag, frx_vanillaClearColor, solidIsUnderwater);
-	vec4 sky = customSky(skyBasic, u_tex_sun, u_tex_moon, toFrag, dSolid == 1.0 ? cSolid.rgb : frx_vanillaClearColor, solidIsUnderwater);
+	vec3 sky0 = skyBase(toFrag, frx_vanillaClearColor);
+	vec4 skyBasic = basicSky(toFrag, sky0);
+	vec4 sky = customSky(sky0, u_tex_sun, u_tex_moon, toFrag, dSolid == 1.0 ? cSolid.rgb : frx_vanillaClearColor, solidIsUnderwater);
 
 	if (dSolid == 1.0) {
 		base = sky;
@@ -174,7 +175,7 @@ void main()
 		fogged = mix(fogged, skyBasic, edgeBlend);
 
 		if (foggedIsTrans) {
-			nextTrans = mix(nextTrans, fogged, frx_rainGradient);
+			nextTrans = fogged;
 		}
 
 		// do this mix to fill gaps
