@@ -155,8 +155,8 @@ void main()
 	}
 
 	// fog behind rain or trans but only if it's not water (why are you like this)
-	if ((cRains.a > 0 && dRains < dSolid) || (dMin < dSolid && !solidIsUnderwater)) {
-		bool foggedIsTrans = dTrans < dSolid && dRains < dTrans;
+	bool foggedIsTrans = dTrans < dSolid && dMin < dTrans;
+	if (dMin < dSolid && (!solidIsUnderwater || foggedIsTrans)) {
 
 		if (foggedIsTrans) {
 			foggedColor = nextTrans;
@@ -179,7 +179,7 @@ void main()
 		}
 
 		// do this mix to fill gaps
-		base = mix(base, fogged, (1.0 - nextTrans.a) * frx_rainGradient);
+		base = mix(base, fogged, foggedIsTrans ? (1.0 - nextTrans.a) : 1.0);
 	}
 
 	vec4 nextRains = vec4(hdr_fromGamma(cRains.rgb), cRains.a);
