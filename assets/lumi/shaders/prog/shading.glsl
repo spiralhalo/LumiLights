@@ -125,14 +125,18 @@ float pbr_geometrySchlickGGX(float NdotV, float roughness)
 	return num / denom;
 }
 
-float pbr_geometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
+// #define FAST_GGX
+
+float pbr_geometrySmith(float NdotV, float NdotL, float roughness)
 {
-	float NdotV = pbr_dot(N, V);
-	float NdotL = pbr_dot(N, L);
+	#ifdef FAST_GGX
+	return 0.5 / mix(2.0 * NdotL * NdotV, NdotL + NdotV, roughness * roughness);
+	#else
 	float ggx2  = pbr_geometrySchlickGGX(NdotV, roughness);
 	float ggx1  = pbr_geometrySchlickGGX(NdotL, roughness);
 
 	return ggx1 * ggx2;
+	#endif
 }
 
 vec3 pbr_calcF0(vec3 albedo, vec2 material) {
@@ -150,14 +154,16 @@ vec3 pbr_fresnelSchlick(float cosTheta, vec3 F0)
 	return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
 }
 
-vec3 pbr_specularBRDF(float roughness, vec3 radiance, vec3 halfway, vec3 lightDir, vec3 viewDir, vec3 normal, vec3 fresnel, float NdotL)
+vec3 pbr_specularBRDF(float roughness, vec3 radiance, vec3 halfway, vec3 viewDir, vec3 normal, vec3 fresnel, float NdotL)
 {
+	float NdotV = pbr_dot(normal, viewDir);
+
 	// cook-torrance brdf
 	float distribution = pbr_distributionGGX(normal, halfway, roughness);
-	float geometry	   = pbr_geometrySmith(normal, viewDir, lightDir, roughness);
+	float geometry	   = pbr_geometrySmith(NdotV, NdotL, roughness);
 
 	vec3  num   = distribution * geometry * fresnel;
-	float denom = 4.0 * pbr_dot(normal, viewDir) * NdotL;
+	float denom = 4.0 * NdotV * NdotL;
 
 	vec3  specular = num / max(denom, 0.001);
 	return specular * radiance * NdotL;
@@ -210,7 +216,7 @@ void lightPbr(vec3 albedo, float alpha, vec3 radiance, float roughness, vec3 f0,
 
 	float diffuseNdotL = diffuseNdL(NdotL, alpha, disableDiffuse, dielectricity);
 
-	shading0.specular = pbr_specularBRDF(roughness, radiance, halfway, toLight, toEye, normal, fresnel, NdotL);
+	shading0.specular = pbr_specularBRDF(roughness, radiance, halfway, toEye, normal, fresnel, NdotL);
 	shading0.diffuse = albedo * radiance * diffuseNdotL * (1.0 - fresnel * step(0.0, rawNdL)) * dielectricity / PI;
 }
 
@@ -344,7 +350,7 @@ vec4 shading(vec4 color, sampler2D natureTexture, vec4 light, float ao, vec2 mat
 	// perfect diffuse light
 	vec3 shaded = albedo * (baseLight + blockLight * (1.0 - blF)) * dotPerfect * (1.0 - material.y * 0.5) / PI;
 	// block light specular
-	vec3 specular = pbr_specularBRDF(max(material.x, 0.5 * material.y), blockLight, blH, normal, toEye, normal, blF, 1.0);
+	vec3 specular = pbr_specularBRDF(max(material.x, 0.5 * material.y), blockLight, blH, toEye, normal, blF, 1.0);
 	shaded += specular;
 
 	lightPbr(albedo, color.a, hlLight, material.x, f0, toEye, toEye, toEye, normal, disableDiffuse);
