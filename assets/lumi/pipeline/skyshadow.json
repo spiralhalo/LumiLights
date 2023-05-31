@@ -1,4 +1,13 @@
 {
+	sky: {
+		// Used when dimension/celestial object does not specify
+		defaultZenithAngle: {option: "shadow_angle"}
+	},
+
+	include: [
+		"lumi:pipeline/config/shadow_config.json",
+	],
+	
 	skyShadows: {
 		framebuffer: "shadow",
 		allowEntities: true,

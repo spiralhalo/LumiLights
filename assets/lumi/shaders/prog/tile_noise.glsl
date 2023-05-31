@@ -35,19 +35,19 @@ const float BLUE_RES_RCP = 1. / float(BLUE_RES);
 
 #if DITHERING_MODE == DITHERING_MODE_DISABLED
 
-vec3 getRandomVec(sampler2D blueNoiseTex, vec2 uv, vec2 texSize)
+vec3 getRandomVec(sampler2DArray resources, vec2 uv, vec2 texSize)
 {
 	return vec3(1.0);
 }
 
-float getRandomFloat(sampler2D blueNoiseTex, vec2 uv, vec2 texSize)
+float getRandomFloat(sampler2DArray resources, vec2 uv, vec2 texSize)
 {
 	return 1.0;
 }
 
 #else
 
-vec3 getRandomVec(sampler2D blueNoiseTex, vec2 uv, vec2 texSize)
+vec3 getRandomVec(sampler2DArray resources, vec2 uv, vec2 texSize)
 {
 	uint mult = (frx_renderFrames % 2u) * 2u - 1u;
 	uvec2 texelPos = uvec2(uv * texSize) + uvec2((frx_renderFrames % BLUE_RES) * mult * _MSPD, 0u); 
@@ -56,11 +56,11 @@ vec3 getRandomVec(sampler2D blueNoiseTex, vec2 uv, vec2 texSize)
 	return tile_randomVec[texelPos.x + texelPos.y * 4u];
 #else
 	vec2 noiseUv = (texelPos % BLUE_RES) * BLUE_RES_RCP;
-	return texture(blueNoiseTex, noiseUv).rgb;
+	return texture(resources, vec3(noiseUv, ID_RES_NOISE)).rgb;
 #endif
 }
 
-float getRandomFloat(sampler2D blueNoiseTex, vec2 uv, vec2 texSize)
+float getRandomFloat(sampler2DArray resources, vec2 uv, vec2 texSize)
 {
 	uint mult = (frx_renderFrames % 2u) * 2u - 1u;
 	uvec2 texelPos = uvec2(uv * texSize) + uvec2((frx_renderFrames % BLUE_RES) * mult * _MSPD, 0u); 
@@ -69,7 +69,7 @@ float getRandomFloat(sampler2D blueNoiseTex, vec2 uv, vec2 texSize)
 	return tile_randomVec[texelPos.x + texelPos.y * 4u].x;
 #else
 	vec2 noiseUv = (texelPos % BLUE_RES) * BLUE_RES_RCP;
-	return texture(blueNoiseTex, noiseUv).r;
+	return texture(resources, vec3(noiseUv, ID_RES_NOISE)).r;
 #endif
 }
 

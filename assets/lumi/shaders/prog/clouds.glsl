@@ -89,7 +89,7 @@ bool optimizeStart(float startTravel, float maxDist, vec3 toSky, inout vec3 worl
 	return false;
 }
 
-vec3 rayMarchCloud(sampler2D natureTexture, sampler2D noiseTexture, vec2 texcoord, float maxDist, vec3 toSky, float numSample, float startTravel)
+vec3 rayMarchCloud(sampler2D natureTexture, sampler2DArray resources, vec2 texcoord, float maxDist, vec3 toSky, float numSample, float startTravel)
 {
 	vec3 lightUnit = frx_skyLightVector * LIGHT_SAMPLE_SIZE;
 	vec3 worldRayPos = vec3(0.0, 63.0, 0.0);
@@ -104,7 +104,7 @@ vec3 rayMarchCloud(sampler2D natureTexture, sampler2D noiseTexture, vec2 texcoor
 	if (optimizeStart(startTravel, maxDist, toSky, worldRayPos, numSample, sampleSize, distanceTotal)) return vec3(0.0);
 
 	vec3 unitRay = toSky * sampleSize;
-	float i = getRandomFloat(noiseTexture, texcoord, frxu_size) * CLOUD_MARCH_JITTER_STRENGTH;
+	float i = getRandomFloat(resources, texcoord, frxu_size) * CLOUD_MARCH_JITTER_STRENGTH;
 
 	worldRayPos += unitRay * i; // start position
 
@@ -199,7 +199,7 @@ vec2 vanillaClouds(sampler2D cloudsDepthBuffer, float depth, vec2 texcoord)
 	return vec2(energy, 1.0);
 }
 
-vec4 customClouds(sampler2D cloudsDepthBuffer, sampler2D natureTexture, sampler2D noiseTexture, float depth, vec2 texcoord, vec3 eyePos, vec3 toSky, int numSample, float startTravel, vec4 fallback)
+vec4 customClouds(sampler2D cloudsDepthBuffer, sampler2D natureTexture, sampler2DArray resources, float depth, vec2 texcoord, vec3 eyePos, vec3 toSky, int numSample, float startTravel, vec4 fallback)
 {
 	vec3 result;
 	if (frx_worldIsOverworld != 1) {
@@ -220,7 +220,7 @@ vec4 customClouds(sampler2D cloudsDepthBuffer, sampler2D natureTexture, sampler2
 		maxDist = min(length(eyePos), maxDist);
 		#endif
 
-		result = rayMarchCloud(natureTexture, noiseTexture, texcoord, maxDist, toSky, numSample, startTravel);
+		result = rayMarchCloud(natureTexture, resources, texcoord, maxDist, toSky, numSample, startTravel);
 		#else
 		result = vec3(vanillaClouds(cloudsDepthBuffer, depth, texcoord), 1.0);
 		#endif
@@ -244,7 +244,7 @@ vec4 customClouds(sampler2D cloudsDepthBuffer, sampler2D natureTexture, sampler2
 	return vec4(color, result.y);
 }
 
-vec4 customClouds(sampler2D cloudsDepthBuffer, sampler2D natureTexture, sampler2D noiseTexture, float depth, vec2 texcoord, vec3 eyePos, vec3 toSky, int numSample, vec4 fallback)
+vec4 customClouds(sampler2D cloudsDepthBuffer, sampler2D natureTexture, sampler2DArray resources, float depth, vec2 texcoord, vec3 eyePos, vec3 toSky, int numSample, vec4 fallback)
 {
-	return customClouds(cloudsDepthBuffer, natureTexture, noiseTexture, depth, texcoord, eyePos, toSky, numSample, 0.0, fallback);
+	return customClouds(cloudsDepthBuffer, natureTexture, resources, depth, texcoord, eyePos, toSky, numSample, 0.0, fallback);
 }

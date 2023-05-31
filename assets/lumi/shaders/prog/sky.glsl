@@ -31,7 +31,7 @@ void skySetup()
 
 const vec3 VOID_CORE_COLOR = hdr_fromGamma(vec3(1.0, 0.7, 0.5));
 
-vec4 celestFrag(in Rect celestRect, sampler2D ssun, sampler2D smoon, vec3 worldVec)
+vec4 celestFrag(in Rect celestRect, sampler2DArray resources, vec3 worldVec)
 {
 	if (dot(worldVec, frx_skyLightVector) < 0.) return vec4(0.); // no more both at opposites, sorry
 
@@ -49,7 +49,7 @@ vec4 celestFrag(in Rect celestRect, sampler2D ssun, sampler2D smoon, vec3 worldV
 			if (celestUV == moonUv) {
 				celestUV = 2.0 * moonUv - 0.5;
 				vec2 fullMoonUV	   = celestUV * vec2(0.25, 0.5);
-				vec3 fullMoonColor = texture(smoon, fullMoonUV).rgb;
+				vec3 fullMoonColor = texture(resources, vec3(fullMoonUV, ID_RES_MOON)).rgb;
 
 				opacity = l2_max3(fullMoonColor);
 				opacity = min(1.0, opacity * 3.0);
@@ -59,12 +59,12 @@ vec4 celestFrag(in Rect celestRect, sampler2D ssun, sampler2D smoon, vec3 worldV
 				celestUV.x += mod(frx_worldDay, 4.) * 0.25;
 				celestUV.y += (mod(frx_worldDay, 8.) >= 4.) ? 0.5 : 0.0;
 
-				celestTex = hdr_fromGamma(texture(smoon, celestUV).rgb);
+				celestTex = hdr_fromGamma(texture(resources, vec3(celestUV, ID_RES_MOON)).rgb);
 				celestCol = celestTex + vec3(0.001) * hdr_fromGamma(fullMoonColor);
 				celestCol *= frx_skyLightTransitionFactor;
 			}
 		} else {
-			celestTex = texture(ssun, celestUV).rgb;
+			celestTex = texture(resources, vec3(celestUV, ID_RES_SUN)).rgb;
 			celestCol = hdr_fromGamma(celestTex) * atmosv_CelestialRadiance;
 		}
 
@@ -135,13 +135,13 @@ vec4 basicSky(vec3 toSky, vec3 result) {
 	return voidCore(result, toSky);
 }
 
-vec4 customSky(vec3 result, sampler2D sunTexture, sampler2D moonTexture, vec3 toSky, vec3 fallback, bool isUnderwater, float skyVisible, float celestVisible) {
+vec4 customSky(vec3 result, sampler2DArray resources, vec3 toSky, vec3 fallback, bool isUnderwater, float skyVisible, float celestVisible) {
 	float starEraser = 0.0;
 
 	if (frx_worldIsOverworld == 1 && !isUnderwater) {
 		// Sky, sun and moon
 		#if SKY_MODE == SKY_MODE_LUMI
-		vec4 celestColor = celestFrag(Rect(v_celest1, v_celest2, v_celest3), sunTexture, moonTexture, toSky);
+		vec4 celestColor = celestFrag(Rect(v_celest1, v_celest2, v_celest3), resources, toSky);
 		starEraser = celestColor.a;
 
 		result += pow(max(0.0, dot(toSky, frx_skyLightVector)), 100.0) * atmosv_CelestialRadiance * exp(-lightLuminance(atmosv_CelestialRadiance)) * 0.1 * (1. - frx_rainGradient) * celestVisible; // halo?
@@ -188,11 +188,11 @@ vec4 customSky(vec3 result, sampler2D sunTexture, sampler2D moonTexture, vec3 to
 	return voidCore(result, toSky);
 }
 
-vec4 customSky(vec3 result, sampler2D sunTexture, sampler2D moonTexture, vec3 toSky, vec3 fallback, bool isUnderwater) {
-	return customSky(result, sunTexture, moonTexture, toSky, fallback, isUnderwater, 1.0, 1.0);
+vec4 customSky(vec3 result, sampler2DArray resources, vec3 toSky, vec3 fallback, bool isUnderwater) {
+	return customSky(result, resources, toSky, fallback, isUnderwater, 1.0, 1.0);
 }
 
-vec3 skyRadiance(sampler2D sunTexture, sampler2D moonTexture, vec2 material, vec3 toSky, vec2 lightyw) {
+vec3 skyRadiance(sampler2DArray resources, vec2 material, vec3 toSky, vec2 lightyw) {
 	float skyVisible = lightmapRemap(lightyw.x);
 
 	if (material.x > REFLECTION_MAXIMUM_ROUGHNESS) {
@@ -200,15 +200,15 @@ vec3 skyRadiance(sampler2D sunTexture, sampler2D moonTexture, vec2 material, vec
 	} else {
 		bool isUnderwater = frx_cameraInWater == 1 && toSky.y < 0.0;
 		vec3 base = skyBase(toSky, vec3(0.0)) * skyVisible;
-		return customSky(base, sunTexture, moonTexture, toSky, vec3(0.0), isUnderwater, skyVisible, lightyw.y).rgb;
+		return customSky(base, resources, toSky, vec3(0.0), isUnderwater, skyVisible, lightyw.y).rgb;
 	}
 }
 
 #define skyReflectionFac(march) smoothstep(-0.1, 0.1, march.y)
 
-vec4 skyReflection(sampler2D sunTexture, sampler2D moonTexture, sampler2D noiseTexture, vec3 albedo, vec2 material, vec3 toFrag, vec3 normal, vec2 lightyw) {
-	vec3 toSky = reflectRough(noiseTexture, toFrag, normal, material.x);
-	vec3 radiance = skyRadiance(sunTexture, moonTexture, material, toSky, lightyw);
+vec4 skyReflection(sampler2DArray resources, vec3 albedo, vec2 material, vec3 toFrag, vec3 normal, vec2 lightyw) {
+	vec3 toSky = reflectRough(resources, toFrag, normal, material.x);
+	vec3 radiance = skyRadiance(resources, material, toSky, lightyw);
 	return vec4(reflectionPbr(albedo, material, radiance, toSky, -toFrag), 0.0) * skyReflectionFac(toSky);
 }
 

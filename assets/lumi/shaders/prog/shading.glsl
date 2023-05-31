@@ -169,18 +169,18 @@ vec3 pbr_specularBRDF(float roughness, vec3 radiance, vec3 halfway, vec3 viewDir
 	return specular * radiance * NdotL;
 }
 
-vec3 reflectRough(sampler2D noiseTexture, vec3 toFrag, vec3 normal, float materialx, out vec3 jitterPrc)
+vec3 reflectRough(sampler2DArray resources, vec3 toFrag, vec3 normal, float materialx, out vec3 jitterPrc)
 {
 	const float strength = 0.6;
-	vec3 jitterRaw = getRandomVec(noiseTexture, v_texcoord, frxu_size) * 2.0 - 1.0;
+	vec3 jitterRaw = getRandomVec(resources, v_texcoord, frxu_size) * 2.0 - 1.0;
 	jitterPrc = jitterRaw * strength * materialx * materialx;
 	return normalize(reflect(toFrag, normal) + jitterPrc);
 }
 
-vec3 reflectRough(sampler2D noiseTexture, vec3 toFrag, vec3 normal, float materialx)
+vec3 reflectRough(sampler2DArray resources, vec3 toFrag, vec3 normal, float materialx)
 {
 	vec3 ignored;
-	return reflectRough(noiseTexture, toFrag, normal, materialx, ignored);
+	return reflectRough(resources, toFrag, normal, materialx, ignored);
 }
 
 vec3 reflectionPbr(vec3 albedo, vec2 material, vec3 radiance, vec3 toLight, vec3 toEye)

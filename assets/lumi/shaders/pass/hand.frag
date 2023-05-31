@@ -16,11 +16,8 @@ uniform sampler2DArray u_gbuffer_main_etc;
 uniform sampler2DArray u_gbuffer_lightnormal;
 uniform sampler2DArrayShadow u_gbuffer_shadow;
 
-uniform sampler2D u_tex_sun;
-uniform sampler2D u_tex_moon;
+uniform sampler2DArray u_resources;
 uniform sampler2D u_tex_nature;
-uniform sampler2D u_tex_glint;
-uniform sampler2D u_tex_noise;
 
 out vec4 fragColor;
 
@@ -49,9 +46,9 @@ void main()
 		normal = normal * frx_normalModelMatrix;
 
 		fragColor = shading(cSolid, u_tex_nature, light, rawMat, eyePos, normal, vertexNormal, frx_cameraInWater == 1., disableDiffuse);
-		fragColor += skyReflection(u_tex_sun, u_tex_moon, u_tex_noise, hdrAlbedo(cSolid), rawMat.xy, normalize(eyePos), normal, light.yw);
+		fragColor += skyReflection(u_resources, hdrAlbedo(cSolid), rawMat.xy, normalize(eyePos), normal, light.yw);
 
-		fragColor = overlay(fragColor, u_tex_glint, misc);
+		fragColor = overlay(fragColor, u_resources, misc);
 
 		fragColor = ldr_tonemap(fragColor);
 	}

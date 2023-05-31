@@ -116,7 +116,7 @@ vec3 reflectionMarch_v2(sampler2D depthBuffer, sampler2DArray lightNormalBuffer,
 
 const float JITTER_STRENGTH = 0.6;
 
-vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer, sampler2DArray lightNormalBuffer, sampler2D depthBuffer, sampler2DArrayShadow shadowMap, sampler2D sunTexture, sampler2D moonTexture, sampler2D noiseTexture, float idLight, float idMaterial, float idNormal, float idMicroNormal)
+vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer, sampler2DArray lightNormalBuffer, sampler2D depthBuffer, sampler2DArrayShadow shadowMap, sampler2DArray resources, float idLight, float idMaterial, float idNormal, float idMicroNormal)
 {
 	vec3 rawMat = texture(mainEtcBuffer, vec3(v_texcoord, idMaterial)).xyz;
 
@@ -141,7 +141,7 @@ vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer
 	vec3 viewToEye  = normalize(-viewPos + nearPos.xyz);
 	vec3 viewToFrag = -viewToEye;
 	vec3 viewNormal = normalize(frx_normalModelMatrix * normal);
-	vec3 viewMarch  = reflectRough(noiseTexture, viewToFrag, viewNormal, roughness, jitterPrc);
+	vec3 viewMarch  = reflectRough(resources, viewToFrag, viewNormal, roughness, jitterPrc);
 	vec3 march = viewMarch * frx_normalModelMatrix;
 
 	#ifdef SS_REFLECTION
@@ -159,7 +159,7 @@ vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer
 		}
 
 		// reduce jagginess
-		float startJitter = getRandomFloat(noiseTexture, v_texcoord, frxu_size) * mix(0.2, 1.0, roughness);
+		float startJitter = getRandomFloat(resources, v_texcoord, frxu_size) * mix(0.2, 1.0, roughness);
 		vec3 viewStartPos = viewPos + viewMarch * startJitter;
 
 		vec3 result = reflectionMarch_v2(depthBuffer, lightNormalBuffer, idNormal, viewStartPos, viewMarch, nearPos.z);
@@ -183,7 +183,7 @@ vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer
 	const vec4 objLight = vec4(0.0);
 	#endif
 
-	vec3 skyLight = skyRadiance(sunTexture, moonTexture, rawMat.xy, march, light.yw) * skyReflectionFac(march);
+	vec3 skyLight = skyRadiance(resources, rawMat.xy, march, light.yw) * skyReflectionFac(march);
 	vec3 envLight = blockLightColor(light.x, light.z) * lightmapRemap(light.x) * (1.0 - frx_smoothedEyeBrightness.y);
 
 	vec3 reflectedLight = reflectionPbr(albedo, rawMat.xy, envLight + mix(skyLight, objLight.rgb, objLight.a), viewMarch, viewToEye);

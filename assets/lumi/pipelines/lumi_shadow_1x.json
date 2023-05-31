@@ -4,7 +4,6 @@
 
 	include: [
 		"lumi:pipeline/main.json",
-		"lumi:pipeline/main_shadow.json",
 		"lumi:pipeline/skyshadow.json",
 		"lumi:pipeline/config.json",
 	],
