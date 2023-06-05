@@ -28,8 +28,44 @@ uniform sampler2DArrayShadow u_gbuffer_shadow;
 
 uniform sampler2DArray u_resources;
 uniform sampler2D u_tex_nature;
+uniform sampler3D u_light_data;
 
 out vec4 fragColor;
+
+vec3 lightColor(vec3 toFrag, float distToEye, vec3 fallback) {
+	int steps = 40;
+	float range = min(distToEye, 32.0);
+
+	vec3 lerp = (toFrag * range) / float(steps);
+	vec3 jitt = getRandomFloat(u_resources, v_texcoord, frxu_size) * lerp;
+
+	int i = 0;
+
+	vec3 size = vec3(textureSize(u_light_data, 0));
+	vec3 totalLight = vec3(0.0);
+	vec3 visiblity = vec3(1.0);
+	float alpha = range / 800.0;
+
+	while (i < steps) {	
+		vec3 light = vec3(0.0);
+		vec3 pos = mod(lerp * float(i * 2) + jitt + frx_cameraPos, size);
+
+		vec4 tex = texture(u_light_data, pos / size);
+		light = tex.rgb * tex.rgb * visiblity * alpha;// * tex.a;
+		visiblity = clamp(visiblity - light, 0.0, 1.0);
+		// light = pos / size;
+
+		totalLight += light;
+		i++;
+	}
+
+	// totalLight /= float(steps);
+	// totalLight *= 2.0;
+
+	totalLight += fallback * visiblity;
+
+	return totalLight;
+}
 
 void main()
 {
@@ -68,6 +104,8 @@ void main()
 			skyBasic,
 			edgeBlendFactor(distToEye));
 	}
+
+	fragColor.rgb = lightColor(toFrag, distToEye, fragColor.rgb);
 
 	vec4 clouds = customClouds(u_vanilla_clouds_depth, u_tex_nature, u_resources, dMin, v_texcoord, eyePos, toFrag, NUM_SAMPLE, skyBasic);
 	fragColor.rgb = fragColor.rgb * (1.0 - clouds.a) + clouds.rgb * clouds.a;

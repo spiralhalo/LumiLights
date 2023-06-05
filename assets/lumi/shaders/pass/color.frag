@@ -30,6 +30,7 @@ uniform sampler2DArrayShadow u_gbuffer_shadow;
 
 uniform sampler2DArray u_resources;
 uniform sampler2D u_tex_nature;
+uniform sampler3D u_light_data;
 
 layout(location = 0) out vec4 fragColor;
 layout(location = 1) out float fragDepth;
@@ -91,7 +92,7 @@ void main()
 	if (dSolid == 1.0) {
 		base = sky;
 	} else {
-		base = shading(cSolid, u_tex_nature, light, rawMat, eyePos, normal, vertexNormal, solidIsUnderwater, disableDiffuse);
+		base = shading(cSolid, u_tex_nature, u_light_data, light, rawMat, eyePos, normal, vertexNormal, solidIsUnderwater, disableDiffuse);
 		base = overlay(base, u_resources, miscSolid);
 	}
 
@@ -120,7 +121,7 @@ void main()
 	eyePos  = tempPos.xyz / tempPos.w;
 	light = texture(u_gbuffer_lightnormal, vec3(v_texcoord, ID_PARTS_LIGT));
 	light.w = denoisedShadowFactor(u_gbuffer_shadow, v_texcoord, eyePos, dParts, light.y, -frx_cameraView);
-	vec4 nextParts = particleShading(cParts, u_tex_nature, light, eyePos, decideUnderwater(dParts, dTrans, transIsWater, false));
+	vec4 nextParts = particleShading(cParts, u_tex_nature, u_light_data, light, eyePos, decideUnderwater(dParts, dTrans, transIsWater, false));
 
 	vec4 nextTrans;
 	bool transIsManaged = cTrans.a > 0.0 && notEndPortal(u_gbuffer_lightnormal) && lTrans.x > 0.0;
@@ -144,7 +145,7 @@ void main()
 		}
 		#endif
 
-		nextTrans = shading(cTrans, u_tex_nature, light, rawMat, eyePos, normal, vertexNormal, decideUnderwater(dTrans, dTrans, transIsWater, true), disableDiffuse);
+		nextTrans = shading(cTrans, u_tex_nature, u_light_data, light, rawMat, eyePos, normal, vertexNormal, decideUnderwater(dTrans, dTrans, transIsWater, true), disableDiffuse);
 		nextTrans = overlay(nextTrans, u_resources, miscTrans);
 	} else {
 		cTrans.rgb = cTrans.rgb / (cTrans.a == 0.0 ? 1.0 : cTrans.a);

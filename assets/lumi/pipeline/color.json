@@ -83,6 +83,7 @@
 
 				"u_resources",
 				"u_tex_nature",
+				"u_light_data",
 			]
 		},
 		{
@@ -99,6 +100,7 @@
 
 				"u_resources",
 				"u_tex_nature",
+				"u_light_data",
 			]
 		},
 		{
@@ -246,6 +248,7 @@
 
 					"resources",
 					"lumi:textures/misc/nature.png",
+					"canvas:alpha/light_data",
 				]
 			},
 		]
@@ -267,6 +270,7 @@
 
 					"resources",
 					"lumi:textures/misc/nature.png",
+					"canvas:alpha/light_data",
 				]
 			},
 		]
