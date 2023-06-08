@@ -33,7 +33,7 @@ uniform sampler3D u_light_data;
 out vec4 fragColor;
 
 vec3 lightColor(vec3 toFrag, float distToEye, vec3 fallback) {
-	int steps = 40;
+	int steps = 20;
 	float range = min(distToEye, 32.0);
 
 	vec3 lerp = (toFrag * range) / float(steps);
@@ -44,7 +44,7 @@ vec3 lightColor(vec3 toFrag, float distToEye, vec3 fallback) {
 	vec3 size = vec3(textureSize(u_light_data, 0));
 	vec3 totalLight = vec3(0.0);
 	vec3 visiblity = vec3(1.0);
-	float alpha = range / 800.0;
+	float alpha = range / 400.0;
 
 	while (i < steps) {	
 		vec3 light = vec3(0.0);
@@ -105,10 +105,10 @@ void main()
 			edgeBlendFactor(distToEye));
 	}
 
-	fragColor.rgb = lightColor(toFrag, distToEye, fragColor.rgb);
-
 	vec4 clouds = customClouds(u_vanilla_clouds_depth, u_tex_nature, u_resources, dMin, v_texcoord, eyePos, toFrag, NUM_SAMPLE, skyBasic);
 	fragColor.rgb = fragColor.rgb * (1.0 - clouds.a) + clouds.rgb * clouds.a;
+
+	fragColor.rgb = lightColor(toFrag, distToEye, fragColor.rgb);
 
 	fragColor = blindnessFog(fragColor, distToEye);
 	fragColor = ldr_tonemap(fragColor);

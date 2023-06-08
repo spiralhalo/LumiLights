@@ -278,13 +278,8 @@ void lights(sampler3D lightTexture, vec3 albedo, vec4 light, vec3 eyePos, vec3 t
 	baseLight += atmosv_SkyAmbientRadiance * remappedY;
 	baseLight += albedo * light.z * EMISSIVE_LIGHT_STR;
 
-	float bl = l2_clampScale(0.03125, 0.96875, light.x);
-
-
 	// exaggerate block light
-	#define BL_MULT 3.0
-	bl = clamp(pow(bl, 0.5 + BL_MULT / 2.0) * BL_MULT, 0.0, BL_MULT); // unnecessary if BL_MULT is 1
-	bl += pow(l2_clampScale(0.7, 0.96875, light.x), 2.0) * 3.0;
+	#define BL_MULT 5.0
 
 	// makes builds look better outside
 	float adaptationTerm = mix(1.0, 0.5 / BL_MULT, atmosv_eyeAdaptation);
@@ -293,15 +288,10 @@ void lights(sampler3D lightTexture, vec3 albedo, vec4 light, vec3 eyePos, vec3 t
 	vec3 size = vec3(textureSize(lightTexture, 0));
 	vec3 blPos = mod(eyePos + normal * 0.5 + frx_cameraPos, size);
 	vec3 blColor = texture(lightTexture, blPos / size).rgb;
-	blColor *= blColor;// * 4.0;
-	float lum = lightLuminance(blColor);
-	blColor /= (lum == 0.0 ? 1.0 : lum);
-	// vec3 blColor = blockLightColor(light.x, light.z);
 
-	// float max3bl = l2_max3(blColor);
-	// if (max3bl > 0) {
-	// 	blColor /= max3bl;
-	// }
+	float bl = lightLuminance(blColor);
+	bl *= mix(0.0, BL_MULT * 2.0, bl);
+	// blColor = blockLightColor(light.x, light.z);
 	
 	blockLight = blColor * BLOCK_LIGHT_STR * bl * adaptationTerm;
 	blockLight *= 0.7 + userBrightness * 0.4;
