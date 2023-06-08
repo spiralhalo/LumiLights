@@ -259,7 +259,7 @@ vec3 blockLightColor(float lightx, float blWhite) {
 #endif
 }
 
-void lights(sampler3D lightTexture, vec3 albedo, vec4 light, vec3 eyePos, vec3 toEye, vec3 normal, out vec3 baseLight, out vec3 blockLight, out vec3 hlLight, out vec3 skyLight)
+void lights(sampler3D lightTexture, sampler2DArray resources, vec3 albedo, vec4 light, vec3 eyePos, vec3 toEye, vec3 normal, out vec3 baseLight, out vec3 blockLight, out vec3 hlLight, out vec3 skyLight)
 {
 	float userBrightness = frx_viewBrightness <= 0.5 ? (0.5 + frx_viewBrightness) : (2.0 * frx_viewBrightness);
 
@@ -286,11 +286,15 @@ void lights(sampler3D lightTexture, vec3 albedo, vec4 light, vec3 eyePos, vec3 t
 
 	// TODO: check for extents
 	vec3 size = vec3(textureSize(lightTexture, 0));
-	vec3 blPos = mod(eyePos + normal * 0.5 + frx_cameraPos, size);
+	vec3 blPos = mod(eyePos + (normal + getRandomVec(resources, v_texcoord, frxu_size) - vec3(0.5)) + frx_cameraPos, size);
 	vec3 blColor = texture(lightTexture, blPos / size).rgb;
+	// vec3 blColor2 = texture(lightTexture, floor(blPos) / size).rgb;
+	// vec3 blColor = (blColor1 + blColor2) * 0.5;
+	blColor *= blColor;
 
 	float bl = lightLuminance(blColor);
-	bl *= mix(0.0, BL_MULT * 2.0, bl);
+	bl = sqrt(bl);
+	bl *= mix(1.0, BL_MULT, bl);
 	// blColor = blockLightColor(light.x, light.z);
 	
 	blockLight = blColor * BLOCK_LIGHT_STR * bl * adaptationTerm;
@@ -327,7 +331,7 @@ void lights(sampler3D lightTexture, vec3 albedo, vec4 light, vec3 eyePos, vec3 t
 
 #define hdrAlbedo(color) hdr_fromGamma(color.rgb) * vec3(0.98, 0.96, 0.94) * 0.98 + 0.02
 
-vec4 shading(vec4 color, sampler2D natureTexture, sampler3D lightTexture, vec4 light, float ao, vec2 material, vec3 eyePos, vec3 normal, vec3 vertexNormal, bool isUnderwater, float disableDiffuse)
+vec4 shading(vec4 color, sampler2D natureTexture, sampler2DArray resources, sampler3D lightTexture, vec4 light, float ao, vec2 material, vec3 eyePos, vec3 normal, vec3 vertexNormal, bool isUnderwater, float disableDiffuse)
 {
 	vec3 albedo = hdrAlbedo(color);
 
@@ -341,7 +345,7 @@ vec4 shading(vec4 color, sampler2D natureTexture, sampler3D lightTexture, vec4 l
 
 	vec3 baseLight, blockLight, hlLight, skyLight;
 
-	lights(lightTexture, albedo, light, eyePos, toEye, normal, baseLight, blockLight, hlLight, skyLight);
+	lights(lightTexture, resources, albedo, light, eyePos, toEye, normal, baseLight, blockLight, hlLight, skyLight);
 
 	// block light fresnel
 	vec3 blH = normalize(toEye + normal);
@@ -376,7 +380,7 @@ vec4 shading(vec4 color, sampler2D natureTexture, sampler3D lightTexture, vec4 l
 	return vec4(shaded, min(1.0, alpha));
 }
 
-vec4 particleShading(vec4 color, sampler2D natureTexture, sampler3D lightTexture, vec4 light, vec3 eyePos, bool isUnderwater)
+vec4 particleShading(vec4 color, sampler2D natureTexture, sampler2DArray resources, sampler3D lightTexture, vec4 light, vec3 eyePos, bool isUnderwater)
 {
 	vec3 albedo = hdrAlbedo(color);
 	
@@ -390,7 +394,7 @@ vec4 particleShading(vec4 color, sampler2D natureTexture, sampler3D lightTexture
 	vec3 blockLight = vec3(0.0);
 	vec3 hlLight = vec3(0.0);
 	vec3 skyLight = vec3(0.0);
-	lights(lightTexture, albedo, light, eyePos, toEye, vec3(0.0), baseLight, blockLight, hlLight, skyLight);
+	lights(lightTexture, resources, albedo, light, eyePos, toEye, vec3(0.0), baseLight, blockLight, hlLight, skyLight);
 
 	vec3 shaded = albedo * (baseLight + blockLight + hlLight);
 	shaded += albedo * skyLight;
@@ -398,8 +402,8 @@ vec4 particleShading(vec4 color, sampler2D natureTexture, sampler3D lightTexture
 	return vec4(shaded / PI, color.a);
 }
 
-vec4 shading(vec4 color, sampler2D natureTexture, sampler3D lightTexture, vec4 light, vec3 rawMat, vec3 eyePos, vec3 normal, vec3 vertexNormal, bool isUnderwater, float disableDiffuse) {
-	return shading(color, natureTexture, lightTexture, light, rawMat.z, rawMat.xy, eyePos, normal, vertexNormal, isUnderwater, disableDiffuse);
+vec4 shading(vec4 color, sampler2D natureTexture, sampler2DArray resources, sampler3D lightTexture, vec4 light, vec3 rawMat, vec3 eyePos, vec3 normal, vec3 vertexNormal, bool isUnderwater, float disableDiffuse) {
+	return shading(color, natureTexture, resources, lightTexture, light, rawMat.z, rawMat.xy, eyePos, normal, vertexNormal, isUnderwater, disableDiffuse);
 }
 #endif
 #endif

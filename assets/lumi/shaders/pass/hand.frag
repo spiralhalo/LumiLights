@@ -46,7 +46,7 @@ void main()
 		vertexNormal = vertexNormal * frx_normalModelMatrix;
 		normal = normal * frx_normalModelMatrix;
 
-		fragColor = shading(cSolid, u_tex_nature, u_light_data, light, rawMat, eyePos, normal, vertexNormal, frx_cameraInWater == 1., disableDiffuse);
+		fragColor = shading(cSolid, u_tex_nature, u_resources, u_light_data, light, rawMat, eyePos, normal, vertexNormal, frx_cameraInWater == 1., disableDiffuse);
 		fragColor += skyReflection(u_resources, hdrAlbedo(cSolid), rawMat.xy, normalize(eyePos), normal, light.yw);
 
 		fragColor = overlay(fragColor, u_resources, misc);
