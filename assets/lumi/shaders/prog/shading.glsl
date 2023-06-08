@@ -286,7 +286,7 @@ void lights(sampler3D lightTexture, sampler2DArray resources, vec3 albedo, vec4 
 
 	// TODO: check for extents
 	vec3 size = vec3(textureSize(lightTexture, 0));
-	vec3 blPos = mod(eyePos + (normal + getRandomVec(resources, v_texcoord, frxu_size) - vec3(0.5)) + frx_cameraPos, size);
+	vec3 blPos = mod(eyePos + (normal + getRandomVec(resources, v_texcoord, frxu_size) - vec3(0.5)) * 0.5 + frx_cameraPos, size);
 	vec3 blColor = texture(lightTexture, blPos / size).rgb;
 	// vec3 blColor2 = texture(lightTexture, floor(blPos) / size).rgb;
 	// vec3 blColor = (blColor1 + blColor2) * 0.5;

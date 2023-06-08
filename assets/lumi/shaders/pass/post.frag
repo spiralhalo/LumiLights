@@ -44,7 +44,7 @@ vec3 lightColor(vec3 toFrag, float distToEye, vec3 fallback) {
 	vec3 size = vec3(textureSize(u_light_data, 0));
 	vec3 totalLight = vec3(0.0);
 	vec3 visiblity = vec3(1.0);
-	float alpha = range / 100.0;
+	float alpha = range / 200.0;
 
 	while (i < steps) {	
 		vec3 light = vec3(0.0);
