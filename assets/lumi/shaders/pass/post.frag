@@ -34,7 +34,7 @@ out vec4 fragColor;
 
 vec3 lightColor(vec3 toFrag, float distToEye, vec3 fallback) {
 	int steps = 10;
-	float range = min(distToEye, 32.0);
+	float range = min(distToEye, 128.0);
 
 	vec3 lerp = (toFrag * range) / float(steps);
 	vec3 jitt = getRandomFloat(u_resources, v_texcoord, frxu_size) * lerp;
@@ -44,15 +44,33 @@ vec3 lightColor(vec3 toFrag, float distToEye, vec3 fallback) {
 	vec3 size = vec3(textureSize(u_light_data, 0));
 	vec3 totalLight = vec3(0.0);
 	vec3 visiblity = vec3(1.0);
-	float alpha = range / 200.0;
+	float alpha = 0.01 * range / float(steps);
+	alpha *= mix(1.0, 0.01, atmosv_eyeAdaptation);
 
 	while (i < steps) {	
 		vec3 light = vec3(0.0);
 		vec3 pos = mod(lerp * float(i) + jitt + frx_cameraPos, size);
 
-		vec4 tex = texture(u_light_data, pos / size);
-		light = tex.rgb * tex.rgb * visiblity * alpha;// * tex.a;
-		light *= light;
+		vec3 tex = texture(u_light_data, pos / size).rgb;
+		// vec4 texA = vec4(0.0);
+		// texA += vec4(texture(u_light_data, pos / size).rgb, 1.0);
+		// tex = texture(u_light_data, (pos + vec3(0.0, 0.0, 1.0)) / size).rgb;
+		// if (tex != vec3(0.0)) texA += vec4(tex, 1.0);
+		// tex = texture(u_light_data, (pos + vec3(0.0, 0.0, -1.0)) / size).rgb;
+		// if (tex != vec3(0.0)) texA += vec4(tex, 1.0);
+		// tex = texture(u_light_data, (pos + vec3(0.0, 1.0, 0.0)) / size).rgb;
+		// if (tex != vec3(0.0)) texA += vec4(tex, 1.0);
+		// tex = texture(u_light_data, (pos + vec3(0.0, -1.0, 0.0)) / size).rgb;
+		// if (tex != vec3(0.0)) texA += vec4(tex, 1.0);
+		// tex = texture(u_light_data, (pos + vec3(1.0, 0.0, 0.0)) / size).rgb;
+		// if (tex != vec3(0.0)) texA += vec4(tex, 1.0);
+		// tex = texture(u_light_data, (pos + vec3(-1.0, 0.0, 0.0)) / size).rgb;
+		// if (tex != vec3(0.0)) texA += vec4(tex, 1.0);
+		// tex = texA.rgb / texA.a;
+		light = tex.rgb * tex.rgb;// * tex.a;
+		// float l = lightLuminance(light);
+		// light *= l;
+		light *= visiblity * alpha;
 		visiblity = clamp(visiblity - light, 0.0, 1.0);
 		// light = pos / size;
 
