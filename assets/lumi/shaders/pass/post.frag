@@ -52,27 +52,12 @@ vec3 lightColor(vec3 toFrag, float distToEye, vec3 fallback) {
 		vec3 pos = mod(lerp * float(i) + jitt + frx_cameraPos, size);
 
 		vec3 tex = texture(u_light_data, pos / size).rgb;
-		// vec4 texA = vec4(0.0);
-		// texA += vec4(texture(u_light_data, pos / size).rgb, 1.0);
-		// tex = texture(u_light_data, (pos + vec3(0.0, 0.0, 1.0)) / size).rgb;
-		// if (tex != vec3(0.0)) texA += vec4(tex, 1.0);
-		// tex = texture(u_light_data, (pos + vec3(0.0, 0.0, -1.0)) / size).rgb;
-		// if (tex != vec3(0.0)) texA += vec4(tex, 1.0);
-		// tex = texture(u_light_data, (pos + vec3(0.0, 1.0, 0.0)) / size).rgb;
-		// if (tex != vec3(0.0)) texA += vec4(tex, 1.0);
-		// tex = texture(u_light_data, (pos + vec3(0.0, -1.0, 0.0)) / size).rgb;
-		// if (tex != vec3(0.0)) texA += vec4(tex, 1.0);
-		// tex = texture(u_light_data, (pos + vec3(1.0, 0.0, 0.0)) / size).rgb;
-		// if (tex != vec3(0.0)) texA += vec4(tex, 1.0);
-		// tex = texture(u_light_data, (pos + vec3(-1.0, 0.0, 0.0)) / size).rgb;
-		// if (tex != vec3(0.0)) texA += vec4(tex, 1.0);
-		// tex = texA.rgb / texA.a;
 		light = tex.rgb * tex.rgb;// * tex.a;
 		// float l = lightLuminance(light);
 		// light *= l;
+		// light = pos / size;
 		light *= visiblity * alpha;
 		visiblity = clamp(visiblity - light, 0.0, 1.0);
-		// light = pos / size;
 
 		totalLight += light;
 		i++;
