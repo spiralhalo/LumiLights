@@ -227,7 +227,7 @@ void prepare(vec4 color, sampler2D natureTexture, vec3 eyePos, float vertexNorma
 #ifdef WATER_CAUSTICS
 	if (isUnderwater && frx_worldHasSkylight == 1) {
 		causticLight  = caustics(natureTexture, eyePos + frx_cameraPos, vertexNormaly);
-		causticLight  = pow(causticLight, 15.0);
+		causticLight *= 2.0;
 		causticLight *= smoothstep(0.0, 1.0, light.y);
 	}
 #endif
