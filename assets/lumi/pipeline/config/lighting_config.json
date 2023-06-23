@@ -64,7 +64,7 @@
 				nether_ambient_boost: {
 					default: 1.0,
 					min: 0.0,
-					max: 2.0,
+					max: 8.0,
 					nameKey: "config.lumi_lights.value.nether_ambient_brightness",
 					descriptionKey: "config.lumi_lights.help.nether_ambient_brightness"
 				},
