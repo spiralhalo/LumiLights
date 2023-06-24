@@ -80,7 +80,7 @@ void main()
 	float idMicroNormal = albedo.a == 0.0 ? ID_SOLID_MNORM : ID_TRANS_MNORM;
 
 	if (notEndPortal(u_gbuffer_lightnormal) || albedo.a == 0.0) {
-		fragColor += reflection(albedo.rgb, u_color_result, u_gbuffer_main_etc, u_gbuffer_lightnormal, u_translucent_depth, u_gbuffer_shadow, u_resources, idLight, idMaterial, idNormal, idMicroNormal);
+		fragColor += reflection(albedo.rgb, u_color_result, u_gbuffer_main_etc, u_gbuffer_lightnormal, u_translucent_depth, u_gbuffer_shadow, u_tex_nature, u_resources, idLight, idMaterial, idNormal, idMicroNormal);
 	}
 
 	vec4 trans = texture(u_color_others, vec3(v_texcoord, ID_OTHER_TRANS));

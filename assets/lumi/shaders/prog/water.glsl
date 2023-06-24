@@ -16,6 +16,16 @@ float textureWater(sampler2D natureTexture, vec4 uvuv, vec2 uvMove)
 }
 
 #ifdef POST_SHADER
+float textureCaustics(sampler2D natureTexture, vec4 uvuv, vec2 uvMove)
+{
+	uvuv *= WATER_SAMPLING_ZOOM * WATER_BLOCK_RES / WATER_TEXSIZE;
+
+	float A = texture(natureTexture, uvuv.xy + uvMove).g;
+	float B = texture(natureTexture, uvuv.zw + uvMove).b;
+
+	return A * 0.5 + B * 0.5;
+}
+
 bool decideUnderwater(float depth, float dTrans, bool transIsWater, bool translucent) {
 	if (frx_cameraInWater == 1) {
 		if (translucent) {
@@ -60,12 +70,12 @@ float caustics(sampler2D natureTexture, vec3 worldPos, float vertexNormaly)
 	vec2 moveA = vec2(1. + yMove, 1. - yMove) * frx_renderSeconds;
 	vec2 moveB = vec2(1. + yMove, -1. - yMove) * frx_renderSeconds;
 
-	vec2 uv = worldPos.xz + vec2(-1.0, 1.0) * worldPos.y;
+	vec2 uv = worldPos.xz - frx_skyLightVector.xz * worldPos.y * (1.0 / max(0.000001, frx_skyLightVector.y));
 
 	vec4 uvuv = vec4(uv + moveA, uv + moveB);
 
-	float e = textureWater(natureTexture, uvuv, vec2(0.0));
-		  e = smoothstep(-1.0, 1.0, e);
+	float e = textureCaustics(natureTexture, uvuv, vec2(0.0));
+	      e = smoothstep(0.55, 1.0, e);
 
 	return e;
 }
