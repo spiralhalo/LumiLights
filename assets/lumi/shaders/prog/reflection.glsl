@@ -199,7 +199,7 @@ vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer
 
 	#ifdef VOLUMETRIC_CLOUDS
 	vec4 clouds = customClouds(natureTexture, natureTexture, resources, depth, v_texcoord, cloudPos, march, NUM_SAMPLE / 2, vec4(skyLight, 1.0));
-	baseReflection = mix(baseReflection, clouds.rgb, clouds.a);
+	baseReflection = mix(baseReflection, clouds.rgb, clouds.a * float(frx_worldIsOverworld));
 	#endif
 
 	vec3 reflectedLight = reflectionPbr(albedo, rawMat.xy, baseReflection, viewMarch, viewToEye);
