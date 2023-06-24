@@ -131,7 +131,7 @@ vec3 rayMarchCloud(sampler2D natureTexture, sampler2DArray resources, vec2 texco
 	}
 
 	distanceTotal += sampleSize * numSample;
-	float fade = min(1.0, distanceTotal / 1024.0);
+	float fade = min(1.0, distanceTotal / 2048.0);
 	// I guess this works because we limit the distance when we are on cloud level with world-clouds
 	float fadeOut = 1.0 - pow(fade, 2.0);
 
