@@ -4,6 +4,9 @@
  *  lumi:shaders/prog/water.glsl
  *******************************************************/
 
+#define WATER_SPEED 0.35
+const float WATERFALL_SPEED = 3.0 / WATER_SPEED;
+
 #ifndef VERTEX_SHADER
 float textureWater(sampler2D natureTexture, vec4 uvuv, vec2 uvMove)
 {
@@ -67,8 +70,8 @@ vec2 refractSolidUV(sampler2DArray normalBuffer, sampler2D solidDepthBuffer, flo
 float caustics(sampler2D natureTexture, vec3 worldPos, float vertexNormaly)
 {
 	float yMove = 1.0 - vertexNormaly;
-	vec2 moveA = vec2(1. + yMove, 1. - yMove) * frx_renderSeconds;
-	vec2 moveB = vec2(1. + yMove, -1. - yMove) * frx_renderSeconds;
+	vec2 moveA = vec2(1. + yMove, 1. - yMove) * frx_renderSeconds * WATER_SPEED;
+	vec2 moveB = vec2(1. + yMove, -1. - yMove) * frx_renderSeconds * WATER_SPEED;
 
 	vec2 uv = worldPos.xz - frx_skyLightVector.xz * worldPos.y * (1.0 / max(0.000001, frx_skyLightVector.y));
 
@@ -82,8 +85,8 @@ float caustics(sampler2D natureTexture, vec3 worldPos, float vertexNormaly)
 
 void foamPreprocess(inout vec4 albedo, sampler2D natureTexture, vec3 worldPos, float waterNormaly, float solidNormaly, vec3 waterPos, vec3 solidPos)
 {
-	vec2 moveA = vec2(1., 1.) * frx_renderSeconds;
-	vec2 moveB = vec2(1., -1.) * frx_renderSeconds;
+	vec2 moveA = vec2(1., 1.) * frx_renderSeconds * WATER_SPEED;
+	vec2 moveB = moveA * vec2(1., -1.);
 
 	vec2 uv = worldPos.xz + vec2(-1.0, 1.0) * worldPos.y;
 	uv *= vec2(4.0);
@@ -110,8 +113,8 @@ void foamPreprocess(inout vec4 albedo, sampler2D natureTexture, vec3 worldPos, f
 float sampleWaterNoise(sampler2D natureTexture, vec3 worldPos, vec2 uvMove, vec3 absVertexNormal)
 {
 	vec3 yMove = 1.0 - absVertexNormal;
-	vec2 moveA = vec2(1. + yMove.y * 5., 1. - yMove.y) * frx_renderSeconds;
-	vec2 moveB = vec2(1. + yMove.y * 5., -1. + yMove.y) * frx_renderSeconds;
+	vec2 moveA = vec2(1. + yMove.y * WATERFALL_SPEED, 1. - yMove.y) * frx_renderSeconds * WATER_SPEED;
+	vec2 moveB = moveA * vec2(1., -1.);
 
 	vec2 uv = worldPos.xz * absVertexNormal.y + yMove.y * vec2(worldPos.y, worldPos.x * yMove.x + worldPos.z * yMove.z);
 
