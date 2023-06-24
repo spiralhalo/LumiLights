@@ -116,7 +116,7 @@ vec3 reflectionMarch_v2(sampler2D depthBuffer, sampler2DArray lightNormalBuffer,
 
 const float JITTER_STRENGTH = 0.6;
 
-vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer, sampler2DArray lightNormalBuffer, sampler2D depthBuffer, sampler2DArrayShadow shadowMap, sampler2DArray resources, float idLight, float idMaterial, float idNormal, float idMicroNormal)
+vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer, sampler2DArray lightNormalBuffer, sampler2D depthBuffer, sampler2DArrayShadow shadowMap, sampler2D natureTexture, sampler2DArray resources, float idLight, float idMaterial, float idNormal, float idMicroNormal)
 {
 	vec3 rawMat = texture(mainEtcBuffer, vec3(v_texcoord, idMaterial)).xyz;
 
@@ -144,6 +144,10 @@ vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer
 	vec3 viewMarch  = reflectRough(resources, viewToFrag, viewNormal, roughness, jitterPrc);
 	vec3 march = viewMarch * frx_normalModelMatrix;
 
+	#ifdef VOLUMETRIC_CLOUDS
+	vec3 cloudPos = march * frx_viewDistance * 4.0;
+	#endif
+
 	#ifdef SS_REFLECTION
 	vec4 objLight = vec4(0.0);
 	if (roughness <= REFLECTION_MAXIMUM_ROUGHNESS) {
@@ -168,9 +172,15 @@ vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer
 		result.z *= min(uvFade.x, uvFade.y);
 
 		vec4 reflectedPos = frx_inverseViewProjectionMatrix * vec4(result.xy * 2.0 - 1.0, texture(depthBuffer, result.xy).r * 2.0 - 1.0, 1.0);
-		float dist = length(reflectedPos.xyz / reflectedPos.w);
+		reflectedPos.xyz /= reflectedPos.w;
+		float dist = length(reflectedPos.xyz);
 		float distanceFade = fogFactor(dist, march, frx_cameraInFluid == 1);
 		float edgeBlendFade = edgeBlendFactor(dist);
+
+		
+		#ifdef VOLUMETRIC_CLOUDS
+		cloudPos = reflectedPos.xyz;
+		#endif
 
 		result.z *= 1.0 - pow(distanceFade, 3.0);
 		result.z *= 1.0 - edgeBlendFade;
@@ -185,8 +195,14 @@ vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer
 
 	vec3 skyLight = skyRadiance(resources, rawMat.xy, march, light.yw) * skyReflectionFac(march);
 	vec3 envLight = blockLightColor(light.x, light.z) * lightmapRemap(light.x) * (1.0 - frx_smoothedEyeBrightness.y);
+	vec3 baseReflection = envLight + mix(skyLight, objLight.rgb, objLight.a);
 
-	vec3 reflectedLight = reflectionPbr(albedo, rawMat.xy, envLight + mix(skyLight, objLight.rgb, objLight.a), viewMarch, viewToEye);
+	#ifdef VOLUMETRIC_CLOUDS
+	vec4 clouds = customClouds(natureTexture, natureTexture, resources, depth, v_texcoord, cloudPos, march, NUM_SAMPLE / 2, vec4(skyLight, 1.0));
+	baseReflection = mix(baseReflection, clouds.rgb, clouds.a);
+	#endif
+
+	vec3 reflectedLight = reflectionPbr(albedo, rawMat.xy, baseReflection, viewMarch, viewToEye);
 
 	return vec4(reflectedLight, 0.0);
 }
