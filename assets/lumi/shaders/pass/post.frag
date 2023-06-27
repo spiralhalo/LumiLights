@@ -32,12 +32,13 @@ uniform sampler3D u_light_data;
 
 out vec4 fragColor;
 
-vec3 lightColor(vec3 toFrag, float distToEye, vec3 fallback) {
-	int steps = 10;
+#ifdef VOLUMETRIC_FOG
+vec3 colorLightFog(vec3 toFrag, float distToEye, vec3 fallback) {
+	int steps = 6;
 	float range = min(distToEye, 128.0);
 
 	vec3 lerp = (toFrag * range) / float(steps);
-	vec3 jitt = getRandomFloat(u_resources, v_texcoord, frxu_size) * lerp;
+	float jitt = getRandomFloat(u_resources, v_texcoord, frxu_size);
 
 	int i = 0;
 
@@ -49,7 +50,7 @@ vec3 lightColor(vec3 toFrag, float distToEye, vec3 fallback) {
 
 	while (i < steps) {	
 		vec3 light = vec3(0.0);
-		vec3 pos = mod(lerp * float(i) + jitt + frx_cameraPos, size);
+		vec3 pos = mod(lerp * (float(i) + jitt) + frx_cameraPos, size);
 
 		vec3 tex = texture(u_light_data, pos / size).rgb;
 		light = tex.rgb * tex.rgb;// * tex.a;
@@ -67,6 +68,7 @@ vec3 lightColor(vec3 toFrag, float distToEye, vec3 fallback) {
 
 	return totalLight;
 }
+#endif
 
 void main()
 {
@@ -109,7 +111,9 @@ void main()
 	vec4 clouds = customClouds(u_vanilla_clouds_depth, u_tex_nature, u_resources, dMin, v_texcoord, eyePos, toFrag, NUM_SAMPLE, skyBasic);
 	fragColor.rgb = fragColor.rgb * (1.0 - clouds.a) + clouds.rgb * clouds.a;
 
-	fragColor.rgb = lightColor(toFrag, distToEye, fragColor.rgb);
+	#ifdef VOLUMETRIC_FOG
+	fragColor.rgb = colorLightFog(toFrag, distToEye, fragColor.rgb);
+	#endif
 
 	fragColor = blindnessFog(fragColor, distToEye);
 	fragColor = ldr_tonemap(fragColor);
