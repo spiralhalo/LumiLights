@@ -116,7 +116,7 @@ vec3 reflectionMarch_v2(sampler2D depthBuffer, sampler2DArray lightNormalBuffer,
 
 const float JITTER_STRENGTH = 0.6;
 
-vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer, sampler2DArray lightNormalBuffer, sampler2D depthBuffer, sampler2DArrayShadow shadowMap, sampler2D natureTexture, sampler2DArray resources, float idLight, float idMaterial, float idNormal, float idMicroNormal)
+vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer, sampler2DArray lightNormalBuffer, sampler2D depthBuffer, sampler2DArrayShadow shadowMap, sampler2D natureTexture, sampler3D lightTexture, sampler2DArray resources, float idLight, float idMaterial, float idNormal, float idMicroNormal)
 {
 	vec3 rawMat = texture(mainEtcBuffer, vec3(v_texcoord, idMaterial)).xyz;
 
@@ -194,7 +194,10 @@ vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer
 	#endif
 
 	vec3 skyLight = skyRadiance(resources, rawMat.xy, march, light.yw) * skyReflectionFac(march);
-	vec3 envLight = blockLightColor(light.x, light.z) * lightmapRemap(light.x) * (1.0 - frx_smoothedEyeBrightness.y);
+
+	vec3 lightSize = textureSize(lightTexture, 0);
+	vec3 envLight = texture(lightTexture, mod(eyePos + frx_cameraPos + normal * 0.5, lightSize) / lightSize).rgb * (1.0 - frx_smoothedEyeBrightness.y);
+	
 	vec3 baseReflection = envLight + mix(skyLight, objLight.rgb, objLight.a);
 
 	#ifdef VOLUMETRIC_CLOUDS
