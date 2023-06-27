@@ -242,11 +242,6 @@ void prepare(vec4 color, sampler2D natureTexture, vec3 eyePos, float vertexNorma
 
 	// caustics is unclamped
 	light.w += causticLight;
-
-	float luminance = frx_luminance(color.rgb);
-	float vanillaEmissive = step(0.93625, light.x) * luminance;
-
-	light.z += vanillaEmissive;
 }
 
 vec3 blockLightColor(float lightx, float blWhite) {
