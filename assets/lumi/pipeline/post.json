@@ -60,7 +60,7 @@
 
 					"resources",
 					"lumi:textures/misc/nature.png",
-					"canvas:alpha/light_data",
+					"light_data",
 				]
 			},
 		]

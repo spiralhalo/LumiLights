@@ -38,6 +38,7 @@
 	enablePBR: true,
 
 	include: [
+		"lumi:pipeline/light.json",
 		"lumi:pipeline/init.json",
 		"lumi:pipeline/layers.json",
 		// "lumi:pipeline/common.json",

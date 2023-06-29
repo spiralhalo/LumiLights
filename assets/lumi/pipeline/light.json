@@ -1,0 +1,26 @@
+{
+	coloredLights: {
+		lightImage: "light_data"
+	},
+
+	images: [
+		{
+			name: "light_data",
+			texParams: [
+				{name: "TEXTURE_MIN_FILTER", val: "LINEAR"},
+				{name: "TEXTURE_MAG_FILTER", val: "LINEAR"},
+				{name: "TEXTURE_WRAP_S", val: "REPEAT"},
+				{name: "TEXTURE_WRAP_T", val: "REPEAT"},
+				{name: "TEXTURE_WRAP_R", val: "REPEAT"}
+			],
+			width: 256,
+			height: 256,
+			depth: 256,
+			// DO NOT CHANGE ANY SETTINGS BELOW
+			target: "GL_TEXTURE_3D",
+			internalFormat: "GL_RGBA4",
+			pixelFormat: "GL_RGBA",
+			pixelDataType: "GL_UNSIGNED_SHORT_4_4_4_4",
+		}
+	]
+}
