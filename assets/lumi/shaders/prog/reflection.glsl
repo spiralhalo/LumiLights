@@ -1,3 +1,4 @@
+#include frex:shaders/api/light.glsl
 #include lumi:shaders/prog/fog.glsl
 #include lumi:shaders/prog/shading.glsl
 #include lumi:shaders/prog/sky.glsl
@@ -194,10 +195,7 @@ vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer
 	#endif
 
 	vec3 skyLight = skyRadiance(resources, rawMat.xy, march, light.yw) * skyReflectionFac(march);
-
-	vec3 lightPos = eyePos + frx_cameraPos + normal * 0.5;
-	bool inExtent = clamp(lightPos, frx_lightVolumeOrigin, frx_lightVolumeOrigin + LIGHT_VOLUME_SIZE) == lightPos;
-	vec3 envLight = mix(vec3(0.0), texture(lightTexture, mod(lightPos, LIGHT_VOLUME_SIZE) / LIGHT_VOLUME_SIZE).rgb * (1.0 - frx_smoothedEyeBrightness.y), inExtent);
+	vec3 envLight = pow(frx_getLightFiltered(lightTexture, lightPos, vec3(0.0)), vec3(2.0)) * (1.0 - frx_smoothedEyeBrightness.y);
 	
 	vec3 baseReflection = envLight + mix(skyLight, objLight.rgb, objLight.a);
 

@@ -1,5 +1,6 @@
 #include lumi:shaders/pass/header.glsl
 
+#include frex:shaders/api/light.glsl
 #include lumi:shaders/lib/taa_jitter.glsl
 #include lumi:shaders/prog/clouds.glsl
 #include lumi:shaders/prog/fog.glsl
@@ -50,9 +51,7 @@ vec3 colorLightFog(vec3 toFrag, float distToEye, vec3 fallback) {
 	while (i < steps) {	
 		vec3 light = vec3(0.0);
 		vec3 pos = lerp * (float(i) + jitt) + frx_cameraPos;
-		bool inExtent = clamp(pos, frx_lightVolumeOrigin, frx_lightVolumeOrigin + LIGHT_VOLUME_SIZE) == pos;
-		vec3 tex = texture(u_light_data, mod(pos, LIGHT_VOLUME_SIZE) / LIGHT_VOLUME_SIZE).rgb;
-		tex = mix(vec3(0.0), tex, float(inExtent));
+		vec3 tex = frx_getLightFiltered(lightTexture, pos, vec3(0.0));
 		light = tex.rgb * tex.rgb;// * tex.a;
 		// float l = lightLuminance(light);
 		// light *= l;

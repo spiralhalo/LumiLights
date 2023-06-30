@@ -1,4 +1,5 @@
 #include frex:shaders/lib/math.glsl
+#include frex:shaders/api/light.glsl
 #include frex:shaders/api/world.glsl
 #include frex:shaders/api/player.glsl
 #include frex:shaders/api/view.glsl
@@ -279,17 +280,13 @@ void lights(sampler3D lightTexture, sampler2DArray resources, vec3 albedo, vec4 
 	// makes builds look better outside
 	float adaptationTerm = mix(1.0, 0.5 / BL_MULT, atmosv_eyeAdaptation);
 
-	vec3 blPos = eyePos + (normal + getRandomVec(resources, v_texcoord, frxu_size) - vec3(0.5)) * 0.5 + frx_cameraPos;
-	bool inExtent = clamp(blPos, frx_lightVolumeOrigin, frx_lightVolumeOrigin + LIGHT_VOLUME_SIZE) == blPos;
-	vec3 blColor = mix(vec3(0.0), texture(lightTexture, mod(blPos, LIGHT_VOLUME_SIZE) / LIGHT_VOLUME_SIZE).rgb, float(inExtent));
-	// vec3 blColor2 = texture(lightTexture, floor(blPos) / size).rgb;
-	// vec3 blColor = (blColor1 + blColor2) * 0.5;
+	vec3 fallbackBL = hdr_toSRGB(blockLightColor(light.x, light.z)) * l2_clampScale(0.03125, 0.96875, light.x);
+	vec3 blColor = frx_getLightFiltered(lightTexture, eyePos + frx_cameraPos, fallbackBL);
 	blColor *= blColor;
 
 	float bl = lightLuminance(blColor);
 	bl = sqrt(bl);
 	bl *= mix(1.0, BL_MULT, bl);
-	// blColor = blockLightColor(light.x, light.z);
 	
 	blockLight = blColor * BLOCK_LIGHT_STR * bl * adaptationTerm;
 	blockLight *= 0.7 + userBrightness * 0.4;

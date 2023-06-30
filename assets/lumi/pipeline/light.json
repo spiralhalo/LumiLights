@@ -1,5 +1,6 @@
 {
 	coloredLights: {
+		mode: "SIMPLE",
 		lightImage: "light_data"
 	},
 
@@ -13,9 +14,9 @@
 				{name: "TEXTURE_WRAP_T", val: "REPEAT"},
 				{name: "TEXTURE_WRAP_R", val: "REPEAT"}
 			],
-			width: 256,
-			height: 256,
-			depth: 256,
+			width: 384,
+			height: 384,
+			depth: 384,
 			// DO NOT CHANGE ANY SETTINGS BELOW
 			target: "GL_TEXTURE_3D",
 			internalFormat: "GL_RGBA4",
