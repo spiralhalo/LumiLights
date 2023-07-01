@@ -195,7 +195,7 @@ vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer
 	#endif
 
 	vec3 skyLight = skyRadiance(resources, rawMat.xy, march, light.yw) * skyReflectionFac(march);
-	vec3 envLight = pow(frx_getLightFiltered(lightTexture, lightPos, vec3(0.0)), vec3(2.0)) * (1.0 - frx_smoothedEyeBrightness.y);
+	vec3 envLight = pow(frx_getLightFiltered(lightTexture, eyePos + frx_cameraPos + normal * 0.1, vec3(0.0)), vec3(2.0)) * (1.0 - frx_smoothedEyeBrightness.y);
 	
 	vec3 baseReflection = envLight + mix(skyLight, objLight.rgb, objLight.a);
 

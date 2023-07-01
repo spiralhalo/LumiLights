@@ -1,22 +1,31 @@
 {
 	coloredLights: {
-		mode: "SIMPLE",
-		lightImage: "light_data"
+		// either SPARSE or any custom string
+		mode: "Awoo's special sauce",
+		// only available when mode is NOT SPARSE
+		lightImage: "light_data",
+		// enable selective neighbor filtering
+		useComplexFilter: true,
+		// enable occlusion data when available
+		occlusionData: true
 	},
 
 	images: [
 		{
 			name: "light_data",
 			texParams: [
-				{name: "TEXTURE_MIN_FILTER", val: "LINEAR"},
-				{name: "TEXTURE_MAG_FILTER", val: "LINEAR"},
-				{name: "TEXTURE_WRAP_S", val: "REPEAT"},
-				{name: "TEXTURE_WRAP_T", val: "REPEAT"},
-				{name: "TEXTURE_WRAP_R", val: "REPEAT"}
+				// Texture filter is ignored if useComplexFilter is true
+				{name: "TEXTURE_MIN_FILTER", val: "NEAREST"},
+				{name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
+				{name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"},
+				{name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"},
+				{name: "TEXTURE_WRAP_R", val: "CLAMP_TO_EDGE"}
 			],
-			width: 384,
-			height: 384,
-			depth: 384,
+			// Corresponds to cubic region around the player covered by light data
+			// MIGHT CAUSE ERRORS IF NOT POWER OF TWO
+			width: 256,
+			height: 256,
+			depth: 256,
 			// DO NOT CHANGE ANY SETTINGS BELOW
 			target: "GL_TEXTURE_3D",
 			internalFormat: "GL_RGBA4",

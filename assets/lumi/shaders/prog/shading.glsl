@@ -281,7 +281,7 @@ void lights(sampler3D lightTexture, sampler2DArray resources, vec3 albedo, vec4 
 	float adaptationTerm = mix(1.0, 0.5 / BL_MULT, atmosv_eyeAdaptation);
 
 	vec3 fallbackBL = hdr_toSRGB(blockLightColor(light.x, light.z)) * l2_clampScale(0.03125, 0.96875, light.x);
-	vec3 blColor = frx_getLightFiltered(lightTexture, eyePos + frx_cameraPos, fallbackBL);
+	vec3 blColor = frx_getLightFiltered(lightTexture, eyePos + frx_cameraPos + normal * 0.1, fallbackBL);
 	blColor *= blColor;
 
 	float bl = lightLuminance(blColor);

@@ -49,10 +49,9 @@ vec3 colorLightFog(vec3 toFrag, float distToEye, vec3 fallback) {
 	alpha *= mix(1.0, 0.01, atmosv_eyeAdaptation);
 
 	while (i < steps) {	
-		vec3 light = vec3(0.0);
 		vec3 pos = lerp * (float(i) + jitt) + frx_cameraPos;
-		vec3 tex = frx_getLightFiltered(lightTexture, pos, vec3(0.0));
-		light = tex.rgb * tex.rgb;// * tex.a;
+		vec3 tex = frx_getLightFiltered(u_light_data, pos, vec3(0.0));
+		vec3 light = tex.rgb * tex.rgb;// * tex.a;
 		// float l = lightLuminance(light);
 		// light *= l;
 		// light = pos / size;
