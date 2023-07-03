@@ -255,6 +255,161 @@ vec3 blockLightColor(float lightx, float blWhite) {
 #endif
 }
 
+vec4 spline(float v){
+    vec4 n = vec4(1.0, 2.0, 3.0, 4.0) - v;
+    vec4 s = n * n * n;
+    float x = s.x;
+    float y = s.y - 4.0 * s.x;
+    float z = s.z - 4.0 * s.y + 6.0 * s.x;
+    float w = 6.0 - x - y - z;
+    return vec4(x, y, z, w) * (1.0/6.0);
+}
+// vec4 spline(float x)
+// {
+//     float x2 = x * x;
+//     float x3 = x2 * x;
+//     vec4 w;
+//     w.x =   -x3 + 3.0*x2 - 3.0*x + 1.0;
+//     w.y =  3.0*x3 - 6.0*x2       + 4.0;
+//     w.z = -3.0*x3 + 3.0*x2 + 3.0*x + 1.0;
+//     w.w =  x3;
+//     return w / 6.0;
+// }
+
+// vec3 cubic(vec3 fac) {
+// 	return fac * fac * (3.0 - 2.0 * fac); 
+// }
+
+vec4 lightTrilinear(sampler3D lightTexture, vec3 pos) {
+	if (!frx_lightDataExists(pos) || frx_getLightRaw(lightTexture, pos).a == 0.0) {
+		return vec4(0.0);
+	}
+
+	vec3 ori = pos - vec3(0.5);
+	vec3 fac = fract(ori);
+	ori -= fac;
+	ori += vec3(0.5);
+
+	vec2 xoffset = vec2(ori.x, ori.x + 1.0);
+	vec2 yoffset = vec2(ori.y, ori.y + 1.0);
+	vec2 zoffset = vec2(ori.z, ori.z + 1.0);
+
+	vec3 v000 = vec3(xoffset.s, yoffset.s, zoffset.s);
+	vec3 v001 = vec3(xoffset.s, yoffset.s, zoffset.t);
+	vec3 v010 = vec3(xoffset.s, yoffset.t, zoffset.s);
+	vec3 v011 = vec3(xoffset.s, yoffset.t, zoffset.t);
+	vec3 v100 = vec3(xoffset.t, yoffset.s, zoffset.s);
+	vec3 v101 = vec3(xoffset.t, yoffset.s, zoffset.t);
+	vec3 v110 = vec3(xoffset.t, yoffset.t, zoffset.s);
+	vec3 v111 = vec3(xoffset.t, yoffset.t, zoffset.t);
+
+	vec4 tex000 = frx_getLightRaw(lightTexture, v000);
+	vec4 tex001 = frx_getLightRaw(lightTexture, v001);
+	vec4 tex010 = frx_getLightRaw(lightTexture, v010);
+	vec4 tex011 = frx_getLightRaw(lightTexture, v011);
+	vec4 tex100 = frx_getLightRaw(lightTexture, v100);
+	vec4 tex101 = frx_getLightRaw(lightTexture, v101);
+	vec4 tex110 = frx_getLightRaw(lightTexture, v110);
+	vec4 tex111 = frx_getLightRaw(lightTexture, v111);
+
+	v000 = pos - v000;
+	v001 = pos - v001;
+	v010 = pos - v010;
+	v011 = pos - v011;
+	v100 = pos - v100;
+	v101 = pos - v101;
+	v110 = pos - v110;
+	v111 = pos - v111;
+
+	float w000 = tex000.a * abs(v111.x * v111.y * v111.z);
+	float w001 = tex001.a * abs(v110.x * v110.y * v110.z);
+	float w010 = tex010.a * abs(v101.x * v101.y * v101.z);
+	float w011 = tex011.a * abs(v100.x * v100.y * v100.z);
+	float w100 = tex100.a * abs(v011.x * v011.y * v011.z);
+	float w101 = tex101.a * abs(v010.x * v010.y * v010.z);
+	float w110 = tex110.a * abs(v001.x * v001.y * v001.z);
+	float w111 = tex111.a * abs(v000.x * v000.y * v000.z);
+
+	float w = w000 + w001 + w010 + w011 + w100 + w101 + w110 + w111;
+
+	return vec4(w == 0.0 ? vec3(0.0) : (tex000.rgb * w000 + tex001.rgb * w001 + tex010.rgb * w010 + tex011.rgb * w011 + tex100.rgb * w100 + tex101.rgb * w101 + tex110.rgb * w110 + tex111.rgb * w111) / w, 1.0);
+}
+
+vec3 lightTrilinear(sampler3D lightTexture, vec3 pos, vec3 fallback) {
+	vec4 tex = lightTrilinear(lightTexture, pos);
+	return mix(fallback, tex.rgb, tex.a);
+}
+
+vec3 lightTricubic(sampler3D lightTexture, vec3 pos, vec3 fallback) {
+	if (!frx_lightDataExists(pos)) {
+		return fallback;
+	}
+
+	vec3 ori = pos - vec3(0.5);
+	vec3 fac = fract(ori);
+	ori -= fac;
+
+    vec4 xcubic = spline(fac.x);
+    vec4 ycubic = spline(fac.y);
+    vec4 zcubic = spline(fac.z);
+
+	vec2 xoffset = vec2(ori.x - 0.5, ori.x + 1.5);
+	vec2 yoffset = vec2(ori.y - 0.5, ori.y + 1.5);
+	vec2 zoffset = vec2(ori.z - 0.5, ori.z + 1.5);
+
+	vec2 xscale = vec2(xcubic.x + xcubic.y, xcubic.z + xcubic.w);
+	vec2 yscale = vec2(ycubic.x + ycubic.y, ycubic.z + ycubic.w);
+	vec2 zscale = vec2(zcubic.x + zcubic.y, zcubic.z + zcubic.w);
+
+	xoffset = xoffset + vec2(xcubic.y, xcubic.w) / xscale;
+	yoffset = yoffset + vec2(ycubic.y, ycubic.w) / yscale;
+	zoffset = zoffset + vec2(zcubic.y, zcubic.w) / zscale;
+
+	// vec4 c = vec4(ori.x - 0.5, ori.x + 1.5, ori.y - 0.5, ori.y + 1.5);
+	// vec4 s = vec4(xcubic.x + xcubic.y, xcubic.z + xcubic.w, ycubic.x + ycubic.y, ycubic.z + ycubic.w);
+	// vec4 offset = c + vec4(xcubic.y, xcubic.w, ycubic.y, ycubic.w) / s;
+
+	vec3 v000 = vec3(xoffset.s, yoffset.s, zoffset.s);
+	vec3 v001 = vec3(xoffset.s, yoffset.s, zoffset.t);
+	vec3 v010 = vec3(xoffset.s, yoffset.t, zoffset.s);
+	vec3 v011 = vec3(xoffset.s, yoffset.t, zoffset.t);
+	vec3 v100 = vec3(xoffset.t, yoffset.s, zoffset.s);
+	vec3 v101 = vec3(xoffset.t, yoffset.s, zoffset.t);
+	vec3 v110 = vec3(xoffset.t, yoffset.t, zoffset.s);
+	vec3 v111 = vec3(xoffset.t, yoffset.t, zoffset.t);
+
+	vec4 tex000 = lightTrilinear(lightTexture, v000);
+	vec4 tex001 = lightTrilinear(lightTexture, v001);
+	vec4 tex010 = lightTrilinear(lightTexture, v010);
+	vec4 tex011 = lightTrilinear(lightTexture, v011);
+	vec4 tex100 = lightTrilinear(lightTexture, v100);
+	vec4 tex101 = lightTrilinear(lightTexture, v101);
+	vec4 tex110 = lightTrilinear(lightTexture, v110);
+	vec4 tex111 = lightTrilinear(lightTexture, v111);
+
+	v000 = pos - v000;
+	v001 = pos - v001;
+	v010 = pos - v010;
+	v011 = pos - v011;
+	v100 = pos - v100;
+	v101 = pos - v101;
+	v110 = pos - v110;
+	v111 = pos - v111;
+
+	float w000 = tex000.a * abs(v111.x * v111.y * v111.z);
+	float w001 = tex001.a * abs(v110.x * v110.y * v110.z);
+	float w010 = tex010.a * abs(v101.x * v101.y * v101.z);
+	float w011 = tex011.a * abs(v100.x * v100.y * v100.z);
+	float w100 = tex100.a * abs(v011.x * v011.y * v011.z);
+	float w101 = tex101.a * abs(v010.x * v010.y * v010.z);
+	float w110 = tex110.a * abs(v001.x * v001.y * v001.z);
+	float w111 = tex111.a * abs(v000.x * v000.y * v000.z);
+
+	float w = w000 + w001 + w010 + w011 + w100 + w101 + w110 + w111;
+
+	return w == 0.0 ? vec3(0.0) : (tex000.rgb * w000 + tex001.rgb * w001 + tex010.rgb * w010 + tex011.rgb * w011 + tex100.rgb * w100 + tex101.rgb * w101 + tex110.rgb * w110 + tex111.rgb * w111) / w;
+}
+
 void lights(sampler3D lightTexture, sampler2DArray resources, vec3 albedo, vec4 light, vec3 eyePos, vec3 toEye, vec3 normal, out vec3 baseLight, out vec3 blockLight, out vec3 hlLight, out vec3 skyLight)
 {
 	float userBrightness = frx_viewBrightness <= 0.5 ? (0.5 + frx_viewBrightness) : (2.0 * frx_viewBrightness);
@@ -274,21 +429,17 @@ void lights(sampler3D lightTexture, sampler2DArray resources, vec3 albedo, vec4 
 	baseLight += atmosv_SkyAmbientRadiance * remappedY;
 	baseLight += albedo * light.z * EMISSIVE_LIGHT_STR;
 
-	// exaggerate block light
-	#define BL_MULT 5.0
-
 	// makes builds look better outside
-	float adaptationTerm = mix(1.0, 0.5 / BL_MULT, atmosv_eyeAdaptation);
+	float adaptationTerm = mix(1.0, 0.5, atmosv_eyeAdaptation);
 
 	vec3 fallbackBL = hdr_toSRGB(blockLightColor(light.x, light.z)) * l2_clampScale(0.03125, 0.96875, light.x);
-	vec3 blColor = frx_getLightFiltered(lightTexture, eyePos + frx_cameraPos + normal * 0.1, fallbackBL);
+	vec3 blColor = frx_getLight(lightTexture, eyePos + frx_cameraPos + normal * 0.1, fallbackBL);
 	blColor *= blColor;
 
 	float bl = lightLuminance(blColor);
-	bl = sqrt(bl);
-	bl *= mix(1.0, BL_MULT, bl);
-	
-	blockLight = blColor * BLOCK_LIGHT_STR * bl * adaptationTerm;
+	blColor = mix(vec3(bl), blColor, l2_softenUp(bl, 10.0));
+
+	blockLight = blColor * BLOCK_LIGHT_STR * adaptationTerm;
 	blockLight *= 0.7 + userBrightness * 0.4;
 
 #if HANDHELD_LIGHT_RADIUS != 0
