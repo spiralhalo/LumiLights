@@ -1,4 +1,5 @@
 #include lumi:shaders/common/contrast.glsl
+#include lumi:shaders/common/resources.glsl
 #include lumi:shaders/common/userconfig.glsl
 #include lumi:shaders/lib/bitpack.glsl
 
@@ -64,7 +65,7 @@ vec3 noiseGlint(vec2 normalizedUV, float glint)
 	}
 }
 
-vec3 textureGlint(sampler2D glintTexture, vec2 normalizedUV, float glint)
+vec3 textureGlint(sampler2DArray resources, vec2 normalizedUV, float glint)
 {
 	if (glint == 1.0) {
 		// vanilla scale factor for entity, works in most scenario
@@ -89,7 +90,7 @@ vec3 textureGlint(sampler2D glintTexture, vec2 normalizedUV, float glint)
 		vec2 translation = vec2(-tx, ty);
 
 		vec2 uv = (rotation * vec4(normalizedUV * scale, 0.0, 1.0)).xy + translation;
-		vec3 glint = texture(glintTexture, uv).rgb;
+		vec3 glint = texture(resources, vec3(uv, ID_RES_GLINT)).rgb;
 
 		// emulate GL_SRC_COLOR sfactor
 		return glint * glint;
@@ -98,24 +99,24 @@ vec3 textureGlint(sampler2D glintTexture, vec2 normalizedUV, float glint)
 	}
 }
 
-vec3 autoGlint(sampler2D glintTexture, vec2 normalizedUV, float glint)
+vec3 autoGlint(sampler2DArray resources, vec2 normalizedUV, float glint)
 {
 #if GLINT_MODE == GLINT_MODE_GLINT_SHADER
 	return noiseGlint(normalizedUV, glint);
 #else
-	return textureGlint(glintTexture, normalizedUV, glint);
+	return textureGlint(resources, normalizedUV, glint);
 #endif
 }
 
 #ifdef POST_SHADER
-vec4 overlay(vec4 base, sampler2D glintTexture, vec3 misc)
+vec4 overlay(vec4 base, sampler2DArray resources, vec3 misc)
 {
 	const float GLINT_EMISSIVE_STR = 2.0;
 	float flash = bit_unpack(misc.z, 0);
 	float hurt = bit_unpack(misc.z, 1);
 	float glint = bit_unpack(misc.z, 2);
 
-	vec3 glintColor = hdr_fromGamma(autoGlint(glintTexture, misc.xy, glint));
+	vec3 glintColor = hdr_fromGamma(autoGlint(resources, misc.xy, glint));
 
 	vec3 overlay = glintColor * GLINT_EMISSIVE_STR;
 	overlay += vec3(flash) + vec3(0.5 * hurt, 0.0, 0.0);

@@ -42,7 +42,7 @@ void main()
 uniform sampler2D u_vanilla_depth;
 uniform sampler2DArray u_gbuffer_lightnormal;
 uniform sampler2D u_gbuffer_main_etc_copy;
-uniform sampler2D u_tex_noise;
+uniform sampler2DArray u_resources;
 
 in mat2 v_deltaRotator;
 
@@ -72,7 +72,7 @@ void main()
 
 	// exclude last step here too
 	vec2 deltaUV = vec2(float(RADIAL_STEPS - 1) / float(RADIAL_STEPS), 0.0) * (screenRadius / float(RADIAL_STEPS));
-	vec3 fragNoise = normalize(2.0 * getRandomVec(u_tex_noise, v_texcoord, frxu_size) - 1.0);
+	vec3 fragNoise = normalize(2.0 * getRandomVec(u_resources, v_texcoord, frxu_size) - 1.0);
 	mat2 randomRotation = mat2(
 		fragNoise.x, -fragNoise.y,
 		fragNoise.y,  fragNoise.x

@@ -23,7 +23,7 @@
  *  published by the Free Software Foundation, Inc.
  *******************************************************/
 
-uniform sampler2D u_tex_glint;
+uniform sampler2DArray u_resources;
 uniform sampler2D u_tex_nature;
 
 in float pv_diffuse;
@@ -59,7 +59,7 @@ void frx_pipelineFragment()
 		// diffuse = frx_isGui ? diffuse : min(1.0, 1.5 - diffuse);
 		diffuse = frx_fragEnableDiffuse ? diffuse : 1.0;
 		frx_fragColor.rgb *= diffuse;
-		frx_fragColor.rgb += autoGlint(u_tex_glint, frx_normalizeMappedUV(frx_texcoord), frx_matGlint);
+		frx_fragColor.rgb += autoGlint(u_resources, frx_normalizeMappedUV(frx_texcoord), frx_matGlint);
 	} else {
 		#if LUMI_PBR_API >= 7
 		pbrExt_resolveProperties();
@@ -114,8 +114,7 @@ void frx_pipelineFragment()
 
 		float ao = (frx_fragEnableAo && frx_modelOriginRegion) ? frx_fragLight.z : 1.0;
 
-		float roughness = max(0.01, frx_fragRoughness); // TODO: use white clear color and stop doing this
-		roughness = max(0.01, roughness - roughness * 0.6 * frx_smoothedRainGradient * l2_clampScale(0.9, 0.93, frx_fragLight.y));
+		float roughness = max(0.01, frx_fragRoughness - frx_fragRoughness * 0.6 * frx_smoothedRainGradient * l2_clampScale(0.9, 0.93, frx_fragLight.y));
 		float disableDiffuse = 1.0 - float(frx_fragEnableDiffuse);
 
 		// put water flag last because it makes the material buffer looks blue :D easier to debug

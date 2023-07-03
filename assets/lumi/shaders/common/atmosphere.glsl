@@ -156,29 +156,25 @@ void atmos_generateAtmosphereModel()
 
 	// vanilla clear color is unreliable, we want to control its brightness
 	vec3 clearRadiance = hdr_fromGamma(frx_vanillaClearColor);
-	float clearLuminance = lightLuminance(clearRadiance);
-	clearRadiance = safeDiv(clearRadiance, clearLuminance);
 
 	bool customOWFog	 = frx_worldIsOverworld == 1 && max(frx_cameraInSnow, frx_cameraInLava) < 1;
 	bool customEndFog	 = frx_worldIsEnd == 1 && max(frx_cameraInSnow, frx_cameraInLava) < 1;
 	bool customNetherFog = frx_worldIsNether == 1 && max(frx_cameraInSnow, frx_cameraInLava) < 1;
 
 	if (customOWFog) {
-		atmosv_FogRadiance = (atmosv_SkyRadiance / skyLuminance) * max(skyLuminance, mix(lightLuminance(atmosv_CelestialRadiance * 0.4), 0.1 - frx_smoothedRainGradient * 0.05, nightFactor));
+		atmosv_FogRadiance = (atmosv_SkyRadiance / skyLuminance) * max(skyLuminance, mix(lightLuminanceUnclamped(atmosv_CelestialRadiance * 0.4), 0.1 - frx_smoothedRainGradient * 0.05, nightFactor));
 		atmosv_FogRadiance = mix(atmosv_FogRadiance, vec3(lightLuminance(atmosv_FogRadiance)), 0.25);
 		atmosv_FogRadiance = mix(atmosv_FogRadiance, twilightRadiance, atmosv_OWTwilightFactor);
 	} else if (customEndFog) {
 		atmosv_FogRadiance = mix(clearRadiance, hdr_fromGamma(vec3(1.0, 0.7, 1.0)), float(frx_cameraInFluid)) * 0.1;
 	} else if (customNetherFog) {
-		atmosv_FogRadiance = clearRadiance * 0.1; // controllable overall brightness
+		atmosv_FogRadiance = clearRadiance; // controllable overall brightness
 	} else {
 		atmosv_FogRadiance = hdr_fromGamma(frx_vanillaClearColor);
 	}
 
 	atmosv_WaterFogRadiance = clearRadiance;
-	atmosv_WaterFogRadiance.g = max(atmosv_WaterFogRadiance.g, atmosv_WaterFogRadiance.b * 0.1);
-	float waterFogL = lightLuminance(atmosv_WaterFogRadiance);
-	atmosv_WaterFogRadiance *= 0.05 / (waterFogL > 0.0 ? waterFogL : 1.0);
+	atmosv_WaterFogRadiance.g = max(atmosv_WaterFogRadiance.g, atmosv_WaterFogRadiance.b * 0.15);
 
 	// prevent custom overworld sky reflection in non-overworld dimension or when the sky mode is not Lumi
 	bool customOWSkyAndFallback = frx_worldIsOverworld == 1;

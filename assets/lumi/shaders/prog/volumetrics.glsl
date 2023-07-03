@@ -17,6 +17,7 @@ float celestialLightRays(sampler2DArrayShadow shadowBuffer, sampler2D natureText
 	if (frx_worldHasSkylight == 0) return 1.0;
 
 	bool doUnderwaterRays = frx_cameraInWater == 1 && isUnderwater;
+	float UWRays = float(doUnderwaterRays);
 
 #if !defined(SHADOW_MAP_PRESENT) || !defined(VOLUMETRIC_FOG)
 	// there is no point
@@ -68,6 +69,11 @@ float celestialLightRays(sampler2DArrayShadow shadowBuffer, sampler2D natureText
 		vec4 shadowRay = (frx_shadowViewMatrix * vec4(ray, 1.0));
 		e *= simpleShadowFactor(shadowBuffer, shadowRay);
 		#endif
+
+		// doesn't look good unless we can sample sky light volume
+		// #ifdef WATER_CAUSTICS
+		// e *= mix(1.0, 0.1 + caustics(natureTexture, ray + frx_cameraPos, 1.0) * 5.0, UWRays);
+		// #endif
 
 		energy += e;
 		ray += march;

@@ -29,10 +29,8 @@
 				"u_gbuffer_lightnormal",
 				"u_gbuffer_shadow",
 
- 				"u_tex_sun",
- 				"u_tex_moon",
+ 				"u_resources",
 				"u_tex_nature",
- 				"u_tex_noise",
 			]
 		},
 	],
@@ -59,10 +57,8 @@
 					"gbuffer_lightnormal",
 					"gbuffer_shadow",
 
-					"minecraft:textures/environment/sun.png",
-					"minecraft:textures/environment/moon_phases.png",
+					"resources",
 					"lumi:textures/misc/nature.png",
-					"lumi:textures/filter_pattern/bluenoise256.png",
 				]
 			},
 		]

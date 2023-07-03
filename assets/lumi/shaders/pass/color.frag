@@ -28,11 +28,8 @@ uniform sampler2DArray u_gbuffer_main_etc;
 uniform sampler2DArray u_gbuffer_lightnormal;
 uniform sampler2DArrayShadow u_gbuffer_shadow;
 
-uniform sampler2D u_tex_sun;
-uniform sampler2D u_tex_moon;
+uniform sampler2DArray u_resources;
 uniform sampler2D u_tex_nature;
-uniform sampler2D u_tex_glint;
-uniform sampler2D u_tex_noise;
 
 layout(location = 0) out vec4 fragColor;
 layout(location = 1) out float fragDepth;
@@ -87,35 +84,36 @@ void main()
 	float disableDiffuse = bit_unpack(miscSolid.z, 4);
 
 	vec4 base;
-	vec4 skyBasic = basicSky(toFrag, frx_vanillaClearColor, solidIsUnderwater);
-	vec4 sky = customSky(skyBasic, u_tex_sun, u_tex_moon, toFrag, dSolid == 1.0 ? cSolid.rgb : frx_vanillaClearColor, solidIsUnderwater);
+	vec3 sky0 = skyBase(toFrag, frx_vanillaClearColor);
+	vec4 skyBasic = basicSky(toFrag, sky0);
+	vec4 sky = customSky(sky0, u_resources, toFrag, dSolid == 1.0 ? cSolid.rgb : frx_vanillaClearColor, solidIsUnderwater);
 
 	if (dSolid == 1.0) {
 		base = sky;
 	} else {
 		base = shading(cSolid, u_tex_nature, light, rawMat, eyePos, normal, vertexNormal, solidIsUnderwater, disableDiffuse);
-		base = overlay(base, u_tex_glint, miscSolid);
+		base = overlay(base, u_resources, miscSolid);
 	}
 
 	float dMin = min(dSolid, min(dTrans, min(dParts, dRains)));
 
 	// reflection doesn't include other translucent stuff
 	if (dSolid > dTrans) {
-		base += skyReflection(u_tex_sun, u_tex_moon, u_tex_noise, cSolid.rgb, rawMat.xy, toFrag, normal, light.yw);
+		base += skyReflection(u_resources, cSolid.rgb, rawMat.xy, toFrag, normal, light.yw);
 	}
 
 	if (dSolid > dMin) {
-		vec4 clouds = customClouds(u_vanilla_clouds_depth, u_tex_nature, u_tex_noise, dSolid, uvSolid, eyePos, toFrag, NUM_SAMPLE, ldepth(dMin) * frx_viewDistance * 4., skyBasic);
+		vec4 clouds = customClouds(u_vanilla_clouds_depth, u_tex_nature, u_resources, dSolid, uvSolid, eyePos, toFrag, NUM_SAMPLE, ldepth(dMin) * frx_viewDistance * 4., skyBasic);
 		base.rgb = base.rgb * (1.0 - clouds.a) + clouds.rgb * clouds.a;
 	}
 
 	vec4 foggedColor = base;
 	vec3 foggedToFrag = toFrag;
-	// float foggedLightY = light.y;
 	float foggedDist = length(eyePos);
-	// float tileJitter = getRandomFloat(u_tex_noise, v_texcoord, frxu_size);
-	// float foggedDepth = dSolid;
 	bool foggedIsUnderwater = solidIsUnderwater;
+	// float foggedLightY = light.y;
+	// float foggedDepth = dSolid;
+	// float tileJitter = getRandomFloat(u_resources, v_texcoord, frxu_size);
 
 
 	tempPos = frx_inverseViewProjectionMatrix * vec4(2.0 * v_texcoord - 1.0, 2.0 * dParts - 1.0, 1.0);
@@ -147,35 +145,38 @@ void main()
 		#endif
 
 		nextTrans = shading(cTrans, u_tex_nature, light, rawMat, eyePos, normal, vertexNormal, decideUnderwater(dTrans, dTrans, transIsWater, true), disableDiffuse);
-		nextTrans = overlay(nextTrans, u_tex_glint, miscTrans);
+		nextTrans = overlay(nextTrans, u_resources, miscTrans);
 	} else {
 		cTrans.rgb = cTrans.rgb / (cTrans.a == 0.0 ? 1.0 : cTrans.a);
 		nextTrans = vec4(hdr_fromGamma(cTrans.rgb), cTrans.a);
 	}
 
 	// fog behind rain or trans but only if it's not water (why are you like this)
-	if ((cRains.a > 0 && dSolid > dRains) || (dSolid > dMin && !solidIsUnderwater)) {
-		bool foggedIsTrans = dTrans < dSolid && dTrans > dRains;
+	bool foggedIsTrans = dTrans < dSolid && dMin < dTrans;
+	if (dMin < dSolid && (!solidIsUnderwater || foggedIsTrans)) {
 
 		if (foggedIsTrans) {
 			foggedColor = nextTrans;
-			////// foggedToFrag = normalize(eyePos); // should be the same
-			// foggedLightY = light.y;
 			foggedDist = length(eyePos);
-			// foggedDepth = dTrans;
 			foggedIsUnderwater = frx_cameraInWater == 1;
+			// foggedToFrag is the same
+			// foggedLightY = light.y;
+			// foggedDepth = dTrans;
 		}
 
 		// use normal fog for optimization because vol fog isn't applied during rain
 		vec4 fogged = fog(foggedColor, foggedDist, foggedToFrag, foggedIsUnderwater);
 		// vec4 fogged = volumetricFog(u_gbuffer_shadow, u_tex_nature, foggedColor, foggedDist, foggedToFrag, foggedLightY, tileJitter, foggedDepth, foggedIsUnderwater);
+		
+		float edgeBlend = edgeBlendFactor(foggedDist);
+		fogged = mix(fogged, skyBasic, edgeBlend);
 
 		if (foggedIsTrans) {
-			nextTrans = mix(nextTrans, fogged, frx_rainGradient);
+			nextTrans = fogged;
 		}
 
 		// do this mix to fill gaps
-		base = mix(base, fogged, 1.0 - nextTrans.a);
+		base = mix(base, fogged, foggedIsTrans ? (1.0 - nextTrans.a) : 1.0);
 	}
 
 	vec4 nextRains = vec4(hdr_fromGamma(cRains.rgb), cRains.a);

@@ -26,10 +26,8 @@ uniform sampler2DArray u_gbuffer_main_etc;
 uniform sampler2DArray u_gbuffer_lightnormal;
 uniform sampler2DArrayShadow u_gbuffer_shadow;
 
-uniform sampler2D u_tex_sun;
-uniform sampler2D u_tex_moon;
+uniform sampler2DArray u_resources;
 uniform sampler2D u_tex_nature;
-uniform sampler2D u_tex_noise;
 
 out vec4 fragColor;
 
@@ -45,7 +43,7 @@ void main()
 	float idMicroNormal = albedo.a == 0.0 ? ID_SOLID_MNORM : ID_TRANS_MNORM;
 
 	if (notEndPortal(u_gbuffer_lightnormal) || albedo.a == 0.0) {
-		fragColor += reflection(albedo.rgb, u_color_result, u_gbuffer_main_etc, u_gbuffer_lightnormal, u_translucent_depth, u_gbuffer_shadow, u_tex_sun, u_tex_moon, u_tex_noise, idLight, idMaterial, idNormal, idMicroNormal);
+		fragColor += reflection(albedo.rgb, u_color_result, u_gbuffer_main_etc, u_gbuffer_lightnormal, u_translucent_depth, u_gbuffer_shadow, u_tex_nature, u_resources, idLight, idMaterial, idNormal, idMicroNormal);
 	}
 
 	vec4 trans = texture(u_color_others, vec3(v_texcoord, ID_OTHER_TRANS));
@@ -63,15 +61,15 @@ void main()
 	vec3 toFrag  = normalize(eyePos);
 
 	float distToEye = length(eyePos);
-	vec4 skyBasic = basicSky(toFrag, frx_vanillaClearColor, frx_cameraInWater == 1);
+	vec4 skyBasic = basicSky(toFrag, skyBase(toFrag, frx_vanillaClearColor));
 	if (dMin < 1) {
 		fragColor = mix(
-			volumetricFog(u_gbuffer_shadow, u_tex_nature, fragColor, distToEye, toFrag, texture(u_gbuffer_lightnormal, vec3(v_texcoord, idLight)).y, getRandomFloat(u_tex_noise, v_texcoord, frxu_size), dMin, frx_cameraInWater == 1),
+			volumetricFog(u_gbuffer_shadow, u_tex_nature, fragColor, distToEye, toFrag, texture(u_gbuffer_lightnormal, vec3(v_texcoord, idLight)).y, getRandomFloat(u_resources, v_texcoord, frxu_size), dMin, frx_cameraInWater == 1),
 			skyBasic,
 			edgeBlendFactor(distToEye));
 	}
 
-	vec4 clouds = customClouds(u_vanilla_clouds_depth, u_tex_nature, u_tex_noise, dMin, v_texcoord, eyePos, toFrag, NUM_SAMPLE, skyBasic);
+	vec4 clouds = customClouds(u_vanilla_clouds_depth, u_tex_nature, u_resources, dMin, v_texcoord, eyePos, toFrag, NUM_SAMPLE, skyBasic);
 	fragColor.rgb = fragColor.rgb * (1.0 - clouds.a) + clouds.rgb * clouds.a;
 
 	fragColor = blindnessFog(fragColor, distToEye);

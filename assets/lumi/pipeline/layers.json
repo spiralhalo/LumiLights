@@ -178,7 +178,7 @@
 				{image: "gbuffer_lightnormal", layer: 0, clearColor: 0x00000000},
 				{image: "gbuffer_lightnormal", layer: 3, clearColor: 0x00000000},
 				{image: "gbuffer_lightnormal", layer: 4, clearColor: 0x00000000},
-				{image: "gbuffer_main_etc",	layer: 0, clearColor: 0x00000000},
+				{image: "gbuffer_main_etc",	layer: 0, clearColor: 0x00ff0000},
 				{image: "gbuffer_main_etc",	layer: 1, clearColor: 0x00000000},
 			]
 		},
@@ -190,7 +190,7 @@
 				{image: "gbuffer_lightnormal", layer: 1, clearColor: 0x00000000},
 				{image: "gbuffer_lightnormal", layer: 5, clearColor: 0x00000000},
 				{image: "gbuffer_lightnormal", layer: 6, clearColor: 0x00000000},
-				{image: "gbuffer_main_etc",	layer: 2, clearColor: 0x00000000},
+				{image: "gbuffer_main_etc",	layer: 2, clearColor: 0x00ff0000},
 				{image: "gbuffer_main_etc",	layer: 3, clearColor: 0x00000000},
 			]
 		},

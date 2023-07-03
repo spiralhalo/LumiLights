@@ -125,14 +125,18 @@ float pbr_geometrySchlickGGX(float NdotV, float roughness)
 	return num / denom;
 }
 
-float pbr_geometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
+// #define FAST_GGX
+
+float pbr_geometrySmith(float NdotV, float NdotL, float roughness)
 {
-	float NdotV = pbr_dot(N, V);
-	float NdotL = pbr_dot(N, L);
+	#ifdef FAST_GGX
+	return 0.5 / mix(2.0 * NdotL * NdotV, NdotL + NdotV, roughness * roughness);
+	#else
 	float ggx2  = pbr_geometrySchlickGGX(NdotV, roughness);
 	float ggx1  = pbr_geometrySchlickGGX(NdotL, roughness);
 
 	return ggx1 * ggx2;
+	#endif
 }
 
 vec3 pbr_calcF0(vec3 albedo, vec2 material) {
@@ -150,31 +154,33 @@ vec3 pbr_fresnelSchlick(float cosTheta, vec3 F0)
 	return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
 }
 
-vec3 pbr_specularBRDF(float roughness, vec3 radiance, vec3 halfway, vec3 lightDir, vec3 viewDir, vec3 normal, vec3 fresnel, float NdotL)
+vec3 pbr_specularBRDF(float roughness, vec3 radiance, vec3 halfway, vec3 viewDir, vec3 normal, vec3 fresnel, float NdotL)
 {
+	float NdotV = pbr_dot(normal, viewDir);
+
 	// cook-torrance brdf
 	float distribution = pbr_distributionGGX(normal, halfway, roughness);
-	float geometry	   = pbr_geometrySmith(normal, viewDir, lightDir, roughness);
+	float geometry	   = pbr_geometrySmith(NdotV, NdotL, roughness);
 
 	vec3  num   = distribution * geometry * fresnel;
-	float denom = 4.0 * pbr_dot(normal, viewDir) * NdotL;
+	float denom = 4.0 * NdotV * NdotL;
 
 	vec3  specular = num / max(denom, 0.001);
 	return specular * radiance * NdotL;
 }
 
-vec3 reflectRough(sampler2D noiseTexture, vec3 toFrag, vec3 normal, float materialx, out vec3 jitterPrc)
+vec3 reflectRough(sampler2DArray resources, vec3 toFrag, vec3 normal, float materialx, out vec3 jitterPrc)
 {
 	const float strength = 0.6;
-	vec3 jitterRaw = getRandomVec(noiseTexture, v_texcoord, frxu_size) * 2.0 - 1.0;
+	vec3 jitterRaw = getRandomVec(resources, v_texcoord, frxu_size) * 2.0 - 1.0;
 	jitterPrc = jitterRaw * strength * materialx * materialx;
 	return normalize(reflect(toFrag, normal) + jitterPrc);
 }
 
-vec3 reflectRough(sampler2D noiseTexture, vec3 toFrag, vec3 normal, float materialx)
+vec3 reflectRough(sampler2DArray resources, vec3 toFrag, vec3 normal, float materialx)
 {
 	vec3 ignored;
-	return reflectRough(noiseTexture, toFrag, normal, materialx, ignored);
+	return reflectRough(resources, toFrag, normal, materialx, ignored);
 }
 
 vec3 reflectionPbr(vec3 albedo, vec2 material, vec3 radiance, vec3 toLight, vec3 toEye)
@@ -210,7 +216,7 @@ void lightPbr(vec3 albedo, float alpha, vec3 radiance, float roughness, vec3 f0,
 
 	float diffuseNdotL = diffuseNdL(NdotL, alpha, disableDiffuse, dielectricity);
 
-	shading0.specular = pbr_specularBRDF(roughness, radiance, halfway, toLight, toEye, normal, fresnel, NdotL);
+	shading0.specular = pbr_specularBRDF(roughness, radiance, halfway, toEye, normal, fresnel, NdotL);
 	shading0.diffuse = albedo * radiance * diffuseNdotL * (1.0 - fresnel * step(0.0, rawNdL)) * dielectricity / PI;
 }
 
@@ -221,7 +227,7 @@ void prepare(vec4 color, sampler2D natureTexture, vec3 eyePos, float vertexNorma
 #ifdef WATER_CAUSTICS
 	if (isUnderwater && frx_worldHasSkylight == 1) {
 		causticLight  = caustics(natureTexture, eyePos + frx_cameraPos, vertexNormaly);
-		causticLight  = pow(causticLight, 15.0);
+		causticLight *= 2.0;
 		causticLight *= smoothstep(0.0, 1.0, light.y);
 	}
 #endif
@@ -236,11 +242,6 @@ void prepare(vec4 color, sampler2D natureTexture, vec3 eyePos, float vertexNorma
 
 	// caustics is unclamped
 	light.w += causticLight;
-
-	float luminance = frx_luminance(color.rgb);
-	float vanillaEmissive = step(0.93625, light.x) * luminance;
-
-	light.z += vanillaEmissive;
 }
 
 vec3 blockLightColor(float lightx, float blWhite) {
@@ -260,7 +261,7 @@ void lights(vec3 albedo, vec4 light, vec3 eyePos, vec3 toEye, out vec3 baseLight
 	baseLight = vec3(BASE_AMBIENT_STR);
 	baseLight += hdr_fromGamma(NIGHT_VISION_COLOR) * NIGHT_VISION_STR * frx_effectNightVision;
 
-	vec3 skylessColor = SKYLESS_LIGHT_COLOR * mix(USER_END_AMBIENT_MULTIPLIER, USER_NETHER_AMBIENT_MULTIPLIER, frx_worldIsNether);
+	vec3 skylessColor = SKYLESS_LIGHT_COLOR * mix(USER_END_AMBIENT_MULTIPLIER, USER_NETHER_AMBIENT_MULTIPLIER * 0.25, frx_worldIsNether);
 
 	baseLight += (1.0 - frx_worldHasSkylight) * skylessColor * SKYLESS_AMBIENT_STR;
 
@@ -340,11 +341,11 @@ vec4 shading(vec4 color, sampler2D natureTexture, vec4 light, float ao, vec2 mat
 	vec3 blF = pbr_fresnelSchlick(pbr_dot(toEye, blH), f0);
 	// vanilla-ish style diffuse
 	const vec3 upNorth = vec3(0, 0.5547, -0.83205);
-	float dotPerfect = 0.5 + 0.5 * abs(dot(normal, upNorth));
+	float dotPerfect = 0.5 + 0.5 * max(0.0, dot(normal, upNorth));
 	// perfect diffuse light
-	vec3 shaded = albedo * (baseLight + blockLight * (1.0 - blF)) * dotPerfect * (1.0 - material.y * 0.5) / PI;
+	vec3 shaded = albedo * (baseLight + blockLight * (1.0 - blF)) * (1.0 - material.y * 0.5) / PI;
 	// block light specular
-	vec3 specular = pbr_specularBRDF(max(material.x, 0.5 * material.y), blockLight, blH, normal, toEye, normal, blF, 1.0);
+	vec3 specular = pbr_specularBRDF(max(material.x, 0.5 * material.y), blockLight, blH, toEye, normal, blF, 1.0);
 	shaded += specular;
 
 	lightPbr(albedo, color.a, hlLight, material.x, f0, toEye, toEye, toEye, normal, disableDiffuse);
@@ -371,13 +372,17 @@ vec4 shading(vec4 color, sampler2D natureTexture, vec4 light, float ao, vec2 mat
 vec4 particleShading(vec4 color, sampler2D natureTexture, vec4 light, vec3 eyePos, bool isUnderwater)
 {
 	vec3 albedo = hdrAlbedo(color);
+	
 	// unmanaged
 	if (light.x == 0.0) return vec4(albedo, color.a);
 
 	vec3 toEye = -normalize(eyePos);
 	prepare(color, natureTexture, eyePos, 1.0, isUnderwater, light);
 
-	vec3 baseLight, blockLight, hlLight, skyLight;
+	vec3 baseLight = vec3(0.0);
+	vec3 blockLight = vec3(0.0);
+	vec3 hlLight = vec3(0.0);
+	vec3 skyLight = vec3(0.0);
 	lights(albedo, light, eyePos, toEye, baseLight, blockLight, hlLight, skyLight);
 
 	vec3 shaded = albedo * (baseLight + blockLight + hlLight);
