@@ -18,7 +18,7 @@ uniform sampler2DArrayShadow u_gbuffer_shadow;
 
 uniform sampler2DArray u_resources;
 uniform sampler2D u_tex_nature;
-uniform sampler3D u_light_data;
+uniform sampler2D u_light_data;
 
 out vec4 fragColor;
 

@@ -60,7 +60,7 @@
 
 					"resources",
 					"lumi:textures/misc/nature.png",
-					"light_data",
+					"frex:textures/colored_lights",
 				]
 			},
 		]

@@ -280,8 +280,8 @@ vec4 spline(float v){
 // 	return fac * fac * (3.0 - 2.0 * fac); 
 // }
 
-vec4 lightTrilinear(sampler3D lightTexture, vec3 pos) {
-	if (!frx_lightDataExists(pos) || frx_getLightRaw(lightTexture, pos).a == 0.0) {
+vec4 lightTrilinear(sampler2D lightTexture, vec3 pos) {
+	if (!frx_lightDataExists(lightTexture, pos) || frx_getLightRaw(lightTexture, pos).a == 0.0) {
 		return vec4(0.0);
 	}
 
@@ -335,13 +335,13 @@ vec4 lightTrilinear(sampler3D lightTexture, vec3 pos) {
 	return vec4(w == 0.0 ? vec3(0.0) : (tex000.rgb * w000 + tex001.rgb * w001 + tex010.rgb * w010 + tex011.rgb * w011 + tex100.rgb * w100 + tex101.rgb * w101 + tex110.rgb * w110 + tex111.rgb * w111) / w, 1.0);
 }
 
-vec3 lightTrilinear(sampler3D lightTexture, vec3 pos, vec3 fallback) {
+vec3 lightTrilinear(sampler2D lightTexture, vec3 pos, vec3 fallback) {
 	vec4 tex = lightTrilinear(lightTexture, pos);
 	return mix(fallback, tex.rgb, tex.a);
 }
 
-vec3 lightTricubic(sampler3D lightTexture, vec3 pos, vec3 fallback) {
-	if (!frx_lightDataExists(pos)) {
+vec3 lightTricubic(sampler2D lightTexture, vec3 pos, vec3 fallback) {
+	if (!frx_lightDataExists(lightTexture, pos)) {
 		return fallback;
 	}
 
@@ -410,7 +410,7 @@ vec3 lightTricubic(sampler3D lightTexture, vec3 pos, vec3 fallback) {
 	return w == 0.0 ? vec3(0.0) : (tex000.rgb * w000 + tex001.rgb * w001 + tex010.rgb * w010 + tex011.rgb * w011 + tex100.rgb * w100 + tex101.rgb * w101 + tex110.rgb * w110 + tex111.rgb * w111) / w;
 }
 
-void lights(sampler3D lightTexture, sampler2DArray resources, vec3 albedo, vec4 light, vec3 eyePos, vec3 toEye, vec3 normal, out vec3 baseLight, out vec3 blockLight, out vec3 hlLight, out vec3 skyLight)
+void lights(sampler2D lightTexture, sampler2DArray resources, vec3 albedo, vec4 light, vec3 eyePos, vec3 toEye, vec3 normal, out vec3 baseLight, out vec3 blockLight, out vec3 hlLight, out vec3 skyLight)
 {
 	float userBrightness = frx_viewBrightness <= 0.5 ? (0.5 + frx_viewBrightness) : (2.0 * frx_viewBrightness);
 
@@ -473,7 +473,7 @@ void lights(sampler3D lightTexture, sampler2DArray resources, vec3 albedo, vec4 
 
 #define hdrAlbedo(color) hdr_fromGamma(color.rgb) * vec3(0.98, 0.96, 0.94) * 0.98 + 0.02
 
-vec4 shading(vec4 color, sampler2D natureTexture, sampler2DArray resources, sampler3D lightTexture, vec4 light, float ao, vec2 material, vec3 eyePos, vec3 normal, vec3 vertexNormal, bool isUnderwater, float disableDiffuse)
+vec4 shading(vec4 color, sampler2D natureTexture, sampler2DArray resources, sampler2D lightTexture, vec4 light, float ao, vec2 material, vec3 eyePos, vec3 normal, vec3 vertexNormal, bool isUnderwater, float disableDiffuse)
 {
 	vec3 albedo = hdrAlbedo(color);
 
@@ -522,7 +522,7 @@ vec4 shading(vec4 color, sampler2D natureTexture, sampler2DArray resources, samp
 	return vec4(shaded, min(1.0, alpha));
 }
 
-vec4 particleShading(vec4 color, sampler2D natureTexture, sampler2DArray resources, sampler3D lightTexture, vec4 light, vec3 eyePos, bool isUnderwater)
+vec4 particleShading(vec4 color, sampler2D natureTexture, sampler2DArray resources, sampler2D lightTexture, vec4 light, vec3 eyePos, bool isUnderwater)
 {
 	vec3 albedo = hdrAlbedo(color);
 	
@@ -544,7 +544,7 @@ vec4 particleShading(vec4 color, sampler2D natureTexture, sampler2DArray resourc
 	return vec4(shaded / PI, color.a);
 }
 
-vec4 shading(vec4 color, sampler2D natureTexture, sampler2DArray resources, sampler3D lightTexture, vec4 light, vec3 rawMat, vec3 eyePos, vec3 normal, vec3 vertexNormal, bool isUnderwater, float disableDiffuse) {
+vec4 shading(vec4 color, sampler2D natureTexture, sampler2DArray resources, sampler2D lightTexture, vec4 light, vec3 rawMat, vec3 eyePos, vec3 normal, vec3 vertexNormal, bool isUnderwater, float disableDiffuse) {
 	return shading(color, natureTexture, resources, lightTexture, light, rawMat.z, rawMat.xy, eyePos, normal, vertexNormal, isUnderwater, disableDiffuse);
 }
 #endif
