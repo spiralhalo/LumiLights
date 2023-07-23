@@ -34,6 +34,10 @@ void main()
 	} else {
 		vec4 tempPos = frx_inverseViewProjectionMatrix * vec4(2.0 * v_texcoord - 1.0, 2.0 * dSolid - 1.0, 1.0);
 		vec3 eyePos  = tempPos.xyz / tempPos.w;
+
+		//ensmallen
+		eyePos *= 0.2;
+
 		vec4 light	= texture(u_gbuffer_lightnormal, vec3(v_texcoord, ID_SOLID_LIGT));
 		vec3 vertexNormal = normalize(texture(u_gbuffer_lightnormal, vec3(v_texcoord, ID_SOLID_NORM)).xyz);
 		light.w = denoisedShadowFactor(u_gbuffer_shadow, v_texcoord, eyePos, dSolid, light.y, vertexNormal);

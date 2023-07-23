@@ -1,9 +1,6 @@
 {
 	coloredLights: {
-		maxRadiusChunks: 16,
-		// enable selective neighbor filtering (doesn't do anything)
-		// useComplexFilter: true,
 		// enable occlusion data when available
-		useOcclusionData: true
+		useOcclusionData: false
 	}
 }
