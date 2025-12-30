@@ -80,7 +80,7 @@ bool optimizeStart(float startTravel, float maxDist, vec3 toSky, inout vec3 worl
 	if (nearBorder > maxDist) return true;
 
 	worldRayPos += toSky * nearBorder;
-	preTraveled += nearBorder;
+	preTraveled = nearBorder;
 
 	float toTravel = max(0.0, maxDist - preTraveled);
 
