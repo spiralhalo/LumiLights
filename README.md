@@ -1,3 +1,11 @@
+### 🪧 This repo is ARCHIVED
+
+Follow the latest development at [Lumi Lights Plus repo](https://github.com/spiralhalo/LumiLightsPlus).
+
+If you just needed downloads, head over to [Lumi Lights Plus page at Modrinth](https://modrinth.com/resourcepack/lumi-lights-plus) instead.
+
+This repo is kept for history.
+
 # Lumi Lights 
 ![Lumi Lights](https://github.com/spiralhalo/spiralhalo.github.io/raw/main/img/main.jpg)
 
